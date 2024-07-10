@@ -1,0 +1,9 @@
+control_brace_style = "ClosingNextLine"
+force_multiline_blocks = false
+group_imports = "StdExternalCrate"
+imports_granularity = "Item"
+match_arm_blocks = false
+newline_style = "Unix"
+reorder_impl_items = true
+struct_lit_width = 40
+use_field_init_shorthand = true
