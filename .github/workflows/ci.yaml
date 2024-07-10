@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    tags: '*'
+    branches:
+      - main
+      - 'test-me-*'
+  pull_request:
+
+env:
+  TERM: xterm-256color
+
+jobs:
+  ci:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Rust nightly toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2024-06-28
+          components: rustc-codegen-cranelift
+      - name: test
+        run: |
+          cargo test
