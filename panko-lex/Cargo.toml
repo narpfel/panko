@@ -1,0 +1,12 @@
+[package]
+name = "panko-lex"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bumpalo = { workspace = true }
+logos = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }
+rstest = { workspace = true }

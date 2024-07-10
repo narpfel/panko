@@ -1,0 +1,29 @@
+cargo-features = ["codegen-backend"]
+
+[workspace]
+resolver = "2"
+members = [
+    "panko",
+    "panko-lex",
+]
+
+[workspace.dependencies]
+bumpalo = "3.16.0"
+logos = "0.14.0"
+
+pretty_assertions = { version = "1.4.0", features = ["unstable"] }
+rstest = { version = "0.21.0", default-features = false }
+
+[profile.perf]
+inherits = "release"
+debug = 2
+lto = true
+codegen-units = 1
+
+[profile.clif]
+inherits = "dev"
+codegen-backend = "cranelift"
+
+[profile.clif.package."*"]
+opt-level = 3
+codegen-backend = "llvm"
