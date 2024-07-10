@@ -6,15 +6,19 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
+      - id: check-executables-have-shebangs
+      - id: check-json
       - id: check-merge-conflict
       - id: check-symlinks
       - id: check-toml
+      - id: check-yaml
       - id: end-of-file-fixer
       - id: file-contents-sorter
         files: \.gitignore
         args: ["--unique"]
       - id: fix-byte-order-marker
       - id: mixed-line-ending
+      - id: trailing-whitespace
   - repo: local
     hooks:
       - id: cargo-fmt
