@@ -1,0 +1,74 @@
+default_job = "check"
+
+[jobs.check]
+command = ["cargo", "check", "--profile=clif", "--all-targets", "--color", "always"]
+need_stdout = false
+
+[jobs.check-all]
+command = ["cargo", "check", "--profile=clif", "--all-targets", "--color", "always"]
+need_stdout = false
+
+[jobs.clippy]
+command = [
+    "cargo", "clippy",
+    "--profile=clif",
+    "--all-targets",
+    "--color", "always",
+]
+need_stdout = false
+
+[jobs.test]
+command = [
+    "cargo", "test", "--color", "always",
+    "--profile=clif",
+    "--package", "panko",
+    "--package", "panko-lex",
+    "--tests",
+    "--", "--color", "always", # see https://github.com/Canop/bacon/issues/124
+    "--quiet",
+]
+need_stdout = true
+
+[jobs.covtest]
+command = [
+    "cargo", "llvm-cov", "--branch", "--open",
+    "--color", "always", "--", "--color", "always",
+]
+need_stdout = true
+on_success = "back"
+allow_warnings = true
+env.RUSTFLAGS = ""
+
+[jobs.doc]
+command = [
+    "cargo", "doc", "--profile=clif", "--color", "always",
+    "--no-deps", "--document-private-items",
+]
+need_stdout = false
+
+[jobs.doc-open]
+command = [
+    "cargo", "doc", "--profile=clif", "--color", "always",
+    "--no-deps", "--open", "--document-private-items",
+]
+need_stdout = false
+on_success = "back"
+
+[jobs.run]
+command = [
+    "cargo", "run",
+    "--profile=clif",
+    "--color", "always",
+]
+need_stdout = true
+allow_warnings = true
+background = true
+
+[jobs.fmt]
+command = ["cargo", "fmt"]
+need_stdout = false
+on_success = "back"
+
+[keybindings]
+f = "job:fmt"
+shift-t = "job:covtest"
