@@ -1,0 +1,158 @@
+use bumpalo::Bump;
+use panko_lex::Token;
+use panko_lex::TokenKind;
+
+use crate as ast;
+
+grammar<'a>(bump: &'a Bump);
+
+extern {
+    type Error = ast::Error<'a>;
+
+    enum Token<'a> {
+        ";" => Token { kind: TokenKind::Semicolon, .. },
+
+        // StorageClassSpecifierToken
+        "auto" => Token { kind: TokenKind::Auto, .. },
+        "constexpr" => Token { kind: TokenKind::Constexpr, .. },
+        "extern" => Token { kind: TokenKind::Extern, .. },
+        "register" => Token { kind: TokenKind::Register, .. },
+        "static" => Token { kind: TokenKind::Static, .. },
+        "thread_local" => Token { kind: TokenKind::ThreadLocal, .. },
+        "typedef" => Token { kind: TokenKind::Typedef, .. },
+
+        // TypeSpecifierToken
+        "void" => Token { kind: TokenKind::Void, .. },
+        "char" => Token { kind: TokenKind::Char, .. },
+        "short" => Token { kind: TokenKind::Short, .. },
+        "int" => Token { kind: TokenKind::Int, .. },
+        "long" => Token { kind: TokenKind::Long, .. },
+        "float" => Token { kind: TokenKind::Float, .. },
+        "double" => Token { kind: TokenKind::Double, .. },
+        "signed" => Token { kind: TokenKind::Signed, .. },
+        "unsigned" => Token { kind: TokenKind::Unsigned, .. },
+        "bool" => Token { kind: TokenKind::Bool, .. },
+        "_Complex" => Token { kind: TokenKind::Complex, .. },
+        "_Decimal32" => Token { kind: TokenKind::Decimal32, .. },
+        "_Decimal64" => Token { kind: TokenKind::Decimal64, .. },
+        "_Decimal128" => Token { kind: TokenKind::Decimal128, .. },
+
+        // TypeQualifierToken
+        "const" => Token { kind: TokenKind::Const, .. },
+        "restrict" => Token { kind: TokenKind::Restrict, .. },
+        "volatile" => Token { kind: TokenKind::Volatile, .. },
+        "_Atomic" => Token { kind: TokenKind::Atomic, .. },
+
+        // FunctionSpecifierToken
+        "inline" => Token { kind: TokenKind::Inline, .. },
+        "_Noreturn" => Token { kind: TokenKind::Noreturn, .. },
+
+        Identifier => Token { kind: TokenKind::Identifier, .. },
+    }
+}
+
+pub TranslationUnit: ast::TranslationUnit<'a> = {
+    Many<ExternalDeclaration> => ast::TranslationUnit { decls: <> },
+}
+
+ExternalDeclaration: ast::ExternalDeclaration<'a> = {
+    FunctionDefinition => todo!(),
+    Declaration => ast::ExternalDeclaration::Declaration(<>),
+}
+
+FunctionDefinition: () = {}
+
+Declaration: ast::Declaration<'a> = {
+    <specifiers:DeclarationSpecifiers> <init_declarator_list:InitDeclaratorList?> ";" =>
+        ast::Declaration { <> },
+}
+
+DeclarationSpecifiers: &'a [ast::DeclarationSpecifier<'a>] = {
+    Many<(<DeclarationSpecifier> AttributeSpecifierSequence?)>,
+}
+
+DeclarationSpecifier: ast::DeclarationSpecifier<'a> = {
+    StorageClassSpecifier => ast::DeclarationSpecifier::StorageClass(<>),
+    TypeSpecifierQualifier => ast::DeclarationSpecifier::TypeSpecifierQualifier(<>),
+    FunctionSpecifier => ast::DeclarationSpecifier::FunctionSpecifier(<>),
+}
+
+InitDeclaratorList: () = {}
+AttributeSpecifierSequence: () = {}
+
+StorageClassSpecifier: ast::StorageClassSpecifier<'a> = {
+    StorageClassSpecifierToken => ast::StorageClassSpecifier::new(<>),
+}
+
+StorageClassSpecifierToken = {
+    "auto",
+    "constexpr",
+    "extern",
+    "register",
+    "static",
+    "thread_local",
+    "typedef",
+}
+
+TypeSpecifierQualifier: ast::TypeSpecifierQualifier<'a> = {
+    TypeSpecifier => ast::TypeSpecifierQualifier::Specifier(<>),
+    TypeQualifier => ast::TypeSpecifierQualifier::Qualifier(<>),
+}
+
+TypeSpecifier: ast::TypeSpecifier<'a> = {
+    TypeSpecifierToken => ast::TypeSpecifier::new(<>),
+    BitIntTypeSpecifier => todo!(),
+    AtomicTypeSpecifier => todo!(),
+    StructOrUnionSpecifier => todo!(),
+    EnumSpecifier => todo!(),
+    TypedefName => todo!(),
+    TypeofSpecifier => todo!(),
+}
+
+TypeSpecifierToken = {
+    "void",
+    "char",
+    "short",
+    "int",
+    "long",
+    "float",
+    "double",
+    "signed",
+    "unsigned",
+    "bool",
+    "_Complex",
+    "_Decimal32",
+    "_Decimal64",
+    "_Decimal128",
+}
+
+BitIntTypeSpecifier: () = {}
+AtomicTypeSpecifier: () = {}
+StructOrUnionSpecifier: () = {}
+EnumSpecifier: () = {}
+TypedefName: () = {}
+TypeofSpecifier: () = {}
+
+TypeQualifier: ast::TypeQualifier<'a> = {
+    TypeQualifierToken => ast::TypeQualifier::new(<>),
+}
+
+TypeQualifierToken = {
+    "const",
+    "restrict",
+    "volatile",
+    "_Atomic",
+}
+
+FunctionSpecifier: ast::FunctionSpecifier<'a> = {
+    FunctionSpecifierToken => ast::FunctionSpecifier::new(<>),
+}
+
+FunctionSpecifierToken = {
+    "inline",
+    "_Noreturn",
+}
+
+Many<T>: &'a [T] = {
+    T* => bump.alloc_slice_copy(&<>),
+}

@@ -5,10 +5,14 @@ resolver = "2"
 members = [
     "panko",
     "panko-lex",
+    "panko-parser",
 ]
 
 [workspace.dependencies]
 bumpalo = "3.16.0"
+itertools = "0.13.0"
+lalrpop = "0.20.2"
+lalrpop-util = { version = "0.20.2", features = ["unicode"] }
 logos = "0.14.0"
 
 pretty_assertions = { version = "1.4.0", features = ["unstable"] }

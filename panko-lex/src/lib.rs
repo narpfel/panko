@@ -9,7 +9,7 @@ use logos::Logos;
 
 #[derive(Clone, Copy)]
 pub struct Token<'a> {
-    kind: TokenKind,
+    pub kind: TokenKind,
     loc: Loc<'a>,
 }
 

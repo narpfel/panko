@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-panko-lex = { path = "../panko-lex" }
 bumpalo = { workspace = true }
+panko-lex = { path = "../panko-lex" }
+panko-parser = { path = "../panko-parser" }

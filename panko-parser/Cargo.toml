@@ -1,0 +1,13 @@
+[package]
+name = "panko-parser"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bumpalo = { workspace = true }
+itertools = { workspace = true }
+lalrpop-util = { workspace = true }
+panko-lex = { path = "../panko-lex" }
+
+[build-dependencies]
+lalrpop = { workspace = true }

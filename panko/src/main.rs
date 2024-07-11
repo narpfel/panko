@@ -9,7 +9,6 @@ fn main() {
         Path::new("main.c"),
         &std::fs::read_to_string("main.c").unwrap(),
     );
-    for token in tokens {
-        println!("{:?}", token);
-    }
+    let translation_unit = panko_parser::parse(bump, tokens).unwrap();
+    println!("{}", translation_unit.as_sexpr());
 }
