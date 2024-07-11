@@ -21,8 +21,6 @@ need_stdout = false
 command = [
     "cargo", "test", "--color", "always",
     "--profile=clif",
-    "--package", "panko",
-    "--package", "panko-lex",
     "--tests",
     "--", "--color", "always", # see https://github.com/Canop/bacon/issues/124
     "--quiet",
