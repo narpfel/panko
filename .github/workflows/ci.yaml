@@ -26,4 +26,4 @@ jobs:
           components: rustc-codegen-cranelift
       - name: test
         run: |
-          cargo test
+          cargo test --color=always -- --color=always
