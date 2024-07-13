@@ -15,6 +15,8 @@ extern {
         "=" => Token { kind: TokenKind::Equal, .. },
 
         // parentheses
+        "(" => Token { kind: TokenKind::LParen, .. },
+        ")" => Token { kind: TokenKind::RParen, .. },
         "{" => Token { kind: TokenKind::LBrace, .. },
         "}" => Token { kind: TokenKind::RBrace, .. },
 
@@ -105,7 +107,29 @@ InitDeclarator: ast::InitDeclarator<'a> = {
 
 Declarator: ast::Declarator<'a> = {
     // TODO: incomplete
-    Identifier => ast::Declarator(<>),
+    DirectDeclarator => ast::Declarator(<>),
+}
+
+DirectDeclarator: ast::DirectDeclarator<'a> = {
+    <Identifier> AttributeSpecifierSequence? => ast::DirectDeclarator::Identifier(<>),
+    "(" <Bump<Declarator>> ")" => ast::DirectDeclarator::Parenthesised(<>),
+    // array-declarator attribute-specifier-sequence?
+    <FunctionDeclarator> AttributeSpecifierSequence? => ast::DirectDeclarator::FunctionDeclarator(<>),
+}
+
+FunctionDeclarator: ast::FunctionDeclarator<'a> = {
+    <direct_declarator:Bump<DirectDeclarator>> "(" <parameter_type_list:ParameterTypeList> ")" =>
+        ast::FunctionDeclarator { <> },
+}
+
+ParameterTypeList: &'a [ast::ParameterDeclaration<'a>] = {
+    CommaSep<ParameterDeclaration>,
+}
+
+ParameterDeclaration: ast::ParameterDeclaration<'a> = {
+    AttributeSpecifierSequence? <declaration_specifiers:DeclarationSpecifiers> <declarator:Declarator> =>
+        ast::ParameterDeclaration { <> },
+    // attribute-specifier-sequence? declaration-specifiers abstract-declarator?
 }
 
 Initialiser: ast::Initialiser<'a> = {
@@ -200,6 +224,10 @@ BlockItem: ast::BlockItem<'a> = {
     Declaration => ast::BlockItem::Declaration(<>),
     // unlabeled-statement
     // label
+}
+
+Bump<T>: &'a T = {
+    T => bump.alloc(<>),
 }
 
 Some<T>: &'a [T] = {

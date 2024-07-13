@@ -291,11 +291,63 @@ impl InitDeclarator<'_> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Declarator<'a>(Token<'a>);
+struct Declarator<'a>(DirectDeclarator<'a>);
 
 impl Declarator<'_> {
     fn as_sexpr(&self) -> String {
-        self.0.slice().to_owned()
+        self.0.as_sexpr()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum DirectDeclarator<'a> {
+    Identifier(Token<'a>),
+    Parenthesised(&'a Declarator<'a>),
+    // ArrayDeclarator(ArrayDeclarator<'a>),
+    FunctionDeclarator(FunctionDeclarator<'a>),
+}
+
+impl DirectDeclarator<'_> {
+    fn as_sexpr(&self) -> String {
+        match self {
+            DirectDeclarator::Identifier(ident) => ident.slice().to_owned(),
+            DirectDeclarator::Parenthesised(declarator) => declarator.as_sexpr(),
+            DirectDeclarator::FunctionDeclarator(function_declarator) =>
+                function_declarator.as_sexpr(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct FunctionDeclarator<'a> {
+    direct_declarator: &'a DirectDeclarator<'a>,
+    parameter_type_list: &'a [ParameterDeclaration<'a>],
+}
+
+impl FunctionDeclarator<'_> {
+    fn as_sexpr(&self) -> String {
+        format!(
+            "(function-declarator {}\n{})",
+            self.direct_declarator.as_sexpr(),
+            self.parameter_type_list
+                .iter()
+                .map(|param| param.as_sexpr())
+                .join("\n")
+                .indent_lines()
+                .trim_end(),
+        )
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct ParameterDeclaration<'a> {
+    declaration_specifiers: &'a [DeclarationSpecifier<'a>],
+    declarator: Declarator<'a>,
+}
+
+impl ParameterDeclaration<'_> {
+    fn as_sexpr(&self) -> String {
+        format!("(param {})", self.declarator.as_sexpr())
     }
 }
 
@@ -318,8 +370,8 @@ pub struct FunctionDefinition<'a> {
 impl FunctionDefinition<'_> {
     fn as_sexpr(&self) -> String {
         format!(
-            "(function-definition {}\n{}\n{})",
-            self.declarator.as_sexpr(),
+            "(function-definition\n{}\n{}\n{})",
+            self.declarator.as_sexpr().indent_lines().trim_end(),
             self.declaration_specifiers
                 .iter()
                 .map(|declaration_specifier| format!("{declaration_specifier:?}"))
