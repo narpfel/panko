@@ -49,12 +49,14 @@ impl TranslationUnit<'_> {
 
 #[derive(Debug, Clone, Copy)]
 pub enum ExternalDeclaration<'a> {
+    FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
 }
 
 impl ExternalDeclaration<'_> {
     fn as_sexpr(&self) -> String {
         match self {
+            ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
         }
     }
@@ -303,6 +305,57 @@ struct Initialiser<'a>(Token<'a>);
 impl Initialiser<'_> {
     fn as_sexpr(&self) -> String {
         self.0.slice().to_owned()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct FunctionDefinition<'a> {
+    declaration_specifiers: &'a [DeclarationSpecifier<'a>],
+    declarator: Declarator<'a>,
+    body: CompoundStatement<'a>,
+}
+
+impl FunctionDefinition<'_> {
+    fn as_sexpr(&self) -> String {
+        format!(
+            "(function-definition {}\n{}\n{})",
+            self.declarator.as_sexpr(),
+            self.declaration_specifiers
+                .iter()
+                .map(|declaration_specifier| format!("{declaration_specifier:?}"))
+                .join("\n")
+                .indent_lines()
+                .trim_end(),
+            self.body.as_sexpr().indent_lines().trim_end(),
+        )
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct CompoundStatement<'a>(&'a [BlockItem<'a>]);
+
+impl CompoundStatement<'_> {
+    fn as_sexpr(&self) -> String {
+        if self.0.is_empty() {
+            "(compound-statement)".to_owned()
+        }
+        else {
+            let items = self.0.iter().map(|item| item.as_sexpr()).join("\n");
+            format!("(compound-statement\n{})", items.indent_lines().trim_end())
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum BlockItem<'a> {
+    Declaration(Declaration<'a>),
+}
+
+impl BlockItem<'_> {
+    fn as_sexpr(&self) -> String {
+        match self {
+            BlockItem::Declaration(decl) => decl.as_sexpr(),
+        }
     }
 }
 

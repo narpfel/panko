@@ -14,6 +14,10 @@ extern {
         "," => Token { kind: TokenKind::Comma, .. },
         "=" => Token { kind: TokenKind::Equal, .. },
 
+        // parentheses
+        "{" => Token { kind: TokenKind::LBrace, .. },
+        "}" => Token { kind: TokenKind::RBrace, .. },
+
         // StorageClassSpecifierToken
         "auto" => Token { kind: TokenKind::Auto, .. },
         "constexpr" => Token { kind: TokenKind::Constexpr, .. },
@@ -59,11 +63,18 @@ pub TranslationUnit: ast::TranslationUnit<'a> = {
 }
 
 ExternalDeclaration: ast::ExternalDeclaration<'a> = {
-    FunctionDefinition => todo!(),
+    FunctionDefinition => ast::ExternalDeclaration::FunctionDefinition(<>),
     Declaration => ast::ExternalDeclaration::Declaration(<>),
 }
 
-FunctionDefinition: () = {}
+FunctionDefinition: ast::FunctionDefinition<'a> = {
+    AttributeSpecifierSequence?
+        <declaration_specifiers:DeclarationSpecifiers>
+        <declarator:Declarator>
+        <body:FunctionBody> => ast::FunctionDefinition { <> },
+}
+
+FunctionBody = { CompoundStatement }
 
 Declaration: ast::Declaration<'a> = {
     <specifiers:DeclarationSpecifiers> <init_declarator_list:InitDeclaratorList> ";" =>
@@ -175,6 +186,24 @@ FunctionSpecifier: ast::FunctionSpecifier<'a> = {
 FunctionSpecifierToken = {
     "inline",
     "_Noreturn",
+}
+
+CompoundStatement: ast::CompoundStatement<'a> = {
+    "{" <BlockItemList?> "}" => ast::CompoundStatement(<>.unwrap_or(&[])),
+}
+
+BlockItemList: &'a [ast::BlockItem<'a>] = {
+    Some<BlockItem>,
+}
+
+BlockItem: ast::BlockItem<'a> = {
+    Declaration => ast::BlockItem::Declaration(<>),
+    // unlabeled-statement
+    // label
+}
+
+Some<T>: &'a [T] = {
+    T+ => bump.alloc_slice_copy(&<>),
 }
 
 Many<T>: &'a [T] = {
