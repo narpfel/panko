@@ -291,12 +291,27 @@ impl InitDeclarator<'_> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Declarator<'a>(DirectDeclarator<'a>);
+struct Declarator<'a> {
+    pointers: Option<&'a [Pointer<'a>]>,
+    direct_declarator: DirectDeclarator<'a>,
+}
 
 impl Declarator<'_> {
     fn as_sexpr(&self) -> String {
-        self.0.as_sexpr()
+        match self.pointers {
+            None => self.direct_declarator.as_sexpr(),
+            Some(pointers) => format!(
+                "(pointer level={} {})",
+                pointers.len(),
+                self.direct_declarator.as_sexpr()
+            ),
+        }
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct Pointer<'a> {
+    qualifiers: &'a [TypeQualifier<'a>],
 }
 
 #[derive(Debug, Clone, Copy)]

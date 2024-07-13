@@ -14,6 +14,8 @@ extern {
         "," => Token { kind: TokenKind::Comma, .. },
         "=" => Token { kind: TokenKind::Equal, .. },
 
+        "*" => Token { kind: TokenKind::Star, .. },
+
         // parentheses
         "(" => Token { kind: TokenKind::LParen, .. },
         ")" => Token { kind: TokenKind::RParen, .. },
@@ -101,13 +103,15 @@ InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
 }
 
 InitDeclarator: ast::InitDeclarator<'a> = {
-    // TODO: pointer? direct-declarator
     <declarator:Declarator> <initialiser:("=" <Initialiser>)?> => ast::InitDeclarator { <> },
 }
 
 Declarator: ast::Declarator<'a> = {
-    // TODO: incomplete
-    DirectDeclarator => ast::Declarator(<>),
+    <pointers:Some<Pointer>?> <direct_declarator:DirectDeclarator> => ast::Declarator { <> },
+}
+
+Pointer: ast::Pointer<'a> = {
+    "*" AttributeSpecifierSequence? <qualifiers:Many<TypeQualifier>> => ast::Pointer { <> },
 }
 
 DirectDeclarator: ast::DirectDeclarator<'a> = {
