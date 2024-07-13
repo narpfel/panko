@@ -18,7 +18,7 @@ impl<'a> Token<'a> {
         self.loc
     }
 
-    fn slice(&self) -> &'a str {
+    pub fn slice(&self) -> &'a str {
         self.loc.slice()
     }
 }
@@ -183,8 +183,8 @@ pub enum TokenKind {
     Identifier,
     #[regex(r#""[^"]*""#)]
     String,
-    #[regex(r"[0-9]+(\.[0-9]+)?")]
-    Number,
+    #[regex(r"[0-9]+")]
+    Integer,
 
     #[token("alignas")]
     #[token("_Alignas")]

@@ -40,7 +40,7 @@ impl TranslationUnit<'_> {
             self.decls
                 .iter()
                 .map(|decl| decl.as_sexpr())
-                .collect::<String>()
+                .join("\n")
                 .indent_lines()
                 .trim_end(),
         )
@@ -63,24 +63,32 @@ impl ExternalDeclaration<'_> {
 #[derive(Debug, Clone, Copy)]
 pub struct Declaration<'a> {
     specifiers: &'a [DeclarationSpecifier<'a>],
-    init_declarator_list: Option<()>,
+    init_declarator_list: &'a [InitDeclarator<'a>],
 }
 
 impl Declaration<'_> {
     fn as_sexpr(&self) -> String {
         format!(
             "(declaration\n{}\n{})",
-            self.specifiers
-                .iter()
-                .map(|s| format!("{s:?}"))
-                .join("\n")
-                .indent_lines()
-                .trim_end(),
-            self.init_declarator_list
-                .map(|()| "()")
-                .unwrap_or(NO_VALUE)
-                .indent_lines()
-                .trim_end(),
+            if self.specifiers.is_empty() {
+                NO_VALUE.to_owned()
+            }
+            else {
+                self.specifiers.iter().map(|s| format!("{s:?}")).join("\n")
+            }
+            .indent_lines()
+            .trim_end(),
+            if self.init_declarator_list.is_empty() {
+                NO_VALUE.to_owned()
+            }
+            else {
+                self.init_declarator_list
+                    .iter()
+                    .map(|init_declarator| init_declarator.as_sexpr())
+                    .join("\n")
+            }
+            .indent_lines()
+            .trim_end(),
         )
     }
 }
@@ -259,6 +267,42 @@ fn function_specifier_kind(token_kind: TokenKind) -> FunctionSpecifierKind {
         TokenKind::Inline => FunctionSpecifierKind::Inline,
         TokenKind::Noreturn => FunctionSpecifierKind::Noreturn,
         _ => unreachable!(),
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct InitDeclarator<'a> {
+    declarator: Declarator<'a>,
+    initialiser: Option<Initialiser<'a>>,
+}
+
+impl InitDeclarator<'_> {
+    fn as_sexpr(&self) -> String {
+        format!(
+            "(init-declarator {} {})",
+            self.declarator.as_sexpr(),
+            self.initialiser
+                .map(|initialiser| initialiser.as_sexpr())
+                .unwrap_or_else(|| NO_VALUE.to_owned())
+        )
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct Declarator<'a>(Token<'a>);
+
+impl Declarator<'_> {
+    fn as_sexpr(&self) -> String {
+        self.0.slice().to_owned()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct Initialiser<'a>(Token<'a>);
+
+impl Initialiser<'_> {
+    fn as_sexpr(&self) -> String {
+        self.0.slice().to_owned()
     }
 }
 

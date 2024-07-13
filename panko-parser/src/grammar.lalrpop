@@ -11,6 +11,8 @@ extern {
 
     enum Token<'a> {
         ";" => Token { kind: TokenKind::Semicolon, .. },
+        "," => Token { kind: TokenKind::Comma, .. },
+        "=" => Token { kind: TokenKind::Equal, .. },
 
         // StorageClassSpecifierToken
         "auto" => Token { kind: TokenKind::Auto, .. },
@@ -48,6 +50,7 @@ extern {
         "_Noreturn" => Token { kind: TokenKind::Noreturn, .. },
 
         Identifier => Token { kind: TokenKind::Identifier, .. },
+        Integer => Token { kind: TokenKind::Integer, .. },
     }
 }
 
@@ -63,8 +66,11 @@ ExternalDeclaration: ast::ExternalDeclaration<'a> = {
 FunctionDefinition: () = {}
 
 Declaration: ast::Declaration<'a> = {
-    <specifiers:DeclarationSpecifiers> <init_declarator_list:InitDeclaratorList?> ";" =>
+    <specifiers:DeclarationSpecifiers> <init_declarator_list:InitDeclaratorList> ";" =>
         ast::Declaration { <> },
+    // attribute-specifier-sequence declaration-specifiers init_declarator_list ";"
+    // static_assert-declaration
+    // attribute-declaration
 }
 
 DeclarationSpecifiers: &'a [ast::DeclarationSpecifier<'a>] = {
@@ -77,7 +83,25 @@ DeclarationSpecifier: ast::DeclarationSpecifier<'a> = {
     FunctionSpecifier => ast::DeclarationSpecifier::FunctionSpecifier(<>),
 }
 
-InitDeclaratorList: () = {}
+InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
+    CommaSep<InitDeclarator>,
+}
+
+InitDeclarator: ast::InitDeclarator<'a> = {
+    // TODO: pointer? direct-declarator
+    <declarator:Declarator> <initialiser:("=" <Initialiser>)?> => ast::InitDeclarator { <> },
+}
+
+Declarator: ast::Declarator<'a> = {
+    // TODO: incomplete
+    Identifier => ast::Declarator(<>),
+}
+
+Initialiser: ast::Initialiser<'a> = {
+    // TODO: incomplete
+    Integer => ast::Initialiser(<>),
+}
+
 AttributeSpecifierSequence: () = {}
 
 StorageClassSpecifier: ast::StorageClassSpecifier<'a> = {
@@ -155,4 +179,12 @@ FunctionSpecifierToken = {
 
 Many<T>: &'a [T] = {
     T* => bump.alloc_slice_copy(&<>),
+}
+
+CommaSep<T>: &'a [T] = {
+    () => &[],
+    <mut v:(<T> ",")*> <e:T> => {
+        v.push(e);
+        bump.alloc_slice_copy(&v)
+    },
 }
