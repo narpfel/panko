@@ -6,12 +6,12 @@ use crate::SEXPR_INDENT;
 const EMPTY: &str = "";
 
 pub struct SExpr<'a> {
-    pub name: String,
-    pub params: Vec<Param<'a>>,
+    pub(crate) name: String,
+    pub(crate) params: Vec<Param<'a>>,
 }
 
 impl SExpr<'_> {
-    pub fn string(s: &str) -> Self {
+    pub(crate) fn string(s: &str) -> Self {
         Self { name: s.to_owned(), params: vec![] }
     }
 
