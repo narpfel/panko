@@ -8,9 +8,11 @@ use panko_lex::Token;
 use panko_lex::TokenIter;
 use panko_lex::TokenKind;
 
-use crate::indent_lines::IndentLines as _;
+use crate::sexpr_builder::AsSExpr;
+use crate::sexpr_builder::Param;
+use crate::sexpr_builder::SExpr;
 
-mod indent_lines;
+pub mod sexpr_builder;
 
 lalrpop_mod!(grammar);
 
@@ -33,17 +35,16 @@ pub struct TranslationUnit<'a> {
     decls: &'a [ExternalDeclaration<'a>],
 }
 
-impl TranslationUnit<'_> {
-    pub fn as_sexpr(&self) -> String {
-        format!(
-            "(translation-unit\n{})",
-            self.decls
+impl AsSExpr for TranslationUnit<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr {
+            name: "translation-unit".to_owned(),
+            params: self
+                .decls
                 .iter()
-                .map(|decl| decl.as_sexpr())
-                .join("\n")
-                .indent_lines()
-                .trim_end(),
-        )
+                .map(|decl| Param::Line(Box::new(*decl)))
+                .collect(),
+        }
     }
 }
 
@@ -53,8 +54,8 @@ pub enum ExternalDeclaration<'a> {
     Declaration(Declaration<'a>),
 }
 
-impl ExternalDeclaration<'_> {
-    fn as_sexpr(&self) -> String {
+impl AsSExpr for ExternalDeclaration<'_> {
+    fn as_sexpr(&self) -> SExpr {
         match self {
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
@@ -68,30 +69,38 @@ pub struct Declaration<'a> {
     init_declarator_list: &'a [InitDeclarator<'a>],
 }
 
-impl Declaration<'_> {
-    fn as_sexpr(&self) -> String {
-        format!(
-            "(declaration\n{}\n{})",
-            if self.specifiers.is_empty() {
-                NO_VALUE.to_owned()
-            }
-            else {
-                self.specifiers.iter().map(|s| format!("{s:?}")).join("\n")
-            }
-            .indent_lines()
-            .trim_end(),
-            if self.init_declarator_list.is_empty() {
-                NO_VALUE.to_owned()
-            }
-            else {
+impl AsSExpr for Declaration<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let mut params = vec![];
+        if self.specifiers.is_empty() {
+            params.push(Param::Inherit(Box::new(None::<Self>)));
+        }
+        else {
+            params.extend(
+                self.specifiers
+                    .iter()
+                    .map(|specifier| Param::String(format!("{specifier:?}"))),
+            );
+        }
+
+        let param = if self.init_declarator_list.len() > 1 {
+            Param::Line
+        }
+        else {
+            Param::Inherit
+        };
+        if self.init_declarator_list.is_empty() {
+            params.push(Param::Inherit(Box::new(None::<Self>)));
+        }
+        else {
+            params.extend(
                 self.init_declarator_list
                     .iter()
-                    .map(|init_declarator| init_declarator.as_sexpr())
-                    .join("\n")
-            }
-            .indent_lines()
-            .trim_end(),
-        )
+                    .map(|decl| param(Box::new(*decl))),
+            );
+        }
+
+        SExpr { name: "declaration".to_owned(), params }
     }
 }
 
@@ -278,15 +287,15 @@ struct InitDeclarator<'a> {
     initialiser: Option<Initialiser<'a>>,
 }
 
-impl InitDeclarator<'_> {
-    fn as_sexpr(&self) -> String {
-        format!(
-            "(init-declarator {} {})",
-            self.declarator.as_sexpr(),
-            self.initialiser
-                .map(|initialiser| initialiser.as_sexpr())
-                .unwrap_or_else(|| NO_VALUE.to_owned())
-        )
+impl AsSExpr for InitDeclarator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr {
+            name: "init-declarator".to_owned(),
+            params: vec![
+                Param::Inherit(Box::new(self.declarator)),
+                Param::Inherit(Box::new(self.initialiser)),
+            ],
+        }
     }
 }
 
@@ -296,15 +305,17 @@ struct Declarator<'a> {
     direct_declarator: DirectDeclarator<'a>,
 }
 
-impl Declarator<'_> {
-    fn as_sexpr(&self) -> String {
+impl AsSExpr for Declarator<'_> {
+    fn as_sexpr(&self) -> SExpr {
         match self.pointers {
             None => self.direct_declarator.as_sexpr(),
-            Some(pointers) => format!(
-                "(pointer level={} {})",
-                pointers.len(),
-                self.direct_declarator.as_sexpr()
-            ),
+            Some(pointers) => SExpr {
+                name: "pointers".to_owned(),
+                params: vec![
+                    Param::InlineString(format!("level={}", pointers.len())),
+                    Param::Inherit(Box::new(self.direct_declarator)),
+                ],
+            },
         }
     }
 }
@@ -322,10 +333,10 @@ enum DirectDeclarator<'a> {
     FunctionDeclarator(FunctionDeclarator<'a>),
 }
 
-impl DirectDeclarator<'_> {
-    fn as_sexpr(&self) -> String {
+impl AsSExpr for DirectDeclarator<'_> {
+    fn as_sexpr(&self) -> SExpr {
         match self {
-            DirectDeclarator::Identifier(ident) => ident.slice().to_owned(),
+            DirectDeclarator::Identifier(ident) => SExpr::string(ident.slice()),
             DirectDeclarator::Parenthesised(declarator) => declarator.as_sexpr(),
             DirectDeclarator::FunctionDeclarator(function_declarator) =>
                 function_declarator.as_sexpr(),
@@ -339,18 +350,19 @@ struct FunctionDeclarator<'a> {
     parameter_type_list: &'a [ParameterDeclaration<'a>],
 }
 
-impl FunctionDeclarator<'_> {
-    fn as_sexpr(&self) -> String {
-        format!(
-            "(function-declarator {}\n{})",
-            self.direct_declarator.as_sexpr(),
+impl AsSExpr for FunctionDeclarator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let mut params = vec![Param::Inherit(Box::new(*self.direct_declarator))];
+        params.extend(
             self.parameter_type_list
                 .iter()
-                .map(|param| param.as_sexpr())
-                .join("\n")
-                .indent_lines()
-                .trim_end(),
-        )
+                .map(|param| Param::Line(Box::new(*param))),
+        );
+
+        SExpr {
+            name: "function-declarator".to_owned(),
+            params,
+        }
     }
 }
 
@@ -360,18 +372,21 @@ struct ParameterDeclaration<'a> {
     declarator: Declarator<'a>,
 }
 
-impl ParameterDeclaration<'_> {
-    fn as_sexpr(&self) -> String {
-        format!("(param {})", self.declarator.as_sexpr())
+impl AsSExpr for ParameterDeclaration<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr {
+            name: "param".to_owned(),
+            params: vec![Param::Inherit(Box::new(self.declarator))],
+        }
     }
 }
 
 #[derive(Debug, Clone, Copy)]
 struct Initialiser<'a>(Token<'a>);
 
-impl Initialiser<'_> {
-    fn as_sexpr(&self) -> String {
-        self.0.slice().to_owned()
+impl AsSExpr for Initialiser<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::string(self.0.slice())
     }
 }
 
@@ -382,33 +397,34 @@ pub struct FunctionDefinition<'a> {
     body: CompoundStatement<'a>,
 }
 
-impl FunctionDefinition<'_> {
-    fn as_sexpr(&self) -> String {
-        format!(
-            "(function-definition\n{}\n{}\n{})",
-            self.declarator.as_sexpr().indent_lines().trim_end(),
-            self.declaration_specifiers
-                .iter()
-                .map(|declaration_specifier| format!("{declaration_specifier:?}"))
-                .join("\n")
-                .indent_lines()
-                .trim_end(),
-            self.body.as_sexpr().indent_lines().trim_end(),
-        )
+impl AsSExpr for FunctionDefinition<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let mut params = self
+            .declaration_specifiers
+            .iter()
+            .map(|declaration_specifier| Param::String(format!("{declaration_specifier:?}")))
+            .collect_vec();
+        params.push(Param::Inherit(Box::new(self.declarator)));
+        params.push(Param::Line(Box::new(self.body)));
+        SExpr {
+            name: "function-definition".to_owned(),
+            params,
+        }
     }
 }
 
 #[derive(Debug, Clone, Copy)]
 struct CompoundStatement<'a>(&'a [BlockItem<'a>]);
 
-impl CompoundStatement<'_> {
-    fn as_sexpr(&self) -> String {
-        if self.0.is_empty() {
-            "(compound-statement)".to_owned()
-        }
-        else {
-            let items = self.0.iter().map(|item| item.as_sexpr()).join("\n");
-            format!("(compound-statement\n{})", items.indent_lines().trim_end())
+impl AsSExpr for CompoundStatement<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr {
+            name: "compound-statement".to_owned(),
+            params: self
+                .0
+                .iter()
+                .map(|item| Param::Line(Box::new(*item)))
+                .collect(),
         }
     }
 }
@@ -418,8 +434,8 @@ enum BlockItem<'a> {
     Declaration(Declaration<'a>),
 }
 
-impl BlockItem<'_> {
-    fn as_sexpr(&self) -> String {
+impl AsSExpr for BlockItem<'_> {
+    fn as_sexpr(&self) -> SExpr {
         match self {
             BlockItem::Declaration(decl) => decl.as_sexpr(),
         }

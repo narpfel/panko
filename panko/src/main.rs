@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use bumpalo::Bump;
+use panko_parser::sexpr_builder::AsSExpr as _;
 
 fn main() {
     let bump = &Bump::new();
