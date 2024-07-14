@@ -39,11 +39,7 @@ impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr {
             name: "translation-unit".to_owned(),
-            params: self
-                .decls
-                .iter()
-                .map(|decl| Param::Line(Box::new(*decl)))
-                .collect(),
+            params: self.decls.iter().map(|decl| Param::Line(decl)).collect(),
         }
     }
 }
@@ -73,7 +69,7 @@ impl AsSExpr for Declaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         let mut params = vec![];
         if self.specifiers.is_empty() {
-            params.push(Param::Inherit(Box::new(None::<Self>)));
+            params.push(Param::Inherit(&None::<Self>));
         }
         else {
             params.extend(
@@ -90,14 +86,10 @@ impl AsSExpr for Declaration<'_> {
             Param::Inherit
         };
         if self.init_declarator_list.is_empty() {
-            params.push(Param::Inherit(Box::new(None::<Self>)));
+            params.push(Param::Inherit(&None::<Self>));
         }
         else {
-            params.extend(
-                self.init_declarator_list
-                    .iter()
-                    .map(|decl| param(Box::new(*decl))),
-            );
+            params.extend(self.init_declarator_list.iter().map(|decl| param(decl)));
         }
 
         SExpr { name: "declaration".to_owned(), params }
@@ -292,8 +284,8 @@ impl AsSExpr for InitDeclarator<'_> {
         SExpr {
             name: "init-declarator".to_owned(),
             params: vec![
-                Param::Inherit(Box::new(self.declarator)),
-                Param::Inherit(Box::new(self.initialiser)),
+                Param::Inherit(&self.declarator),
+                Param::Inherit(&self.initialiser),
             ],
         }
     }
@@ -313,7 +305,7 @@ impl AsSExpr for Declarator<'_> {
                 name: "pointers".to_owned(),
                 params: vec![
                     Param::InlineString(format!("level={}", pointers.len())),
-                    Param::Inherit(Box::new(self.direct_declarator)),
+                    Param::Inherit(&self.direct_declarator),
                 ],
             },
         }
@@ -352,11 +344,11 @@ struct FunctionDeclarator<'a> {
 
 impl AsSExpr for FunctionDeclarator<'_> {
     fn as_sexpr(&self) -> SExpr {
-        let mut params = vec![Param::Inherit(Box::new(*self.direct_declarator))];
+        let mut params = vec![Param::Inherit(self.direct_declarator)];
         params.extend(
             self.parameter_type_list
                 .iter()
-                .map(|param| Param::Line(Box::new(*param))),
+                .map(|param| Param::Line(param)),
         );
 
         SExpr {
@@ -376,7 +368,7 @@ impl AsSExpr for ParameterDeclaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr {
             name: "param".to_owned(),
-            params: vec![Param::Inherit(Box::new(self.declarator))],
+            params: vec![Param::Inherit(&self.declarator)],
         }
     }
 }
@@ -404,8 +396,8 @@ impl AsSExpr for FunctionDefinition<'_> {
             .iter()
             .map(|declaration_specifier| Param::String(format!("{declaration_specifier:?}")))
             .collect_vec();
-        params.push(Param::Inherit(Box::new(self.declarator)));
-        params.push(Param::Line(Box::new(self.body)));
+        params.push(Param::Inherit(&self.declarator));
+        params.push(Param::Line(&self.body));
         SExpr {
             name: "function-definition".to_owned(),
             params,
@@ -420,11 +412,7 @@ impl AsSExpr for CompoundStatement<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr {
             name: "compound-statement".to_owned(),
-            params: self
-                .0
-                .iter()
-                .map(|item| Param::Line(Box::new(*item)))
-                .collect(),
+            params: self.0.iter().map(|item| Param::Line(item)).collect(),
         }
     }
 }

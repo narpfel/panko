@@ -49,8 +49,8 @@ impl fmt::Display for SExpr<'_> {
 }
 
 pub enum Param<'a> {
-    Line(Box<dyn AsSExpr + 'a>),
-    Inherit(Box<dyn AsSExpr + 'a>),
+    Line(&'a dyn AsSExpr),
+    Inherit(&'a dyn AsSExpr),
     InlineString(String),
     String(String),
 }
