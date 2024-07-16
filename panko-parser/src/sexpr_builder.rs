@@ -44,7 +44,7 @@ impl<'a> SExpr<'a> {
 
     pub(crate) fn debug<T>(mut self, params: impl IntoIterator<Item = T>) -> Self
     where
-        T: std::fmt::Debug,
+        T: fmt::Debug,
     {
         self.params.extend(
             params
@@ -58,7 +58,7 @@ impl<'a> SExpr<'a> {
     where
         IntoIter: IntoIterator<Item = T>,
         IntoIter::IntoIter: ExactSizeIterator,
-        T: std::fmt::Debug,
+        T: fmt::Debug,
     {
         let params = params.into_iter();
         if params.len() == 0 {
