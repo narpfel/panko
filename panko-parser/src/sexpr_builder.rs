@@ -8,11 +8,24 @@ const EMPTY: &str = "";
 pub struct SExpr<'a> {
     name: String,
     params: Vec<Param<'a>>,
+    parenthesise_if_empty: bool,
 }
 
 impl<'a> SExpr<'a> {
+    pub(crate) fn new(s: &str) -> Self {
+        Self {
+            name: s.to_owned(),
+            params: vec![],
+            parenthesise_if_empty: true,
+        }
+    }
+
     pub(crate) fn string(s: &str) -> Self {
-        Self { name: s.to_owned(), params: vec![] }
+        Self {
+            name: s.to_owned(),
+            params: vec![],
+            parenthesise_if_empty: false,
+        }
     }
 
     pub(crate) fn lines<T>(mut self, params: impl IntoIterator<Item = &'a T>) -> Self
@@ -82,7 +95,14 @@ impl<'a> SExpr<'a> {
     }
 
     fn fmt(&self, f: &mut fmt::Formatter, indent: usize) -> fmt::Result {
-        write!(f, "{EMPTY:indent$}({}", self.name)?;
+        let (open_paren, close_paren) = if self.params.is_empty() && !self.parenthesise_if_empty {
+            ("", "")
+        }
+        else {
+            ("(", ")")
+        };
+
+        write!(f, "{EMPTY:indent$}{open_paren}{}", self.name)?;
         let mut has_line_break = false;
         for param in &self.params {
             match param {
@@ -104,7 +124,7 @@ impl<'a> SExpr<'a> {
                 }
             }
         }
-        write!(f, ")")
+        write!(f, "{}", close_paren)
     }
 }
 

@@ -36,7 +36,7 @@ pub struct TranslationUnit<'a> {
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::string("translation-unit").lines(self.decls)
+        SExpr::new("translation-unit").lines(self.decls)
     }
 }
 
@@ -63,7 +63,7 @@ pub struct Declaration<'a> {
 
 impl AsSExpr for Declaration<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::string("declaration")
+        SExpr::new("declaration")
             .debug_explicit_empty(self.specifiers)
             .short_inline_explicit_empty(self.init_declarator_list)
     }
@@ -254,7 +254,7 @@ struct InitDeclarator<'a> {
 
 impl AsSExpr for InitDeclarator<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::string("init-declarator")
+        SExpr::new("init-declarator")
             .inherit(&self.declarator)
             .inherit(&self.initialiser)
     }
@@ -270,7 +270,7 @@ impl AsSExpr for Declarator<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self.pointers {
             None => self.direct_declarator.as_sexpr(),
-            Some(pointers) => SExpr::string("pointers")
+            Some(pointers) => SExpr::new("pointers")
                 .inline_string(format!("level={}", pointers.len()))
                 .inherit(&self.direct_declarator),
         }
@@ -309,7 +309,7 @@ struct FunctionDeclarator<'a> {
 
 impl AsSExpr for FunctionDeclarator<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::string("function-declarator")
+        SExpr::new("function-declarator")
             .inherit(self.direct_declarator)
             .lines(self.parameter_type_list)
     }
@@ -323,7 +323,7 @@ struct ParameterDeclaration<'a> {
 
 impl AsSExpr for ParameterDeclaration<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::string("param").inherit(&self.declarator)
+        SExpr::new("param").inherit(&self.declarator)
     }
 }
 
@@ -332,7 +332,7 @@ struct Initialiser<'a>(Token<'a>);
 
 impl AsSExpr for Initialiser<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::string(self.0.slice())
+        SExpr::new(self.0.slice())
     }
 }
 
@@ -345,7 +345,7 @@ pub struct FunctionDefinition<'a> {
 
 impl AsSExpr for FunctionDefinition<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::string("function-definition")
+        SExpr::new("function-definition")
             .debug(self.declaration_specifiers)
             .inherit(&self.declarator)
             .inherit(&self.body)
@@ -357,7 +357,7 @@ struct CompoundStatement<'a>(&'a [BlockItem<'a>]);
 
 impl AsSExpr for CompoundStatement<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::string("compound-statement").lines(self.0)
+        SExpr::new("compound-statement").lines(self.0)
     }
 }
 
