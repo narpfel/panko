@@ -152,12 +152,13 @@ AbstractDeclarator: ast::AbstractDeclarator<'a> = {
 DirectAbstractDeclarator: ast::DirectAbstractDeclarator<'a> = {
     "(" <Bump<AbstractDeclarator>> ")" => ast::DirectAbstractDeclarator::Parenthesised(<>),
     // array-abstract-declarator attribute-specifier-sequence?
-    <FunctionAbstractDeclarator> AttributeSpecifierSequence? => ast::DirectAbstractDeclarator::FunctionAbstractDeclarator(<>),
+    <FunctionAbstractDeclarator> AttributeSpecifierSequence?
+        => ast::DirectAbstractDeclarator::FunctionAbstractDeclarator(<>),
 }
 
 FunctionAbstractDeclarator: ast::FunctionAbstractDeclarator<'a> = {
-    <direct_abstract_declarator:Bump<DirectAbstractDeclarator>?> "(" <parameter_type_list:ParameterTypeList> ")"
-        => ast::FunctionAbstractDeclarator { <> },
+    <direct_abstract_declarator:Bump<DirectAbstractDeclarator>?>
+        "(" <parameter_type_list:ParameterTypeList> ")" => ast::FunctionAbstractDeclarator { <> },
 }
 
 Initialiser: ast::Initialiser<'a> = {
