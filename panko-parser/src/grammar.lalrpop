@@ -89,7 +89,7 @@ Declaration: ast::Declaration<'a> = {
 }
 
 DeclarationSpecifiers: &'a [ast::DeclarationSpecifier<'a>] = {
-    Many<(<DeclarationSpecifier> AttributeSpecifierSequence?)>,
+    Some<(<DeclarationSpecifier> AttributeSpecifierSequence?)>,
 }
 
 DeclarationSpecifier: ast::DeclarationSpecifier<'a> = {
