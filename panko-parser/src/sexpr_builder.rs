@@ -160,6 +160,15 @@ pub trait AsSExpr {
     }
 }
 
+impl<T> AsSExpr for &T
+where
+    T: AsSExpr,
+{
+    fn as_sexpr(&self) -> SExpr {
+        (*self).as_sexpr()
+    }
+}
+
 impl<T> AsSExpr for Option<T>
 where
     T: AsSExpr,
