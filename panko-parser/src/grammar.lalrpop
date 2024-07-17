@@ -131,9 +131,27 @@ ParameterTypeList: &'a [ast::ParameterDeclaration<'a>] = {
 }
 
 ParameterDeclaration: ast::ParameterDeclaration<'a> = {
-    AttributeSpecifierSequence? <declaration_specifiers:DeclarationSpecifiers> <declarator:Declarator> =>
-        ast::ParameterDeclaration { <> },
-    // attribute-specifier-sequence? declaration-specifiers abstract-declarator?
+    AttributeSpecifierSequence? <declaration_specifiers:DeclarationSpecifiers>
+        <declarator:ParameterDeclarator> => ast::ParameterDeclaration { <> },
+}
+
+ParameterDeclarator: ast::ParameterDeclarator<'a> = {
+    Declarator => ast::ParameterDeclarator::Concrete(<>),
+    AbstractDeclarator? => ast::ParameterDeclarator::Abstract(<>),
+}
+
+AbstractDeclarator: ast::AbstractDeclarator<'a> = {
+    Some<Pointer> => ast::AbstractDeclarator { pointers: Some(<>), direct_abstract_declarator: None },
+    <pointers:Some<Pointer>?> <direct_abstract_declarator:DirectAbstractDeclarator>
+        => ast::AbstractDeclarator {
+            pointers,
+            direct_abstract_declarator: Some(direct_abstract_declarator),
+        },
+}
+
+DirectAbstractDeclarator: ast::DirectAbstractDeclarator<'a> = {
+    "(" <Bump<AbstractDeclarator>> ")" => ast::DirectAbstractDeclarator::Parenthesised(<>),
+    // TODO: incomplete
 }
 
 Initialiser: ast::Initialiser<'a> = {

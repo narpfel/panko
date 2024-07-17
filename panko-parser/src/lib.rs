@@ -318,12 +318,60 @@ impl AsSExpr for FunctionDeclarator<'_> {
 #[derive(Debug, Clone, Copy)]
 struct ParameterDeclaration<'a> {
     declaration_specifiers: &'a [DeclarationSpecifier<'a>],
-    declarator: Declarator<'a>,
+    declarator: ParameterDeclarator<'a>,
 }
 
 impl AsSExpr for ParameterDeclaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("param").inherit(&self.declarator)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum ParameterDeclarator<'a> {
+    Concrete(Declarator<'a>),
+    Abstract(Option<AbstractDeclarator<'a>>),
+}
+
+impl AsSExpr for ParameterDeclarator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            ParameterDeclarator::Concrete(concrete) => concrete.as_sexpr(),
+            ParameterDeclarator::Abstract(abstract_) => abstract_.as_sexpr(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct AbstractDeclarator<'a> {
+    pointers: Option<&'a [Pointer<'a>]>,
+    direct_abstract_declarator: Option<DirectAbstractDeclarator<'a>>,
+}
+
+impl AsSExpr for AbstractDeclarator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self.pointers {
+            None => self.direct_abstract_declarator.as_sexpr(),
+            Some(pointers) => SExpr::new("pointers")
+                .inline_string(format!("level={}", pointers.len()))
+                .inherit(&self.direct_abstract_declarator),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum DirectAbstractDeclarator<'a> {
+    Parenthesised(&'a AbstractDeclarator<'a>),
+    // ArrayAbstractDeclarator(ArrayAbstractDeclarator<'a>),
+    // FunctionAbstractDeclarator(FunctionAbstractDeclarator<'a>),
+}
+
+impl AsSExpr for DirectAbstractDeclarator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            DirectAbstractDeclarator::Parenthesised(abstract_declarator) =>
+                abstract_declarator.as_sexpr(),
+        }
     }
 }
 
