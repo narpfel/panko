@@ -363,7 +363,7 @@ impl AsSExpr for AbstractDeclarator<'_> {
 enum DirectAbstractDeclarator<'a> {
     Parenthesised(&'a AbstractDeclarator<'a>),
     // ArrayAbstractDeclarator(ArrayAbstractDeclarator<'a>),
-    // FunctionAbstractDeclarator(FunctionAbstractDeclarator<'a>),
+    FunctionAbstractDeclarator(FunctionAbstractDeclarator<'a>),
 }
 
 impl AsSExpr for DirectAbstractDeclarator<'_> {
@@ -371,7 +371,23 @@ impl AsSExpr for DirectAbstractDeclarator<'_> {
         match self {
             DirectAbstractDeclarator::Parenthesised(abstract_declarator) =>
                 abstract_declarator.as_sexpr(),
+            DirectAbstractDeclarator::FunctionAbstractDeclarator(function_abstract_declarator) =>
+                function_abstract_declarator.as_sexpr(),
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct FunctionAbstractDeclarator<'a> {
+    direct_abstract_declarator: Option<&'a DirectAbstractDeclarator<'a>>,
+    parameter_type_list: &'a [ParameterDeclaration<'a>],
+}
+
+impl AsSExpr for FunctionAbstractDeclarator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("function-abstract-declarator")
+            .inherit(&self.direct_abstract_declarator)
+            .lines(self.parameter_type_list)
     }
 }
 
