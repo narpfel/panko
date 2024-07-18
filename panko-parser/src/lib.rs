@@ -428,12 +428,81 @@ impl AsSExpr for CompoundStatement<'_> {
 #[derive(Debug, Clone, Copy)]
 enum BlockItem<'a> {
     Declaration(Declaration<'a>),
+    UnlabeledStatement(UnlabeledStatement<'a>),
 }
 
 impl AsSExpr for BlockItem<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             BlockItem::Declaration(decl) => decl.as_sexpr(),
+            BlockItem::UnlabeledStatement(unlabeled_statement) => unlabeled_statement.as_sexpr(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum UnlabeledStatement<'a> {
+    ExpressionStatement(ExpressionStatement<'a>),
+    PrimaryBlock(PrimaryBlock<'a>),
+    JumpStatement(JumpStatement<'a>),
+}
+
+impl AsSExpr for UnlabeledStatement<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            UnlabeledStatement::ExpressionStatement(stmt) => stmt.as_sexpr(),
+            UnlabeledStatement::PrimaryBlock(block) => block.as_sexpr(),
+            UnlabeledStatement::JumpStatement(jump) => jump.as_sexpr(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct ExpressionStatement<'a>(Option<Expression<'a>>);
+
+impl AsSExpr for ExpressionStatement<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("expression").inherit(&self.0)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum PrimaryBlock<'a> {
+    CompoundStatement(CompoundStatement<'a>),
+}
+
+impl AsSExpr for PrimaryBlock<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            PrimaryBlock::CompoundStatement(stmt) => SExpr::new("primary-block").inherit(stmt),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum JumpStatement<'a> {
+    Return(Option<Expression<'a>>),
+}
+
+impl AsSExpr for JumpStatement<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            JumpStatement::Return(expr) => SExpr::new("return").inherit(expr),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Expression<'a> {
+    Name(Token<'a>),
+    Integer(Token<'a>),
+}
+
+impl AsSExpr for Expression<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Expression::Name(name) => SExpr::new("name").inline_string(name.slice().to_owned()),
+            Expression::Integer(int) => SExpr::string(int.slice()),
         }
     }
 }

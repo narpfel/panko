@@ -57,6 +57,8 @@ extern {
         "inline" => Token { kind: TokenKind::Inline, .. },
         "_Noreturn" => Token { kind: TokenKind::Noreturn, .. },
 
+        "return" => Token { kind: TokenKind::Return, .. },
+
         Identifier => Token { kind: TokenKind::Identifier, .. },
         Integer => Token { kind: TokenKind::Integer, .. },
     }
@@ -251,8 +253,38 @@ BlockItemList: &'a [ast::BlockItem<'a>] = {
 
 BlockItem: ast::BlockItem<'a> = {
     Declaration => ast::BlockItem::Declaration(<>),
-    // unlabeled-statement
+    UnlabeledStatement => ast::BlockItem::UnlabeledStatement(<>),
     // label
+}
+
+UnlabeledStatement: ast::UnlabeledStatement<'a> = {
+    ExpressionStatement => ast::UnlabeledStatement::ExpressionStatement(<>),
+    AttributeSpecifierSequence? <PrimaryBlock> => ast::UnlabeledStatement::PrimaryBlock(<>),
+    AttributeSpecifierSequence? <JumpStatement> => ast::UnlabeledStatement::JumpStatement(<>),
+}
+
+PrimaryBlock: ast::PrimaryBlock<'a> = {
+    CompoundStatement => ast::PrimaryBlock::CompoundStatement(<>),
+    // selection-statement
+    // iteration-statement
+}
+
+JumpStatement: ast::JumpStatement<'a> = {
+    // goto Identifier ;
+    // continue ;
+    // break ;
+    "return" <Expression?> ";" => ast::JumpStatement::Return(<>),
+}
+
+ExpressionStatement: ast::ExpressionStatement<'a> = {
+    <Expression?> ";" => ast::ExpressionStatement(<>),
+    // FIXME: this produces a conflict
+    // AttributeSpecifierSequence? <Expression> ";" => ast::ExpressionStatement(Some(<>)),
+}
+
+Expression: ast::Expression<'a> = {
+    Identifier => ast::Expression::Name(<>),
+    Integer => ast::Expression::Integer(<>),
 }
 
 Bump<T>: &'a T = {
