@@ -377,7 +377,9 @@ struct ParameterDeclaration<'a> {
 
 impl AsSExpr for ParameterDeclaration<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::new("param").inherit(&self.declarator)
+        SExpr::new("param")
+            .inherit(&self.declaration_specifiers)
+            .inherit(&self.declarator)
     }
 }
 
