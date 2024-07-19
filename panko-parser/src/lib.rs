@@ -57,15 +57,24 @@ impl AsSExpr for ExternalDeclaration<'_> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Declaration<'a> {
-    specifiers: &'a [DeclarationSpecifier<'a>],
+    specifiers: DeclarationSpecifiers<'a>,
     init_declarator_list: &'a [InitDeclarator<'a>],
 }
 
 impl AsSExpr for Declaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("declaration")
-            .debug_explicit_empty(self.specifiers)
+            .inherit(&self.specifiers)
             .short_inline_explicit_empty(self.init_declarator_list)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct DeclarationSpecifiers<'a>(&'a [DeclarationSpecifier<'a>]);
+
+impl AsSExpr for DeclarationSpecifiers<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("declaration-specifiers").inherit_many_explicit_empty(self.0)
     }
 }
 
@@ -76,10 +85,28 @@ enum DeclarationSpecifier<'a> {
     FunctionSpecifier(FunctionSpecifier<'a>),
 }
 
+impl AsSExpr for DeclarationSpecifier<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            DeclarationSpecifier::StorageClass(storage_class) => storage_class.as_sexpr(),
+            DeclarationSpecifier::TypeSpecifierQualifier(type_specifier_qualifier) =>
+                type_specifier_qualifier.as_sexpr(),
+            DeclarationSpecifier::FunctionSpecifier(function_specifier) =>
+                function_specifier.as_sexpr(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 struct StorageClassSpecifier<'a> {
     token: Token<'a>,
     kind: StorageClassSpecifierKind,
+}
+
+impl AsSExpr for StorageClassSpecifier<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::string(self.token.slice())
+    }
 }
 
 impl<'a> StorageClassSpecifier<'a> {
@@ -121,6 +148,15 @@ enum TypeSpecifierQualifier<'a> {
     Specifier(TypeSpecifier<'a>),
 }
 
+impl AsSExpr for TypeSpecifierQualifier<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            TypeSpecifierQualifier::Qualifier(qualifier) => qualifier.as_sexpr(),
+            TypeSpecifierQualifier::Specifier(specifier) => specifier.as_sexpr(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 struct TypeQualifier<'a> {
     token: Token<'a>,
@@ -133,6 +169,12 @@ impl<'a> TypeQualifier<'a> {
             token,
             kind: type_qualifier_kind(token.kind),
         }
+    }
+}
+
+impl AsSExpr for TypeQualifier<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::string(self.token.slice())
     }
 }
 
@@ -166,6 +208,12 @@ impl<'a> TypeSpecifier<'a> {
             token,
             kind: type_specifier_kind(token.kind),
         }
+    }
+}
+
+impl AsSExpr for TypeSpecifier<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::string(self.token.slice())
     }
 }
 
@@ -229,6 +277,12 @@ impl<'a> FunctionSpecifier<'a> {
             token,
             kind: function_specifier_kind(token.kind),
         }
+    }
+}
+
+impl AsSExpr for FunctionSpecifier<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::string(self.token.slice())
     }
 }
 
@@ -317,7 +371,7 @@ impl AsSExpr for FunctionDeclarator<'_> {
 
 #[derive(Debug, Clone, Copy)]
 struct ParameterDeclaration<'a> {
-    declaration_specifiers: &'a [DeclarationSpecifier<'a>],
+    declaration_specifiers: DeclarationSpecifiers<'a>,
     declarator: ParameterDeclarator<'a>,
 }
 
@@ -396,13 +450,13 @@ struct Initialiser<'a>(Token<'a>);
 
 impl AsSExpr for Initialiser<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::new(self.0.slice())
+        SExpr::string(self.0.slice())
     }
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct FunctionDefinition<'a> {
-    declaration_specifiers: &'a [DeclarationSpecifier<'a>],
+    declaration_specifiers: DeclarationSpecifiers<'a>,
     declarator: Declarator<'a>,
     body: CompoundStatement<'a>,
 }
@@ -410,7 +464,7 @@ pub struct FunctionDefinition<'a> {
 impl AsSExpr for FunctionDefinition<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("function-definition")
-            .debug(self.declaration_specifiers)
+            .inherit(&self.declaration_specifiers)
             .inherit(&self.declarator)
             .inherit(&self.body)
     }

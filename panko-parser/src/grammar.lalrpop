@@ -90,8 +90,8 @@ Declaration: ast::Declaration<'a> = {
     // attribute-declaration
 }
 
-DeclarationSpecifiers: &'a [ast::DeclarationSpecifier<'a>] = {
-    Some<(<DeclarationSpecifier> AttributeSpecifierSequence?)>,
+DeclarationSpecifiers: ast::DeclarationSpecifiers<'a> = {
+    Some<(<DeclarationSpecifier> AttributeSpecifierSequence?)> => ast::DeclarationSpecifiers(<>),
 }
 
 DeclarationSpecifier: ast::DeclarationSpecifier<'a> = {

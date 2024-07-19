@@ -42,29 +42,19 @@ impl<'a> SExpr<'a> {
         self
     }
 
-    pub(crate) fn debug<T>(mut self, params: impl IntoIterator<Item = T>) -> Self
+    pub(crate) fn inherit_many_explicit_empty<T, IntoIter>(mut self, params: IntoIter) -> Self
     where
-        T: fmt::Debug,
-    {
-        self.params.extend(
-            params
-                .into_iter()
-                .map(|param| Param::String(format!("{param:?}"))),
-        );
-        self
-    }
-
-    pub(crate) fn debug_explicit_empty<T, IntoIter>(mut self, params: IntoIter) -> Self
-    where
-        IntoIter: IntoIterator<Item = T>,
+        IntoIter: IntoIterator<Item = &'a T>,
         IntoIter::IntoIter: ExactSizeIterator,
-        T: fmt::Debug,
+        T: AsSExpr + 'a,
     {
         let params = params.into_iter();
         if params.len() == 0 {
             self.params.push(Param::Inherit(&()));
         }
-        self.debug(params)
+        self.params
+            .extend(params.map(|param| Param::Inherit(param)));
+        self
     }
 
     pub(crate) fn short_inline_explicit_empty<T, IntoIter>(mut self, params: IntoIter) -> Self
