@@ -1,6 +1,5 @@
 use bumpalo::Bump;
 use panko_lex::Token;
-use panko_lex::TokenKind;
 
 use crate as ast;
 
@@ -10,57 +9,57 @@ extern {
     type Error = ast::Error<'a>;
 
     enum Token<'a> {
-        ";" => Token { kind: TokenKind::Semicolon, .. },
-        "," => Token { kind: TokenKind::Comma, .. },
-        "=" => Token { kind: TokenKind::Equal, .. },
+        ";" => Token { kind: panko_lex::TokenKind::Semicolon, .. },
+        "," => Token { kind: panko_lex::TokenKind::Comma, .. },
+        "=" => Token { kind: panko_lex::TokenKind::Equal, .. },
 
-        "*" => Token { kind: TokenKind::Star, .. },
+        "*" => Token { kind: panko_lex::TokenKind::Star, .. },
 
         // parentheses
-        "(" => Token { kind: TokenKind::LParen, .. },
-        ")" => Token { kind: TokenKind::RParen, .. },
-        "{" => Token { kind: TokenKind::LBrace, .. },
-        "}" => Token { kind: TokenKind::RBrace, .. },
+        "(" => Token { kind: panko_lex::TokenKind::LParen, .. },
+        ")" => Token { kind: panko_lex::TokenKind::RParen, .. },
+        "{" => Token { kind: panko_lex::TokenKind::LBrace, .. },
+        "}" => Token { kind: panko_lex::TokenKind::RBrace, .. },
 
         // StorageClassSpecifierToken
-        "auto" => Token { kind: TokenKind::Auto, .. },
-        "constexpr" => Token { kind: TokenKind::Constexpr, .. },
-        "extern" => Token { kind: TokenKind::Extern, .. },
-        "register" => Token { kind: TokenKind::Register, .. },
-        "static" => Token { kind: TokenKind::Static, .. },
-        "thread_local" => Token { kind: TokenKind::ThreadLocal, .. },
-        "typedef" => Token { kind: TokenKind::Typedef, .. },
+        "auto" => Token { kind: panko_lex::TokenKind::Auto, .. },
+        "constexpr" => Token { kind: panko_lex::TokenKind::Constexpr, .. },
+        "extern" => Token { kind: panko_lex::TokenKind::Extern, .. },
+        "register" => Token { kind: panko_lex::TokenKind::Register, .. },
+        "static" => Token { kind: panko_lex::TokenKind::Static, .. },
+        "thread_local" => Token { kind: panko_lex::TokenKind::ThreadLocal, .. },
+        "typedef" => Token { kind: panko_lex::TokenKind::Typedef, .. },
 
         // TypeSpecifierToken
-        "void" => Token { kind: TokenKind::Void, .. },
-        "char" => Token { kind: TokenKind::Char, .. },
-        "short" => Token { kind: TokenKind::Short, .. },
-        "int" => Token { kind: TokenKind::Int, .. },
-        "long" => Token { kind: TokenKind::Long, .. },
-        "float" => Token { kind: TokenKind::Float, .. },
-        "double" => Token { kind: TokenKind::Double, .. },
-        "signed" => Token { kind: TokenKind::Signed, .. },
-        "unsigned" => Token { kind: TokenKind::Unsigned, .. },
-        "bool" => Token { kind: TokenKind::Bool, .. },
-        "_Complex" => Token { kind: TokenKind::Complex, .. },
-        "_Decimal32" => Token { kind: TokenKind::Decimal32, .. },
-        "_Decimal64" => Token { kind: TokenKind::Decimal64, .. },
-        "_Decimal128" => Token { kind: TokenKind::Decimal128, .. },
+        "void" => Token { kind: panko_lex::TokenKind::Void, .. },
+        "char" => Token { kind: panko_lex::TokenKind::Char, .. },
+        "short" => Token { kind: panko_lex::TokenKind::Short, .. },
+        "int" => Token { kind: panko_lex::TokenKind::Int, .. },
+        "long" => Token { kind: panko_lex::TokenKind::Long, .. },
+        "float" => Token { kind: panko_lex::TokenKind::Float, .. },
+        "double" => Token { kind: panko_lex::TokenKind::Double, .. },
+        "signed" => Token { kind: panko_lex::TokenKind::Signed, .. },
+        "unsigned" => Token { kind: panko_lex::TokenKind::Unsigned, .. },
+        "bool" => Token { kind: panko_lex::TokenKind::Bool, .. },
+        "_Complex" => Token { kind: panko_lex::TokenKind::Complex, .. },
+        "_Decimal32" => Token { kind: panko_lex::TokenKind::Decimal32, .. },
+        "_Decimal64" => Token { kind: panko_lex::TokenKind::Decimal64, .. },
+        "_Decimal128" => Token { kind: panko_lex::TokenKind::Decimal128, .. },
 
         // TypeQualifierToken
-        "const" => Token { kind: TokenKind::Const, .. },
-        "restrict" => Token { kind: TokenKind::Restrict, .. },
-        "volatile" => Token { kind: TokenKind::Volatile, .. },
-        "_Atomic" => Token { kind: TokenKind::Atomic, .. },
+        "const" => Token { kind: panko_lex::TokenKind::Const, .. },
+        "restrict" => Token { kind: panko_lex::TokenKind::Restrict, .. },
+        "volatile" => Token { kind: panko_lex::TokenKind::Volatile, .. },
+        "_Atomic" => Token { kind: panko_lex::TokenKind::Atomic, .. },
 
         // FunctionSpecifierToken
-        "inline" => Token { kind: TokenKind::Inline, .. },
-        "_Noreturn" => Token { kind: TokenKind::Noreturn, .. },
+        "inline" => Token { kind: panko_lex::TokenKind::Inline, .. },
+        "_Noreturn" => Token { kind: panko_lex::TokenKind::Noreturn, .. },
 
-        "return" => Token { kind: TokenKind::Return, .. },
+        "return" => Token { kind: panko_lex::TokenKind::Return, .. },
 
-        Identifier => Token { kind: TokenKind::Identifier, .. },
-        Integer => Token { kind: TokenKind::Integer, .. },
+        Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
+        Integer => Token { kind: panko_lex::TokenKind::Integer, .. },
     }
 }
 

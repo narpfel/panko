@@ -160,6 +160,7 @@ enum Param<'a> {
     Line(&'a dyn AsSExpr),
     Inherit(&'a dyn AsSExpr),
     InlineString(String),
+    #[expect(unused)]
     String(String),
 }
 

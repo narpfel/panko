@@ -1,8 +1,4 @@
-// FIXME: everything is incomplete, so there are a lot of unused things
-#![expect(unused)]
-
 use bumpalo::Bump;
-use itertools::Itertools as _;
 use lalrpop_util::lalrpop_mod;
 use panko_lex::Token;
 use panko_lex::TokenIter;
@@ -100,6 +96,7 @@ impl AsSExpr for DeclarationSpecifier<'_> {
 #[derive(Debug, Clone, Copy)]
 struct StorageClassSpecifier<'a> {
     token: Token<'a>,
+    #[expect(unused)]
     kind: StorageClassSpecifierKind,
 }
 
@@ -160,6 +157,7 @@ impl AsSExpr for TypeSpecifierQualifier<'_> {
 #[derive(Debug, Clone, Copy)]
 struct TypeQualifier<'a> {
     token: Token<'a>,
+    #[expect(unused)]
     kind: TypeQualifierKind,
 }
 
@@ -199,6 +197,7 @@ fn type_qualifier_kind(token_kind: TokenKind) -> TypeQualifierKind {
 #[derive(Debug, Clone, Copy)]
 struct TypeSpecifier<'a> {
     token: Token<'a>,
+    #[expect(unused)]
     kind: TypeSpecifierKind<'a>,
 }
 
@@ -228,6 +227,7 @@ enum TypeSpecifierKind<'a> {
     Double,
     Signed,
     Unsigned,
+    #[expect(unused)]
     BitInt {
         open_paren: Token<'a>,
         size: u64,
@@ -268,6 +268,7 @@ fn type_specifier_kind(token_kind: TokenKind) -> TypeSpecifierKind<'static> {
 #[derive(Debug, Clone, Copy)]
 struct FunctionSpecifier<'a> {
     token: Token<'a>,
+    #[expect(unused)]
     kind: FunctionSpecifierKind,
 }
 
