@@ -1,4 +1,6 @@
 use std::fmt;
+use std::iter::once;
+use std::iter::repeat;
 
 use crate::NO_VALUE;
 use crate::SEXPR_INDENT;
@@ -28,6 +30,14 @@ impl<'a> SExpr<'a> {
         }
     }
 
+    fn list() -> Self {
+        Self {
+            name: "".to_owned(),
+            params: vec![],
+            parenthesise_if_empty: true,
+        }
+    }
+
     pub(crate) fn lines<T>(mut self, params: impl IntoIterator<Item = &'a T>) -> Self
     where
         T: AsSExpr + 'a,
@@ -42,6 +52,15 @@ impl<'a> SExpr<'a> {
         self
     }
 
+    pub(crate) fn inherit_many<T>(mut self, params: impl IntoIterator<Item = &'a T>) -> Self
+    where
+        T: AsSExpr + 'a,
+    {
+        self.params
+            .extend(params.into_iter().map(|param| Param::Inherit(param)));
+        self
+    }
+
     pub(crate) fn inherit_many_explicit_empty<T, IntoIter>(mut self, params: IntoIter) -> Self
     where
         IntoIter: IntoIterator<Item = &'a T>,
@@ -52,9 +71,7 @@ impl<'a> SExpr<'a> {
         if params.len() == 0 {
             self.params.push(Param::Inherit(&()));
         }
-        self.params
-            .extend(params.map(|param| Param::Inherit(param)));
-        self
+        self.inherit_many(params)
     }
 
     pub(crate) fn short_inline_explicit_empty<T, IntoIter>(mut self, params: IntoIter) -> Self
@@ -94,22 +111,37 @@ impl<'a> SExpr<'a> {
 
         write!(f, "{EMPTY:indent$}{open_paren}{}", self.name)?;
         let mut has_line_break = false;
-        for param in &self.params {
+        let first_was_preceded = !self.name.is_empty();
+        for (param, was_preceded) in self
+            .params
+            .iter()
+            .zip(once(first_was_preceded).chain(repeat(true)))
+        {
             match param {
                 Param::Inherit(param) if !param.is_multiline() && !has_line_break => {
-                    write!(f, " ")?;
+                    if was_preceded {
+                        write!(f, " ")?;
+                    }
                     param.as_sexpr().fmt(f, 0)?;
                 }
                 Param::Inherit(param) | Param::Line(param) => {
-                    writeln!(f)?;
+                    if was_preceded {
+                        writeln!(f)?;
+                    }
                     param.as_sexpr().fmt(f, indent + SEXPR_INDENT)?;
                     has_line_break = true;
                 }
                 Param::InlineString(s) if !has_line_break => {
-                    write!(f, " {s}")?;
+                    if was_preceded {
+                        write!(f, " ")?;
+                    }
+                    write!(f, "{s}")?;
                 }
                 Param::InlineString(s) | Param::String(s) => {
-                    write!(f, "\n{EMPTY:indent$}{s}", indent = indent + SEXPR_INDENT)?;
+                    if was_preceded {
+                        writeln!(f)?;
+                    }
+                    write!(f, "{EMPTY:indent$}{s}", indent = indent + SEXPR_INDENT)?;
                     has_line_break = true;
                 }
             }
@@ -174,5 +206,14 @@ where
 impl AsSExpr for () {
     fn as_sexpr(&self) -> SExpr {
         SExpr::string(NO_VALUE)
+    }
+}
+
+impl<T> AsSExpr for &[T]
+where
+    T: AsSExpr,
+{
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::list().inherit_many_explicit_empty(*self)
     }
 }

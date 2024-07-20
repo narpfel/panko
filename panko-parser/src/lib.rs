@@ -322,11 +322,9 @@ struct Declarator<'a> {
 
 impl AsSExpr for Declarator<'_> {
     fn as_sexpr(&self) -> SExpr {
-        match self.pointers {
+        match &self.pointers {
             None => self.direct_declarator.as_sexpr(),
-            Some(pointers) => SExpr::new("pointers")
-                .inline_string(format!("level={}", pointers.len()))
-                .inherit(&self.direct_declarator),
+            Some(pointers) => pointers.as_sexpr().inherit(&self.direct_declarator),
         }
     }
 }
@@ -334,6 +332,12 @@ impl AsSExpr for Declarator<'_> {
 #[derive(Debug, Clone, Copy)]
 struct Pointer<'a> {
     qualifiers: &'a [TypeQualifier<'a>],
+}
+
+impl AsSExpr for Pointer<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("pointer").inherit_many(self.qualifiers)
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -406,10 +410,10 @@ struct AbstractDeclarator<'a> {
 
 impl AsSExpr for AbstractDeclarator<'_> {
     fn as_sexpr(&self) -> SExpr {
-        match self.pointers {
+        match &self.pointers {
             None => self.direct_abstract_declarator.as_sexpr(),
-            Some(pointers) => SExpr::new("pointers")
-                .inline_string(format!("level={}", pointers.len()))
+            Some(pointers) => pointers
+                .as_sexpr()
                 .inherit(&self.direct_abstract_declarator),
         }
     }
