@@ -2,6 +2,8 @@ use std::fmt;
 use std::iter::once;
 use std::iter::repeat;
 
+use panko_lex::Token;
+
 use crate::NO_VALUE;
 use crate::SEXPR_INDENT;
 
@@ -216,5 +218,17 @@ where
 {
     fn as_sexpr(&self) -> SExpr {
         SExpr::list().inherit_many_explicit_empty(*self)
+    }
+}
+
+impl AsSExpr for Token<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::string(self.slice())
+    }
+}
+
+impl AsSExpr for &str {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::string(self)
     }
 }

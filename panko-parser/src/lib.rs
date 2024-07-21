@@ -7,6 +7,7 @@ use panko_lex::TokenKind;
 use crate::sexpr_builder::AsSExpr;
 use crate::sexpr_builder::SExpr;
 
+mod ast;
 pub mod sexpr_builder;
 
 lalrpop_mod!(grammar);
@@ -157,7 +158,6 @@ impl AsSExpr for TypeSpecifierQualifier<'_> {
 #[derive(Debug, Clone, Copy)]
 struct TypeQualifier<'a> {
     token: Token<'a>,
-    #[expect(unused)]
     kind: TypeQualifierKind,
 }
 
@@ -197,7 +197,6 @@ fn type_qualifier_kind(token_kind: TokenKind) -> TypeQualifierKind {
 #[derive(Debug, Clone, Copy)]
 struct TypeSpecifier<'a> {
     token: Token<'a>,
-    #[expect(unused)]
     kind: TypeSpecifierKind<'a>,
 }
 
@@ -568,9 +567,13 @@ impl AsSExpr for Expression<'_> {
     }
 }
 
-pub fn parse<'a>(bump: &'a Bump, tokens: TokenIter<'a>) -> Result<TranslationUnit<'a>, Error<'a>> {
+pub fn parse<'a>(
+    bump: &'a Bump,
+    tokens: TokenIter<'a>,
+) -> Result<ast::TranslationUnit<'a>, Error<'a>> {
     let parser = grammar::TranslationUnitParser::new();
-    Ok(parser
+    let parse_tree = parser
         .parse(bump, tokens.map(|token| Ok(token?)))
-        .unwrap_or_else(|err| todo!("handle parse error: {err:?}")))
+        .unwrap_or_else(|err| todo!("handle parse error: {err:?}"));
+    Ok(ast::from_parse_tree(bump, parse_tree))
 }
