@@ -8,6 +8,7 @@ use panko_lex::Token;
 use crate as cst;
 use crate::CompoundStatement;
 use crate::DirectDeclarator;
+use crate::InitDeclarator;
 use crate::TypeQualifier;
 use crate::TypeQualifierKind;
 use crate::TypeSpecifierKind;
@@ -58,7 +59,6 @@ enum Type<'a> {
     #[expect(unused)]
     Char,
     Pointer(&'a QualifiedType<'a>),
-    #[expect(unused)]
     Function(FunctionType<'a>),
     // TODO
 }
@@ -93,7 +93,8 @@ enum Signedness {
 
 #[derive(Debug, Clone, Copy)]
 struct FunctionType<'a> {
-    params: &'a [QualifiedType<'a>],
+    // TODO: also transform `params`
+    params: &'a [cst::ParameterDeclaration<'a>],
     return_type: &'a QualifiedType<'a>,
 }
 
@@ -150,30 +151,42 @@ impl<'a> Declaration<'a> {
 
         let ty = ty.unwrap_or_else(|| unimplemented!("error: no type given in declaration"));
         let ty = QualifiedType { is_const, is_volatile, ty };
-        decl.init_declarator_list.iter().map(move |declarator| {
-            let mut ty = ty;
-            for pointer in declarator.declarator.pointers.unwrap_or_default() {
-                let mut is_const = false;
-                let mut is_volatile = false;
-                for qualifier in pointer.qualifiers {
-                    qualifier.parse(&mut is_const, &mut is_volatile);
+        decl.init_declarator_list
+            .iter()
+            .map(move |InitDeclarator { declarator, initialiser }| {
+                let mut ty = ty;
+                for pointer in declarator.pointers.unwrap_or_default() {
+                    let mut is_const = false;
+                    let mut is_volatile = false;
+                    for qualifier in pointer.qualifiers {
+                        qualifier.parse(&mut is_const, &mut is_volatile);
+                    }
+                    ty = QualifiedType {
+                        is_const,
+                        is_volatile,
+                        ty: Type::Pointer(bump.alloc(ty)),
+                    };
                 }
-                ty = QualifiedType {
-                    is_const,
-                    is_volatile,
-                    ty: Type::Pointer(bump.alloc(ty)),
+                let mut direct_declarator = &declarator.direct_declarator;
+                let name = loop {
+                    match direct_declarator {
+                        DirectDeclarator::Identifier(name) => break *name,
+                        DirectDeclarator::FunctionDeclarator(function_declarator) => {
+                            direct_declarator = function_declarator.direct_declarator;
+                            ty = QualifiedType {
+                                is_const: false,
+                                is_volatile: false,
+                                ty: Type::Function(FunctionType {
+                                    params: function_declarator.parameter_type_list,
+                                    return_type: bump.alloc(ty),
+                                }),
+                            };
+                        }
+                        direct_declarator => unimplemented!("{direct_declarator:#?}"),
+                    }
                 };
-            }
-            let name = match declarator.declarator.direct_declarator {
-                DirectDeclarator::Identifier(name) => name,
-                direct_declarator => unimplemented!("{direct_declarator:#?}"),
-            };
-            Self {
-                ty,
-                name,
-                initialiser: declarator.initialiser,
-            }
-        })
+                Self { ty, name, initialiser: *initialiser }
+            })
     }
 }
 
