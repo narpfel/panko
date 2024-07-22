@@ -27,7 +27,10 @@ impl AsSExpr for ExternalDeclaration<'_> {
 
 impl AsSExpr for FunctionDefinition<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::new("function-definition").inherit(&self.name)
+        SExpr::new("function-definition")
+            .inherit(&self.name)
+            .lines([&self.ty])
+            .lines([&self.body])
     }
 }
 

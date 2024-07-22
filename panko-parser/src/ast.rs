@@ -39,7 +39,7 @@ struct Declaration<'a> {
 #[derive(Debug, Clone, Copy)]
 struct FunctionDefinition<'a> {
     name: Token<'a>,
-    storage_class: cst::StorageClassSpecifier<'a>,
+    storage_class: Option<cst::StorageClassSpecifier<'a>>,
     inline: Option<cst::FunctionSpecifier<'a>>,
     noreturn: Option<cst::FunctionSpecifier<'a>>,
     ty: QualifiedType<'a>,
@@ -104,9 +104,10 @@ impl<'a> ExternalDeclaration<'a> {
         decl: &'a cst::ExternalDeclaration<'a>,
     ) -> Either<impl Iterator<Item = Self>, impl Iterator<Item = Self>> {
         match decl {
-            cst::ExternalDeclaration::FunctionDefinition(def) => Either::Left(once(
-                ExternalDeclaration::FunctionDefinition(FunctionDefinition::from_parse_tree(def)),
-            )),
+            cst::ExternalDeclaration::FunctionDefinition(def) =>
+                Either::Left(once(ExternalDeclaration::FunctionDefinition(
+                    FunctionDefinition::from_parse_tree(bump, def),
+                ))),
             cst::ExternalDeclaration::Declaration(decl) => Either::Right(
                 Declaration::from_parse_tree(bump, decl).map(ExternalDeclaration::Declaration),
             ),
@@ -114,9 +115,19 @@ impl<'a> ExternalDeclaration<'a> {
     }
 }
 
-impl FunctionDefinition<'_> {
-    fn from_parse_tree(#[expect(unused)] def: &cst::FunctionDefinition) -> Self {
-        todo!()
+impl<'a> FunctionDefinition<'a> {
+    fn from_parse_tree(bump: &'a Bump, def: &cst::FunctionDefinition<'a>) -> Self {
+        let cst::FunctionDefinition { declaration_specifiers, declarator, body } = *def;
+        let ty = parse_type_specifiers(declaration_specifiers.0);
+        let (ty, name) = parse_declarator(bump, ty, declarator);
+        Self {
+            name,
+            storage_class: None,
+            inline: None,
+            noreturn: None,
+            ty,
+            body,
+        }
     }
 }
 
@@ -125,70 +136,13 @@ impl<'a> Declaration<'a> {
         bump: &'a Bump,
         decl: &'a cst::Declaration<'a>,
     ) -> impl Iterator<Item = Self> + 'a {
-        let specifiers = decl.specifiers.0;
-        let mut is_const = false;
-        let mut is_volatile = false;
-        let mut ty = None;
-        for specifier in specifiers {
-            match specifier {
-                cst::DeclarationSpecifier::StorageClass(storage_class) =>
-                    unimplemented!("{storage_class:#?}"),
-                cst::DeclarationSpecifier::TypeSpecifierQualifier(Specifier(specifier)) =>
-                    match specifier.kind {
-                        TypeSpecifierKind::Int =>
-                            ty = Some(Type::Integral(Integral {
-                                signedness: None,
-                                kind: IntegralKind::Int,
-                            })),
-                        _ => unimplemented!("{specifier:#?}"),
-                    },
-                cst::DeclarationSpecifier::TypeSpecifierQualifier(Qualifier(qualifier)) =>
-                    qualifier.parse(&mut is_const, &mut is_volatile),
-                cst::DeclarationSpecifier::FunctionSpecifier(function_specifier) =>
-                    unimplemented!("{function_specifier:#?}"),
-            }
-        }
-
-        let ty = ty.unwrap_or_else(|| unimplemented!("error: no type given in declaration"));
-        let ty = QualifiedType { is_const, is_volatile, ty };
-        decl.init_declarator_list.iter().map(
-            move |&InitDeclarator { mut declarator, initialiser }| {
-                let mut ty = ty;
-                let name = loop {
-                    for pointer in declarator.pointers.unwrap_or_default() {
-                        let mut is_const = false;
-                        let mut is_volatile = false;
-                        for qualifier in pointer.qualifiers {
-                            qualifier.parse(&mut is_const, &mut is_volatile);
-                        }
-                        ty = QualifiedType {
-                            is_const,
-                            is_volatile,
-                            ty: Type::Pointer(bump.alloc(ty)),
-                        };
-                    }
-                    match declarator.direct_declarator {
-                        DirectDeclarator::Identifier(name) => break name,
-                        DirectDeclarator::Parenthesised(decl) => declarator = *decl,
-                        DirectDeclarator::FunctionDeclarator(function_declarator) => {
-                            declarator = cst::Declarator {
-                                pointers: None,
-                                direct_declarator: *function_declarator.direct_declarator,
-                            };
-                            ty = QualifiedType {
-                                is_const: false,
-                                is_volatile: false,
-                                ty: Type::Function(FunctionType {
-                                    params: function_declarator.parameter_type_list,
-                                    return_type: bump.alloc(ty),
-                                }),
-                            };
-                        }
-                    }
-                };
+        let ty = parse_type_specifiers(decl.specifiers.0);
+        decl.init_declarator_list
+            .iter()
+            .map(move |&InitDeclarator { declarator, initialiser }| {
+                let (ty, name) = parse_declarator(bump, ty, declarator);
                 Self { ty, name, initialiser }
-            },
-        )
+            })
     }
 }
 
@@ -212,6 +166,74 @@ impl TypeQualifier<'_> {
             _ => unimplemented!("{self:#?}"),
         }
     }
+}
+
+fn parse_type_specifiers<'a>(specifiers: &'a [cst::DeclarationSpecifier<'a>]) -> QualifiedType<'a> {
+    let mut is_const = false;
+    let mut is_volatile = false;
+    let mut ty = None;
+    for specifier in specifiers {
+        match specifier {
+            cst::DeclarationSpecifier::StorageClass(storage_class) =>
+                unimplemented!("{storage_class:#?}"),
+            cst::DeclarationSpecifier::TypeSpecifierQualifier(Specifier(specifier)) =>
+                match specifier.kind {
+                    TypeSpecifierKind::Int =>
+                        ty = Some(Type::Integral(Integral {
+                            signedness: None,
+                            kind: IntegralKind::Int,
+                        })),
+                    _ => unimplemented!("{specifier:#?}"),
+                },
+            cst::DeclarationSpecifier::TypeSpecifierQualifier(Qualifier(qualifier)) =>
+                qualifier.parse(&mut is_const, &mut is_volatile),
+            cst::DeclarationSpecifier::FunctionSpecifier(function_specifier) =>
+                unimplemented!("{function_specifier:#?}"),
+        }
+    }
+
+    let ty = ty.unwrap_or_else(|| unimplemented!("error: no type given in declaration"));
+    QualifiedType { is_const, is_volatile, ty }
+}
+
+fn parse_declarator<'a>(
+    bump: &'a Bump,
+    mut ty: QualifiedType<'a>,
+    mut declarator: cst::Declarator<'a>,
+) -> (QualifiedType<'a>, Token<'a>) {
+    let name = loop {
+        for pointer in declarator.pointers.unwrap_or_default() {
+            let mut is_const = false;
+            let mut is_volatile = false;
+            for qualifier in pointer.qualifiers {
+                qualifier.parse(&mut is_const, &mut is_volatile);
+            }
+            ty = QualifiedType {
+                is_const,
+                is_volatile,
+                ty: Type::Pointer(bump.alloc(ty)),
+            };
+        }
+        match declarator.direct_declarator {
+            DirectDeclarator::Identifier(name) => break name,
+            DirectDeclarator::Parenthesised(decl) => declarator = *decl,
+            DirectDeclarator::FunctionDeclarator(function_declarator) => {
+                declarator = cst::Declarator {
+                    pointers: None,
+                    direct_declarator: *function_declarator.direct_declarator,
+                };
+                ty = QualifiedType {
+                    is_const: false,
+                    is_volatile: false,
+                    ty: Type::Function(FunctionType {
+                        params: function_declarator.parameter_type_list,
+                        return_type: bump.alloc(ty),
+                    }),
+                };
+            }
+        }
+    };
+    (ty, name)
 }
 
 pub(crate) fn from_parse_tree<'a>(
