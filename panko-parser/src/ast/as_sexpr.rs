@@ -84,7 +84,7 @@ impl AsSExpr for Signedness {
 impl AsSExpr for FunctionType<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("function")
-            .inherit(&self.return_type)
+            .lines([&self.return_type])
             .inherit_many_explicit_empty(self.params)
     }
 }
