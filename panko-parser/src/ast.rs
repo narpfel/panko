@@ -151,28 +151,30 @@ impl<'a> Declaration<'a> {
 
         let ty = ty.unwrap_or_else(|| unimplemented!("error: no type given in declaration"));
         let ty = QualifiedType { is_const, is_volatile, ty };
-        decl.init_declarator_list
-            .iter()
-            .map(move |InitDeclarator { declarator, initialiser }| {
+        decl.init_declarator_list.iter().map(
+            move |&InitDeclarator { mut declarator, initialiser }| {
                 let mut ty = ty;
-                for pointer in declarator.pointers.unwrap_or_default() {
-                    let mut is_const = false;
-                    let mut is_volatile = false;
-                    for qualifier in pointer.qualifiers {
-                        qualifier.parse(&mut is_const, &mut is_volatile);
-                    }
-                    ty = QualifiedType {
-                        is_const,
-                        is_volatile,
-                        ty: Type::Pointer(bump.alloc(ty)),
-                    };
-                }
-                let mut direct_declarator = &declarator.direct_declarator;
                 let name = loop {
-                    match direct_declarator {
-                        DirectDeclarator::Identifier(name) => break *name,
+                    for pointer in declarator.pointers.unwrap_or_default() {
+                        let mut is_const = false;
+                        let mut is_volatile = false;
+                        for qualifier in pointer.qualifiers {
+                            qualifier.parse(&mut is_const, &mut is_volatile);
+                        }
+                        ty = QualifiedType {
+                            is_const,
+                            is_volatile,
+                            ty: Type::Pointer(bump.alloc(ty)),
+                        };
+                    }
+                    match declarator.direct_declarator {
+                        DirectDeclarator::Identifier(name) => break name,
+                        DirectDeclarator::Parenthesised(decl) => declarator = *decl,
                         DirectDeclarator::FunctionDeclarator(function_declarator) => {
-                            direct_declarator = function_declarator.direct_declarator;
+                            declarator = cst::Declarator {
+                                pointers: None,
+                                direct_declarator: *function_declarator.direct_declarator,
+                            };
                             ty = QualifiedType {
                                 is_const: false,
                                 is_volatile: false,
@@ -182,11 +184,11 @@ impl<'a> Declaration<'a> {
                                 }),
                             };
                         }
-                        direct_declarator => unimplemented!("{direct_declarator:#?}"),
                     }
                 };
-                Self { ty, name, initialiser: *initialiser }
-            })
+                Self { ty, name, initialiser }
+            },
+        )
     }
 }
 
