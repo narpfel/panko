@@ -56,7 +56,6 @@ struct QualifiedType<'a> {
 #[derive(Debug, Clone, Copy)]
 enum Type<'a> {
     Integral(Integral),
-    #[expect(unused)]
     Char,
     Pointer(&'a QualifiedType<'a>),
     Function(FunctionType<'a>),
@@ -183,6 +182,7 @@ fn parse_type_specifiers<'a>(specifiers: &'a [cst::DeclarationSpecifier<'a>]) ->
                             signedness: None,
                             kind: IntegralKind::Int,
                         })),
+                    TypeSpecifierKind::Char => ty = Some(Type::Char),
                     _ => unimplemented!("{specifier:#?}"),
                 },
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Qualifier(qualifier)) =>
