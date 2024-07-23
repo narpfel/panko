@@ -122,7 +122,7 @@ impl<'a> ExternalDeclaration<'a> {
 impl<'a> FunctionDefinition<'a> {
     fn from_parse_tree(bump: &'a Bump, def: &cst::FunctionDefinition<'a>) -> Self {
         let cst::FunctionDefinition { declaration_specifiers, declarator, body } = *def;
-        let ty = parse_type_specifiers(declaration_specifiers.0);
+        let ty = parse_type_specifiers(declaration_specifiers);
         let (ty, name) = parse_declarator(bump, ty, declarator);
         let name =
             name.unwrap_or_else(|| unreachable!("[parser] syntax error: declaration without name"));
@@ -142,7 +142,7 @@ impl<'a> Declaration<'a> {
         bump: &'a Bump,
         decl: &'a cst::Declaration<'a>,
     ) -> impl Iterator<Item = Self> + 'a {
-        let ty = parse_type_specifiers(decl.specifiers.0);
+        let ty = parse_type_specifiers(decl.specifiers);
         decl.init_declarator_list
             .iter()
             .map(move |&InitDeclarator { declarator, initialiser }| {
@@ -177,11 +177,11 @@ impl TypeQualifier<'_> {
     }
 }
 
-fn parse_type_specifiers<'a>(specifiers: &'a [cst::DeclarationSpecifier<'a>]) -> QualifiedType<'a> {
+fn parse_type_specifiers(specifiers: cst::DeclarationSpecifiers) -> QualifiedType {
     let mut is_const = false;
     let mut is_volatile = false;
     let mut ty = None;
-    for specifier in specifiers {
+    for specifier in specifiers.0 {
         match specifier {
             cst::DeclarationSpecifier::StorageClass(storage_class) =>
                 unimplemented!("{storage_class:#?}"),
@@ -239,7 +239,7 @@ fn parse_declarator<'a>(
                     ty: Type::Function(FunctionType {
                         params: bump.alloc_slice_fill_iter(
                             function_declarator.parameter_type_list.iter().map(|param| {
-                                let ty = parse_type_specifiers(param.declaration_specifiers.0);
+                                let ty = parse_type_specifiers(param.declaration_specifiers);
                                 let (ty, name) = param
                                     .declarator
                                     .map(|declarator| parse_declarator(bump, ty, declarator))
