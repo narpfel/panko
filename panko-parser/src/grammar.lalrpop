@@ -136,30 +136,30 @@ ParameterDeclaration: ast::ParameterDeclaration<'a> = {
         <declarator:ParameterDeclarator> => ast::ParameterDeclaration { <> },
 }
 
-ParameterDeclarator: ast::ParameterDeclarator<'a> = {
-    Declarator => ast::ParameterDeclarator::Concrete(<>),
-    AbstractDeclarator? => ast::ParameterDeclarator::Abstract(<>),
+ParameterDeclarator: Option<ast::Declarator<'a>> = {
+    Declarator => Some(<>),
+    AbstractDeclarator?,
 }
 
-AbstractDeclarator: ast::AbstractDeclarator<'a> = {
-    Some<Pointer> => ast::AbstractDeclarator { pointers: Some(<>), direct_abstract_declarator: None },
-    <pointers:Some<Pointer>?> <direct_abstract_declarator:DirectAbstractDeclarator>
-        => ast::AbstractDeclarator {
-            pointers,
-            direct_abstract_declarator: Some(direct_abstract_declarator),
-        },
+AbstractDeclarator: ast::Declarator<'a> = {
+    Some<Pointer> => ast::Declarator { pointers: Some(<>), direct_declarator: ast::DirectDeclarator::Abstract },
+    <pointers:Some<Pointer>?> <direct_declarator:DirectAbstractDeclarator>
+        => ast::Declarator { <> },
 }
 
-DirectAbstractDeclarator: ast::DirectAbstractDeclarator<'a> = {
-    "(" <Bump<AbstractDeclarator>> ")" => ast::DirectAbstractDeclarator::Parenthesised(<>),
+DirectAbstractDeclarator: ast::DirectDeclarator<'a> = {
+    "(" <Bump<AbstractDeclarator>> ")" => ast::DirectDeclarator::Parenthesised(<>),
     // array-abstract-declarator attribute-specifier-sequence?
     <FunctionAbstractDeclarator> AttributeSpecifierSequence?
-        => ast::DirectAbstractDeclarator::FunctionAbstractDeclarator(<>),
+        => ast::DirectDeclarator::FunctionDeclarator(<>),
 }
 
-FunctionAbstractDeclarator: ast::FunctionAbstractDeclarator<'a> = {
-    <direct_abstract_declarator:Bump<DirectAbstractDeclarator>?>
-        "(" <parameter_type_list:ParameterTypeList> ")" => ast::FunctionAbstractDeclarator { <> },
+FunctionAbstractDeclarator: ast::FunctionDeclarator<'a> = {
+    <direct_declarator:Bump<DirectAbstractDeclarator>?>
+        "(" <parameter_type_list:ParameterTypeList> ")" => {
+            let direct_declarator = direct_declarator.unwrap_or(&ast::DirectDeclarator::Abstract);
+            ast::FunctionDeclarator { <> }
+        },
 }
 
 Initialiser: ast::Initialiser<'a> = {

@@ -3,6 +3,7 @@ use crate::ast::ExternalDeclaration;
 use crate::ast::FunctionDefinition;
 use crate::ast::FunctionType;
 use crate::ast::Integral;
+use crate::ast::ParameterDeclaration;
 use crate::ast::QualifiedType;
 use crate::ast::Signedness;
 use crate::ast::TranslationUnit;
@@ -89,5 +90,11 @@ impl AsSExpr for FunctionType<'_> {
         SExpr::new("function")
             .lines([&self.return_type])
             .inherit_many_explicit_empty(self.params)
+    }
+}
+
+impl AsSExpr for ParameterDeclaration<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("param").inherit(&self.name).inherit(&self.ty)
     }
 }

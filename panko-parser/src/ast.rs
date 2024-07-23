@@ -92,9 +92,14 @@ enum Signedness {
 
 #[derive(Debug, Clone, Copy)]
 struct FunctionType<'a> {
-    // TODO: also transform `params`
-    params: &'a [cst::ParameterDeclaration<'a>],
+    params: &'a [ParameterDeclaration<'a>],
     return_type: &'a QualifiedType<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct ParameterDeclaration<'a> {
+    ty: QualifiedType<'a>,
+    name: Option<Token<'a>>,
 }
 
 impl<'a> ExternalDeclaration<'a> {
@@ -119,6 +124,8 @@ impl<'a> FunctionDefinition<'a> {
         let cst::FunctionDefinition { declaration_specifiers, declarator, body } = *def;
         let ty = parse_type_specifiers(declaration_specifiers.0);
         let (ty, name) = parse_declarator(bump, ty, declarator);
+        let name =
+            name.unwrap_or_else(|| unreachable!("[parser] syntax error: declaration without name"));
         Self {
             name,
             storage_class: None,
@@ -140,6 +147,9 @@ impl<'a> Declaration<'a> {
             .iter()
             .map(move |&InitDeclarator { declarator, initialiser }| {
                 let (ty, name) = parse_declarator(bump, ty, declarator);
+                let name = name.unwrap_or_else(|| {
+                    unreachable!("[parser] syntax error: declaration without name")
+                });
                 Self { ty, name, initialiser }
             })
     }
@@ -200,7 +210,7 @@ fn parse_declarator<'a>(
     bump: &'a Bump,
     mut ty: QualifiedType<'a>,
     mut declarator: cst::Declarator<'a>,
-) -> (QualifiedType<'a>, Token<'a>) {
+) -> (QualifiedType<'a>, Option<Token<'a>>) {
     let name = loop {
         for pointer in declarator.pointers.unwrap_or_default() {
             let mut is_const = false;
@@ -215,7 +225,8 @@ fn parse_declarator<'a>(
             };
         }
         match declarator.direct_declarator {
-            DirectDeclarator::Identifier(name) => break name,
+            DirectDeclarator::Abstract => break None,
+            DirectDeclarator::Identifier(name) => break Some(name),
             DirectDeclarator::Parenthesised(decl) => declarator = *decl,
             DirectDeclarator::FunctionDeclarator(function_declarator) => {
                 declarator = cst::Declarator {
@@ -226,7 +237,16 @@ fn parse_declarator<'a>(
                     is_const: false,
                     is_volatile: false,
                     ty: Type::Function(FunctionType {
-                        params: function_declarator.parameter_type_list,
+                        params: bump.alloc_slice_fill_iter(
+                            function_declarator.parameter_type_list.iter().map(|param| {
+                                let ty = parse_type_specifiers(param.declaration_specifiers.0);
+                                let (ty, name) = param
+                                    .declarator
+                                    .map(|declarator| parse_declarator(bump, ty, declarator))
+                                    .unwrap_or_else(|| (ty, None));
+                                ParameterDeclaration { ty, name }
+                            }),
+                        ),
                         return_type: bump.alloc(ty),
                     }),
                 };
