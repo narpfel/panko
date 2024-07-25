@@ -35,12 +35,14 @@ struct Declaration<'a> {
     initialiser: Option<cst::Initialiser<'a>>,
 }
 
-#[expect(unused)]
 #[derive(Debug, Clone, Copy)]
 struct FunctionDefinition<'a> {
     name: Token<'a>,
+    #[expect(unused)]
     storage_class: Option<cst::StorageClassSpecifier<'a>>,
+    #[expect(unused)]
     inline: Option<cst::FunctionSpecifier<'a>>,
+    #[expect(unused)]
     noreturn: Option<cst::FunctionSpecifier<'a>>,
     ty: QualifiedType<'a>,
     body: CompoundStatement<'a>,
