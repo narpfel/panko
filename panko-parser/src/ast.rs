@@ -242,10 +242,10 @@ fn parse_declarator<'a>(
                         params: bump.alloc_slice_fill_iter(
                             function_declarator.parameter_type_list.iter().map(|param| {
                                 let ty = parse_type_specifiers(param.declaration_specifiers);
-                                let (ty, name) = param
-                                    .declarator
-                                    .map(|declarator| parse_declarator(bump, ty, declarator))
-                                    .unwrap_or_else(|| (ty, None));
+                                let (ty, name) =
+                                    param.declarator.map_or((ty, None), |declarator| {
+                                        parse_declarator(bump, ty, declarator)
+                                    });
                                 ParameterDeclaration { ty, name }
                             }),
                         ),
