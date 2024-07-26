@@ -6,14 +6,17 @@ use itertools::Itertools as _;
 use panko_lex::Token;
 
 use crate as cst;
-use crate::CompoundStatement;
+use crate::BlockItem;
 use crate::DirectDeclarator;
 use crate::InitDeclarator;
+use crate::JumpStatement;
+use crate::PrimaryBlock;
 use crate::TypeQualifier;
 use crate::TypeQualifierKind;
 use crate::TypeSpecifierKind;
 use crate::TypeSpecifierQualifier::Qualifier;
 use crate::TypeSpecifierQualifier::Specifier;
+use crate::UnlabeledStatement;
 
 mod as_sexpr;
 
@@ -104,6 +107,18 @@ struct ParameterDeclaration<'a> {
     name: Option<Token<'a>>,
 }
 
+#[derive(Debug, Clone, Copy)]
+struct CompoundStatement<'a>(&'a [Statement<'a>]);
+
+#[derive(Debug, Clone, Copy)]
+enum Statement<'a> {
+    // TODO: restrict the kinds of decls that are allowed in function scope?
+    Declaration(Declaration<'a>),
+    Expression(Option<cst::Expression<'a>>),
+    Compound(CompoundStatement<'a>),
+    Return(Option<cst::Expression<'a>>),
+}
+
 impl<'a> ExternalDeclaration<'a> {
     fn from_parse_tree(
         bump: &'a Bump,
@@ -134,7 +149,7 @@ impl<'a> FunctionDefinition<'a> {
             inline: None,
             noreturn: None,
             ty,
-            body,
+            body: CompoundStatement::from_parse_tree(bump, &body),
         }
     }
 }
@@ -175,6 +190,43 @@ impl TypeQualifier<'_> {
                     *is_volatile = true;
                 },
             _ => unimplemented!("{self:#?}"),
+        }
+    }
+}
+
+impl<'a> CompoundStatement<'a> {
+    fn from_parse_tree(bump: &'a Bump, stmt: &cst::CompoundStatement<'a>) -> Self {
+        Self(
+            bump.alloc_slice_copy(
+                &stmt
+                    .0
+                    .iter()
+                    .flat_map(|stmt| Statement::from_parse_tree(bump, stmt))
+                    .collect_vec(),
+            ),
+        )
+    }
+}
+
+impl<'a> Statement<'a> {
+    fn from_parse_tree(
+        bump: &'a Bump,
+        item: &'a cst::BlockItem<'a>,
+    ) -> impl Iterator<Item = Self> + 'a {
+        match item {
+            BlockItem::Declaration(decl) =>
+                Either::Left(Declaration::from_parse_tree(bump, decl).map(Self::Declaration)),
+            BlockItem::UnlabeledStatement(stmt) =>
+                Either::Right(once(Self::from_unlabeled_statement(bump, stmt))),
+        }
+    }
+
+    fn from_unlabeled_statement(bump: &'a Bump, stmt: &cst::UnlabeledStatement<'a>) -> Self {
+        match stmt {
+            UnlabeledStatement::ExpressionStatement(expr) => Self::Expression(expr.0),
+            UnlabeledStatement::PrimaryBlock(PrimaryBlock::CompoundStatement(block)) =>
+                Self::Compound(CompoundStatement::from_parse_tree(bump, block)),
+            UnlabeledStatement::JumpStatement(JumpStatement::Return(expr)) => Self::Return(*expr),
         }
     }
 }
