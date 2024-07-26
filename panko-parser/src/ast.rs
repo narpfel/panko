@@ -123,7 +123,7 @@ impl<'a> ExternalDeclaration<'a> {
     fn from_parse_tree(
         bump: &'a Bump,
         decl: &'a cst::ExternalDeclaration<'a>,
-    ) -> Either<impl Iterator<Item = Self>, impl Iterator<Item = Self>> {
+    ) -> impl Iterator<Item = Self> {
         match decl {
             cst::ExternalDeclaration::FunctionDefinition(def) =>
                 Either::Left(once(ExternalDeclaration::FunctionDefinition(
