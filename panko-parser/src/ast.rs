@@ -177,19 +177,19 @@ impl TypeQualifier<'_> {
         match self.kind {
             TypeQualifierKind::Const =>
                 if *is_const {
-                    unimplemented!("duplicate `const` in declaration");
+                    todo!("duplicate `const` in declaration");
                 }
                 else {
                     *is_const = true;
                 },
             TypeQualifierKind::Volatile =>
                 if *is_volatile {
-                    unimplemented!("duplicate `volatile` in declaration");
+                    todo!("duplicate `volatile` in declaration");
                 }
                 else {
                     *is_volatile = true;
                 },
-            _ => unimplemented!("{self:#?}"),
+            _ => todo!("{self:#?}"),
         }
     }
 }
@@ -237,8 +237,7 @@ fn parse_type_specifiers(specifiers: cst::DeclarationSpecifiers) -> QualifiedTyp
     let mut ty = None;
     for specifier in specifiers.0 {
         match specifier {
-            cst::DeclarationSpecifier::StorageClass(storage_class) =>
-                unimplemented!("{storage_class:#?}"),
+            cst::DeclarationSpecifier::StorageClass(storage_class) => todo!("{storage_class:#?}"),
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Specifier(specifier)) =>
                 match specifier.kind {
                     TypeSpecifierKind::Int =>
@@ -247,16 +246,16 @@ fn parse_type_specifiers(specifiers: cst::DeclarationSpecifiers) -> QualifiedTyp
                             kind: IntegralKind::Int,
                         })),
                     TypeSpecifierKind::Char => ty = Some(Type::Char),
-                    _ => unimplemented!("{specifier:#?}"),
+                    _ => todo!("{specifier:#?}"),
                 },
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Qualifier(qualifier)) =>
                 qualifier.parse(&mut is_const, &mut is_volatile),
             cst::DeclarationSpecifier::FunctionSpecifier(function_specifier) =>
-                unimplemented!("{function_specifier:#?}"),
+                todo!("{function_specifier:#?}"),
         }
     }
 
-    let ty = ty.unwrap_or_else(|| unimplemented!("error: no type given in declaration"));
+    let ty = ty.unwrap_or_else(|| todo!("error: no type given in declaration"));
     QualifiedType { is_const, is_volatile, ty }
 }
 
