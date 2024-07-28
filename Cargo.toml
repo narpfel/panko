@@ -6,6 +6,7 @@ members = [
     "panko",
     "panko-lex",
     "panko-parser",
+    "panko-sema",
 ]
 
 [workspace.dependencies]

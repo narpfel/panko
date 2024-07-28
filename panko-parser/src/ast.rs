@@ -20,46 +20,45 @@ use crate::UnlabeledStatement;
 
 mod as_sexpr;
 
+pub type Expression<'a> = cst::Expression<'a>;
+
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
-    decls: &'a [ExternalDeclaration<'a>],
+    pub decls: &'a [ExternalDeclaration<'a>],
 }
 
 #[derive(Debug, Clone, Copy)]
-enum ExternalDeclaration<'a> {
+pub enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Declaration<'a> {
-    ty: QualifiedType<'a>,
-    name: Token<'a>,
-    initialiser: Option<cst::Initialiser<'a>>,
+pub struct Declaration<'a> {
+    pub ty: QualifiedType<'a>,
+    pub name: Token<'a>,
+    pub initialiser: Option<Expression<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct FunctionDefinition<'a> {
-    name: Token<'a>,
-    #[expect(unused)]
-    storage_class: Option<cst::StorageClassSpecifier<'a>>,
-    #[expect(unused)]
-    inline: Option<cst::FunctionSpecifier<'a>>,
-    #[expect(unused)]
-    noreturn: Option<cst::FunctionSpecifier<'a>>,
-    ty: QualifiedType<'a>,
-    body: CompoundStatement<'a>,
+pub struct FunctionDefinition<'a> {
+    pub name: Token<'a>,
+    pub storage_class: Option<cst::StorageClassSpecifier<'a>>,
+    pub inline: Option<cst::FunctionSpecifier<'a>>,
+    pub noreturn: Option<cst::FunctionSpecifier<'a>>,
+    pub ty: QualifiedType<'a>,
+    pub body: CompoundStatement<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct QualifiedType<'a> {
-    is_const: bool,
-    is_volatile: bool,
-    ty: Type<'a>,
+pub struct QualifiedType<'a> {
+    pub is_const: bool,
+    pub is_volatile: bool,
+    pub ty: Type<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
-enum Type<'a> {
+pub enum Type<'a> {
     Integral(Integral),
     Char,
     Pointer(&'a QualifiedType<'a>),
@@ -68,7 +67,7 @@ enum Type<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Integral {
+pub struct Integral {
     signedness: Option<Signedness>,
     kind: IntegralKind,
 }
@@ -96,27 +95,27 @@ enum Signedness {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct FunctionType<'a> {
-    params: &'a [ParameterDeclaration<'a>],
+pub struct FunctionType<'a> {
+    pub params: &'a [ParameterDeclaration<'a>],
     return_type: &'a QualifiedType<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct ParameterDeclaration<'a> {
-    ty: QualifiedType<'a>,
-    name: Option<Token<'a>>,
+pub struct ParameterDeclaration<'a> {
+    pub ty: QualifiedType<'a>,
+    pub name: Option<Token<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct CompoundStatement<'a>(&'a [Statement<'a>]);
+pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
 
 #[derive(Debug, Clone, Copy)]
-enum Statement<'a> {
+pub enum Statement<'a> {
     // TODO: restrict the kinds of decls that are allowed in function scope?
     Declaration(Declaration<'a>),
-    Expression(Option<cst::Expression<'a>>),
+    Expression(Option<Expression<'a>>),
     Compound(CompoundStatement<'a>),
-    Return(Option<cst::Expression<'a>>),
+    Return(Option<Expression<'a>>),
 }
 
 impl<'a> ExternalDeclaration<'a> {

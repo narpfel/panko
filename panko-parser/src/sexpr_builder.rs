@@ -16,7 +16,7 @@ pub struct SExpr<'a> {
 }
 
 impl<'a> SExpr<'a> {
-    pub(crate) fn new(s: &str) -> Self {
+    pub fn new(s: &str) -> Self {
         Self {
             name: s.to_owned(),
             params: vec![],
@@ -24,7 +24,7 @@ impl<'a> SExpr<'a> {
         }
     }
 
-    pub(crate) fn string(s: &str) -> Self {
+    pub fn string(s: &str) -> Self {
         Self {
             name: s.to_owned(),
             params: vec![],
@@ -40,7 +40,7 @@ impl<'a> SExpr<'a> {
         }
     }
 
-    pub(crate) fn lines<T>(mut self, params: impl IntoIterator<Item = &'a T>) -> Self
+    pub fn lines<T>(mut self, params: impl IntoIterator<Item = &'a T>) -> Self
     where
         T: AsSExpr + 'a,
     {
@@ -49,7 +49,7 @@ impl<'a> SExpr<'a> {
         self
     }
 
-    pub(crate) fn inherit(mut self, param: &'a dyn AsSExpr) -> Self {
+    pub fn inherit(mut self, param: &'a dyn AsSExpr) -> Self {
         self.params.push(Param::Inherit(param));
         self
     }
@@ -98,7 +98,7 @@ impl<'a> SExpr<'a> {
         self
     }
 
-    pub(crate) fn inline_string(mut self, string: String) -> Self {
+    pub fn inline_string(mut self, string: String) -> Self {
         self.params.push(Param::InlineString(string));
         self
     }

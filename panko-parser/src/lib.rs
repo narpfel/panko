@@ -7,7 +7,7 @@ use panko_lex::TokenKind;
 use crate::sexpr_builder::AsSExpr;
 use crate::sexpr_builder::SExpr;
 
-mod ast;
+pub mod ast;
 pub mod sexpr_builder;
 
 lalrpop_mod!(grammar);
@@ -95,7 +95,7 @@ impl AsSExpr for DeclarationSpecifier<'_> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct StorageClassSpecifier<'a> {
+pub struct StorageClassSpecifier<'a> {
     token: Token<'a>,
     #[expect(unused)]
     kind: StorageClassSpecifierKind,
@@ -265,7 +265,7 @@ fn type_specifier_kind(token_kind: TokenKind) -> TypeSpecifierKind<'static> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct FunctionSpecifier<'a> {
+pub struct FunctionSpecifier<'a> {
     token: Token<'a>,
     #[expect(unused)]
     kind: FunctionSpecifierKind,
@@ -303,7 +303,7 @@ fn function_specifier_kind(token_kind: TokenKind) -> FunctionSpecifierKind {
 #[derive(Debug, Clone, Copy)]
 struct InitDeclarator<'a> {
     declarator: Declarator<'a>,
-    initialiser: Option<Initialiser<'a>>,
+    initialiser: Option<Expression<'a>>,
 }
 
 impl AsSExpr for InitDeclarator<'_> {
@@ -386,15 +386,6 @@ impl AsSExpr for ParameterDeclaration<'_> {
         SExpr::new("param")
             .inherit(&self.declaration_specifiers)
             .inherit(&self.declarator)
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-struct Initialiser<'a>(Token<'a>);
-
-impl AsSExpr for Initialiser<'_> {
-    fn as_sexpr(&self) -> SExpr {
-        SExpr::string(self.0.slice())
     }
 }
 
@@ -491,7 +482,7 @@ impl AsSExpr for JumpStatement<'_> {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum Expression<'a> {
+pub enum Expression<'a> {
     Name(Token<'a>),
     Integer(Token<'a>),
 }

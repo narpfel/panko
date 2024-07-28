@@ -309,6 +309,7 @@ dependencies = [
  "bumpalo",
  "panko-lex",
  "panko-parser",
+ "panko-sema",
 ]
 
 [[package]]
@@ -330,6 +331,15 @@ dependencies = [
  "lalrpop",
  "lalrpop-util",
  "panko-lex",
+]
+
+[[package]]
+name = "panko-sema"
+version = "0.1.0"
+dependencies = [
+ "bumpalo",
+ "panko-lex",
+ "panko-parser",
 ]
 
 [[package]]

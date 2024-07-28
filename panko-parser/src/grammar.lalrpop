@@ -162,9 +162,9 @@ FunctionAbstractDeclarator: ast::FunctionDeclarator<'a> = {
         },
 }
 
-Initialiser: ast::Initialiser<'a> = {
+Initialiser: ast::Expression<'a> = {
     // TODO: incomplete
-    Integer => ast::Initialiser(<>),
+    Integer => ast::Expression::Integer(<>),
 }
 
 AttributeSpecifierSequence: () = {}

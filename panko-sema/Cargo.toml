@@ -1,5 +1,5 @@
 [package]
-name = "panko"
+name = "panko-sema"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,4 +7,3 @@ edition = "2021"
 bumpalo = { workspace = true }
 panko-lex = { path = "../panko-lex" }
 panko-parser = { path = "../panko-parser" }
-panko-sema = { path = "../panko-sema" }

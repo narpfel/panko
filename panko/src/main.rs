@@ -11,5 +11,6 @@ fn main() {
         &std::fs::read_to_string("main.c").unwrap(),
     );
     let translation_unit = panko_parser::parse(bump, tokens).unwrap();
+    let translation_unit = panko_sema::resolve_names(bump, translation_unit);
     println!("{}", translation_unit.as_sexpr());
 }
