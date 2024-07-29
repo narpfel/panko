@@ -1,3 +1,4 @@
+use std::fmt;
 use std::iter::once;
 
 use bumpalo::Bump;
@@ -17,6 +18,7 @@ use crate::TypeSpecifierKind;
 use crate::TypeSpecifierQualifier::Qualifier;
 use crate::TypeSpecifierQualifier::Specifier;
 use crate::UnlabeledStatement;
+use crate::NO_VALUE;
 
 mod as_sexpr;
 
@@ -150,6 +152,57 @@ impl<'a> FunctionDefinition<'a> {
             ty,
             body: CompoundStatement::from_parse_tree(bump, &body),
         }
+    }
+}
+
+impl fmt::Display for QualifiedType<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.ty.fmt(f)?;
+        if self.is_const {
+            write!(f, " const")?;
+        }
+        if self.is_volatile {
+            write!(f, " volatile")?;
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Display for Type<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Type::Integral(integral) => write!(f, "{integral}"),
+            Type::Char => write!(f, "char"),
+            Type::Pointer(pointee) => write!(f, "ptr<{pointee}>"),
+            Type::Function(function) => write!(f, "{function}"),
+        }
+    }
+}
+
+impl fmt::Display for Integral {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(signedness) = self.signedness {
+            write!(f, "{signedness:?}")?;
+        }
+        write!(f, "{:?}", self.kind)
+    }
+}
+
+impl fmt::Display for FunctionType<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "fn(")?;
+        for (i, param) in self.params.iter().enumerate() {
+            write!(
+                f,
+                "{}: {}",
+                param.name.map_or(NO_VALUE, |name| name.slice()),
+                param.ty,
+            )?;
+            if i != self.params.len() - 1 {
+                write!(f, ", ")?;
+            }
+        }
+        write!(f, ") -> {}", self.return_type)
     }
 }
 

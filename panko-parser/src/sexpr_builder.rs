@@ -40,6 +40,14 @@ impl<'a> SExpr<'a> {
         }
     }
 
+    pub(crate) fn display(value: &dyn fmt::Display) -> Self {
+        Self {
+            name: format!("`{value}`"),
+            params: vec![],
+            parenthesise_if_empty: false,
+        }
+    }
+
     pub fn lines<T>(mut self, params: impl IntoIterator<Item = &'a T>) -> Self
     where
         T: AsSExpr + 'a,
