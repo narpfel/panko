@@ -6,6 +6,7 @@ use super::Declaration;
 use super::Expression;
 use super::ExternalDeclaration;
 use super::FunctionDefinition;
+use super::Reference;
 use super::Statement;
 use super::TranslationUnit;
 
@@ -27,8 +28,7 @@ impl AsSExpr for ExternalDeclaration<'_> {
 impl AsSExpr for FunctionDefinition<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("function-definition")
-            .inherit(&self.reference.name)
-            .lines([&self.reference.ty])
+            .lines([&self.reference])
             .lines([&self.body])
     }
 }
@@ -36,8 +36,7 @@ impl AsSExpr for FunctionDefinition<'_> {
 impl AsSExpr for Declaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("declaration")
-            .inherit(&self.reference.name)
-            .inherit(&self.reference.ty)
+            .inherit(&self.reference)
             .inherit(&self.initialiser)
     }
 }
@@ -62,8 +61,19 @@ impl AsSExpr for Statement<'_> {
 impl AsSExpr for Expression<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            Expression::Name(name) => SExpr::new("name").inline_string(name.ident().to_owned()),
+            Expression::Name(name) => SExpr::new("name").inherit(name),
             Expression::Integer(int) => SExpr::string(int.slice()),
         }
+    }
+}
+
+impl AsSExpr for Reference<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::string(&format!(
+            "{}~{} `{}`",
+            self.name.slice(),
+            self.id.0,
+            self.ty,
+        ))
     }
 }

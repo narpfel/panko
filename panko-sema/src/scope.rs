@@ -12,6 +12,9 @@ use crate::nonempty;
 mod as_sexpr;
 
 #[derive(Debug, Clone, Copy)]
+struct Id(u64);
+
+#[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
     decls: &'a [ExternalDeclaration<'a>],
 }
@@ -61,6 +64,7 @@ enum Expression<'a> {
 struct Reference<'a> {
     name: Token<'a>,
     ty: QualifiedType<'a>,
+    id: Id,
 }
 
 impl<'a> Reference<'a> {
@@ -101,6 +105,7 @@ struct Scopes<'a> {
     bump: &'a Bump,
     /// at most two elements: the global scope and a function scope
     scopes: nonempty::Vec<Scope<'a>>,
+    next_id: u64,
 }
 
 impl<'a> Scopes<'a> {
@@ -138,13 +143,23 @@ impl<'a> Scopes<'a> {
     fn pop(&mut self) {
         self.scopes.pop().unwrap();
     }
+
+    fn id(&mut self) -> Id {
+        let id = Id(self.next_id);
+        self.next_id += 1;
+        id
+    }
 }
 
 fn resolve_function_definition<'a>(
     scopes: &mut Scopes<'a>,
     def: &ast::FunctionDefinition<'a>,
 ) -> FunctionDefinition<'a> {
-    let reference = Reference { name: def.name, ty: def.ty };
+    let reference = Reference {
+        name: def.name,
+        ty: def.ty,
+        id: scopes.id(),
+    };
     scopes.add(reference);
     scopes.push();
     let QualifiedType {
@@ -159,7 +174,8 @@ fn resolve_function_definition<'a>(
     // of parameters properly produce an error.
     for param in function_ty.params {
         if let Some(name) = param.name {
-            scopes.add(Reference { ty: param.ty, name });
+            let reference = Reference { ty: param.ty, name, id: scopes.id() };
+            scopes.add(reference);
         }
     }
     let body = resolve_compound_statement(scopes, &def.body);
@@ -191,7 +207,11 @@ fn resolve_declaration<'a>(
     scopes: &mut Scopes<'a>,
     decl: &ast::Declaration<'a>,
 ) -> Declaration<'a> {
-    let reference = Reference { name: decl.name, ty: decl.ty };
+    let reference = Reference {
+        name: decl.name,
+        ty: decl.ty,
+        id: scopes.id(),
+    };
     scopes.add(reference);
     Declaration {
         reference,
@@ -230,7 +250,11 @@ pub fn resolve_names<'a>(
     bump: &'a Bump,
     translation_unit: ast::TranslationUnit<'a>,
 ) -> TranslationUnit<'a> {
-    let scopes = &mut Scopes { bump, scopes: nonempty::Vec::default() };
+    let scopes = &mut Scopes {
+        bump,
+        scopes: nonempty::Vec::default(),
+        next_id: 0,
+    };
     TranslationUnit {
         decls: bump.alloc_slice_fill_iter(translation_unit.decls.iter().map(|decl| match decl {
             ast::ExternalDeclaration::FunctionDefinition(def) =>
