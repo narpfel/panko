@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use bumpalo::Bump;
+use itertools::Itertools as _;
 use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast;
@@ -10,6 +11,12 @@ use panko_parser::ast::Type;
 use crate::nonempty;
 
 mod as_sexpr;
+
+#[derive(Debug)]
+enum OpenNewScope {
+    Yes,
+    No,
+}
 
 #[derive(Debug, Clone, Copy)]
 struct Id(u64);
@@ -34,6 +41,7 @@ struct Declaration<'a> {
 #[derive(Debug, Clone, Copy)]
 struct FunctionDefinition<'a> {
     reference: Reference<'a>,
+    params: ParamRefs<'a>,
     #[expect(unused)]
     storage_class: Option<cst::StorageClassSpecifier<'a>>,
     #[expect(unused)]
@@ -42,6 +50,9 @@ struct FunctionDefinition<'a> {
     noreturn: Option<cst::FunctionSpecifier<'a>>,
     body: CompoundStatement<'a>,
 }
+
+#[derive(Debug, Clone, Copy)]
+struct ParamRefs<'a>(&'a [Reference<'a>]);
 
 #[derive(Debug, Clone, Copy)]
 struct CompoundStatement<'a>(&'a [Statement<'a>]);
@@ -170,18 +181,26 @@ fn resolve_function_definition<'a>(
     else {
         unreachable!()
     };
-    // FIXME: the params need to be resolved in the same scope as the body so that redeclarations
-    // of parameters properly produce an error.
-    for param in function_ty.params {
-        if let Some(name) = param.name {
-            let reference = Reference { ty: param.ty, name, id: scopes.id() };
-            scopes.add(reference);
-        }
-    }
-    let body = resolve_compound_statement(scopes, &def.body);
+
+    let params = scopes.bump.alloc_slice_copy(
+        &function_ty
+            .params
+            .iter()
+            .filter_map(|param| {
+                param.name.map(|name| {
+                    let reference = Reference { ty: param.ty, name, id: scopes.id() };
+                    scopes.add(reference);
+                    reference
+                })
+            })
+            .collect_vec(),
+    );
+
+    let body = resolve_compound_statement(scopes, &def.body, OpenNewScope::No);
     scopes.pop();
     FunctionDefinition {
         reference,
+        params: ParamRefs(params),
         storage_class: def.storage_class,
         inline: def.inline,
         noreturn: def.noreturn,
@@ -192,14 +211,19 @@ fn resolve_function_definition<'a>(
 fn resolve_compound_statement<'a>(
     scopes: &mut Scopes<'a>,
     stmts: &ast::CompoundStatement<'a>,
+    open_new_scope: OpenNewScope,
 ) -> CompoundStatement<'a> {
-    scopes.scopes.last_mut().push();
+    if let OpenNewScope::Yes = open_new_scope {
+        scopes.scopes.last_mut().push();
+    }
     let stmts = CompoundStatement(
         scopes
             .bump
             .alloc_slice_fill_iter(stmts.0.iter().map(|stmt| resolve_stmt(scopes, stmt))),
     );
-    scopes.scopes.last_mut().pop();
+    if let OpenNewScope::Yes = open_new_scope {
+        scopes.scopes.last_mut().pop();
+    }
     stmts
 }
 
@@ -229,7 +253,7 @@ fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> State
         ast::Statement::Expression(expr) =>
             Statement::Expression(expr.as_ref().map(|expr| resolve_expr(scopes, expr))),
         ast::Statement::Compound(stmts) =>
-            Statement::Compound(resolve_compound_statement(scopes, stmts)),
+            Statement::Compound(resolve_compound_statement(scopes, stmts, OpenNewScope::Yes)),
         ast::Statement::Return(expr) =>
             Statement::Return(expr.as_ref().map(|expr| resolve_expr(scopes, expr))),
     }

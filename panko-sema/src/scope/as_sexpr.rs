@@ -1,3 +1,6 @@
+use std::iter;
+
+use itertools::Either;
 use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
 
@@ -6,6 +9,7 @@ use super::Declaration;
 use super::Expression;
 use super::ExternalDeclaration;
 use super::FunctionDefinition;
+use super::ParamRefs;
 use super::Reference;
 use super::Statement;
 use super::TranslationUnit;
@@ -29,7 +33,19 @@ impl AsSExpr for FunctionDefinition<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("function-definition")
             .lines([&self.reference])
+            .lines(if self.params.0.is_empty() {
+                Either::Left(iter::empty())
+            }
+            else {
+                Either::Right(iter::once(&self.params))
+            })
             .lines([&self.body])
+    }
+}
+
+impl AsSExpr for ParamRefs<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("params").lines(self.0)
     }
 }
 

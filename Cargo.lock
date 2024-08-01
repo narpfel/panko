@@ -338,6 +338,7 @@ name = "panko-sema"
 version = "0.1.0"
 dependencies = [
  "bumpalo",
+ "itertools 0.13.0",
  "panko-lex",
  "panko-parser",
 ]
