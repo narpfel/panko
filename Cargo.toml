@@ -11,6 +11,7 @@ members = [
 
 [workspace.dependencies]
 bumpalo = "3.16.0"
+clap = { version = "4.5.13", features = ["derive"] }
 itertools = "0.13.0"
 lalrpop = "0.20.2"
 lalrpop-util = { version = "0.20.2", features = ["unicode"] }
