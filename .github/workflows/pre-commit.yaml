@@ -28,6 +28,9 @@ jobs:
           # when running `cargo fmt`, which conflicts with the rust-toolchain
           # installed rust.
           components: rustfmt, clippy, rustc-codegen-cranelift
+      - name: Install `cargo-insta`
+        run: |
+          curl -LsSf https://insta.rs/install.sh | sh
       - name: pre-commit
         uses: pre-commit/action@v3.0.1
         with:
