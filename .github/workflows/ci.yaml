@@ -24,6 +24,10 @@ jobs:
         with:
           toolchain: nightly-2024-06-28
           components: rustc-codegen-cranelift
+      - name: Install `cargo-insta`
+        run: |
+          curl -LsSf https://insta.rs/install.sh | sh
       - name: test
         run: |
-          cargo test --color=always -- --color=always
+          cargo insta test \
+            --unreferenced=reject
