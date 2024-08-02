@@ -17,6 +17,7 @@ lalrpop = "0.20.2"
 lalrpop-util = { version = "0.20.2", features = ["unicode"] }
 logos = "0.14.0"
 
+insta-cmd = "0.6.0"
 pretty_assertions = { version = "1.4.0", features = ["unstable"] }
 rstest = { version = "0.21.0", default-features = false }
 

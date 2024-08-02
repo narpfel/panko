@@ -9,3 +9,7 @@ clap = { workspace = true }
 panko-lex = { path = "../panko-lex" }
 panko-parser = { path = "../panko-parser" }
 panko-sema = { path = "../panko-sema" }
+
+[dev-dependencies]
+insta-cmd = { workspace = true }
+rstest = { workspace = true }
