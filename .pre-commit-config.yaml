@@ -19,6 +19,7 @@ repos:
       - id: fix-byte-order-marker
       - id: mixed-line-ending
       - id: trailing-whitespace
+        exclude: '\.snap$'
   - repo: local
     hooks:
       - id: cargo-fmt
