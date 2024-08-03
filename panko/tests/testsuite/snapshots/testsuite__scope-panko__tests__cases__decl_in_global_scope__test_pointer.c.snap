@@ -10,6 +10,15 @@ exit_code: 0
 ----- stdout -----
 (translation-unit
    (declaration x~0 `ptr<Int>` ∅)
-   (declaration y~1 `ptr<Int>` ∅))
+   (declaration y~1 `ptr<Int>` ∅)
+   (declaration a~2 `ptr<Int const>` ∅)
+   (declaration b~3 `ptr<Int> const` ∅)
+   (declaration c~4 `ptr<Int const> const` ∅)
+   (declaration d~5 `ptr<Int const>` ∅)
+   (declaration e~6 `ptr<Int const> const` ∅)
+   (declaration f~7 `ptr<ptr<Int>>` ∅)
+   (declaration g~8 `ptr<ptr<Int const>>` ∅)
+   (declaration h~9 `ptr<ptr<Int>> const` ∅)
+   (declaration i~10 `ptr<ptr<Int> const>` ∅))
 
 ----- stderr -----

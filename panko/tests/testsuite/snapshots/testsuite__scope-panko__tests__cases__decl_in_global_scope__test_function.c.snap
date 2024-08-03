@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - panko/tests/cases/decl_in_global_scope/test_function.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration a~0 `fn() -> Int` ∅)
+   (declaration b~1 `fn(∅: Int) -> Int` ∅)
+   (declaration c~2 `fn(a: Int) -> Int` ∅)
+   (declaration d~3 `fn(∅: Int, ∅: Int) -> Int` ∅)
+   (declaration e~4 `fn() -> ptr<Int>` ∅)
+   (declaration f~5 `ptr<fn(∅: Int) -> Int>` ∅)
+   (declaration g~6 `ptr<fn(∅: ptr<Int>) -> Int>` ∅)
+   (declaration h~7 `ptr<fn(∅: fn() -> Int) -> Int>` ∅)
+   (declaration i~8 `fn(a: fn() -> Int) -> Int` ∅)
+   (declaration j~9 `fn(a: fn(∅: Int) -> Int) -> Int` ∅)
+   (declaration k~10 `fn(a: fn(a: Int) -> Int) -> Int` ∅)
+   (declaration l~11 `fn(∅: Int, ∅: ptr<fn() -> Int>) -> Int` ∅))
+
+----- stderr -----

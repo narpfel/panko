@@ -1,0 +1,12 @@
+int a();
+int b(int);
+int c(int a);
+int d(int, int);
+int* e();
+int (*f)(int);
+int (*g)(int*);
+int (*h)(int());
+int i(int a());
+int j(int a(int));
+int k(int a(int a));
+int l(int, int(*)());
