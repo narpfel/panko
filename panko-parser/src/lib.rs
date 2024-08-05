@@ -1,4 +1,3 @@
-use bumpalo::Bump;
 use lalrpop_util::lalrpop_mod;
 use panko_lex::Token;
 use panko_lex::TokenIter;
@@ -497,12 +496,12 @@ impl AsSExpr for Expression<'_> {
 }
 
 pub fn parse<'a>(
-    bump: &'a Bump,
+    sess: &'a ast::Session<'a>,
     tokens: TokenIter<'a>,
 ) -> Result<ast::TranslationUnit<'a>, Error<'a>> {
     let parser = grammar::TranslationUnitParser::new();
     let parse_tree = parser
-        .parse(bump, tokens.map(|token| Ok(token?)))
+        .parse(sess.bump, tokens.map(|token| Ok(token?)))
         .unwrap_or_else(|err| todo!("handle parse error: {err:?}"));
-    Ok(ast::from_parse_tree(bump, parse_tree))
+    Ok(ast::from_parse_tree(sess, parse_tree))
 }

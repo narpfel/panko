@@ -17,7 +17,12 @@ fn main() {
         &args.filename,
         &std::fs::read_to_string(&args.filename).unwrap(),
     );
-    let translation_unit = panko_parser::parse(bump, tokens).unwrap();
+    let session = &panko_parser::ast::Session::new(bump);
+    let translation_unit = panko_parser::parse(session, tokens).unwrap();
+    if !session.diagnostics().is_empty() {
+        eprintln!("{:#?}", &session.diagnostics());
+        todo!("not all diagnostics are fatal");
+    }
     let translation_unit = panko_sema::resolve_names(bump, translation_unit);
     println!("{}", translation_unit.as_sexpr());
 }
