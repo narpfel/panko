@@ -301,21 +301,15 @@ impl<'a> TypeQualifier<'a> {
     ) {
         match self.kind {
             TypeQualifierKind::Const =>
-                if const_qualifier.is_some() {
-                    sess.emit(Diagnostic::DuplicateConst {
-                        first: const_qualifier.unwrap(),
-                        repeated: self,
-                    });
+                if let Some(first) = *const_qualifier {
+                    sess.emit(Diagnostic::DuplicateConst { first, repeated: self });
                 }
                 else {
                     *const_qualifier = Some(self);
                 },
             TypeQualifierKind::Volatile =>
-                if volatile_qualifier.is_some() {
-                    sess.emit(Diagnostic::DuplicateVolatile {
-                        first: volatile_qualifier.unwrap(),
-                        repeated: self,
-                    });
+                if let Some(first) = *volatile_qualifier {
+                    sess.emit(Diagnostic::DuplicateVolatile { first, repeated: self });
                 }
                 else {
                     *volatile_qualifier = Some(self);
