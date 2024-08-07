@@ -37,6 +37,10 @@ enum Diagnostic<'a> {
         #[expect(unused)]
         repeated: TypeQualifier<'a>,
     },
+    DeclarationWithoutType {
+        #[expect(unused)]
+        specifiers: cst::DeclarationSpecifiers<'a>,
+    },
 }
 
 pub struct Session<'a> {
@@ -383,7 +387,14 @@ fn parse_type_specifiers<'a>(
         }
     }
 
-    let ty = ty.unwrap_or_else(|| todo!("error: no type given in declaration"));
+    let ty = ty.unwrap_or_else(|| {
+        sess.emit(Diagnostic::DeclarationWithoutType { specifiers });
+        // FIXME: don’t use implicit int here, an explicit “type error” type will be better
+        Type::Integral(Integral {
+            signedness: None,
+            kind: IntegralKind::Int,
+        })
+    });
     QualifiedType {
         is_const: const_qualifier.is_some(),
         is_volatile: volatile_qualifier.is_some(),
