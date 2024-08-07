@@ -82,11 +82,11 @@ impl AsSExpr for DeclarationSpecifiers<'_> {
 
 impl<'a> DeclarationSpecifiers<'a> {
     fn loc(&self) -> Loc<'a> {
-        self.0
-            .first()
-            .unwrap()
-            .loc()
-            .until(self.0.last().unwrap().loc())
+        match self.0 {
+            [] => unreachable!(),
+            [specifier] => specifier.loc(),
+            [first, .., last] => first.loc().until(last.loc()),
+        }
     }
 }
 
