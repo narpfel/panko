@@ -81,13 +81,6 @@ pub struct Session<'a> {
 #[derive(Default, Debug)]
 pub struct Diagnostics<'a>(RefCell<Vec<Diagnostic<'a>>>);
 
-impl Diagnostics<'_> {
-    #[must_use]
-    pub fn is_empty(&self) -> bool {
-        self.0.borrow().is_empty()
-    }
-}
-
 impl<'a> Session<'a> {
     pub fn new(bump: &'a Bump) -> Self {
         Self {
