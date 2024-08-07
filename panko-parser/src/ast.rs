@@ -1,10 +1,15 @@
+use std::cell::Ref;
 use std::cell::RefCell;
 use std::fmt;
 use std::iter::once;
 
+use ariadne::Color::Blue;
+use ariadne::Color::Red;
 use bumpalo::Bump;
+use crabbing_interpreters_derive_report::Report;
 use itertools::Either;
 use itertools::Itertools as _;
+use panko_lex::Loc;
 use panko_lex::Token;
 
 use crate as cst;
@@ -23,24 +28,49 @@ use crate::NO_VALUE;
 
 mod as_sexpr;
 
-#[derive(Debug, Clone, Copy)]
-enum Diagnostic<'a> {
-    DuplicateConst {
-        #[expect(unused)]
-        first: TypeQualifier<'a>,
-        #[expect(unused)]
-        repeated: TypeQualifier<'a>,
+#[derive(Debug, Clone, Copy, Report)]
+#[exit_code(1)]
+pub enum Diagnostic<'a> {
+    #[error("declaration with duplicate `{first}` declaration specifier")]
+    #[with(
+        first = at.first,
+        repeated = at.repeated,
+    )]
+    DuplicateDeclarationSpecifier {
+        #[diagnostics(
+            first(colour = Blue, label = "first `{first}` here"),
+            repeated(colour = Red, label = "duplicated `{repeated}` here"),
+            repeated(colour = Red, label = "help: remove this `{repeated}`"),
+        )]
+        at: DuplicateDeclarationSpecifier<'a>,
     },
-    DuplicateVolatile {
-        #[expect(unused)]
-        first: TypeQualifier<'a>,
-        #[expect(unused)]
-        repeated: TypeQualifier<'a>,
-    },
+
+    #[error("declaration does not specify a type")]
     DeclarationWithoutType {
-        #[expect(unused)]
-        specifiers: cst::DeclarationSpecifiers<'a>,
+        #[diagnostics(0(colour = Red, label = "type missing"))]
+        at: ErrorAtDeclarationSpecifiers<'a>,
     },
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DuplicateDeclarationSpecifier<'a> {
+    first: TypeQualifier<'a>,
+    repeated: TypeQualifier<'a>,
+}
+
+impl<'a> DuplicateDeclarationSpecifier<'a> {
+    fn loc(&self) -> Loc<'a> {
+        self.repeated.loc()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ErrorAtDeclarationSpecifiers<'a>(cst::DeclarationSpecifiers<'a>);
+
+impl<'a> ErrorAtDeclarationSpecifiers<'a> {
+    fn loc(&self) -> Loc<'a> {
+        self.0.loc()
+    }
 }
 
 pub struct Session<'a> {
@@ -89,8 +119,8 @@ impl<'a> Session<'a> {
         self.diagnostics.0.borrow_mut().push(diagnostic)
     }
 
-    pub fn diagnostics(&self) -> &Diagnostics<'a> {
-        &self.diagnostics
+    pub fn diagnostics(&self) -> Ref<Vec<Diagnostic<'a>>> {
+        self.diagnostics.0.borrow()
     }
 }
 
@@ -306,14 +336,18 @@ impl<'a> TypeQualifier<'a> {
         match self.kind {
             TypeQualifierKind::Const =>
                 if let Some(first) = *const_qualifier {
-                    sess.emit(Diagnostic::DuplicateConst { first, repeated: self });
+                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier {
+                        at: DuplicateDeclarationSpecifier { first, repeated: self },
+                    });
                 }
                 else {
                     *const_qualifier = Some(self);
                 },
             TypeQualifierKind::Volatile =>
                 if let Some(first) = *volatile_qualifier {
-                    sess.emit(Diagnostic::DuplicateVolatile { first, repeated: self });
+                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier {
+                        at: DuplicateDeclarationSpecifier { first, repeated: self },
+                    });
                 }
                 else {
                     *volatile_qualifier = Some(self);
@@ -388,7 +422,9 @@ fn parse_type_specifiers<'a>(
     }
 
     let ty = ty.unwrap_or_else(|| {
-        sess.emit(Diagnostic::DeclarationWithoutType { specifiers });
+        sess.emit(Diagnostic::DeclarationWithoutType {
+            at: ErrorAtDeclarationSpecifiers(specifiers),
+        });
         // FIXME: don’t use implicit int here, an explicit “type error” type will be better
         Type::Integral(Integral {
             signedness: None,

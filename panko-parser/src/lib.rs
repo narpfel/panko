@@ -1,4 +1,5 @@
 use lalrpop_util::lalrpop_mod;
+use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenIter;
 use panko_lex::TokenKind;
@@ -13,6 +14,11 @@ lalrpop_mod!(grammar);
 
 const SEXPR_INDENT: usize = 3;
 const NO_VALUE: &str = "∅";
+
+pub trait Report {
+    fn print(&self);
+    fn exit_code(&self) -> i32;
+}
 
 #[derive(Debug)]
 pub enum Error<'a> {
@@ -74,6 +80,16 @@ impl AsSExpr for DeclarationSpecifiers<'_> {
     }
 }
 
+impl<'a> DeclarationSpecifiers<'a> {
+    fn loc(&self) -> Loc<'a> {
+        self.0
+            .first()
+            .unwrap()
+            .loc()
+            .until(self.0.last().unwrap().loc())
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 enum DeclarationSpecifier<'a> {
     StorageClass(StorageClassSpecifier<'a>),
@@ -89,6 +105,17 @@ impl AsSExpr for DeclarationSpecifier<'_> {
                 type_specifier_qualifier.as_sexpr(),
             DeclarationSpecifier::FunctionSpecifier(function_specifier) =>
                 function_specifier.as_sexpr(),
+        }
+    }
+}
+
+impl<'a> DeclarationSpecifier<'a> {
+    fn loc(&self) -> Loc<'a> {
+        match self {
+            DeclarationSpecifier::StorageClass(storage_class) => storage_class.loc(),
+            DeclarationSpecifier::TypeSpecifierQualifier(type_specifier_qualifier) =>
+                type_specifier_qualifier.loc(),
+            DeclarationSpecifier::FunctionSpecifier(function_specifier) => function_specifier.loc(),
         }
     }
 }
@@ -112,6 +139,10 @@ impl<'a> StorageClassSpecifier<'a> {
             token,
             kind: storage_class_specifier_kind(token.kind),
         }
+    }
+
+    fn loc(&self) -> Loc<'a> {
+        self.token.loc()
     }
 }
 
@@ -154,6 +185,15 @@ impl AsSExpr for TypeSpecifierQualifier<'_> {
     }
 }
 
+impl<'a> TypeSpecifierQualifier<'a> {
+    fn loc(&self) -> Loc<'a> {
+        match self {
+            TypeSpecifierQualifier::Qualifier(qualifier) => qualifier.loc(),
+            TypeSpecifierQualifier::Specifier(specifier) => specifier.loc(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 struct TypeQualifier<'a> {
     token: Token<'a>,
@@ -166,6 +206,14 @@ impl<'a> TypeQualifier<'a> {
             token,
             kind: type_qualifier_kind(token.kind),
         }
+    }
+
+    fn loc(&self) -> Loc<'a> {
+        self.token.loc()
+    }
+
+    fn slice(&self) -> &'a str {
+        self.token.slice()
     }
 }
 
@@ -205,6 +253,10 @@ impl<'a> TypeSpecifier<'a> {
             token,
             kind: type_specifier_kind(token.kind),
         }
+    }
+
+    fn loc(&self) -> Loc<'a> {
+        self.token.loc()
     }
 }
 
@@ -276,6 +328,10 @@ impl<'a> FunctionSpecifier<'a> {
             token,
             kind: function_specifier_kind(token.kind),
         }
+    }
+
+    fn loc(&self) -> Loc<'a> {
+        self.token.loc()
     }
 }
 

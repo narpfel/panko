@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - panko/tests/cases/decl_in_global_scope/test_error_duplicate_volatile.c
+---
+success: false
+exit_code: 101
+----- stdout -----
+
+----- stderr -----
+Error: declaration with duplicate `volatile` declaration specifier
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_duplicate_volatile.c:1:20]
+   │
+ 1 │ int const volatile volatile x;
+   │           ────┬─── ────┬───  
+   │               │        ╰───── help: remove this `volatile`
+   │               │              
+   │               ╰────────────── first `volatile` here
+───╯
+thread 'main' panicked at panko/src/main.rs:31:9:
+not yet implemented: not all diagnostics are fatal
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

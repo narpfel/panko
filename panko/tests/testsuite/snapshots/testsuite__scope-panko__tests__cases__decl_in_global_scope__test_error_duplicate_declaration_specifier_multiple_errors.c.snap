@@ -1,0 +1,54 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - panko/tests/cases/decl_in_global_scope/test_error_duplicate_declaration_specifier_multiple_errors.c
+---
+success: false
+exit_code: 101
+----- stdout -----
+
+----- stderr -----
+Error: declaration with duplicate `const` declaration specifier
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_duplicate_declaration_specifier_multiple_errors.c:1:11]
+   │
+ 1 │ int const const x;
+   │     ──┬── ──┬──  
+   │       │     ╰──── help: remove this `const`
+   │       │          
+   │       ╰────────── first `const` here
+───╯
+
+Error: declaration with duplicate `const` declaration specifier
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_duplicate_declaration_specifier_multiple_errors.c:2:11]
+   │
+ 2 │ int const const y;
+   │     ──┬── ──┬──  
+   │       │     ╰──── help: remove this `const`
+   │       │          
+   │       ╰────────── first `const` here
+───╯
+
+Error: declaration with duplicate `const` declaration specifier
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_duplicate_declaration_specifier_multiple_errors.c:3:11]
+   │
+ 3 │ int const const* const const z;
+   │     ──┬── ──┬──  
+   │       │     ╰──── help: remove this `const`
+   │       │          
+   │       ╰────────── first `const` here
+───╯
+
+Error: declaration with duplicate `const` declaration specifier
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_duplicate_declaration_specifier_multiple_errors.c:3:24]
+   │
+ 3 │ int const const* const const z;
+   │                  ──┬── ──┬──  
+   │                    │     ╰──── help: remove this `const`
+   │                    │          
+   │                    ╰────────── first `const` here
+───╯
+thread 'main' panicked at panko/src/main.rs:31:9:
+not yet implemented: not all diagnostics are fatal
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

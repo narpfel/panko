@@ -4,6 +4,8 @@
 use std::ops::Range;
 use std::path::Path;
 
+use ariadne::Config;
+use ariadne::IndexType;
 use bumpalo::Bump;
 use logos::Logos;
 
@@ -14,7 +16,7 @@ pub struct Token<'a> {
 }
 
 impl<'a> Token<'a> {
-    fn loc(&self) -> Loc<'a> {
+    pub fn loc(&self) -> Loc<'a> {
         self.loc
     }
 
@@ -56,12 +58,79 @@ impl<'a> Loc<'a> {
         self.source_file.src
     }
 
+    pub(crate) fn start(&self) -> usize {
+        self.span.start
+    }
+
     fn span(&self) -> Range<usize> {
         self.span.start..self.span.end
     }
 
     fn slice(&self) -> &'a str {
         &self.src()[self.span()]
+    }
+
+    pub fn until(self, other: Self) -> Self {
+        assert_eq!(self.file(), other.file());
+        assert_eq!(self.src(), other.src());
+        assert!(self.span.end <= other.span.start);
+        Self {
+            span: Span {
+                start: self.span.start,
+                end: other.span.end,
+            },
+            ..self
+        }
+    }
+
+    pub fn report(&self, kind: ariadne::ReportKind<'a>) -> ariadne::ReportBuilder<'a, Self> {
+        ariadne::Report::build(kind, self.file(), self.start())
+            .with_config(Config::default().with_index_type(IndexType::Byte))
+    }
+
+    pub fn cache(&self) -> impl ariadne::Cache<Path> + 'a {
+        struct Cache<'b>(&'b Path, ariadne::Source<&'b str>);
+
+        impl<'b> ariadne::Cache<Path> for Cache<'b> {
+            type Storage = &'b str;
+
+            fn fetch(
+                &mut self,
+                id: &Path,
+            ) -> Result<&ariadne::Source<&'b str>, Box<dyn std::fmt::Debug + '_>> {
+                if self.0 == id {
+                    Ok(&self.1)
+                }
+                else {
+                    Err(Box::new(format!(
+                        "failed to fetch source `{}`",
+                        id.display(),
+                    )))
+                }
+            }
+
+            fn display<'a>(&self, id: &'a Path) -> Option<Box<dyn std::fmt::Display + 'a>> {
+                Some(Box::new(id.display()))
+            }
+        }
+
+        Cache(self.file(), ariadne::Source::from(self.src()))
+    }
+}
+
+impl ariadne::Span for Loc<'_> {
+    type SourceId = Path;
+
+    fn source(&self) -> &Self::SourceId {
+        self.file()
+    }
+
+    fn start(&self) -> usize {
+        self.span.start
+    }
+
+    fn end(&self) -> usize {
+        self.span.end
     }
 }
 

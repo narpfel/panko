@@ -21,6 +21,14 @@ insta-cmd = "0.6.0"
 pretty_assertions = { version = "1.4.0", features = ["unstable"] }
 rstest = { version = "0.21.0", default-features = false }
 
+[workspace.dependencies.ariadne]
+git = "https://github.com/narpfel/ariadne"
+branch = "underlines-for-unlabeled"
+features = ["auto-color"]
+
+[workspace.dependencies.crabbing-interpreters-derive-report]
+git = "https://github.com/narpfel/crabbing-interpreters"
+
 [profile.perf]
 inherits = "release"
 debug = 2
