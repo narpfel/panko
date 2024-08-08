@@ -18,6 +18,7 @@ use crate::DirectDeclarator;
 use crate::InitDeclarator;
 use crate::JumpStatement;
 use crate::PrimaryBlock;
+use crate::Report;
 use crate::TypeQualifier;
 use crate::TypeQualifierKind;
 use crate::TypeSpecifierKind;
@@ -80,7 +81,7 @@ pub struct Session<'a> {
 }
 
 #[derive(Default, Debug)]
-pub struct Diagnostics<'a>(RefCell<Vec<Diagnostic<'a>>>);
+pub struct Diagnostics<'a>(RefCell<Vec<&'a dyn Report>>);
 
 impl<'a> Session<'a> {
     pub fn new(bump: &'a Bump) -> Self {
@@ -109,11 +110,14 @@ impl<'a> Session<'a> {
         self.bump.alloc_slice_copy(values)
     }
 
-    pub fn emit(&self, diagnostic: Diagnostic<'a>) {
-        self.diagnostics.0.borrow_mut().push(diagnostic)
+    pub fn emit<T>(&self, diagnostic: T)
+    where
+        T: Report + 'a,
+    {
+        self.diagnostics.0.borrow_mut().push(self.alloc(diagnostic))
     }
 
-    pub fn diagnostics(&self) -> Ref<Vec<Diagnostic<'a>>> {
+    pub fn diagnostics(&self) -> Ref<Vec<&'a dyn Report>> {
         self.diagnostics.0.borrow()
     }
 }

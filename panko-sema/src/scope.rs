@@ -1,6 +1,10 @@
 use std::collections::HashMap;
 
+use ariadne::Color::Blue;
+use ariadne::Color::Red;
+use crabbing_interpreters_derive_report::Report;
 use itertools::Itertools as _;
+use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast;
@@ -11,6 +15,32 @@ use panko_parser::ast::Type;
 use crate::nonempty;
 
 mod as_sexpr;
+
+#[derive(Debug, Report)]
+#[exit_code(1)]
+enum Diagnostic<'a> {
+    #[error("duplicate declaration for `{name}`")]
+    #[with(name = at.redefinition)]
+    AlreadyDefined {
+        #[diagnostics(
+            previous_definition(colour = Blue, label = "previously defined here"),
+            redefinition(colour = Red, label = "duplicate definition"),
+        )]
+        at: AlreadyDefined<'a>,
+    },
+}
+
+#[derive(Debug)]
+struct AlreadyDefined<'a> {
+    redefinition: Reference<'a>,
+    previous_definition: Reference<'a>,
+}
+
+impl<'a> AlreadyDefined<'a> {
+    fn loc(&self) -> Loc<'a> {
+        self.redefinition.loc()
+    }
+}
 
 #[derive(Debug)]
 enum OpenNewScope {
@@ -82,6 +112,14 @@ impl<'a> Reference<'a> {
     fn ident(&self) -> &'a str {
         self.name.slice()
     }
+
+    fn loc(&self) -> Loc<'a> {
+        self.name.loc()
+    }
+
+    fn slice(&self) -> &'a str {
+        self.name.slice()
+    }
 }
 
 #[derive(Debug, Default)]
@@ -122,7 +160,12 @@ struct Scopes<'a> {
 impl<'a> Scopes<'a> {
     fn add(&mut self, reference: Reference<'a>) {
         match self.lookup_innermost(reference.ident()) {
-            Some(_) => todo!("already declared: {reference:#?}"),
+            Some(previous_definition) => self.sess.emit(Diagnostic::AlreadyDefined {
+                at: AlreadyDefined {
+                    redefinition: reference,
+                    previous_definition,
+                },
+            }),
             None => {
                 let maybe_old_value = self
                     .scopes

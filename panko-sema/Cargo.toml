@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+ariadne = { workspace = true }
 bumpalo = { workspace = true }
+crabbing-interpreters-derive-report = { workspace = true }
 itertools = { workspace = true }
 panko-lex = { path = "../panko-lex" }
 panko-parser = { path = "../panko-parser" }

@@ -570,7 +570,9 @@ dependencies = [
 name = "panko-sema"
 version = "0.1.0"
 dependencies = [
+ "ariadne",
  "bumpalo",
+ "crabbing-interpreters-derive-report",
  "itertools 0.13.0",
  "panko-lex",
  "panko-parser",

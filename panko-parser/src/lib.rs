@@ -15,7 +15,7 @@ lalrpop_mod!(grammar);
 const SEXPR_INDENT: usize = 3;
 const NO_VALUE: &str = "∅";
 
-pub trait Report {
+pub trait Report: std::fmt::Debug {
     fn print(&self);
     fn exit_code(&self) -> i32;
 }
