@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use bumpalo::Bump;
 use itertools::Itertools as _;
 use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast;
 use panko_parser::ast::QualifiedType;
+use panko_parser::ast::Session;
 use panko_parser::ast::Type;
 
 use crate::nonempty;
@@ -113,7 +113,7 @@ impl<'a> Scope<'a> {
 
 #[derive(Debug)]
 struct Scopes<'a> {
-    bump: &'a Bump,
+    sess: &'a Session<'a>,
     /// at most two elements: the global scope and a function scope
     scopes: nonempty::Vec<Scope<'a>>,
     next_id: u64,
@@ -182,7 +182,7 @@ fn resolve_function_definition<'a>(
         unreachable!()
     };
 
-    let params = scopes.bump.alloc_slice_copy(
+    let params = scopes.sess.alloc_slice_copy(
         &function_ty
             .params
             .iter()
@@ -218,7 +218,7 @@ fn resolve_compound_statement<'a>(
     }
     let stmts = CompoundStatement(
         scopes
-            .bump
+            .sess
             .alloc_slice_fill_iter(stmts.0.iter().map(|stmt| resolve_stmt(scopes, stmt))),
     );
     if let OpenNewScope::Yes = open_new_scope {
@@ -271,16 +271,16 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
 }
 
 pub fn resolve_names<'a>(
-    bump: &'a Bump,
+    sess: &'a Session<'a>,
     translation_unit: ast::TranslationUnit<'a>,
 ) -> TranslationUnit<'a> {
     let scopes = &mut Scopes {
-        bump,
+        sess,
         scopes: nonempty::Vec::default(),
         next_id: 0,
     };
     TranslationUnit {
-        decls: bump.alloc_slice_fill_iter(translation_unit.decls.iter().map(|decl| match decl {
+        decls: sess.alloc_slice_fill_iter(translation_unit.decls.iter().map(|decl| match decl {
             ast::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(resolve_function_definition(scopes, def)),
             ast::ExternalDeclaration::Declaration(decl) =>

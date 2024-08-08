@@ -73,6 +73,7 @@ impl<'a> ErrorAtDeclarationSpecifiers<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct Session<'a> {
     pub(crate) bump: &'a Bump,
     diagnostics: Diagnostics<'a>,
@@ -89,11 +90,11 @@ impl<'a> Session<'a> {
         }
     }
 
-    fn alloc<T>(&self, value: T) -> &'a T {
+    pub fn alloc<T>(&self, value: T) -> &'a T {
         self.bump.alloc(value)
     }
 
-    fn alloc_slice_fill_iter<I, T>(&self, value: I) -> &'a [T]
+    pub fn alloc_slice_fill_iter<I, T>(&self, value: I) -> &'a [T]
     where
         I: IntoIterator<Item = T>,
         I::IntoIter: ExactSizeIterator,
@@ -101,14 +102,14 @@ impl<'a> Session<'a> {
         self.bump.alloc_slice_fill_iter(value)
     }
 
-    fn alloc_slice_copy<T>(&self, values: &[T]) -> &'a [T]
+    pub fn alloc_slice_copy<T>(&self, values: &[T]) -> &'a [T]
     where
         T: Copy,
     {
         self.bump.alloc_slice_copy(values)
     }
 
-    fn emit(&self, diagnostic: Diagnostic<'a>) {
+    pub fn emit(&self, diagnostic: Diagnostic<'a>) {
         self.diagnostics.0.borrow_mut().push(diagnostic)
     }
 

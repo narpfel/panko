@@ -30,6 +30,6 @@ fn main() {
 
         todo!("not all diagnostics are fatal");
     }
-    let translation_unit = panko_sema::resolve_names(bump, translation_unit);
+    let translation_unit = panko_sema::resolve_names(session, translation_unit);
     println!("{}", translation_unit.as_sexpr());
 }
