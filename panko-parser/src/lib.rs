@@ -1,3 +1,5 @@
+#![feature(coverage_attribute)]
+
 use lalrpop_util::lalrpop_mod;
 use panko_lex::Loc;
 use panko_lex::Token;

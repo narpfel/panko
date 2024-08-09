@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use crate::ast::CompoundStatement;
 use crate::ast::Declaration;
 use crate::ast::ExternalDeclaration;

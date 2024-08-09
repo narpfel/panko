@@ -1,3 +1,5 @@
+#![coverage(off)]
+
 use crate::sexpr_builder::AsSExpr;
 use crate::sexpr_builder::SExpr;
 use crate::BlockItem;
