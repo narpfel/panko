@@ -230,11 +230,10 @@ fn resolve_function_definition<'a>(
             .params
             .iter()
             .filter_map(|param| {
-                param.name.map(|name| {
-                    let reference = Reference { ty: param.ty, name, id: scopes.id() };
-                    scopes.add(reference);
-                    reference
-                })
+                let name = param.name?;
+                let reference = Reference { ty: param.ty, name, id: scopes.id() };
+                scopes.add(reference);
+                Some(reference)
             })
             .collect_vec(),
     );
