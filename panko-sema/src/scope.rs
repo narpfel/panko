@@ -281,10 +281,7 @@ fn resolve_declaration<'a>(
     scopes.add(reference);
     Declaration {
         reference,
-        initialiser: decl
-            .initialiser
-            .as_ref()
-            .map(|initialiser| resolve_expr(scopes, initialiser)),
+        initialiser: try { resolve_expr(scopes, &decl.initialiser?) },
     }
 }
 
@@ -293,11 +290,11 @@ fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> State
         ast::Statement::Declaration(decl) =>
             Statement::Declaration(resolve_declaration(scopes, decl)),
         ast::Statement::Expression(expr) =>
-            Statement::Expression(expr.as_ref().map(|expr| resolve_expr(scopes, expr))),
+            Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
         ast::Statement::Compound(stmts) =>
             Statement::Compound(resolve_compound_statement(scopes, stmts, OpenNewScope::Yes)),
         ast::Statement::Return(expr) =>
-            Statement::Return(expr.as_ref().map(|expr| resolve_expr(scopes, expr))),
+            Statement::Return(try { resolve_expr(scopes, expr.as_ref()?) }),
     }
 }
 
