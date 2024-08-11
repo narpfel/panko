@@ -64,6 +64,7 @@ need_stdout = true
 allow_warnings = true
 background = true
 watch = ["../c"]
+env.CLICOLOR_FORCE = "1"
 
 [jobs.fmt]
 command = ["cargo", "fmt"]
