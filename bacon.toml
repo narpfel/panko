@@ -57,10 +57,13 @@ command = [
     "cargo", "run",
     "--profile=clif",
     "--color", "always",
+    "--",
+    "c/main.c",
 ]
 need_stdout = true
 allow_warnings = true
 background = true
+watch = ["../c"]
 
 [jobs.fmt]
 command = ["cargo", "fmt"]
