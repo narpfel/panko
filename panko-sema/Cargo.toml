@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 ariadne = { workspace = true }
 bumpalo = { workspace = true }
-crabbing-interpreters-derive-report = { workspace = true }
+crabbing-interpreters-derive-report = { path = "../crabbing-interpreters-derive-report" }
 itertools = { workspace = true }
 panko-lex = { path = "../panko-lex" }
 panko-parser = { path = "../panko-parser" }

@@ -3,6 +3,7 @@ cargo-features = ["codegen-backend"]
 [workspace]
 resolver = "2"
 members = [
+    "crabbing-interpreters-derive-report",
     "panko",
     "panko-lex",
     "panko-parser",
@@ -12,10 +13,15 @@ members = [
 [workspace.dependencies]
 bumpalo = "3.16.0"
 clap = { version = "4.5.13", features = ["derive"] }
+indexmap = "2.3.0"
 itertools = "0.13.0"
 lalrpop = "0.20.2"
 lalrpop-util = { version = "0.20.2", features = ["unicode"] }
 logos = "0.14.0"
+proc-macro2 = "1.0.86"
+quote = "1.0.36"
+regex = "1.10.6"
+syn = { version = "2.0.74", features = ["fold", "visit"] }
 
 insta-cmd = "0.6.0"
 pretty_assertions = { version = "1.4.0", features = ["unstable"] }
@@ -25,9 +31,6 @@ rstest = { version = "0.21.0", default-features = false }
 git = "https://github.com/narpfel/ariadne"
 branch = "underlines-for-unlabeled"
 features = ["auto-color"]
-
-[workspace.dependencies.crabbing-interpreters-derive-report]
-git = "https://github.com/narpfel/crabbing-interpreters"
 
 [profile.perf]
 inherits = "release"
