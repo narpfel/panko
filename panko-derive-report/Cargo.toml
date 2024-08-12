@@ -1,5 +1,5 @@
 [package]
-name = "crabbing-interpreters-derive-report"
+name = "panko-derive-report"
 version = "0.1.0"
 edition = "2021"
 

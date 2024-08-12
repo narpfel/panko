@@ -209,18 +209,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "crabbing-interpreters-derive-report"
-version = "0.1.0"
-dependencies = [
- "indexmap",
- "itertools 0.13.0",
- "proc-macro2",
- "quote",
- "regex",
- "syn",
-]
-
-[[package]]
 name = "crunchy"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -542,6 +530,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "panko-derive-report"
+version = "0.1.0"
+dependencies = [
+ "indexmap",
+ "itertools 0.13.0",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "syn",
+]
+
+[[package]]
 name = "panko-lex"
 version = "0.1.0"
 dependencies = [
@@ -558,10 +558,10 @@ version = "0.1.0"
 dependencies = [
  "ariadne",
  "bumpalo",
- "crabbing-interpreters-derive-report",
  "itertools 0.13.0",
  "lalrpop",
  "lalrpop-util",
+ "panko-derive-report",
  "panko-lex",
 ]
 
@@ -571,8 +571,8 @@ version = "0.1.0"
 dependencies = [
  "ariadne",
  "bumpalo",
- "crabbing-interpreters-derive-report",
  "itertools 0.13.0",
+ "panko-derive-report",
  "panko-lex",
  "panko-parser",
 ]

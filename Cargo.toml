@@ -3,8 +3,8 @@ cargo-features = ["codegen-backend"]
 [workspace]
 resolver = "2"
 members = [
-    "crabbing-interpreters-derive-report",
     "panko",
+    "panko-derive-report",
     "panko-lex",
     "panko-parser",
     "panko-sema",

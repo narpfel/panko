@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
-use crabbing_interpreters_derive_report::Report;
 use itertools::Itertools as _;
+use panko_derive_report::Report;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
