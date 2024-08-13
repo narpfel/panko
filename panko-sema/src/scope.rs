@@ -19,27 +19,15 @@ mod as_sexpr;
 #[derive(Debug, Report)]
 #[exit_code(1)]
 enum Diagnostic<'a> {
-    #[error("duplicate declaration for `{name}`")]
-    #[with(name = at.redefinition)]
+    #[error("duplicate declaration for `{at}`")]
+    #[diagnostics(
+        previous_definition(colour = Blue, label = "previously defined here"),
+        at(colour = Red, label = "duplicate definition"),
+    )]
     AlreadyDefined {
-        #[diagnostics(
-            previous_definition(colour = Blue, label = "previously defined here"),
-            redefinition(colour = Red, label = "duplicate definition"),
-        )]
-        at: AlreadyDefined<'a>,
+        at: Reference<'a>,
+        previous_definition: Reference<'a>,
     },
-}
-
-#[derive(Debug)]
-struct AlreadyDefined<'a> {
-    redefinition: Reference<'a>,
-    previous_definition: Reference<'a>,
-}
-
-impl<'a> AlreadyDefined<'a> {
-    fn loc(&self) -> Loc<'a> {
-        self.redefinition.loc()
-    }
 }
 
 #[derive(Debug)]
@@ -160,12 +148,9 @@ struct Scopes<'a> {
 impl<'a> Scopes<'a> {
     fn add(&mut self, reference: Reference<'a>) {
         match self.lookup_innermost(reference.ident()) {
-            Some(previous_definition) => self.sess.emit(Diagnostic::AlreadyDefined {
-                at: AlreadyDefined {
-                    redefinition: reference,
-                    previous_definition,
-                },
-            }),
+            Some(previous_definition) => self
+                .sess
+                .emit(Diagnostic::AlreadyDefined { at: reference, previous_definition }),
             None => {
                 let maybe_old_value = self
                     .scopes

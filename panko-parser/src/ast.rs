@@ -9,7 +9,6 @@ use bumpalo::Bump;
 use itertools::Either;
 use itertools::Itertools as _;
 use panko_derive_report::Report;
-use panko_lex::Loc;
 use panko_lex::Token;
 
 use crate as cst;
@@ -31,47 +30,20 @@ mod as_sexpr;
 
 #[derive(Debug, Clone, Copy, Report)]
 #[exit_code(1)]
-pub enum Diagnostic<'a> {
+enum Diagnostic<'a> {
     #[error("declaration with duplicate `{first}` declaration specifier")]
-    #[with(
-        first = at.first,
-        repeated = at.repeated,
+    #[diagnostics(
+        first(colour = Blue, label = "first `{first}` here"),
+        at(colour = Red, label = "help: remove this `{at}`"),
     )]
     DuplicateDeclarationSpecifier {
-        #[diagnostics(
-            first(colour = Blue, label = "first `{first}` here"),
-            repeated(colour = Red, label = "duplicated `{repeated}` here"),
-            repeated(colour = Red, label = "help: remove this `{repeated}`"),
-        )]
-        at: DuplicateDeclarationSpecifier<'a>,
+        first: TypeQualifier<'a>,
+        at: TypeQualifier<'a>,
     },
 
     #[error("declaration does not specify a type")]
-    DeclarationWithoutType {
-        #[diagnostics(0(colour = Red, label = "type missing"))]
-        at: ErrorAtDeclarationSpecifiers<'a>,
-    },
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct DuplicateDeclarationSpecifier<'a> {
-    first: TypeQualifier<'a>,
-    repeated: TypeQualifier<'a>,
-}
-
-impl<'a> DuplicateDeclarationSpecifier<'a> {
-    fn loc(&self) -> Loc<'a> {
-        self.repeated.loc()
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct ErrorAtDeclarationSpecifiers<'a>(cst::DeclarationSpecifiers<'a>);
-
-impl<'a> ErrorAtDeclarationSpecifiers<'a> {
-    fn loc(&self) -> Loc<'a> {
-        self.0.loc()
-    }
+    #[diagnostics(at(colour = Red, label = "type missing"))]
+    DeclarationWithoutType { at: cst::DeclarationSpecifiers<'a> },
 }
 
 #[derive(Debug)]
@@ -334,18 +306,14 @@ impl<'a> TypeQualifier<'a> {
         match self.kind {
             TypeQualifierKind::Const =>
                 if let Some(first) = *const_qualifier {
-                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier {
-                        at: DuplicateDeclarationSpecifier { first, repeated: self },
-                    });
+                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier { at: self, first });
                 }
                 else {
                     *const_qualifier = Some(self);
                 },
             TypeQualifierKind::Volatile =>
                 if let Some(first) = *volatile_qualifier {
-                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier {
-                        at: DuplicateDeclarationSpecifier { first, repeated: self },
-                    });
+                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier { at: self, first });
                 }
                 else {
                     *volatile_qualifier = Some(self);
@@ -420,9 +388,7 @@ fn parse_type_specifiers<'a>(
     }
 
     let ty = ty.unwrap_or_else(|| {
-        sess.emit(Diagnostic::DeclarationWithoutType {
-            at: ErrorAtDeclarationSpecifiers(specifiers),
-        });
+        sess.emit(Diagnostic::DeclarationWithoutType { at: specifiers });
         // FIXME: don’t use implicit int here, an explicit “type error” type will be better
         Type::Integral(Integral {
             signedness: None,

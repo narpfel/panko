@@ -39,7 +39,7 @@ struct Args(Punctuated<Assign, Token![,]>);
 struct Assign(Vec<Attribute>, Pat, Expr);
 
 #[derive(Default)]
-struct Diagnostics(IndexMap<Member, IndexMap<String, Expr>>);
+struct Diagnostics(IndexMap<Ident, IndexMap<String, Expr>>);
 
 impl Parse for Args {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
@@ -125,34 +125,14 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
         .variants
         .iter()
         .map(|variant| -> Result<_> {
-            let at = variant
-                .fields
-                .iter()
-                .find(|field| {
-                    field
-                        .ident
-                        .as_ref()
-                        .map(|ident| ident == "at")
-                        .unwrap_or(false)
-                })
-                .ok_or_else(|| {
-                    Error::new_spanned(
-                        &variant.ident,
-                        "`at` field not present in error type variant",
-                    )
-                })?;
-
             let diagnostics =
-                attr_value::<Diagnostics>(&at.attrs, "diagnostics")?.unwrap_or_default();
+                attr_value::<Diagnostics>(&variant.attrs, "diagnostics")?.unwrap_or_default();
 
             let mut colours: IndexMap<_, _> = diagnostics
                 .0
                 .iter()
-                .flat_map(|(member, attrs)| {
-                    Some((
-                        member_to_string(member),
-                        Cow::Borrowed(attrs.get("colour")?),
-                    ))
+                .flat_map(|(ident, attrs)| {
+                    Some((ident.to_string(), Cow::Borrowed(attrs.get("colour")?)))
                 })
                 .collect();
 
@@ -170,15 +150,6 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
                 .process_results(|iter| iter.unzip())?;
 
             let lifetimes = find_lifetimes(&field_types);
-
-            // TODO: this is slightly too magical; require that `at` is a struct with named
-            // fields
-            fields.iter().enumerate().for_each(|(i, field)| {
-                if let Some(colour) = colours.get(&i.to_string()) {
-                    let name = field.to_string();
-                    colours.insert(name, colour.clone());
-                }
-            });
 
             let extras = attr_value::<Args>(&variant.attrs, "with")?.unwrap_or_default();
             for Assign(attrs, name, value) in &extras.0 {
@@ -217,7 +188,7 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
                     let colour = args.get("colour").into_iter();
                     let colour = quote!(#(.with_color(#colour))*);
                     (
-                        quote!(at.#name.loc()),
+                        quote!(#name.loc()),
                         msg,
                         colour,
                         i32::try_from(length.checked_sub(i).unwrap()).unwrap(),
