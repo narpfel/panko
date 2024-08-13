@@ -4,8 +4,6 @@
 use std::ops::Range;
 use std::path::Path;
 
-use ariadne::Config;
-use ariadne::IndexType;
 use bumpalo::Bump;
 use logos::Logos;
 
@@ -85,7 +83,6 @@ impl<'a> Loc<'a> {
 
     pub fn report(&self, kind: ariadne::ReportKind<'a>) -> ariadne::ReportBuilder<'a, Self> {
         ariadne::Report::build(kind, self.file(), self.start())
-            .with_config(Config::default().with_index_type(IndexType::Byte))
     }
 
     pub fn cache(&self) -> impl ariadne::Cache<Path> + 'a {

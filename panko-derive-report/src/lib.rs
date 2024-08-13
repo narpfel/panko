@@ -248,6 +248,10 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
                         .report(::ariadne::ReportKind::Error)
                         .with_message((#error_msg)())
                         .with_labels(labels)
+                        .with_config(
+                            ::ariadne::Config::default()
+                                .with_index_type(::ariadne::IndexType::Byte)
+                        )
                         #(.with_help((#help_msg)()))*
                         .finish()
                         .eprint(at.loc().cache())
