@@ -8,8 +8,8 @@ use ariadne::Color::Red;
 use bumpalo::Bump;
 use itertools::Either;
 use itertools::Itertools as _;
-use panko_derive_report::Report;
 use panko_lex::Token;
+use panko_report::Report;
 
 use crate as cst;
 use crate::BlockItem;
@@ -17,7 +17,6 @@ use crate::DirectDeclarator;
 use crate::InitDeclarator;
 use crate::JumpStatement;
 use crate::PrimaryBlock;
-use crate::Report;
 use crate::TypeQualifier;
 use crate::TypeQualifierKind;
 use crate::TypeSpecifierKind;

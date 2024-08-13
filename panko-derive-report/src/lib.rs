@@ -243,7 +243,7 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
     );
 
     let expanded = quote::quote!(
-        impl #impl_generics crate::Report for #name #ty_generics #where_clause {
+        impl #impl_generics ::panko_report::Report for #name #ty_generics #where_clause {
             fn print(&self) {
                 #(#report_printers)*
 
@@ -255,7 +255,7 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
             #exit_code
         }
 
-        impl #impl_generics crate::Report for Box<#name #ty_generics> #where_clause {
+        impl #impl_generics ::panko_report::Report for Box<#name #ty_generics> #where_clause {
             fn print(&self) {
                 self.as_ref().print()
             }

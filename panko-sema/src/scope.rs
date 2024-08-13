@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
 use itertools::Itertools as _;
-use panko_derive_report::Report;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
@@ -11,6 +10,7 @@ use panko_parser::ast;
 use panko_parser::ast::QualifiedType;
 use panko_parser::ast::Session;
 use panko_parser::ast::Type;
+use panko_report::Report;
 
 use crate::nonempty;
 

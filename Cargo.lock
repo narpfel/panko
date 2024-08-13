@@ -561,8 +561,15 @@ dependencies = [
  "itertools 0.13.0",
  "lalrpop",
  "lalrpop-util",
- "panko-derive-report",
  "panko-lex",
+ "panko-report",
+]
+
+[[package]]
+name = "panko-report"
+version = "0.1.0"
+dependencies = [
+ "panko-derive-report",
 ]
 
 [[package]]
@@ -572,9 +579,9 @@ dependencies = [
  "ariadne",
  "bumpalo",
  "itertools 0.13.0",
- "panko-derive-report",
  "panko-lex",
  "panko-parser",
+ "panko-report",
 ]
 
 [[package]]

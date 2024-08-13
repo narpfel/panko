@@ -15,11 +15,6 @@ lalrpop_mod!(grammar);
 const SEXPR_INDENT: usize = 3;
 const NO_VALUE: &str = "∅";
 
-pub trait Report: std::fmt::Debug {
-    fn print(&self);
-    fn exit_code(&self) -> i32;
-}
-
 #[derive(Debug)]
 pub enum Error<'a> {
     UnterminatedStringLiteral { at: panko_lex::Error<'a> },
