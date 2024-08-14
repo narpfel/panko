@@ -45,14 +45,13 @@ enum Diagnostic<'a> {
     DeclarationWithoutType { at: cst::DeclarationSpecifiers<'a> },
 }
 
+type Diagnostics<'a> = RefCell<Vec<&'a dyn Report>>;
+
 #[derive(Debug)]
 pub struct Session<'a> {
     pub(crate) bump: &'a Bump,
     diagnostics: Diagnostics<'a>,
 }
-
-#[derive(Default, Debug)]
-pub struct Diagnostics<'a>(RefCell<Vec<&'a dyn Report>>);
 
 impl<'a> Session<'a> {
     pub fn new(bump: &'a Bump) -> Self {
@@ -85,11 +84,11 @@ impl<'a> Session<'a> {
     where
         T: Report + 'a,
     {
-        self.diagnostics.0.borrow_mut().push(self.alloc(diagnostic))
+        self.diagnostics.borrow_mut().push(self.alloc(diagnostic))
     }
 
     pub fn diagnostics(&self) -> Ref<Vec<&'a dyn Report>> {
-        self.diagnostics.0.borrow()
+        self.diagnostics.borrow()
     }
 }
 
