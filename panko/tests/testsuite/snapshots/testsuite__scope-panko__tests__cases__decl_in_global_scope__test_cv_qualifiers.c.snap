@@ -1,0 +1,16 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - panko/tests/cases/decl_in_global_scope/test_cv_qualifiers.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration a~0 `Int volatile` ∅)
+   (declaration b~1 `Int const volatile` ∅)
+   (declaration c~2 `Int const volatile` ∅))
+
+----- stderr -----
