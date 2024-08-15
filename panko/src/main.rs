@@ -18,7 +18,13 @@ fn main() {
         &std::fs::read_to_string(&args.filename).unwrap(),
     );
     let session = &panko_parser::ast::Session::new(bump);
-    let translation_unit = panko_parser::parse(session, tokens).unwrap();
+    let translation_unit = match panko_parser::parse(session, tokens) {
+        Ok(translation_unit) => translation_unit,
+        Err(err) => {
+            err.print();
+            std::process::exit(err.exit_code());
+        }
+    };
     if !session.diagnostics().is_empty() {
         for (i, diagnostic) in session.diagnostics().iter().enumerate() {
             if i != 0 {

@@ -422,6 +422,12 @@ pub struct Error<'a> {
     pub at: Loc<'a>,
 }
 
+impl<'a> Error<'a> {
+    pub fn loc(&self) -> Loc<'a> {
+        self.at
+    }
+}
+
 mod wrap_defining_use_for_token_iter {
     use super::*;
 

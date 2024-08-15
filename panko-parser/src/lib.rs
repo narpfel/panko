@@ -1,10 +1,14 @@
 #![feature(coverage_attribute)]
 
+use ariadne::Color::Red;
+use itertools::Itertools as _;
 use lalrpop_util::lalrpop_mod;
+use lalrpop_util::ParseError;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenIter;
 use panko_lex::TokenKind;
+use panko_report::Report;
 
 mod as_sexpr;
 pub mod ast;
@@ -15,14 +19,28 @@ lalrpop_mod!(grammar);
 const SEXPR_INDENT: usize = 3;
 const NO_VALUE: &str = "∅";
 
-#[derive(Debug)]
-pub enum Error<'a> {
+#[derive(Debug, Report)]
+#[exit_code(1)]
+enum Error<'a> {
+    #[error("unterminated string literal")]
     UnterminatedStringLiteral { at: panko_lex::Error<'a> },
+    #[error("unrecognised token")]
+    #[diagnostics(at(colour = Red, label = "expected one of the following token kinds: {expected}"))]
+    UnrecognisedToken { at: Token<'a>, expected: Strings },
 }
 
 impl<'a> From<panko_lex::Error<'a>> for Error<'a> {
     fn from(value: panko_lex::Error<'a>) -> Self {
         Self::UnterminatedStringLiteral { at: value }
+    }
+}
+
+#[derive(Debug)]
+struct Strings(Vec<String>);
+
+impl Strings {
+    fn slice(&self) -> String {
+        format!("[{}]", self.0.iter().join(", "))
     }
 }
 
@@ -359,10 +377,14 @@ pub enum Expression<'a> {
 pub fn parse<'a>(
     sess: &'a ast::Session<'a>,
     tokens: TokenIter<'a>,
-) -> Result<ast::TranslationUnit<'a>, Error<'a>> {
+) -> Result<ast::TranslationUnit<'a>, Box<dyn Report + 'a>> {
     let parser = grammar::TranslationUnitParser::new();
     let parse_tree = parser
         .parse(sess.bump, tokens.map(|token| Ok(token?)))
-        .unwrap_or_else(|err| todo!("handle parse error: {err:?}"));
+        .map_err(|err| match err {
+            ParseError::UnrecognizedToken { token, expected } =>
+                Error::UnrecognisedToken { at: token.1, expected: Strings(expected) },
+            err => todo!("{err:#?}"),
+        })?;
     Ok(ast::from_parse_tree(sess, parse_tree))
 }

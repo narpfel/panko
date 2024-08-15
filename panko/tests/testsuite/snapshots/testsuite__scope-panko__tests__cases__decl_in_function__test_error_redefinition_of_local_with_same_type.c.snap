@@ -20,6 +20,6 @@ Error: duplicate declaration for `x`
    │         ┬  
    │         ╰── duplicate definition
 ───╯
-thread 'main' panicked at panko/src/main.rs:41:9:
+thread 'main' panicked at panko/src/main.rs:47:9:
 not yet implemented: not all diagnostics are fatal
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
