@@ -6,7 +6,7 @@ info:
     - panko/tests/cases/decl_in_global_scope/test_error_declaration_without_type.c
 ---
 success: false
-exit_code: 101
+exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
@@ -33,6 +33,3 @@ Error: declaration does not specify a type
    │ ──┬──  
    │   ╰──── type missing
 ───╯
-thread 'main' panicked at panko/src/main.rs:36:9:
-not yet implemented: not all diagnostics are fatal
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

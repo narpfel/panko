@@ -6,7 +6,7 @@ info:
     - panko/tests/cases/decl_in_global_scope/test_error_duplicate_declaration_specifier.c
 ---
 success: false
-exit_code: 101
+exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
@@ -19,6 +19,3 @@ Error: declaration with duplicate `const` declaration specifier
    │       │          
    │       ╰────────── first `const` here
 ───╯
-thread 'main' panicked at panko/src/main.rs:36:9:
-not yet implemented: not all diagnostics are fatal
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

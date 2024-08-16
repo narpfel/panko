@@ -6,7 +6,7 @@ info:
     - panko/tests/cases/decl_in_function/test_error_redefinition_of_local_with_same_type.c
 ---
 success: false
-exit_code: 101
+exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
@@ -20,6 +20,3 @@ Error: duplicate declaration for `x`
    │         ┬  
    │         ╰── duplicate definition
 ───╯
-thread 'main' panicked at panko/src/main.rs:47:9:
-not yet implemented: not all diagnostics are fatal
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

@@ -25,16 +25,6 @@ fn main() {
             std::process::exit(err.exit_code());
         }
     };
-    if !session.diagnostics().is_empty() {
-        for (i, diagnostic) in session.diagnostics().iter().enumerate() {
-            if i != 0 {
-                eprintln!();
-            }
-            diagnostic.print();
-        }
-
-        todo!("not all diagnostics are fatal");
-    }
     let translation_unit = panko_sema::resolve_names(session, translation_unit);
     if !session.diagnostics().is_empty() {
         for (i, diagnostic) in session.diagnostics().iter().enumerate() {
@@ -43,8 +33,14 @@ fn main() {
             }
             diagnostic.print();
         }
-
-        todo!("not all diagnostics are fatal");
+        let exit_code = session
+            .diagnostics()
+            .iter()
+            .map(|diagnostic| diagnostic.exit_code())
+            .max()
+            .unwrap();
+        // TODO: not all diagnostics are fatal
+        std::process::exit(exit_code);
     }
     println!("{}", translation_unit.as_sexpr());
 }
