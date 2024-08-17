@@ -121,7 +121,7 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
         return Err(Error::new_spanned(name, "must be an enum"));
     };
 
-    let (report_printers, cases): (Vec<_>, Vec<_>) = type_
+    let (report_printers, cases, locations): (Vec<_>, Vec<_>, Vec<_>) = type_
         .variants
         .iter()
         .map(|variant| -> Result<_> {
@@ -232,9 +232,10 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
             Ok((
                 print_report,
                 quote!(Self::#name { #(#fields,)* } => #name(#(#fields,)*)),
+                quote!(Self::#name { at, .. } => at.loc() ),
             ))
         })
-        .process_results(|iter| iter.unzip())?;
+        .process_results(|iter| iter.multiunzip())?;
 
     let exit_code = quote_spanned!(exit_code.span() =>
         fn exit_code(&self) -> i32 {
@@ -253,6 +254,12 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
             }
 
             #exit_code
+
+            fn location(&self) -> ::panko_report::Loc {
+                match self {
+                    #(#locations,)*
+                }
+            }
         }
 
         impl #impl_generics ::panko_report::Report for Box<#name #ty_generics> #where_clause {
@@ -262,6 +269,10 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
 
             fn exit_code(&self) -> i32 {
                 self.as_ref().exit_code()
+            }
+
+            fn location(&self) -> ::panko_report::Loc {
+                self.as_ref().location()
             }
         }
     );

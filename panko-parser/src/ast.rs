@@ -88,6 +88,10 @@ impl<'a> Session<'a> {
     }
 
     pub fn diagnostics(&self) -> Ref<Vec<&'a dyn Report>> {
+        // FIXME: maybe `self.diagnostics` should be a `BinaryHeap` so it is naturally sorted?
+        self.diagnostics
+            .borrow_mut()
+            .sort_by_key(|diagnostic| diagnostic.location().start());
         self.diagnostics.borrow()
     }
 }

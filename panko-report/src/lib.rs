@@ -1,8 +1,10 @@
 pub use panko_derive_report::Report;
+pub use panko_lex::Loc;
 
 pub trait Report: std::fmt::Debug {
     fn print(&self);
     fn exit_code(&self) -> i32;
+    fn location(&self) -> Loc;
 }
 
 impl<'a, T> From<T> for Box<dyn Report + 'a>

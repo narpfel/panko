@@ -570,6 +570,7 @@ name = "panko-report"
 version = "0.1.0"
 dependencies = [
  "panko-derive-report",
+ "panko-lex",
 ]
 
 [[package]]

@@ -56,7 +56,7 @@ impl<'a> Loc<'a> {
         self.source_file.src
     }
 
-    pub(crate) fn start(&self) -> usize {
+    pub fn start(&self) -> usize {
         self.span.start
     }
 

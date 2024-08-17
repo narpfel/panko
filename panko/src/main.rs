@@ -26,15 +26,15 @@ fn main() {
         }
     };
     let translation_unit = panko_sema::resolve_names(session, translation_unit);
-    if !session.diagnostics().is_empty() {
-        for (i, diagnostic) in session.diagnostics().iter().enumerate() {
+    let diagnostics = session.diagnostics();
+    if !diagnostics.is_empty() {
+        for (i, diagnostic) in diagnostics.iter().enumerate() {
             if i != 0 {
                 eprintln!();
             }
             diagnostic.print();
         }
-        let exit_code = session
-            .diagnostics()
+        let exit_code = diagnostics
             .iter()
             .map(|diagnostic| diagnostic.exit_code())
             .max()

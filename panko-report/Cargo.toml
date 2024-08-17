@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 panko-derive-report = { path = "../panko-derive-report" }
+panko-lex = { path = "../panko-lex" }
