@@ -2,6 +2,7 @@ use std::cell::Ref;
 use std::cell::RefCell;
 use std::fmt;
 use std::iter::once;
+use std::process::ExitCode;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
@@ -87,12 +88,34 @@ impl<'a> Session<'a> {
         self.diagnostics.borrow_mut().push(self.alloc(diagnostic))
     }
 
-    pub fn diagnostics(&self) -> Ref<Vec<&'a dyn Report>> {
+    fn diagnostics(&self) -> Ref<Vec<&'a dyn Report>> {
         // FIXME: maybe `self.diagnostics` should be a `BinaryHeap` so it is naturally sorted?
         self.diagnostics
             .borrow_mut()
             .sort_by_key(|diagnostic| diagnostic.location().start());
         self.diagnostics.borrow()
+    }
+
+    pub fn handle_diagnostics(&self) -> Result<(), ExitCode> {
+        let diagnostics = self.diagnostics();
+        if diagnostics.is_empty() {
+            Ok(())
+        }
+        else {
+            for (i, diagnostic) in diagnostics.iter().enumerate() {
+                if i != 0 {
+                    eprintln!();
+                }
+                diagnostic.print();
+            }
+            let exit_code = diagnostics
+                .iter()
+                .map(|diagnostic| diagnostic.exit_code())
+                .max()
+                .unwrap();
+            // TODO: not all diagnostics are fatal
+            Err(ExitCode::from(u8::try_from(exit_code).unwrap()))
+        }
     }
 }
 

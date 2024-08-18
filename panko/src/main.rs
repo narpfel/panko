@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::process::ExitCode;
 
 use bumpalo::Bump;
 use clap::Parser;
@@ -9,7 +10,7 @@ struct Args {
     filename: PathBuf,
 }
 
-fn main() {
+fn main_impl() -> Result<(), ExitCode> {
     let args = Args::parse();
     let bump = &Bump::new();
     let tokens = panko_lex::lex(
@@ -26,21 +27,14 @@ fn main() {
         }
     };
     let translation_unit = panko_sema::resolve_names(session, translation_unit);
-    let diagnostics = session.diagnostics();
-    if !diagnostics.is_empty() {
-        for (i, diagnostic) in diagnostics.iter().enumerate() {
-            if i != 0 {
-                eprintln!();
-            }
-            diagnostic.print();
-        }
-        let exit_code = diagnostics
-            .iter()
-            .map(|diagnostic| diagnostic.exit_code())
-            .max()
-            .unwrap();
-        // TODO: not all diagnostics are fatal
-        std::process::exit(exit_code);
-    }
+    session.handle_diagnostics()?;
     println!("{}", translation_unit.as_sexpr());
+    Ok(())
+}
+
+fn main() -> ExitCode {
+    match main_impl() {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(exit_code) => exit_code,
+    }
 }
