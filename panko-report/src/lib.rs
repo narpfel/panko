@@ -3,7 +3,7 @@ pub use panko_lex::Loc;
 
 pub trait Report: std::fmt::Debug {
     fn print(&self);
-    fn exit_code(&self) -> i32;
+    fn exit_code(&self) -> u8;
     fn location(&self) -> Loc;
 }
 

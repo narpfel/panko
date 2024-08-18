@@ -114,7 +114,7 @@ impl<'a> Session<'a> {
                 .max()
                 .unwrap();
             // TODO: not all diagnostics are fatal
-            Err(ExitCode::from(u8::try_from(exit_code).unwrap()))
+            Err(ExitCode::from(exit_code))
         }
     }
 }

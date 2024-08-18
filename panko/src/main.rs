@@ -23,7 +23,7 @@ fn main_impl() -> Result<(), ExitCode> {
         Ok(translation_unit) => translation_unit,
         Err(err) => {
             err.print();
-            std::process::exit(err.exit_code());
+            return Err(ExitCode::from(err.exit_code()));
         }
     };
     let translation_unit = panko_sema::resolve_names(session, translation_unit);

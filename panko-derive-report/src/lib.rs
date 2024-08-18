@@ -238,7 +238,7 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
         .process_results(|iter| iter.multiunzip())?;
 
     let exit_code = quote_spanned!(exit_code.span() =>
-        fn exit_code(&self) -> i32 {
+        fn exit_code(&self) -> u8 {
             #exit_code
         }
     );
@@ -267,7 +267,7 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
                 self.as_ref().print()
             }
 
-            fn exit_code(&self) -> i32 {
+            fn exit_code(&self) -> u8 {
                 self.as_ref().exit_code()
             }
 
