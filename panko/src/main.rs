@@ -9,6 +9,7 @@ use panko_parser::sexpr_builder::AsSExpr as _;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 enum Step {
     Scopes,
+    Typeck,
 }
 
 #[derive(Debug, Parser)]
@@ -43,6 +44,16 @@ fn main_impl() -> Result<(), ExitCode> {
         println!("{}", translation_unit.as_sexpr());
     }
     if let Some(Step::Scopes) = args.stop_after {
+        return Ok(());
+    }
+
+    let translation_unit = panko_sema::resolve_types(session, translation_unit);
+    session.handle_diagnostics()?;
+
+    if args.print.contains(&Step::Typeck) {
+        println!("{}", translation_unit.as_sexpr());
+    }
+    if let Some(Step::Typeck) = args.stop_after {
         return Ok(());
     }
     Ok(())

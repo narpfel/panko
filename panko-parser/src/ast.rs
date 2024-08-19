@@ -149,14 +149,16 @@ pub struct FunctionDefinition<'a> {
     pub body: CompoundStatement<'a>,
 }
 
-#[derive(Debug, Clone, Copy)]
+// TODO: The instances for `PartialEq` and `Eq` are only needed until correct type checking is
+// implemented and should be removed afterwards.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QualifiedType<'a> {
     pub is_const: bool,
     pub is_volatile: bool,
     pub ty: Type<'a>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Type<'a> {
     Integral(Integral),
     Char,
@@ -165,38 +167,32 @@ pub enum Type<'a> {
     // TODO
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Integral {
-    signedness: Option<Signedness>,
-    kind: IntegralKind,
+    pub signedness: Option<Signedness>,
+    pub kind: IntegralKind,
 }
 
-#[derive(Debug, Clone, Copy)]
-enum IntegralKind {
-    #[expect(unused)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum IntegralKind {
     /// explicitly `signed char` or `unsigned char`
     Char,
-    #[expect(unused)]
     Short,
     Int,
-    #[expect(unused)]
     Long,
-    #[expect(unused)]
     LongLong,
 }
 
-#[derive(Debug, Clone, Copy)]
-enum Signedness {
-    #[expect(unused)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Signedness {
     Signed,
-    #[expect(unused)]
     Unsigned,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FunctionType<'a> {
     pub params: &'a [ParameterDeclaration<'a>],
-    return_type: &'a QualifiedType<'a>,
+    pub return_type: &'a QualifiedType<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -204,6 +200,14 @@ pub struct ParameterDeclaration<'a> {
     pub ty: QualifiedType<'a>,
     pub name: Option<Token<'a>>,
 }
+
+impl PartialEq for ParameterDeclaration<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.ty == other.ty
+    }
+}
+
+impl Eq for ParameterDeclaration<'_> {}
 
 #[derive(Debug, Clone, Copy)]
 pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);

@@ -41,42 +41,39 @@ struct Id(u64);
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
-    decls: &'a [ExternalDeclaration<'a>],
+    pub(crate) decls: &'a [ExternalDeclaration<'a>],
 }
 
 #[derive(Debug, Clone, Copy)]
-enum ExternalDeclaration<'a> {
+pub(crate) enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Declaration<'a> {
-    reference: Reference<'a>,
-    initialiser: Option<Expression<'a>>,
+pub(crate) struct Declaration<'a> {
+    pub(crate) reference: Reference<'a>,
+    pub(crate) initialiser: Option<Expression<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct FunctionDefinition<'a> {
-    reference: Reference<'a>,
-    params: ParamRefs<'a>,
-    #[expect(unused)]
-    storage_class: Option<cst::StorageClassSpecifier<'a>>,
-    #[expect(unused)]
-    inline: Option<cst::FunctionSpecifier<'a>>,
-    #[expect(unused)]
-    noreturn: Option<cst::FunctionSpecifier<'a>>,
-    body: CompoundStatement<'a>,
+pub(crate) struct FunctionDefinition<'a> {
+    pub(crate) reference: Reference<'a>,
+    pub(crate) params: ParamRefs<'a>,
+    pub(crate) storage_class: Option<cst::StorageClassSpecifier<'a>>,
+    pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
+    pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
+    pub(crate) body: CompoundStatement<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct ParamRefs<'a>(&'a [Reference<'a>]);
+pub(crate) struct ParamRefs<'a>(pub(crate) &'a [Reference<'a>]);
 
 #[derive(Debug, Clone, Copy)]
-struct CompoundStatement<'a>(&'a [Statement<'a>]);
+pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 
 #[derive(Debug, Clone, Copy)]
-enum Statement<'a> {
+pub(crate) enum Statement<'a> {
     Declaration(Declaration<'a>),
     Expression(Option<Expression<'a>>),
     Compound(CompoundStatement<'a>),
@@ -84,15 +81,15 @@ enum Statement<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum Expression<'a> {
+pub(crate) enum Expression<'a> {
     Name(Reference<'a>),
     Integer(Token<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Reference<'a> {
+pub(crate) struct Reference<'a> {
     name: Token<'a>,
-    ty: QualifiedType<'a>,
+    pub(crate) ty: QualifiedType<'a>,
     id: Id,
 }
 
