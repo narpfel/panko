@@ -6,7 +6,7 @@ use clap::Parser;
 use clap::ValueEnum;
 use panko_parser::sexpr_builder::AsSExpr as _;
 
-#[derive(Debug, Clone, Copy, ValueEnum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 enum Step {
     Scopes,
 }
@@ -16,6 +16,8 @@ struct Args {
     filename: PathBuf,
     #[arg(long)]
     stop_after: Option<Step>,
+    #[arg(long)]
+    print: Vec<Step>,
 }
 
 fn main_impl() -> Result<(), ExitCode> {
@@ -36,7 +38,10 @@ fn main_impl() -> Result<(), ExitCode> {
     };
     let translation_unit = panko_sema::resolve_names(session, translation_unit);
     session.handle_diagnostics()?;
-    println!("{}", translation_unit.as_sexpr());
+
+    if args.print.contains(&Step::Scopes) {
+        println!("{}", translation_unit.as_sexpr());
+    }
     if let Some(Step::Scopes) = args.stop_after {
         return Ok(());
     }
