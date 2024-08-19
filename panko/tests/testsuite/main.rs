@@ -20,6 +20,7 @@ fn scope(#[files("tests/cases/**/test_*.c")] filename: PathBuf) {
         format!("scope-{}", filename.display()),
         Command::new(get_cargo_bin("panko"))
             .current_dir("..")
+            .arg("--stop-after=scopes")
             .arg(filename),
     );
 }
