@@ -7,6 +7,7 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast;
+use panko_parser::ast::FunctionType;
 use panko_parser::ast::QualifiedType;
 use panko_parser::ast::Session;
 use panko_parser::ast::Type;
@@ -28,6 +29,10 @@ enum Diagnostic<'a> {
         at: Reference<'a>,
         previous_definition: Reference<'a>,
     },
+
+    #[error("expected `;` after declaration (or did you mean to declare a function: `{at}()`?)")]
+    #[diagnostics(at(colour = Red, label = "in this declaration"))]
+    FunctionDeclaratorDoesNotHaveFunctionType { at: Token<'a> },
 }
 
 #[derive(Debug)]
@@ -189,7 +194,7 @@ impl<'a> Scopes<'a> {
 
 fn resolve_function_definition<'a>(
     scopes: &mut Scopes<'a>,
-    def: &ast::FunctionDefinition<'a>,
+    def: &'a ast::FunctionDefinition<'a>,
 ) -> FunctionDefinition<'a> {
     let reference = Reference {
         name: def.name,
@@ -198,13 +203,24 @@ fn resolve_function_definition<'a>(
     };
     scopes.add(reference);
     scopes.push();
-    let QualifiedType {
-        is_const: false,
-        is_volatile: false,
-        ty: Type::Function(function_ty),
-    } = def.ty
-    else {
-        unreachable!()
+
+    let function_ty = match &def.ty {
+        QualifiedType {
+            is_const: false,
+            is_volatile: false,
+            ty: Type::Function(function_ty),
+        } => *function_ty,
+        QualifiedType { ty: Type::Function(_), .. } =>
+            unreachable!("function types cannot be qualified"),
+        non_function_ty => {
+            scopes
+                .sess
+                .emit(Diagnostic::FunctionDeclaratorDoesNotHaveFunctionType { at: def.name });
+            FunctionType {
+                params: &[],
+                return_type: non_function_ty,
+            }
+        }
     };
 
     let params = scopes.sess.alloc_slice_copy(
