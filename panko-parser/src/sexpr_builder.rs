@@ -2,6 +2,7 @@ use std::fmt;
 use std::iter::once;
 use std::iter::repeat;
 
+use itertools::Either;
 use panko_lex::Token;
 
 use crate::NO_VALUE;
@@ -238,5 +239,18 @@ impl AsSExpr for Token<'_> {
 impl AsSExpr for &str {
     fn as_sexpr(&self) -> SExpr {
         SExpr::string(self)
+    }
+}
+
+impl<T, U> AsSExpr for Either<T, U>
+where
+    T: AsSExpr,
+    U: AsSExpr,
+{
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Either::Left(left) => left.as_sexpr(),
+            Either::Right(right) => right.as_sexpr(),
+        }
     }
 }

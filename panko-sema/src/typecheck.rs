@@ -1,8 +1,11 @@
+use itertools::Either;
 use panko_parser as cst;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::QualifiedType;
 use panko_parser::ast::Session;
+use panko_parser::ast::Type;
+use panko_parser::sexpr_builder::AsSExpr as _;
 
 use crate::scope;
 use crate::scope::ParamRefs;
@@ -54,7 +57,44 @@ pub enum Statement<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct Expression<'a> {
     ty: QualifiedType<'a>,
-    expr: scope::Expression<'a>,
+    // TODO: unify into one `enum`, rename `self::Expression` to `TypedExpression`
+    expr: Either<scope::Expression<'a>, ImplicitConversion<'a>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct ImplicitConversion<'a> {
+    ty: Type<'a>,
+    from: &'a Expression<'a>,
+}
+
+fn convert_as_if_by_assignment<'a>(
+    sess: &'a Session<'a>,
+    target: QualifiedType<'a>,
+    expr: Expression<'a>,
+) -> Expression<'a> {
+    let target_ty = target.ty;
+    let expr_ty = expr.ty.ty;
+    match (target_ty, expr_ty) {
+        // TODO: these are the arithmetic types, find a way to avoid this duplication with
+        // `Type::is_arithmetic`
+        (Type::Integral(_) | Type::Char, Type::Integral(_) | Type::Char)
+        | (Type::Pointer(_), Type::Pointer(_)) =>
+            if expr_ty != target_ty {
+                Expression {
+                    ty: target_ty.unqualified(),
+                    expr: Either::Right(ImplicitConversion {
+                        ty: target_ty,
+                        from: sess.alloc(expr),
+                    }),
+                }
+            }
+            else {
+                expr
+            },
+        (Type::Integral(_) | Type::Char, _) => todo!("type error"),
+        (Type::Pointer(_), _) => todo!("type error"),
+        (Type::Function(_), _) => todo!("[{}] = {}", target.as_sexpr(), expr.as_sexpr()),
+    }
 }
 
 fn typeck_function_definition<'a>(
@@ -62,7 +102,7 @@ fn typeck_function_definition<'a>(
     definition: &scope::FunctionDefinition<'a>,
 ) -> FunctionDefinition<'a> {
     let return_ty = match definition.reference.ty.ty {
-        panko_parser::ast::Type::Function(function_ty) => function_ty.return_type,
+        Type::Function(function_ty) => function_ty.return_type,
         _ => unreachable!(),
     };
     FunctionDefinition {
@@ -75,14 +115,14 @@ fn typeck_function_definition<'a>(
     }
 }
 
-fn typeck_declaration<'a>(declaration: &scope::Declaration<'a>) -> Declaration<'a> {
+fn typeck_declaration<'a>(
+    sess: &'a Session<'a>,
+    declaration: &scope::Declaration<'a>,
+) -> Declaration<'a> {
     let scope::Declaration { reference, initialiser } = *declaration;
-    let initialiser = initialiser
-        .as_ref()
-        .map(|initialiser| typeck_expression(initialiser));
-    if let Some(initialiser) = initialiser {
-        assert_eq!(reference.ty, initialiser.ty, "TODO: real typeck here",);
-    }
+    let initialiser = initialiser.as_ref().map(|initialiser| {
+        convert_as_if_by_assignment(sess, reference.ty, typeck_expression(initialiser))
+    });
     Declaration { reference, initialiser }
 }
 
@@ -106,17 +146,18 @@ fn typeck_statement<'a>(
     return_ty: &QualifiedType<'a>,
 ) -> Statement<'a> {
     match stmt {
-        scope::Statement::Declaration(decl) => Statement::Declaration(typeck_declaration(decl)),
+        scope::Statement::Declaration(decl) =>
+            Statement::Declaration(typeck_declaration(sess, decl)),
         scope::Statement::Expression(expr) =>
             Statement::Expression(try { typeck_expression(expr.as_ref()?) }),
         scope::Statement::Compound(stmt) =>
             Statement::Compound(typeck_compound_statement(sess, stmt, return_ty)),
         scope::Statement::Return(expr) => {
             let expr = expr.as_ref().map(|expr| typeck_expression(expr));
-            match expr {
-                Some(expr) => assert_eq!(&expr.ty, return_ty, "TODO: real typeck here"),
+            let expr = match expr {
+                Some(expr) => Some(convert_as_if_by_assignment(sess, *return_ty, expr)),
                 None => todo!("assert we are in a `void` function"),
-            }
+            };
             Statement::Return(expr)
         }
     }
@@ -124,18 +165,18 @@ fn typeck_statement<'a>(
 
 fn typeck_expression<'a>(expr: &scope::Expression<'a>) -> Expression<'a> {
     match expr {
-        scope::Expression::Name(reference) => Expression { ty: reference.ty, expr: *expr },
+        scope::Expression::Name(reference) => Expression {
+            ty: reference.ty,
+            expr: Either::Left(*expr),
+        },
         scope::Expression::Integer(_token) => Expression {
             // TODO: resolve to correct type depending on the actual value in `_token`
-            ty: QualifiedType {
-                is_const: false,
-                is_volatile: false,
-                ty: panko_parser::ast::Type::Integral(Integral {
-                    signedness: None,
-                    kind: IntegralKind::Int,
-                }),
-            },
-            expr: *expr,
+            ty: Type::Integral(Integral {
+                signedness: None,
+                kind: IntegralKind::Int,
+            })
+            .unqualified(),
+            expr: Either::Left(*expr),
         },
     }
 }
@@ -149,7 +190,7 @@ pub fn resolve_types<'a>(
             scope::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(typeck_function_definition(sess, def)),
             scope::ExternalDeclaration::Declaration(decl) =>
-                ExternalDeclaration::Declaration(typeck_declaration(decl)),
+                ExternalDeclaration::Declaration(typeck_declaration(sess, decl)),
         })),
     }
 }

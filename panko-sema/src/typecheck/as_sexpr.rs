@@ -9,6 +9,7 @@ use super::Declaration;
 use super::Expression;
 use super::ExternalDeclaration;
 use super::FunctionDefinition;
+use super::ImplicitConversion;
 use super::Statement;
 use super::TranslationUnit;
 
@@ -69,5 +70,13 @@ impl AsSExpr for Statement<'_> {
 impl AsSExpr for Expression<'_> {
     fn as_sexpr(&self) -> SExpr {
         self.expr.as_sexpr().inherit(&self.ty)
+    }
+}
+
+impl AsSExpr for ImplicitConversion<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("implicit-conversion")
+            .inherit(&self.ty)
+            .inherit(&self.from)
     }
 }

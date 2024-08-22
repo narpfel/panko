@@ -1,5 +1,6 @@
 #![coverage(off)]
 
+use super::Type;
 use crate::ast::CompoundStatement;
 use crate::ast::Declaration;
 use crate::ast::ExternalDeclaration;
@@ -45,6 +46,12 @@ impl AsSExpr for Declaration<'_> {
 }
 
 impl AsSExpr for QualifiedType<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::display(self)
+    }
+}
+
+impl AsSExpr for Type<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::display(self)
     }

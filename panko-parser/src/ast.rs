@@ -270,6 +270,16 @@ impl fmt::Display for QualifiedType<'_> {
     }
 }
 
+impl<'a> Type<'a> {
+    pub fn unqualified(&self) -> QualifiedType<'a> {
+        QualifiedType {
+            is_const: false,
+            is_volatile: false,
+            ty: *self,
+        }
+    }
+}
+
 impl fmt::Display for Type<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
