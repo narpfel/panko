@@ -169,6 +169,7 @@ pub enum Type<'a> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Integral {
+    // FIXME: this considers `int` and `signed int` as different types
     pub signedness: Option<Signedness>,
     pub kind: IntegralKind,
 }
