@@ -85,11 +85,6 @@ impl AsSExpr for Expression<'_> {
 
 impl AsSExpr for Reference<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::string(&format!(
-            "{}~{} `{}`",
-            self.name.slice(),
-            self.id.0,
-            self.ty,
-        ))
+        SExpr::string(&format!("{} `{}`", self.unique_name(), self.ty))
     }
 }

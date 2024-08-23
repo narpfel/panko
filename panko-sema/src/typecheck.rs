@@ -1,4 +1,4 @@
-use itertools::Either;
+use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
@@ -27,7 +27,7 @@ pub enum ExternalDeclaration<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct Declaration<'a> {
     reference: Reference<'a>,
-    initialiser: Option<Expression<'a>>,
+    initialiser: Option<TypedExpression<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -49,29 +49,36 @@ pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
 #[derive(Debug, Clone, Copy)]
 pub enum Statement<'a> {
     Declaration(Declaration<'a>),
-    Expression(Option<Expression<'a>>),
+    Expression(Option<TypedExpression<'a>>),
     Compound(CompoundStatement<'a>),
-    Return(Option<Expression<'a>>),
+    Return(Option<TypedExpression<'a>>),
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Expression<'a> {
+pub struct TypedExpression<'a> {
     ty: QualifiedType<'a>,
-    // TODO: unify into one `enum`, rename `self::Expression` to `TypedExpression`
-    expr: Either<scope::Expression<'a>, ImplicitConversion<'a>>,
+    expr: Expression<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Expression<'a> {
+    Name(Reference<'a>),
+    Integer(Token<'a>),
+    ImplicitConversion(ImplicitConversion<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
 struct ImplicitConversion<'a> {
+    #[expect(unused)]
     ty: Type<'a>,
-    from: &'a Expression<'a>,
+    from: &'a TypedExpression<'a>,
 }
 
 fn convert_as_if_by_assignment<'a>(
     sess: &'a Session<'a>,
     target: QualifiedType<'a>,
-    expr: Expression<'a>,
-) -> Expression<'a> {
+    expr: TypedExpression<'a>,
+) -> TypedExpression<'a> {
     let target_ty = target.ty;
     let expr_ty = expr.ty.ty;
     match (target_ty, expr_ty) {
@@ -80,9 +87,9 @@ fn convert_as_if_by_assignment<'a>(
         (Type::Integral(_) | Type::Char, Type::Integral(_) | Type::Char)
         | (Type::Pointer(_), Type::Pointer(_)) =>
             if expr_ty != target_ty {
-                Expression {
+                TypedExpression {
                     ty: target_ty.unqualified(),
-                    expr: Either::Right(ImplicitConversion {
+                    expr: Expression::ImplicitConversion(ImplicitConversion {
                         ty: target_ty,
                         from: sess.alloc(expr),
                     }),
@@ -163,20 +170,20 @@ fn typeck_statement<'a>(
     }
 }
 
-fn typeck_expression<'a>(expr: &scope::Expression<'a>) -> Expression<'a> {
+fn typeck_expression<'a>(expr: &scope::Expression<'a>) -> TypedExpression<'a> {
     match expr {
-        scope::Expression::Name(reference) => Expression {
+        scope::Expression::Name(reference) => TypedExpression {
             ty: reference.ty,
-            expr: Either::Left(*expr),
+            expr: Expression::Name(*reference),
         },
-        scope::Expression::Integer(_token) => Expression {
+        scope::Expression::Integer(token) => TypedExpression {
             // TODO: resolve to correct type depending on the actual value in `_token`
             ty: Type::Integral(Integral {
                 signedness: None,
                 kind: IntegralKind::Int,
             })
             .unqualified(),
-            expr: Either::Left(*expr),
+            expr: Expression::Integer(*token),
         },
     }
 }

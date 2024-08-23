@@ -12,6 +12,7 @@ use super::FunctionDefinition;
 use super::ImplicitConversion;
 use super::Statement;
 use super::TranslationUnit;
+use super::TypedExpression;
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {
@@ -67,16 +68,24 @@ impl AsSExpr for Statement<'_> {
     }
 }
 
-impl AsSExpr for Expression<'_> {
+impl AsSExpr for TypedExpression<'_> {
     fn as_sexpr(&self) -> SExpr {
         self.expr.as_sexpr().inherit(&self.ty)
     }
 }
 
+impl AsSExpr for Expression<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Expression::Name(reference) => SExpr::string(&reference.unique_name()),
+            Expression::Integer(int) => SExpr::string(int.slice()),
+            Expression::ImplicitConversion(implicit_conversion) => implicit_conversion.as_sexpr(),
+        }
+    }
+}
+
 impl AsSExpr for ImplicitConversion<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::new("implicit-conversion")
-            .inherit(&self.ty)
-            .inherit(&self.from)
+        SExpr::new("implicit-conversion").inherit(&self.from)
     }
 }

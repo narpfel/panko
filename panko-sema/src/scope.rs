@@ -99,6 +99,10 @@ pub(crate) struct Reference<'a> {
 }
 
 impl<'a> Reference<'a> {
+    pub fn unique_name(&self) -> String {
+        format!("{}~{}", self.ident(), self.id.0)
+    }
+
     fn ident(&self) -> &'a str {
         self.name.slice()
     }
