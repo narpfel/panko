@@ -160,11 +160,16 @@ pub struct QualifiedType<'a> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Type<'a> {
-    Integral(Integral),
-    Char,
+    Arithmetic(Arithmetic),
     Pointer(&'a QualifiedType<'a>),
     Function(FunctionType<'a>),
     // TODO
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Arithmetic {
+    Integral(Integral),
+    Char,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -283,8 +288,8 @@ impl<'a> Type<'a> {
 impl fmt::Display for Type<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Type::Integral(integral) => write!(f, "{integral}"),
-            Type::Char => write!(f, "char"),
+            Type::Arithmetic(Arithmetic::Integral(integral)) => write!(f, "{integral}"),
+            Type::Arithmetic(Arithmetic::Char) => write!(f, "char"),
             Type::Pointer(pointee) => write!(f, "ptr<{pointee}>"),
             Type::Function(function) => write!(f, "{function}"),
         }
@@ -413,11 +418,11 @@ fn parse_type_specifiers<'a>(
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Specifier(specifier)) =>
                 match specifier.kind {
                     TypeSpecifierKind::Int =>
-                        ty = Some(Type::Integral(Integral {
+                        ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
                             signedness: None,
                             kind: IntegralKind::Int,
-                        })),
-                    TypeSpecifierKind::Char => ty = Some(Type::Char),
+                        }))),
+                    TypeSpecifierKind::Char => ty = Some(Type::Arithmetic(Arithmetic::Char)),
                     _ => todo!("{specifier:#?}"),
                 },
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Qualifier(qualifier)) =>
@@ -430,10 +435,10 @@ fn parse_type_specifiers<'a>(
     let ty = ty.unwrap_or_else(|| {
         sess.emit(Diagnostic::DeclarationWithoutType { at: specifiers });
         // FIXME: don’t use implicit int here, an explicit “type error” type will be better
-        Type::Integral(Integral {
+        Type::Arithmetic(Arithmetic::Integral(Integral {
             signedness: None,
             kind: IntegralKind::Int,
-        })
+        }))
     });
     QualifiedType {
         is_const: const_qualifier.is_some(),

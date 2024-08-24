@@ -1,5 +1,6 @@
 use panko_lex::Token;
 use panko_parser as cst;
+use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::QualifiedType;
@@ -82,10 +83,7 @@ fn convert_as_if_by_assignment<'a>(
     let target_ty = target.ty;
     let expr_ty = expr.ty.ty;
     match (target_ty, expr_ty) {
-        // TODO: these are the arithmetic types, find a way to avoid this duplication with
-        // `Type::is_arithmetic`
-        (Type::Integral(_) | Type::Char, Type::Integral(_) | Type::Char)
-        | (Type::Pointer(_), Type::Pointer(_)) =>
+        (Type::Arithmetic(_), Type::Arithmetic(_)) | (Type::Pointer(_), Type::Pointer(_)) =>
             if expr_ty != target_ty {
                 TypedExpression {
                     ty: target_ty.unqualified(),
@@ -98,7 +96,7 @@ fn convert_as_if_by_assignment<'a>(
             else {
                 expr
             },
-        (Type::Integral(_) | Type::Char, _) => todo!("type error"),
+        (Type::Arithmetic(_), _) => todo!("type error"),
         (Type::Pointer(_), _) => todo!("type error"),
         (Type::Function(_), _) => todo!("[{}] = {}", target.as_sexpr(), expr.as_sexpr()),
     }
@@ -178,10 +176,10 @@ fn typeck_expression<'a>(expr: &scope::Expression<'a>) -> TypedExpression<'a> {
         },
         scope::Expression::Integer(token) => TypedExpression {
             // TODO: resolve to correct type depending on the actual value in `_token`
-            ty: Type::Integral(Integral {
+            ty: Type::Arithmetic(Arithmetic::Integral(Integral {
                 signedness: None,
                 kind: IntegralKind::Int,
-            })
+            }))
             .unqualified(),
             expr: Expression::Integer(*token),
         },
