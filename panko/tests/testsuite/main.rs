@@ -11,17 +11,23 @@ fn relative_to(path: &Path, target: impl AsRef<Path>) -> &Path {
 }
 
 #[rstest]
-fn scope(#[files("tests/cases/**/test_*.c")] filename: PathBuf) {
+#[case::scopes("scope", "scopes")]
+#[case::typeck("typeck", "typeck")]
+fn test(
+    #[case] snapshot_name_prefix: &str,
+    #[case] step: &str,
+    #[files("tests/cases/**/test_*.c")] filename: PathBuf,
+) {
     let filename = relative_to(
         &filename,
         Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap(),
     );
     assert_cmd_snapshot!(
-        format!("scope-{}", filename.display()),
+        format!("{snapshot_name_prefix}-{}", filename.display()),
         Command::new(get_cargo_bin("panko"))
             .current_dir("..")
-            .arg("--print=scopes")
-            .arg("--stop-after=scopes")
+            .arg(format!("--print={step}"))
+            .arg(format!("--stop-after={step}"))
             .arg(filename),
     );
 }

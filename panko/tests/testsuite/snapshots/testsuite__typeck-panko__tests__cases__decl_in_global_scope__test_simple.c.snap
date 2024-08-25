@@ -1,0 +1,17 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/decl_in_global_scope/test_simple.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration x~0 `Int` ∅)
+   (declaration y~1 `Int` (42 `Int`)))
+
+----- stderr -----

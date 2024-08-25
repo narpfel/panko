@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/decl_in_global_scope/test_multiple_variables_in_one_decl.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration a~0 `Int` ∅)
+   (declaration b~1 `Int` ∅)
+   (declaration c~2 `Int` ∅)
+   (declaration d~3 `ptr<Int>` ∅)
+   (declaration e~4 `ptr<Int>` ∅)
+   (declaration f~5 `Int` ∅)
+   (declaration g~6 `Int` ∅)
+   (declaration h~7 `fn() -> Int` ∅)
+   (declaration i~8 `fn(∅: Int) -> Int` ∅)
+   (declaration j~9 `Int` ∅))
+
+----- stderr -----

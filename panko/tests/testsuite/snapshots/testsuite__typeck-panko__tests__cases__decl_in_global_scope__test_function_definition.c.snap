@@ -1,0 +1,76 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/decl_in_global_scope/test_function_definition.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      a~0 `fn() -> Int`
+      (compound-statement
+         (return (42 `Int`))))
+   (function-definition
+      b~1 `fn(∅: Int) -> Int`
+      (compound-statement
+         (return (42 `Int`))))
+   (function-definition
+      c~2 `fn(a: Int) -> Int`
+      (params
+         a~3 `Int`)
+      (compound-statement
+         (return (a~3 `Int`))))
+   (function-definition
+      d~4 `fn(a: Int) -> Int`
+      (params
+         a~5 `Int`)
+      (compound-statement
+         (compound-statement
+            (return (a~5 `Int`)))))
+   (function-definition
+      e~6 `fn() -> Int`
+      (compound-statement
+         (compound-statement)
+         (expression ∅)
+         (return (42 `Int`))))
+   (function-definition
+      f~7 `fn() -> Int`
+      (compound-statement
+         (declaration a~8 `Int` (42 `Int`))
+         (expression (a~8 `Int`))
+         (return (a~8 `Int`))))
+   (function-definition
+      g~9 `fn() -> char`
+      (compound-statement
+         (declaration c~10 `char` (implicit-conversion (0 `Int`) `char`))
+         (return (c~10 `char`))))
+   (function-definition
+      h~11 `fn() -> Int`
+      (compound-statement
+         (declaration a~12 `Int` (42 `Int`))
+         (compound-statement
+            (declaration a~13 `Int` (27 `Int`))
+            (return (a~13 `Int`)))))
+   (function-definition
+      i~14 `fn(a: Int) -> Int`
+      (params
+         a~15 `Int`)
+      (compound-statement
+         (compound-statement
+            (declaration a~16 `Int` (42 `Int`)))
+         (return (a~15 `Int`))))
+   (function-definition
+      j~17 `fn() -> Int`
+      (compound-statement
+         (declaration a~18 `Int` (42 `Int`))
+         (compound-statement
+            (declaration a~19 `Int` (27 `Int`))
+            (expression (a~19 `Int`)))
+         (return (a~18 `Int`)))))
+
+----- stderr -----
