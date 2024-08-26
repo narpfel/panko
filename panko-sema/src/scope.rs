@@ -164,9 +164,10 @@ struct Scopes<'a> {
 impl<'a> Scopes<'a> {
     fn add(&mut self, reference: Reference<'a>) {
         match self.lookup_innermost(reference.ident()) {
-            Some(previous_definition) => self
-                .sess
-                .emit(Diagnostic::AlreadyDefined { at: reference, previous_definition }),
+            Some(previous_definition) => self.sess.emit(Diagnostic::AlreadyDefined {
+                at: reference,
+                previous_definition: previous_definition.at(previous_definition.name),
+            }),
             None => {
                 let maybe_old_value = self
                     .scopes
