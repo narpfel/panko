@@ -111,17 +111,8 @@ fn convert_as_if_by_assignment<'a>(
     let expr_ty = expr.ty.ty;
     match (target_ty, expr_ty) {
         (Type::Arithmetic(_), Type::Arithmetic(_)) | (Type::Pointer(_), Type::Pointer(_)) =>
-            if expr_ty != target_ty {
-                TypedExpression {
-                    ty: target_ty.unqualified(),
-                    expr: Expression::ImplicitConversion(ImplicitConversion {
-                        ty: target_ty,
-                        from: sess.alloc(expr),
-                    }),
-                }
-            }
-            else {
-                expr
+            if expr_ty == target_ty {
+                return expr;
             },
         // TODO: clang (but not gcc) allows implicitly converting `Type::Function(_)` to
         // `Type::Pointer(_)` (with a warning).
@@ -133,14 +124,14 @@ fn convert_as_if_by_assignment<'a>(
                 from_ty: expr_ty,
                 to_ty: target_ty,
             });
-            TypedExpression {
-                ty: target_ty.unqualified(),
-                expr: Expression::ImplicitConversion(ImplicitConversion {
-                    ty: target_ty,
-                    from: sess.alloc(expr),
-                }),
-            }
         }
+    }
+    TypedExpression {
+        ty: target_ty.unqualified(),
+        expr: Expression::ImplicitConversion(ImplicitConversion {
+            ty: target_ty,
+            from: sess.alloc(expr),
+        }),
     }
 }
 
