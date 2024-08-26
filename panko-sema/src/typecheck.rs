@@ -125,6 +125,7 @@ fn convert_as_if_by_assignment<'a>(
             },
         // TODO: clang (but not gcc) allows implicitly converting `Type::Function(_)` to
         // `Type::Pointer(_)` (with a warning).
+        // TODO: handle nullptr literals
         (Type::Function(_), _) => todo!("[{}] = {}", target.as_sexpr(), expr.as_sexpr()),
         _ => {
             sess.emit(Diagnostic::InvalidImplicitConversion {
