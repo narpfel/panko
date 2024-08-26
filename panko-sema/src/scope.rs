@@ -5,6 +5,7 @@ use ariadne::Color::Red;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
+use panko_lex::TokenKind;
 use panko_parser as cst;
 use panko_parser::ast;
 use panko_parser::ast::FunctionType;
@@ -93,26 +94,35 @@ pub(crate) enum Expression<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Reference<'a> {
+    // TODO: The location of `name` points to where this name was declared. This is unused for now,
+    // but should be used in error messages to print e. g. “note: [...] was declared here:”.
     name: Token<'a>,
     pub(crate) ty: QualifiedType<'a>,
     id: Id,
+    usage_location: Token<'a>,
 }
 
 impl<'a> Reference<'a> {
     pub fn unique_name(&self) -> String {
-        format!("{}~{}", self.ident(), self.id.0)
+        format!("{}~{}", self.ident().slice(), self.id.0)
     }
 
-    fn ident(&self) -> &'a str {
-        self.name.slice()
+    fn ident(&self) -> Token<'a> {
+        self.name
     }
 
-    fn loc(&self) -> Loc<'a> {
-        self.name.loc()
+    pub fn loc(&self) -> Loc<'a> {
+        self.usage_location.loc()
     }
 
     fn slice(&self) -> &'a str {
         self.name.slice()
+    }
+
+    fn at(&self, location: Token<'a>) -> Self {
+        assert!(matches!(location.kind, TokenKind::Identifier));
+        assert_eq!(self.name.slice(), location.slice());
+        Self { usage_location: location, ..*self }
     }
 }
 
@@ -163,21 +173,25 @@ impl<'a> Scopes<'a> {
                     .last_mut()
                     .names
                     .last_mut()
-                    .insert(reference.ident(), reference);
+                    .insert(reference.ident().slice(), reference);
                 assert!(maybe_old_value.is_none());
             }
         }
     }
 
-    fn lookup(&self, name: &'a str) -> Option<Reference<'a>> {
+    fn lookup(&self, name: Token<'a>) -> Option<Reference<'a>> {
         self.scopes
             .iter()
             .rev()
-            .find_map(|scope| scope.lookup(name))
+            .find_map(|scope| scope.lookup(name.slice()))
+            .map(|reference| reference.at(name))
     }
 
-    fn lookup_innermost(&self, name: &'a str) -> Option<Reference<'a>> {
-        self.scopes.last().lookup_innermost(name)
+    fn lookup_innermost(&self, name: Token<'a>) -> Option<Reference<'a>> {
+        self.scopes
+            .last()
+            .lookup_innermost(name.slice())
+            .map(|reference| reference.at(name))
     }
 
     fn push(&mut self) {
@@ -204,6 +218,7 @@ fn resolve_function_definition<'a>(
         name: def.name,
         ty: def.ty,
         id: scopes.id(),
+        usage_location: def.name,
     };
     scopes.add(reference);
     scopes.push();
@@ -233,7 +248,12 @@ fn resolve_function_definition<'a>(
             .iter()
             .filter_map(|param| {
                 let name = param.name?;
-                let reference = Reference { ty: param.ty, name, id: scopes.id() };
+                let reference = Reference {
+                    ty: param.ty,
+                    name,
+                    id: scopes.id(),
+                    usage_location: name,
+                };
                 scopes.add(reference);
                 Some(reference)
             })
@@ -279,6 +299,7 @@ fn resolve_declaration<'a>(
         name: decl.name,
         ty: decl.ty,
         id: scopes.id(),
+        usage_location: decl.name,
     };
     scopes.add(reference);
     Declaration {
@@ -304,7 +325,7 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
     match expr {
         ast::Expression::Name(name) => Expression::Name(
             scopes
-                .lookup(name.slice())
+                .lookup(*name)
                 .unwrap_or_else(|| todo!("name error: {name:#?}")),
         ),
         ast::Expression::Integer(integer) => Expression::Integer(*integer),

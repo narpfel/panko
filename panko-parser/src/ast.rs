@@ -283,6 +283,12 @@ impl<'a> Type<'a> {
             ty: *self,
         }
     }
+
+    // TODO: this is a temporary hack until the `Report` derive macro handles stringification
+    // better
+    pub fn slice(&self) -> String {
+        self.to_string()
+    }
 }
 
 impl fmt::Display for Type<'_> {

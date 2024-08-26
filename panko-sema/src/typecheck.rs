@@ -1,3 +1,5 @@
+use ariadne::Color::Red;
+use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast::Arithmetic;
@@ -7,12 +9,27 @@ use panko_parser::ast::QualifiedType;
 use panko_parser::ast::Session;
 use panko_parser::ast::Type;
 use panko_parser::sexpr_builder::AsSExpr as _;
+use panko_report::Report;
 
 use crate::scope;
 use crate::scope::ParamRefs;
 use crate::scope::Reference;
 
 mod as_sexpr;
+
+#[derive(Debug, Report)]
+#[exit_code(1)]
+enum Diagnostic<'a> {
+    // TODO: colourise types
+    // TODO: types should be printed in C syntax, not in their SExpr debug repr
+    #[error("invalid implicit conversion from `{from_ty}` to `{to_ty}`")]
+    #[diagnostics(at(colour = Red, label = "this is of type `{from_ty}`, which cannot be implicitly converted to `{to_ty}`"))]
+    InvalidImplicitConversion {
+        at: TypedExpression<'a>,
+        from_ty: Type<'a>,
+        to_ty: Type<'a>,
+    },
+}
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
@@ -75,6 +92,16 @@ struct ImplicitConversion<'a> {
     from: &'a TypedExpression<'a>,
 }
 
+impl TypedExpression<'_> {
+    fn loc(&self) -> Loc {
+        match self.expr {
+            Expression::Name(name) => name.loc(),
+            Expression::Integer(token) => token.loc(),
+            Expression::ImplicitConversion(implicit_conversion) => implicit_conversion.from.loc(),
+        }
+    }
+}
+
 fn convert_as_if_by_assignment<'a>(
     sess: &'a Session<'a>,
     target: QualifiedType<'a>,
@@ -96,9 +123,23 @@ fn convert_as_if_by_assignment<'a>(
             else {
                 expr
             },
-        (Type::Arithmetic(_), _) => todo!("type error"),
-        (Type::Pointer(_), _) => todo!("type error"),
+        // TODO: clang (but not gcc) allows implicitly converting `Type::Function(_)` to
+        // `Type::Pointer(_)` (with a warning).
         (Type::Function(_), _) => todo!("[{}] = {}", target.as_sexpr(), expr.as_sexpr()),
+        _ => {
+            sess.emit(Diagnostic::InvalidImplicitConversion {
+                at: expr,
+                from_ty: expr_ty,
+                to_ty: target_ty,
+            });
+            TypedExpression {
+                ty: target_ty.unqualified(),
+                expr: Expression::ImplicitConversion(ImplicitConversion {
+                    ty: target_ty,
+                    from: sess.alloc(expr),
+                }),
+            }
+        }
     }
 }
 
