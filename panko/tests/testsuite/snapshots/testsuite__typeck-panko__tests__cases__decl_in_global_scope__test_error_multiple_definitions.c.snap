@@ -12,7 +12,7 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: duplicate declaration for `value`
+Error: duplicate definition for `value`
    ╭─[panko/tests/cases/decl_in_global_scope/test_error_multiple_definitions.c:2:5]
    │
  1 │ int value = 42;
@@ -23,7 +23,7 @@ Error: duplicate declaration for `value`
    │       ╰──── duplicate definition
 ───╯
 
-Error: duplicate declaration for `f`
+Error: duplicate definition for `f`
    ╭─[panko/tests/cases/decl_in_global_scope/test_error_multiple_definitions.c:8:5]
    │
  4 │ int f() {

@@ -3,6 +3,8 @@ source: panko/tests/testsuite/main.rs
 info:
   program: panko
   args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
     - panko/tests/cases/decl_in_function/test_error_redefinition_of_local_with_same_type.c
 ---
 success: false
@@ -10,7 +12,7 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: duplicate declaration for `x`
+Error: duplicate definition for `x`
    ╭─[panko/tests/cases/decl_in_function/test_error_redefinition_of_local_with_same_type.c:3:9]
    │
  2 │     int x = 42;

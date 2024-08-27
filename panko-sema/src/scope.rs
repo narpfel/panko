@@ -22,8 +22,7 @@ mod as_sexpr;
 #[derive(Debug, Report)]
 #[exit_code(1)]
 enum Diagnostic<'a> {
-    // TODO: This should say “duplicate definition” or “redefinition”.
-    #[error("duplicate declaration for `{at}`")]
+    #[error("duplicate definition for `{at}`")]
     #[diagnostics(
         previous_definition(colour = Blue, label = "previously defined here"),
         at(colour = Red, label = "duplicate definition"),

@@ -12,7 +12,7 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: duplicate declaration for `duplicate`
+Error: duplicate definition for `duplicate`
    ╭─[panko/tests/cases/decl_in_global_scope/test_error_diagnostics_from_multiple_steps_are_sorted.c:2:5]
    │
  1 │ int duplicate = 42;
