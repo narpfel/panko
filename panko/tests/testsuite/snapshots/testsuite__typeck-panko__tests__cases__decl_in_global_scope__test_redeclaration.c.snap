@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/decl_in_global_scope/test_redeclaration.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration f~0 `fn() -> Int` ∅)
+   (declaration f~0 `fn() -> Int` ∅)
+   (function-definition
+      f~0 `fn() -> Int`
+      (compound-statement
+         (return (42 `Int`))))
+   (declaration f~0 `fn() -> Int` ∅)
+   (declaration f~0 `fn() -> Int` ∅))
+
+----- stderr -----

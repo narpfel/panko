@@ -15,10 +15,10 @@ exit_code: 1
 Error: duplicate declaration for `duplicate`
    ╭─[panko/tests/cases/decl_in_global_scope/test_error_diagnostics_from_multiple_steps_are_sorted.c:2:5]
    │
- 1 │ int duplicate;
+ 1 │ int duplicate = 42;
    │     ────┬────  
    │         ╰────── previously defined here
- 2 │ int duplicate;
+ 2 │ int duplicate = 27;
    │     ────┬────  
    │         ╰────── duplicate definition
 ───╯

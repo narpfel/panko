@@ -14,22 +14,22 @@ exit_code: 0
    (function-definition
       a~0 `fn() -> Int`
       (compound-statement
-         (declaration p~1 `ptr<Int>` 0)
+         (definition p~1 `ptr<Int>` 0)
          (return (name p~1 `ptr<Int>`))))
    (function-definition
       b~2 `fn() -> Int`
       (compound-statement
-         (declaration p~3 `ptr<char const>` 0)
+         (definition p~3 `ptr<char const>` 0)
          (return (name p~3 `ptr<char const>`))))
    (function-definition
       c~4 `fn() -> ptr<Int>`
       (compound-statement
-         (declaration x~5 `Int` 42)
+         (definition x~5 `Int` 42)
          (return (name x~5 `Int`))))
    (function-definition
       d~6 `fn() -> ptr<char const>`
       (compound-statement
-         (declaration x~7 `Int` 42)
+         (definition x~7 `Int` 42)
          (return (name x~7 `Int`)))))
 
 ----- stderr -----

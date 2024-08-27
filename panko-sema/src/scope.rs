@@ -1,3 +1,4 @@
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
 use ariadne::Color::Blue;
@@ -21,6 +22,7 @@ mod as_sexpr;
 #[derive(Debug, Report)]
 #[exit_code(1)]
 enum Diagnostic<'a> {
+    // TODO: This should say “duplicate definition” or “redefinition”.
     #[error("duplicate declaration for `{at}`")]
     #[diagnostics(
         previous_definition(colour = Blue, label = "previously defined here"),
@@ -100,6 +102,14 @@ pub(crate) struct Reference<'a> {
     pub(crate) ty: QualifiedType<'a>,
     id: Id,
     usage_location: Token<'a>,
+    kind: RefKind,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) enum RefKind {
+    Declaration,
+    TentativeDefinition,
+    Definition,
 }
 
 impl<'a> Reference<'a> {
@@ -124,6 +134,20 @@ impl<'a> Reference<'a> {
         assert_eq!(self.name.slice(), location.slice());
         Self { usage_location: location, ..*self }
     }
+
+    pub(crate) fn kind(&self) -> RefKind {
+        self.kind
+    }
+}
+
+impl RefKind {
+    pub(crate) fn str(&self) -> &'static str {
+        match self {
+            RefKind::Declaration => "declaration",
+            RefKind::TentativeDefinition => "tentative-definition",
+            RefKind::Definition => "definition",
+        }
+    }
 }
 
 #[derive(Debug, Default)]
@@ -140,8 +164,8 @@ impl<'a> Scope<'a> {
             .copied()
     }
 
-    fn lookup_innermost(&self, name: &'a str) -> Option<Reference<'a>> {
-        self.names.last().get(name).copied()
+    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Reference<'a>> {
+        self.names.last_mut().entry(name)
     }
 
     fn push(&mut self) {
@@ -162,20 +186,35 @@ struct Scopes<'a> {
 }
 
 impl<'a> Scopes<'a> {
-    fn add(&mut self, reference: Reference<'a>) {
-        match self.lookup_innermost(reference.ident()) {
-            Some(previous_definition) => self.sess.emit(Diagnostic::AlreadyDefined {
-                at: reference,
-                previous_definition: previous_definition.at(previous_definition.name),
-            }),
-            None => {
-                let maybe_old_value = self
-                    .scopes
-                    .last_mut()
-                    .names
-                    .last_mut()
-                    .insert(reference.ident().slice(), reference);
-                assert!(maybe_old_value.is_none());
+    fn add(&mut self, name: Token<'a>, ty: QualifiedType<'a>, kind: RefKind) -> Reference<'a> {
+        let sess = self.sess;
+        let id = self.id();
+        let reference = Reference { name, ty, id, usage_location: name, kind };
+        match self.lookup_innermost(name) {
+            Entry::Occupied(mut entry) => {
+                let previous_definition = entry.get_mut();
+                // TODO: conflicting types should raise an error.
+                if matches!(kind, RefKind::Definition)
+                    && matches!(previous_definition.kind, RefKind::Definition)
+                {
+                    sess.emit(Diagnostic::AlreadyDefined {
+                        at: reference,
+                        previous_definition: previous_definition.at(previous_definition.name),
+                    });
+                }
+                if kind > previous_definition.kind {
+                    previous_definition.name = name;
+                    previous_definition.kind = kind;
+                }
+                Reference {
+                    kind,
+                    usage_location: name,
+                    ..*previous_definition
+                }
+            }
+            Entry::Vacant(entry) => {
+                entry.insert(reference);
+                reference
             }
         }
     }
@@ -188,11 +227,8 @@ impl<'a> Scopes<'a> {
             .map(|reference| reference.at(name))
     }
 
-    fn lookup_innermost(&self, name: Token<'a>) -> Option<Reference<'a>> {
-        self.scopes
-            .last()
-            .lookup_innermost(name.slice())
-            .map(|reference| reference.at(name))
+    fn lookup_innermost(&mut self, name: Token<'a>) -> Entry<&'a str, Reference<'a>> {
+        self.scopes.last_mut().lookup_innermost(name.slice())
     }
 
     fn push(&mut self) {
@@ -209,19 +245,17 @@ impl<'a> Scopes<'a> {
         self.next_id += 1;
         id
     }
+
+    fn is_in_global_scope(&self) -> bool {
+        self.scopes.len() == 1
+    }
 }
 
 fn resolve_function_definition<'a>(
     scopes: &mut Scopes<'a>,
     def: &'a ast::FunctionDefinition<'a>,
 ) -> FunctionDefinition<'a> {
-    let reference = Reference {
-        name: def.name,
-        ty: def.ty,
-        id: scopes.id(),
-        usage_location: def.name,
-    };
-    scopes.add(reference);
+    let reference = scopes.add(def.name, def.ty, RefKind::Definition);
     scopes.push();
 
     let function_ty = match &def.ty {
@@ -249,13 +283,7 @@ fn resolve_function_definition<'a>(
             .iter()
             .filter_map(|param| {
                 let name = param.name?;
-                let reference = Reference {
-                    ty: param.ty,
-                    name,
-                    id: scopes.id(),
-                    usage_location: name,
-                };
-                scopes.add(reference);
+                let reference = scopes.add(name, param.ty, RefKind::Definition);
                 Some(reference)
             })
             .collect_vec(),
@@ -296,13 +324,22 @@ fn resolve_declaration<'a>(
     scopes: &mut Scopes<'a>,
     decl: &ast::Declaration<'a>,
 ) -> Declaration<'a> {
-    let reference = Reference {
-        name: decl.name,
-        ty: decl.ty,
-        id: scopes.id(),
-        usage_location: decl.name,
+    let kind = if decl.initialiser.is_some() {
+        RefKind::Definition
+    }
+    else {
+        match decl.ty.ty {
+            Type::Function(_) => RefKind::Declaration,
+            _ =>
+                if scopes.is_in_global_scope() {
+                    RefKind::TentativeDefinition
+                }
+                else {
+                    RefKind::Definition
+                },
+        }
     };
-    scopes.add(reference);
+    let reference = scopes.add(decl.name, decl.ty, kind);
     Declaration {
         reference,
         initialiser: try { resolve_expr(scopes, &decl.initialiser?) },

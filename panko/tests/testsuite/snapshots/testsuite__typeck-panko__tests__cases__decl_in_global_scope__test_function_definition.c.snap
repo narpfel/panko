@@ -41,20 +41,20 @@ exit_code: 0
    (function-definition
       f~7 `fn() -> Int`
       (compound-statement
-         (declaration a~8 `Int` (42 `Int`))
+         (definition a~8 `Int` (42 `Int`))
          (expression (a~8 `Int`))
          (return (a~8 `Int`))))
    (function-definition
       g~9 `fn() -> char`
       (compound-statement
-         (declaration c~10 `char` (implicit-conversion (0 `Int`) `char`))
+         (definition c~10 `char` (implicit-conversion (0 `Int`) `char`))
          (return (c~10 `char`))))
    (function-definition
       h~11 `fn() -> Int`
       (compound-statement
-         (declaration a~12 `Int` (42 `Int`))
+         (definition a~12 `Int` (42 `Int`))
          (compound-statement
-            (declaration a~13 `Int` (27 `Int`))
+            (definition a~13 `Int` (27 `Int`))
             (return (a~13 `Int`)))))
    (function-definition
       i~14 `fn(a: Int) -> Int`
@@ -62,14 +62,14 @@ exit_code: 0
          a~15 `Int`)
       (compound-statement
          (compound-statement
-            (declaration a~16 `Int` (42 `Int`)))
+            (definition a~16 `Int` (42 `Int`)))
          (return (a~15 `Int`))))
    (function-definition
       j~17 `fn() -> Int`
       (compound-statement
-         (declaration a~18 `Int` (42 `Int`))
+         (definition a~18 `Int` (42 `Int`))
          (compound-statement
-            (declaration a~19 `Int` (27 `Int`))
+            (definition a~19 `Int` (27 `Int`))
             (expression (a~19 `Int`)))
          (return (a~18 `Int`)))))
 

@@ -3,22 +3,24 @@ source: panko/tests/testsuite/main.rs
 info:
   program: panko
   args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
     - panko/tests/cases/decl_in_global_scope/test_pointer.c
 ---
 success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (declaration x~0 `ptr<Int>` ∅)
-   (declaration y~1 `ptr<Int>` ∅)
-   (declaration a~2 `ptr<Int const>` ∅)
-   (declaration b~3 `ptr<Int> const` ∅)
-   (declaration c~4 `ptr<Int const> const` ∅)
-   (declaration d~5 `ptr<Int const>` ∅)
-   (declaration e~6 `ptr<Int const> const` ∅)
-   (declaration f~7 `ptr<ptr<Int>>` ∅)
-   (declaration g~8 `ptr<ptr<Int const>>` ∅)
-   (declaration h~9 `ptr<ptr<Int>> const` ∅)
-   (declaration i~10 `ptr<ptr<Int> const>` ∅))
+   (tentative-definition x~0 `ptr<Int>` ∅)
+   (tentative-definition y~1 `ptr<Int>` ∅)
+   (tentative-definition a~2 `ptr<Int const>` ∅)
+   (tentative-definition b~3 `ptr<Int> const` ∅)
+   (tentative-definition c~4 `ptr<Int const> const` ∅)
+   (tentative-definition d~5 `ptr<Int const>` ∅)
+   (tentative-definition e~6 `ptr<Int const> const` ∅)
+   (tentative-definition f~7 `ptr<ptr<Int>>` ∅)
+   (tentative-definition g~8 `ptr<ptr<Int const>>` ∅)
+   (tentative-definition h~9 `ptr<ptr<Int>> const` ∅)
+   (tentative-definition i~10 `ptr<ptr<Int> const>` ∅))
 
 ----- stderr -----
