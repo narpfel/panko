@@ -59,6 +59,7 @@ command = [
     "--color", "always",
     "--",
     "--print=typeck",
+    "--print=codegen",
     "c/main.c",
 ]
 need_stdout = true
