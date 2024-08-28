@@ -17,5 +17,5 @@ Error: unrecognised token
    │
  1 │ int 42;
    │     ─┬  
-   │      ╰── expected one of the following token kinds: ["(", "*", ";", "_Atomic", "_Complex", "_Decimal128", "_Decimal32", "_Decimal64", "_Noreturn", "auto", "bool", "char", "const", "constexpr", "double", "extern", "float", "inline", "int", "long", "register", "restrict", "short", "signed", "static", "thread_local", "typedef", "unsigned", "void", "volatile", Identifier]
+   │      ╰── expected one of the following token kinds: [";", "*", "(", "auto", "constexpr", "extern", "register", "static", "thread_local", "typedef", "void", "char", "short", "int", "long", "float", "double", "signed", "unsigned", "bool", "_Complex", "_Decimal32", "_Decimal64", "_Decimal128", "const", "restrict", "volatile", "_Atomic", "inline", "_Noreturn", Identifier]
 ───╯
