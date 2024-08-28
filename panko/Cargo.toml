@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 bumpalo = { workspace = true }
 clap = { workspace = true }
+panko-codegen = { path = "../panko-codegen" }
 panko-lex = { path = "../panko-lex" }
 panko-parser = { path = "../panko-parser" }
 panko-sema = { path = "../panko-sema" }

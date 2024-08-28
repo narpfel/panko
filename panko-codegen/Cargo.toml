@@ -1,0 +1,10 @@
+[package]
+name = "panko-codegen"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+indexmap = { workspace = true }
+itertools = { workspace = true }
+panko-parser = { path = "../panko-parser" }
+panko-sema = { path = "../panko-sema" }

@@ -94,24 +94,28 @@ pub(crate) enum Expression<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct Reference<'a> {
+pub struct Reference<'a> {
     // TODO: The location of `name` points to where this name was declared. This is unused for now,
     // but should be used in error messages to print e. g. “note: [...] was declared here:”.
     name: Token<'a>,
-    pub(crate) ty: QualifiedType<'a>,
+    pub ty: QualifiedType<'a>,
     id: Id,
     usage_location: Token<'a>,
     kind: RefKind,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) enum RefKind {
+pub enum RefKind {
     Declaration,
     TentativeDefinition,
     Definition,
 }
 
 impl<'a> Reference<'a> {
+    pub fn name(&self) -> &'a str {
+        self.ident().slice()
+    }
+
     pub fn unique_name(&self) -> String {
         format!("{}~{}", self.ident().slice(), self.id.0)
     }
@@ -134,7 +138,7 @@ impl<'a> Reference<'a> {
         Self { usage_location: location, ..*self }
     }
 
-    pub(crate) fn kind(&self) -> RefKind {
+    pub fn kind(&self) -> RefKind {
         self.kind
     }
 }

@@ -1,3 +1,4 @@
+use std::io::Write as _;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
@@ -10,6 +11,7 @@ use panko_parser::sexpr_builder::AsSExpr as _;
 enum Step {
     Scopes,
     Typeck,
+    Codegen,
 }
 
 #[derive(Debug, Parser)]
@@ -19,6 +21,8 @@ struct Args {
     stop_after: Option<Step>,
     #[arg(long)]
     print: Vec<Step>,
+    #[arg(short, long)]
+    output_filename: Option<PathBuf>,
 }
 
 fn main_impl() -> Result<(), ExitCode> {
@@ -56,6 +60,24 @@ fn main_impl() -> Result<(), ExitCode> {
     if let Some(Step::Typeck) = args.stop_after {
         return Ok(());
     }
+
+    let code = panko_codegen::emit(translation_unit);
+
+    if args.print.contains(&Step::Codegen) {
+        println!("{code}");
+    }
+    if let Some(Step::Codegen) = args.stop_after {
+        return Ok(());
+    }
+
+    std::fs::File::create(
+        args.output_filename
+            .unwrap_or_else(|| args.filename.with_extension("S")),
+    )
+    .unwrap()
+    .write_all(code.as_bytes())
+    .unwrap();
+
     Ok(())
 }
 

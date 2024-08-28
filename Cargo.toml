@@ -4,6 +4,7 @@ cargo-features = ["codegen-backend"]
 resolver = "2"
 members = [
     "panko",
+    "panko-codegen",
     "panko-derive-report",
     "panko-lex",
     "panko-parser",

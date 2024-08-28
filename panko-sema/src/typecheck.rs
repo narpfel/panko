@@ -33,7 +33,7 @@ enum Diagnostic<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
-    decls: &'a [ExternalDeclaration<'a>],
+    pub decls: &'a [ExternalDeclaration<'a>],
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -44,8 +44,8 @@ pub enum ExternalDeclaration<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Declaration<'a> {
-    reference: Reference<'a>,
-    initialiser: Option<TypedExpression<'a>>,
+    pub reference: Reference<'a>,
+    pub initialiser: Option<TypedExpression<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -75,21 +75,27 @@ pub enum Statement<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct TypedExpression<'a> {
     ty: QualifiedType<'a>,
-    expr: Expression<'a>,
+    pub expr: Expression<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
-enum Expression<'a> {
+pub enum Expression<'a> {
     Name(Reference<'a>),
     Integer(Token<'a>),
     ImplicitConversion(ImplicitConversion<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
-struct ImplicitConversion<'a> {
+pub struct ImplicitConversion<'a> {
     #[expect(unused)]
     ty: Type<'a>,
     from: &'a TypedExpression<'a>,
+}
+
+impl<'a> FunctionDefinition<'a> {
+    pub fn name(&self) -> &'a str {
+        self.reference.name()
+    }
 }
 
 impl TypedExpression<'_> {

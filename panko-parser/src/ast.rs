@@ -289,6 +289,19 @@ impl<'a> Type<'a> {
     pub fn slice(&self) -> String {
         self.to_string()
     }
+
+    pub fn size(&self) -> u64 {
+        match self {
+            Type::Arithmetic(arithmetic) => arithmetic.size(),
+            Type::Pointer(_) => 8,
+            Type::Function(_) => 0,
+        }
+    }
+
+    pub fn align(&self) -> u64 {
+        // TODO: correct align
+        self.size()
+    }
 }
 
 impl fmt::Display for Type<'_> {
@@ -407,6 +420,27 @@ impl<'a> Statement<'a> {
             UnlabeledStatement::PrimaryBlock(PrimaryBlock::CompoundStatement(block)) =>
                 Self::Compound(CompoundStatement::from_parse_tree(sess, block)),
             UnlabeledStatement::JumpStatement(JumpStatement::Return(expr)) => Self::Return(*expr),
+        }
+    }
+}
+
+impl Arithmetic {
+    fn size(&self) -> u64 {
+        match self {
+            Arithmetic::Integral(Integral { signedness: _, kind }) => kind.size(),
+            Arithmetic::Char => 1,
+        }
+    }
+}
+
+impl IntegralKind {
+    fn size(&self) -> u64 {
+        match self {
+            IntegralKind::Char => 1,
+            IntegralKind::Short => 2,
+            IntegralKind::Int => 4,
+            IntegralKind::Long => 8,
+            IntegralKind::LongLong => 8,
         }
     }
 }

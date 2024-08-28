@@ -523,10 +523,21 @@ dependencies = [
  "bumpalo",
  "clap",
  "insta-cmd",
+ "panko-codegen",
  "panko-lex",
  "panko-parser",
  "panko-sema",
  "rstest",
+]
+
+[[package]]
+name = "panko-codegen"
+version = "0.1.0"
+dependencies = [
+ "indexmap",
+ "itertools 0.13.0",
+ "panko-parser",
+ "panko-sema",
 ]
 
 [[package]]
