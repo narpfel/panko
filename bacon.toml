@@ -60,6 +60,7 @@ command = [
     "--",
     "--print=typeck",
     "--print=codegen",
+    "-o/tmp/main.S",
     "c/main.c",
 ]
 need_stdout = true
