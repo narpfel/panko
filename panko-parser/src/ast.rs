@@ -294,7 +294,7 @@ impl<'a> Type<'a> {
         match self {
             Type::Arithmetic(arithmetic) => arithmetic.size(),
             Type::Pointer(_) => 8,
-            Type::Function(_) => 0,
+            Type::Function(_) => unreachable!("functions are not objects and don’t have a size"),
         }
     }
 
