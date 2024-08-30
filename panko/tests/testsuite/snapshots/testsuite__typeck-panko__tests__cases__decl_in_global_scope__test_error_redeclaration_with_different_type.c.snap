@@ -1,0 +1,47 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/decl_in_global_scope/test_error_redeclaration_with_different_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: redeclaration of `a` with different type: `Int` vs. `Int const`
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_redeclaration_with_different_type.c:2:11]
+   │
+ 1 │ int a;
+   │     ┬  
+   │     ╰── previously declared here with type `Int`
+ 2 │ int const a;
+   │           ┬  
+   │           ╰── new declaration with different type `Int const`
+───╯
+
+Error: redeclaration of `f` with different type: `Int` vs. `fn() -> Int`
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_redeclaration_with_different_type.c:5:5]
+   │
+ 4 │ int f;
+   │     ┬  
+   │     ╰── previously declared here with type `Int`
+ 5 │ int f();
+   │     ┬  
+   │     ╰── new declaration with different type `fn() -> Int`
+───╯
+
+Error: redeclaration of `g` with different type: `fn(∅: Int) -> Int` vs. `fn(∅: Int, ∅: Int) -> Int`
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_redeclaration_with_different_type.c:9:5]
+   │
+ 7 │ int g(int);
+   │     ┬  
+   │     ╰── previously declared here with type `fn(∅: Int) -> Int`
+   │ 
+ 9 │ int g(int, int);
+   │     ┬  
+   │     ╰── new declaration with different type `fn(∅: Int, ∅: Int) -> Int`
+───╯

@@ -27,7 +27,6 @@ use syn::Error;
 use syn::Expr;
 use syn::Lifetime;
 use syn::LitStr;
-use syn::Member;
 use syn::Pat;
 use syn::Result;
 use syn::Token;
@@ -325,17 +324,7 @@ fn source(expr: &Expr) -> Option<String> {
     match expr {
         Expr::MethodCall(call) => source(&call.receiver),
         Expr::Path(path) => path.path.get_ident().map(Ident::to_string),
-        Expr::Field(field) => match &*field.base {
-            Expr::Path(path) if path.path.is_ident("at") => Some(member_to_string(&field.member)),
-            base => source(base),
-        },
+        Expr::Field(field) => source(&field.base),
         _ => None,
-    }
-}
-
-fn member_to_string(member: &Member) -> String {
-    match member {
-        Member::Named(named) => named.to_string(),
-        Member::Unnamed(unnamed) => unnamed.index.to_string(),
     }
 }

@@ -35,6 +35,17 @@ enum Diagnostic<'a> {
     #[error("expected `;` after declaration (or did you mean to declare a function: `{at}()`?)")]
     #[diagnostics(at(colour = Red, label = "in this declaration"))]
     FunctionDeclaratorDoesNotHaveFunctionType { at: Token<'a> },
+
+    #[error("redeclaration of `{at}` with different type: `{original_ty}` vs. `{new_ty}`")]
+    #[with(original_ty = previous_definition.ty, new_ty = at.ty)]
+    #[diagnostics(
+        previous_definition(colour = Blue, label = "previously declared here with type `{original_ty}`"),
+        at(colour = Red, label = "new declaration with different type `{new_ty}`"),
+    )]
+    AlreadyDefinedWithDifferentType {
+        at: Reference<'a>,
+        previous_definition: Reference<'a>,
+    },
 }
 
 #[derive(Debug)]
@@ -196,13 +207,19 @@ impl<'a> Scopes<'a> {
         match self.lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
                 let previous_definition = entry.get_mut();
-                // TODO: conflicting types should raise an error.
                 if matches!(kind, RefKind::Definition)
                     && matches!(previous_definition.kind, RefKind::Definition)
                 {
                     sess.emit(Diagnostic::AlreadyDefined {
                         at: reference,
                         previous_definition: previous_definition.at(previous_definition.name),
+                    });
+                }
+                if previous_definition.ty != ty {
+                    sess.emit(Diagnostic::AlreadyDefinedWithDifferentType {
+                        at: reference,
+                        previous_definition: previous_definition
+                            .at(previous_definition.usage_location),
                     });
                 }
                 if kind > previous_definition.kind {

@@ -262,6 +262,14 @@ impl<'a> FunctionDefinition<'a> {
     }
 }
 
+impl QualifiedType<'_> {
+    // TODO: this is a temporary hack until the `Report` derive macro handles stringification
+    // better
+    pub fn slice(&self) -> String {
+        self.to_string()
+    }
+}
+
 impl fmt::Display for QualifiedType<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.ty.fmt(f)?;
