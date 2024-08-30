@@ -52,8 +52,7 @@ pub struct Declaration<'a> {
 pub struct FunctionDefinition<'a> {
     reference: Reference<'a>,
     params: ParamRefs<'a>,
-    #[expect(unused)]
-    storage_class: Option<cst::StorageClassSpecifier<'a>>,
+    pub storage_class: Option<cst::StorageClassSpecifier<'a>>,
     #[expect(unused)]
     inline: Option<cst::FunctionSpecifier<'a>>,
     #[expect(unused)]

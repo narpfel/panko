@@ -56,6 +56,10 @@ impl<'a> Codegen<'a> {
 
     fn function_definition(&mut self, def: &FunctionDefinition) {
         self.block(2);
+        assert!(
+            def.storage_class.is_none(),
+            "TODO: only non-static functions are implemented",
+        );
         self.directive("globl", &[&def.name()]);
         self.directive("text", &[]);
         self.directive("type", &[&def.name(), &"@function"]);
