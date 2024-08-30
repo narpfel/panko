@@ -65,7 +65,13 @@ impl<'a> Codegen<'a> {
         self.directive("type", &[&def.name(), &"@function"]);
         self.label(def.name());
         // TODO: actually emit the function body
-        self.emit("ret");
+        if def.name() == "main" {
+            self.emit("xor eax, eax");
+            self.emit("ret");
+        }
+        else {
+            self.emit("ud2");
+        }
     }
 
     fn object_definition(&mut self, name: &str, ty: Type, initialiser: Option<&Expression>) {
