@@ -8,11 +8,14 @@ use indexmap::IndexSet;
 use itertools::Itertools as _;
 use panko_parser::ast::Type;
 use panko_sema::scope::RefKind;
+use panko_sema::typecheck::CompoundStatement;
 use panko_sema::typecheck::Declaration;
 use panko_sema::typecheck::Expression;
 use panko_sema::typecheck::ExternalDeclaration;
 use panko_sema::typecheck::FunctionDefinition;
+use panko_sema::typecheck::Statement;
 use panko_sema::typecheck::TranslationUnit;
+use panko_sema::typecheck::TypedExpression;
 
 #[derive(Debug, Default)]
 struct Codegen<'a> {
@@ -54,6 +57,16 @@ impl<'a> Codegen<'a> {
         writeln!(self.code, "    {instr}").unwrap();
     }
 
+    fn emit_args(&mut self, instr: &str, args: &[&dyn Display]) {
+        writeln!(
+            self.code,
+            "    {instr}{}{}",
+            if args.is_empty() { "" } else { " " },
+            args.iter().format(", "),
+        )
+        .unwrap();
+    }
+
     fn function_definition(&mut self, def: &FunctionDefinition) {
         self.block(2);
         assert!(
@@ -64,7 +77,7 @@ impl<'a> Codegen<'a> {
         self.directive("text", &[]);
         self.directive("type", &[&def.name(), &"@function"]);
         self.label(def.name());
-        // TODO: actually emit the function body
+        self.compound_statement(def.body);
         if def.name() == "main" {
             self.emit("xor eax, eax");
             self.emit("ret");
@@ -109,6 +122,42 @@ impl<'a> Codegen<'a> {
                 self.defined.insert(name);
                 self.object_definition(name, ty, try { &decl.initialiser?.expr })
             }
+        }
+    }
+
+    fn compound_statement(&mut self, stmts: CompoundStatement) {
+        for stmt in stmts.0 {
+            self.stmt(stmt);
+        }
+    }
+
+    fn stmt(&mut self, stmt: &Statement) {
+        match stmt {
+            Statement::Declaration(_) => todo!(),
+            Statement::Expression(expr) =>
+                if let Some(expr) = expr.as_ref() {
+                    self.expr(expr);
+                    self.emit("pop rax");
+                },
+            Statement::Compound(stmts) => self.compound_statement(*stmts),
+            Statement::Return(expr) => {
+                if let Some(expr) = expr.as_ref() {
+                    self.expr(expr);
+                    self.emit("pop rax");
+                }
+                self.emit("ret");
+            }
+        }
+    }
+
+    fn expr(&mut self, expr: &TypedExpression) {
+        match expr.expr {
+            Expression::Name(_) => todo!(),
+            Expression::Integer(token) => {
+                self.emit_args("mov", &[&"eax", &token.slice()]);
+                self.emit("push rax");
+            }
+            Expression::ImplicitConversion(_) => todo!(),
         }
     }
 }

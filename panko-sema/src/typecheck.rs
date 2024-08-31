@@ -57,7 +57,7 @@ pub struct FunctionDefinition<'a> {
     inline: Option<cst::FunctionSpecifier<'a>>,
     #[expect(unused)]
     noreturn: Option<cst::FunctionSpecifier<'a>>,
-    body: CompoundStatement<'a>,
+    pub body: CompoundStatement<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
