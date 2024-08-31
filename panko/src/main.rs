@@ -1,5 +1,9 @@
+#![feature(exit_status_error)]
+
+use std::fs::File;
 use std::io::Write as _;
 use std::path::PathBuf;
+use std::process::Command;
 use std::process::ExitCode;
 
 use bumpalo::Bump;
@@ -12,6 +16,8 @@ enum Step {
     Scopes,
     Typeck,
     Codegen,
+    Assemble,
+    Link,
 }
 
 #[derive(Debug, Parser)]
@@ -70,13 +76,62 @@ fn main_impl() -> Result<(), ExitCode> {
         return Ok(());
     }
 
-    std::fs::File::create(
-        args.output_filename
-            .unwrap_or_else(|| args.filename.with_extension("S")),
-    )
-    .unwrap()
-    .write_all(code.as_bytes())
-    .unwrap();
+    let output_filename = args
+        .output_filename
+        .unwrap_or_else(|| args.filename.with_extension("S"));
+
+    File::create(&output_filename)
+        .unwrap()
+        .write_all(code.as_bytes())
+        .unwrap();
+
+    let object_filename = output_filename.with_extension("o");
+    Command::new("as")
+        .arg(&output_filename)
+        .arg("-o")
+        .arg(&object_filename)
+        .status()
+        .unwrap()
+        .exit_ok()
+        .unwrap();
+
+    if args.print.contains(&Step::Assemble) {
+        Command::new("objdump")
+            .arg("-d")
+            .arg("-Mintel")
+            .arg(&object_filename)
+            .status()
+            .unwrap()
+            .exit_ok()
+            .unwrap();
+    }
+    if let Some(Step::Codegen) = args.stop_after {
+        return Ok(());
+    }
+
+    let executable_filename = object_filename.with_extension("");
+    Command::new("cc")
+        .arg(&object_filename)
+        .arg("-o")
+        .arg(&executable_filename)
+        .status()
+        .unwrap()
+        .exit_ok()
+        .unwrap();
+
+    if args.print.contains(&Step::Link) {
+        Command::new("objdump")
+            .arg("-d")
+            .arg("-Mintel")
+            .arg(&executable_filename)
+            .status()
+            .unwrap()
+            .exit_ok()
+            .unwrap();
+    }
+    if let Some(Step::Link) = args.stop_after {
+        return Ok(());
+    }
 
     Ok(())
 }

@@ -1,9 +1,13 @@
+#![feature(exit_status_error)]
+
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 
 use insta_cmd::assert_cmd_snapshot;
 use insta_cmd::get_cargo_bin;
+use itertools::Itertools as _;
+use regex::Regex;
 use rstest::rstest;
 
 fn relative_to(path: &Path, target: impl AsRef<Path>) -> &Path {
@@ -30,4 +34,65 @@ fn test(
             .arg(format!("--stop-after={step}"))
             .arg(filename),
     );
+}
+
+#[rstest]
+fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
+    let source = std::fs::read_to_string(&filename).unwrap();
+
+    let expected_return_code_re =
+        Regex::new(r"(?m)^// \[\[return: (?P<return_code>.*?)\]\]$").unwrap();
+
+    let expected_return_codes = expected_return_code_re.captures_iter(&source).map(|captures| {
+        let return_code = captures.name("return_code").unwrap().as_str();
+        return_code.parse::<i32>().unwrap_or_else(|err| {
+            panic!("while parsing `return_code` in {expected_return_code_re:?}:\n{err:?} in capture {return_code:?}")
+        })
+    }).collect_vec();
+    assert!(
+        expected_return_codes.len() <= 1,
+        "test source invalid: more than one return code set: {expected_return_codes:?}",
+    );
+    let expected_return_code = expected_return_codes.first().copied();
+
+    let filename = relative_to(
+        &filename,
+        Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap(),
+    );
+
+    let output_dir = tempfile::tempdir().unwrap();
+    let executable_filename = output_dir
+        .path()
+        .join(filename.file_name().unwrap())
+        .with_extension("");
+
+    Command::new(get_cargo_bin("panko"))
+        .current_dir("..")
+        .arg(filename)
+        .arg("-o")
+        .arg(&executable_filename)
+        .status()
+        .unwrap()
+        .exit_ok()
+        .unwrap();
+
+    let status = Command::new(&executable_filename).status().unwrap();
+    let actual_exit_code = status.code().unwrap_or_else(
+        #[cfg(unix)]
+        || {
+            panic!(
+                "process `{}` died with {status}",
+                executable_filename.display(),
+            )
+        },
+        #[cfg(not(unix))]
+        || unreachable!("`ExitStatus::code()` can only be `None` on Unix"),
+    );
+
+    if let Some(expected_return_code) = expected_return_code {
+        assert_eq!(
+            expected_return_code, actual_exit_code,
+            "test program did not exit with expected return code {expected_return_code}",
+        );
+    }
 }

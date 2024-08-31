@@ -13,4 +13,7 @@ panko-sema = { path = "../panko-sema" }
 
 [dev-dependencies]
 insta-cmd = { workspace = true }
+itertools = { workspace = true }
+regex = { workspace = true }
 rstest = { workspace = true }
+tempfile = { workspace = true }
