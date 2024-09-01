@@ -105,7 +105,7 @@ fn main_impl() -> Result<(), ExitCode> {
             .exit_ok()
             .unwrap();
     }
-    if let Some(Step::Codegen) = args.stop_after {
+    if let Some(Step::Assemble) = args.stop_after {
         return Ok(());
     }
 
