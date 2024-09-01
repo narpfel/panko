@@ -2,7 +2,6 @@ use std::cell::Ref;
 use std::cell::RefCell;
 use std::fmt;
 use std::iter::once;
-use std::process::ExitCode;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
@@ -96,12 +95,9 @@ impl<'a> Session<'a> {
         self.diagnostics.borrow()
     }
 
-    pub fn handle_diagnostics(&self) -> Result<(), ExitCode> {
+    pub fn handle_diagnostics(&self) {
         let diagnostics = self.diagnostics();
-        if diagnostics.is_empty() {
-            Ok(())
-        }
-        else {
+        if !diagnostics.is_empty() {
             for (i, diagnostic) in diagnostics.iter().enumerate() {
                 if i != 0 {
                     eprintln!();
@@ -114,7 +110,7 @@ impl<'a> Session<'a> {
                 .max()
                 .unwrap();
             // TODO: not all diagnostics are fatal
-            Err(ExitCode::from(exit_code))
+            std::process::exit(exit_code.into())
         }
     }
 }
