@@ -83,7 +83,7 @@ impl<'a> Codegen<'a> {
             self.emit("ret");
         }
         else {
-            self.emit("ud2");
+            self.emit("ret");
         }
     }
 
