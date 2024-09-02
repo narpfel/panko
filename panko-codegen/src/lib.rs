@@ -80,11 +80,8 @@ impl<'a> Codegen<'a> {
         self.compound_statement(def.body);
         if def.name() == "main" {
             self.emit("xor eax, eax");
-            self.emit("ret");
         }
-        else {
-            self.emit("ret");
-        }
+        self.emit("ret");
     }
 
     fn object_definition(&mut self, name: &str, ty: Type, initialiser: Option<&Expression>) {
