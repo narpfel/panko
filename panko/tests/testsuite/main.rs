@@ -1,14 +1,29 @@
 #![feature(exit_status_error)]
 
+use std::io;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
+use std::process::ExitStatus;
 
 use insta_cmd::assert_cmd_snapshot;
 use insta_cmd::get_cargo_bin;
 use itertools::Itertools as _;
 use regex::Regex;
 use rstest::rstest;
+
+trait CaptureOutputForLibtest {
+    fn status_with_captured_output(&mut self) -> io::Result<ExitStatus>;
+}
+
+impl CaptureOutputForLibtest for Command {
+    fn status_with_captured_output(&mut self) -> io::Result<ExitStatus> {
+        let output = self.output()?;
+        println!("{}", String::from_utf8_lossy(&output.stdout));
+        eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+        Ok(output.status)
+    }
+}
 
 fn relative_to(path: &Path, target: impl AsRef<Path>) -> &Path {
     path.strip_prefix(target.as_ref()).unwrap()
@@ -71,12 +86,14 @@ fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
         .arg(filename)
         .arg("-o")
         .arg(&executable_filename)
-        .status()
+        .status_with_captured_output()
         .unwrap()
         .exit_ok()
         .unwrap();
 
-    let status = Command::new(&executable_filename).status().unwrap();
+    let status = Command::new(&executable_filename)
+        .status_with_captured_output()
+        .unwrap();
     let actual_exit_code = status.code().unwrap_or_else(
         #[cfg(unix)]
         || {
