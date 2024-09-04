@@ -7,15 +7,15 @@ use indexmap::IndexMap;
 use indexmap::IndexSet;
 use itertools::Itertools as _;
 use panko_parser::ast::Type;
+use panko_sema::layout::CompoundStatement;
+use panko_sema::layout::Declaration;
+use panko_sema::layout::Expression;
+use panko_sema::layout::ExternalDeclaration;
+use panko_sema::layout::FunctionDefinition;
+use panko_sema::layout::LayoutedExpression;
+use panko_sema::layout::Statement;
+use panko_sema::layout::TranslationUnit;
 use panko_sema::scope::RefKind;
-use panko_sema::typecheck::CompoundStatement;
-use panko_sema::typecheck::Declaration;
-use panko_sema::typecheck::Expression;
-use panko_sema::typecheck::ExternalDeclaration;
-use panko_sema::typecheck::FunctionDefinition;
-use panko_sema::typecheck::Statement;
-use panko_sema::typecheck::TranslationUnit;
-use panko_sema::typecheck::TypedExpression;
 
 #[derive(Debug, Default)]
 struct Codegen<'a> {
@@ -77,7 +77,10 @@ impl<'a> Codegen<'a> {
         self.directive("text", &[]);
         self.directive("type", &[&def.name(), &"@function"]);
         self.label(def.name());
+        // TODO: move `sp` by the actual stack size of the function
+        self.emit("sub sp, 16");
         self.compound_statement(def.body);
+        self.emit("add sp, 16");
         if def.name() == "main" {
             self.emit("xor eax, eax");
         }
@@ -134,25 +137,25 @@ impl<'a> Codegen<'a> {
             Statement::Expression(expr) =>
                 if let Some(expr) = expr.as_ref() {
                     self.expr(expr);
-                    self.emit("pop rax");
                 },
             Statement::Compound(stmts) => self.compound_statement(*stmts),
             Statement::Return(expr) => {
                 if let Some(expr) = expr.as_ref() {
                     self.expr(expr);
-                    self.emit("pop rax");
+                    self.emit_args("mov", &[&"eax", &expr.slot]);
                 }
+                // TODO: move `sp` by the actual stack size of the function
+                self.emit("add sp, 16");
                 self.emit("ret");
             }
         }
     }
 
-    fn expr(&mut self, expr: &TypedExpression) {
+    fn expr(&mut self, expr: &LayoutedExpression) {
         match expr.expr {
-            Expression::Name(_) => todo!(),
+            Expression::Name(_reference) => (), // already in memory
             Expression::Integer(token) => {
-                self.emit_args("mov", &[&"eax", &token.slice()]);
-                self.emit("push rax");
+                self.emit_args("mov", &[&expr.slot, &token.slice()]);
             }
             Expression::ImplicitConversion(_) => todo!(),
         }

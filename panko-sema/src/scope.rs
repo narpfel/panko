@@ -55,7 +55,7 @@ enum OpenNewScope {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Id(u64);
+pub(crate) struct Id(pub(crate) u64);
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
@@ -108,11 +108,12 @@ pub(crate) enum Expression<'a> {
 pub struct Reference<'a> {
     // TODO: The location of `name` points to where this name was declared. This is unused for now,
     // but should be used in error messages to print e. g. “note: [...] was declared here:”.
-    name: Token<'a>,
-    pub ty: QualifiedType<'a>,
-    id: Id,
-    usage_location: Token<'a>,
-    kind: RefKind,
+    pub(crate) name: Token<'a>,
+    pub(crate) ty: QualifiedType<'a>,
+    pub(crate) id: Id,
+    pub(crate) usage_location: Token<'a>,
+    pub(crate) kind: RefKind,
+    pub(crate) storage_duration: StorageDuration,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -122,8 +123,15 @@ pub enum RefKind {
     Definition,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum StorageDuration {
+    Static,
+    Automatic,
+    // TODO: thread local
+}
+
 impl<'a> Reference<'a> {
-    pub fn name(&self) -> &'a str {
+    pub(crate) fn name(&self) -> &'a str {
         self.ident().slice()
     }
 
@@ -200,10 +208,23 @@ struct Scopes<'a> {
 }
 
 impl<'a> Scopes<'a> {
-    fn add(&mut self, name: Token<'a>, ty: QualifiedType<'a>, kind: RefKind) -> Reference<'a> {
+    fn add(
+        &mut self,
+        name: Token<'a>,
+        ty: QualifiedType<'a>,
+        kind: RefKind,
+        storage_duration: StorageDuration,
+    ) -> Reference<'a> {
         let sess = self.sess;
         let id = self.id();
-        let reference = Reference { name, ty, id, usage_location: name, kind };
+        let reference = Reference {
+            name,
+            ty,
+            id,
+            usage_location: name,
+            kind,
+            storage_duration,
+        };
         match self.lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
                 let previous_definition = entry.get_mut();
@@ -275,7 +296,12 @@ fn resolve_function_definition<'a>(
     scopes: &mut Scopes<'a>,
     def: &'a ast::FunctionDefinition<'a>,
 ) -> FunctionDefinition<'a> {
-    let reference = scopes.add(def.name, def.ty, RefKind::Definition);
+    let reference = scopes.add(
+        def.name,
+        def.ty,
+        RefKind::Definition,
+        StorageDuration::Static,
+    );
     scopes.push();
 
     let function_ty = match &def.ty {
@@ -303,7 +329,12 @@ fn resolve_function_definition<'a>(
             .iter()
             .filter_map(|param| {
                 let name = param.name?;
-                let reference = scopes.add(name, param.ty, RefKind::Definition);
+                let reference = scopes.add(
+                    name,
+                    param.ty,
+                    RefKind::Definition,
+                    StorageDuration::Automatic,
+                );
                 Some(reference)
             })
             .collect_vec(),
@@ -343,6 +374,7 @@ fn resolve_compound_statement<'a>(
 fn resolve_declaration<'a>(
     scopes: &mut Scopes<'a>,
     decl: &ast::Declaration<'a>,
+    storage_duration: StorageDuration,
 ) -> Declaration<'a> {
     let kind = if decl.initialiser.is_some() {
         RefKind::Definition
@@ -359,7 +391,7 @@ fn resolve_declaration<'a>(
                 },
         }
     };
-    let reference = scopes.add(decl.name, decl.ty, kind);
+    let reference = scopes.add(decl.name, decl.ty, kind, storage_duration);
     Declaration {
         reference,
         initialiser: try { resolve_expr(scopes, &decl.initialiser?) },
@@ -368,8 +400,11 @@ fn resolve_declaration<'a>(
 
 fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Statement<'a> {
     match stmt {
-        ast::Statement::Declaration(decl) =>
-            Statement::Declaration(resolve_declaration(scopes, decl)),
+        ast::Statement::Declaration(decl) => Statement::Declaration(resolve_declaration(
+            scopes,
+            decl,
+            StorageDuration::Automatic,
+        )),
         ast::Statement::Expression(expr) =>
             Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
         ast::Statement::Compound(stmts) =>
@@ -403,8 +438,9 @@ pub fn resolve_names<'a>(
         decls: sess.alloc_slice_fill_iter(translation_unit.decls.iter().map(|decl| match decl {
             ast::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(resolve_function_definition(scopes, def)),
-            ast::ExternalDeclaration::Declaration(decl) =>
-                ExternalDeclaration::Declaration(resolve_declaration(scopes, decl)),
+            ast::ExternalDeclaration::Declaration(decl) => ExternalDeclaration::Declaration(
+                resolve_declaration(scopes, decl, StorageDuration::Static),
+            ),
         })),
     }
 }

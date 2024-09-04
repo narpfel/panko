@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_global_scope/test_error_function_declaration_does_not_have_function_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: expected `;` after declaration (or did you mean to declare a function: `f()`?)
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_function_declaration_does_not_have_function_type.c:1:5]
+   │
+ 1 │ int f {
+   │     ┬  
+   │     ╰── in this declaration
+───╯

@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/test_return_global_variable_in_main.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (definition return_value~0 `Int` (5 `Int`))
+   (function-definition
+      main~1 `fn() -> Int`
+      (compound-statement
+         (return (return_value~0 `Int`)))))
+
+----- stderr -----

@@ -32,6 +32,7 @@ fn relative_to(path: &Path, target: impl AsRef<Path>) -> &Path {
 #[rstest]
 #[case::scopes("scope", "scopes")]
 #[case::typeck("typeck", "typeck")]
+#[case::typeck("layout", "layout")]
 fn test(
     #[case] snapshot_name_prefix: &str,
     #[case] step: &str,
