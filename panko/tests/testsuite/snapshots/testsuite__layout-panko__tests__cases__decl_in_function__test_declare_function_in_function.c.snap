@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       (f~0 `fn() -> Int` (static f))
       (compound-statement
-         (declaration (g~1 `fn() -> Int` @0) ∅)
-         (declaration (g~1 `fn() -> Int` @0) ∅)
+         (declaration (g~1 `fn() -> Int` (static g)) ∅)
+         (declaration (g~1 `fn() -> Int` (static g)) ∅)
          (return (42 `Int` @0)))))
 
 ----- stderr -----

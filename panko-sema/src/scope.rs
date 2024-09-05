@@ -391,6 +391,10 @@ fn resolve_declaration<'a>(
                 },
         }
     };
+    let storage_duration = match decl.ty.ty {
+        Type::Function(_) => StorageDuration::Static,
+        _ => storage_duration,
+    };
     let reference = scopes.add(decl.name, decl.ty, kind, storage_duration);
     Declaration {
         reference,
