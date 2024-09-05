@@ -133,7 +133,10 @@ impl<'a> Codegen<'a> {
 
     fn stmt(&mut self, stmt: &Statement) {
         match stmt {
-            Statement::Declaration(_) => todo!(),
+            Statement::Declaration(decl) =>
+                if let Some(initialiser) = decl.initialiser.as_ref() {
+                    self.expr(initialiser)
+                },
             Statement::Expression(expr) =>
                 if let Some(expr) = expr.as_ref() {
                     self.expr(expr);
