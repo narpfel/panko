@@ -47,30 +47,30 @@ exit_code: 0
    (function-definition
       (g~9 `fn() -> char` (static g))
       (compound-statement
-         (definition (c~10 `char` @0) (implicit-conversion (0 `Int` @0) `char` @0))
+         (definition (c~10 `char` @0) (implicit-conversion (0 `Int` @4) `char` @0))
          (return (c~10 `char` @0))))
    (function-definition
       (h~11 `fn() -> Int` (static h))
       (compound-statement
          (definition (a~12 `Int` @0) (42 `Int` @0))
          (compound-statement
-            (definition (a~13 `Int` @0) (27 `Int` @0))
-            (return (a~13 `Int` @0)))))
+            (definition (a~13 `Int` @4) (27 `Int` @4))
+            (return (a~13 `Int` @4)))))
    (function-definition
       (i~14 `fn(a: Int) -> Int` (static i))
       (params
          (a~15 `Int` @0))
       (compound-statement
          (compound-statement
-            (definition (a~16 `Int` @0) (42 `Int` @0)))
+            (definition (a~16 `Int` @4) (42 `Int` @4)))
          (return (a~15 `Int` @0))))
    (function-definition
       (j~17 `fn() -> Int` (static j))
       (compound-statement
          (definition (a~18 `Int` @0) (42 `Int` @0))
          (compound-statement
-            (definition (a~19 `Int` @0) (27 `Int` @0))
-            (expression (a~19 `Int` @0)))
+            (definition (a~19 `Int` @4) (27 `Int` @4))
+            (expression (a~19 `Int` @4)))
          (return (a~18 `Int` @0)))))
 
 ----- stderr -----

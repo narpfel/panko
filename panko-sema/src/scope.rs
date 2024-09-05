@@ -54,7 +54,7 @@ enum OpenNewScope {
     No,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct Id(pub(crate) u64);
 
 #[derive(Debug, Clone, Copy)]

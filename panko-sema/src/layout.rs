@@ -90,7 +90,7 @@ pub struct Reference<'a> {
 #[derive(Debug, Clone, Copy)]
 pub enum Slot<'a> {
     Static(&'a str),
-    Automatic(usize),
+    Automatic(u64),
 }
 
 impl<'a> FunctionDefinition<'a> {
@@ -157,10 +157,9 @@ fn layout_declaration<'a>(
     decl: &typecheck::Declaration<'a>,
 ) -> Declaration<'a> {
     let typecheck::Declaration { reference, initialiser } = *decl;
-    Declaration {
-        reference: stack.add(reference),
-        initialiser: try { layout_expression(stack, bump, initialiser.as_ref()?) },
-    }
+    let initialiser: Option<_> = try { layout_expression(stack, bump, initialiser.as_ref()?) };
+    let reference = stack.add_at(reference, try { initialiser?.slot });
+    Declaration { reference, initialiser }
 }
 
 fn layout_compound_statement<'a>(
@@ -168,14 +167,14 @@ fn layout_compound_statement<'a>(
     bump: &'a Bump,
     stmts: typecheck::CompoundStatement<'a>,
 ) -> CompoundStatement<'a> {
-    stack.push();
-    let stmts = bump.alloc_slice_fill_iter(
-        stmts
-            .0
-            .iter()
-            .map(|stmt| layout_statement(stack, bump, stmt)),
-    );
-    stack.pop();
+    let stmts = stack.with_block(|stack| {
+        bump.alloc_slice_fill_iter(
+            stmts
+                .0
+                .iter()
+                .map(|stmt| layout_statement(stack, bump, stmt)),
+        )
+    });
     CompoundStatement(stmts)
 }
 
@@ -187,12 +186,14 @@ fn layout_statement<'a>(
     match stmt {
         typecheck::Statement::Declaration(decl) =>
             Statement::Declaration(layout_declaration(stack, bump, decl)),
-        typecheck::Statement::Expression(expr) =>
-            Statement::Expression(try { layout_expression(stack, bump, expr.as_ref()?) }),
+        typecheck::Statement::Expression(expr) => stack.with_block(|stack| {
+            Statement::Expression(try { layout_expression(stack, bump, expr.as_ref()?) })
+        }),
         typecheck::Statement::Compound(stmts) =>
             Statement::Compound(layout_compound_statement(stack, bump, *stmts)),
-        typecheck::Statement::Return(expr) =>
-            Statement::Return(try { layout_expression(stack, bump, expr.as_ref()?) }),
+        typecheck::Statement::Return(expr) => stack.with_block(|stack| {
+            Statement::Return(try { layout_expression(stack, bump, expr.as_ref()?) })
+        }),
     }
 }
 
@@ -202,20 +203,22 @@ fn layout_expression<'a>(
     expr: &typecheck::TypedExpression<'a>,
 ) -> LayoutedExpression<'a> {
     let typecheck::TypedExpression { ty, expr } = *expr;
-    // TODO: implement stack layout for expressions
-    let slot = Slot::Automatic(0);
-    let (expr, slot) = match expr {
+    let (slot, expr) = match expr {
         typecheck::Expression::Name(name) => {
             let reference = stack.add(name);
-            (Expression::Name(reference), reference.slot())
+            (reference.slot(), Expression::Name(reference))
         }
-        typecheck::Expression::Integer(integer) => (Expression::Integer(integer), slot),
-        typecheck::Expression::ImplicitConversion(typecheck::ImplicitConversion { ty, from }) => (
+        typecheck::Expression::Integer(integer) =>
+            (stack.temporary(ty.ty), Expression::Integer(integer)),
+        typecheck::Expression::ImplicitConversion(typecheck::ImplicitConversion {
+            ty: to_ty,
+            from,
+        }) => (
+            stack.temporary(ty.ty),
             Expression::ImplicitConversion(ImplicitConversion {
-                ty,
+                ty: to_ty,
                 from: bump.alloc(layout_expression(stack, bump, from)),
             }),
-            slot,
         ),
     };
     LayoutedExpression { ty, slot, expr }

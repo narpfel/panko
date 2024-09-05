@@ -1,55 +1,94 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
+use panko_parser::ast::Type;
+
 use super::Reference;
 use super::Slot;
 use crate::nonempty;
 use crate::scope;
+use crate::scope::Id;
 use crate::scope::StorageDuration;
 
 #[derive(Debug, Default)]
+struct Slots {
+    stack: nonempty::Vec<u64>,
+    offset: u64,
+    size: u64,
+}
+
+impl Slots {
+    fn add_slot<'a>(&mut self, ty: Type<'a>) -> Slot<'a> {
+        self.offset = self.offset.next_multiple_of(ty.align());
+        let slot = Slot::Automatic(self.offset);
+        self.offset += ty.size();
+        self.size = self.size.max(self.offset);
+        slot
+    }
+
+    fn push(&mut self) {
+        self.stack.push(self.offset);
+    }
+
+    fn pop(&mut self) {
+        self.offset = self.stack.pop().unwrap();
+    }
+}
+
+#[derive(Debug, Default)]
 pub(super) struct Stack<'a> {
-    names: nonempty::Vec<HashMap<&'a str, Reference<'a>>>,
+    ids: HashMap<Id, Reference<'a>>,
+    slots: Slots,
 }
 
 impl<'a> Stack<'a> {
-    #[expect(unused)]
-    fn lookup(&self, name: &'a str) -> Option<Reference<'a>> {
-        self.names
-            .iter()
-            .rev()
-            .find_map(|names| names.get(name))
-            .copied()
-    }
-
-    #[expect(unused)]
-    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Reference<'a>> {
-        self.names.last_mut().entry(name)
+    pub(super) fn with_block<T>(&mut self, f: impl FnOnce(&mut Self) -> T) -> T {
+        self.push();
+        let result = f(self);
+        self.pop();
+        result
     }
 
     pub(super) fn push(&mut self) {
-        self.names.push(HashMap::default());
+        self.slots.push()
     }
 
     pub(super) fn pop(&mut self) {
-        self.names.pop();
+        self.slots.pop()
     }
 
     pub(super) fn add(&mut self, reference: scope::Reference<'a>) -> Reference<'a> {
-        // TODO: lookup reference
-        let scope::Reference {
-            name,
-            ty,
-            id,
-            usage_location: _,
-            kind,
-            storage_duration,
-        } = reference;
-        let slot = match storage_duration {
-            StorageDuration::Static => Slot::Static(reference.name()),
-            // TODO: do actual stack layout
-            StorageDuration::Automatic => Slot::Automatic(0),
-        };
-        Reference { name, ty, id, kind, slot }
+        self.add_at(reference, None)
+    }
+
+    pub(super) fn add_at(
+        &mut self,
+        reference: scope::Reference<'a>,
+        maybe_slot: Option<Slot<'a>>,
+    ) -> Reference<'a> {
+        match self.ids.entry(reference.id) {
+            Entry::Occupied(entry) => *entry.get(),
+            Entry::Vacant(entry) => {
+                let scope::Reference {
+                    name,
+                    ty,
+                    id,
+                    usage_location: _,
+                    kind,
+                    storage_duration,
+                } = reference;
+                let slot = match storage_duration {
+                    StorageDuration::Static => Slot::Static(reference.name()),
+                    StorageDuration::Automatic =>
+                        maybe_slot.unwrap_or_else(|| self.slots.add_slot(ty.ty)),
+                };
+                let reference = *entry.insert(Reference { name, ty, id, kind, slot });
+                reference
+            }
+        }
+    }
+
+    pub(super) fn temporary(&mut self, ty: Type<'a>) -> Slot<'a> {
+        self.slots.add_slot(ty)
     }
 }
