@@ -144,13 +144,15 @@ fn layout_function_definition<'a>(
     let params =
         ParamRefs(bump.alloc_slice_fill_iter(params.0.iter().map(|&param| stack.add(param))));
     let body = layout_compound_statement(&mut stack, bump, body);
+    // TODO: This depends on the ABI
+    let stack_size = stack.size().next_multiple_of(16);
     FunctionDefinition {
         reference,
         params,
         storage_class,
         inline,
         noreturn,
-        stack_size: stack.size(),
+        stack_size,
         body,
     }
 }
