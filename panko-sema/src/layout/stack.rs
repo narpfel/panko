@@ -49,6 +49,10 @@ impl<'a> Stack<'a> {
         result
     }
 
+    pub(super) fn size(self) -> u64 {
+        self.slots.size
+    }
+
     pub(super) fn push(&mut self) {
         self.slots.push()
     }

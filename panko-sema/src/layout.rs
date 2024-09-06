@@ -40,6 +40,7 @@ pub struct FunctionDefinition<'a> {
     inline: Option<cst::FunctionSpecifier<'a>>,
     #[expect(unused)]
     noreturn: Option<cst::FunctionSpecifier<'a>>,
+    pub stack_size: u64,
     pub body: CompoundStatement<'a>,
 }
 
@@ -130,7 +131,7 @@ fn layout_function_definition<'a>(
     bump: &'a Bump,
     def: &typecheck::FunctionDefinition<'a>,
 ) -> FunctionDefinition<'a> {
-    let stack = &mut Stack::default();
+    let mut stack = Stack::default();
     let typecheck::FunctionDefinition {
         reference,
         params,
@@ -139,15 +140,18 @@ fn layout_function_definition<'a>(
         noreturn,
         body,
     } = *def;
+    let reference = stack.add(reference);
+    let params =
+        ParamRefs(bump.alloc_slice_fill_iter(params.0.iter().map(|&param| stack.add(param))));
+    let body = layout_compound_statement(&mut stack, bump, body);
     FunctionDefinition {
-        reference: stack.add(reference),
-        params: ParamRefs(
-            bump.alloc_slice_fill_iter(params.0.iter().map(|&param| stack.add(param))),
-        ),
+        reference,
+        params,
         storage_class,
         inline,
         noreturn,
-        body: layout_compound_statement(stack, bump, body),
+        stack_size: stack.size(),
+        body,
     }
 }
 

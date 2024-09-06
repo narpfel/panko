@@ -21,6 +21,7 @@ use panko_sema::scope::RefKind;
 struct Codegen<'a> {
     tentative_definitions: IndexMap<&'a str, Type<'a>>,
     defined: IndexSet<&'a str>,
+    current_function_stack_size: Option<u64>,
     code: String,
 }
 
@@ -77,10 +78,15 @@ impl<'a> Codegen<'a> {
         self.directive("text", &[]);
         self.directive("type", &[&def.name(), &"@function"]);
         self.label(def.name());
-        // TODO: move `sp` by the actual stack size of the function
-        self.emit("sub sp, 16");
+        self.emit_args("sub", &[&"sp", &def.stack_size]);
+        self.current_function_stack_size = Some(def.stack_size);
         self.compound_statement(def.body);
-        self.emit("add sp, 16");
+        assert_eq!(
+            self.current_function_stack_size.take(),
+            Some(def.stack_size),
+            "`current_function_stack_size` is not changed",
+        );
+        self.emit_args("add", &[&"sp", &def.stack_size]);
         if def.name() == "main" {
             self.emit("xor eax, eax");
         }
@@ -147,8 +153,7 @@ impl<'a> Codegen<'a> {
                     self.expr(expr);
                     self.emit_args("mov", &[&"eax", &expr.slot]);
                 }
-                // TODO: move `sp` by the actual stack size of the function
-                self.emit("add sp, 16");
+                self.emit_args("add", &[&"sp", &self.current_function_stack_size.unwrap()]);
                 self.emit("ret");
             }
         }
