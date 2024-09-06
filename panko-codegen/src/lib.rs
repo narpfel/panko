@@ -78,6 +78,13 @@ impl<'a> Codegen<'a> {
         self.directive("text", &[]);
         self.directive("type", &[&def.name(), &"@function"]);
         self.label(def.name());
+
+        // check that sp is correctly aligned
+        self.emit("lea rax, [rsp + 8]");
+        self.emit("and rax, 0xf");
+        self.emit(&format!("jnz .L.{}.entry.sp_unaligned", def.name()));
+
+        self.block(1);
         self.emit_args("sub", &[&"sp", &def.stack_size]);
         self.current_function_stack_size = Some(def.stack_size);
         self.compound_statement(def.body);
@@ -91,6 +98,10 @@ impl<'a> Codegen<'a> {
             self.emit("xor eax, eax");
         }
         self.emit("ret");
+
+        self.block(1);
+        self.label(&format!(".L.{}.entry.sp_unaligned", def.name()));
+        self.emit("int3");
     }
 
     fn object_definition(&mut self, name: &str, ty: Type, initialiser: Option<&Expression>) {

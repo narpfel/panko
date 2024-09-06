@@ -145,6 +145,7 @@ fn layout_function_definition<'a>(
         ParamRefs(bump.alloc_slice_fill_iter(params.0.iter().map(|&param| stack.add(param))));
     let body = layout_compound_statement(&mut stack, bump, body);
     // TODO: This depends on the ABI
+    // unsure if this is correct, for now we check for correct alignment in the function prologue
     let stack_size = stack.size().next_multiple_of(16);
     FunctionDefinition {
         reference,
