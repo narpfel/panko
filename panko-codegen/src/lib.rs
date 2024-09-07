@@ -21,7 +21,7 @@ use panko_sema::scope::RefKind;
 struct Codegen<'a> {
     tentative_definitions: IndexMap<&'a str, Type<'a>>,
     defined: IndexSet<&'a str>,
-    current_function_stack_size: Option<u64>,
+    current_function: Option<&'a FunctionDefinition<'a>>,
     code: String,
 }
 
@@ -68,7 +68,7 @@ impl<'a> Codegen<'a> {
         .unwrap();
     }
 
-    fn function_definition(&mut self, def: &FunctionDefinition) {
+    fn function_definition(&mut self, def: &'a FunctionDefinition<'a>) {
         self.block(2);
         assert!(
             def.storage_class.is_none(),
@@ -86,15 +86,15 @@ impl<'a> Codegen<'a> {
 
         self.block(1);
         self.emit_args("sub", &[&"sp", &def.stack_size]);
-        self.current_function_stack_size = Some(def.stack_size);
+        self.current_function = Some(def);
         self.compound_statement(def.body);
         assert_eq!(
-            self.current_function_stack_size.take(),
-            Some(def.stack_size),
-            "`current_function_stack_size` is not changed",
+            self.current_function.take().map(std::ptr::from_ref),
+            Some(std::ptr::from_ref(def)),
+            "`current_function` is not changed",
         );
         self.emit_args("add", &[&"sp", &def.stack_size]);
-        if def.name() == "main" {
+        if def.is_main() {
             self.emit("xor eax, eax");
         }
         self.emit("ret");
@@ -164,7 +164,7 @@ impl<'a> Codegen<'a> {
                     self.expr(expr);
                     self.emit_args("mov", &[&"eax", &expr.slot]);
                 }
-                self.emit_args("add", &[&"sp", &self.current_function_stack_size.unwrap()]);
+                self.emit_args("add", &[&"sp", &self.current_function.unwrap().stack_size]);
                 self.emit("ret");
             }
         }

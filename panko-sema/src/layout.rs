@@ -95,6 +95,10 @@ pub enum Slot<'a> {
 }
 
 impl<'a> FunctionDefinition<'a> {
+    pub fn is_main(&self) -> bool {
+        self.name() == "main"
+    }
+
     pub fn name(&self) -> &'a str {
         self.reference.name()
     }
