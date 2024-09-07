@@ -90,12 +90,19 @@ pub(crate) struct ParamRefs<'a>(pub(crate) &'a [Reference<'a>]);
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 
+// TODO: this is a hack required by the `variant_types` derive macro
+type MaybeExpr<'a> = Option<Expression<'a>>;
+
+#[variant_types::derive_variant_types]
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
     Declaration(Declaration<'a>),
-    Expression(Option<Expression<'a>>),
+    Expression(MaybeExpr<'a>),
     Compound(CompoundStatement<'a>),
-    Return(Option<Expression<'a>>),
+    Return {
+        return_: Token<'a>,
+        expr: MaybeExpr<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -130,6 +137,51 @@ pub enum StorageDuration {
     // TODO: thread local
 }
 
+impl<'a> FunctionDefinition<'a> {
+    pub(crate) fn return_ty(&self) -> &'a QualifiedType<'a> {
+        match self.reference.ty.ty {
+            Type::Function(function_ty) => function_ty.return_type,
+            _ => unreachable!(),
+        }
+    }
+
+    pub(crate) fn loc(&self) -> Loc<'a> {
+        self.reference.loc()
+    }
+}
+
+impl<'a> Statement<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
+        match self {
+            Statement::Declaration(decl) => decl.reference.loc(),
+            Statement::Expression(expr) => expr.as_ref().unwrap().loc(),
+            Statement::Compound(_) => todo!(),
+            Statement::Return { return_, expr } => {
+                let loc = return_.loc();
+                if let Some(expr) = expr {
+                    loc.until(expr.loc())
+                }
+                else {
+                    loc
+                }
+            }
+        }
+    }
+
+    fn slice(&self) -> &'static str {
+        unimplemented!("TODO: `variant-types` requires this, but `pnako` does not really need this")
+    }
+}
+
+impl<'a> Expression<'a> {
+    fn loc(&self) -> Loc<'a> {
+        match self {
+            Expression::Name(name) => name.loc(),
+            Expression::Integer(token) => token.loc(),
+        }
+    }
+}
+
 impl<'a> Reference<'a> {
     pub(crate) fn name(&self) -> &'a str {
         self.ident().slice()
@@ -147,7 +199,7 @@ impl<'a> Reference<'a> {
         self.usage_location.loc()
     }
 
-    fn slice(&self) -> &'a str {
+    pub(crate) fn slice(&self) -> &'a str {
         self.name.slice()
     }
 
@@ -413,8 +465,10 @@ fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> State
             Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
         ast::Statement::Compound(stmts) =>
             Statement::Compound(resolve_compound_statement(scopes, stmts, OpenNewScope::Yes)),
-        ast::Statement::Return(expr) =>
-            Statement::Return(try { resolve_expr(scopes, expr.as_ref()?) }),
+        ast::Statement::Return { return_, expr } => Statement::Return {
+            return_: *return_,
+            expr: try { resolve_expr(scopes, expr.as_ref()?) },
+        },
     }
 }
 

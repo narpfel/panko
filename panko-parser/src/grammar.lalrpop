@@ -272,7 +272,7 @@ JumpStatement: ast::JumpStatement<'a> = {
     // goto Identifier ;
     // continue ;
     // break ;
-    "return" <Expression?> ";" => ast::JumpStatement::Return(<>),
+    <return_:"return"> <expr:Expression?> ";" => ast::JumpStatement::Return { <> },
 }
 
 ExpressionStatement: ast::ExpressionStatement<'a> = {

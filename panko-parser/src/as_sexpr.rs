@@ -203,7 +203,7 @@ impl AsSExpr for PrimaryBlock<'_> {
 impl AsSExpr for JumpStatement<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            JumpStatement::Return(expr) => SExpr::new("return").inherit(expr),
+            JumpStatement::Return { return_: _, expr } => SExpr::new("return").inherit(expr),
         }
     }
 }

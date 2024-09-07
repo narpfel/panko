@@ -69,7 +69,7 @@ impl AsSExpr for Statement<'_> {
             Statement::Declaration(decl) => decl.as_sexpr(),
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),
-            Statement::Return(expr) => SExpr::new("return").inherit(expr),
+            Statement::Return { return_: _, expr } => SExpr::new("return").inherit(expr),
         }
     }
 }

@@ -25,6 +25,7 @@ proc-macro2 = "1.0.86"
 quote = "1.0.37"
 regex = "1.10.6"
 syn = { version = "2.0.76", features = ["fold", "visit"] }
+variant-types = { git = "https://github.com/narpfel/crabbing-interpreters" }
 
 insta-cmd = "0.6.0"
 pretty_assertions = { version = "1.4.0", features = ["unstable"] }

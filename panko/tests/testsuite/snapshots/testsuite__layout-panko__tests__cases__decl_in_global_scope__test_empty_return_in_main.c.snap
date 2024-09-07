@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_global_scope/test_empty_return_in_main.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `return` statement without value in non-`void` function `main` returning `Int`
+   ╭─[panko/tests/cases/decl_in_global_scope/test_empty_return_in_main.c:2:5]
+   │
+ 1 │ int main() {
+   │     ──┬─  
+   │       ╰─── function `main` declared here
+ 2 │     return;
+   │     ───┬──  
+   │        ╰──── `return` statement here
+───╯

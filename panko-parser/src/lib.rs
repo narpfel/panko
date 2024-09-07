@@ -365,7 +365,10 @@ enum PrimaryBlock<'a> {
 
 #[derive(Debug, Clone, Copy)]
 enum JumpStatement<'a> {
-    Return(Option<Expression<'a>>),
+    Return {
+        return_: Token<'a>,
+        expr: Option<Expression<'a>>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]

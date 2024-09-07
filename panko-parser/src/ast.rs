@@ -159,6 +159,7 @@ pub enum Type<'a> {
     Arithmetic(Arithmetic),
     Pointer(&'a QualifiedType<'a>),
     Function(FunctionType<'a>),
+    Void,
     // TODO
 }
 
@@ -220,7 +221,10 @@ pub enum Statement<'a> {
     Declaration(Declaration<'a>),
     Expression(Option<Expression<'a>>),
     Compound(CompoundStatement<'a>),
-    Return(Option<Expression<'a>>),
+    Return {
+        return_: Token<'a>,
+        expr: Option<Expression<'a>>,
+    },
 }
 
 impl<'a> ExternalDeclaration<'a> {
@@ -299,6 +303,7 @@ impl<'a> Type<'a> {
             Type::Arithmetic(arithmetic) => arithmetic.size(),
             Type::Pointer(_) => 8,
             Type::Function(_) => unreachable!("functions are not objects and don’t have a size"),
+            Type::Void => unreachable!("void is not an object and doesn’t have a size"),
         }
     }
 
@@ -315,6 +320,7 @@ impl fmt::Display for Type<'_> {
             Type::Arithmetic(Arithmetic::Char) => write!(f, "char"),
             Type::Pointer(pointee) => write!(f, "ptr<{pointee}>"),
             Type::Function(function) => write!(f, "{function}"),
+            Type::Void => write!(f, "void"),
         }
     }
 }
@@ -423,7 +429,8 @@ impl<'a> Statement<'a> {
             UnlabeledStatement::ExpressionStatement(expr) => Self::Expression(expr.0),
             UnlabeledStatement::PrimaryBlock(PrimaryBlock::CompoundStatement(block)) =>
                 Self::Compound(CompoundStatement::from_parse_tree(sess, block)),
-            UnlabeledStatement::JumpStatement(JumpStatement::Return(expr)) => Self::Return(*expr),
+            UnlabeledStatement::JumpStatement(JumpStatement::Return { return_, expr }) =>
+                Self::Return { return_: *return_, expr: *expr },
         }
     }
 }

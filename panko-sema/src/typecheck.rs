@@ -1,3 +1,4 @@
+use ariadne::Color::Blue;
 use ariadne::Color::Red;
 use panko_lex::Loc;
 use panko_lex::Token;
@@ -10,6 +11,7 @@ use panko_parser::ast::Session;
 use panko_parser::ast::Type;
 use panko_parser::sexpr_builder::AsSExpr as _;
 use panko_report::Report;
+use variant_types::IntoVariant as _;
 
 use crate::scope;
 use crate::scope::ParamRefs;
@@ -28,6 +30,21 @@ enum Diagnostic<'a> {
         at: TypedExpression<'a>,
         from_ty: Type<'a>,
         to_ty: Type<'a>,
+    },
+
+    #[error("`{return_}` statement without value in non-`void` function `{name}` returning `{return_ty}`")]
+    #[diagnostics(
+        at(colour = Red, label = "`{return_}` statement here"),
+        function(colour = Blue, label = "function `{name}` declared here"),
+    )]
+    #[with(
+        return_ = at.return_,
+        name = function.reference,
+        return_ty = function.return_ty(),
+    )]
+    ReturnWithoutValueInNonVoidFunction {
+        at: scope::StatementTypes::Return<'a>,
+        function: scope::FunctionDefinition<'a>,
     },
 }
 
@@ -135,17 +152,13 @@ fn typeck_function_definition<'a>(
     sess: &'a Session<'a>,
     definition: &scope::FunctionDefinition<'a>,
 ) -> FunctionDefinition<'a> {
-    let return_ty = match definition.reference.ty.ty {
-        Type::Function(function_ty) => function_ty.return_type,
-        _ => unreachable!(),
-    };
     FunctionDefinition {
         reference: definition.reference,
         params: definition.params,
         storage_class: definition.storage_class,
         inline: definition.inline,
         noreturn: definition.noreturn,
-        body: typeck_compound_statement(sess, &definition.body, return_ty),
+        body: typeck_compound_statement(sess, &definition.body, definition),
     }
 }
 
@@ -163,13 +176,13 @@ fn typeck_declaration<'a>(
 fn typeck_compound_statement<'a>(
     sess: &'a Session<'a>,
     stmt: &scope::CompoundStatement<'a>,
-    return_ty: &QualifiedType<'a>,
+    function: &scope::FunctionDefinition<'a>,
 ) -> CompoundStatement<'a> {
     CompoundStatement(
         sess.alloc_slice_fill_iter(
             stmt.0
                 .iter()
-                .map(|stmt| typeck_statement(sess, stmt, return_ty)),
+                .map(|stmt| typeck_statement(sess, stmt, function)),
         ),
     )
 }
@@ -177,7 +190,7 @@ fn typeck_compound_statement<'a>(
 fn typeck_statement<'a>(
     sess: &'a Session<'a>,
     stmt: &scope::Statement<'a>,
-    return_ty: &QualifiedType<'a>,
+    function: &scope::FunctionDefinition<'a>,
 ) -> Statement<'a> {
     match stmt {
         scope::Statement::Declaration(decl) =>
@@ -185,12 +198,24 @@ fn typeck_statement<'a>(
         scope::Statement::Expression(expr) =>
             Statement::Expression(try { typeck_expression(expr.as_ref()?) }),
         scope::Statement::Compound(stmt) =>
-            Statement::Compound(typeck_compound_statement(sess, stmt, return_ty)),
-        scope::Statement::Return(expr) => {
+            Statement::Compound(typeck_compound_statement(sess, stmt, function)),
+        scope::Statement::Return { return_: _, expr } => {
             let expr = expr.as_ref().map(|expr| typeck_expression(expr));
             let expr = match expr {
-                Some(expr) => Some(convert_as_if_by_assignment(sess, *return_ty, expr)),
-                None => todo!("assert we are in a `void` function"),
+                Some(expr) => Some(convert_as_if_by_assignment(
+                    sess,
+                    *function.return_ty(),
+                    expr,
+                )),
+                None => {
+                    if !matches!(function.return_ty().ty, Type::Void) {
+                        sess.emit(Diagnostic::ReturnWithoutValueInNonVoidFunction {
+                            at: stmt.into_variant(),
+                            function: *function,
+                        });
+                    }
+                    None
+                }
             };
             Statement::Return(expr)
         }
