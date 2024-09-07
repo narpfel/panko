@@ -80,8 +80,8 @@ impl<'a> Codegen<'a> {
         self.label(def.name());
 
         // check that sp is correctly aligned
-        self.emit("lea rax, [rsp + 8]");
-        self.emit("and rax, 0xf");
+        self.emit("lea r10, [rsp + 8]");
+        self.emit("and r10, 0xf");
         self.emit(&format!("jnz .L.{}.entry.sp_unaligned", def.name()));
 
         self.block(1);
