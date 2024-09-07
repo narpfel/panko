@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_return_in_compound_statement_in_main.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (a~1 `int` @0) (42 `int` @0))
+         (compound-statement
+            (definition (a~2 `int` @4) (27 `int` @4))
+            (return (a~2 `int` @4)))
+         (return (a~1 `int` @0)))))
+
+----- stderr -----
