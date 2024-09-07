@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (tentative-definition tentative~0 `Int` ∅)
-   (tentative-definition tentative~0 `Int` ∅)
-   (tentative-definition tentative~0 `Int` ∅))
+   (tentative-definition tentative~0 `int` ∅)
+   (tentative-definition tentative~0 `int` ∅)
+   (tentative-definition tentative~0 `int` ∅))
 
 ----- stderr -----

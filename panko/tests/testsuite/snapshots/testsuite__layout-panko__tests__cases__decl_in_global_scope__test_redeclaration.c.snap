@@ -11,13 +11,13 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (declaration (f~0 `fn() -> Int` (static f)) ∅)
-   (declaration (f~0 `fn() -> Int` (static f)) ∅)
+   (declaration (f~0 `fn() -> int` (static f)) ∅)
+   (declaration (f~0 `fn() -> int` (static f)) ∅)
    (function-definition
-      (f~0 `fn() -> Int` (static f))
+      (f~0 `fn() -> int` (static f))
       (compound-statement
-         (return (42 `Int` @0))))
-   (declaration (f~0 `fn() -> Int` (static f)) ∅)
-   (declaration (f~0 `fn() -> Int` (static f)) ∅))
+         (return (42 `int` @0))))
+   (declaration (f~0 `fn() -> int` (static f)) ∅)
+   (declaration (f~0 `fn() -> int` (static f)) ∅))
 
 ----- stderr -----

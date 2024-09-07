@@ -23,15 +23,15 @@ Error: duplicate definition for `x`
    │               ╰── duplicate definition
 ───╯
 
-Error: redeclaration of `x` with different type: `Int` vs. `Int const`
+Error: redeclaration of `x` with different type: `int` vs. `int const`
    ╭─[panko/tests/cases/decl_in_function/test_error_redefinition_of_local_with_different_type.c:3:15]
    │
  2 │     int x = 42;
    │         ┬  
-   │         ╰── previously declared here with type `Int`
+   │         ╰── previously declared here with type `int`
  3 │     int const x = 27;
    │               ┬  
-   │               ╰── new declaration with different type `Int const`
+   │               ╰── new declaration with different type `int const`
 ───╯
 
 Error: duplicate definition for `a`
@@ -45,12 +45,12 @@ Error: duplicate definition for `a`
    │          ╰── duplicate definition
 ───╯
 
-Error: redeclaration of `a` with different type: `Int` vs. `char`
+Error: redeclaration of `a` with different type: `int` vs. `char`
    ╭─[panko/tests/cases/decl_in_function/test_error_redefinition_of_local_with_different_type.c:5:10]
    │
  4 │     int a = 0;
    │         ┬  
-   │         ╰── previously declared here with type `Int`
+   │         ╰── previously declared here with type `int`
  5 │     char a = 1;
    │          ┬  
    │          ╰── new declaration with different type `char`

@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (tentative-definition (x~0 `Int` (static x)) ∅)
-   (definition (y~1 `Int` (static y)) (42 `Int` @0)))
+   (tentative-definition (x~0 `int` (static x)) ∅)
+   (definition (y~1 `int` (static y)) (42 `int` @0)))
 
 ----- stderr -----

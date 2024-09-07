@@ -12,24 +12,24 @@ exit_code: 0
 ----- stdout -----
 (translation-unit
    (function-definition
-      a~0 `fn() -> Int`
+      a~0 `fn() -> int`
       (compound-statement
-         (definition p~1 `ptr<Int>` 0)
-         (return (name p~1 `ptr<Int>`))))
+         (definition p~1 `ptr<int>` 0)
+         (return (name p~1 `ptr<int>`))))
    (function-definition
-      b~2 `fn() -> Int`
+      b~2 `fn() -> int`
       (compound-statement
          (definition p~3 `ptr<char const>` 0)
          (return (name p~3 `ptr<char const>`))))
    (function-definition
-      c~4 `fn() -> ptr<Int>`
+      c~4 `fn() -> ptr<int>`
       (compound-statement
-         (definition x~5 `Int` 42)
-         (return (name x~5 `Int`))))
+         (definition x~5 `int` 42)
+         (return (name x~5 `int`))))
    (function-definition
       d~6 `fn() -> ptr<char const>`
       (compound-statement
-         (definition x~7 `Int` 42)
-         (return (name x~7 `Int`)))))
+         (definition x~7 `int` 42)
+         (return (name x~7 `int`)))))
 
 ----- stderr -----

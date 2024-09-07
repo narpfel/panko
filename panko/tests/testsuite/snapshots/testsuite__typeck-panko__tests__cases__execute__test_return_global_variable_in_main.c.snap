@@ -11,10 +11,10 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (definition return_value~0 `Int` (5 `Int`))
+   (definition return_value~0 `int` (5 `int`))
    (function-definition
-      main~1 `fn() -> Int`
+      main~1 `fn() -> int`
       (compound-statement
-         (return (return_value~0 `Int`)))))
+         (return (return_value~0 `int`)))))
 
 ----- stderr -----

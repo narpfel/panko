@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit
    (function-definition
-      (main~0 `fn() -> Int` (static main))
+      (main~0 `fn() -> int` (static main))
       (compound-statement)))
 
 ----- stderr -----

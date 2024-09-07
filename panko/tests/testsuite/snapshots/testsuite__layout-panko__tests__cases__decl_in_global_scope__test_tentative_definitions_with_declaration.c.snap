@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (tentative-definition (value~0 `Int` (static value)) ∅)
-   (definition (value~0 `Int` (static value)) (42 `Int` @0))
-   (tentative-definition (value~0 `Int` (static value)) ∅))
+   (tentative-definition (value~0 `int` (static value)) ∅)
+   (definition (value~0 `int` (static value)) (42 `int` @0))
+   (tentative-definition (value~0 `int` (static value)) ∅))
 
 ----- stderr -----

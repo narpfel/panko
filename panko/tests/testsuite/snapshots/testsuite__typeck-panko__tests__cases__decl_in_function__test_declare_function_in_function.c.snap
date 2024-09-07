@@ -12,10 +12,10 @@ exit_code: 0
 ----- stdout -----
 (translation-unit
    (function-definition
-      f~0 `fn() -> Int`
+      f~0 `fn() -> int`
       (compound-statement
-         (declaration g~1 `fn() -> Int` ∅)
-         (declaration g~1 `fn() -> Int` ∅)
-         (return (42 `Int`)))))
+         (declaration g~1 `fn() -> int` ∅)
+         (declaration g~1 `fn() -> int` ∅)
+         (return (42 `int`)))))
 
 ----- stderr -----

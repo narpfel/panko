@@ -11,17 +11,17 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (declaration (a~0 `fn() -> Int` (static a)) ∅)
-   (declaration (b~1 `fn(∅: Int) -> Int` (static b)) ∅)
-   (declaration (c~2 `fn(a: Int) -> Int` (static c)) ∅)
-   (declaration (d~3 `fn(∅: Int, ∅: Int) -> Int` (static d)) ∅)
-   (declaration (e~4 `fn() -> ptr<Int>` (static e)) ∅)
-   (tentative-definition (f~5 `ptr<fn(∅: Int) -> Int>` (static f)) ∅)
-   (tentative-definition (g~6 `ptr<fn(∅: ptr<Int>) -> Int>` (static g)) ∅)
-   (tentative-definition (h~7 `ptr<fn(∅: fn() -> Int) -> Int>` (static h)) ∅)
-   (declaration (i~8 `fn(a: fn() -> Int) -> Int` (static i)) ∅)
-   (declaration (j~9 `fn(a: fn(∅: Int) -> Int) -> Int` (static j)) ∅)
-   (declaration (k~10 `fn(a: fn(a: Int) -> Int) -> Int` (static k)) ∅)
-   (declaration (l~11 `fn(∅: Int, ∅: ptr<fn() -> Int>) -> Int` (static l)) ∅))
+   (declaration (a~0 `fn() -> int` (static a)) ∅)
+   (declaration (b~1 `fn(∅: int) -> int` (static b)) ∅)
+   (declaration (c~2 `fn(a: int) -> int` (static c)) ∅)
+   (declaration (d~3 `fn(∅: int, ∅: int) -> int` (static d)) ∅)
+   (declaration (e~4 `fn() -> ptr<int>` (static e)) ∅)
+   (tentative-definition (f~5 `ptr<fn(∅: int) -> int>` (static f)) ∅)
+   (tentative-definition (g~6 `ptr<fn(∅: ptr<int>) -> int>` (static g)) ∅)
+   (tentative-definition (h~7 `ptr<fn(∅: fn() -> int) -> int>` (static h)) ∅)
+   (declaration (i~8 `fn(a: fn() -> int) -> int` (static i)) ∅)
+   (declaration (j~9 `fn(a: fn(∅: int) -> int) -> int` (static j)) ∅)
+   (declaration (k~10 `fn(a: fn(a: int) -> int) -> int` (static k)) ∅)
+   (declaration (l~11 `fn(∅: int, ∅: ptr<fn() -> int>) -> int` (static l)) ∅))
 
 ----- stderr -----

@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (tentative-definition x~0 `Int` ∅)
-   (definition y~1 `Int` (42 `Int`)))
+   (tentative-definition x~0 `int` ∅)
+   (definition y~1 `int` (42 `int`)))
 
 ----- stderr -----

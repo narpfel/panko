@@ -328,9 +328,9 @@ impl fmt::Display for Type<'_> {
 impl fmt::Display for Integral {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(signedness) = self.signedness {
-            write!(f, "{signedness:?}")?;
+            write!(f, "{signedness}")?;
         }
-        write!(f, "{:?}", self.kind)
+        write!(f, "{}", self.kind)
     }
 }
 
@@ -452,6 +452,27 @@ impl IntegralKind {
             IntegralKind::Int => 4,
             IntegralKind::Long => 8,
             IntegralKind::LongLong => 8,
+        }
+    }
+}
+
+impl fmt::Display for IntegralKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            IntegralKind::Char => write!(f, "char"),
+            IntegralKind::Short => write!(f, "short"),
+            IntegralKind::Int => write!(f, "int"),
+            IntegralKind::Long => write!(f, "long"),
+            IntegralKind::LongLong => write!(f, "long long"),
+        }
+    }
+}
+
+impl fmt::Display for Signedness {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Signedness::Signed => write!(f, "signed"),
+            Signedness::Unsigned => write!(f, "unsigned"),
         }
     }
 }

@@ -12,8 +12,8 @@ exit_code: 0
 ----- stdout -----
 (translation-unit
    (function-definition
-      (main~0 `fn() -> Int` (static main))
+      (main~0 `fn() -> int` (static main))
       (compound-statement
-         (return (27 `Int` @0)))))
+         (return (27 `int` @0)))))
 
 ----- stderr -----

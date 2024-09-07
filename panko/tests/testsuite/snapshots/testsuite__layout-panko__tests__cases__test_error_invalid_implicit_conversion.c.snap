@@ -12,50 +12,50 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: invalid implicit conversion from `Int` to `ptr<Int>`
+Error: invalid implicit conversion from `int` to `ptr<int>`
    ╭─[panko/tests/cases/test_error_invalid_implicit_conversion.c:2:14]
    │
  2 │     int* p = 0;
    │              ┬  
-   │              ╰── this is of type `Int`, which cannot be implicitly converted to `ptr<Int>`
+   │              ╰── this is of type `int`, which cannot be implicitly converted to `ptr<int>`
 ───╯
 
-Error: invalid implicit conversion from `ptr<Int>` to `Int`
+Error: invalid implicit conversion from `ptr<int>` to `int`
    ╭─[panko/tests/cases/test_error_invalid_implicit_conversion.c:3:12]
    │
  3 │     return p;
    │            ┬  
-   │            ╰── this is of type `ptr<Int>`, which cannot be implicitly converted to `Int`
+   │            ╰── this is of type `ptr<int>`, which cannot be implicitly converted to `int`
 ───╯
 
-Error: invalid implicit conversion from `Int` to `ptr<char const>`
+Error: invalid implicit conversion from `int` to `ptr<char const>`
    ╭─[panko/tests/cases/test_error_invalid_implicit_conversion.c:7:21]
    │
  7 │     char const* p = 0;
    │                     ┬  
-   │                     ╰── this is of type `Int`, which cannot be implicitly converted to `ptr<char const>`
+   │                     ╰── this is of type `int`, which cannot be implicitly converted to `ptr<char const>`
 ───╯
 
-Error: invalid implicit conversion from `ptr<char const>` to `Int`
+Error: invalid implicit conversion from `ptr<char const>` to `int`
    ╭─[panko/tests/cases/test_error_invalid_implicit_conversion.c:8:12]
    │
  8 │     return p;
    │            ┬  
-   │            ╰── this is of type `ptr<char const>`, which cannot be implicitly converted to `Int`
+   │            ╰── this is of type `ptr<char const>`, which cannot be implicitly converted to `int`
 ───╯
 
-Error: invalid implicit conversion from `Int` to `ptr<Int>`
+Error: invalid implicit conversion from `int` to `ptr<int>`
     ╭─[panko/tests/cases/test_error_invalid_implicit_conversion.c:13:12]
     │
  13 │     return x;
     │            ┬  
-    │            ╰── this is of type `Int`, which cannot be implicitly converted to `ptr<Int>`
+    │            ╰── this is of type `int`, which cannot be implicitly converted to `ptr<int>`
 ────╯
 
-Error: invalid implicit conversion from `Int` to `ptr<char const>`
+Error: invalid implicit conversion from `int` to `ptr<char const>`
     ╭─[panko/tests/cases/test_error_invalid_implicit_conversion.c:18:12]
     │
  18 │     return x;
     │            ┬  
-    │            ╰── this is of type `Int`, which cannot be implicitly converted to `ptr<char const>`
+    │            ╰── this is of type `int`, which cannot be implicitly converted to `ptr<char const>`
 ────╯
