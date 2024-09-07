@@ -73,7 +73,7 @@ fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
         expected_return_codes.len() <= 1,
         "test source invalid: more than one return code set: {expected_return_codes:?}",
     );
-    let expected_return_code = expected_return_codes.first().copied();
+    let expected_return_code = expected_return_codes.first().copied().unwrap_or(0);
 
     let filename = relative_to(
         &filename,
@@ -111,10 +111,8 @@ fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
         || unreachable!("`ExitStatus::code()` can only be `None` on Unix"),
     );
 
-    if let Some(expected_return_code) = expected_return_code {
-        assert_eq!(
-            expected_return_code, actual_exit_code,
-            "test program did not exit with expected return code {expected_return_code}",
-        );
-    }
+    assert_eq!(
+        expected_return_code, actual_exit_code,
+        "test program did not exit with expected return code {expected_return_code}",
+    );
 }
