@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_return_multiple_local_variables_in_main.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (a~1 `int` @0) (27 `int` @0))
+         (definition (b~2 `int` @4) (42 `int` @4))
+         (expression (123 `int` @8))
+         (return (b~2 `int` @4)))))
+
+----- stderr -----
