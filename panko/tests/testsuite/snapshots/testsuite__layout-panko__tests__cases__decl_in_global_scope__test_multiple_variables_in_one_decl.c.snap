@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_global_scope/test_multiple_variables_in_one_decl.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (tentative-definition (a~0 `Int` (static a)) ∅)
+   (tentative-definition (b~1 `Int` (static b)) ∅)
+   (tentative-definition (c~2 `Int` (static c)) ∅)
+   (tentative-definition (d~3 `ptr<Int>` (static d)) ∅)
+   (tentative-definition (e~4 `ptr<Int>` (static e)) ∅)
+   (tentative-definition (f~5 `Int` (static f)) ∅)
+   (tentative-definition (g~6 `Int` (static g)) ∅)
+   (declaration (h~7 `fn() -> Int` (static h)) ∅)
+   (declaration (i~8 `fn(∅: Int) -> Int` (static i)) ∅)
+   (tentative-definition (j~9 `Int` (static j)) ∅))
+
+----- stderr -----

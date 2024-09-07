@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_function/test_declare_function_in_function.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (f~0 `fn() -> Int` (static f))
+      (compound-statement
+         (declaration (g~1 `fn() -> Int` (static g)) ∅)
+         (declaration (g~1 `fn() -> Int` (static g)) ∅)
+         (return (42 `Int` @0)))))
+
+----- stderr -----

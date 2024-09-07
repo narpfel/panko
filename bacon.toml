@@ -58,7 +58,7 @@ command = [
     "--profile=clif",
     "--color", "always",
     "--",
-    "--print=typeck",
+    "--print=layout",
     "--print=codegen",
     "-o/tmp/main.S",
     "c/main.c",

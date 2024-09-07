@@ -1,0 +1,18 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_global_scope/test_cv_qualifiers.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (tentative-definition (a~0 `Int volatile` (static a)) ∅)
+   (tentative-definition (b~1 `Int const volatile` (static b)) ∅)
+   (tentative-definition (c~2 `Int const volatile` (static c)) ∅))
+
+----- stderr -----

@@ -50,14 +50,12 @@ pub struct Declaration<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct FunctionDefinition<'a> {
-    reference: Reference<'a>,
-    params: ParamRefs<'a>,
-    pub storage_class: Option<cst::StorageClassSpecifier<'a>>,
-    #[expect(unused)]
-    inline: Option<cst::FunctionSpecifier<'a>>,
-    #[expect(unused)]
-    noreturn: Option<cst::FunctionSpecifier<'a>>,
-    pub body: CompoundStatement<'a>,
+    pub(crate) reference: Reference<'a>,
+    pub(crate) params: ParamRefs<'a>,
+    pub(crate) storage_class: Option<cst::StorageClassSpecifier<'a>>,
+    pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
+    pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
+    pub(crate) body: CompoundStatement<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -73,7 +71,7 @@ pub enum Statement<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct TypedExpression<'a> {
-    ty: QualifiedType<'a>,
+    pub(crate) ty: QualifiedType<'a>,
     pub expr: Expression<'a>,
 }
 
@@ -86,15 +84,8 @@ pub enum Expression<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct ImplicitConversion<'a> {
-    #[expect(unused)]
-    ty: Type<'a>,
-    from: &'a TypedExpression<'a>,
-}
-
-impl<'a> FunctionDefinition<'a> {
-    pub fn name(&self) -> &'a str {
-        self.reference.name()
-    }
+    pub(crate) ty: Type<'a>,
+    pub(crate) from: &'a TypedExpression<'a>,
 }
 
 impl TypedExpression<'_> {

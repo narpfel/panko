@@ -7,20 +7,21 @@ use indexmap::IndexMap;
 use indexmap::IndexSet;
 use itertools::Itertools as _;
 use panko_parser::ast::Type;
+use panko_sema::layout::CompoundStatement;
+use panko_sema::layout::Declaration;
+use panko_sema::layout::Expression;
+use panko_sema::layout::ExternalDeclaration;
+use panko_sema::layout::FunctionDefinition;
+use panko_sema::layout::LayoutedExpression;
+use panko_sema::layout::Statement;
+use panko_sema::layout::TranslationUnit;
 use panko_sema::scope::RefKind;
-use panko_sema::typecheck::CompoundStatement;
-use panko_sema::typecheck::Declaration;
-use panko_sema::typecheck::Expression;
-use panko_sema::typecheck::ExternalDeclaration;
-use panko_sema::typecheck::FunctionDefinition;
-use panko_sema::typecheck::Statement;
-use panko_sema::typecheck::TranslationUnit;
-use panko_sema::typecheck::TypedExpression;
 
 #[derive(Debug, Default)]
 struct Codegen<'a> {
     tentative_definitions: IndexMap<&'a str, Type<'a>>,
     defined: IndexSet<&'a str>,
+    current_function: Option<&'a FunctionDefinition<'a>>,
     code: String,
 }
 
@@ -67,7 +68,7 @@ impl<'a> Codegen<'a> {
         .unwrap();
     }
 
-    fn function_definition(&mut self, def: &FunctionDefinition) {
+    fn function_definition(&mut self, def: &'a FunctionDefinition<'a>) {
         self.block(2);
         assert!(
             def.storage_class.is_none(),
@@ -77,11 +78,30 @@ impl<'a> Codegen<'a> {
         self.directive("text", &[]);
         self.directive("type", &[&def.name(), &"@function"]);
         self.label(def.name());
+
+        // check that sp is correctly aligned
+        self.emit("lea r10, [rsp + 8]");
+        self.emit("and r10, 0xf");
+        self.emit(&format!("jnz .L.{}.entry.sp_unaligned", def.name()));
+
+        self.block(1);
+        self.emit_args("sub", &[&"sp", &def.stack_size]);
+        self.current_function = Some(def);
         self.compound_statement(def.body);
-        if def.name() == "main" {
+        assert_eq!(
+            self.current_function.take().map(std::ptr::from_ref),
+            Some(std::ptr::from_ref(def)),
+            "`current_function` is not changed",
+        );
+        self.emit_args("add", &[&"sp", &def.stack_size]);
+        if def.is_main() {
             self.emit("xor eax, eax");
         }
         self.emit("ret");
+
+        self.block(1);
+        self.label(&format!(".L.{}.entry.sp_unaligned", def.name()));
+        self.emit("int3");
     }
 
     fn object_definition(&mut self, name: &str, ty: Type, initialiser: Option<&Expression>) {
@@ -130,29 +150,31 @@ impl<'a> Codegen<'a> {
 
     fn stmt(&mut self, stmt: &Statement) {
         match stmt {
-            Statement::Declaration(_) => todo!(),
+            Statement::Declaration(decl) =>
+                if let Some(initialiser) = decl.initialiser.as_ref() {
+                    self.expr(initialiser)
+                },
             Statement::Expression(expr) =>
                 if let Some(expr) = expr.as_ref() {
                     self.expr(expr);
-                    self.emit("pop rax");
                 },
             Statement::Compound(stmts) => self.compound_statement(*stmts),
             Statement::Return(expr) => {
                 if let Some(expr) = expr.as_ref() {
                     self.expr(expr);
-                    self.emit("pop rax");
+                    self.emit_args("mov", &[&"eax", &expr.slot]);
                 }
+                self.emit_args("add", &[&"sp", &self.current_function.unwrap().stack_size]);
                 self.emit("ret");
             }
         }
     }
 
-    fn expr(&mut self, expr: &TypedExpression) {
+    fn expr(&mut self, expr: &LayoutedExpression) {
         match expr.expr {
-            Expression::Name(_) => todo!(),
+            Expression::Name(_reference) => (), // already in memory
             Expression::Integer(token) => {
-                self.emit_args("mov", &[&"eax", &token.slice()]);
-                self.emit("push rax");
+                self.emit_args("mov", &[&expr.slot, &token.slice()]);
             }
             Expression::ImplicitConversion(_) => todo!(),
         }

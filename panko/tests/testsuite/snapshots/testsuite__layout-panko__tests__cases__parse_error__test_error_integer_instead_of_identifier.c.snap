@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/parse_error/test_error_integer_instead_of_identifier.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unrecognised token
+   ╭─[panko/tests/cases/parse_error/test_error_integer_instead_of_identifier.c:1:5]
+   │
+ 1 │ int 42;
+   │     ─┬  
+   │      ╰── expected one of the following token kinds: [";", "*", "(", "auto", "constexpr", "extern", "register", "static", "thread_local", "typedef", "void", "char", "short", "int", "long", "float", "double", "signed", "unsigned", "bool", "_Complex", "_Decimal32", "_Decimal64", "_Decimal128", "const", "restrict", "volatile", "_Atomic", "inline", "_Noreturn", Identifier]
+───╯

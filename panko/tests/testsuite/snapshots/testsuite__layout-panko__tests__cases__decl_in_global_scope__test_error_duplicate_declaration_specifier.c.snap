@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_global_scope/test_error_duplicate_declaration_specifier.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: declaration with duplicate `const` declaration specifier
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_duplicate_declaration_specifier.c:1:11]
+   │
+ 1 │ int const const x;
+   │     ──┬── ──┬──  
+   │       │     ╰──── help: remove this `const`
+   │       │          
+   │       ╰────────── first `const` here
+───╯

@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_global_scope/test_pointer.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (tentative-definition (x~0 `ptr<Int>` (static x)) ∅)
+   (tentative-definition (y~1 `ptr<Int>` (static y)) ∅)
+   (tentative-definition (a~2 `ptr<Int const>` (static a)) ∅)
+   (tentative-definition (b~3 `ptr<Int> const` (static b)) ∅)
+   (tentative-definition (c~4 `ptr<Int const> const` (static c)) ∅)
+   (tentative-definition (d~5 `ptr<Int const>` (static d)) ∅)
+   (tentative-definition (e~6 `ptr<Int const> const` (static e)) ∅)
+   (tentative-definition (f~7 `ptr<ptr<Int>>` (static f)) ∅)
+   (tentative-definition (g~8 `ptr<ptr<Int const>>` (static g)) ∅)
+   (tentative-definition (h~9 `ptr<ptr<Int>> const` (static h)) ∅)
+   (tentative-definition (i~10 `ptr<ptr<Int> const>` (static i)) ∅))
+
+----- stderr -----

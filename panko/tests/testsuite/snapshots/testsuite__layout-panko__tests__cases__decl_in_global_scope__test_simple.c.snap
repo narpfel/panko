@@ -1,0 +1,17 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_global_scope/test_simple.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (tentative-definition (x~0 `Int` (static x)) ∅)
+   (definition (y~1 `Int` (static y)) (42 `Int` @0)))
+
+----- stderr -----

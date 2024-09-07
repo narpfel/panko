@@ -16,6 +16,7 @@ use panko_parser::sexpr_builder::AsSExpr as _;
 enum Step {
     Scopes,
     Typeck,
+    Layout,
     Codegen,
     Assemble,
     Link,
@@ -68,6 +69,15 @@ fn main() -> Result<()> {
         println!("{}", translation_unit.as_sexpr());
     }
     if let Some(Step::Typeck) = args.stop_after {
+        return Ok(());
+    }
+
+    let translation_unit = panko_sema::layout(bump, translation_unit);
+
+    if args.print.contains(&Step::Layout) {
+        println!("{}", translation_unit.as_sexpr());
+    }
+    if let Some(Step::Layout) = args.stop_after {
         return Ok(());
     }
 

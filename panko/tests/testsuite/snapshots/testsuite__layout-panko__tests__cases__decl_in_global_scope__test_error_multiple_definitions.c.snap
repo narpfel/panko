@@ -1,0 +1,36 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_global_scope/test_error_multiple_definitions.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: duplicate definition for `value`
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_multiple_definitions.c:2:5]
+   │
+ 1 │ int value = 42;
+   │     ──┬──  
+   │       ╰──── previously defined here
+ 2 │ int value = 27;
+   │     ──┬──  
+   │       ╰──── duplicate definition
+───╯
+
+Error: duplicate definition for `f`
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_multiple_definitions.c:8:5]
+   │
+ 4 │ int f() {
+   │     ┬  
+   │     ╰── previously defined here
+   │ 
+ 8 │ int f() {
+   │     ┬  
+   │     ╰── duplicate definition
+───╯
