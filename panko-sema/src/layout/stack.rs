@@ -86,8 +86,7 @@ impl<'a> Stack<'a> {
                     StorageDuration::Automatic =>
                         maybe_slot.unwrap_or_else(|| self.slots.add_slot(ty.ty)),
                 };
-                let reference = *entry.insert(Reference { name, ty, id, kind, slot });
-                reference
+                *entry.insert(Reference { name, ty, id, kind, slot })
             }
         }
     }
