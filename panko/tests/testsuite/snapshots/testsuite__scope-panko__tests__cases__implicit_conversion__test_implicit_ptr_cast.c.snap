@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/implicit_conversion/test_implicit_ptr_cast.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      const_can_be_added~0 `fn() -> ptr<int const>`
+      (compound-statement
+         (definition p~1 `ptr<int>` ∅)
+         (return (name p~1 `ptr<int>`))))
+   (function-definition
+      const_can_be_removed~2 `fn() -> ptr<int>`
+      (compound-statement
+         (definition p~3 `ptr<int const>` ∅)
+         (return (name p~3 `ptr<int const>`))))
+   (function-definition
+      cast_between_completely_different_ptr_types~4 `fn() -> ptr<ptr<char>>`
+      (compound-statement
+         (definition p~5 `ptr<int>` ∅)
+         (return (name p~5 `ptr<int>`)))))
+
+----- stderr -----
