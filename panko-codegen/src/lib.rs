@@ -215,10 +215,27 @@ impl<'a> Codegen<'a> {
             Expression::Integer(token) => {
                 self.emit_args("mov", &[&expr.typed_slot(), &token.slice()]);
             }
-            Expression::NoopTypeConversion(_) => todo!(),
-            Expression::Truncate(_) => todo!(),
-            Expression::SignExtend(_) => todo!(),
-            Expression::ZeroExtend(_) => todo!(),
+            Expression::NoopTypeConversion(inner) => {
+                assert_eq!(expr.ty.ty.size(), inner.ty.ty.size());
+                self.expr(inner);
+                self.emit_args("mov", &[&Rax.typed(inner), &inner.typed_slot()]);
+                self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
+            }
+            Expression::Truncate(truncate) => {
+                self.expr(truncate);
+                self.emit_args("mov", &[&Rax.typed(truncate), &truncate.typed_slot()]);
+                self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
+            }
+            Expression::SignExtend(sign_extend) => {
+                self.expr(sign_extend);
+                self.emit_args("movsx", &[&Rax.typed(expr), &sign_extend.typed_slot()]);
+                self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
+            }
+            Expression::ZeroExtend(zero_extend) => {
+                self.expr(zero_extend);
+                self.emit_args("movzx", &[&Rax.typed(expr), &zero_extend.typed_slot()]);
+                self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
+            }
         }
     }
 }

@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/test_char_local_variable.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `char` (truncate (1 `int`) `char`))
+         (definition b~2 `char` (truncate (27 `int`) `char`))
+         (definition c~3 `char` (truncate (3 `int`) `char`))
+         (definition d~4 `char` (truncate (4 `int`) `char`))
+         (return (sign-extend (b~2 `char`) `int`)))))
+
+----- stderr -----
