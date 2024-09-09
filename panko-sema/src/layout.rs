@@ -84,7 +84,7 @@ pub struct Reference<'a> {
     slot: Slot<'a>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Slot<'a> {
     Static(&'a str),
     Automatic(u64),
@@ -248,10 +248,10 @@ fn layout_expression_keep_slot<'a>(
         }
         typecheck::Expression::Integer(integer) =>
             (stack.temporary(ty.ty), Expression::Integer(integer)),
-        typecheck::Expression::NoopTypeConversion(expr) => (
-            stack.temporary(ty.ty),
-            Expression::NoopTypeConversion(bump.alloc(layout_expression(stack, bump, expr))),
-        ),
+        typecheck::Expression::NoopTypeConversion(expr) => {
+            let expr = layout_expression(stack, bump, expr);
+            (expr.slot, Expression::NoopTypeConversion(bump.alloc(expr)))
+        }
         typecheck::Expression::Truncate(truncate) => (
             stack.temporary(ty.ty),
             Expression::Truncate(bump.alloc(layout_expression(stack, bump, truncate))),

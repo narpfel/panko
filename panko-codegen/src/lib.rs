@@ -217,9 +217,8 @@ impl<'a> Codegen<'a> {
             }
             Expression::NoopTypeConversion(inner) => {
                 assert_eq!(expr.ty.ty.size(), inner.ty.ty.size());
+                assert_eq!(expr.slot, inner.slot);
                 self.expr(inner);
-                self.emit_args("mov", &[&Rax.typed(inner), &inner.typed_slot()]);
-                self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
             }
             Expression::Truncate(truncate) => {
                 self.expr(truncate);
