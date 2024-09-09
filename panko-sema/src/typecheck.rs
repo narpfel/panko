@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
 use panko_lex::Loc;
@@ -8,6 +10,7 @@ use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::QualifiedType;
 use panko_parser::ast::Session;
+use panko_parser::ast::Signedness;
 use panko_parser::ast::Type;
 use panko_parser::sexpr_builder::AsSExpr as _;
 use panko_report::Report;
@@ -96,13 +99,10 @@ pub struct TypedExpression<'a> {
 pub enum Expression<'a> {
     Name(Reference<'a>),
     Integer(Token<'a>),
-    ImplicitConversion(ImplicitConversion<'a>),
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct ImplicitConversion<'a> {
-    pub(crate) ty: Type<'a>,
-    pub(crate) from: &'a TypedExpression<'a>,
+    NoopTypeConversion(&'a TypedExpression<'a>),
+    Truncate(&'a TypedExpression<'a>),
+    SignExtend(&'a TypedExpression<'a>),
+    ZeroExtend(&'a TypedExpression<'a>),
 }
 
 impl TypedExpression<'_> {
@@ -110,7 +110,10 @@ impl TypedExpression<'_> {
         match self.expr {
             Expression::Name(name) => name.loc(),
             Expression::Integer(token) => token.loc(),
-            Expression::ImplicitConversion(implicit_conversion) => implicit_conversion.from.loc(),
+            Expression::NoopTypeConversion(expr) => expr.loc(),
+            Expression::Truncate(truncate) => truncate.loc(),
+            Expression::SignExtend(sign_extend) => sign_extend.loc(),
+            Expression::ZeroExtend(zero_extend) => zero_extend.loc(),
         }
     }
 }
@@ -122,11 +125,29 @@ fn convert_as_if_by_assignment<'a>(
 ) -> TypedExpression<'a> {
     let target_ty = target.ty;
     let expr_ty = expr.ty.ty;
-    match (target_ty, expr_ty) {
-        (Type::Arithmetic(_), Type::Arithmetic(_)) | (Type::Pointer(_), Type::Pointer(_)) =>
-            if expr_ty == target_ty {
-                return expr;
-            },
+    let conversion = match (target_ty, expr_ty) {
+        (Type::Arithmetic(_), Type::Arithmetic(_)) | (Type::Pointer(_), Type::Pointer(_))
+            if expr_ty == target_ty =>
+            return expr,
+        (Type::Arithmetic(target_arithmetic), Type::Arithmetic(_)) => {
+            let expr_kind = match target_ty.size().cmp(&expr_ty.size()) {
+                Ordering::Less => Expression::Truncate,
+                Ordering::Equal => Expression::NoopTypeConversion,
+                Ordering::Greater => {
+                    let signedness = match target_arithmetic {
+                        Arithmetic::Char => Signedness::Signed,
+                        Arithmetic::Integral(integral) =>
+                            integral.signedness.unwrap_or(Signedness::Signed),
+                    };
+                    match signedness {
+                        Signedness::Signed => Expression::SignExtend,
+                        Signedness::Unsigned => Expression::ZeroExtend,
+                    }
+                }
+            };
+            expr_kind(sess.alloc(expr))
+        }
+        (Type::Pointer(_), Type::Pointer(_)) => Expression::NoopTypeConversion(sess.alloc(expr)),
         // TODO: clang (but not gcc) allows implicitly converting `Type::Function(_)` to
         // `Type::Pointer(_)` (with a warning).
         // TODO: handle nullptr literals
@@ -137,14 +158,12 @@ fn convert_as_if_by_assignment<'a>(
                 from_ty: expr_ty,
                 to_ty: target_ty,
             });
+            expr.expr
         }
-    }
+    };
     TypedExpression {
         ty: target_ty.unqualified(),
-        expr: Expression::ImplicitConversion(ImplicitConversion {
-            ty: target_ty,
-            from: sess.alloc(expr),
-        }),
+        expr: conversion,
     }
 }
 

@@ -69,14 +69,10 @@ pub struct LayoutedExpression<'a> {
 pub enum Expression<'a> {
     Name(Reference<'a>),
     Integer(Token<'a>),
-    ImplicitConversion(ImplicitConversion<'a>),
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct ImplicitConversion<'a> {
-    #[expect(unused)]
-    ty: Type<'a>,
-    from: &'a LayoutedExpression<'a>,
+    NoopTypeConversion(&'a LayoutedExpression<'a>),
+    Truncate(&'a LayoutedExpression<'a>),
+    SignExtend(&'a LayoutedExpression<'a>),
+    ZeroExtend(&'a LayoutedExpression<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -245,15 +241,21 @@ fn layout_expression<'a>(
         }
         typecheck::Expression::Integer(integer) =>
             (stack.temporary(ty.ty), Expression::Integer(integer)),
-        typecheck::Expression::ImplicitConversion(typecheck::ImplicitConversion {
-            ty: to_ty,
-            from,
-        }) => (
+        typecheck::Expression::NoopTypeConversion(expr) => (
             stack.temporary(ty.ty),
-            Expression::ImplicitConversion(ImplicitConversion {
-                ty: to_ty,
-                from: bump.alloc(layout_expression(stack, bump, from)),
-            }),
+            Expression::NoopTypeConversion(bump.alloc(layout_expression(stack, bump, expr))),
+        ),
+        typecheck::Expression::Truncate(truncate) => (
+            stack.temporary(ty.ty),
+            Expression::Truncate(bump.alloc(layout_expression(stack, bump, truncate))),
+        ),
+        typecheck::Expression::SignExtend(sign_extend) => (
+            stack.temporary(ty.ty),
+            Expression::SignExtend(bump.alloc(layout_expression(stack, bump, sign_extend))),
+        ),
+        typecheck::Expression::ZeroExtend(sign_extend) => (
+            stack.temporary(ty.ty),
+            Expression::ZeroExtend(bump.alloc(layout_expression(stack, bump, sign_extend))),
         ),
     };
     LayoutedExpression { ty, slot, expr }

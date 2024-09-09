@@ -155,7 +155,10 @@ impl<'a> Codegen<'a> {
                     &token.slice().parse::<u128>().unwrap().to_le_bytes()
                         [..usize::try_from(ty.size()).unwrap()],
                 ),
-                Expression::ImplicitConversion(_) => todo!(),
+                Expression::NoopTypeConversion(_) => todo!(),
+                Expression::Truncate(_) => todo!(),
+                Expression::SignExtend(_) => todo!(),
+                Expression::ZeroExtend(_) => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -212,7 +215,10 @@ impl<'a> Codegen<'a> {
             Expression::Integer(token) => {
                 self.emit_args("mov", &[&expr.typed_slot(), &token.slice()]);
             }
-            Expression::ImplicitConversion(_) => todo!(),
+            Expression::NoopTypeConversion(_) => todo!(),
+            Expression::Truncate(_) => todo!(),
+            Expression::SignExtend(_) => todo!(),
+            Expression::ZeroExtend(_) => todo!(),
         }
     }
 }

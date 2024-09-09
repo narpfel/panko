@@ -9,7 +9,6 @@ use super::Declaration;
 use super::Expression;
 use super::ExternalDeclaration;
 use super::FunctionDefinition;
-use super::ImplicitConversion;
 use super::Statement;
 use super::TranslationUnit;
 use super::TypedExpression;
@@ -79,13 +78,13 @@ impl AsSExpr for Expression<'_> {
         match self {
             Expression::Name(reference) => SExpr::string(&reference.unique_name()),
             Expression::Integer(int) => SExpr::string(int.slice()),
-            Expression::ImplicitConversion(implicit_conversion) => implicit_conversion.as_sexpr(),
+            Expression::NoopTypeConversion(expr) =>
+                SExpr::string("noop-type-conversion").inherit(expr),
+            Expression::Truncate(truncate) => SExpr::string("truncate").inherit(truncate),
+            Expression::SignExtend(sign_extend) =>
+                SExpr::string("sign-extend").inherit(sign_extend),
+            Expression::ZeroExtend(zero_extend) =>
+                SExpr::string("zero-extend").inherit(zero_extend),
         }
-    }
-}
-
-impl AsSExpr for ImplicitConversion<'_> {
-    fn as_sexpr(&self) -> SExpr {
-        SExpr::new("implicit-conversion").inherit(&self.from)
     }
 }
