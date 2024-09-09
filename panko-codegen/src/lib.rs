@@ -1,5 +1,6 @@
 #![feature(try_blocks)]
 
+use std::fmt;
 use std::fmt::Display;
 use std::fmt::Write as _;
 
@@ -16,6 +17,39 @@ use panko_sema::layout::LayoutedExpression;
 use panko_sema::layout::Statement;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::scope::RefKind;
+use Register::*;
+
+#[derive(Debug, Copy, Clone)]
+#[repr(u8)]
+enum Register {
+    Rax,
+}
+
+#[derive(Debug, Copy, Clone)]
+struct TypedRegister<'a> {
+    ty: &'a Type<'a>,
+    register: Register,
+}
+
+impl Register {
+    fn typed<'a>(self, expr: &'a LayoutedExpression<'a>) -> TypedRegister<'a> {
+        TypedRegister { ty: &expr.ty.ty, register: self }
+    }
+}
+
+impl Display for TypedRegister<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let size = match self.ty {
+            Type::Arithmetic(_) | Type::Pointer(_) => self.ty.size(),
+            Type::Function(_) | Type::Void => unreachable!(),
+        };
+
+        const REGISTERS: [[&str; 4]; 1] = [["al", "ax", "eax", "rax"]];
+        let register_str =
+            REGISTERS[self.register as usize][usize::try_from(size.ilog2()).unwrap()];
+        write!(f, "{register_str}")
+    }
+}
 
 #[derive(Debug, Default)]
 struct Codegen<'a> {
@@ -162,7 +196,7 @@ impl<'a> Codegen<'a> {
             Statement::Return(expr) => {
                 if let Some(expr) = expr.as_ref() {
                     self.expr(expr);
-                    self.emit_args("mov", &[&"eax", &expr.slot]);
+                    self.emit_args("mov", &[&Rax.typed(expr), &expr.typed_slot()]);
                 }
                 self.emit_args("add", &[&"sp", &self.current_function.unwrap().stack_size]);
                 self.emit("ret");
@@ -174,7 +208,7 @@ impl<'a> Codegen<'a> {
         match expr.expr {
             Expression::Name(_reference) => (), // already in memory
             Expression::Integer(token) => {
-                self.emit_args("mov", &[&expr.slot, &token.slice()]);
+                self.emit_args("mov", &[&expr.typed_slot(), &token.slice()]);
             }
             Expression::ImplicitConversion(_) => todo!(),
         }

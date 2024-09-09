@@ -60,7 +60,7 @@ pub enum Statement<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct LayoutedExpression<'a> {
-    ty: QualifiedType<'a>,
+    pub ty: QualifiedType<'a>,
     pub slot: Slot<'a>,
     pub expr: Expression<'a>,
 }
@@ -94,6 +94,12 @@ pub enum Slot<'a> {
     Automatic(u64),
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct TypedSlot<'a> {
+    slot: Slot<'a>,
+    ty: &'a Type<'a>,
+}
+
 impl<'a> FunctionDefinition<'a> {
     pub fn is_main(&self) -> bool {
         self.name() == "main"
@@ -104,12 +110,30 @@ impl<'a> FunctionDefinition<'a> {
     }
 }
 
-impl fmt::Display for Slot<'_> {
+impl<'a> LayoutedExpression<'a> {
+    pub fn typed_slot(&'a self) -> TypedSlot<'a> {
+        self.slot.typed(&self.ty.ty)
+    }
+}
+
+impl fmt::Display for TypedSlot<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Slot::Static(s) => write!(f, "dword ptr [rip + {s}]"),
-            Slot::Automatic(stack_offset) => write!(f, "dword ptr [rsp + {stack_offset}]"),
+        let size = match self.ty {
+            Type::Arithmetic(_) | Type::Pointer(_) => self.ty.size(),
+            Type::Function(_) | Type::Void => unreachable!(),
+        };
+        const PTR_TYPES: [&str; 4] = ["byte", "word", "dword", "qword"];
+        let ptr_type = PTR_TYPES[usize::try_from(size.ilog2()).unwrap()];
+        match self.slot {
+            Slot::Static(s) => write!(f, "{ptr_type} ptr [rip + {s}]"),
+            Slot::Automatic(stack_offset) => write!(f, "{ptr_type} ptr [rsp + {stack_offset}]"),
         }
+    }
+}
+
+impl<'a> Slot<'a> {
+    fn typed(self, ty: &'a Type<'a>) -> TypedSlot<'a> {
+        TypedSlot { slot: self, ty }
     }
 }
 
