@@ -92,6 +92,8 @@ impl<'a> Codegen<'a> {
         writeln!(self.code, "    {instr}").unwrap();
     }
 
+    // TODO: use a bespoke trait that is implemented by `LayoutedExpression` and `TypedRegister`
+    // instead of `Display`
     fn emit_args(&mut self, instr: &str, args: &[&dyn Display]) {
         writeln!(
             self.code,
