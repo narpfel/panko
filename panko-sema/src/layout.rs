@@ -188,7 +188,8 @@ fn layout_declaration<'a>(
     decl: &typecheck::Declaration<'a>,
 ) -> Declaration<'a> {
     let typecheck::Declaration { reference, initialiser } = *decl;
-    let initialiser: Option<_> = try { layout_expression(stack, bump, initialiser.as_ref()?) };
+    let initialiser: Option<_> =
+        try { layout_expression_keep_slot(stack, bump, initialiser.as_ref()?) };
     let reference = stack.add_at(reference, try { initialiser?.slot });
     Declaration { reference, initialiser }
 }
@@ -217,18 +218,24 @@ fn layout_statement<'a>(
     match stmt {
         typecheck::Statement::Declaration(decl) =>
             Statement::Declaration(layout_declaration(stack, bump, decl)),
-        typecheck::Statement::Expression(expr) => stack.with_block(|stack| {
-            Statement::Expression(try { layout_expression(stack, bump, expr.as_ref()?) })
-        }),
+        typecheck::Statement::Expression(expr) =>
+            Statement::Expression(try { layout_expression(stack, bump, expr.as_ref()?) }),
         typecheck::Statement::Compound(stmts) =>
             Statement::Compound(layout_compound_statement(stack, bump, *stmts)),
-        typecheck::Statement::Return(expr) => stack.with_block(|stack| {
-            Statement::Return(try { layout_expression(stack, bump, expr.as_ref()?) })
-        }),
+        typecheck::Statement::Return(expr) =>
+            Statement::Return(try { layout_expression(stack, bump, expr.as_ref()?) }),
     }
 }
 
 fn layout_expression<'a>(
+    stack: &mut Stack<'a>,
+    bump: &'a Bump,
+    expr: &typecheck::TypedExpression<'a>,
+) -> LayoutedExpression<'a> {
+    stack.with_block(|stack| layout_expression_keep_slot(stack, bump, expr))
+}
+
+fn layout_expression_keep_slot<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
     expr: &typecheck::TypedExpression<'a>,
