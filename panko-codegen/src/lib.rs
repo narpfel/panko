@@ -16,6 +16,7 @@ use panko_sema::layout::FunctionDefinition;
 use panko_sema::layout::LayoutedExpression;
 use panko_sema::layout::Statement;
 use panko_sema::layout::TranslationUnit;
+use panko_sema::layout::TypedSlot;
 use panko_sema::scope::RefKind;
 use Register::*;
 
@@ -32,6 +33,10 @@ struct TypedRegister<'a> {
 }
 
 impl Register {
+    fn with_ty<'a>(self, ty: &'a Type<'a>) -> TypedRegister<'a> {
+        TypedRegister { ty, register: self }
+    }
+
     fn typed<'a>(self, expr: &'a LayoutedExpression<'a>) -> TypedRegister<'a> {
         TypedRegister { ty: &expr.ty.ty, register: self }
     }
@@ -102,6 +107,18 @@ impl<'a> Codegen<'a> {
             args.iter().format(", "),
         )
         .unwrap();
+    }
+
+    fn copy(&mut self, tgt: &TypedSlot, src: &TypedSlot) {
+        let ty = tgt.ty();
+        assert!(ty == src.ty());
+        match ty {
+            Type::Arithmetic(_) | Type::Pointer(_) => {
+                self.emit_args("mov", &[&Rax.with_ty(ty), &src]);
+                self.emit_args("mov", &[tgt, &Rax.with_ty(ty)]);
+            }
+            Type::Function(_) | Type::Void => todo!(),
+        }
     }
 
     fn function_definition(&mut self, def: &'a FunctionDefinition<'a>) {
@@ -189,9 +206,12 @@ impl<'a> Codegen<'a> {
 
     fn stmt(&mut self, stmt: &Statement) {
         match stmt {
-            Statement::Declaration(decl) =>
-                if let Some(initialiser) = decl.initialiser.as_ref() {
-                    self.expr(initialiser)
+            Statement::Declaration(Declaration { reference, initialiser }) =>
+                if let Some(initialiser) = initialiser.as_ref() {
+                    self.expr(initialiser);
+                    if reference.slot() != initialiser.slot {
+                        self.copy(&reference.typed_slot(), &initialiser.typed_slot());
+                    }
                 },
             Statement::Expression(expr) =>
                 if let Some(expr) = expr.as_ref() {

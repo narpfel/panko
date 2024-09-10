@@ -16,6 +16,7 @@ members = [
 bumpalo = "3.16.0"
 clap = { version = "4.5.16", features = ["derive"] }
 color-eyre = "0.6.3"
+im-rc = "15.1.0"
 indexmap = "2.4.0"
 itertools = "0.13.0"
 lalrpop = "0.21.0"

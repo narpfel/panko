@@ -112,6 +112,12 @@ impl<'a> LayoutedExpression<'a> {
     }
 }
 
+impl<'a> TypedSlot<'a> {
+    pub fn ty(&self) -> &'a Type<'a> {
+        self.ty
+    }
+}
+
 impl fmt::Display for TypedSlot<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let size = match self.ty {
@@ -148,6 +154,10 @@ impl<'a> Reference<'a> {
 
     pub fn slot(&self) -> Slot<'a> {
         self.slot
+    }
+
+    pub fn typed_slot(&'a self) -> TypedSlot<'a> {
+        self.slot.typed(&self.ty.ty)
     }
 }
 

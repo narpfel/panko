@@ -15,7 +15,7 @@ exit_code: 0
       (main~0 `fn() -> int` (static main))
       (compound-statement
          (definition (a~1 `int` @0) (42 `int` @0))
-         (definition (b~2 `int` @0) (a~1 `int` @0))
-         (return (b~2 `int` @0)))))
+         (definition (b~2 `int` @4) (a~1 `int` @0))
+         (return (b~2 `int` @4)))))
 
 ----- stderr -----

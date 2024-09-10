@@ -39,6 +39,10 @@ impl<T> Vec<T> {
         self.0.iter()
     }
 
+    pub(crate) fn last(&self) -> &T {
+        self.0.last().unwrap()
+    }
+
     pub(crate) fn last_mut(&mut self) -> &mut T {
         self.0.last_mut().unwrap()
     }
