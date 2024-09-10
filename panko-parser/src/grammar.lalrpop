@@ -163,8 +163,8 @@ FunctionAbstractDeclarator: ast::FunctionDeclarator<'a> = {
 }
 
 Initialiser: ast::Expression<'a> = {
-    // TODO: incomplete
-    Integer => ast::Expression::Integer(<>),
+    // TODO: incomplete; this should be `AssignmentExpression` (and braced-initializer)
+    Expression
 }
 
 AttributeSpecifierSequence: () = {}

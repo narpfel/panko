@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_variable_can_be_initialised_with_variable.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (a~1 `int` @0) (42 `int` @0))
+         (definition (b~2 `int` @0) (a~1 `int` @0))
+         (return (b~2 `int` @0)))))
+
+----- stderr -----
