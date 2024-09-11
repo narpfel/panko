@@ -79,6 +79,8 @@ impl AsSExpr for Expression<'_> {
         match self {
             Expression::Name(name) => SExpr::new("name").inherit(name),
             Expression::Integer(int) => SExpr::string(int.slice()),
+            Expression::Assign { target, value } =>
+                SExpr::new("assign").inherit(target).inherit(value),
         }
     }
 }

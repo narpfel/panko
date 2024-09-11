@@ -92,6 +92,8 @@ impl AsSExpr for Expression<'_> {
             Expression::Truncate(from) => SExpr::string("truncate").inherit(from),
             Expression::SignExtend(from) => SExpr::string("sign-extend").inherit(from),
             Expression::ZeroExtend(from) => SExpr::string("zero-extend").inherit(from),
+            Expression::Assign { target, value } =>
+                SExpr::new("assign").inherit(target).inherit(value),
         }
     }
 }

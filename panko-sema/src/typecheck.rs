@@ -103,6 +103,10 @@ pub enum Expression<'a> {
     Truncate(&'a TypedExpression<'a>),
     SignExtend(&'a TypedExpression<'a>),
     ZeroExtend(&'a TypedExpression<'a>),
+    Assign {
+        target: &'a TypedExpression<'a>,
+        value: &'a TypedExpression<'a>,
+    },
 }
 
 impl TypedExpression<'_> {
@@ -114,6 +118,7 @@ impl TypedExpression<'_> {
             Expression::Truncate(truncate) => truncate.loc(),
             Expression::SignExtend(sign_extend) => sign_extend.loc(),
             Expression::ZeroExtend(zero_extend) => zero_extend.loc(),
+            Expression::Assign { target, value } => target.loc().until(value.loc()),
         }
     }
 }
@@ -187,7 +192,7 @@ fn typeck_declaration<'a>(
 ) -> Declaration<'a> {
     let scope::Declaration { reference, initialiser } = *declaration;
     let initialiser = initialiser.as_ref().map(|initialiser| {
-        convert_as_if_by_assignment(sess, reference.ty, typeck_expression(initialiser))
+        convert_as_if_by_assignment(sess, reference.ty, typeck_expression(sess, initialiser))
     });
     Declaration { reference, initialiser }
 }
@@ -215,11 +220,11 @@ fn typeck_statement<'a>(
         scope::Statement::Declaration(decl) =>
             Statement::Declaration(typeck_declaration(sess, decl)),
         scope::Statement::Expression(expr) =>
-            Statement::Expression(try { typeck_expression(expr.as_ref()?) }),
+            Statement::Expression(try { typeck_expression(sess, expr.as_ref()?) }),
         scope::Statement::Compound(stmt) =>
             Statement::Compound(typeck_compound_statement(sess, stmt, function)),
         scope::Statement::Return { return_: _, expr } => {
-            let expr = expr.as_ref().map(|expr| typeck_expression(expr));
+            let expr = expr.as_ref().map(|expr| typeck_expression(sess, expr));
             let expr = match expr {
                 Some(expr) => Some(convert_as_if_by_assignment(
                     sess,
@@ -241,7 +246,10 @@ fn typeck_statement<'a>(
     }
 }
 
-fn typeck_expression<'a>(expr: &scope::Expression<'a>) -> TypedExpression<'a> {
+fn typeck_expression<'a>(
+    sess: &'a Session<'a>,
+    expr: &scope::Expression<'a>,
+) -> TypedExpression<'a> {
     match expr {
         scope::Expression::Name(reference) => TypedExpression {
             ty: reference.ty,
@@ -256,6 +264,16 @@ fn typeck_expression<'a>(expr: &scope::Expression<'a>) -> TypedExpression<'a> {
             .unqualified(),
             expr: Expression::Integer(*token),
         },
+        scope::Expression::Assign { target, value } => {
+            // TODO: check that `target` is a modifiable lvalue
+            let target = sess.alloc(typeck_expression(sess, target));
+            let value = typeck_expression(sess, value);
+            let value = sess.alloc(convert_as_if_by_assignment(sess, target.ty, value));
+            TypedExpression {
+                ty: target.ty,
+                expr: Expression::Assign { target, value },
+            }
+        }
     }
 }
 

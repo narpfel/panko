@@ -109,6 +109,10 @@ pub(crate) enum Statement<'a> {
 pub(crate) enum Expression<'a> {
     Name(Reference<'a>),
     Integer(Token<'a>),
+    Assign {
+        target: &'a Expression<'a>,
+        value: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -178,6 +182,7 @@ impl<'a> Expression<'a> {
         match self {
             Expression::Name(name) => name.loc(),
             Expression::Integer(token) => token.loc(),
+            Expression::Assign { target, value } => target.loc().until(value.loc()),
         }
     }
 }
@@ -480,6 +485,10 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
                 .unwrap_or_else(|| todo!("name error: {name:#?}")),
         ),
         ast::Expression::Integer(integer) => Expression::Integer(*integer),
+        ast::Expression::Assign { target, value } => Expression::Assign {
+            target: scopes.sess.alloc(resolve_expr(scopes, target)),
+            value: scopes.sess.alloc(resolve_expr(scopes, value)),
+        },
     }
 }
 

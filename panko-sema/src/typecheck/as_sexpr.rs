@@ -85,6 +85,8 @@ impl AsSExpr for Expression<'_> {
                 SExpr::string("sign-extend").inherit(sign_extend),
             Expression::ZeroExtend(zero_extend) =>
                 SExpr::string("zero-extend").inherit(zero_extend),
+            Expression::Assign { target, value } =>
+                SExpr::new("assign").inherit(target).inherit(value),
         }
     }
 }

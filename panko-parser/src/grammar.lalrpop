@@ -163,8 +163,8 @@ FunctionAbstractDeclarator: ast::FunctionDeclarator<'a> = {
 }
 
 Initialiser: ast::Expression<'a> = {
-    // TODO: incomplete; this should be `AssignmentExpression` (and braced-initializer)
-    Expression
+    // TODO: incomplete: `braced-initializer` is missing
+    AssignmentExpression
 }
 
 AttributeSpecifierSequence: () = {}
@@ -282,6 +282,15 @@ ExpressionStatement: ast::ExpressionStatement<'a> = {
 }
 
 Expression: ast::Expression<'a> = {
+    AssignmentExpression,
+}
+
+AssignmentExpression: ast::Expression<'a> = {
+    <target:Bump<UnaryExpression>> "=" <value:Bump<AssignmentExpression>> => ast::Expression::Assign { <> },
+    UnaryExpression,
+}
+
+UnaryExpression: ast::Expression<'a> = {
     Identifier => ast::Expression::Name(<>),
     Integer => ast::Expression::Integer(<>),
 }

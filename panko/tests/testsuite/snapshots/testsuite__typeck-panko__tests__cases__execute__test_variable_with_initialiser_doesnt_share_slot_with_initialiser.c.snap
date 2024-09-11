@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/test_variable_with_initialiser_doesnt_share_slot_with_initialiser.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `int` (42 `int`))
+         (definition b~2 `int` (a~1 `int`))
+         (expression (assign (b~2 `int`) (27 `int`) `int`))
+         (return (a~1 `int`)))))
+
+----- stderr -----

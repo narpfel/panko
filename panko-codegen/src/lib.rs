@@ -176,6 +176,7 @@ impl<'a> Codegen<'a> {
                 Expression::Truncate(_) => todo!(),
                 Expression::SignExtend(_) => todo!(),
                 Expression::ZeroExtend(_) => todo!(),
+                Expression::Assign { .. } => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -254,6 +255,13 @@ impl<'a> Codegen<'a> {
                 self.expr(zero_extend);
                 self.emit_args("movzx", &[&Rax.typed(expr), &zero_extend.typed_slot()]);
                 self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
+            }
+            Expression::Assign { target, value } => {
+                self.expr(target);
+                self.expr(value);
+                if target.slot != value.slot {
+                    self.copy(&target.typed_slot(), &value.typed_slot());
+                }
             }
         }
     }

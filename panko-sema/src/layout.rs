@@ -73,6 +73,10 @@ pub enum Expression<'a> {
     Truncate(&'a LayoutedExpression<'a>),
     SignExtend(&'a LayoutedExpression<'a>),
     ZeroExtend(&'a LayoutedExpression<'a>),
+    Assign {
+        target: &'a LayoutedExpression<'a>,
+        value: &'a LayoutedExpression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -274,6 +278,12 @@ fn layout_expression_keep_slot<'a>(
             stack.temporary(ty.ty),
             Expression::ZeroExtend(bump.alloc(layout_expression(stack, bump, sign_extend))),
         ),
+        typecheck::Expression::Assign { target, value } => {
+            let target = bump.alloc(layout_expression(stack, bump, target));
+            // TODO: layout `value` into `target`’s slot to avoid an unnecessary copy
+            let value = bump.alloc(layout_expression(stack, bump, value));
+            (target.slot, Expression::Assign { target, value })
+        }
     };
     LayoutedExpression { ty, slot, expr }
 }

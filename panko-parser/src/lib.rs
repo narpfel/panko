@@ -375,6 +375,10 @@ enum JumpStatement<'a> {
 pub enum Expression<'a> {
     Name(Token<'a>),
     Integer(Token<'a>),
+    Assign {
+        target: &'a Expression<'a>,
+        value: &'a Expression<'a>,
+    },
 }
 
 pub fn parse<'a>(
