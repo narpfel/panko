@@ -49,6 +49,20 @@ enum Diagnostic<'a> {
         at: scope::StatementTypes::Return<'a>,
         function: scope::FunctionDefinition<'a>,
     },
+
+    #[error("cannot assign to `const` value `{decl}`")]
+    #[diagnostics(
+        at(colour = Red, label = "this value is `const`"),
+        decl(colour = Blue, label = "note: `{decl}` declared here")
+    )]
+    AssignmentToConst {
+        at: ExpressionTypes::Name<'a>,
+        decl: Reference<'a>,
+    },
+
+    #[error("cannot assign to this expression because it is not an lvalue")]
+    #[diagnostics(at(colour = Red, label = "this expression is not an lvalue"))]
+    AssignmentToNonLValue { at: &'a Expression<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -95,6 +109,7 @@ pub struct TypedExpression<'a> {
     pub expr: Expression<'a>,
 }
 
+#[variant_types::derive_variant_types]
 #[derive(Debug, Clone, Copy)]
 pub enum Expression<'a> {
     Name(Reference<'a>),
@@ -120,6 +135,44 @@ impl TypedExpression<'_> {
             Expression::ZeroExtend(zero_extend) => zero_extend.loc(),
             Expression::Assign { target, value } => target.loc().until(value.loc()),
         }
+    }
+
+    fn is_modifiable_lvalue(&self) -> bool {
+        self.is_lvalue() && self.is_modifiable()
+    }
+
+    fn is_lvalue(&self) -> bool {
+        match self.expr {
+            Expression::Name(_) => true,
+            Expression::Integer(_)
+            | Expression::NoopTypeConversion(_)
+            | Expression::Truncate(_)
+            | Expression::SignExtend(_)
+            | Expression::ZeroExtend(_)
+            | Expression::Assign { .. } => false,
+        }
+    }
+
+    fn is_modifiable(&self) -> bool {
+        !self.ty.is_const
+    }
+}
+
+impl<'a> Expression<'a> {
+    fn loc(&self) -> Loc<'a> {
+        match self {
+            Expression::Name(reference) => reference.loc(),
+            Expression::Integer(token) => token.loc(),
+            Expression::NoopTypeConversion(inner)
+            | Expression::Truncate(inner)
+            | Expression::SignExtend(inner)
+            | Expression::ZeroExtend(inner) => inner.loc(),
+            Expression::Assign { target, value } => target.loc().until(value.loc()),
+        }
+    }
+
+    fn slice(&self) -> &'static str {
+        unimplemented!("TODO: `variant-types` requires this, but `pnako` does not really need this")
     }
 }
 
@@ -265,8 +318,17 @@ fn typeck_expression<'a>(
             expr: Expression::Integer(*token),
         },
         scope::Expression::Assign { target, value } => {
-            // TODO: check that `target` is a modifiable lvalue
             let target = sess.alloc(typeck_expression(sess, target));
+            if !target.is_modifiable_lvalue() {
+                if !target.is_lvalue() {
+                    sess.emit(Diagnostic::AssignmentToNonLValue { at: &target.expr })
+                }
+                else {
+                    assert!(!target.is_modifiable());
+                    let at = target.expr.into_variant();
+                    sess.emit(Diagnostic::AssignmentToConst { at, decl: at.0.at_decl() })
+                }
+            }
             let value = typeck_expression(sess, value);
             let value = sess.alloc(convert_as_if_by_assignment(sess, target.ty, value));
             TypedExpression {

@@ -1,0 +1,36 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/assignment/test_assignment_to_const.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to `const` value `a`
+   ╭─[panko/tests/cases/assignment/test_assignment_to_const.c:3:5]
+   │
+ 2 │     int const a = 42;
+   │               ┬  
+   │               ╰── note: `a` declared here
+ 3 │     a = 27;
+   │     ┬  
+   │     ╰── this value is `const`
+───╯
+
+Error: cannot assign to `const` value `d`
+    ╭─[panko/tests/cases/assignment/test_assignment_to_const.c:19:5]
+    │
+ 16 │     int* const d;
+    │                ┬  
+    │                ╰── note: `d` declared here
+    │ 
+ 19 │     d = e;
+    │     ┬  
+    │     ╰── this value is `const`
+────╯

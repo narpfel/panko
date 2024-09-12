@@ -217,6 +217,10 @@ impl<'a> Reference<'a> {
     pub fn kind(&self) -> RefKind {
         self.kind
     }
+
+    pub(crate) fn at_decl(&self) -> Self {
+        self.at(self.name)
+    }
 }
 
 impl RefKind {
