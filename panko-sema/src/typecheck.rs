@@ -270,6 +270,8 @@ fn typeck_expression<'a>(
             let value = typeck_expression(sess, value);
             let value = sess.alloc(convert_as_if_by_assignment(sess, target.ty, value));
             TypedExpression {
+                // TODO: `ty` is the type that `target` would have after lvalue conversion, so it
+                // might be necessary to add a `NoopTypeConversion` here
                 ty: target.ty,
                 expr: Expression::Assign { target, value },
             }
