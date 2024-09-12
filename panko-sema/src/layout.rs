@@ -274,9 +274,9 @@ fn layout_expression_keep_slot<'a>(
             stack.temporary(ty.ty),
             Expression::SignExtend(bump.alloc(layout_expression(stack, bump, sign_extend))),
         ),
-        typecheck::Expression::ZeroExtend(sign_extend) => (
+        typecheck::Expression::ZeroExtend(zero_extend) => (
             stack.temporary(ty.ty),
-            Expression::ZeroExtend(bump.alloc(layout_expression(stack, bump, sign_extend))),
+            Expression::ZeroExtend(bump.alloc(layout_expression(stack, bump, zero_extend))),
         ),
         typecheck::Expression::Assign { target, value } => {
             let target = bump.alloc(layout_expression(stack, bump, target));
