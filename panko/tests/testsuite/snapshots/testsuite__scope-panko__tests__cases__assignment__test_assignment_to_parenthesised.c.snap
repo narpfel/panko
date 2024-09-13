@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/assignment/test_assignment_to_parenthesised.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition x~1 `int const` ∅)
+         (definition y~2 `int const` 27)
+         (definition mutable~3 `int` ∅)
+         (expression (assign (assign (name mutable~3 `int`) (assign (name x~1 `int const`) (name y~2 `int const`))) 42))
+         (expression (assign (name mutable~3 `int`) 123))
+         (expression (assign (name x~1 `int const`) 42))
+         (return (name x~1 `int const`)))))
+
+----- stderr -----

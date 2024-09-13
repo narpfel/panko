@@ -56,7 +56,7 @@ enum Diagnostic<'a> {
         decl(colour = Blue, label = "note: `{decl}` declared here")
     )]
     AssignmentToConst {
-        at: ExpressionTypes::Name<'a>,
+        at: &'a Expression<'a>,
         decl: Reference<'a>,
     },
 
@@ -109,7 +109,6 @@ pub struct TypedExpression<'a> {
     pub expr: Expression<'a>,
 }
 
-#[variant_types::derive_variant_types]
 #[derive(Debug, Clone, Copy)]
 pub enum Expression<'a> {
     Name(Reference<'a>),
@@ -118,6 +117,11 @@ pub enum Expression<'a> {
     Truncate(&'a TypedExpression<'a>),
     SignExtend(&'a TypedExpression<'a>),
     ZeroExtend(&'a TypedExpression<'a>),
+    Parenthesised {
+        open_paren: Token<'a>,
+        expr: &'a TypedExpression<'a>,
+        close_paren: Token<'a>,
+    },
     Assign {
         target: &'a TypedExpression<'a>,
         value: &'a TypedExpression<'a>,
@@ -133,6 +137,8 @@ impl TypedExpression<'_> {
             Expression::Truncate(truncate) => truncate.loc(),
             Expression::SignExtend(sign_extend) => sign_extend.loc(),
             Expression::ZeroExtend(zero_extend) => zero_extend.loc(),
+            Expression::Parenthesised { open_paren, expr: _, close_paren } =>
+                open_paren.loc().until(close_paren.loc()),
             Expression::Assign { target, value } => target.loc().until(value.loc()),
         }
     }
@@ -144,6 +150,7 @@ impl TypedExpression<'_> {
     fn is_lvalue(&self) -> bool {
         match self.expr {
             Expression::Name(_) => true,
+            Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.is_lvalue(),
             Expression::Integer(_)
             | Expression::NoopTypeConversion(_)
             | Expression::Truncate(_)
@@ -168,11 +175,17 @@ impl<'a> Expression<'a> {
             | Expression::SignExtend(inner)
             | Expression::ZeroExtend(inner) => inner.loc(),
             Expression::Assign { target, value } => target.loc().until(value.loc()),
+            Expression::Parenthesised { open_paren, expr: _, close_paren } =>
+                open_paren.loc().until(close_paren.loc()),
         }
     }
 
-    fn slice(&self) -> &'static str {
-        unimplemented!("TODO: `variant-types` requires this, but `pnako` does not really need this")
+    fn unwrap_parens(&'a self) -> &'a Self {
+        match self {
+            Expression::Parenthesised { open_paren: _, expr, close_paren: _ } =>
+                expr.expr.unwrap_parens(),
+            _ => self,
+        }
     }
 }
 
@@ -317,6 +330,17 @@ fn typeck_expression<'a>(
             .unqualified(),
             expr: Expression::Integer(*token),
         },
+        scope::Expression::Parenthesised { open_paren, expr, close_paren } => {
+            let expr = sess.alloc(typeck_expression(sess, expr));
+            TypedExpression {
+                ty: expr.ty,
+                expr: Expression::Parenthesised {
+                    open_paren: *open_paren,
+                    expr,
+                    close_paren: *close_paren,
+                },
+            }
+        }
         scope::Expression::Assign { target, value } => {
             let target = sess.alloc(typeck_expression(sess, target));
             if !target.is_modifiable_lvalue() {
@@ -325,8 +349,13 @@ fn typeck_expression<'a>(
                 }
                 else {
                     assert!(!target.is_modifiable());
-                    let at = target.expr.into_variant();
-                    sess.emit(Diagnostic::AssignmentToConst { at, decl: at.0.at_decl() })
+                    match target.expr.unwrap_parens() {
+                        Expression::Name(reference) => sess.emit(Diagnostic::AssignmentToConst {
+                            at: &target.expr,
+                            decl: reference.at_decl(),
+                        }),
+                        _ => todo!("for pointer derefs and const struct members etc."),
+                    }
                 }
             }
             let value = typeck_expression(sess, value);

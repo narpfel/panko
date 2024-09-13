@@ -109,6 +109,11 @@ pub(crate) enum Statement<'a> {
 pub(crate) enum Expression<'a> {
     Name(Reference<'a>),
     Integer(Token<'a>),
+    Parenthesised {
+        open_paren: Token<'a>,
+        expr: &'a Expression<'a>,
+        close_paren: Token<'a>,
+    },
     Assign {
         target: &'a Expression<'a>,
         value: &'a Expression<'a>,
@@ -182,6 +187,8 @@ impl<'a> Expression<'a> {
         match self {
             Expression::Name(name) => name.loc(),
             Expression::Integer(token) => token.loc(),
+            Expression::Parenthesised { open_paren, expr: _, close_paren } =>
+                open_paren.loc().until(close_paren.loc()),
             Expression::Assign { target, value } => target.loc().until(value.loc()),
         }
     }
@@ -489,6 +496,12 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
                 .unwrap_or_else(|| todo!("name error: {name:#?}")),
         ),
         ast::Expression::Integer(integer) => Expression::Integer(*integer),
+        ast::Expression::Parenthesised { open_paren, expr, close_paren } =>
+            Expression::Parenthesised {
+                open_paren: *open_paren,
+                expr: scopes.sess.alloc(resolve_expr(scopes, expr)),
+                close_paren: *close_paren,
+            },
         ast::Expression::Assign { target, value } => Expression::Assign {
             target: scopes.sess.alloc(resolve_expr(scopes, target)),
             value: scopes.sess.alloc(resolve_expr(scopes, value)),

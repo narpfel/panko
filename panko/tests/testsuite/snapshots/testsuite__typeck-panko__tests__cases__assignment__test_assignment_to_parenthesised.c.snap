@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/assignment/test_assignment_to_parenthesised.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to this expression because it is not an lvalue
+   ╭─[panko/tests/cases/assignment/test_assignment_to_parenthesised.c:4:5]
+   │
+ 4 │     (mutable = x = y) = 42;
+   │     ────────┬────────  
+   │             ╰────────── this expression is not an lvalue
+───╯
+
+Error: cannot assign to `const` value `x`
+   ╭─[panko/tests/cases/assignment/test_assignment_to_parenthesised.c:4:16]
+   │
+ 2 │     int const x, y = 27;
+   │               ┬  
+   │               ╰── note: `x` declared here
+   │ 
+ 4 │     (mutable = x = y) = 42;
+   │                ┬  
+   │                ╰── this value is `const`
+───╯
+
+Error: cannot assign to `const` value `x`
+   ╭─[panko/tests/cases/assignment/test_assignment_to_parenthesised.c:6:5]
+   │
+ 2 │     int const x, y = 27;
+   │               ┬  
+   │               ╰── note: `x` declared here
+   │ 
+ 6 │     (x) = 42;
+   │     ─┬─  
+   │      ╰─── this value is `const`
+───╯

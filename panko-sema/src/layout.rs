@@ -278,6 +278,8 @@ fn layout_expression_keep_slot<'a>(
             stack.temporary(ty.ty),
             Expression::ZeroExtend(bump.alloc(layout_expression(stack, bump, zero_extend))),
         ),
+        typecheck::Expression::Parenthesised { open_paren: _, expr, close_paren: _ } =>
+            return layout_expression(stack, bump, expr),
         typecheck::Expression::Assign { target, value } => {
             let target = bump.alloc(layout_expression(stack, bump, target));
             // TODO: layout `value` into `target`’s slot to avoid an unnecessary copy

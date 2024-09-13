@@ -291,8 +291,13 @@ AssignmentExpression: ast::Expression<'a> = {
 }
 
 UnaryExpression: ast::Expression<'a> = {
+    PrimaryExpression,
+}
+
+PrimaryExpression: ast::Expression<'a> = {
     Identifier => ast::Expression::Name(<>),
     Integer => ast::Expression::Integer(<>),
+    <open_paren:"("> <expr:Bump<Expression>> <close_paren:")"> => ast::Expression::Parenthesised { <> },
 }
 
 Bump<T>: &'a T = {
