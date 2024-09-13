@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/test_assignment_to_char.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `char` 1)
+         (definition b~2 `char` 2)
+         (definition c~3 `char` 42)
+         (definition d~4 `char` 3)
+         (expression (assign (name b~2 `char`) 123))
+         (return (name c~3 `char`)))))
+
+----- stderr -----
