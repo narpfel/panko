@@ -132,13 +132,13 @@ impl<'a> Codegen<'a> {
         self.directive("type", &[&def.name(), &"@function"]);
         self.label(def.name());
 
-        // check that sp is correctly aligned
+        // check that rsp is correctly aligned
         self.emit("lea r10, [rsp + 8]");
         self.emit("and r10, 0xf");
         self.emit(&format!("jnz .L.{}.entry.sp_unaligned", def.name()));
 
         self.block(1);
-        self.emit_args("sub", &[&"sp", &def.stack_size]);
+        self.emit_args("sub", &[&"rsp", &def.stack_size]);
         self.current_function = Some(def);
         self.compound_statement(def.body);
         assert_eq!(
@@ -146,7 +146,7 @@ impl<'a> Codegen<'a> {
             Some(std::ptr::from_ref(def)),
             "`current_function` is not changed",
         );
-        self.emit_args("add", &[&"sp", &def.stack_size]);
+        self.emit_args("add", &[&"rsp", &def.stack_size]);
         if def.is_main() {
             self.emit("xor eax, eax");
         }
@@ -224,7 +224,7 @@ impl<'a> Codegen<'a> {
                     self.expr(expr);
                     self.emit_args("mov", &[&Rax.typed(expr), &expr.typed_slot()]);
                 }
-                self.emit_args("add", &[&"sp", &self.current_function.unwrap().stack_size]);
+                self.emit_args("add", &[&"rsp", &self.current_function.unwrap().stack_size]);
                 self.emit("ret");
             }
         }
