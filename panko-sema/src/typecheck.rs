@@ -166,7 +166,7 @@ impl TypedExpression<'_> {
 }
 
 impl<'a> Expression<'a> {
-    fn loc(&self) -> Loc<'a> {
+    fn loc(&self) -> Loc {
         match self {
             Expression::Name(reference) => reference.loc(),
             Expression::Integer(token) => token.loc(),
@@ -180,7 +180,7 @@ impl<'a> Expression<'a> {
         }
     }
 
-    fn unwrap_parens(&'a self) -> &'a Self {
+    fn unwrap_parens(&self) -> &Self {
         match self {
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } =>
                 expr.expr.unwrap_parens(),
