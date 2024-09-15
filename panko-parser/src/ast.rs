@@ -336,19 +336,18 @@ impl fmt::Display for Integral {
 
 impl fmt::Display for FunctionType<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "fn(")?;
-        for (i, param) in self.params.iter().enumerate() {
-            write!(
-                f,
-                "{}: {}",
-                param.name.map_or(NO_VALUE, |name| name.slice()),
-                param.ty,
-            )?;
-            if i != self.params.len() - 1 {
-                write!(f, ", ")?;
-            }
-        }
-        write!(f, ") -> {}", self.return_type)
+        write!(
+            f,
+            "fn({}) -> {}",
+            self.params
+                .iter()
+                .format_with(", ", |param, f| f(&format_args!(
+                    "{}: {}",
+                    param.name.map_or(NO_VALUE, |name| name.slice()),
+                    param.ty,
+                ))),
+            self.return_type,
+        )
     }
 }
 
