@@ -200,12 +200,12 @@ fn convert_as_if_by_assignment<'a>(
         (Type::Arithmetic(_), Type::Arithmetic(_)) | (Type::Pointer(_), Type::Pointer(_))
             if expr_ty == target_ty =>
             return expr,
-        (Type::Arithmetic(target_arithmetic), Type::Arithmetic(_)) => {
+        (Type::Arithmetic(_), Type::Arithmetic(source_arithmetic)) => {
             let expr_kind = match target_ty.size().cmp(&expr_ty.size()) {
                 Ordering::Less => Expression::Truncate,
                 Ordering::Equal => Expression::NoopTypeConversion,
                 Ordering::Greater => {
-                    let signedness = match target_arithmetic {
+                    let signedness = match source_arithmetic {
                         Arithmetic::Char => Signedness::Signed,
                         Arithmetic::Integral(integral) =>
                             integral.signedness.unwrap_or(Signedness::Signed),
