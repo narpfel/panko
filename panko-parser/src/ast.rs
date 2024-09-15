@@ -19,7 +19,6 @@ use crate::JumpStatement;
 use crate::PrimaryBlock;
 use crate::TypeQualifier;
 use crate::TypeQualifierKind;
-use crate::TypeSpecifierKind;
 use crate::TypeSpecifierQualifier::Qualifier;
 use crate::TypeSpecifierQualifier::Specifier;
 use crate::UnlabeledStatement;
@@ -487,15 +486,7 @@ fn parse_type_specifiers<'a>(
         match specifier {
             cst::DeclarationSpecifier::StorageClass(storage_class) => todo!("{storage_class:#?}"),
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Specifier(specifier)) =>
-                match specifier.kind {
-                    TypeSpecifierKind::Int =>
-                        ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                            signedness: None,
-                            kind: IntegralKind::Int,
-                        }))),
-                    TypeSpecifierKind::Char => ty = Some(Type::Arithmetic(Arithmetic::Char)),
-                    _ => todo!("{specifier:#?}"),
-                },
+                specifier.parse(sess, &mut ty),
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Qualifier(qualifier)) =>
                 qualifier.parse(sess, &mut const_qualifier, &mut volatile_qualifier),
             cst::DeclarationSpecifier::FunctionSpecifier(function_specifier) =>

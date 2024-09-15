@@ -1,6 +1,11 @@
 #![feature(coverage_attribute)]
 
 use ariadne::Color::Red;
+use ast::Arithmetic;
+use ast::Integral;
+use ast::IntegralKind;
+use ast::Signedness;
+use ast::Type;
 use itertools::Itertools as _;
 use lalrpop_util::lalrpop_mod;
 use lalrpop_util::ParseError;
@@ -208,6 +213,110 @@ impl<'a> TypeSpecifier<'a> {
 
     fn loc(&self) -> Loc<'a> {
         self.token.loc()
+    }
+
+    fn parse(&self, _sess: &ast::Session<'a>, ty: &mut Option<Type<'_>>) {
+        match self.kind {
+            TypeSpecifierKind::Short => match ty {
+                None =>
+                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                        signedness: None,
+                        kind: IntegralKind::Short,
+                    }))),
+                Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                    signedness,
+                    kind: IntegralKind::Int,
+                }))) =>
+                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                        signedness: *signedness,
+                        kind: IntegralKind::Short,
+                    }))),
+                _ => todo!(),
+            },
+            // TODO: only allow at most one `int` per type
+            TypeSpecifierKind::Int => match ty {
+                Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                    signedness: _,
+                    kind:
+                        IntegralKind::Short
+                        | IntegralKind::Int
+                        | IntegralKind::Long
+                        | IntegralKind::LongLong,
+                }))) => (),
+                Some(_) => todo!(),
+                None =>
+                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                        signedness: None,
+                        kind: IntegralKind::Int,
+                    }))),
+            },
+            TypeSpecifierKind::Long => match ty {
+                None =>
+                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                        signedness: None,
+                        kind: IntegralKind::Long,
+                    }))),
+                Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                    signedness,
+                    kind: IntegralKind::Int,
+                }))) =>
+                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                        signedness: *signedness,
+                        kind: IntegralKind::Long,
+                    }))),
+                Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                    signedness,
+                    kind: IntegralKind::Long,
+                }))) =>
+                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                        signedness: *signedness,
+                        kind: IntegralKind::LongLong,
+                    }))),
+                _ => todo!(),
+            },
+            TypeSpecifierKind::Char => match ty {
+                Some(_) => todo!(),
+                None => *ty = Some(Type::Arithmetic(Arithmetic::Char)),
+            },
+            TypeSpecifierKind::Void => match ty {
+                Some(_) => todo!(),
+                None => *ty = Some(Type::Void),
+            },
+            TypeSpecifierKind::Signed => match ty {
+                Some(Type::Arithmetic(Arithmetic::Char)) =>
+                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                        signedness: Some(Signedness::Signed),
+                        kind: IntegralKind::Char,
+                    }))),
+                Some(Type::Arithmetic(Arithmetic::Integral(
+                    integral @ Integral { signedness: None, kind: _ },
+                ))) => integral.signedness = Some(Signedness::Signed),
+                None =>
+                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                        signedness: Some(Signedness::Signed),
+                        kind: IntegralKind::Int,
+                    }))),
+                _ => todo!(),
+            },
+            TypeSpecifierKind::Unsigned => match ty {
+                Some(Type::Arithmetic(Arithmetic::Char)) =>
+                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                        signedness: Some(Signedness::Unsigned),
+                        kind: IntegralKind::Char,
+                    }))),
+                Some(Type::Arithmetic(Arithmetic::Integral(
+                    integral @ Integral { signedness: None, kind: _ },
+                ))) => integral.signedness = Some(Signedness::Unsigned),
+                None =>
+                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                        signedness: Some(Signedness::Unsigned),
+                        kind: IntegralKind::Int,
+                    }))),
+                _ => todo!(),
+            },
+            TypeSpecifierKind::Bool => todo!(),
+            _ => todo!("{self:#?}"),
+        }
     }
 }
 
