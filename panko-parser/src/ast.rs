@@ -328,7 +328,7 @@ impl fmt::Display for Type<'_> {
 impl fmt::Display for Integral {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(signedness) = self.signedness {
-            write!(f, "{signedness}")?;
+            write!(f, "{signedness} ")?;
         }
         write!(f, "{}", self.kind)
     }
