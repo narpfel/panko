@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_initialisation_with_noop_type_conversion_gets_new_slot.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (a~1 `unsigned int` @0) (noop-type-conversion (42 `int` @0) `unsigned int` @0))
+         (definition (b~2 `int` @4) (27 `int` @4))
+         (return (noop-type-conversion (a~1 `unsigned int` @0) `int` @0)))))
+
+----- stderr -----

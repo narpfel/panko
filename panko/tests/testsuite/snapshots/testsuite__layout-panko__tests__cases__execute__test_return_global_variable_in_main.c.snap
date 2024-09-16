@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (definition (return_value~0 `int` (static return_value)) (5 `int` @0))
+   (definition (return_value~0 `int` (static return_value)) (5 `int` (static return_value)))
    (function-definition
       (main~1 `fn() -> int` (static main))
       (compound-statement

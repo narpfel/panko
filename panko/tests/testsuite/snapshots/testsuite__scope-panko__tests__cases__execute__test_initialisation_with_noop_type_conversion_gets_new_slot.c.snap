@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/test_initialisation_with_noop_type_conversion_gets_new_slot.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `unsigned int` 42)
+         (definition b~2 `int` 27)
+         (return (name a~1 `unsigned int`)))))
+
+----- stderr -----

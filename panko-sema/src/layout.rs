@@ -202,9 +202,10 @@ fn layout_declaration<'a>(
     decl: &typecheck::Declaration<'a>,
 ) -> Declaration<'a> {
     let typecheck::Declaration { reference, initialiser } = *decl;
-    let initialiser: Option<_> =
-        try { layout_expression_keep_slot(stack, bump, initialiser.as_ref()?) };
-    let reference = stack.add_at(reference, try { initialiser?.slot });
+    let reference = stack.add(reference);
+    let initialiser = try {
+        layout_expression_keep_slot(stack, bump, initialiser.as_ref()?, Some(reference.slot))
+    };
     Declaration { reference, initialiser }
 }
 
@@ -246,13 +247,14 @@ fn layout_expression<'a>(
     bump: &'a Bump,
     expr: &typecheck::TypedExpression<'a>,
 ) -> LayoutedExpression<'a> {
-    stack.with_block(|stack| layout_expression_keep_slot(stack, bump, expr))
+    stack.with_block(|stack| layout_expression_keep_slot(stack, bump, expr, None))
 }
 
 fn layout_expression_keep_slot<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
     expr: &typecheck::TypedExpression<'a>,
+    target_slot: Option<Slot<'a>>,
 ) -> LayoutedExpression<'a> {
     let typecheck::TypedExpression { ty, expr } = *expr;
     let (slot, expr) = match expr {
@@ -260,22 +262,24 @@ fn layout_expression_keep_slot<'a>(
             let reference = stack.add(name);
             (reference.slot(), Expression::Name(reference))
         }
-        typecheck::Expression::Integer(integer) =>
-            (stack.temporary(ty.ty), Expression::Integer(integer)),
+        typecheck::Expression::Integer(integer) => (
+            target_slot.unwrap_or_else(|| stack.temporary(ty.ty)),
+            Expression::Integer(integer),
+        ),
         typecheck::Expression::NoopTypeConversion(expr) => {
-            let expr = layout_expression(stack, bump, expr);
+            let expr = layout_expression_keep_slot(stack, bump, expr, target_slot);
             (expr.slot, Expression::NoopTypeConversion(bump.alloc(expr)))
         }
         typecheck::Expression::Truncate(truncate) => (
-            stack.temporary(ty.ty),
+            target_slot.unwrap_or_else(|| stack.temporary(ty.ty)),
             Expression::Truncate(bump.alloc(layout_expression(stack, bump, truncate))),
         ),
         typecheck::Expression::SignExtend(sign_extend) => (
-            stack.temporary(ty.ty),
+            target_slot.unwrap_or_else(|| stack.temporary(ty.ty)),
             Expression::SignExtend(bump.alloc(layout_expression(stack, bump, sign_extend))),
         ),
         typecheck::Expression::ZeroExtend(zero_extend) => (
-            stack.temporary(ty.ty),
+            target_slot.unwrap_or_else(|| stack.temporary(ty.ty)),
             Expression::ZeroExtend(bump.alloc(layout_expression(stack, bump, zero_extend))),
         ),
         typecheck::Expression::Parenthesised { open_paren: _, expr, close_paren: _ } =>
