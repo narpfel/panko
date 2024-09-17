@@ -1,7 +1,6 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-use im_rc::HashSet;
 use panko_parser::ast::Type;
 
 use super::Reference;
@@ -13,7 +12,7 @@ use crate::scope::StorageDuration;
 
 #[derive(Debug, Default)]
 struct Slots {
-    stack: nonempty::Vec<(u64, HashSet<u64>)>,
+    stack: nonempty::Vec<u64>,
     offset: u64,
     size: u64,
 }
@@ -28,19 +27,11 @@ impl Slots {
     }
 
     fn push(&mut self) {
-        self.stack.push((self.offset, self.stack.last().1.clone()));
+        self.stack.push(self.offset);
     }
 
     fn pop(&mut self) {
-        self.offset = self.stack.pop().unwrap().0;
-    }
-
-    fn make_permanent(&mut self, offset: u64) {
-        self.stack.last_mut().1.insert(offset);
-    }
-
-    fn is_permanent(&self, offset: u64) -> bool {
-        self.stack.last().1.contains(&offset)
+        self.offset = self.stack.pop().unwrap();
     }
 }
 
@@ -92,16 +83,9 @@ impl<'a> Stack<'a> {
                 } = reference;
                 let slot = match storage_duration {
                     StorageDuration::Static => Slot::Static(reference.name()),
-                    // TODO: This can be expressed more concisely using guard patterns
-                    StorageDuration::Automatic => match maybe_slot {
-                        Some(Slot::Automatic(offset)) if self.slots.is_permanent(offset) =>
-                            self.slots.add_slot(ty.ty),
-                        maybe_slot => maybe_slot.unwrap_or_else(|| self.slots.add_slot(ty.ty)),
-                    },
+                    StorageDuration::Automatic =>
+                        maybe_slot.unwrap_or_else(|| self.slots.add_slot(ty.ty)),
                 };
-                if let Slot::Automatic(offset) = slot {
-                    self.slots.make_permanent(offset);
-                }
                 *entry.insert(Reference { name, ty, id, kind, slot })
             }
         }
