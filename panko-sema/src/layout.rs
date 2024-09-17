@@ -283,8 +283,8 @@ fn layout_expression_in_slot<'a>(
             return layout_expression(stack, bump, expr),
         typecheck::Expression::Assign { target, value } => {
             let target = bump.alloc(layout_expression(stack, bump, target));
-            // TODO: layout `value` into `target`’s slot to avoid an unnecessary copy
-            let value = bump.alloc(layout_expression(stack, bump, value));
+            let value = layout_expression_in_slot(stack, bump, value, Some(target.slot));
+            let value = bump.alloc(value);
             (target.slot, Expression::Assign { target, value })
         }
     };

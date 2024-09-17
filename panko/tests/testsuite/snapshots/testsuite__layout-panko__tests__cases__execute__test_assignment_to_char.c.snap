@@ -18,7 +18,7 @@ exit_code: 0
          (definition (b~2 `char` @1) (truncate (2 `int` @4) `char` @1))
          (definition (c~3 `char` @2) (truncate (42 `int` @4) `char` @2))
          (definition (d~4 `char` @3) (truncate (3 `int` @4) `char` @3))
-         (expression (assign (b~2 `char` @1) (truncate (123 `int` @8) `char` @4) `char` @1))
+         (expression (assign (b~2 `char` @1) (truncate (123 `int` @4) `char` @1) `char` @1))
          (return (sign-extend (c~3 `char` @2) `int` @4)))))
 
 ----- stderr -----
