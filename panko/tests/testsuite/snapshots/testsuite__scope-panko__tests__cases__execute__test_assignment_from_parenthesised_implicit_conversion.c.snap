@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/test_assignment_from_parenthesised_implicit_conversion.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `unsigned int` 27)
+         (expression (assign (name a~1 `unsigned int`) 42))
+         (return (name a~1 `unsigned int`)))))
+
+----- stderr -----

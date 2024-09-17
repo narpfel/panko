@@ -280,7 +280,7 @@ fn layout_expression_in_slot<'a>(
             Expression::ZeroExtend(bump.alloc(layout_expression(stack, bump, zero_extend))),
         ),
         typecheck::Expression::Parenthesised { open_paren: _, expr, close_paren: _ } =>
-            return layout_expression(stack, bump, expr),
+            return layout_expression_in_slot(stack, bump, expr, target_slot),
         typecheck::Expression::Assign { target, value } => {
             let target = bump.alloc(layout_expression(stack, bump, target));
             let value = layout_expression_in_slot(stack, bump, value, Some(target.slot));

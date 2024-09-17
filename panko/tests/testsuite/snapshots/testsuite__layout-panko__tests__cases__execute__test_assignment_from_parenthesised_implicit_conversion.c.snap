@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_assignment_from_parenthesised_implicit_conversion.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (a~1 `unsigned int` @0) (noop-type-conversion (27 `int` @0) `unsigned int` @0))
+         (expression (assign (a~1 `unsigned int` @0) (noop-type-conversion (42 `int` @0) `unsigned int` @0) `unsigned int` @0))
+         (return (noop-type-conversion (a~1 `unsigned int` @0) `int` @0)))))
+
+----- stderr -----
