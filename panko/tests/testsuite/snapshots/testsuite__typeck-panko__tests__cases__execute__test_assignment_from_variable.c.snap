@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/test_assignment_from_variable.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `int` (0 `int`))
+         (definition b~2 `int` (42 `int`))
+         (expression (assign (b~2 `int`) (a~1 `int`) `int`))
+         (return (b~2 `int`)))))
+
+----- stderr -----
