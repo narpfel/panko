@@ -15,18 +15,12 @@ exit_code: 0
       (main~0 `fn() -> int` (static main))
       (compound-statement
          (return
-            (add
-               (add
-                  (add
+            (add `int` @0
+               (add `int` @0
+                  (add `int` @0
                      (1 `int` @0)
-                     (1 `int` @4)
-                     `int`
-                     @0)
-                  (1 `int` @4)
-                  `int`
-                  @0)
-               (2 `int` @4)
-               `int`
-               @0)))))
+                     (1 `int` @4))
+                  (1 `int` @4))
+               (2 `int` @4))))))
 
 ----- stderr -----

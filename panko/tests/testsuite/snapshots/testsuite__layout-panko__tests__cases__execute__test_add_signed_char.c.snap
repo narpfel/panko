@@ -14,14 +14,12 @@ exit_code: 0
    (function-definition
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (definition (a~1 `signed char` @0) (truncate (90 `int` @4) `signed char` @0))
-         (definition (b~2 `signed char` @1) (truncate (110 `int` @4) `signed char` @1))
+         (definition (a~1 `signed char` @0) (truncate `signed char` @0 (90 `int` @4)))
+         (definition (b~2 `signed char` @1) (truncate `signed char` @1 (110 `int` @4)))
          (definition (result~3 `int` @4)
-            (add
-               (sign-extend (a~1 `signed char` @0) `int` @4)
-               (sign-extend (b~2 `signed char` @1) `int` @8)
-               `int`
-               @4))
+            (add `int` @4
+               (sign-extend `int` @4 (a~1 `signed char` @0))
+               (sign-extend `int` @8 (b~2 `signed char` @1))))
          (return (result~3 `int` @4)))))
 
 ----- stderr -----

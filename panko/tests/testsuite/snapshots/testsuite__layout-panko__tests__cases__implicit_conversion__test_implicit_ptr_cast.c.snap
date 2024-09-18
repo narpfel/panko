@@ -15,16 +15,16 @@ exit_code: 0
       (const_can_be_added~0 `fn() -> ptr<int const>` (static const_can_be_added))
       (compound-statement
          (definition (p~1 `ptr<int>` @0) ∅)
-         (return (noop-type-conversion (p~1 `ptr<int>` @0) `ptr<int const>` @0))))
+         (return (noop-type-conversion `ptr<int const>` @0 (p~1 `ptr<int>` @0)))))
    (function-definition
       (const_can_be_removed~2 `fn() -> ptr<int>` (static const_can_be_removed))
       (compound-statement
          (definition (p~3 `ptr<int const>` @0) ∅)
-         (return (noop-type-conversion (p~3 `ptr<int const>` @0) `ptr<int>` @0))))
+         (return (noop-type-conversion `ptr<int>` @0 (p~3 `ptr<int const>` @0)))))
    (function-definition
       (cast_between_completely_different_ptr_types~4 `fn() -> ptr<ptr<char>>` (static cast_between_completely_different_ptr_types))
       (compound-statement
          (definition (p~5 `ptr<int>` @0) ∅)
-         (return (noop-type-conversion (p~5 `ptr<int>` @0) `ptr<ptr<char>>` @0)))))
+         (return (noop-type-conversion `ptr<ptr<char>>` @0 (p~5 `ptr<int>` @0))))))
 
 ----- stderr -----

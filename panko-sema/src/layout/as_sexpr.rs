@@ -78,7 +78,10 @@ impl AsSExpr for Statement<'_> {
 
 impl AsSExpr for LayoutedExpression<'_> {
     fn as_sexpr(&self) -> SExpr {
-        self.expr.as_sexpr().inherit(&self.ty).inherit(&self.slot)
+        self.expr
+            .as_sexpr()
+            .inherit_front(&self.slot)
+            .inherit_front(&self.ty)
     }
 }
 

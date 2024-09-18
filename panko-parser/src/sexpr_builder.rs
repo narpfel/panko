@@ -63,6 +63,11 @@ impl<'a> SExpr<'a> {
         self
     }
 
+    pub fn inherit_front(mut self, param: &'a dyn AsSExpr) -> Self {
+        self.params.insert(0, Param::Inherit(param));
+        self
+    }
+
     pub(crate) fn inherit_many<T>(mut self, params: impl IntoIterator<Item = &'a T>) -> Self
     where
         T: AsSExpr + 'a,
