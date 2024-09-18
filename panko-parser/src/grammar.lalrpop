@@ -58,6 +58,9 @@ extern {
 
         "return" => Token { kind: panko_lex::TokenKind::Return, .. },
 
+        "+" => Token { kind: panko_lex::TokenKind::Plus, .. },
+        "-" => Token { kind: panko_lex::TokenKind::Minus, .. },
+
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
         Integer => Token { kind: panko_lex::TokenKind::Integer, .. },
     }
@@ -291,6 +294,18 @@ AssignmentExpression: ast::Expression<'a> = {
 }
 
 UnaryExpression: ast::Expression<'a> = {
+    AdditiveExpression,
+}
+
+AdditiveExpression: ast::Expression<'a> = {
+    MultiplicativeExpression,
+    <lhs:Bump<AdditiveExpression>> "+" <rhs:Bump<MultiplicativeExpression>> =>
+        ast::Expression::BinOp { kind: ast::BinOpKind::Add, <> },
+    <lhs:Bump<AdditiveExpression>> "-" <rhs:Bump<MultiplicativeExpression>> =>
+        ast::Expression::BinOp { kind: ast::BinOpKind::Subtract, <> },
+}
+
+MultiplicativeExpression: ast::Expression<'a> = {
     PrimaryExpression,
 }
 

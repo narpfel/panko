@@ -13,6 +13,7 @@ use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::Type;
 use panko_parser::sexpr_builder::AsSExpr as _;
+use panko_parser::BinOpKind;
 use panko_report::Report;
 use variant_types::IntoVariant as _;
 
@@ -21,6 +22,8 @@ use crate::scope::ParamRefs;
 use crate::scope::Reference;
 
 mod as_sexpr;
+#[cfg(test)]
+mod tests;
 
 #[derive(Debug, Report)]
 #[exit_code(1)]
@@ -126,6 +129,11 @@ pub enum Expression<'a> {
         target: &'a TypedExpression<'a>,
         value: &'a TypedExpression<'a>,
     },
+    BinOp {
+        lhs: &'a TypedExpression<'a>,
+        kind: BinOpKind,
+        rhs: &'a TypedExpression<'a>,
+    },
 }
 
 impl TypedExpression<'_> {
@@ -146,7 +154,8 @@ impl TypedExpression<'_> {
             | Expression::Truncate(_)
             | Expression::SignExtend(_)
             | Expression::ZeroExtend(_)
-            | Expression::Assign { .. } => false,
+            | Expression::Assign { .. }
+            | Expression::BinOp { .. } => false,
         }
     }
 
@@ -167,6 +176,7 @@ impl<'a> Expression<'a> {
             Expression::Assign { target, value } => target.loc().until(value.loc()),
             Expression::Parenthesised { open_paren, expr: _, close_paren } =>
                 open_paren.loc().until(close_paren.loc()),
+            Expression::BinOp { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
         }
     }
 
@@ -356,6 +366,100 @@ fn typeck_expression<'a>(
                 ty: target.ty,
                 expr: Expression::Assign { target, value },
             }
+        }
+        scope::Expression::BinOp { lhs, kind, rhs } => {
+            let lhs = typeck_expression(sess, lhs);
+            let rhs = typeck_expression(sess, rhs);
+            match (lhs.ty.ty, rhs.ty.ty) {
+                (Type::Arithmetic(lhs_ty), Type::Arithmetic(rhs_ty)) =>
+                    typeck_arithmetic_binop(sess, *kind, lhs, rhs, lhs_ty, rhs_ty),
+                (Type::Arithmetic(arith_ty), Type::Pointer(_))
+                | (Type::Pointer(_), Type::Arithmetic(arith_ty))
+                    if matches!(kind, BinOpKind::Add) && arith_ty.is_integral() =>
+                    todo!(),
+                (Type::Pointer(_), Type::Arithmetic(arith_ty))
+                    if matches!(kind, BinOpKind::Subtract) && arith_ty.is_integral() =>
+                    todo!(),
+                (Type::Pointer(_), Type::Pointer(_)) if matches!(kind, BinOpKind::Subtract) =>
+                    todo!(),
+                _ => todo!("type error"),
+            }
+        }
+    }
+}
+
+fn typeck_arithmetic_binop<'a>(
+    sess: &'a Session<'a>,
+    kind: BinOpKind,
+    lhs: TypedExpression<'a>,
+    rhs: TypedExpression<'a>,
+    lhs_ty: Arithmetic,
+    rhs_ty: Arithmetic,
+) -> TypedExpression<'a> {
+    let result_ty =
+        Type::Arithmetic(perform_usual_arithmetic_conversions(lhs_ty, rhs_ty)).unqualified();
+    let lhs = convert_as_if_by_assignment(sess, result_ty, lhs);
+    let rhs = convert_as_if_by_assignment(sess, result_ty, rhs);
+    TypedExpression {
+        ty: result_ty,
+        expr: Expression::BinOp {
+            lhs: sess.alloc(lhs),
+            kind,
+            rhs: sess.alloc(rhs),
+        },
+    }
+}
+
+type Comparator = impl Fn(&Arithmetic) -> (impl Ord + use<>);
+const SIZE_WITH_UNSIGNED_AS_TIE_BREAKER: Comparator = |ty| (ty.conversion_rank(), ty.signedness());
+
+fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) -> Arithmetic {
+    // TODO: handle floats
+    // TODO: convert enumerations to their underlying types
+
+    let promote = |ty| match ty {
+        Arithmetic::Integral(Integral {
+            signedness: _,
+            kind: IntegralKind::Char | IntegralKind::Short,
+        })
+        | Arithmetic::Char => Arithmetic::Integral(Integral {
+            signedness: None,
+            kind: IntegralKind::Int,
+        }),
+        ty => ty,
+    };
+
+    let lhs_ty = promote(lhs_ty);
+    let rhs_ty = promote(rhs_ty);
+
+    if lhs_ty == rhs_ty {
+        lhs_ty
+    }
+    else if lhs_ty.signedness() == rhs_ty.signedness() {
+        std::cmp::max_by_key(lhs_ty, rhs_ty, |ty| ty.conversion_rank())
+    }
+    else {
+        let [smaller_ty, larger_ty] =
+            std::cmp::minmax_by_key(lhs_ty, rhs_ty, SIZE_WITH_UNSIGNED_AS_TIE_BREAKER);
+
+        if matches!(larger_ty.signedness(), Signedness::Unsigned) {
+            larger_ty
+        }
+        else if larger_ty.size() > smaller_ty.size() {
+            assert!(matches!(larger_ty.signedness(), Signedness::Signed));
+            larger_ty
+        }
+        else {
+            assert!(matches!(larger_ty.signedness(), Signedness::Signed));
+            let Arithmetic::Integral(Integral { signedness: _, kind }) = larger_ty
+            else {
+                unreachable!()
+            };
+
+            Arithmetic::Integral(Integral {
+                signedness: Some(Signedness::Unsigned),
+                kind,
+            })
         }
     }
 }

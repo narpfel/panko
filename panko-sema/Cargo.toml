@@ -11,3 +11,6 @@ panko-lex = { path = "../panko-lex" }
 panko-parser = { path = "../panko-parser" }
 panko-report = { path = "../panko-report" }
 variant-types = { workspace = true }
+
+[dev-dependencies]
+rstest = { workspace = true }

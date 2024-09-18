@@ -8,6 +8,7 @@ use indexmap::IndexMap;
 use indexmap::IndexSet;
 use itertools::Itertools as _;
 use panko_parser::ast::Type;
+use panko_parser::BinOpKind;
 use panko_sema::layout::CompoundStatement;
 use panko_sema::layout::Declaration;
 use panko_sema::layout::Expression;
@@ -177,6 +178,7 @@ impl<'a> Codegen<'a> {
                 Expression::SignExtend(_) => todo!(),
                 Expression::ZeroExtend(_) => todo!(),
                 Expression::Assign { .. } => todo!(),
+                Expression::BinOp { .. } => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -262,6 +264,17 @@ impl<'a> Codegen<'a> {
                 if target.slot != value.slot {
                     self.copy(&target.typed_slot(), &value.typed_slot());
                 }
+            }
+            Expression::BinOp { lhs, kind, rhs } => {
+                self.expr(lhs);
+                self.expr(rhs);
+                let operation = match kind {
+                    BinOpKind::Add => "add",
+                    BinOpKind::Subtract => "sub",
+                };
+                self.emit_args("mov", &[&Rax.typed(lhs), &lhs.typed_slot()]);
+                self.emit_args(operation, &[&Rax.typed(lhs), &rhs.typed_slot()]);
+                self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
             }
         }
     }

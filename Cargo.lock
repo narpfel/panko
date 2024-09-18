@@ -774,6 +774,7 @@ dependencies = [
  "panko-lex",
  "panko-parser",
  "panko-report",
+ "rstest",
  "variant-types",
 ]
 

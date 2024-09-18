@@ -185,7 +185,7 @@ pub enum IntegralKind {
     LongLong,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Signedness {
     Signed,
     Unsigned,
@@ -434,10 +434,38 @@ impl<'a> Statement<'a> {
 }
 
 impl Arithmetic {
-    fn size(&self) -> u64 {
+    pub fn size(&self) -> u64 {
         match self {
             Arithmetic::Integral(Integral { signedness: _, kind }) => kind.size(),
             Arithmetic::Char => 1,
+        }
+    }
+
+    pub fn signedness(&self) -> Signedness {
+        match self {
+            Arithmetic::Integral(Integral { signedness, kind: _ }) =>
+                signedness.unwrap_or(Signedness::Signed),
+            Arithmetic::Char => Signedness::Signed,
+        }
+    }
+
+    pub fn conversion_rank(&self) -> u64 {
+        match self {
+            Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Char })
+            | Arithmetic::Char => 1,
+            Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Short }) => 2,
+            Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Int }) => 3,
+            Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Long }) => 4,
+            Arithmetic::Integral(Integral {
+                signedness: _,
+                kind: IntegralKind::LongLong,
+            }) => 5,
+        }
+    }
+
+    pub fn is_integral(&self) -> bool {
+        match self {
+            Arithmetic::Integral(_) | Arithmetic::Char => true,
         }
     }
 }

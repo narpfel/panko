@@ -5,6 +5,7 @@ use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast::QualifiedType;
 use panko_parser::ast::Type;
+use panko_parser::BinOpKind;
 
 use crate::layout::stack::Stack;
 use crate::scope::Id;
@@ -76,6 +77,11 @@ pub enum Expression<'a> {
     Assign {
         target: &'a LayoutedExpression<'a>,
         value: &'a LayoutedExpression<'a>,
+    },
+    BinOp {
+        lhs: &'a LayoutedExpression<'a>,
+        kind: BinOpKind,
+        rhs: &'a LayoutedExpression<'a>,
     },
 }
 
@@ -289,6 +295,12 @@ fn layout_expression_in_slot<'a>(
             let value = layout_expression_in_slot(stack, bump, value, Some(target.slot));
             let value = bump.alloc(value);
             (target.slot, Expression::Assign { target, value })
+        }
+        typecheck::Expression::BinOp { lhs, kind, rhs } => {
+            let slot = make_slot();
+            let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, Some(slot)));
+            let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
+            (slot, Expression::BinOp { lhs, kind, rhs })
         }
     };
     LayoutedExpression { ty, slot, expr }

@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_add_signed_char.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (a~1 `signed char` @0) (truncate (90 `int` @4) `signed char` @0))
+         (definition (b~2 `signed char` @1) (truncate (110 `int` @4) `signed char` @1))
+         (definition (result~3 `int` @4)
+            (add
+               (sign-extend (a~1 `signed char` @0) `int` @4)
+               (sign-extend (b~2 `signed char` @1) `int` @8)
+               `int`
+               @4))
+         (return (result~3 `int` @4)))))
+
+----- stderr -----

@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_addition.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (return
+            (add
+               (add
+                  (add
+                     (1 `int` @0)
+                     (1 `int` @4)
+                     `int`
+                     @0)
+                  (1 `int` @4)
+                  `int`
+                  @0)
+               (2 `int` @4)
+               `int`
+               @0)))))
+
+----- stderr -----

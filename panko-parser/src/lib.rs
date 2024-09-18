@@ -493,6 +493,26 @@ pub enum Expression<'a> {
         target: &'a Expression<'a>,
         value: &'a Expression<'a>,
     },
+    BinOp {
+        lhs: &'a Expression<'a>,
+        kind: BinOpKind,
+        rhs: &'a Expression<'a>,
+    },
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum BinOpKind {
+    Add,
+    Subtract,
+}
+
+impl BinOpKind {
+    pub fn str(self) -> &'static str {
+        match self {
+            BinOpKind::Add => "add",
+            BinOpKind::Subtract => "subtract",
+        }
+    }
 }
 
 pub fn parse<'a>(

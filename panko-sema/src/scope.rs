@@ -13,6 +13,7 @@ use panko_parser::ast::FunctionType;
 use panko_parser::ast::QualifiedType;
 use panko_parser::ast::Session;
 use panko_parser::ast::Type;
+use panko_parser::BinOpKind;
 use panko_report::Report;
 
 use crate::nonempty;
@@ -118,6 +119,11 @@ pub(crate) enum Expression<'a> {
         target: &'a Expression<'a>,
         value: &'a Expression<'a>,
     },
+    BinOp {
+        lhs: &'a Expression<'a>,
+        kind: BinOpKind,
+        rhs: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -190,6 +196,7 @@ impl<'a> Expression<'a> {
             Expression::Parenthesised { open_paren, expr: _, close_paren } =>
                 open_paren.loc().until(close_paren.loc()),
             Expression::Assign { target, value } => target.loc().until(value.loc()),
+            Expression::BinOp { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
         }
     }
 }
@@ -505,6 +512,11 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::Assign { target, value } => Expression::Assign {
             target: scopes.sess.alloc(resolve_expr(scopes, target)),
             value: scopes.sess.alloc(resolve_expr(scopes, value)),
+        },
+        ast::Expression::BinOp { lhs, kind, rhs } => Expression::BinOp {
+            lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
+            kind: *kind,
+            rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),
         },
     }
 }

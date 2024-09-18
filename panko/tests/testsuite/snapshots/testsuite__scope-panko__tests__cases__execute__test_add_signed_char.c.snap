@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/test_add_signed_char.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `signed char` 90)
+         (definition b~2 `signed char` 110)
+         (definition result~3 `int` (add (name a~1 `signed char`) (name b~2 `signed char`)))
+         (return (name result~3 `int`)))))
+
+----- stderr -----
