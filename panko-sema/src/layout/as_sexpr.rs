@@ -91,10 +91,10 @@ impl AsSExpr for Expression<'_> {
             Expression::Name(reference) => SExpr::string(&reference.unique_name()),
             Expression::Integer(int) => SExpr::string(int.slice()),
             Expression::NoopTypeConversion(expr) =>
-                SExpr::string("noop-type-conversion").inherit(expr),
-            Expression::Truncate(from) => SExpr::string("truncate").inherit(from),
-            Expression::SignExtend(from) => SExpr::string("sign-extend").inherit(from),
-            Expression::ZeroExtend(from) => SExpr::string("zero-extend").inherit(from),
+                SExpr::new("noop-type-conversion").inherit(expr),
+            Expression::Truncate(from) => SExpr::new("truncate").inherit(from),
+            Expression::SignExtend(from) => SExpr::new("sign-extend").inherit(from),
+            Expression::ZeroExtend(from) => SExpr::new("zero-extend").inherit(from),
             Expression::Assign { target, value } =>
                 SExpr::new("assign").inherit(target).inherit(value),
             Expression::BinOp { lhs, kind, rhs } => SExpr::new(kind.str()).lines([lhs, rhs]),
@@ -104,14 +104,14 @@ impl AsSExpr for Expression<'_> {
 
 impl AsSExpr for Reference<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::string(&format!("{} `{}`", self.unique_name(), self.ty,)).inherit(&self.slot)
+        SExpr::new(&format!("{} `{}`", self.unique_name(), self.ty,)).inherit(&self.slot)
     }
 }
 
 impl AsSExpr for Slot<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            Slot::Static(name) => SExpr::string("static").inline_string(name.to_string()),
+            Slot::Static(name) => SExpr::new("static").inline_string(name.to_string()),
             Slot::Automatic(offset) => SExpr::string(&format!("@{offset}")),
         }
     }

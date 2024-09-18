@@ -79,12 +79,10 @@ impl AsSExpr for Expression<'_> {
             Expression::Name(reference) => SExpr::string(&reference.unique_name()),
             Expression::Integer(int) => SExpr::string(int.slice()),
             Expression::NoopTypeConversion(expr) =>
-                SExpr::string("noop-type-conversion").inherit(expr),
-            Expression::Truncate(truncate) => SExpr::string("truncate").inherit(truncate),
-            Expression::SignExtend(sign_extend) =>
-                SExpr::string("sign-extend").inherit(sign_extend),
-            Expression::ZeroExtend(zero_extend) =>
-                SExpr::string("zero-extend").inherit(zero_extend),
+                SExpr::new("noop-type-conversion").inherit(expr),
+            Expression::Truncate(truncate) => SExpr::new("truncate").inherit(truncate),
+            Expression::SignExtend(sign_extend) => SExpr::new("sign-extend").inherit(sign_extend),
+            Expression::ZeroExtend(zero_extend) => SExpr::new("zero-extend").inherit(zero_extend),
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.as_sexpr(),
             Expression::Assign { target, value } =>
                 SExpr::new("assign").inherit(target).inherit(value),
