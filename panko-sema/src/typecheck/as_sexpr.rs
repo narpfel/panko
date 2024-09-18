@@ -76,7 +76,7 @@ impl AsSExpr for TypedExpression<'_> {
 impl AsSExpr for Expression<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            Expression::Name(reference) => SExpr::string(&reference.unique_name()),
+            Expression::Name(reference) => SExpr::string(reference.unique_name()),
             Expression::Integer(int) => SExpr::string(int.slice()),
             Expression::NoopTypeConversion(expr) =>
                 SExpr::new("noop-type-conversion").inherit(expr),

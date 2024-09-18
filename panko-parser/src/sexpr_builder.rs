@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fmt;
 use std::iter::once;
 use std::iter::repeat;
@@ -11,23 +12,23 @@ use crate::SEXPR_INDENT;
 const EMPTY: &str = "";
 
 pub struct SExpr<'a> {
-    name: String,
+    name: Cow<'a, str>,
     params: Vec<Param<'a>>,
     parenthesise_if_empty: bool,
 }
 
 impl<'a> SExpr<'a> {
-    pub fn new(s: &str) -> Self {
+    pub fn new(s: impl Into<Cow<'a, str>>) -> Self {
         Self {
-            name: s.to_owned(),
+            name: s.into(),
             params: vec![],
             parenthesise_if_empty: true,
         }
     }
 
-    pub fn string(s: &str) -> Self {
+    pub fn string(s: impl Into<Cow<'a, str>>) -> Self {
         Self {
-            name: s.to_owned(),
+            name: s.into(),
             params: vec![],
             parenthesise_if_empty: false,
         }
@@ -35,7 +36,7 @@ impl<'a> SExpr<'a> {
 
     fn list() -> Self {
         Self {
-            name: "".to_owned(),
+            name: "".into(),
             params: vec![],
             parenthesise_if_empty: true,
         }
@@ -43,7 +44,7 @@ impl<'a> SExpr<'a> {
 
     pub(crate) fn display(value: &dyn fmt::Display) -> Self {
         Self {
-            name: format!("`{value}`"),
+            name: format!("`{value}`").into(),
             params: vec![],
             parenthesise_if_empty: false,
         }
@@ -243,7 +244,7 @@ impl AsSExpr for Token<'_> {
 
 impl AsSExpr for &str {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::string(self)
+        SExpr::string(*self)
     }
 }
 

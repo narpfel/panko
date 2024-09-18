@@ -88,7 +88,7 @@ impl AsSExpr for LayoutedExpression<'_> {
 impl AsSExpr for Expression<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            Expression::Name(reference) => SExpr::string(&reference.unique_name()),
+            Expression::Name(reference) => SExpr::string(reference.unique_name()),
             Expression::Integer(int) => SExpr::string(int.slice()),
             Expression::NoopTypeConversion(expr) =>
                 SExpr::new("noop-type-conversion").inherit(expr),
@@ -104,7 +104,7 @@ impl AsSExpr for Expression<'_> {
 
 impl AsSExpr for Reference<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::new(&format!("{} `{}`", self.unique_name(), self.ty,)).inherit(&self.slot)
+        SExpr::new(format!("{} `{}`", self.unique_name(), self.ty,)).inherit(&self.slot)
     }
 }
 
@@ -112,7 +112,7 @@ impl AsSExpr for Slot<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Slot::Static(name) => SExpr::new("static").inline_string(name.to_string()),
-            Slot::Automatic(offset) => SExpr::string(&format!("@{offset}")),
+            Slot::Automatic(offset) => SExpr::string(format!("@{offset}")),
         }
     }
 }
