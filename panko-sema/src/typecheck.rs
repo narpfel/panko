@@ -130,17 +130,7 @@ pub enum Expression<'a> {
 
 impl TypedExpression<'_> {
     fn loc(&self) -> Loc {
-        match self.expr {
-            Expression::Name(name) => name.loc(),
-            Expression::Integer(token) => token.loc(),
-            Expression::NoopTypeConversion(expr) => expr.loc(),
-            Expression::Truncate(truncate) => truncate.loc(),
-            Expression::SignExtend(sign_extend) => sign_extend.loc(),
-            Expression::ZeroExtend(zero_extend) => zero_extend.loc(),
-            Expression::Parenthesised { open_paren, expr: _, close_paren } =>
-                open_paren.loc().until(close_paren.loc()),
-            Expression::Assign { target, value } => target.loc().until(value.loc()),
-        }
+        self.expr.loc()
     }
 
     fn is_modifiable_lvalue(&self) -> bool {
