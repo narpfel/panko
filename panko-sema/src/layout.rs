@@ -203,8 +203,9 @@ fn layout_declaration<'a>(
 ) -> Declaration<'a> {
     let typecheck::Declaration { reference, initialiser } = *decl;
     let reference = stack.add(reference);
-    let initialiser =
-        try { layout_expression_in_slot(stack, bump, initialiser.as_ref()?, Some(reference.slot)) };
+    let initialiser = stack.with_block(|stack| try {
+        layout_expression_in_slot(stack, bump, initialiser.as_ref()?, Some(reference.slot))
+    });
     Declaration { reference, initialiser }
 }
 
@@ -232,12 +233,14 @@ fn layout_statement<'a>(
     match stmt {
         typecheck::Statement::Declaration(decl) =>
             Statement::Declaration(layout_declaration(stack, bump, decl)),
-        typecheck::Statement::Expression(expr) =>
-            Statement::Expression(try { layout_expression(stack, bump, expr.as_ref()?) }),
+        typecheck::Statement::Expression(expr) => stack.with_block(|stack| {
+            Statement::Expression(try { layout_expression(stack, bump, expr.as_ref()?) })
+        }),
         typecheck::Statement::Compound(stmts) =>
             Statement::Compound(layout_compound_statement(stack, bump, *stmts)),
-        typecheck::Statement::Return(expr) =>
-            Statement::Return(try { layout_expression(stack, bump, expr.as_ref()?) }),
+        typecheck::Statement::Return(expr) => stack.with_block(|stack| {
+            Statement::Return(try { layout_expression(stack, bump, expr.as_ref()?) })
+        }),
     }
 }
 
@@ -246,7 +249,7 @@ fn layout_expression<'a>(
     bump: &'a Bump,
     expr: &typecheck::TypedExpression<'a>,
 ) -> LayoutedExpression<'a> {
-    stack.with_block(|stack| layout_expression_in_slot(stack, bump, expr, None))
+    layout_expression_in_slot(stack, bump, expr, None)
 }
 
 fn layout_expression_in_slot<'a>(
