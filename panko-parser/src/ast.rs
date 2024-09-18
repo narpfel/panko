@@ -165,18 +165,17 @@ pub enum Type<'a> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Arithmetic {
     Integral(Integral),
-    Char,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Integral {
-    // FIXME: this considers `int` and `signed int` as different types
-    pub signedness: Option<Signedness>,
+    pub signedness: Signedness,
     pub kind: IntegralKind,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IntegralKind {
+    PlainChar,
     /// explicitly `signed char` or `unsigned char`
     Char,
     Short,
@@ -316,7 +315,6 @@ impl fmt::Display for Type<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Type::Arithmetic(Arithmetic::Integral(integral)) => write!(f, "{integral}"),
-            Type::Arithmetic(Arithmetic::Char) => write!(f, "char"),
             Type::Pointer(pointee) => write!(f, "ptr<{pointee}>"),
             Type::Function(function) => write!(f, "{function}"),
             Type::Void => write!(f, "void"),
@@ -326,10 +324,13 @@ impl fmt::Display for Type<'_> {
 
 impl fmt::Display for Integral {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(signedness) = self.signedness {
+        let Self { kind, signedness } = self;
+        if let (IntegralKind::Char, signedness) | (_, signedness @ Signedness::Unsigned) =
+            (kind, signedness)
+        {
             write!(f, "{signedness} ")?;
         }
-        write!(f, "{}", self.kind)
+        write!(f, "{}", kind)
     }
 }
 
@@ -437,22 +438,21 @@ impl Arithmetic {
     pub fn size(&self) -> u64 {
         match self {
             Arithmetic::Integral(Integral { signedness: _, kind }) => kind.size(),
-            Arithmetic::Char => 1,
         }
     }
 
     pub fn signedness(&self) -> Signedness {
         match self {
-            Arithmetic::Integral(Integral { signedness, kind: _ }) =>
-                signedness.unwrap_or(Signedness::Signed),
-            Arithmetic::Char => Signedness::Signed,
+            Arithmetic::Integral(Integral { signedness, kind: _ }) => *signedness,
         }
     }
 
     pub fn conversion_rank(&self) -> u64 {
         match self {
-            Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Char })
-            | Arithmetic::Char => 1,
+            Arithmetic::Integral(Integral {
+                signedness: _,
+                kind: IntegralKind::Char | IntegralKind::PlainChar,
+            }) => 1,
             Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Short }) => 2,
             Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Int }) => 3,
             Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Long }) => 4,
@@ -465,7 +465,7 @@ impl Arithmetic {
 
     pub fn is_integral(&self) -> bool {
         match self {
-            Arithmetic::Integral(_) | Arithmetic::Char => true,
+            Arithmetic::Integral(_) => true,
         }
     }
 }
@@ -473,6 +473,7 @@ impl Arithmetic {
 impl IntegralKind {
     fn size(&self) -> u64 {
         match self {
+            IntegralKind::PlainChar => 1,
             IntegralKind::Char => 1,
             IntegralKind::Short => 2,
             IntegralKind::Int => 4,
@@ -485,6 +486,7 @@ impl IntegralKind {
 impl fmt::Display for IntegralKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            IntegralKind::PlainChar => write!(f, "char"),
             IntegralKind::Char => write!(f, "char"),
             IntegralKind::Short => write!(f, "short"),
             IntegralKind::Int => write!(f, "int"),
@@ -526,7 +528,7 @@ fn parse_type_specifiers<'a>(
         sess.emit(Diagnostic::DeclarationWithoutType { at: specifiers });
         // FIXME: don’t use implicit int here, an explicit “type error” type will be better
         Type::Arithmetic(Arithmetic::Integral(Integral {
-            signedness: None,
+            signedness: Signedness::Signed,
             kind: IntegralKind::Int,
         }))
     });

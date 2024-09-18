@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `signed int` (noop-type-conversion (42 `int`) `signed int`))
-         (definition b~2 `unsigned long` (sign-extend (a~1 `signed int`) `unsigned long`)))))
+         (definition a~1 `int` (42 `int`))
+         (definition b~2 `unsigned long` (sign-extend (a~1 `int`) `unsigned long`)))))
 
 ----- stderr -----

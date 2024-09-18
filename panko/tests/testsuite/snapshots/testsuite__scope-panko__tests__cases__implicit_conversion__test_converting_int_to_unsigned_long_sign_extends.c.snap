@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `signed int` 42)
-         (definition b~2 `unsigned long` (name a~1 `signed int`)))))
+         (definition a~1 `int` 42)
+         (definition b~2 `unsigned long` (name a~1 `int`)))))
 
 ----- stderr -----

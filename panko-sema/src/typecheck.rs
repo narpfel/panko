@@ -204,17 +204,10 @@ fn convert_as_if_by_assignment<'a>(
             let expr_kind = match target_ty.size().cmp(&expr_ty.size()) {
                 Ordering::Less => Expression::Truncate,
                 Ordering::Equal => Expression::NoopTypeConversion,
-                Ordering::Greater => {
-                    let signedness = match source_arithmetic {
-                        Arithmetic::Char => Signedness::Signed,
-                        Arithmetic::Integral(integral) =>
-                            integral.signedness.unwrap_or(Signedness::Signed),
-                    };
-                    match signedness {
-                        Signedness::Signed => Expression::SignExtend,
-                        Signedness::Unsigned => Expression::ZeroExtend,
-                    }
-                }
+                Ordering::Greater => match source_arithmetic.signedness() {
+                    Signedness::Signed => Expression::SignExtend,
+                    Signedness::Unsigned => Expression::ZeroExtend,
+                },
             };
             expr_kind(sess.alloc(expr))
         }
@@ -324,7 +317,7 @@ fn typeck_expression<'a>(
         scope::Expression::Integer(token) => TypedExpression {
             // TODO: resolve to correct type depending on the actual value in `_token`
             ty: Type::Arithmetic(Arithmetic::Integral(Integral {
-                signedness: None,
+                signedness: Signedness::Signed,
                 kind: IntegralKind::Int,
             }))
             .unqualified(),
@@ -420,10 +413,9 @@ fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) 
     let promote = |ty| match ty {
         Arithmetic::Integral(Integral {
             signedness: _,
-            kind: IntegralKind::Char | IntegralKind::Short,
-        })
-        | Arithmetic::Char => Arithmetic::Integral(Integral {
-            signedness: None,
+            kind: IntegralKind::PlainChar | IntegralKind::Char | IntegralKind::Short,
+        }) => Arithmetic::Integral(Integral {
+            signedness: Signedness::Signed,
             kind: IntegralKind::Int,
         }),
         ty => ty,
@@ -451,15 +443,13 @@ fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) 
         }
         else {
             assert!(matches!(larger_ty.signedness(), Signedness::Signed));
+            #[expect(irrefutable_let_patterns)]
             let Arithmetic::Integral(Integral { signedness: _, kind }) = larger_ty
             else {
                 unreachable!()
             };
 
-            Arithmetic::Integral(Integral {
-                signedness: Some(Signedness::Unsigned),
-                kind,
-            })
+            Arithmetic::Integral(Integral { signedness: Signedness::Unsigned, kind })
         }
     }
 }
