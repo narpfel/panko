@@ -184,7 +184,7 @@ impl<'a> Statement<'a> {
     }
 
     fn slice(&self) -> &'static str {
-        unimplemented!("TODO: `variant-types` requires this, but `pnako` does not really need this")
+        unimplemented!("TODO: `variant-types` requires this, but `panko` does not really need this")
     }
 }
 
