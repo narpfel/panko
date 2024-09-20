@@ -266,14 +266,27 @@ impl<'a> Codegen<'a> {
                 }
             }
             Expression::BinOp { lhs, kind, rhs } => {
+                let emit_arithmetic = |cg: &mut Self, operation| {
+                    cg.emit_args(operation, &[&Rax.typed(lhs), &rhs.typed_slot()]);
+                };
+                let emit_comparison = |cg: &mut Self, operation| {
+                    emit_arithmetic(cg, "cmp");
+                    cg.emit_args(operation, &[&"al"]);
+                    cg.emit_args("movzx", &[&Rax.typed(expr), &"al"]);
+                };
+
                 self.expr(lhs);
                 self.expr(rhs);
-                let operation = match kind {
-                    BinOpKind::Add => "add",
-                    BinOpKind::Subtract => "sub",
-                };
+
                 self.emit_args("mov", &[&Rax.typed(lhs), &lhs.typed_slot()]);
-                self.emit_args(operation, &[&Rax.typed(lhs), &rhs.typed_slot()]);
+
+                match kind {
+                    BinOpKind::Add => emit_arithmetic(self, "add"),
+                    BinOpKind::Subtract => emit_arithmetic(self, "sub"),
+                    BinOpKind::Equal => emit_comparison(self, "sete"),
+                    BinOpKind::NotEqual => emit_comparison(self, "setne"),
+                };
+
                 self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
             }
         }

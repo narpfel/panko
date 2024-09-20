@@ -61,6 +61,9 @@ extern {
         "+" => Token { kind: panko_lex::TokenKind::Plus, .. },
         "-" => Token { kind: panko_lex::TokenKind::Minus, .. },
 
+        "==" => Token { kind: panko_lex::TokenKind::EqualEqual, .. },
+        "!=" => Token { kind: panko_lex::TokenKind::BangEqual, .. },
+
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
         Integer => Token { kind: panko_lex::TokenKind::Integer, .. },
     }
@@ -306,8 +309,24 @@ AdditiveExpression: ast::Expression<'a> = {
         ast::Expression::BinOp { kind: ast::BinOpKind::Subtract, <> },
 }
 
-AssignmentExpression: ast::Expression<'a> = {
+RelationalExpression: ast::Expression<'a> = {
     AdditiveExpression,
+}
+
+EqualityExpression: ast::Expression<'a> = {
+    RelationalExpression,
+    <lhs:Bump<EqualityExpression>> "==" <rhs:Bump<RelationalExpression>> =>
+        ast::Expression::BinOp { kind: ast::BinOpKind::Equal, <> },
+    <lhs:Bump<EqualityExpression>> "!=" <rhs:Bump<RelationalExpression>> =>
+        ast::Expression::BinOp { kind: ast::BinOpKind::NotEqual, <> },
+}
+
+ConditionalExpression: ast::Expression<'a> = {
+    EqualityExpression,
+}
+
+AssignmentExpression: ast::Expression<'a> = {
+    ConditionalExpression,
     <target:Bump<UnaryExpression>> "=" <value:Bump<AssignmentExpression>> => ast::Expression::Assign { <> },
 }
 

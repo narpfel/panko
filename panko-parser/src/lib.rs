@@ -514,6 +514,8 @@ pub enum Expression<'a> {
 pub enum BinOpKind {
     Add,
     Subtract,
+    Equal,
+    NotEqual,
 }
 
 impl BinOpKind {
@@ -521,6 +523,8 @@ impl BinOpKind {
         match self {
             BinOpKind::Add => "add",
             BinOpKind::Subtract => "subtract",
+            BinOpKind::Equal => "equal",
+            BinOpKind::NotEqual => "not-equal",
         }
     }
 }

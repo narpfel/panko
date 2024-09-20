@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/equality-ops/test_int_not_neq.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (a~1 `int` @0) (42 `int` @0))
+         (return
+            (not-equal `int` @4
+               (a~1 `int` @0)
+               (add `int` @8
+                  (21 `int` @8)
+                  (21 `int` @12)))))))
+
+----- stderr -----

@@ -389,12 +389,21 @@ fn typeck_arithmetic_binop<'a>(
     lhs_ty: Arithmetic,
     rhs_ty: Arithmetic,
 ) -> TypedExpression<'a> {
-    let result_ty =
+    let common_ty =
         Type::Arithmetic(perform_usual_arithmetic_conversions(lhs_ty, rhs_ty)).unqualified();
-    let lhs = convert_as_if_by_assignment(sess, result_ty, lhs);
-    let rhs = convert_as_if_by_assignment(sess, result_ty, rhs);
+    let ty = match kind {
+        BinOpKind::Add | BinOpKind::Subtract => common_ty,
+        BinOpKind::Equal | BinOpKind::NotEqual =>
+            Type::Arithmetic(Arithmetic::Integral(Integral {
+                signedness: Signedness::Signed,
+                kind: IntegralKind::Int,
+            }))
+            .unqualified(),
+    };
+    let lhs = convert_as_if_by_assignment(sess, common_ty, lhs);
+    let rhs = convert_as_if_by_assignment(sess, common_ty, rhs);
     TypedExpression {
-        ty: result_ty,
+        ty,
         expr: Expression::BinOp {
             lhs: sess.alloc(lhs),
             kind,
