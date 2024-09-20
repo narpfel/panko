@@ -284,17 +284,18 @@ ExpressionStatement: ast::ExpressionStatement<'a> = {
     // AttributeSpecifierSequence? <Expression> ";" => ast::ExpressionStatement(Some(<>)),
 }
 
-Expression: ast::Expression<'a> = {
-    AssignmentExpression,
-}
-
-AssignmentExpression: ast::Expression<'a> = {
-    <target:Bump<UnaryExpression>> "=" <value:Bump<AssignmentExpression>> => ast::Expression::Assign { <> },
-    UnaryExpression,
+PrimaryExpression: ast::Expression<'a> = {
+    Identifier => ast::Expression::Name(<>),
+    Integer => ast::Expression::Integer(<>),
+    <open_paren:"("> <expr:Bump<Expression>> <close_paren:")"> => ast::Expression::Parenthesised { <> },
 }
 
 UnaryExpression: ast::Expression<'a> = {
-    AdditiveExpression,
+    PrimaryExpression,
+}
+
+MultiplicativeExpression: ast::Expression<'a> = {
+    UnaryExpression,
 }
 
 AdditiveExpression: ast::Expression<'a> = {
@@ -305,14 +306,13 @@ AdditiveExpression: ast::Expression<'a> = {
         ast::Expression::BinOp { kind: ast::BinOpKind::Subtract, <> },
 }
 
-MultiplicativeExpression: ast::Expression<'a> = {
-    PrimaryExpression,
+AssignmentExpression: ast::Expression<'a> = {
+    AdditiveExpression,
+    <target:Bump<UnaryExpression>> "=" <value:Bump<AssignmentExpression>> => ast::Expression::Assign { <> },
 }
 
-PrimaryExpression: ast::Expression<'a> = {
-    Identifier => ast::Expression::Name(<>),
-    Integer => ast::Expression::Integer(<>),
-    <open_paren:"("> <expr:Bump<Expression>> <close_paren:")"> => ast::Expression::Parenthesised { <> },
+Expression: ast::Expression<'a> = {
+    AssignmentExpression,
 }
 
 Bump<T>: &'a T = {
