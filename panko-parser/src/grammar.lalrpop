@@ -301,24 +301,30 @@ MultiplicativeExpression: ast::Expression<'a> = {
     UnaryExpression,
 }
 
+AdditiveOperator: ast::BinOpKind = {
+    "+" => ast::BinOpKind::Add,
+    "-" => ast::BinOpKind::Subtract,
+}
+
 AdditiveExpression: ast::Expression<'a> = {
     MultiplicativeExpression,
-    <lhs:Bump<AdditiveExpression>> "+" <rhs:Bump<MultiplicativeExpression>> =>
-        ast::Expression::BinOp { kind: ast::BinOpKind::Add, <> },
-    <lhs:Bump<AdditiveExpression>> "-" <rhs:Bump<MultiplicativeExpression>> =>
-        ast::Expression::BinOp { kind: ast::BinOpKind::Subtract, <> },
+    <lhs:Bump<AdditiveExpression>> <kind:AdditiveOperator> <rhs:Bump<MultiplicativeExpression>> =>
+        ast::Expression::BinOp { <> },
 }
 
 RelationalExpression: ast::Expression<'a> = {
     AdditiveExpression,
 }
 
+EqualityOperator: ast::BinOpKind = {
+    "==" => ast::BinOpKind::Equal,
+    "!=" => ast::BinOpKind::NotEqual,
+}
+
 EqualityExpression: ast::Expression<'a> = {
     RelationalExpression,
-    <lhs:Bump<EqualityExpression>> "==" <rhs:Bump<RelationalExpression>> =>
-        ast::Expression::BinOp { kind: ast::BinOpKind::Equal, <> },
-    <lhs:Bump<EqualityExpression>> "!=" <rhs:Bump<RelationalExpression>> =>
-        ast::Expression::BinOp { kind: ast::BinOpKind::NotEqual, <> },
+    <lhs:Bump<EqualityExpression>> <kind:EqualityOperator> <rhs:Bump<RelationalExpression>> =>
+        ast::Expression::BinOp { <> },
 }
 
 ConditionalExpression: ast::Expression<'a> = {
