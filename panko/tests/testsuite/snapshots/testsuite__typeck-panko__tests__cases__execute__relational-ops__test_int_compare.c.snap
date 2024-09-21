@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/relational-ops/test_int_compare.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `int` (42 `int`))
+         (definition b~2 `int` (27 `int`))
+         (return (add (less (a~1 `int`) (add (a~1 `int`) (b~2 `int`) `int`) `int` `int`) (greater (a~1 `int`) (b~2 `int`) `int` `int`) `int`)))))
+
+----- stderr -----

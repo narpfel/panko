@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/relational-ops/test_signed_less_equal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `int` (42 `int`))
+         (definition b~2 `int` (27 `int`))
+         (return (add (less-equal (b~2 `int`) (a~1 `int`) `int` `int`) (less-equal (b~2 `int`) (27 `int`) `int` `int`) `int`)))))
+
+----- stderr -----

@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/relational-ops/test_char_sign_extend.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (c~1 `char` @0) (truncate `char` @0 (128 `int` @4)))
+         (definition (x~2 `unsigned int` @4) (noop-type-conversion `unsigned int` @4 (200 `int` @4)))
+         (return
+            (add `int` @8
+               (less `int` @8
+                  (sign-extend `int` @8 (c~1 `char` @0))
+                  (0 `int` @12))
+               (greater `int` @12
+                  (sign-extend `unsigned int` @12 (c~1 `char` @0))
+                  (x~2 `unsigned int` @4)))))))
+
+----- stderr -----

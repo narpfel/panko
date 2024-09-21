@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/relational-ops/test_char_sign_extend.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition c~1 `char` 128)
+         (definition x~2 `unsigned int` 200)
+         (return (add (less (name c~1 `char`) 0) (greater (name c~1 `char`) (name x~2 `unsigned int`)))))))
+
+----- stderr -----

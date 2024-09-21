@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/relational-ops/test_int_compare.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `int` 42)
+         (definition b~2 `int` 27)
+         (return (add (less (name a~1 `int`) (add (name a~1 `int`) (name b~2 `int`))) (greater (name a~1 `int`) (name b~2 `int`)))))))
+
+----- stderr -----
