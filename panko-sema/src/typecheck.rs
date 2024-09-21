@@ -129,7 +129,8 @@ pub enum Expression<'a> {
         target: &'a TypedExpression<'a>,
         value: &'a TypedExpression<'a>,
     },
-    BinOp {
+    IntegralBinOp {
+        ty: Integral,
         lhs: &'a TypedExpression<'a>,
         kind: BinOpKind,
         rhs: &'a TypedExpression<'a>,
@@ -155,7 +156,7 @@ impl TypedExpression<'_> {
             | Expression::SignExtend(_)
             | Expression::ZeroExtend(_)
             | Expression::Assign { .. }
-            | Expression::BinOp { .. } => false,
+            | Expression::IntegralBinOp { .. } => false,
         }
     }
 
@@ -176,7 +177,7 @@ impl<'a> Expression<'a> {
             Expression::Assign { target, value } => target.loc().until(value.loc()),
             Expression::Parenthesised { open_paren, expr: _, close_paren } =>
                 open_paren.loc().until(close_paren.loc()),
-            Expression::BinOp { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::IntegralBinOp { ty: _, lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
         }
     }
 
@@ -389,8 +390,8 @@ fn typeck_arithmetic_binop<'a>(
     lhs_ty: Arithmetic,
     rhs_ty: Arithmetic,
 ) -> TypedExpression<'a> {
-    let common_ty =
-        Type::Arithmetic(perform_usual_arithmetic_conversions(lhs_ty, rhs_ty)).unqualified();
+    let Arithmetic::Integral(integral_ty) = perform_usual_arithmetic_conversions(lhs_ty, rhs_ty);
+    let common_ty = Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified();
     let ty = match kind {
         BinOpKind::Add | BinOpKind::Subtract => common_ty,
         BinOpKind::Equal
@@ -408,7 +409,8 @@ fn typeck_arithmetic_binop<'a>(
     let rhs = convert_as_if_by_assignment(sess, common_ty, rhs);
     TypedExpression {
         ty,
-        expr: Expression::BinOp {
+        expr: Expression::IntegralBinOp {
+            ty: integral_ty,
             lhs: sess.alloc(lhs),
             kind,
             rhs: sess.alloc(rhs),

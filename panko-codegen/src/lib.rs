@@ -7,6 +7,7 @@ use std::fmt::Write as _;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use itertools::Itertools as _;
+use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::Type;
 use panko_parser::BinOpKind;
@@ -179,7 +180,7 @@ impl<'a> Codegen<'a> {
                 Expression::SignExtend(_) => todo!(),
                 Expression::ZeroExtend(_) => todo!(),
                 Expression::Assign { .. } => todo!(),
-                Expression::BinOp { .. } => todo!(),
+                Expression::IntegralBinOp { .. } => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -266,11 +267,11 @@ impl<'a> Codegen<'a> {
                     self.copy(&target.typed_slot(), &value.typed_slot());
                 }
             }
-            Expression::BinOp { lhs, kind, rhs } => {
+            Expression::IntegralBinOp { ty, lhs, kind, rhs } => {
                 assert_eq!(lhs.ty, rhs.ty);
+                assert_eq!(lhs.ty.ty, Type::Arithmetic(Arithmetic::Integral(ty)));
 
                 let emit_arithmetic = |cg: &mut Self, operation| {
-                    assert!(matches!(lhs.ty.ty, Type::Arithmetic(_)));
                     cg.emit_args(operation, &[&Rax.typed(lhs), &rhs.typed_slot()]);
                 };
                 let emit_comparison = |cg: &mut Self, operation| {
@@ -281,13 +282,7 @@ impl<'a> Codegen<'a> {
                 };
                 let emit_sign_dependent_comparison =
                     |cg: &mut Self, operation_if_signed, operation_if_unsigned| {
-                        let signedness = match lhs.ty.ty {
-                            Type::Arithmetic(arithmetic) => arithmetic.signedness(),
-                            Type::Pointer(_) => todo!(),
-                            Type::Function(_) => todo!(),
-                            Type::Void => todo!(),
-                        };
-                        let operation = match signedness {
+                        let operation = match ty.signedness {
                             Signedness::Signed => operation_if_signed,
                             Signedness::Unsigned => operation_if_unsigned,
                         };

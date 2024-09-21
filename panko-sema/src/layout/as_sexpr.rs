@@ -97,7 +97,8 @@ impl AsSExpr for Expression<'_> {
             Expression::ZeroExtend(from) => SExpr::new("zero-extend").inherit(from),
             Expression::Assign { target, value } =>
                 SExpr::new("assign").inherit(target).inherit(value),
-            Expression::BinOp { lhs, kind, rhs } => SExpr::new(kind.str()).lines([lhs, rhs]),
+            Expression::IntegralBinOp { ty: _, lhs, kind, rhs } =>
+                SExpr::new(kind.str()).lines([lhs, rhs]),
         }
     }
 }

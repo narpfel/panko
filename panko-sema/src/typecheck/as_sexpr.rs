@@ -86,7 +86,7 @@ impl AsSExpr for Expression<'_> {
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.as_sexpr(),
             Expression::Assign { target, value } =>
                 SExpr::new("assign").inherit(target).inherit(value),
-            Expression::BinOp { lhs, kind, rhs } =>
+            Expression::IntegralBinOp { ty: _, lhs, kind, rhs } =>
                 SExpr::new(kind.str()).inherit(lhs).inherit(rhs),
         }
     }
