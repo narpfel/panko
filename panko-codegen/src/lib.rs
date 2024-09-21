@@ -7,6 +7,7 @@ use std::fmt::Write as _;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use itertools::Itertools as _;
+use panko_parser::ast::Signedness;
 use panko_parser::ast::Type;
 use panko_parser::BinOpKind;
 use panko_sema::layout::CompoundStatement;
@@ -274,6 +275,21 @@ impl<'a> Codegen<'a> {
                     cg.emit_args(operation, &[&"al"]);
                     cg.emit_args("movzx", &[&Rax.typed(expr), &"al"]);
                 };
+                let emit_sign_dependent_comparison =
+                    |cg: &mut Self, operation_if_signed, operation_if_unsigned| {
+                        assert_eq!(lhs.ty, rhs.ty);
+                        let signedness = match lhs.ty.ty {
+                            Type::Arithmetic(arithmetic) => arithmetic.signedness(),
+                            Type::Pointer(_) => todo!(),
+                            Type::Function(_) => todo!(),
+                            Type::Void => todo!(),
+                        };
+                        let operation = match signedness {
+                            Signedness::Signed => operation_if_signed,
+                            Signedness::Unsigned => operation_if_unsigned,
+                        };
+                        emit_comparison(cg, operation);
+                    };
 
                 self.expr(lhs);
                 self.expr(rhs);
@@ -285,6 +301,11 @@ impl<'a> Codegen<'a> {
                     BinOpKind::Subtract => emit_arithmetic(self, "sub"),
                     BinOpKind::Equal => emit_comparison(self, "sete"),
                     BinOpKind::NotEqual => emit_comparison(self, "setne"),
+                    BinOpKind::Less => emit_sign_dependent_comparison(self, "setl", "setb"),
+                    BinOpKind::LessEqual => emit_sign_dependent_comparison(self, "setle", "setbe"),
+                    BinOpKind::Greater => emit_sign_dependent_comparison(self, "setg", "seta"),
+                    BinOpKind::GreaterEqual =>
+                        emit_sign_dependent_comparison(self, "setge", "setbe"),
                 };
 
                 self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);

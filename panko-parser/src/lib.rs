@@ -516,6 +516,10 @@ pub enum BinOpKind {
     Subtract,
     Equal,
     NotEqual,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
 }
 
 impl BinOpKind {
@@ -525,6 +529,10 @@ impl BinOpKind {
             BinOpKind::Subtract => "subtract",
             BinOpKind::Equal => "equal",
             BinOpKind::NotEqual => "not-equal",
+            BinOpKind::Less => "less",
+            BinOpKind::LessEqual => "less-equal",
+            BinOpKind::Greater => "greater",
+            BinOpKind::GreaterEqual => "greater-equal",
         }
     }
 }

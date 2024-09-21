@@ -64,6 +64,11 @@ extern {
         "==" => Token { kind: panko_lex::TokenKind::EqualEqual, .. },
         "!=" => Token { kind: panko_lex::TokenKind::BangEqual, .. },
 
+        "<" => Token { kind: panko_lex::TokenKind::Less, .. },
+        "<=" => Token { kind: panko_lex::TokenKind::LessEqual, .. },
+        ">" => Token { kind: panko_lex::TokenKind::Greater, .. },
+        ">=" => Token { kind: panko_lex::TokenKind::GreaterEqual, .. },
+
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
         Integer => Token { kind: panko_lex::TokenKind::Integer, .. },
     }
@@ -312,8 +317,21 @@ AdditiveExpression: ast::Expression<'a> = {
         ast::Expression::BinOp { <> },
 }
 
-RelationalExpression: ast::Expression<'a> = {
+ShiftExpression: ast::Expression<'a> = {
     AdditiveExpression,
+}
+
+RelationalOperator: ast::BinOpKind = {
+    "<" => ast::BinOpKind::Less,
+    "<=" => ast::BinOpKind::LessEqual,
+    ">" => ast::BinOpKind::Greater,
+    ">=" => ast::BinOpKind::GreaterEqual,
+}
+
+RelationalExpression: ast::Expression<'a> = {
+    ShiftExpression,
+    <lhs:Bump<RelationalExpression>> <kind:RelationalOperator> <rhs:Bump<ShiftExpression>> =>
+        ast::Expression::BinOp { <> },
 }
 
 EqualityOperator: ast::BinOpKind = {

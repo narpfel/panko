@@ -393,12 +393,16 @@ fn typeck_arithmetic_binop<'a>(
         Type::Arithmetic(perform_usual_arithmetic_conversions(lhs_ty, rhs_ty)).unqualified();
     let ty = match kind {
         BinOpKind::Add | BinOpKind::Subtract => common_ty,
-        BinOpKind::Equal | BinOpKind::NotEqual =>
-            Type::Arithmetic(Arithmetic::Integral(Integral {
-                signedness: Signedness::Signed,
-                kind: IntegralKind::Int,
-            }))
-            .unqualified(),
+        BinOpKind::Equal
+        | BinOpKind::NotEqual
+        | BinOpKind::Less
+        | BinOpKind::LessEqual
+        | BinOpKind::Greater
+        | BinOpKind::GreaterEqual => Type::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Signed,
+            kind: IntegralKind::Int,
+        }))
+        .unqualified(),
     };
     let lhs = convert_as_if_by_assignment(sess, common_ty, lhs);
     let rhs = convert_as_if_by_assignment(sess, common_ty, rhs);
