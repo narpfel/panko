@@ -267,17 +267,20 @@ impl<'a> Codegen<'a> {
                 }
             }
             Expression::BinOp { lhs, kind, rhs } => {
+                assert_eq!(lhs.ty, rhs.ty);
+
                 let emit_arithmetic = |cg: &mut Self, operation| {
+                    assert!(matches!(lhs.ty.ty, Type::Arithmetic(_)));
                     cg.emit_args(operation, &[&Rax.typed(lhs), &rhs.typed_slot()]);
                 };
                 let emit_comparison = |cg: &mut Self, operation| {
+                    assert!(matches!(lhs.ty.ty, Type::Arithmetic(_) | Type::Pointer(_)));
                     emit_arithmetic(cg, "cmp");
                     cg.emit_args(operation, &[&"al"]);
                     cg.emit_args("movzx", &[&Rax.typed(expr), &"al"]);
                 };
                 let emit_sign_dependent_comparison =
                     |cg: &mut Self, operation_if_signed, operation_if_unsigned| {
-                        assert_eq!(lhs.ty, rhs.ty);
                         let signedness = match lhs.ty.ty {
                             Type::Arithmetic(arithmetic) => arithmetic.signedness(),
                             Type::Pointer(_) => todo!(),
