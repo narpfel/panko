@@ -306,6 +306,93 @@ fn typeck_statement<'a>(
     }
 }
 
+type Comparator = impl Fn(&Arithmetic) -> (impl Ord + use<>);
+const SIZE_WITH_UNSIGNED_AS_TIE_BREAKER: Comparator = |ty| (ty.conversion_rank(), ty.signedness());
+
+fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) -> Arithmetic {
+    // TODO: handle floats
+    // TODO: convert enumerations to their underlying types
+
+    let promote = |ty| match ty {
+        Arithmetic::Integral(Integral {
+            signedness: _,
+            kind: IntegralKind::PlainChar | IntegralKind::Char | IntegralKind::Short,
+        }) => Arithmetic::Integral(Integral {
+            signedness: Signedness::Signed,
+            kind: IntegralKind::Int,
+        }),
+        ty => ty,
+    };
+
+    let lhs_ty = promote(lhs_ty);
+    let rhs_ty = promote(rhs_ty);
+
+    if lhs_ty == rhs_ty {
+        lhs_ty
+    }
+    else if lhs_ty.signedness() == rhs_ty.signedness() {
+        std::cmp::max_by_key(lhs_ty, rhs_ty, |ty| ty.conversion_rank())
+    }
+    else {
+        let [smaller_ty, larger_ty] =
+            std::cmp::minmax_by_key(lhs_ty, rhs_ty, SIZE_WITH_UNSIGNED_AS_TIE_BREAKER);
+
+        if matches!(larger_ty.signedness(), Signedness::Unsigned) {
+            larger_ty
+        }
+        else if larger_ty.size() > smaller_ty.size() {
+            assert!(matches!(larger_ty.signedness(), Signedness::Signed));
+            larger_ty
+        }
+        else {
+            assert!(matches!(larger_ty.signedness(), Signedness::Signed));
+            #[expect(irrefutable_let_patterns)]
+            let Arithmetic::Integral(Integral { signedness: _, kind }) = larger_ty
+            else {
+                unreachable!()
+            };
+
+            Arithmetic::Integral(Integral { signedness: Signedness::Unsigned, kind })
+        }
+    }
+}
+
+fn typeck_arithmetic_binop<'a>(
+    sess: &'a Session<'a>,
+    kind: BinOpKind,
+    lhs: TypedExpression<'a>,
+    rhs: TypedExpression<'a>,
+    lhs_ty: Arithmetic,
+    rhs_ty: Arithmetic,
+) -> TypedExpression<'a> {
+    let Arithmetic::Integral(integral_ty) = perform_usual_arithmetic_conversions(lhs_ty, rhs_ty);
+    let common_ty = Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified();
+    let ty = match kind {
+        BinOpKind::Add | BinOpKind::Subtract => common_ty,
+        BinOpKind::Equal
+        | BinOpKind::NotEqual
+        | BinOpKind::Less
+        | BinOpKind::LessEqual
+        | BinOpKind::Greater
+        | BinOpKind::GreaterEqual => Type::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Signed,
+            kind: IntegralKind::Int,
+        }))
+        .unqualified(),
+    };
+    let lhs = convert_as_if_by_assignment(sess, common_ty, lhs);
+    let rhs = convert_as_if_by_assignment(sess, common_ty, rhs);
+    TypedExpression {
+        ty,
+        expr: Expression::IntegralBinOp {
+            ty: integral_ty,
+            lhs: sess.alloc(lhs),
+            kind,
+            rhs: sess.alloc(rhs),
+        },
+    }
+}
+
 fn typeck_expression<'a>(
     sess: &'a Session<'a>,
     expr: &scope::Expression<'a>,
@@ -378,93 +465,6 @@ fn typeck_expression<'a>(
                     todo!(),
                 _ => todo!("type error"),
             }
-        }
-    }
-}
-
-fn typeck_arithmetic_binop<'a>(
-    sess: &'a Session<'a>,
-    kind: BinOpKind,
-    lhs: TypedExpression<'a>,
-    rhs: TypedExpression<'a>,
-    lhs_ty: Arithmetic,
-    rhs_ty: Arithmetic,
-) -> TypedExpression<'a> {
-    let Arithmetic::Integral(integral_ty) = perform_usual_arithmetic_conversions(lhs_ty, rhs_ty);
-    let common_ty = Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified();
-    let ty = match kind {
-        BinOpKind::Add | BinOpKind::Subtract => common_ty,
-        BinOpKind::Equal
-        | BinOpKind::NotEqual
-        | BinOpKind::Less
-        | BinOpKind::LessEqual
-        | BinOpKind::Greater
-        | BinOpKind::GreaterEqual => Type::Arithmetic(Arithmetic::Integral(Integral {
-            signedness: Signedness::Signed,
-            kind: IntegralKind::Int,
-        }))
-        .unqualified(),
-    };
-    let lhs = convert_as_if_by_assignment(sess, common_ty, lhs);
-    let rhs = convert_as_if_by_assignment(sess, common_ty, rhs);
-    TypedExpression {
-        ty,
-        expr: Expression::IntegralBinOp {
-            ty: integral_ty,
-            lhs: sess.alloc(lhs),
-            kind,
-            rhs: sess.alloc(rhs),
-        },
-    }
-}
-
-type Comparator = impl Fn(&Arithmetic) -> (impl Ord + use<>);
-const SIZE_WITH_UNSIGNED_AS_TIE_BREAKER: Comparator = |ty| (ty.conversion_rank(), ty.signedness());
-
-fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) -> Arithmetic {
-    // TODO: handle floats
-    // TODO: convert enumerations to their underlying types
-
-    let promote = |ty| match ty {
-        Arithmetic::Integral(Integral {
-            signedness: _,
-            kind: IntegralKind::PlainChar | IntegralKind::Char | IntegralKind::Short,
-        }) => Arithmetic::Integral(Integral {
-            signedness: Signedness::Signed,
-            kind: IntegralKind::Int,
-        }),
-        ty => ty,
-    };
-
-    let lhs_ty = promote(lhs_ty);
-    let rhs_ty = promote(rhs_ty);
-
-    if lhs_ty == rhs_ty {
-        lhs_ty
-    }
-    else if lhs_ty.signedness() == rhs_ty.signedness() {
-        std::cmp::max_by_key(lhs_ty, rhs_ty, |ty| ty.conversion_rank())
-    }
-    else {
-        let [smaller_ty, larger_ty] =
-            std::cmp::minmax_by_key(lhs_ty, rhs_ty, SIZE_WITH_UNSIGNED_AS_TIE_BREAKER);
-
-        if matches!(larger_ty.signedness(), Signedness::Unsigned) {
-            larger_ty
-        }
-        else if larger_ty.size() > smaller_ty.size() {
-            assert!(matches!(larger_ty.signedness(), Signedness::Signed));
-            larger_ty
-        }
-        else {
-            assert!(matches!(larger_ty.signedness(), Signedness::Signed));
-            #[expect(irrefutable_let_patterns)]
-            let Arithmetic::Integral(Integral { signedness: _, kind }) = larger_ty
-            else {
-                unreachable!()
-            };
-
-            Arithmetic::Integral(Integral { signedness: Signedness::Unsigned, kind })
         }
     }
 }
