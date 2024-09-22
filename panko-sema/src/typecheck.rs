@@ -405,11 +405,7 @@ fn typeck_arithmetic_binop<'a>(
         | BinOpKind::Less
         | BinOpKind::LessEqual
         | BinOpKind::Greater
-        | BinOpKind::GreaterEqual => Type::Arithmetic(Arithmetic::Integral(Integral {
-            signedness: Signedness::Signed,
-            kind: IntegralKind::Int,
-        }))
-        .unqualified(),
+        | BinOpKind::GreaterEqual => Type::int().unqualified(),
     };
     let lhs = convert_as_if_by_assignment(sess, common_ty, lhs);
     let rhs = convert_as_if_by_assignment(sess, common_ty, rhs);
@@ -451,15 +447,7 @@ fn typeck_ptradd<'a>(
         integral.ty.ty,
         Type::Arithmetic(Arithmetic::Integral(_)),
     ));
-    let integral = convert_as_if_by_assignment(
-        sess,
-        Type::Arithmetic(Arithmetic::Integral(Integral {
-            signedness: Signedness::Unsigned,
-            kind: IntegralKind::LongLong,
-        }))
-        .unqualified(),
-        integral,
-    );
+    let integral = convert_as_if_by_assignment(sess, Type::ullong().unqualified(), integral);
     TypedExpression {
         ty: pointer.ty.ty.unqualified(),
         expr: Expression::PtrAdd {
@@ -482,15 +470,7 @@ fn typeck_ptrsub<'a>(
         integral.ty.ty,
         Type::Arithmetic(Arithmetic::Integral(_)),
     ));
-    let integral = convert_as_if_by_assignment(
-        sess,
-        Type::Arithmetic(Arithmetic::Integral(Integral {
-            signedness: Signedness::Unsigned,
-            kind: IntegralKind::LongLong,
-        }))
-        .unqualified(),
-        integral,
-    );
+    let integral = convert_as_if_by_assignment(sess, Type::ullong().unqualified(), integral);
     TypedExpression {
         ty: pointer.ty.ty.unqualified(),
         expr: Expression::PtrSub {
@@ -552,11 +532,7 @@ fn typeck_expression<'a>(
         },
         scope::Expression::Integer(token) => TypedExpression {
             // TODO: resolve to correct type depending on the actual value in `_token`
-            ty: Type::Arithmetic(Arithmetic::Integral(Integral {
-                signedness: Signedness::Signed,
-                kind: IntegralKind::Int,
-            }))
-            .unqualified(),
+            ty: Type::int().unqualified(),
             expr: Expression::Integer(*token),
         },
         scope::Expression::Parenthesised { open_paren, expr, close_paren } => {

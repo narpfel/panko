@@ -289,6 +289,13 @@ impl<'a> Type<'a> {
         }))
     }
 
+    pub fn ullong() -> Self {
+        Self::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::LongLong,
+        }))
+    }
+
     pub fn unqualified(&self) -> QualifiedType<'a> {
         QualifiedType {
             is_const: false,
