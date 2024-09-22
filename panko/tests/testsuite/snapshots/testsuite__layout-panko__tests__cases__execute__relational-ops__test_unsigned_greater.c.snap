@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/relational-ops/test_unsigned_greater.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (a~1 `unsigned int` @0) (noop-type-conversion `unsigned int` @0 (42 `int` @0)))
+         (definition (b~2 `unsigned int` @4) (noop-type-conversion `unsigned int` @4 (27 `int` @4)))
+         (return
+            (add `int` @8
+               (greater-equal `int` @8
+                  (a~1 `unsigned int` @0)
+                  (b~2 `unsigned int` @4))
+               (greater-equal `int` @12
+                  (a~1 `unsigned int` @0)
+                  (a~1 `unsigned int` @0)))))))
+
+----- stderr -----

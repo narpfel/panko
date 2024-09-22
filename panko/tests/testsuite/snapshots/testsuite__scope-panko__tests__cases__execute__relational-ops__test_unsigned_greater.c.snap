@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/relational-ops/test_unsigned_greater.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `unsigned int` 42)
+         (definition b~2 `unsigned int` 27)
+         (return (add (greater-equal (name a~1 `unsigned int`) (name b~2 `unsigned int`)) (greater-equal (name a~1 `unsigned int`) (name a~1 `unsigned int`)))))))
+
+----- stderr -----

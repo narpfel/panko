@@ -363,7 +363,7 @@ impl<'a> Codegen<'a> {
                     BinOpKind::LessEqual => emit_sign_dependent_comparison(self, "setle", "setbe"),
                     BinOpKind::Greater => emit_sign_dependent_comparison(self, "setg", "seta"),
                     BinOpKind::GreaterEqual =>
-                        emit_sign_dependent_comparison(self, "setge", "setbe"),
+                        emit_sign_dependent_comparison(self, "setge", "setae"),
                 };
 
                 self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
