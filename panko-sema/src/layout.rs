@@ -12,6 +12,7 @@ use crate::layout::stack::Stack;
 use crate::scope::Id;
 use crate::scope::RefKind;
 use crate::typecheck;
+use crate::typecheck::PtrAddOrder;
 
 mod as_sexpr;
 mod stack;
@@ -84,6 +85,12 @@ pub enum Expression<'a> {
         lhs: &'a LayoutedExpression<'a>,
         kind: BinOpKind,
         rhs: &'a LayoutedExpression<'a>,
+    },
+    PtrAdd {
+        pointer: &'a LayoutedExpression<'a>,
+        integral: &'a LayoutedExpression<'a>,
+        pointee_size: u64,
+        order: PtrAddOrder,
     },
 }
 
@@ -303,6 +310,17 @@ fn layout_expression_in_slot<'a>(
             let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, Some(slot)));
             let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
             (slot, Expression::IntegralBinOp { ty, lhs, kind, rhs })
+        }
+        typecheck::Expression::PtrAdd { pointer, integral, pointee_size, order } => {
+            let (lhs, rhs) = order.select(pointer, integral);
+            let slot = make_slot();
+            let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, Some(slot)));
+            let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
+            let (pointer, integral) = order.select(lhs, rhs);
+            (
+                slot,
+                Expression::PtrAdd { pointer, integral, pointee_size, order },
+            )
         }
     };
     LayoutedExpression { ty, slot, expr }

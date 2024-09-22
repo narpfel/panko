@@ -99,6 +99,15 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new("assign").inherit(target).inherit(value),
             Expression::IntegralBinOp { ty: _, lhs, kind, rhs } =>
                 SExpr::new(kind.str()).lines([lhs, rhs]),
+            Expression::PtrAdd {
+                pointer,
+                integral,
+                pointee_size: _,
+                order,
+            } => {
+                let (lhs, rhs) = order.select(pointer, integral);
+                SExpr::new("ptr-add").lines([lhs, rhs])
+            }
         }
     }
 }

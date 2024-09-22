@@ -8,6 +8,8 @@ use indexmap::IndexMap;
 use indexmap::IndexSet;
 use itertools::Itertools as _;
 use panko_parser::ast::Arithmetic;
+use panko_parser::ast::Integral;
+use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::Type;
 use panko_parser::BinOpKind;
@@ -23,10 +25,24 @@ use panko_sema::layout::TypedSlot;
 use panko_sema::scope::RefKind;
 use Register::*;
 
+const MAX_IMUL_IMMEDIATE: u64 = 2_u64.pow(31);
+const MAX_ADDRESS_OFFSET: u64 = u32::MAX as _;
+
 #[derive(Debug, Copy, Clone)]
 #[repr(u8)]
 enum Register {
     Rax,
+    R10,
+}
+
+impl Display for Register {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Rax => "rax",
+            R10 => "r10",
+        };
+        write!(f, "{s}")
+    }
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -52,10 +68,27 @@ impl Display for TypedRegister<'_> {
             Type::Function(_) | Type::Void => unreachable!(),
         };
 
-        const REGISTERS: [[&str; 4]; 1] = [["al", "ax", "eax", "rax"]];
+        const REGISTERS: [[&str; 4]; 2] =
+            [["al", "ax", "eax", "rax"], ["r10b", "r10w", "r10d", "r10"]];
         let register_str =
             REGISTERS[self.register as usize][usize::try_from(size.ilog2()).unwrap()];
         write!(f, "{register_str}")
+    }
+}
+
+struct LeaArgument {
+    pointer: Register,
+    index: Register,
+    size: u64,
+    offset: u64,
+}
+
+impl Display for LeaArgument {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let Self { pointer, index, size, offset } = self;
+        assert!(matches!(size, 1 | 2 | 4 | 8));
+        assert!(matches!(offset, 0..=MAX_ADDRESS_OFFSET));
+        write!(f, "[{pointer} + {size} * {index} + {offset}]")
     }
 }
 
@@ -181,6 +214,7 @@ impl<'a> Codegen<'a> {
                 Expression::ZeroExtend(_) => todo!(),
                 Expression::Assign { .. } => todo!(),
                 Expression::IntegralBinOp { .. } => todo!(),
+                Expression::PtrAdd { .. } => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -307,6 +341,47 @@ impl<'a> Codegen<'a> {
                 };
 
                 self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
+            }
+            Expression::PtrAdd { pointer, integral, pointee_size, order } => {
+                assert_eq!(
+                    integral.ty.ty,
+                    Type::Arithmetic(Arithmetic::Integral(Integral {
+                        signedness: Signedness::Unsigned,
+                        kind: IntegralKind::LongLong
+                    })),
+                );
+                let (lhs, rhs) = order.select(pointer, integral);
+                self.expr(lhs);
+                self.expr(rhs);
+                self.emit_args("mov", &[&Rax.typed(pointer), &pointer.typed_slot()]);
+                match pointee_size {
+                    size @ (1 | 2 | 4 | 8) => {
+                        self.emit_args("mov", &[&"r10", &integral.typed_slot()]);
+                        self.emit_args(
+                            "lea",
+                            &[
+                                &Rax.typed(pointer),
+                                &LeaArgument {
+                                    pointer: Rax,
+                                    index: R10,
+                                    size,
+                                    offset: 0,
+                                },
+                            ],
+                        );
+                    }
+                    size => {
+                        if size < MAX_IMUL_IMMEDIATE {
+                            self.emit_args("imul", &[&"r10", &integral.typed_slot(), &size]);
+                        }
+                        else {
+                            self.emit_args("movabs", &[&"r10", &size]);
+                            self.emit_args("imul", &[&"r10", &integral.typed_slot()]);
+                        }
+                        self.emit_args("add", &[&"rax", &"r10"]);
+                    }
+                }
+                self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(pointer)]);
             }
         }
     }

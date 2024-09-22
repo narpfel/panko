@@ -135,6 +135,12 @@ pub enum Expression<'a> {
         kind: BinOpKind,
         rhs: &'a TypedExpression<'a>,
     },
+    PtrAdd {
+        pointer: &'a TypedExpression<'a>,
+        integral: &'a TypedExpression<'a>,
+        pointee_size: u64,
+        order: PtrAddOrder,
+    },
 }
 
 impl TypedExpression<'_> {
@@ -156,7 +162,8 @@ impl TypedExpression<'_> {
             | Expression::SignExtend(_)
             | Expression::ZeroExtend(_)
             | Expression::Assign { .. }
-            | Expression::IntegralBinOp { .. } => false,
+            | Expression::IntegralBinOp { .. }
+            | Expression::PtrAdd { .. } => false,
         }
     }
 
@@ -178,6 +185,15 @@ impl<'a> Expression<'a> {
             Expression::Parenthesised { open_paren, expr: _, close_paren } =>
                 open_paren.loc().until(close_paren.loc()),
             Expression::IntegralBinOp { ty: _, lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::PtrAdd {
+                pointer,
+                integral,
+                pointee_size: _,
+                order,
+            } => {
+                let (lhs, rhs) = order.select(pointer, integral);
+                lhs.loc().until(rhs.loc())
+            }
         }
     }
 
@@ -393,6 +409,53 @@ fn typeck_arithmetic_binop<'a>(
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum PtrAddOrder {
+    PtrFirst,
+    IntegralFirst,
+}
+
+impl PtrAddOrder {
+    pub fn select<T>(self, pointer: T, integral: T) -> (T, T) {
+        match self {
+            Self::PtrFirst => (pointer, integral),
+            Self::IntegralFirst => (integral, pointer),
+        }
+    }
+}
+
+fn typeck_ptradd<'a>(
+    sess: &'a Session<'a>,
+    pointer: TypedExpression<'a>,
+    pointee_ty: &QualifiedType<'a>,
+    integral: TypedExpression<'a>,
+    order: PtrAddOrder,
+) -> TypedExpression<'a> {
+    assert!(matches!(pointer.ty.ty, Type::Pointer(_)));
+    assert!(matches!(
+        integral.ty.ty,
+        Type::Arithmetic(Arithmetic::Integral(_)),
+    ));
+    let integral = convert_as_if_by_assignment(
+        sess,
+        Type::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::LongLong,
+        }))
+        .unqualified(),
+        integral,
+    );
+    TypedExpression {
+        ty: pointer.ty.ty.unqualified(),
+        expr: Expression::PtrAdd {
+            pointer: sess.alloc(pointer),
+            integral: sess.alloc(integral),
+            pointee_size: pointee_ty.ty.size(),
+            order,
+        },
+    }
+}
+
 fn typeck_expression<'a>(
     sess: &'a Session<'a>,
     expr: &scope::Expression<'a>,
@@ -454,12 +517,14 @@ fn typeck_expression<'a>(
             match (lhs.ty.ty, rhs.ty.ty) {
                 (Type::Arithmetic(lhs_ty), Type::Arithmetic(rhs_ty)) =>
                     typeck_arithmetic_binop(sess, *kind, lhs, rhs, lhs_ty, rhs_ty),
-                (Type::Arithmetic(arith_ty), Type::Pointer(_))
-                | (Type::Pointer(_), Type::Arithmetic(arith_ty))
-                    if matches!(kind, BinOpKind::Add) && arith_ty.is_integral() =>
-                    todo!(),
-                (Type::Pointer(_), Type::Arithmetic(arith_ty))
-                    if matches!(kind, BinOpKind::Subtract) && arith_ty.is_integral() =>
+                (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(pointee_ty))
+                    if matches!(kind, BinOpKind::Add) =>
+                    typeck_ptradd(sess, rhs, pointee_ty, lhs, PtrAddOrder::IntegralFirst),
+                (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
+                    if matches!(kind, BinOpKind::Add) =>
+                    typeck_ptradd(sess, lhs, pointee_ty, rhs, PtrAddOrder::PtrFirst),
+                (Type::Pointer(_), Type::Arithmetic(Arithmetic::Integral(_)))
+                    if matches!(kind, BinOpKind::Subtract) =>
                     todo!(),
                 (Type::Pointer(_), Type::Pointer(_)) if matches!(kind, BinOpKind::Subtract) =>
                     todo!(),
