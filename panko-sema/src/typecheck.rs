@@ -141,6 +141,11 @@ pub enum Expression<'a> {
         pointee_size: u64,
         order: PtrAddOrder,
     },
+    PtrSub {
+        pointer: &'a TypedExpression<'a>,
+        integral: &'a TypedExpression<'a>,
+        pointee_size: u64,
+    },
 }
 
 impl TypedExpression<'_> {
@@ -163,7 +168,8 @@ impl TypedExpression<'_> {
             | Expression::ZeroExtend(_)
             | Expression::Assign { .. }
             | Expression::IntegralBinOp { .. }
-            | Expression::PtrAdd { .. } => false,
+            | Expression::PtrAdd { .. }
+            | Expression::PtrSub { .. } => false,
         }
     }
 
@@ -194,6 +200,8 @@ impl<'a> Expression<'a> {
                 let (lhs, rhs) = order.select(pointer, integral);
                 lhs.loc().until(rhs.loc())
             }
+            Expression::PtrSub { pointer, integral, pointee_size: _ } =>
+                pointer.loc().until(integral.loc()),
         }
     }
 
@@ -456,6 +464,36 @@ fn typeck_ptradd<'a>(
     }
 }
 
+fn typeck_ptrsub<'a>(
+    sess: &'a Session<'a>,
+    pointer: TypedExpression<'a>,
+    pointee_ty: &QualifiedType<'a>,
+    integral: TypedExpression<'a>,
+) -> TypedExpression<'a> {
+    assert!(matches!(pointer.ty.ty, Type::Pointer(_)));
+    assert!(matches!(
+        integral.ty.ty,
+        Type::Arithmetic(Arithmetic::Integral(_)),
+    ));
+    let integral = convert_as_if_by_assignment(
+        sess,
+        Type::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::LongLong,
+        }))
+        .unqualified(),
+        integral,
+    );
+    TypedExpression {
+        ty: pointer.ty.ty.unqualified(),
+        expr: Expression::PtrSub {
+            pointer: sess.alloc(pointer),
+            integral: sess.alloc(integral),
+            pointee_size: pointee_ty.ty.size(),
+        },
+    }
+}
+
 fn typeck_expression<'a>(
     sess: &'a Session<'a>,
     expr: &scope::Expression<'a>,
@@ -523,9 +561,9 @@ fn typeck_expression<'a>(
                 (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
                     if matches!(kind, BinOpKind::Add) =>
                     typeck_ptradd(sess, lhs, pointee_ty, rhs, PtrAddOrder::PtrFirst),
-                (Type::Pointer(_), Type::Arithmetic(Arithmetic::Integral(_)))
+                (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
                     if matches!(kind, BinOpKind::Subtract) =>
-                    todo!(),
+                    typeck_ptrsub(sess, lhs, pointee_ty, rhs),
                 (Type::Pointer(_), Type::Pointer(_)) if matches!(kind, BinOpKind::Subtract) =>
                     todo!(),
                 _ => todo!("type error"),

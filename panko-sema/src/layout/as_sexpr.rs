@@ -108,6 +108,8 @@ impl AsSExpr for Expression<'_> {
                 let (lhs, rhs) = order.select(pointer, integral);
                 SExpr::new("ptr-add").lines([lhs, rhs])
             }
+            Expression::PtrSub { pointer, integral, pointee_size: _ } =>
+                SExpr::new("ptr-sub").lines([pointer, integral]),
         }
     }
 }

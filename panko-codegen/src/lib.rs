@@ -157,6 +157,29 @@ impl<'a> Codegen<'a> {
         }
     }
 
+    fn emit_pointer_offset(
+        &mut self,
+        operation: &str,
+        pointee_size: u64,
+        integral: &LayoutedExpression,
+    ) {
+        assert_eq!(
+            integral.ty.ty,
+            Type::Arithmetic(Arithmetic::Integral(Integral {
+                signedness: Signedness::Unsigned,
+                kind: IntegralKind::LongLong
+            })),
+        );
+        if pointee_size < MAX_IMUL_IMMEDIATE {
+            self.emit_args("imul", &[&"r10", &integral.typed_slot(), &pointee_size]);
+        }
+        else {
+            self.emit_args("movabs", &[&"r10", &pointee_size]);
+            self.emit_args("imul", &[&"r10", &integral.typed_slot()]);
+        }
+        self.emit_args(operation, &[&"rax", &"r10"]);
+    }
+
     fn function_definition(&mut self, def: &'a FunctionDefinition<'a>) {
         self.block(2);
         assert!(
@@ -215,6 +238,7 @@ impl<'a> Codegen<'a> {
                 Expression::Assign { .. } => todo!(),
                 Expression::IntegralBinOp { .. } => todo!(),
                 Expression::PtrAdd { .. } => todo!(),
+                Expression::PtrSub { .. } => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -370,17 +394,15 @@ impl<'a> Codegen<'a> {
                             ],
                         );
                     }
-                    size => {
-                        if size < MAX_IMUL_IMMEDIATE {
-                            self.emit_args("imul", &[&"r10", &integral.typed_slot(), &size]);
-                        }
-                        else {
-                            self.emit_args("movabs", &[&"r10", &size]);
-                            self.emit_args("imul", &[&"r10", &integral.typed_slot()]);
-                        }
-                        self.emit_args("add", &[&"rax", &"r10"]);
-                    }
+                    size => self.emit_pointer_offset("add", size, integral),
                 }
+                self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(pointer)]);
+            }
+            Expression::PtrSub { pointer, integral, pointee_size } => {
+                self.expr(pointer);
+                self.expr(integral);
+                self.emit_args("mov", &[&Rax.typed(pointer), &pointer.typed_slot()]);
+                self.emit_pointer_offset("sub", pointee_size, integral);
                 self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(pointer)]);
             }
         }
