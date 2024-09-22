@@ -282,6 +282,13 @@ impl fmt::Display for QualifiedType<'_> {
 }
 
 impl<'a> Type<'a> {
+    pub fn int() -> Self {
+        Self::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Signed,
+            kind: IntegralKind::Int,
+        }))
+    }
+
     pub fn unqualified(&self) -> QualifiedType<'a> {
         QualifiedType {
             is_const: false,

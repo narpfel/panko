@@ -23,6 +23,7 @@ use panko_sema::layout::Statement;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::TypedSlot;
 use panko_sema::scope::RefKind;
+use panko_sema::typecheck::PtrEqKind;
 use Register::*;
 
 const MAX_IMUL_IMMEDIATE: u64 = 2_u64.pow(31);
@@ -239,6 +240,7 @@ impl<'a> Codegen<'a> {
                 Expression::IntegralBinOp { .. } => todo!(),
                 Expression::PtrAdd { .. } => todo!(),
                 Expression::PtrSub { .. } => todo!(),
+                Expression::PtrEq { .. } => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -404,6 +406,19 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[&Rax.typed(pointer), &pointer.typed_slot()]);
                 self.emit_pointer_offset("sub", pointee_size, integral);
                 self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(pointer)]);
+            }
+            Expression::PtrEq { lhs, kind, rhs } => {
+                self.expr(lhs);
+                self.expr(rhs);
+                self.emit_args("mov", &[&Rax.typed(lhs), &lhs.typed_slot()]);
+                self.emit_args("cmp", &[&Rax.typed(lhs), &rhs.typed_slot()]);
+                let operation = match kind {
+                    PtrEqKind::Equal => "sete",
+                    PtrEqKind::NotEqual => "setne",
+                };
+                self.emit_args(operation, &[&"al"]);
+                self.emit_args("movzx", &[&Rax.typed(expr), &"al"]);
+                self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
             }
         }
     }

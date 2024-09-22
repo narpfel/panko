@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_ptr_equality.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (p1~1 `ptr<long>` @0) ∅)
+         (definition (b~2 `unsigned long long` @8) (sign-extend `unsigned long long` @8 (42 `int` @16)))
+         (definition (p2~3 `ptr<long>` @16)
+            (ptr-add `ptr<long>` @16
+               (b~2 `unsigned long long` @8)
+               (p1~1 `ptr<long>` @0)))
+         (definition (p3~4 `ptr<long>` @24)
+            (ptr-sub `ptr<long>` @24
+               (p2~3 `ptr<long>` @16)
+               (b~2 `unsigned long long` @8)))
+         (return
+            (ptr-equal `int` @32
+               (p3~4 `ptr<long>` @24)
+               (p1~1 `ptr<long>` @0))))))
+
+----- stderr -----

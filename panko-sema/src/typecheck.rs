@@ -146,6 +146,11 @@ pub enum Expression<'a> {
         integral: &'a TypedExpression<'a>,
         pointee_size: u64,
     },
+    PtrEq {
+        lhs: &'a TypedExpression<'a>,
+        kind: PtrEqKind,
+        rhs: &'a TypedExpression<'a>,
+    },
 }
 
 impl TypedExpression<'_> {
@@ -169,7 +174,8 @@ impl TypedExpression<'_> {
             | Expression::Assign { .. }
             | Expression::IntegralBinOp { .. }
             | Expression::PtrAdd { .. }
-            | Expression::PtrSub { .. } => false,
+            | Expression::PtrSub { .. }
+            | Expression::PtrEq { .. } => false,
         }
     }
 
@@ -202,6 +208,7 @@ impl<'a> Expression<'a> {
             }
             Expression::PtrSub { pointer, integral, pointee_size: _ } =>
                 pointer.loc().until(integral.loc()),
+            Expression::PtrEq { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
         }
     }
 
@@ -494,6 +501,46 @@ fn typeck_ptrsub<'a>(
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum PtrEqKind {
+    Equal,
+    NotEqual,
+}
+
+impl PtrEqKind {
+    pub(crate) fn str(&self) -> &'static str {
+        match self {
+            PtrEqKind::Equal => "ptr-equal",
+            PtrEqKind::NotEqual => "ptr-not-equal",
+        }
+    }
+}
+
+fn typeck_ptreq<'a>(
+    sess: &'a Session<'a>,
+    lhs: TypedExpression<'a>,
+    kind: BinOpKind,
+    rhs: TypedExpression<'a>,
+) -> TypedExpression<'a> {
+    // TODO: should check for type compatibility, not exact equality
+    if lhs.ty.ty != rhs.ty.ty {
+        todo!("type error: cannot compare pointers of incompatible types");
+    }
+    let kind = match kind {
+        BinOpKind::Equal => PtrEqKind::Equal,
+        BinOpKind::NotEqual => PtrEqKind::NotEqual,
+        _ => unreachable!(),
+    };
+    TypedExpression {
+        ty: Type::int().unqualified(),
+        expr: Expression::PtrEq {
+            lhs: sess.alloc(lhs),
+            kind,
+            rhs: sess.alloc(rhs),
+        },
+    }
+}
+
 fn typeck_expression<'a>(
     sess: &'a Session<'a>,
     expr: &scope::Expression<'a>,
@@ -564,6 +611,9 @@ fn typeck_expression<'a>(
                 (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
                     if matches!(kind, BinOpKind::Subtract) =>
                     typeck_ptrsub(sess, lhs, pointee_ty, rhs),
+                (Type::Pointer(_), Type::Pointer(_))
+                    if matches!(kind, BinOpKind::Equal | BinOpKind::NotEqual) =>
+                    typeck_ptreq(sess, lhs, *kind, rhs),
                 (Type::Pointer(_), Type::Pointer(_)) if matches!(kind, BinOpKind::Subtract) =>
                     todo!(),
                 _ => todo!("type error"),

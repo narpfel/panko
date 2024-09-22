@@ -13,6 +13,7 @@ use crate::scope::Id;
 use crate::scope::RefKind;
 use crate::typecheck;
 use crate::typecheck::PtrAddOrder;
+use crate::typecheck::PtrEqKind;
 
 mod as_sexpr;
 mod stack;
@@ -96,6 +97,11 @@ pub enum Expression<'a> {
         pointer: &'a LayoutedExpression<'a>,
         integral: &'a LayoutedExpression<'a>,
         pointee_size: u64,
+    },
+    PtrEq {
+        lhs: &'a LayoutedExpression<'a>,
+        kind: PtrEqKind,
+        rhs: &'a LayoutedExpression<'a>,
     },
 }
 
@@ -333,6 +339,12 @@ fn layout_expression_in_slot<'a>(
             let integral =
                 bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, integral)));
             (slot, Expression::PtrSub { pointer, integral, pointee_size })
+        }
+        typecheck::Expression::PtrEq { lhs, kind, rhs } => {
+            let slot = make_slot();
+            let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, Some(slot)));
+            let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
+            (slot, Expression::PtrEq { lhs, kind, rhs })
         }
     };
     LayoutedExpression { ty, slot, expr }
