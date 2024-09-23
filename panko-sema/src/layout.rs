@@ -103,6 +103,7 @@ pub enum Expression<'a> {
         kind: PtrCmpKind,
         rhs: &'a LayoutedExpression<'a>,
     },
+    Addressof(&'a LayoutedExpression<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -345,6 +346,11 @@ fn layout_expression_in_slot<'a>(
             let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, Some(slot)));
             let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
             (slot, Expression::PtrEq { lhs, kind, rhs })
+        }
+        typecheck::Expression::Addressof { ampersand: _, operand } => {
+            let slot = make_slot();
+            let operand = bump.alloc(layout_expression_in_slot(stack, bump, operand, Some(slot)));
+            (slot, Expression::Addressof(operand))
         }
     };
     LayoutedExpression { ty, slot, expr }

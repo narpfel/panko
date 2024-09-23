@@ -101,6 +101,8 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new("ptr-sub").inherit(pointer).inherit(integral),
             Expression::PtrEq { lhs, kind, rhs } =>
                 SExpr::new(kind.str()).inherit(lhs).inherit(rhs),
+            Expression::Addressof { ampersand: _, operand } =>
+                SExpr::new("addressof").inherit(operand),
         }
     }
 }

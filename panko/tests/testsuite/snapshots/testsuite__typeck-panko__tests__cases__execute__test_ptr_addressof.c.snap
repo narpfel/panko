@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/test_ptr_addressof.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition i1~1 `int` (42 `int`))
+         (definition i2~2 `int` (27 `int`))
+         (definition p1~3 `ptr<int>` (addressof (i1~1 `int`) `ptr<int>`))
+         (definition p2~4 `ptr<int>` (addressof (i2~2 `int`) `ptr<int>`))
+         (return (add (add (add (ptr-equal (p1~3 `ptr<int>`) (addressof (i1~1 `int`) `ptr<int>`) `int` `int`) (ptr-equal (p2~4 `ptr<int>`) (addressof (i2~2 `int`) `ptr<int>`) `int` `int`) `int`) (ptr-equal (ptr-add (p1~3 `ptr<int>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<int>`) (p2~4 `ptr<int>`) `int` `int`) `int`) (ptr-equal (ptr-sub (p2~4 `ptr<int>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<int>`) (p1~3 `ptr<int>`) `int` `int`) `int`)))))
+
+----- stderr -----

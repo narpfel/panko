@@ -14,6 +14,7 @@ use panko_parser::ast::Signedness;
 use panko_parser::ast::Type;
 use panko_parser::sexpr_builder::AsSExpr as _;
 use panko_parser::BinOpKind;
+use panko_parser::UnaryOpKind;
 use panko_report::Report;
 use variant_types::IntoVariant as _;
 
@@ -151,6 +152,10 @@ pub enum Expression<'a> {
         kind: PtrCmpKind,
         rhs: &'a TypedExpression<'a>,
     },
+    Addressof {
+        ampersand: Token<'a>,
+        operand: &'a TypedExpression<'a>,
+    },
 }
 
 impl TypedExpression<'_> {
@@ -175,7 +180,8 @@ impl TypedExpression<'_> {
             | Expression::IntegralBinOp { .. }
             | Expression::PtrAdd { .. }
             | Expression::PtrSub { .. }
-            | Expression::PtrEq { .. } => false,
+            | Expression::PtrEq { .. }
+            | Expression::Addressof { .. } => false,
         }
     }
 
@@ -209,6 +215,7 @@ impl<'a> Expression<'a> {
             Expression::PtrSub { pointer, integral, pointee_size: _ } =>
                 pointer.loc().until(integral.loc()),
             Expression::PtrEq { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::Addressof { ampersand, operand } => ampersand.loc().until(operand.loc()),
         }
     }
 
@@ -613,6 +620,28 @@ fn typeck_expression<'a>(
                 (Type::Pointer(_), Type::Pointer(_)) if matches!(kind, BinOpKind::Subtract) =>
                     todo!(),
                 _ => todo!("type error"),
+            }
+        }
+        scope::Expression::UnaryOp { operator, operand } => {
+            let operand = typeck_expression(sess, operand);
+            match operator.kind {
+                UnaryOpKind::Addressof => {
+                    let is_function_designator = false; // TODO
+                    let is_result_of_deref = false; // TODO
+                    let is_lvalue = operand.is_lvalue()
+                        // TODO
+                        /* && !operand.is_bitfield() && !operand.has_register_storage_class() */;
+                    if !(is_function_designator || is_result_of_deref || is_lvalue) {
+                        todo!("type error: cannot take address of this expr");
+                    }
+                    TypedExpression {
+                        ty: Type::Pointer(sess.alloc(operand.ty)).unqualified(),
+                        expr: Expression::Addressof {
+                            ampersand: operator.token,
+                            operand: sess.alloc(operand),
+                        },
+                    }
+                }
             }
         }
     }

@@ -14,6 +14,7 @@ use panko_parser::ast::QualifiedType;
 use panko_parser::ast::Session;
 use panko_parser::ast::Type;
 use panko_parser::BinOpKind;
+use panko_parser::UnaryOp;
 use panko_report::Report;
 
 use crate::nonempty;
@@ -124,6 +125,10 @@ pub(crate) enum Expression<'a> {
         kind: BinOpKind,
         rhs: &'a Expression<'a>,
     },
+    UnaryOp {
+        operator: UnaryOp<'a>,
+        operand: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -197,6 +202,7 @@ impl<'a> Expression<'a> {
                 open_paren.loc().until(close_paren.loc()),
             Expression::Assign { target, value } => target.loc().until(value.loc()),
             Expression::BinOp { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::UnaryOp { operator, operand } => operator.loc().until(operand.loc()),
         }
     }
 }
@@ -517,6 +523,10 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
             kind: *kind,
             rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),
+        },
+        ast::Expression::UnaryOp { operator, operand } => Expression::UnaryOp {
+            operator: *operator,
+            operand: scopes.sess.alloc(resolve_expr(scopes, operand)),
         },
     }
 }

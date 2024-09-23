@@ -69,6 +69,8 @@ extern {
         ">" => Token { kind: panko_lex::TokenKind::Greater, .. },
         ">=" => Token { kind: panko_lex::TokenKind::GreaterEqual, .. },
 
+        "&" => Token { kind: panko_lex::TokenKind::And, .. },
+
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
         Integer => Token { kind: panko_lex::TokenKind::Integer, .. },
     }
@@ -298,12 +300,21 @@ PrimaryExpression: ast::Expression<'a> = {
     <open_paren:"("> <expr:Bump<Expression>> <close_paren:")"> => ast::Expression::Parenthesised { <> },
 }
 
+UnaryOperator: ast::UnaryOp<'a> = {
+    "&" => ast::UnaryOp { kind: ast::UnaryOpKind::Addressof, token: <> },
+}
+
 UnaryExpression: ast::Expression<'a> = {
     PrimaryExpression,
+    <operator:UnaryOperator> <operand:Bump<CastExpression>> => ast::Expression::UnaryOp { <> },
+}
+
+CastExpression: ast::Expression<'a> = {
+    UnaryExpression,
 }
 
 MultiplicativeExpression: ast::Expression<'a> = {
-    UnaryExpression,
+    CastExpression,
 }
 
 AdditiveOperator: ast::BinOpKind = {

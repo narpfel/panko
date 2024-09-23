@@ -84,6 +84,8 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new("assign").inherit(target).inherit(value),
             Expression::BinOp { lhs, kind, rhs } =>
                 SExpr::new(kind.str()).inherit(lhs).inherit(rhs),
+            Expression::UnaryOp { operator, operand } =>
+                SExpr::new(operator.str()).inherit(operand),
         }
     }
 }

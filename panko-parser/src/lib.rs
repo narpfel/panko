@@ -508,6 +508,10 @@ pub enum Expression<'a> {
         kind: BinOpKind,
         rhs: &'a Expression<'a>,
     },
+    UnaryOp {
+        operator: UnaryOp<'a>,
+        operand: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -534,6 +538,29 @@ impl BinOpKind {
             BinOpKind::Greater => "greater",
             BinOpKind::GreaterEqual => "greater-equal",
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct UnaryOp<'a> {
+    pub kind: UnaryOpKind,
+    pub token: Token<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum UnaryOpKind {
+    Addressof,
+}
+
+impl<'a> UnaryOp<'a> {
+    pub fn str(&self) -> &'static str {
+        match self.kind {
+            UnaryOpKind::Addressof => "addressof",
+        }
+    }
+
+    pub fn loc(&self) -> Loc<'a> {
+        self.token.loc()
     }
 }
 

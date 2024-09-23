@@ -19,6 +19,7 @@ use panko_sema::layout::Expression;
 use panko_sema::layout::ExternalDeclaration;
 use panko_sema::layout::FunctionDefinition;
 use panko_sema::layout::LayoutedExpression;
+use panko_sema::layout::Slot;
 use panko_sema::layout::Statement;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::TypedSlot;
@@ -33,6 +34,7 @@ const MAX_ADDRESS_OFFSET: u64 = u32::MAX as _;
 #[repr(u8)]
 enum Register {
     Rax,
+    Rsp,
     R10,
 }
 
@@ -40,6 +42,7 @@ impl Display for Register {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             Rax => "rax",
+            Rsp => "rsp",
             R10 => "r10",
         };
         write!(f, "{s}")
@@ -69,8 +72,11 @@ impl Display for TypedRegister<'_> {
             Type::Function(_) | Type::Void => unreachable!(),
         };
 
-        const REGISTERS: [[&str; 4]; 2] =
-            [["al", "ax", "eax", "rax"], ["r10b", "r10w", "r10d", "r10"]];
+        const REGISTERS: [[&str; 4]; 3] = [
+            ["al", "ax", "eax", "rax"],
+            ["spl", "sp", "esp", "rsp"],
+            ["r10b", "r10w", "r10d", "r10"],
+        ];
         let register_str =
             REGISTERS[self.register as usize][usize::try_from(size.ilog2()).unwrap()];
         write!(f, "{register_str}")
@@ -79,7 +85,7 @@ impl Display for TypedRegister<'_> {
 
 struct LeaArgument {
     pointer: Register,
-    index: Register,
+    index: Option<Register>,
     size: u64,
     offset: u64,
 }
@@ -89,7 +95,11 @@ impl Display for LeaArgument {
         let Self { pointer, index, size, offset } = self;
         assert!(matches!(size, 1 | 2 | 4 | 8));
         assert!(matches!(offset, 0..=MAX_ADDRESS_OFFSET));
-        write!(f, "[{pointer} + {size} * {index} + {offset}]")
+        write!(f, "[{pointer} + ")?;
+        if let Some(index) = index {
+            write!(f, "{size} * {index} + ")?;
+        }
+        write!(f, "{offset}]")
     }
 }
 
@@ -241,6 +251,7 @@ impl<'a> Codegen<'a> {
                 Expression::PtrAdd { .. } => todo!(),
                 Expression::PtrSub { .. } => todo!(),
                 Expression::PtrEq { .. } => todo!(),
+                Expression::Addressof(_) => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -389,7 +400,7 @@ impl<'a> Codegen<'a> {
                                 &Rax.typed(pointer),
                                 &LeaArgument {
                                     pointer: Rax,
-                                    index: R10,
+                                    index: Some(R10),
                                     size,
                                     offset: 0,
                                 },
@@ -423,6 +434,26 @@ impl<'a> Codegen<'a> {
                 self.emit_args(operation, &[&"al"]);
                 self.emit_args("movzx", &[&Rax.typed(expr), &"al"]);
                 self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
+            }
+            Expression::Addressof(operand) => {
+                self.expr(operand);
+                let Slot::Automatic(offset) = operand.slot
+                else {
+                    unreachable!()
+                };
+                self.emit_args(
+                    "lea",
+                    &[
+                        &"rax",
+                        &LeaArgument {
+                            pointer: Rsp,
+                            index: None,
+                            size: 1,
+                            offset,
+                        },
+                    ],
+                );
+                self.emit_args("mov", &[&expr.typed_slot(), &"rax"]);
             }
         }
     }
