@@ -13,7 +13,7 @@ use crate::scope::Id;
 use crate::scope::RefKind;
 use crate::typecheck;
 use crate::typecheck::PtrAddOrder;
-use crate::typecheck::PtrEqKind;
+use crate::typecheck::PtrCmpKind;
 
 mod as_sexpr;
 mod stack;
@@ -100,7 +100,7 @@ pub enum Expression<'a> {
     },
     PtrEq {
         lhs: &'a LayoutedExpression<'a>,
-        kind: PtrEqKind,
+        kind: PtrCmpKind,
         rhs: &'a LayoutedExpression<'a>,
     },
 }

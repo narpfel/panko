@@ -148,7 +148,7 @@ pub enum Expression<'a> {
     },
     PtrEq {
         lhs: &'a TypedExpression<'a>,
-        kind: PtrEqKind,
+        kind: PtrCmpKind,
         rhs: &'a TypedExpression<'a>,
     },
 }
@@ -482,21 +482,29 @@ fn typeck_ptrsub<'a>(
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum PtrEqKind {
+pub enum PtrCmpKind {
     Equal,
     NotEqual,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
 }
 
-impl PtrEqKind {
+impl PtrCmpKind {
     pub(crate) fn str(&self) -> &'static str {
         match self {
-            PtrEqKind::Equal => "ptr-equal",
-            PtrEqKind::NotEqual => "ptr-not-equal",
+            PtrCmpKind::Equal => "ptr-equal",
+            PtrCmpKind::NotEqual => "ptr-not-equal",
+            PtrCmpKind::Less => "ptr-less",
+            PtrCmpKind::LessEqual => "ptr-less-equal",
+            PtrCmpKind::Greater => "ptr-greater",
+            PtrCmpKind::GreaterEqual => "ptr-greater-equal",
         }
     }
 }
 
-fn typeck_ptreq<'a>(
+fn typeck_ptrcmp<'a>(
     sess: &'a Session<'a>,
     lhs: TypedExpression<'a>,
     kind: BinOpKind,
@@ -507,9 +515,13 @@ fn typeck_ptreq<'a>(
         todo!("type error: cannot compare pointers of incompatible types");
     }
     let kind = match kind {
-        BinOpKind::Equal => PtrEqKind::Equal,
-        BinOpKind::NotEqual => PtrEqKind::NotEqual,
-        _ => unreachable!(),
+        BinOpKind::Add | BinOpKind::Subtract => unreachable!(),
+        BinOpKind::Equal => PtrCmpKind::Equal,
+        BinOpKind::NotEqual => PtrCmpKind::NotEqual,
+        BinOpKind::Less => PtrCmpKind::Less,
+        BinOpKind::LessEqual => PtrCmpKind::LessEqual,
+        BinOpKind::Greater => PtrCmpKind::Greater,
+        BinOpKind::GreaterEqual => PtrCmpKind::GreaterEqual,
     };
     TypedExpression {
         ty: Type::int().unqualified(),
@@ -588,8 +600,16 @@ fn typeck_expression<'a>(
                     if matches!(kind, BinOpKind::Subtract) =>
                     typeck_ptrsub(sess, lhs, pointee_ty, rhs),
                 (Type::Pointer(_), Type::Pointer(_))
-                    if matches!(kind, BinOpKind::Equal | BinOpKind::NotEqual) =>
-                    typeck_ptreq(sess, lhs, *kind, rhs),
+                    if matches!(
+                        kind,
+                        BinOpKind::Equal
+                            | BinOpKind::NotEqual
+                            | BinOpKind::Less
+                            | BinOpKind::LessEqual
+                            | BinOpKind::Greater
+                            | BinOpKind::GreaterEqual
+                    ) =>
+                    typeck_ptrcmp(sess, lhs, *kind, rhs),
                 (Type::Pointer(_), Type::Pointer(_)) if matches!(kind, BinOpKind::Subtract) =>
                     todo!(),
                 _ => todo!("type error"),

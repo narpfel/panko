@@ -23,7 +23,7 @@ use panko_sema::layout::Statement;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::TypedSlot;
 use panko_sema::scope::RefKind;
-use panko_sema::typecheck::PtrEqKind;
+use panko_sema::typecheck::PtrCmpKind;
 use Register::*;
 
 const MAX_IMUL_IMMEDIATE: u64 = 2_u64.pow(31);
@@ -413,8 +413,12 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[&Rax.typed(lhs), &lhs.typed_slot()]);
                 self.emit_args("cmp", &[&Rax.typed(lhs), &rhs.typed_slot()]);
                 let operation = match kind {
-                    PtrEqKind::Equal => "sete",
-                    PtrEqKind::NotEqual => "setne",
+                    PtrCmpKind::Equal => "sete",
+                    PtrCmpKind::NotEqual => "setne",
+                    PtrCmpKind::Less => "setb",
+                    PtrCmpKind::LessEqual => "setbe",
+                    PtrCmpKind::Greater => "seta",
+                    PtrCmpKind::GreaterEqual => "setae",
                 };
                 self.emit_args(operation, &[&"al"]);
                 self.emit_args("movzx", &[&Rax.typed(expr), &"al"]);

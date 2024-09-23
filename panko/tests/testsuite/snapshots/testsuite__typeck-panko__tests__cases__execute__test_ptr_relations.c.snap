@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/test_ptr_relations.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition p1~1 `ptr<long>` ∅)
+         (definition b~2 `unsigned long long` (sign-extend (42 `int`) `unsigned long long`))
+         (definition p2~3 `ptr<long>` (ptr-add (b~2 `unsigned long long`) (p1~1 `ptr<long>`) `ptr<long>`))
+         (definition p3~4 `ptr<long>` (ptr-sub (p2~3 `ptr<long>`) (b~2 `unsigned long long`) `ptr<long>`))
+         (return (add (add (add (ptr-less (p1~1 `ptr<long>`) (p2~3 `ptr<long>`) `int` `int`) (ptr-less-equal (p1~1 `ptr<long>`) (p3~4 `ptr<long>`) `int` `int`) `int`) (ptr-greater (p2~3 `ptr<long>`) (p1~1 `ptr<long>`) `int` `int`) `int`) (ptr-greater-equal (p3~4 `ptr<long>`) (p1~1 `ptr<long>`) `int` `int`) `int`)))))
+
+----- stderr -----
