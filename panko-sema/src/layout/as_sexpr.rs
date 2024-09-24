@@ -95,8 +95,7 @@ impl AsSExpr for Expression<'_> {
             Expression::Truncate(from) => SExpr::new("truncate").inherit(from),
             Expression::SignExtend(from) => SExpr::new("sign-extend").inherit(from),
             Expression::ZeroExtend(from) => SExpr::new("zero-extend").inherit(from),
-            Expression::Assign { target, value } =>
-                SExpr::new("assign").inherit(target).inherit(value),
+            Expression::Assign { target, value } => SExpr::new("assign").lines([target, value]),
             Expression::IntegralBinOp { ty: _, lhs, kind, rhs } =>
                 SExpr::new(kind.str()).lines([lhs, rhs]),
             Expression::PtrAdd {

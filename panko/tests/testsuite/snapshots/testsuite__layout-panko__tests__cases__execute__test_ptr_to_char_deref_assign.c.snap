@@ -17,7 +17,10 @@ exit_code: 0
          (definition (x~1 `char` @0) (truncate `char` @0 (42 `int` @4)))
          (definition (p~2 `ptr<char>` @8) (addressof `ptr<char>` @8 (x~1 `char` @0)))
          (definition (pp~3 `ptr<ptr<char>>` @16) (addressof `ptr<ptr<char>>` @16 (p~2 `ptr<char>` @8)))
-         (expression (assign `char` @24 (deref `char` @24 (deref `ptr<char>` @32 (pp~3 `ptr<ptr<char>>` @16))) (truncate `char` @40 (27 `int` @48))))
+         (expression
+            (assign `char` @24
+               (deref `char` @24 (deref `ptr<char>` @32 (pp~3 `ptr<ptr<char>>` @16)))
+               (truncate `char` @40 (27 `int` @48))))
          (return (sign-extend `int` @24 (x~1 `char` @0))))))
 
 ----- stderr -----

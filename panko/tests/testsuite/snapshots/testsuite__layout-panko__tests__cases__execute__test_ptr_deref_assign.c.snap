@@ -17,7 +17,10 @@ exit_code: 0
          (definition (x~1 `long` @0) (sign-extend `long` @0 (42 `int` @8)))
          (definition (p~2 `ptr<long>` @8) (addressof `ptr<long>` @8 (x~1 `long` @0)))
          (definition (pp~3 `ptr<ptr<long>>` @16) (addressof `ptr<ptr<long>>` @16 (p~2 `ptr<long>` @8)))
-         (expression (assign `long` @24 (deref `long` @24 (deref `ptr<long>` @32 (pp~3 `ptr<ptr<long>>` @16))) (sign-extend `long` @40 (27 `int` @48))))
+         (expression
+            (assign `long` @24
+               (deref `long` @24 (deref `ptr<long>` @32 (pp~3 `ptr<ptr<long>>` @16)))
+               (sign-extend `long` @40 (27 `int` @48))))
          (return (truncate `int` @24 (x~1 `long` @0))))))
 
 ----- stderr -----
