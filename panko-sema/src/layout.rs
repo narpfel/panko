@@ -184,6 +184,16 @@ impl fmt::Display for TypedSlot<'_> {
 
 impl<'a> Slot<'a> {
     fn typed(self, ty: &'a Type<'a>) -> TypedSlot<'a> {
+        if let Slot::Automatic {
+            #[expect(unused)]
+                0: offset,
+        } = self
+        {
+            // TODO: For types with alignment > 8, we also need to take the stack pointer into
+            // account.
+            // FIXME: This breaks `test_ptr_addressof.c`.
+            // assert!(offset.is_multiple_of(ty.align()));
+        }
         TypedSlot { slot: self, ty }
     }
 }
@@ -375,6 +385,11 @@ fn layout_expression_in_slot<'a>(
         }
         typecheck::Expression::Addressof { ampersand: _, operand } => {
             let slot = make_slot();
+            // This feels iffy because this layouts the operand with type `T` into our slot that
+            // should hold `ptr<T>`. Could this lead to an overlap when `T` is smaller than
+            // `ptr<T>`? What happens if `T` is larger? This *should* be fine because codegen
+            // doesn’t actually generate any code for the operand? Can this lead to unaligned slots
+            // in child nodes of `operand`?
             let operand = bump.alloc(layout_expression_in_slot(stack, bump, operand, Some(slot)));
             (slot, Expression::Addressof(operand))
         }
