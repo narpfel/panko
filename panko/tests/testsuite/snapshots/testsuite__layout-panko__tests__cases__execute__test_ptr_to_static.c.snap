@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_ptr_to_static.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (definition (x~0 `int` (static x)) (42 `int` (static x)))
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (definition (p~2 `ptr<int>` @0) (addressof `ptr<int>` @0 (x~0 `int` (static x))))
+         (definition (local_copy~3 `int` @8) (deref `int` @8 (p~2 `ptr<int>` @0)))
+         (expression (assign `int` @12 (deref `int` @12 (p~2 `ptr<int>` @0)) (27 `int` @16)))
+         (return
+            (add `int` @12
+               (add `int` @12
+                  (local_copy~3 `int` @8)
+                  (deref `int` @16 (p~2 `ptr<int>` @0)))
+               (x~0 `int` (static x)))))))
+
+----- stderr -----
