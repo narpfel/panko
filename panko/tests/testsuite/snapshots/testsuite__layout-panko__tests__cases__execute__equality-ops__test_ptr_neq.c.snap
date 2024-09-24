@@ -18,7 +18,7 @@ exit_code: 0
          (definition (y~2 `int` @4) ∅)
          (return
             (ptr-not-equal `int` @8
-               (addressof `ptr<int>` @8 (x~1 `int` @0))
-               (addressof `ptr<int>` @16 (y~2 `int` @4)))))))
+               (addressof `ptr<int>` @16 (x~1 `int` @0))
+               (addressof `ptr<int>` @24 (y~2 `int` @4)))))))
 
 ----- stderr -----

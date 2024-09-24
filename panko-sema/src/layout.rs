@@ -194,15 +194,10 @@ impl fmt::Display for TypedSlot<'_> {
 
 impl<'a> Slot<'a> {
     fn typed(self, ty: &'a Type<'a>) -> TypedSlot<'a> {
-        if let Slot::Automatic {
-            #[expect(unused)]
-                0: offset,
-        } = self
-        {
+        if let Slot::Automatic(offset) = self {
             // TODO: For types with alignment > 8, we also need to take the stack pointer into
             // account.
-            // FIXME: This breaks `test_ptr_addressof.c`.
-            // assert!(offset.is_multiple_of(ty.align()));
+            assert!(offset.is_multiple_of(ty.align()));
         }
         TypedSlot { slot: self, ty }
     }
@@ -391,7 +386,7 @@ fn layout_expression_in_slot<'a>(
         }
         typecheck::Expression::PtrCmp { lhs, kind, rhs } => {
             let slot = make_slot();
-            let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, Some(slot)));
+            let lhs = bump.alloc(layout_expression(stack, bump, lhs));
             let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
             (slot, Expression::PtrCmp { lhs, kind, rhs })
         }
