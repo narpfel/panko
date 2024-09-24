@@ -385,8 +385,8 @@ fn layout_expression_in_slot<'a>(
         }
         typecheck::Expression::Addressof { ampersand: _, operand } => {
             let slot = make_slot();
-            // This feels iffy because this layouts the operand with type `T` into our slot that
-            // should hold `ptr<T>`. Could this lead to an overlap when `T` is smaller than
+            // TODO: This feels iffy because this layouts the operand with type `T` into our slot
+            // that should hold `ptr<T>`. Could this lead to an overlap when `T` is smaller than
             // `ptr<T>`? What happens if `T` is larger? This *should* be fine because codegen
             // doesn’t actually generate any code for the operand? Can this lead to unaligned slots
             // in child nodes of `operand`?
