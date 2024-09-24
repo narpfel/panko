@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_ptr_deref.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (x~1 `long` @0) (sign-extend `long` @0 (42 `int` @8)))
+         (definition (p~2 `ptr<long>` @8) (addressof `ptr<long>` @8 (x~1 `long` @0)))
+         (definition (pp~3 `ptr<ptr<long>>` @16) (addressof `ptr<ptr<long>>` @16 (p~2 `ptr<long>` @8)))
+         (return (truncate `int` @24 (deref `long` @32 (deref `ptr<long>` @40 (pp~3 `ptr<ptr<long>>` @16))))))))
+
+----- stderr -----

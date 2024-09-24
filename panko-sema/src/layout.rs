@@ -104,6 +104,7 @@ pub enum Expression<'a> {
         rhs: &'a LayoutedExpression<'a>,
     },
     Addressof(&'a LayoutedExpression<'a>),
+    Deref(&'a LayoutedExpression<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -119,6 +120,11 @@ pub struct Reference<'a> {
 pub enum Slot<'a> {
     Static(&'a str),
     Automatic(u64),
+    Pointer {
+        // TODO: This should be a `panko_codegen::Register`, but that would introduce a circular
+        // dependency between `panko_sema` and `panko_codegen`.
+        register: &'a str,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -144,6 +150,17 @@ impl<'a> LayoutedExpression<'a> {
 }
 
 impl<'a> TypedSlot<'a> {
+    pub fn pointer(register: &'a str, expr: &'a LayoutedExpression<'a>) -> Self {
+        let Type::Pointer(ty) = expr.ty.ty
+        else {
+            unreachable!()
+        };
+        Self {
+            slot: Slot::Pointer { register },
+            ty: &ty.ty,
+        }
+    }
+
     pub fn ty(&self) -> &'a Type<'a> {
         self.ty
     }
@@ -160,6 +177,7 @@ impl fmt::Display for TypedSlot<'_> {
         match self.slot {
             Slot::Static(s) => write!(f, "{ptr_type} ptr [rip + {s}]"),
             Slot::Automatic(stack_offset) => write!(f, "{ptr_type} ptr [rsp + {stack_offset}]"),
+            Slot::Pointer { register } => write!(f, "{ptr_type} ptr [{register}]"),
         }
     }
 }
@@ -313,7 +331,15 @@ fn layout_expression_in_slot<'a>(
             return layout_expression_in_slot(stack, bump, expr, target_slot),
         typecheck::Expression::Assign { target, value } => {
             let target = bump.alloc(layout_expression(stack, bump, target));
-            let value = layout_expression_in_slot(stack, bump, value, Some(target.slot));
+            let value_slot = match target.expr {
+                // `Deref` exprs need a slot to store the pointer, so we assign a new slot to the
+                // value.
+                Expression::Deref(operand) => Some(stack.temporary(operand.ty.ty)),
+                // For `Name` exprs, we can assign directly into the name’s slot.
+                Expression::Name(_) => Some(target.slot),
+                _ => unreachable!("not assignable because this expr is not an lvalue"),
+            };
+            let value = layout_expression_in_slot(stack, bump, value, value_slot);
             let value = bump.alloc(value);
             (target.slot, Expression::Assign { target, value })
         }
@@ -351,6 +377,11 @@ fn layout_expression_in_slot<'a>(
             let slot = make_slot();
             let operand = bump.alloc(layout_expression_in_slot(stack, bump, operand, Some(slot)));
             (slot, Expression::Addressof(operand))
+        }
+        typecheck::Expression::Deref { star: _, operand } => {
+            let slot = make_slot();
+            let operand = bump.alloc(layout_expression(stack, bump, operand));
+            (slot, Expression::Deref(operand))
         }
     };
     LayoutedExpression { ty, slot, expr }

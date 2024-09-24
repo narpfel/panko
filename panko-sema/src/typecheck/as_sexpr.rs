@@ -103,6 +103,7 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new(kind.str()).inherit(lhs).inherit(rhs),
             Expression::Addressof { ampersand: _, operand } =>
                 SExpr::new("addressof").inherit(operand),
+            Expression::Deref { star: _, operand } => SExpr::new("deref").inherit(operand),
         }
     }
 }

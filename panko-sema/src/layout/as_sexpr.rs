@@ -112,6 +112,7 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new("ptr-sub").lines([pointer, integral]),
             Expression::PtrEq { lhs, kind, rhs } => SExpr::new(kind.str()).lines([lhs, rhs]),
             Expression::Addressof(operand) => SExpr::new("addressof").inherit(operand),
+            Expression::Deref(operand) => SExpr::new("deref").inherit(operand),
         }
     }
 }
@@ -127,6 +128,7 @@ impl AsSExpr for Slot<'_> {
         match self {
             Slot::Static(name) => SExpr::new("static").inline_string(name.to_string()),
             Slot::Automatic(offset) => SExpr::string(format!("@{offset}")),
+            Slot::Pointer { register } => SExpr::string(*register),
         }
     }
 }

@@ -156,6 +156,10 @@ pub enum Expression<'a> {
         ampersand: Token<'a>,
         operand: &'a TypedExpression<'a>,
     },
+    Deref {
+        star: Token<'a>,
+        operand: &'a TypedExpression<'a>,
+    },
 }
 
 impl TypedExpression<'_> {
@@ -171,6 +175,8 @@ impl TypedExpression<'_> {
         match self.expr {
             Expression::Name(_) => true,
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.is_lvalue(),
+            // TODO: only for pointers to object, pointers to function not implemented yet
+            Expression::Deref { .. } => true,
             Expression::Integer(_)
             | Expression::NoopTypeConversion(_)
             | Expression::Truncate(_)
@@ -216,6 +222,7 @@ impl<'a> Expression<'a> {
                 pointer.loc().until(integral.loc()),
             Expression::PtrEq { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
             Expression::Addressof { ampersand, operand } => ampersand.loc().until(operand.loc()),
+            Expression::Deref { star, operand } => star.loc().until(operand.loc()),
         }
     }
 
@@ -642,6 +649,19 @@ fn typeck_expression<'a>(
                         },
                     }
                 }
+                UnaryOpKind::Deref =>
+                    if let Type::Pointer(pointee_ty) = operand.ty.ty {
+                        TypedExpression {
+                            ty: *pointee_ty,
+                            expr: Expression::Deref {
+                                star: operator.token,
+                                operand: sess.alloc(operand),
+                            },
+                        }
+                    }
+                    else {
+                        todo!("type error: cannot deref this expr");
+                    },
             }
         }
     }

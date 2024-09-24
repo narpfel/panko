@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/test_ptr_to_char_deref.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition x~1 `char` 42)
+         (definition p~2 `ptr<char>` (addressof (name x~1 `char`)))
+         (definition pp~3 `ptr<ptr<char>>` (addressof (name p~2 `ptr<char>`)))
+         (return (deref (deref (name pp~3 `ptr<ptr<char>>`)))))))
+
+----- stderr -----

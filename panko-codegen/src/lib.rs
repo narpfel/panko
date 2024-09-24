@@ -252,6 +252,7 @@ impl<'a> Codegen<'a> {
                 Expression::PtrSub { .. } => todo!(),
                 Expression::PtrEq { .. } => todo!(),
                 Expression::Addressof(_) => todo!(),
+                Expression::Deref(_) => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -331,13 +332,22 @@ impl<'a> Codegen<'a> {
                 self.emit_args("movzx", &[&Rax.typed(expr), &zero_extend.typed_slot()]);
                 self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
             }
-            Expression::Assign { target, value } => {
-                self.expr(target);
-                self.expr(value);
-                if target.slot != value.slot {
-                    self.copy(&target.typed_slot(), &value.typed_slot());
+            Expression::Assign { target, value } => match target.expr {
+                Expression::Name(_) => {
+                    self.expr(target);
+                    self.expr(value);
+                    if target.slot != value.slot {
+                        self.copy(&target.typed_slot(), &value.typed_slot());
+                    }
                 }
-            }
+                Expression::Deref(operand) => {
+                    self.expr(operand);
+                    self.expr(value);
+                    self.emit_args("mov", &[&R10.typed(operand), &operand.typed_slot()]);
+                    self.copy(&TypedSlot::pointer("r10", operand), &value.typed_slot());
+                }
+                _ => unreachable!(),
+            },
             Expression::IntegralBinOp { ty, lhs, kind, rhs } => {
                 assert_eq!(lhs.ty, rhs.ty);
                 assert_eq!(lhs.ty.ty, Type::Arithmetic(Arithmetic::Integral(ty)));
@@ -437,23 +447,23 @@ impl<'a> Codegen<'a> {
             }
             Expression::Addressof(operand) => {
                 self.expr(operand);
-                let Slot::Automatic(offset) = operand.slot
-                else {
-                    unreachable!()
+                let lea_argument: &dyn Display = match operand.slot {
+                    Slot::Static(_) => &operand.typed_slot(),
+                    Slot::Automatic(offset) => &LeaArgument {
+                        pointer: Rsp,
+                        index: None,
+                        size: 1,
+                        offset,
+                    },
+                    Slot::Pointer { register: _ } => unreachable!("TODO???"),
                 };
-                self.emit_args(
-                    "lea",
-                    &[
-                        &"rax",
-                        &LeaArgument {
-                            pointer: Rsp,
-                            index: None,
-                            size: 1,
-                            offset,
-                        },
-                    ],
-                );
+                self.emit_args("lea", &[&"rax", lea_argument]);
                 self.emit_args("mov", &[&expr.typed_slot(), &"rax"]);
+            }
+            Expression::Deref(operand) => {
+                self.expr(operand);
+                self.emit_args("mov", &[&R10.typed(operand), &operand.typed_slot()]);
+                self.copy(&expr.typed_slot(), &TypedSlot::pointer("r10", operand));
             }
         }
     }

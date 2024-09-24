@@ -550,12 +550,14 @@ pub struct UnaryOp<'a> {
 #[derive(Debug, Clone, Copy)]
 pub enum UnaryOpKind {
     Addressof,
+    Deref,
 }
 
 impl<'a> UnaryOp<'a> {
     pub fn str(&self) -> &'static str {
         match self.kind {
             UnaryOpKind::Addressof => "addressof",
+            UnaryOpKind::Deref => "deref",
         }
     }
 
