@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/equality-ops/test_ptr_neq.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (x~1 `int` @0) ∅)
+         (definition (y~2 `int` @4) ∅)
+         (return
+            (ptr-not-equal `int` @8
+               (addressof `ptr<int>` @8 (x~1 `int` @0))
+               (addressof `ptr<int>` @16 (y~2 `int` @4)))))))
+
+----- stderr -----

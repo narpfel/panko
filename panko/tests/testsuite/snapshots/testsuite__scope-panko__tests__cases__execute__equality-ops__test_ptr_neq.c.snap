@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/equality-ops/test_ptr_neq.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition x~1 `int` ∅)
+         (definition y~2 `int` ∅)
+         (return (not-equal (addressof (name x~1 `int`)) (addressof (name y~2 `int`)))))))
+
+----- stderr -----
