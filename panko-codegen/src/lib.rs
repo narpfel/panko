@@ -446,18 +446,26 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
             }
             Expression::Addressof(operand) => {
-                self.expr(operand);
-                let lea_argument: &dyn Display = match operand.slot {
-                    Slot::Static(_) => &operand.typed_slot(),
-                    Slot::Automatic(offset) => &LeaArgument {
-                        pointer: Rsp,
-                        index: None,
-                        size: 1,
-                        offset,
-                    },
-                    Slot::Pointer { register: _ } => unreachable!("TODO???"),
-                };
-                self.emit_args("lea", &[&"rax", lea_argument]);
+                match operand.expr {
+                    Expression::Name(_) => {
+                        let lea_argument: &dyn Display = match operand.slot {
+                            Slot::Static(_) => &operand.typed_slot(),
+                            Slot::Automatic(offset) => &LeaArgument {
+                                pointer: Rsp,
+                                index: None,
+                                size: 1,
+                                offset,
+                            },
+                            Slot::Pointer { register: _ } => unreachable!("TODO???"),
+                        };
+                        self.emit_args("lea", &[&"rax", lea_argument]);
+                    }
+                    Expression::Deref(operand) => {
+                        self.expr(operand);
+                        self.emit_args("mov", &[&Rax.typed(operand), &operand.typed_slot()]);
+                    }
+                    _ => unreachable!(),
+                }
                 self.emit_args("mov", &[&expr.typed_slot(), &"rax"]);
             }
             Expression::Deref(operand) => {

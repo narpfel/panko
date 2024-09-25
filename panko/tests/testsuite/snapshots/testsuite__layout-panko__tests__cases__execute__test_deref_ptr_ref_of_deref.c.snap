@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_deref_ptr_ref_of_deref.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (x~1 `int` @0) (42 `int` @0))
+         (definition (p~2 `ptr<int>` @8) (addressof `ptr<int>` @8 (x~1 `int` @0)))
+         (return (deref `int` @16 (addressof `ptr<int>` @24 (deref `int` @24 (p~2 `ptr<int>` @8))))))))
+
+----- stderr -----
