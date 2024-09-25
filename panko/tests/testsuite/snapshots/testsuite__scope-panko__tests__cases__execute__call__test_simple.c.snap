@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/call/test_simple.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      f~0 `fn(x: int) -> int`
+      (params
+         x~1 `int`)
+      (compound-statement
+         (return (name x~1 `int`))))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (definition x~3 `int` 42)
+         (definition y~4 `int`
+            (call (name f~0 `fn(x: int) -> int`)
+               (name x~3 `int`)))
+         (return (name y~4 `int`)))))
+
+----- stderr -----

@@ -129,6 +129,11 @@ pub(crate) enum Expression<'a> {
         operator: UnaryOp<'a>,
         operand: &'a Expression<'a>,
     },
+    Call {
+        callee: &'a Expression<'a>,
+        args: &'a [Expression<'a>],
+        close_paren: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -203,6 +208,8 @@ impl<'a> Expression<'a> {
             Expression::Assign { target, value } => target.loc().until(value.loc()),
             Expression::BinOp { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
             Expression::UnaryOp { operator, operand } => operator.loc().until(operand.loc()),
+            Expression::Call { callee, args: _, close_paren } =>
+                callee.loc().until(close_paren.loc()),
         }
     }
 }
@@ -527,6 +534,13 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::UnaryOp { operator, operand } => Expression::UnaryOp {
             operator: *operator,
             operand: scopes.sess.alloc(resolve_expr(scopes, operand)),
+        },
+        ast::Expression::Call { callee, args, close_paren } => Expression::Call {
+            callee: scopes.sess.alloc(resolve_expr(scopes, callee)),
+            args: scopes
+                .sess
+                .alloc_slice_fill_iter(args.iter().map(|arg| resolve_expr(scopes, arg))),
+            close_paren: *close_paren,
         },
     }
 }

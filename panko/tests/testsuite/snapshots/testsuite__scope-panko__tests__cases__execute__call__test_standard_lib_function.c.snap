@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/call/test_standard_lib_function.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration isalnum~1 `fn(∅: int) -> int` ∅)
+         (return
+            (not-equal
+               (call (name isalnum~1 `fn(∅: int) -> int`)
+                  100)
+               0)))))
+
+----- stderr -----

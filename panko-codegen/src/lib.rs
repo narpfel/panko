@@ -6,6 +6,7 @@ use std::fmt::Write as _;
 
 use indexmap::IndexMap;
 use indexmap::IndexSet;
+use itertools::EitherOrBoth;
 use itertools::Itertools as _;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Integral;
@@ -29,12 +30,19 @@ use Register::*;
 
 const MAX_IMUL_IMMEDIATE: u64 = 2_u64.pow(31);
 const MAX_ADDRESS_OFFSET: u64 = u32::MAX as _;
+const ARGUMENT_REGISTERS: [Register; 6] = [Rdi, Rsi, Rdx, Rcx, R8, R9];
 
 #[derive(Debug, Copy, Clone)]
 #[repr(u8)]
 enum Register {
     Rax,
+    Rcx,
     Rsp,
+    Rdi,
+    Rsi,
+    Rdx,
+    R8,
+    R9,
     R10,
 }
 
@@ -42,7 +50,13 @@ impl Display for Register {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             Rax => "rax",
+            Rcx => "rcx",
             Rsp => "rsp",
+            Rdi => "rdi",
+            Rsi => "rsi",
+            Rdx => "rdx",
+            R8 => "r8",
+            R9 => "r9",
             R10 => "r10",
         };
         write!(f, "{s}")
@@ -72,9 +86,15 @@ impl Display for TypedRegister<'_> {
             Type::Function(_) | Type::Void => unreachable!(),
         };
 
-        const REGISTERS: [[&str; 4]; 3] = [
+        const REGISTERS: [[&str; 4]; 9] = [
             ["al", "ax", "eax", "rax"],
+            ["cl", "cx", "ecx", "rcx"],
             ["spl", "sp", "esp", "rsp"],
+            ["dil", "di", "edi", "rdi"],
+            ["sil", "si", "esi", "rsi"],
+            ["dl", "dx", "edx", "rdx"],
+            ["r8b", "r8w", "r8d", "r8"],
+            ["r9b", "r9w", "r9d", "r9"],
             ["r10b", "r10w", "r10d", "r10"],
         ];
         let register_str =
@@ -210,6 +230,18 @@ impl<'a> Codegen<'a> {
         self.block(1);
         self.emit_args("sub", &[&"rsp", &def.stack_size]);
         self.current_function = Some(def);
+
+        for parameter in def.params.0.iter().zip_longest(ARGUMENT_REGISTERS) {
+            match parameter {
+                EitherOrBoth::Both(param, register) => self.emit_args(
+                    "mov",
+                    &[&param.typed_slot(), &register.with_ty(&param.ty.ty)],
+                ),
+                EitherOrBoth::Left(_) => todo!("unimplemented: more than six arguments"),
+                EitherOrBoth::Right(_) => break,
+            }
+        }
+
         self.compound_statement(def.body);
         assert_eq!(
             self.current_function.take().map(std::ptr::from_ref),
@@ -253,6 +285,7 @@ impl<'a> Codegen<'a> {
                 Expression::PtrEq { .. } => todo!(),
                 Expression::Addressof(_) => todo!(),
                 Expression::Deref(_) => todo!(),
+                Expression::Call { .. } => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -472,6 +505,28 @@ impl<'a> Codegen<'a> {
                 self.expr(operand);
                 self.emit_args("mov", &[&R10.typed(operand), &operand.typed_slot()]);
                 self.copy(&expr.typed_slot(), &TypedSlot::pointer("r10", operand));
+            }
+            Expression::Call { callee, args } => {
+                self.expr(callee);
+                for arg in args {
+                    self.expr(arg);
+                }
+                for argument in args.iter().zip_longest(ARGUMENT_REGISTERS) {
+                    match argument {
+                        EitherOrBoth::Both(arg, register) =>
+                            self.emit_args("mov", &[&register.typed(arg), &arg.typed_slot()]),
+                        EitherOrBoth::Left(_) => todo!("unimplemented: more than six arguments"),
+                        EitherOrBoth::Right(_) => break,
+                    }
+                }
+                let operation = match callee.ty.ty {
+                    Type::Function(_) => "lea",
+                    Type::Pointer(_) => "mov",
+                    _ => unreachable!(),
+                };
+                self.emit_args(operation, &[&Rax, &callee.typed_slot()]);
+                self.emit("call rax");
+                self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
             }
         }
     }

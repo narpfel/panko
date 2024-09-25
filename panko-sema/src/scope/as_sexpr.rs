@@ -86,6 +86,8 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new(kind.str()).inherit(lhs).inherit(rhs),
             Expression::UnaryOp { operator, operand } =>
                 SExpr::new(operator.str()).inherit(operand),
+            Expression::Call { callee, args, close_paren: _ } =>
+                SExpr::new("call").inherit(callee).lines(*args),
         }
     }
 }

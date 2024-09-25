@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/call/test_simple_declaration.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration f~0 `fn(∅: int) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (return
+            (call (f~0 `fn(∅: int) -> int`)
+               (42 `int`)
+               `int`))))
+   (function-definition
+      f~0 `fn(∅: int) -> int`
+      (params
+         x~3 `int`)
+      (compound-statement
+         (return (x~3 `int`)))))
+
+----- stderr -----

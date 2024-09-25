@@ -512,6 +512,11 @@ pub enum Expression<'a> {
         operator: UnaryOp<'a>,
         operand: &'a Expression<'a>,
     },
+    Call {
+        callee: &'a Expression<'a>,
+        args: &'a [Expression<'a>],
+        close_paren: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]

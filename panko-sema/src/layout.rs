@@ -38,7 +38,7 @@ pub struct Declaration<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct FunctionDefinition<'a> {
     reference: Reference<'a>,
-    params: ParamRefs<'a>,
+    pub params: ParamRefs<'a>,
     pub storage_class: Option<cst::StorageClassSpecifier<'a>>,
     #[expect(unused)]
     inline: Option<cst::FunctionSpecifier<'a>>,
@@ -49,7 +49,7 @@ pub struct FunctionDefinition<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct ParamRefs<'a>(pub(crate) &'a [Reference<'a>]);
+pub struct ParamRefs<'a>(pub &'a [Reference<'a>]);
 
 #[derive(Debug, Clone, Copy)]
 pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
@@ -105,6 +105,10 @@ pub enum Expression<'a> {
     },
     Addressof(&'a LayoutedExpression<'a>),
     Deref(&'a LayoutedExpression<'a>),
+    Call {
+        callee: &'a LayoutedExpression<'a>,
+        args: &'a [LayoutedExpression<'a>],
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -170,7 +174,9 @@ impl fmt::Display for TypedSlot<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let size = match self.ty {
             Type::Arithmetic(_) | Type::Pointer(_) => self.ty.size(),
-            Type::Function(_) | Type::Void => unreachable!(),
+            // Using a function results in a pointer to that function, so we need 8 bytes.
+            Type::Function(_) => 8,
+            Type::Void => unreachable!(),
         };
         const PTR_TYPES: [&str; 4] = ["byte", "word", "dword", "qword"];
         let ptr_type = PTR_TYPES[usize::try_from(size.ilog2()).unwrap()];
@@ -239,7 +245,7 @@ fn layout_function_definition<'a>(
     let body = layout_compound_statement(&mut stack, bump, body);
     // TODO: This depends on the ABI
     // unsure if this is correct, for now we check for correct alignment in the function prologue
-    let stack_size = stack.size().next_multiple_of(16);
+    let stack_size = stack.size().next_multiple_of(16) + 8;
     FunctionDefinition {
         reference,
         params,
@@ -397,6 +403,13 @@ fn layout_expression_in_slot<'a>(
             let slot = make_slot();
             let operand = bump.alloc(layout_expression(stack, bump, operand));
             (slot, Expression::Deref(operand))
+        }
+        typecheck::Expression::Call { callee, args, close_paren: _ } => {
+            let slot = make_slot();
+            let callee = bump.alloc(layout_expression(stack, bump, callee));
+            let args = bump
+                .alloc_slice_fill_iter(args.iter().map(|arg| layout_expression(stack, bump, arg)));
+            (slot, Expression::Call { callee, args })
         }
     };
     LayoutedExpression { ty, slot, expr }

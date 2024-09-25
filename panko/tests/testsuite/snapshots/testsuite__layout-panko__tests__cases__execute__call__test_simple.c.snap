@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/call/test_simple.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (f~0 `fn(x: int) -> int` (static f))
+      (params
+         (x~1 `int` @0))
+      (compound-statement
+         (return (x~1 `int` @0))))
+   (function-definition
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (definition (x~3 `int` @0) (42 `int` @0))
+         (definition (y~4 `int` @4)
+            (call `int` @4 (f~0 `fn(x: int) -> int` (static f))
+               (x~3 `int` @0)))
+         (return (y~4 `int` @4)))))
+
+----- stderr -----

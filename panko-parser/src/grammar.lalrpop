@@ -300,13 +300,21 @@ PrimaryExpression: ast::Expression<'a> = {
     <open_paren:"("> <expr:Bump<Expression>> <close_paren:")"> => ast::Expression::Parenthesised { <> },
 }
 
+PostfixExpression: ast::Expression<'a> = {
+    PrimaryExpression,
+    <callee:Bump<PostfixExpression>> "(" <args:ArgumentExpressionList> <close_paren:")"> =>
+        ast::Expression::Call { <> },
+}
+
+ArgumentExpressionList = { CommaSep<AssignmentExpression> }
+
 UnaryOperator: ast::UnaryOp<'a> = {
     "&" => ast::UnaryOp { kind: ast::UnaryOpKind::Addressof, token: <> },
     "*" => ast::UnaryOp { kind: ast::UnaryOpKind::Deref, token: <> },
 }
 
 UnaryExpression: ast::Expression<'a> = {
-    PrimaryExpression,
+    PostfixExpression,
     <operator:UnaryOperator> <operand:Bump<CastExpression>> => ast::Expression::UnaryOp { <> },
 }
 

@@ -6,6 +6,7 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast::Arithmetic;
+use panko_parser::ast::FunctionType;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::QualifiedType;
@@ -160,6 +161,11 @@ pub enum Expression<'a> {
         star: Token<'a>,
         operand: &'a TypedExpression<'a>,
     },
+    Call {
+        callee: &'a TypedExpression<'a>,
+        args: &'a [TypedExpression<'a>],
+        close_paren: Token<'a>,
+    },
 }
 
 impl TypedExpression<'_> {
@@ -187,7 +193,8 @@ impl TypedExpression<'_> {
             | Expression::PtrAdd { .. }
             | Expression::PtrSub { .. }
             | Expression::PtrEq { .. }
-            | Expression::Addressof { .. } => false,
+            | Expression::Addressof { .. }
+            | Expression::Call { .. } => false,
         }
     }
 
@@ -223,6 +230,8 @@ impl<'a> Expression<'a> {
             Expression::PtrEq { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
             Expression::Addressof { ampersand, operand } => ampersand.loc().until(operand.loc()),
             Expression::Deref { star, operand } => star.loc().until(operand.loc()),
+            Expression::Call { callee, args: _, close_paren } =>
+                callee.loc().until(close_paren.loc()),
         }
     }
 
@@ -662,6 +671,34 @@ fn typeck_expression<'a>(
                     else {
                         todo!("type error: cannot deref this expr");
                     },
+            }
+        }
+        scope::Expression::Call { callee, args, close_paren } => {
+            let callee = typeck_expression(sess, callee);
+            let (Type::Function(ty)
+            | Type::Pointer(QualifiedType {
+                is_const: _,
+                is_volatile: _,
+                ty: Type::Function(ty),
+            })) = &callee.ty.ty
+            else {
+                todo!("type error: uncallable");
+            };
+            let FunctionType { params, return_type } = *ty;
+            if params.len() != args.len() {
+                todo!("type error: argument count mismatch");
+            }
+            let args = args.iter().zip(params).map(|(arg, param)| {
+                let arg = typeck_expression(sess, arg);
+                convert_as_if_by_assignment(sess, param.ty, arg)
+            });
+            TypedExpression {
+                ty: *return_type,
+                expr: Expression::Call {
+                    callee: sess.alloc(callee),
+                    args: sess.alloc_slice_fill_iter(args),
+                    close_paren: *close_paren,
+                },
             }
         }
     }
