@@ -181,7 +181,7 @@ impl fmt::Display for TypedSlot<'_> {
         const PTR_TYPES: [&str; 4] = ["byte", "word", "dword", "qword"];
         let ptr_type = PTR_TYPES[usize::try_from(size.ilog2()).unwrap()];
         match self.slot {
-            Slot::Static(s) => write!(f, "{ptr_type} ptr [rip + {s}]"),
+            Slot::Static(s) => write!(f, "{ptr_type} ptr [rip + {s}@plt]"),
             Slot::Automatic(stack_offset) => write!(f, "{ptr_type} ptr [rsp + {stack_offset}]"),
             Slot::Pointer { register } => write!(f, "{ptr_type} ptr [{register}]"),
         }
