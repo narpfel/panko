@@ -476,12 +476,6 @@ impl Arithmetic {
             }) => 5,
         }
     }
-
-    pub fn is_integral(&self) -> bool {
-        match self {
-            Arithmetic::Integral(_) => true,
-        }
-    }
 }
 
 impl IntegralKind {
