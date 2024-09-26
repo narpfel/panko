@@ -1,5 +1,6 @@
 #![feature(exit_status_error)]
 
+use std::borrow::Borrow;
 use std::io;
 use std::path::Path;
 use std::path::PathBuf;
@@ -10,6 +11,7 @@ use std::process::Output;
 use insta_cmd::assert_cmd_snapshot;
 use insta_cmd::get_cargo_bin;
 use itertools::Itertools as _;
+use regex::Captures;
 use regex::Regex;
 use rstest::rstest;
 
@@ -82,6 +84,23 @@ fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
         .map(|captures| captures.name("output").unwrap().as_str().to_string() + "\n")
         .collect();
 
+    let cmdline_arguments_re = Regex::new(r"(?m)^// \[\[arg: (?P<arg>.*?)\]\]$").unwrap();
+    let expand_escape_sequences_re = Regex::new(r"\\[\\n]").unwrap();
+
+    let cmdline_arguments = cmdline_arguments_re
+        .captures_iter(&source)
+        .map(|captures| {
+            expand_escape_sequences_re.replace_all(
+                captures.name("arg").unwrap().as_str(),
+                |captures: &Captures| match captures.get(0).unwrap().as_str() {
+                    r"\\" => "\\",
+                    r"\n" => "\n",
+                    _ => unreachable!(),
+                },
+            )
+        })
+        .collect_vec();
+
     let filename = relative_to(
         &filename,
         Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap(),
@@ -103,7 +122,10 @@ fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
         .exit_ok()
         .unwrap();
 
-    let Output { status, stdout, stderr } = Command::new(&executable_filename).output().unwrap();
+    let Output { status, stdout, stderr } = Command::new(&executable_filename)
+        .args(cmdline_arguments.iter().map(Borrow::<str>::borrow))
+        .output()
+        .unwrap();
     let stdout = std::str::from_utf8(&stdout).unwrap();
     let stderr = std::str::from_utf8(&stderr).unwrap();
     let actual_exit_code = status.code().unwrap_or_else(

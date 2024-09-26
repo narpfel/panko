@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/test_argc.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn(argc: int, ∅: ptr<ptr<char>>) -> int`
+      (params
+         argc~1 `int`)
+      (compound-statement
+         (return (argc~1 `int`)))))
+
+----- stderr -----

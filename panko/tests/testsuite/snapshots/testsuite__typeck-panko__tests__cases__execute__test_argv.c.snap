@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/test_argv.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration strlen~0 `fn(∅: ptr<char const>) -> unsigned long` ∅)
+   (function-definition
+      main~1 `fn(argc: int, argv: ptr<ptr<char>>) -> int`
+      (params
+         argc~2 `int`
+         argv~3 `ptr<ptr<char>>`)
+      (compound-statement
+         (return
+            (truncate
+               (call (strlen~0 `fn(∅: ptr<char const>) -> unsigned long`)
+                  (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
+                  `unsigned long`)
+               `int`)))))
+
+----- stderr -----
