@@ -1,0 +1,55 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_hello_world.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (putchar~0 `fn(∅: int) -> int` (static putchar)) ∅)
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0 (putchar~0 `fn(∅: int) -> int` (static putchar))
+               (104 `int` @4)))
+         (expression
+            (call `int` @0 (putchar~0 `fn(∅: int) -> int` (static putchar))
+               (101 `int` @4)))
+         (expression
+            (call `int` @0 (putchar~0 `fn(∅: int) -> int` (static putchar))
+               (108 `int` @4)))
+         (expression
+            (call `int` @0 (putchar~0 `fn(∅: int) -> int` (static putchar))
+               (108 `int` @4)))
+         (expression
+            (call `int` @0 (putchar~0 `fn(∅: int) -> int` (static putchar))
+               (111 `int` @4)))
+         (expression
+            (call `int` @0 (putchar~0 `fn(∅: int) -> int` (static putchar))
+               (32 `int` @4)))
+         (expression
+            (call `int` @0 (putchar~0 `fn(∅: int) -> int` (static putchar))
+               (119 `int` @4)))
+         (expression
+            (call `int` @0 (putchar~0 `fn(∅: int) -> int` (static putchar))
+               (111 `int` @4)))
+         (expression
+            (call `int` @0 (putchar~0 `fn(∅: int) -> int` (static putchar))
+               (114 `int` @4)))
+         (expression
+            (call `int` @0 (putchar~0 `fn(∅: int) -> int` (static putchar))
+               (108 `int` @4)))
+         (expression
+            (call `int` @0 (putchar~0 `fn(∅: int) -> int` (static putchar))
+               (100 `int` @4)))
+         (return
+            (call `int` @0 (putchar~0 `fn(∅: int) -> int` (static putchar))
+               (10 `int` @4))))))
+
+----- stderr -----

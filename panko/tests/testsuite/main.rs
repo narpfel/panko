@@ -5,6 +5,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use std::process::ExitStatus;
+use std::process::Output;
 
 use insta_cmd::assert_cmd_snapshot;
 use insta_cmd::get_cargo_bin;
@@ -75,6 +76,12 @@ fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
     );
     let expected_return_code = expected_return_codes.first().copied().unwrap_or(0);
 
+    let expected_print_re = Regex::new(r"(?m)^// \[\[print: (?P<output>.*?)\]\]$").unwrap();
+    let expected_output: String = expected_print_re
+        .captures_iter(&source)
+        .map(|captures| captures.name("output").unwrap().as_str().to_string() + "\n")
+        .collect();
+
     let filename = relative_to(
         &filename,
         Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap(),
@@ -96,9 +103,9 @@ fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
         .exit_ok()
         .unwrap();
 
-    let status = Command::new(&executable_filename)
-        .status_with_captured_output()
-        .unwrap();
+    let Output { status, stdout, stderr } = Command::new(&executable_filename).output().unwrap();
+    let stdout = std::str::from_utf8(&stdout).unwrap();
+    let stderr = std::str::from_utf8(&stderr).unwrap();
     let actual_exit_code = status.code().unwrap_or_else(
         #[cfg(unix)]
         || {
@@ -115,4 +122,10 @@ fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
         expected_return_code, actual_exit_code,
         "test program did not exit with expected return code {expected_return_code}",
     );
+
+    assert_eq!(
+        stdout, expected_output,
+        "output on stdout (left) did not match expected output (right)",
+    );
+    assert_eq!(stderr, "", "no output on stderr is expected");
 }

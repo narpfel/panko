@@ -1,0 +1,67 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/test_hello_world.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration putchar~0 `fn(∅: int) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (putchar~0 `fn(∅: int) -> int`)
+               (104 `int`)
+               `int`))
+         (expression
+            (call (putchar~0 `fn(∅: int) -> int`)
+               (101 `int`)
+               `int`))
+         (expression
+            (call (putchar~0 `fn(∅: int) -> int`)
+               (108 `int`)
+               `int`))
+         (expression
+            (call (putchar~0 `fn(∅: int) -> int`)
+               (108 `int`)
+               `int`))
+         (expression
+            (call (putchar~0 `fn(∅: int) -> int`)
+               (111 `int`)
+               `int`))
+         (expression
+            (call (putchar~0 `fn(∅: int) -> int`)
+               (32 `int`)
+               `int`))
+         (expression
+            (call (putchar~0 `fn(∅: int) -> int`)
+               (119 `int`)
+               `int`))
+         (expression
+            (call (putchar~0 `fn(∅: int) -> int`)
+               (111 `int`)
+               `int`))
+         (expression
+            (call (putchar~0 `fn(∅: int) -> int`)
+               (114 `int`)
+               `int`))
+         (expression
+            (call (putchar~0 `fn(∅: int) -> int`)
+               (108 `int`)
+               `int`))
+         (expression
+            (call (putchar~0 `fn(∅: int) -> int`)
+               (100 `int`)
+               `int`))
+         (return
+            (call (putchar~0 `fn(∅: int) -> int`)
+               (10 `int`)
+               `int`)))))
+
+----- stderr -----

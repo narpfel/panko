@@ -1,0 +1,55 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/test_hello_world.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration putchar~0 `fn(∅: int) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               104))
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               101))
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               108))
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               108))
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               111))
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               32))
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               119))
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               111))
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               114))
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               108))
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               100))
+         (return
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               10)))))
+
+----- stderr -----
