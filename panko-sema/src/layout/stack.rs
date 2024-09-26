@@ -75,6 +75,7 @@ impl<'a> Stack<'a> {
             Entry::Vacant(entry) => {
                 let scope::Reference {
                     name,
+                    loc: _,
                     ty,
                     id,
                     usage_location: _,

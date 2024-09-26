@@ -113,7 +113,7 @@ pub enum Expression<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Reference<'a> {
-    name: Token<'a>,
+    name: &'a str,
     pub ty: QualifiedType<'a>,
     id: Id,
     kind: RefKind,
@@ -206,11 +206,11 @@ impl<'a> Slot<'a> {
 
 impl<'a> Reference<'a> {
     pub fn name(&self) -> &'a str {
-        self.name.slice()
+        self.name
     }
 
     fn unique_name(&self) -> String {
-        format!("{}~{}", self.name.slice(), self.id.0)
+        format!("{}~{}", self.name, self.id.0)
     }
 
     pub fn kind(&self) -> RefKind {

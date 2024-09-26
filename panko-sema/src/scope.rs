@@ -6,7 +6,6 @@ use ariadne::Color::Red;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
-use panko_lex::TokenKind;
 use panko_parser as cst;
 use panko_parser::ast;
 use panko_parser::ast::FunctionType;
@@ -140,10 +139,11 @@ pub(crate) enum Expression<'a> {
 pub struct Reference<'a> {
     // TODO: The location of `name` points to where this name was declared. This is unused for now,
     // but should be used in error messages to print e. g. “note: [...] was declared here:”.
-    pub(crate) name: Token<'a>,
+    pub(crate) name: &'a str,
+    pub(crate) loc: Loc<'a>,
     pub(crate) ty: QualifiedType<'a>,
     pub(crate) id: Id,
-    pub(crate) usage_location: Token<'a>,
+    pub(crate) usage_location: Loc<'a>,
     pub(crate) kind: RefKind,
     pub(crate) storage_duration: StorageDuration,
 }
@@ -216,28 +216,27 @@ impl<'a> Expression<'a> {
 
 impl<'a> Reference<'a> {
     pub(crate) fn name(&self) -> &'a str {
-        self.ident().slice()
-    }
-
-    pub fn unique_name(&self) -> String {
-        format!("{}~{}", self.ident().slice(), self.id.0)
-    }
-
-    fn ident(&self) -> Token<'a> {
         self.name
     }
 
+    pub fn unique_name(&self) -> String {
+        format!("{}~{}", self.name, self.id.0)
+    }
+
+    #[expect(
+        clippy::misnamed_getters,
+        reason = "`loc` should actually return the `usage_location` and not the `loc` where this reference was declared"
+    )]
     pub fn loc(&self) -> Loc<'a> {
-        self.usage_location.loc()
+        self.usage_location
     }
 
     pub(crate) fn slice(&self) -> &'a str {
-        self.name.slice()
+        self.name
     }
 
-    fn at(&self, location: Token<'a>) -> Self {
-        assert!(matches!(location.kind, TokenKind::Identifier));
-        assert_eq!(self.name.slice(), location.slice());
+    fn at(&self, location: Loc<'a>) -> Self {
+        assert_eq!(self.name, location.slice());
         Self { usage_location: location, ..*self }
     }
 
@@ -246,7 +245,7 @@ impl<'a> Reference<'a> {
     }
 
     pub(crate) fn at_decl(&self) -> Self {
-        self.at(self.name)
+        self.at(self.loc)
     }
 }
 
@@ -298,7 +297,8 @@ struct Scopes<'a> {
 impl<'a> Scopes<'a> {
     fn add(
         &mut self,
-        name: Token<'a>,
+        name: &'a str,
+        loc: Loc<'a>,
         ty: QualifiedType<'a>,
         kind: RefKind,
         storage_duration: StorageDuration,
@@ -307,9 +307,10 @@ impl<'a> Scopes<'a> {
         let id = self.id();
         let reference = Reference {
             name,
+            loc,
             ty,
             id,
-            usage_location: name,
+            usage_location: loc,
             kind,
             storage_duration,
         };
@@ -321,7 +322,7 @@ impl<'a> Scopes<'a> {
                 {
                     sess.emit(Diagnostic::AlreadyDefined {
                         at: reference,
-                        previous_definition: previous_definition.at(previous_definition.name),
+                        previous_definition: previous_definition.at(previous_definition.loc),
                     });
                 }
                 if previous_definition.ty != ty {
@@ -335,11 +336,7 @@ impl<'a> Scopes<'a> {
                     previous_definition.name = name;
                     previous_definition.kind = kind;
                 }
-                Reference {
-                    kind,
-                    usage_location: name,
-                    ..*previous_definition
-                }
+                Reference { kind, ..*previous_definition }
             }
             Entry::Vacant(entry) => {
                 entry.insert(reference);
@@ -348,16 +345,16 @@ impl<'a> Scopes<'a> {
         }
     }
 
-    fn lookup(&self, name: Token<'a>) -> Option<Reference<'a>> {
+    fn lookup(&self, name: &'a str, loc: Loc<'a>) -> Option<Reference<'a>> {
         self.scopes
             .iter()
             .rev()
-            .find_map(|scope| scope.lookup(name.slice()))
-            .map(|reference| reference.at(name))
+            .find_map(|scope| scope.lookup(name))
+            .map(|reference| reference.at(loc))
     }
 
-    fn lookup_innermost(&mut self, name: Token<'a>) -> Entry<&'a str, Reference<'a>> {
-        self.scopes.last_mut().lookup_innermost(name.slice())
+    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Reference<'a>> {
+        self.scopes.last_mut().lookup_innermost(name)
     }
 
     fn push(&mut self) {
@@ -385,7 +382,8 @@ fn resolve_function_definition<'a>(
     def: &'a ast::FunctionDefinition<'a>,
 ) -> FunctionDefinition<'a> {
     let reference = scopes.add(
-        def.name,
+        def.name.slice(),
+        def.name.loc(),
         def.ty,
         RefKind::Definition,
         StorageDuration::Static,
@@ -415,15 +413,24 @@ fn resolve_function_definition<'a>(
         &function_ty
             .params
             .iter()
-            .filter_map(|param| {
-                let name = param.name?;
+            .enumerate()
+            .map(|(i, param)| {
+                let name = param.name.map_or_else(
+                    || {
+                        scopes
+                            .sess
+                            .alloc_str(&format!("{}.unnamed_parameter.{i}", def.name.slice()))
+                    },
+                    |name| name.slice(),
+                );
                 let reference = scopes.add(
                     name,
+                    param.loc,
                     param.ty,
                     RefKind::Definition,
                     StorageDuration::Automatic,
                 );
-                Some(reference)
+                reference
             })
             .collect_vec(),
     );
@@ -483,7 +490,13 @@ fn resolve_declaration<'a>(
         Type::Function(_) => StorageDuration::Static,
         _ => storage_duration,
     };
-    let reference = scopes.add(decl.name, decl.ty, kind, storage_duration);
+    let reference = scopes.add(
+        decl.name.slice(),
+        decl.name.loc(),
+        decl.ty,
+        kind,
+        storage_duration,
+    );
     Declaration {
         reference,
         initialiser: try { resolve_expr(scopes, &decl.initialiser?) },
@@ -512,7 +525,7 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
     match expr {
         ast::Expression::Name(name) => Expression::Name(
             scopes
-                .lookup(*name)
+                .lookup(name.slice(), name.loc())
                 .unwrap_or_else(|| todo!("name error: {name:#?}")),
         ),
         ast::Expression::Integer(integer) => Expression::Integer(*integer),

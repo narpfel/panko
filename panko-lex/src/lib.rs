@@ -64,7 +64,7 @@ impl<'a> Loc<'a> {
         self.span.start..self.span.end
     }
 
-    fn slice(&self) -> &'a str {
+    pub fn slice(&self) -> &'a str {
         &self.src()[self.span()]
     }
 

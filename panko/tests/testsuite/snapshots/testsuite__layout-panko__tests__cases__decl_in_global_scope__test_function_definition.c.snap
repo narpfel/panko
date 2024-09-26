@@ -17,60 +17,62 @@ exit_code: 0
          (return (42 `int` @0))))
    (function-definition
       (b~1 `fn(∅: int) -> int` (static b))
-      (compound-statement
-         (return (42 `int` @0))))
-   (function-definition
-      (c~2 `fn(a: int) -> int` (static c))
       (params
-         (a~3 `int` @0))
+         (b.unnamed_parameter.0~2 `int` @0))
       (compound-statement
-         (return (a~3 `int` @0))))
+         (return (42 `int` @4))))
    (function-definition
-      (d~4 `fn(a: int) -> int` (static d))
+      (c~3 `fn(a: int) -> int` (static c))
       (params
-         (a~5 `int` @0))
+         (a~4 `int` @0))
+      (compound-statement
+         (return (a~4 `int` @0))))
+   (function-definition
+      (d~5 `fn(a: int) -> int` (static d))
+      (params
+         (a~6 `int` @0))
       (compound-statement
          (compound-statement
-            (return (a~5 `int` @0)))))
+            (return (a~6 `int` @0)))))
    (function-definition
-      (e~6 `fn() -> int` (static e))
+      (e~7 `fn() -> int` (static e))
       (compound-statement
          (compound-statement)
          (expression ∅)
          (return (42 `int` @0))))
    (function-definition
-      (f~7 `fn() -> int` (static f))
+      (f~8 `fn() -> int` (static f))
       (compound-statement
-         (definition (a~8 `int` @0) (42 `int` @0))
-         (expression (a~8 `int` @0))
-         (return (a~8 `int` @0))))
+         (definition (a~9 `int` @0) (42 `int` @0))
+         (expression (a~9 `int` @0))
+         (return (a~9 `int` @0))))
    (function-definition
-      (g~9 `fn() -> char` (static g))
+      (g~10 `fn() -> char` (static g))
       (compound-statement
-         (definition (c~10 `char` @0) (truncate `char` @0 (0 `int` @4)))
-         (return (c~10 `char` @0))))
+         (definition (c~11 `char` @0) (truncate `char` @0 (0 `int` @4)))
+         (return (c~11 `char` @0))))
    (function-definition
-      (h~11 `fn() -> int` (static h))
+      (h~12 `fn() -> int` (static h))
       (compound-statement
-         (definition (a~12 `int` @0) (42 `int` @0))
+         (definition (a~13 `int` @0) (42 `int` @0))
          (compound-statement
-            (definition (a~13 `int` @4) (27 `int` @4))
-            (return (a~13 `int` @4)))))
+            (definition (a~14 `int` @4) (27 `int` @4))
+            (return (a~14 `int` @4)))))
    (function-definition
-      (i~14 `fn(a: int) -> int` (static i))
+      (i~15 `fn(a: int) -> int` (static i))
       (params
-         (a~15 `int` @0))
+         (a~16 `int` @0))
       (compound-statement
          (compound-statement
-            (definition (a~16 `int` @4) (42 `int` @4)))
-         (return (a~15 `int` @0))))
+            (definition (a~17 `int` @4) (42 `int` @4)))
+         (return (a~16 `int` @0))))
    (function-definition
-      (j~17 `fn() -> int` (static j))
+      (j~18 `fn() -> int` (static j))
       (compound-statement
-         (definition (a~18 `int` @0) (42 `int` @0))
+         (definition (a~19 `int` @0) (42 `int` @0))
          (compound-statement
-            (definition (a~19 `int` @4) (27 `int` @4))
-            (expression (a~19 `int` @4)))
-         (return (a~18 `int` @0)))))
+            (definition (a~20 `int` @4) (27 `int` @4))
+            (expression (a~20 `int` @4)))
+         (return (a~19 `int` @0)))))
 
 ----- stderr -----

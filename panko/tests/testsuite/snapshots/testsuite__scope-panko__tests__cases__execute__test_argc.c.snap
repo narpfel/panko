@@ -14,7 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn(argc: int, ∅: ptr<ptr<char>>) -> int`
       (params
-         argc~1 `int`)
+         argc~1 `int`
+         main.unnamed_parameter.1~2 `ptr<ptr<char>>`)
       (compound-statement
          (return (name argc~1 `int`)))))
 

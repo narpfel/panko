@@ -8,6 +8,7 @@ use ariadne::Color::Red;
 use bumpalo::Bump;
 use itertools::Either;
 use itertools::Itertools as _;
+use panko_lex::Loc;
 use panko_lex::Token;
 use panko_report::Report;
 
@@ -77,6 +78,10 @@ impl<'a> Session<'a> {
         T: Copy,
     {
         self.bump.alloc_slice_copy(values)
+    }
+
+    pub fn alloc_str(&self, s: &str) -> &'a str {
+        self.bump.alloc_str(s)
     }
 
     pub fn emit<T>(&self, diagnostic: T)
@@ -198,6 +203,7 @@ pub struct FunctionType<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct ParameterDeclaration<'a> {
+    pub loc: Loc<'a>,
     pub ty: QualifiedType<'a>,
     pub name: Option<Token<'a>>,
 }
@@ -585,7 +591,11 @@ fn parse_declarator<'a>(
                                     param.declarator.map_or((ty, None), |declarator| {
                                         parse_declarator(sess, ty, declarator)
                                     });
-                                ParameterDeclaration { ty, name }
+                                let loc = name.map_or_else(
+                                    || param.declaration_specifiers.loc(),
+                                    |name| name.loc(),
+                                );
+                                ParameterDeclaration { loc, ty, name }
                             }),
                         ),
                         return_type: sess.alloc(ty),
