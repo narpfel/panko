@@ -151,7 +151,7 @@ pub enum Expression<'a> {
         integral: &'a TypedExpression<'a>,
         pointee_size: u64,
     },
-    PtrEq {
+    PtrCmp {
         lhs: &'a TypedExpression<'a>,
         kind: PtrCmpKind,
         rhs: &'a TypedExpression<'a>,
@@ -196,7 +196,7 @@ impl TypedExpression<'_> {
             | Expression::IntegralBinOp { .. }
             | Expression::PtrAdd { .. }
             | Expression::PtrSub { .. }
-            | Expression::PtrEq { .. }
+            | Expression::PtrCmp { .. }
             | Expression::Addressof { .. }
             | Expression::Call { .. } => false,
         }
@@ -231,7 +231,7 @@ impl<'a> Expression<'a> {
             }
             Expression::PtrSub { pointer, integral, pointee_size: _ } =>
                 pointer.loc().until(integral.loc()),
-            Expression::PtrEq { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::PtrCmp { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
             Expression::Addressof { ampersand, operand } => ampersand.loc().until(operand.loc()),
             Expression::Deref { star, operand } => star.loc().until(operand.loc()),
             Expression::Call {
@@ -569,7 +569,7 @@ fn typeck_ptrcmp<'a>(
     };
     TypedExpression {
         ty: Type::int().unqualified(),
-        expr: Expression::PtrEq {
+        expr: Expression::PtrCmp {
             lhs: sess.alloc(lhs),
             kind,
             rhs: sess.alloc(rhs),

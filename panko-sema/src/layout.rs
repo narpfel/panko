@@ -387,7 +387,7 @@ fn layout_expression_in_slot<'a>(
                 bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, integral)));
             (slot, Expression::PtrSub { pointer, integral, pointee_size })
         }
-        typecheck::Expression::PtrEq { lhs, kind, rhs } => {
+        typecheck::Expression::PtrCmp { lhs, kind, rhs } => {
             let slot = make_slot();
             let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, Some(slot)));
             let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
