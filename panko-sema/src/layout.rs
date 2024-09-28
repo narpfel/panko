@@ -360,11 +360,12 @@ fn layout_expression_in_slot<'a>(
             let value = bump.alloc(value);
             (target.slot, Expression::Assign { target, value })
         }
-        typecheck::Expression::IntegralBinOp { ty, lhs, kind, rhs } => {
+        typecheck::Expression::IntegralBinOp { ty: int, lhs, kind, rhs } => {
             let slot = make_slot();
-            let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, Some(slot)));
+            let lhs_slot = ty.ty.is_slot_compatible(&lhs.ty.ty).then_some(slot);
+            let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, lhs_slot));
             let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
-            (slot, Expression::IntegralBinOp { ty, lhs, kind, rhs })
+            (slot, Expression::IntegralBinOp { ty: int, lhs, kind, rhs })
         }
         typecheck::Expression::PtrAdd { pointer, integral, pointee_size, order } => {
             let (lhs, rhs) = order.select(pointer, integral);

@@ -105,6 +105,11 @@ impl<'a> Type<'a> {
         // TODO: correct align
         self.size()
     }
+
+    pub(crate) fn is_slot_compatible(&self, ty: &Type) -> bool {
+        // TODO: This is more restrictive than necessary.
+        self.size() == ty.size() && self.align() == ty.align()
+    }
 }
 
 impl fmt::Display for Type<'_> {
