@@ -2,6 +2,8 @@ use std::cmp::Ordering;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
+use itertools::EitherOrBoth;
+use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
@@ -94,6 +96,7 @@ pub struct FunctionDefinition<'a> {
     pub(crate) storage_class: Option<cst::StorageClassSpecifier<'a>>,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
+    pub(crate) is_varargs: bool,
     pub(crate) body: CompoundStatement<'a>,
 }
 
@@ -164,6 +167,7 @@ pub enum Expression<'a> {
     Call {
         callee: &'a TypedExpression<'a>,
         args: &'a [TypedExpression<'a>],
+        is_varargs: bool,
         close_paren: Token<'a>,
     },
 }
@@ -230,8 +234,12 @@ impl<'a> Expression<'a> {
             Expression::PtrEq { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
             Expression::Addressof { ampersand, operand } => ampersand.loc().until(operand.loc()),
             Expression::Deref { star, operand } => star.loc().until(operand.loc()),
-            Expression::Call { callee, args: _, close_paren } =>
-                callee.loc().until(close_paren.loc()),
+            Expression::Call {
+                callee,
+                args: _,
+                is_varargs: _,
+                close_paren,
+            } => callee.loc().until(close_paren.loc()),
         }
     }
 
@@ -290,13 +298,24 @@ fn typeck_function_definition<'a>(
     sess: &'a Session<'a>,
     definition: &scope::FunctionDefinition<'a>,
 ) -> FunctionDefinition<'a> {
+    let scope::FunctionDefinition {
+        reference,
+        params,
+        storage_class,
+        inline,
+        noreturn,
+        is_varargs,
+        body,
+    } = *definition;
+
     FunctionDefinition {
-        reference: definition.reference,
-        params: definition.params,
-        storage_class: definition.storage_class,
-        inline: definition.inline,
-        noreturn: definition.noreturn,
-        body: typeck_compound_statement(sess, &definition.body, definition),
+        reference,
+        params,
+        storage_class,
+        inline,
+        noreturn,
+        is_varargs,
+        body: typeck_compound_statement(sess, &body, definition),
     }
 }
 
@@ -363,11 +382,8 @@ fn typeck_statement<'a>(
 type Comparator = impl Fn(&Arithmetic) -> (impl Ord + use<>);
 const SIZE_WITH_UNSIGNED_AS_TIE_BREAKER: Comparator = |ty| (ty.conversion_rank(), ty.signedness());
 
-fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) -> Arithmetic {
-    // TODO: handle floats
-    // TODO: convert enumerations to their underlying types
-
-    let promote = |ty| match ty {
+fn integral_promote(ty: Arithmetic) -> Arithmetic {
+    match ty {
         Arithmetic::Integral(Integral {
             signedness: _,
             kind: IntegralKind::PlainChar | IntegralKind::Char | IntegralKind::Short,
@@ -376,10 +392,15 @@ fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) 
             kind: IntegralKind::Int,
         }),
         ty => ty,
-    };
+    }
+}
 
-    let lhs_ty = promote(lhs_ty);
-    let rhs_ty = promote(rhs_ty);
+fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) -> Arithmetic {
+    // TODO: handle floats
+    // TODO: convert enumerations to their underlying types
+
+    let lhs_ty = integral_promote(lhs_ty);
+    let rhs_ty = integral_promote(rhs_ty);
 
     if lhs_ty == rhs_ty {
         lhs_ty
@@ -675,6 +696,7 @@ fn typeck_expression<'a>(
         }
         scope::Expression::Call { callee, args, close_paren } => {
             let callee = typeck_expression(sess, callee);
+
             let (Type::Function(ty)
             | Type::Pointer(QualifiedType {
                 is_const: _,
@@ -684,19 +706,46 @@ fn typeck_expression<'a>(
             else {
                 todo!("type error: uncallable");
             };
-            let FunctionType { params, return_type } = *ty;
-            if params.len() != args.len() {
+
+            let FunctionType { params, return_type, is_varargs } = *ty;
+
+            if is_varargs {
+                if params.len() > args.len() {
+                    todo!("type error: argument count mismatch");
+                }
+            }
+            else if params.len() != args.len() {
                 todo!("type error: argument count mismatch");
             }
-            let args = args.iter().zip(params).map(|(arg, param)| {
-                let arg = typeck_expression(sess, arg);
-                convert_as_if_by_assignment(sess, param.ty, arg)
-            });
+
+            let default_argument_promote = |arg: TypedExpression<'a>| match arg.ty.ty {
+                Type::Arithmetic(ty @ Arithmetic::Integral(_)) =>
+                    Type::Arithmetic(integral_promote(ty)),
+                ty => ty,
+            };
+
+            let args = args
+                .iter()
+                .zip_longest(params)
+                .map(|arg_param| match arg_param {
+                    EitherOrBoth::Both(arg, param) => {
+                        let arg = typeck_expression(sess, arg);
+                        convert_as_if_by_assignment(sess, param.ty, arg)
+                    }
+                    EitherOrBoth::Left(arg) => {
+                        let arg = typeck_expression(sess, arg);
+                        let ty = default_argument_promote(arg).unqualified();
+                        convert_as_if_by_assignment(sess, ty, arg)
+                    }
+                    EitherOrBoth::Right(_param) => unreachable!(),
+                });
+
             TypedExpression {
                 ty: *return_type,
                 expr: Expression::Call {
                     callee: sess.alloc(callee),
                     args: sess.alloc_slice_fill_iter(args),
+                    is_varargs,
                     close_paren: *close_paren,
                 },
             }

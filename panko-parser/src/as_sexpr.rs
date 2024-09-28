@@ -138,9 +138,14 @@ impl AsSExpr for DirectDeclarator<'_> {
 
 impl AsSExpr for FunctionDeclarator<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::new("function-declarator")
-            .inherit(self.direct_declarator)
-            .lines(self.parameter_type_list)
+        let sexpr = SExpr::new("function-declarator").inherit(self.direct_declarator);
+        let sexpr = if self.parameter_type_list.is_varargs {
+            sexpr.inherit(&"varargs")
+        }
+        else {
+            sexpr
+        };
+        sexpr.lines(self.parameter_type_list.parameter_list)
     }
 }
 

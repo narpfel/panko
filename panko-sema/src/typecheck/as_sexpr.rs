@@ -104,8 +104,13 @@ impl AsSExpr for Expression<'_> {
             Expression::Addressof { ampersand: _, operand } =>
                 SExpr::new("addressof").inherit(operand),
             Expression::Deref { star: _, operand } => SExpr::new("deref").inherit(operand),
-            Expression::Call { callee, args, close_paren: _ } =>
-                SExpr::new("call").inherit(callee).lines(*args),
+            Expression::Call {
+                callee,
+                args,
+                #[expect(unused)]
+                is_varargs,
+                close_paren: _,
+            } => SExpr::new("call").inherit(callee).lines(*args),
         }
     }
 }

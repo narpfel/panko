@@ -82,6 +82,7 @@ pub(crate) struct FunctionDefinition<'a> {
     pub(crate) storage_class: Option<cst::StorageClassSpecifier<'a>>,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
+    pub(crate) is_varargs: bool,
     pub(crate) body: CompoundStatement<'a>,
 }
 
@@ -390,7 +391,7 @@ fn resolve_function_definition<'a>(
     );
     scopes.push();
 
-    let function_ty = match &def.ty {
+    let FunctionType { params, return_type: _, is_varargs } = match &def.ty {
         QualifiedType {
             is_const: false,
             is_volatile: false,
@@ -405,13 +406,13 @@ fn resolve_function_definition<'a>(
             FunctionType {
                 params: &[],
                 return_type: non_function_ty,
+                is_varargs: false,
             }
         }
     };
 
     let params = scopes.sess.alloc_slice_copy(
-        &function_ty
-            .params
+        &params
             .iter()
             .enumerate()
             .map(|(i, param)| {
@@ -443,6 +444,7 @@ fn resolve_function_definition<'a>(
         storage_class: def.storage_class,
         inline: def.inline,
         noreturn: def.noreturn,
+        is_varargs,
         body,
     }
 }

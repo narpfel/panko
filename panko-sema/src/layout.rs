@@ -44,6 +44,7 @@ pub struct FunctionDefinition<'a> {
     inline: Option<cst::FunctionSpecifier<'a>>,
     #[expect(unused)]
     noreturn: Option<cst::FunctionSpecifier<'a>>,
+    pub is_varargs: bool,
     pub stack_size: u64,
     pub body: CompoundStatement<'a>,
 }
@@ -108,6 +109,7 @@ pub enum Expression<'a> {
     Call {
         callee: &'a LayoutedExpression<'a>,
         args: &'a [LayoutedExpression<'a>],
+        is_varargs: bool,
     },
 }
 
@@ -237,6 +239,7 @@ fn layout_function_definition<'a>(
         storage_class,
         inline,
         noreturn,
+        is_varargs,
         body,
     } = *def;
     let reference = stack.add(reference);
@@ -253,6 +256,7 @@ fn layout_function_definition<'a>(
         inline,
         noreturn,
         stack_size,
+        is_varargs,
         body,
     }
 }
@@ -404,12 +408,12 @@ fn layout_expression_in_slot<'a>(
             let operand = bump.alloc(layout_expression(stack, bump, operand));
             (slot, Expression::Deref(operand))
         }
-        typecheck::Expression::Call { callee, args, close_paren: _ } => {
+        typecheck::Expression::Call { callee, args, is_varargs, close_paren: _ } => {
             let slot = make_slot();
             let callee = bump.alloc(layout_expression(stack, bump, callee));
             let args = bump
                 .alloc_slice_fill_iter(args.iter().map(|arg| layout_expression(stack, bump, arg)));
-            (slot, Expression::Call { callee, args })
+            (slot, Expression::Call { callee, args, is_varargs })
         }
     };
     LayoutedExpression { ty, slot, expr }

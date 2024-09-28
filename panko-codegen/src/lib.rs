@@ -506,7 +506,7 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[&R10.typed(operand), &operand.typed_slot()]);
                 self.copy(&expr.typed_slot(), &TypedSlot::pointer("r10", operand));
             }
-            Expression::Call { callee, args } => {
+            Expression::Call { callee, args, is_varargs } => {
                 self.expr(callee);
                 for arg in args {
                     self.expr(arg);
@@ -524,8 +524,15 @@ impl<'a> Codegen<'a> {
                     Type::Pointer(_) => "mov",
                     _ => unreachable!(),
                 };
-                self.emit_args(operation, &[&Rax, &callee.typed_slot()]);
-                self.emit("call rax");
+
+                if is_varargs {
+                    // varargs functions pass an upper bound <= 8 of the number of vector registers
+                    // in `al`.
+                    self.emit("xor eax, eax");
+                }
+
+                self.emit_args(operation, &[&R10, &callee.typed_slot()]);
+                self.emit("call r10");
                 self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
             }
         }

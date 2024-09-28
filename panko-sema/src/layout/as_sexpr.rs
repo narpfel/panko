@@ -112,7 +112,12 @@ impl AsSExpr for Expression<'_> {
             Expression::PtrEq { lhs, kind, rhs } => SExpr::new(kind.str()).lines([lhs, rhs]),
             Expression::Addressof(operand) => SExpr::new("addressof").inherit(operand),
             Expression::Deref(operand) => SExpr::new("deref").inherit(operand),
-            Expression::Call { callee, args } => SExpr::new("call").inherit(callee).lines(*args),
+            Expression::Call {
+                callee,
+                args,
+                #[expect(unused)]
+                is_varargs,
+            } => SExpr::new("call").inherit(callee).lines(*args),
         }
     }
 }

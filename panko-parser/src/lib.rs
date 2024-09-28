@@ -442,7 +442,13 @@ enum DirectDeclarator<'a> {
 #[derive(Debug, Clone, Copy)]
 struct FunctionDeclarator<'a> {
     direct_declarator: &'a DirectDeclarator<'a>,
-    parameter_type_list: &'a [ParameterDeclaration<'a>],
+    parameter_type_list: ParameterTypeList<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct ParameterTypeList<'a> {
+    parameter_list: &'a [ParameterDeclaration<'a>],
+    is_varargs: bool,
 }
 
 #[derive(Debug, Clone, Copy)]

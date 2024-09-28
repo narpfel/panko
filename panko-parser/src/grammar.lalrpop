@@ -71,6 +71,8 @@ extern {
 
         "&" => Token { kind: panko_lex::TokenKind::And, .. },
 
+        "..." => Token { kind: panko_lex::TokenKind::Ellipsis, .. },
+
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
         Integer => Token { kind: panko_lex::TokenKind::Integer, .. },
     }
@@ -140,8 +142,13 @@ FunctionDeclarator: ast::FunctionDeclarator<'a> = {
         ast::FunctionDeclarator { <> },
 }
 
-ParameterTypeList: &'a [ast::ParameterDeclaration<'a>] = {
-    CommaSep<ParameterDeclaration>,
+ParameterTypeList: ast::ParameterTypeList<'a> = {
+    () => ast::ParameterTypeList { parameter_list: &[], is_varargs: false },
+    <parameter_list:NonEmptyCommaSep<ParameterDeclaration>> <is_varargs:("," "...")?> => {
+        let is_varargs = is_varargs.is_some();
+        ast::ParameterTypeList { <> }
+    },
+    "..." => ast::ParameterTypeList { parameter_list: &[], is_varargs: true },
 }
 
 ParameterDeclaration: ast::ParameterDeclaration<'a> = {
@@ -392,6 +399,11 @@ Many<T>: &'a [T] = {
 
 CommaSep<T>: &'a [T] = {
     () => &[],
+    NonEmptyCommaSep<T>,
+}
+
+#[inline]
+NonEmptyCommaSep<T>: &'a [T] = {
     <mut v:(<T> ",")*> <e:T> => {
         v.push(e);
         bump.alloc_slice_copy(&v)

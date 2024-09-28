@@ -15,6 +15,7 @@ use panko_report::Report;
 use crate as cst;
 use crate::BlockItem;
 use crate::DirectDeclarator;
+use crate::FunctionDeclarator;
 use crate::InitDeclarator;
 use crate::JumpStatement;
 use crate::PrimaryBlock;
@@ -199,6 +200,7 @@ pub enum Signedness {
 pub struct FunctionType<'a> {
     pub params: &'a [ParameterDeclaration<'a>],
     pub return_type: &'a QualifiedType<'a>,
+    pub is_varargs: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -356,17 +358,22 @@ impl fmt::Display for Integral {
 
 impl fmt::Display for FunctionType<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let Self { params, return_type, is_varargs } = *self;
+        let maybe_ellipsis = match (is_varargs, params.is_empty()) {
+            (true, true) => "...",
+            (true, false) => ", ...",
+            _ => "",
+        };
         write!(
             f,
-            "fn({}) -> {}",
-            self.params
-                .iter()
-                .format_with(", ", |param, f| f(&format_args!(
-                    "{}: {}",
-                    param.name.map_or(NO_VALUE, |name| name.slice()),
-                    param.ty,
-                ))),
-            self.return_type,
+            "fn({}{}) -> {}",
+            params.iter().format_with(", ", |param, f| f(&format_args!(
+                "{}: {}",
+                param.name.map_or(NO_VALUE, |name| name.slice()),
+                param.ty,
+            ))),
+            maybe_ellipsis,
+            return_type,
         )
     }
 }
@@ -575,17 +582,20 @@ fn parse_declarator<'a>(
             DirectDeclarator::Abstract => break None,
             DirectDeclarator::Identifier(name) => break Some(name),
             DirectDeclarator::Parenthesised(decl) => declarator = *decl,
-            DirectDeclarator::FunctionDeclarator(function_declarator) => {
+            DirectDeclarator::FunctionDeclarator(FunctionDeclarator {
+                direct_declarator,
+                parameter_type_list,
+            }) => {
                 declarator = cst::Declarator {
                     pointers: None,
-                    direct_declarator: *function_declarator.direct_declarator,
+                    direct_declarator: *direct_declarator,
                 };
                 ty = QualifiedType {
                     is_const: false,
                     is_volatile: false,
                     ty: Type::Function(FunctionType {
                         params: sess.alloc_slice_fill_iter(
-                            function_declarator.parameter_type_list.iter().map(|param| {
+                            parameter_type_list.parameter_list.iter().map(|param| {
                                 let ty = parse_type_specifiers(sess, param.declaration_specifiers);
                                 let (ty, name) =
                                     param.declarator.map_or((ty, None), |declarator| {
@@ -598,6 +608,7 @@ fn parse_declarator<'a>(
                                 ParameterDeclaration { loc, ty, name }
                             }),
                         ),
+                        is_varargs: parameter_type_list.is_varargs,
                         return_type: sess.alloc(ty),
                     }),
                 };
