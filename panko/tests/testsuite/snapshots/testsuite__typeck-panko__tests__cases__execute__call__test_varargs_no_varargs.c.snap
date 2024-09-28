@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/call/test_varargs_no_varargs.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn(argc: int, argv: ptr<ptr<char>>) -> int`
+      (params
+         argc~2 `int`
+         argv~3 `ptr<ptr<char>>`)
+      (compound-statement
+         (expression
+            (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
+               `int`)))))
+
+----- stderr -----
