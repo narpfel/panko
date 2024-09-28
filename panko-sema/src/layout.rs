@@ -131,6 +131,7 @@ pub enum Slot<'a> {
         // dependency between `panko_sema` and `panko_codegen`.
         register: &'a str,
     },
+    Void,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -186,6 +187,7 @@ impl fmt::Display for TypedSlot<'_> {
             Slot::Static(s) => write!(f, "{ptr_type} ptr [rip + {s}@plt]"),
             Slot::Automatic(stack_offset) => write!(f, "{ptr_type} ptr [rsp + {stack_offset}]"),
             Slot::Pointer { register } => write!(f, "{ptr_type} ptr [{register}]"),
+            Slot::Void => unreachable!(),
         }
     }
 }

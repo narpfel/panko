@@ -134,6 +134,7 @@ impl AsSExpr for Slot<'_> {
             Slot::Static(name) => SExpr::new("static").inline_string(name.to_string()),
             Slot::Automatic(offset) => SExpr::string(format!("@{offset}")),
             Slot::Pointer { register } => SExpr::string(*register),
+            Self::Void => SExpr::string("@void"),
         }
     }
 }

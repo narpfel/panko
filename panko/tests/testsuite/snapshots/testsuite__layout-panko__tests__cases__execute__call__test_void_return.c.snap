@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/call/test_void_return.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (f~0 `fn() -> void` (static f))
+      (compound-statement))
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (expression (call `void` @void (f~0 `fn() -> void` (static f)))))))
+
+----- stderr -----

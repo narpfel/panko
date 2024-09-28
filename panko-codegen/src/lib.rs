@@ -331,7 +331,9 @@ impl<'a> Codegen<'a> {
             Statement::Return(expr) => {
                 if let Some(expr) = expr.as_ref() {
                     self.expr(expr);
-                    self.emit_args("mov", &[&Rax.typed(expr), &expr.typed_slot()]);
+                    if expr.ty.ty != Type::Void {
+                        self.emit_args("mov", &[&Rax.typed(expr), &expr.typed_slot()]);
+                    }
                 }
                 self.emit_args("add", &[&"rsp", &self.current_function.unwrap().stack_size]);
                 self.emit("ret");
@@ -490,6 +492,7 @@ impl<'a> Codegen<'a> {
                                 offset,
                             },
                             Slot::Pointer { register: _ } => unreachable!("TODO???"),
+                            Slot::Void => unreachable!(),
                         };
                         self.emit_args("lea", &[&"rax", lea_argument]);
                     }
@@ -533,7 +536,9 @@ impl<'a> Codegen<'a> {
 
                 self.emit_args(operation, &[&R10, &callee.typed_slot()]);
                 self.emit("call r10");
-                self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
+                if expr.ty.ty != Type::Void {
+                    self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(expr)]);
+                }
             }
         }
     }

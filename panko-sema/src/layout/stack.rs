@@ -18,6 +18,9 @@ struct Slots {
 
 impl Slots {
     fn add_slot<'a>(&mut self, ty: Type<'a>) -> Slot<'a> {
+        if matches!(ty, Type::Void) {
+            return Slot::Void;
+        }
         self.offset = self.offset.next_multiple_of(ty.align());
         let slot = Slot::Automatic(self.offset);
         self.offset += ty.size();
