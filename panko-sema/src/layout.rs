@@ -99,7 +99,7 @@ pub enum Expression<'a> {
         integral: &'a LayoutedExpression<'a>,
         pointee_size: u64,
     },
-    PtrEq {
+    PtrCmp {
         lhs: &'a LayoutedExpression<'a>,
         kind: PtrCmpKind,
         rhs: &'a LayoutedExpression<'a>,
@@ -391,7 +391,7 @@ fn layout_expression_in_slot<'a>(
             let slot = make_slot();
             let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, Some(slot)));
             let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
-            (slot, Expression::PtrEq { lhs, kind, rhs })
+            (slot, Expression::PtrCmp { lhs, kind, rhs })
         }
         typecheck::Expression::Addressof { ampersand: _, operand } => {
             let slot = make_slot();

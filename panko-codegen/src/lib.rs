@@ -282,7 +282,7 @@ impl<'a> Codegen<'a> {
                 Expression::IntegralBinOp { .. } => todo!(),
                 Expression::PtrAdd { .. } => todo!(),
                 Expression::PtrSub { .. } => todo!(),
-                Expression::PtrEq { .. } => todo!(),
+                Expression::PtrCmp { .. } => todo!(),
                 Expression::Addressof(_) => todo!(),
                 Expression::Deref(_) => todo!(),
                 Expression::Call { .. } => todo!(),
@@ -461,7 +461,7 @@ impl<'a> Codegen<'a> {
                 self.emit_pointer_offset("sub", pointee_size, integral);
                 self.emit_args("mov", &[&expr.typed_slot(), &Rax.typed(pointer)]);
             }
-            Expression::PtrEq { lhs, kind, rhs } => {
+            Expression::PtrCmp { lhs, kind, rhs } => {
                 self.expr(lhs);
                 self.expr(rhs);
                 self.emit_args("mov", &[&Rax.typed(lhs), &lhs.typed_slot()]);
