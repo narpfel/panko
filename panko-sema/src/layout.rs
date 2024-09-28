@@ -4,13 +4,13 @@ use bumpalo::Bump;
 use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast::Integral;
-use panko_parser::ast::QualifiedType;
-use panko_parser::ast::Type;
 use panko_parser::BinOpKind;
 
 use crate::layout::stack::Stack;
 use crate::scope::Id;
 use crate::scope::RefKind;
+use crate::ty::QualifiedType;
+use crate::ty::Type;
 use crate::typecheck;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::PtrCmpKind;

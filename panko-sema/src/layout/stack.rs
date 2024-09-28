@@ -1,14 +1,13 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-use panko_parser::ast::Type;
-
 use super::Reference;
 use super::Slot;
 use crate::nonempty;
 use crate::scope;
 use crate::scope::Id;
 use crate::scope::StorageDuration;
+use crate::ty::Type;
 
 #[derive(Debug, Default)]
 struct Slots {

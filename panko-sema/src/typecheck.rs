@@ -8,13 +8,10 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast::Arithmetic;
-use panko_parser::ast::FunctionType;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
-use panko_parser::ast::QualifiedType;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
-use panko_parser::ast::Type;
 use panko_parser::sexpr_builder::AsSExpr as _;
 use panko_parser::BinOpKind;
 use panko_parser::UnaryOpKind;
@@ -24,6 +21,9 @@ use variant_types::IntoVariant as _;
 use crate::scope;
 use crate::scope::ParamRefs;
 use crate::scope::Reference;
+use crate::ty::FunctionType;
+use crate::ty::QualifiedType;
+use crate::ty::Type;
 
 mod as_sexpr;
 #[cfg(test)]

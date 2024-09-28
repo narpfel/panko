@@ -42,7 +42,7 @@ impl<'a> SExpr<'a> {
         }
     }
 
-    pub(crate) fn display(value: &dyn fmt::Display) -> Self {
+    pub fn display(value: &dyn fmt::Display) -> Self {
         Self {
             name: format!("`{value}`").into(),
             params: vec![],

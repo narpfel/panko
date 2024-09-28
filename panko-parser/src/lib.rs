@@ -22,7 +22,7 @@ pub mod sexpr_builder;
 lalrpop_mod!(grammar);
 
 const SEXPR_INDENT: usize = 3;
-const NO_VALUE: &str = "∅";
+pub const NO_VALUE: &str = "∅";
 
 #[derive(Debug, Report)]
 #[exit_code(1)]

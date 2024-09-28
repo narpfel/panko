@@ -12,7 +12,6 @@ use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Signedness;
-use panko_parser::ast::Type;
 use panko_parser::BinOpKind;
 use panko_sema::layout::CompoundStatement;
 use panko_sema::layout::Declaration;
@@ -25,6 +24,7 @@ use panko_sema::layout::Statement;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::TypedSlot;
 use panko_sema::scope::RefKind;
+use panko_sema::ty::Type;
 use panko_sema::typecheck::PtrCmpKind;
 use Register::*;
 

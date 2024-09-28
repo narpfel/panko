@@ -11,4 +11,5 @@ pub use crate::typecheck::resolve_types;
 pub mod layout;
 mod nonempty;
 pub mod scope;
+pub mod ty;
 pub mod typecheck;

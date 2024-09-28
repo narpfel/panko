@@ -8,15 +8,16 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast;
-use panko_parser::ast::FunctionType;
-use panko_parser::ast::QualifiedType;
 use panko_parser::ast::Session;
-use panko_parser::ast::Type;
 use panko_parser::BinOpKind;
 use panko_parser::UnaryOp;
 use panko_report::Report;
 
 use crate::nonempty;
+use crate::ty::FunctionType;
+use crate::ty::ParameterDeclaration;
+use crate::ty::QualifiedType;
+use crate::ty::Type;
 
 mod as_sexpr;
 
@@ -378,34 +379,72 @@ impl<'a> Scopes<'a> {
     }
 }
 
+fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> QualifiedType<'a> {
+    let ast::QualifiedType { is_const, is_volatile, ty } = *ty;
+    let ty = match ty {
+        ast::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
+        ast::Type::Pointer(pointee) =>
+            Type::Pointer(scopes.sess.alloc(resolve_ty(scopes, pointee))),
+        ast::Type::Function(function_type) =>
+            Type::Function(resolve_function_ty(scopes, &function_type)),
+        ast::Type::Void => Type::Void,
+    };
+    QualifiedType { is_const, is_volatile, ty }
+}
+
+fn resolve_function_ty<'a>(
+    scopes: &mut Scopes<'a>,
+    function_ty: &ast::FunctionType<'a>,
+) -> FunctionType<'a> {
+    let ast::FunctionType { params, return_type, is_varargs } = *function_ty;
+    let params = scopes.sess.alloc_slice_fill_iter(params.iter().map(
+        |&ast::ParameterDeclaration { loc, ty, name }| ParameterDeclaration {
+            loc,
+            ty: resolve_ty(scopes, &ty),
+            name,
+        },
+    ));
+    let return_type = scopes.sess.alloc(resolve_ty(scopes, return_type));
+    FunctionType { params, return_type, is_varargs }
+}
+
 fn resolve_function_definition<'a>(
     scopes: &mut Scopes<'a>,
     def: &'a ast::FunctionDefinition<'a>,
 ) -> FunctionDefinition<'a> {
+    let ast::FunctionDefinition {
+        name,
+        storage_class,
+        inline,
+        noreturn,
+        ty,
+        body,
+    } = def;
+    let ty = resolve_ty(scopes, ty);
     let reference = scopes.add(
-        def.name.slice(),
-        def.name.loc(),
-        def.ty,
+        name.slice(),
+        name.loc(),
+        ty,
         RefKind::Definition,
         StorageDuration::Static,
     );
     scopes.push();
 
-    let FunctionType { params, return_type: _, is_varargs } = match &def.ty {
+    let FunctionType { params, return_type: _, is_varargs } = match ty {
         QualifiedType {
             is_const: false,
             is_volatile: false,
             ty: Type::Function(function_ty),
-        } => *function_ty,
+        } => function_ty,
         QualifiedType { ty: Type::Function(_), .. } =>
             unreachable!("function types cannot be qualified"),
         non_function_ty => {
             scopes
                 .sess
-                .emit(Diagnostic::FunctionDeclaratorDoesNotHaveFunctionType { at: def.name });
+                .emit(Diagnostic::FunctionDeclaratorDoesNotHaveFunctionType { at: *name });
             FunctionType {
                 params: &[],
-                return_type: non_function_ty,
+                return_type: scopes.sess.alloc(non_function_ty),
                 is_varargs: false,
             }
         }
@@ -420,7 +459,7 @@ fn resolve_function_definition<'a>(
                     || {
                         scopes
                             .sess
-                            .alloc_str(&format!("{}.unnamed_parameter.{i}", def.name.slice()))
+                            .alloc_str(&format!("{}.unnamed_parameter.{i}", name.slice()))
                     },
                     |name| name.slice(),
                 );
@@ -436,14 +475,14 @@ fn resolve_function_definition<'a>(
             .collect_vec(),
     );
 
-    let body = resolve_compound_statement(scopes, &def.body, OpenNewScope::No);
+    let body = resolve_compound_statement(scopes, body, OpenNewScope::No);
     scopes.pop();
     FunctionDefinition {
         reference,
         params: ParamRefs(params),
-        storage_class: def.storage_class,
-        inline: def.inline,
-        noreturn: def.noreturn,
+        storage_class: *storage_class,
+        inline: *inline,
+        noreturn: *noreturn,
         is_varargs,
         body,
     }
@@ -473,11 +512,13 @@ fn resolve_declaration<'a>(
     decl: &ast::Declaration<'a>,
     storage_duration: StorageDuration,
 ) -> Declaration<'a> {
-    let kind = if decl.initialiser.is_some() {
+    let ast::Declaration { ty, name, initialiser } = decl;
+    let ty = resolve_ty(scopes, ty);
+    let kind = if initialiser.is_some() {
         RefKind::Definition
     }
     else {
-        match decl.ty.ty {
+        match ty.ty {
             Type::Function(_) => RefKind::Declaration,
             _ =>
                 if scopes.is_in_global_scope() {
@@ -488,20 +529,14 @@ fn resolve_declaration<'a>(
                 },
         }
     };
-    let storage_duration = match decl.ty.ty {
+    let storage_duration = match ty.ty {
         Type::Function(_) => StorageDuration::Static,
         _ => storage_duration,
     };
-    let reference = scopes.add(
-        decl.name.slice(),
-        decl.name.loc(),
-        decl.ty,
-        kind,
-        storage_duration,
-    );
+    let reference = scopes.add(name.slice(), name.loc(), ty, kind, storage_duration);
     Declaration {
         reference,
-        initialiser: try { resolve_expr(scopes, &decl.initialiser?) },
+        initialiser: try { resolve_expr(scopes, initialiser.as_ref()?) },
     }
 }
 

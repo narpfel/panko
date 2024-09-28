@@ -268,14 +268,6 @@ impl<'a> FunctionDefinition<'a> {
     }
 }
 
-impl QualifiedType<'_> {
-    // TODO: this is a temporary hack until the `Report` derive macro handles stringification
-    // better
-    pub fn slice(&self) -> String {
-        self.to_string()
-    }
-}
-
 impl fmt::Display for QualifiedType<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.ty.fmt(f)?;
@@ -286,50 +278,6 @@ impl fmt::Display for QualifiedType<'_> {
             write!(f, " volatile")?;
         }
         Ok(())
-    }
-}
-
-impl<'a> Type<'a> {
-    pub fn int() -> Self {
-        Self::Arithmetic(Arithmetic::Integral(Integral {
-            signedness: Signedness::Signed,
-            kind: IntegralKind::Int,
-        }))
-    }
-
-    pub fn ullong() -> Self {
-        Self::Arithmetic(Arithmetic::Integral(Integral {
-            signedness: Signedness::Unsigned,
-            kind: IntegralKind::LongLong,
-        }))
-    }
-
-    pub fn unqualified(&self) -> QualifiedType<'a> {
-        QualifiedType {
-            is_const: false,
-            is_volatile: false,
-            ty: *self,
-        }
-    }
-
-    // TODO: this is a temporary hack until the `Report` derive macro handles stringification
-    // better
-    pub fn slice(&self) -> String {
-        self.to_string()
-    }
-
-    pub fn size(&self) -> u64 {
-        match self {
-            Type::Arithmetic(arithmetic) => arithmetic.size(),
-            Type::Pointer(_) => 8,
-            Type::Function(_) => unreachable!("functions are not objects and don’t have a size"),
-            Type::Void => unreachable!("void is not an object and doesn’t have a size"),
-        }
-    }
-
-    pub fn align(&self) -> u64 {
-        // TODO: correct align
-        self.size()
     }
 }
 
