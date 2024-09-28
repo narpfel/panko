@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/relational-ops/test_long_compare.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition i1~1 `int` 42)
+         (definition i2~2 `int` 27)
+         (definition p1~3 `long` 5)
+         (definition p2~4 `long` 6)
+         (return (add (add (add (not-equal (name p1~3 `long`) (name i1~1 `int`)) (not-equal (name p2~4 `long`) (name i2~2 `int`))) (equal (add (name p1~3 `long`) 1) (name p2~4 `long`))) (equal (subtract (name p2~4 `long`) 1) (name p1~3 `long`)))))))
+
+----- stderr -----
