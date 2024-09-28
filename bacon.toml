@@ -74,6 +74,12 @@ command = ["cargo", "fmt"]
 need_stdout = false
 on_success = "back"
 
+[jobs.rebuild-tests]
+command = ["touch", "panko/tests/testsuite/main.rs"]
+need_stdout = false
+on_success = "back"
+
 [keybindings]
 f = "job:fmt"
 shift-t = "job:covtest"
+shift-r = "job:rebuild-tests"
