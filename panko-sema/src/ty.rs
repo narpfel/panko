@@ -97,7 +97,7 @@ impl<'a> Type<'a> {
             Type::Arithmetic(arithmetic) => arithmetic.size(),
             Type::Pointer(_) => 8,
             Type::Function(_) => unreachable!("functions are not objects and don’t have a size"),
-            Type::Void => 0,
+            Type::Void => unreachable!("void is not an object and doesn’t have a size"),
         }
     }
 
