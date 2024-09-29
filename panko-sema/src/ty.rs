@@ -123,12 +123,6 @@ impl fmt::Display for Type<'_> {
     }
 }
 
-impl AsSExpr for Type<'_> {
-    fn as_sexpr(&self) -> SExpr {
-        SExpr::display(self)
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QualifiedType<'a> {
     pub(crate) is_const: bool,
