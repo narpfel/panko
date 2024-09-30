@@ -48,6 +48,16 @@ enum Diagnostic<'a> {
         at: Reference<'a>,
         previous_definition: Reference<'a>,
     },
+
+    #[error("cannot declare variable `{at}` with incomplete type `{ty}`")]
+    #[with(ty = at.ty)]
+    #[diagnostics(at(colour = Red, label = "declared here"))]
+    VariableWithIncompleteType { at: Reference<'a> },
+
+    #[error("cannot declare function parameter `{at}` with incomplete type `{ty}`")]
+    #[with(ty = at.ty)]
+    #[diagnostics(at(colour = Red, label = "parameter declared here"))]
+    ParameterWithIncompleteType { at: ParameterDeclaration<'a> },
 }
 
 #[derive(Debug)]
@@ -398,10 +408,17 @@ fn resolve_function_ty<'a>(
 ) -> FunctionType<'a> {
     let ast::FunctionType { params, return_type, is_varargs } = *function_ty;
     let params = scopes.sess.alloc_slice_fill_iter(params.iter().map(
-        |&ast::ParameterDeclaration { loc, ty, name }| ParameterDeclaration {
-            loc,
-            ty: resolve_ty(scopes, &ty),
-            name,
+        |&ast::ParameterDeclaration { loc, ty, name }| {
+            let ty = resolve_ty(scopes, &ty);
+            let param = ParameterDeclaration { loc, ty, name };
+
+            if !ty.ty.is_complete() {
+                scopes
+                    .sess
+                    .emit(Diagnostic::ParameterWithIncompleteType { at: param });
+            }
+
+            param
         },
     ));
     let return_type = scopes.sess.alloc(resolve_ty(scopes, return_type));
@@ -534,6 +551,13 @@ fn resolve_declaration<'a>(
         _ => storage_duration,
     };
     let reference = scopes.add(name.slice(), name.loc(), ty, kind, storage_duration);
+
+    if !ty.ty.is_complete() {
+        scopes
+            .sess
+            .emit(Diagnostic::VariableWithIncompleteType { at: reference });
+    }
+
     Declaration {
         reference,
         initialiser: try { resolve_expr(scopes, initialiser.as_ref()?) },

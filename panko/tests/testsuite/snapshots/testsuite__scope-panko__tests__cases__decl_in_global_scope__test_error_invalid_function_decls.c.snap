@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot declare function parameter `<unnamed parameter of type `void`>` with incomplete type `void`
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c:8:10]
+   │
+ 8 │ int ((*c(void))())();
+   │          ──┬─  
+   │            ╰─── parameter declared here
+───╯
+
+Error: cannot declare function parameter `param` with incomplete type `void`
+    ╭─[panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c:11:12]
+    │
+ 11 │ int d(void param);
+    │            ──┬──  
+    │              ╰──── parameter declared here
+────╯
+
+Error: cannot declare function parameter `<unnamed parameter of type `void`>` with incomplete type `void`
+    ╭─[panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c:14:7]
+    │
+ 14 │ int e(void);
+    │       ──┬─  
+    │         ╰─── parameter declared here
+────╯

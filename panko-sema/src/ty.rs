@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fmt;
 
 use itertools::Itertools as _;
@@ -16,6 +17,18 @@ pub struct ParameterDeclaration<'a> {
     pub loc: Loc<'a>,
     pub ty: QualifiedType<'a>,
     pub name: Option<Token<'a>>,
+}
+
+impl<'a> ParameterDeclaration<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
+        self.loc
+    }
+
+    pub(crate) fn slice(&self) -> Cow<'a, str> {
+        self.name
+            .map(|name| Cow::Borrowed(name.slice()))
+            .unwrap_or_else(|| Cow::Owned(format!("<unnamed parameter of type `{}`>", self.ty)))
+    }
 }
 
 impl PartialEq for ParameterDeclaration<'_> {
@@ -109,6 +122,13 @@ impl<'a> Type<'a> {
     pub(crate) fn is_slot_compatible(&self, ty: &Type) -> bool {
         // TODO: This is more restrictive than necessary.
         self.size() == ty.size() && self.align() == ty.align()
+    }
+
+    pub(crate) fn is_complete(&self) -> bool {
+        match self {
+            Type::Arithmetic(_) | Type::Pointer(_) | Type::Function(_) => true,
+            Type::Void => false,
+        }
     }
 }
 
