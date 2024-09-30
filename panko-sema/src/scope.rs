@@ -418,7 +418,7 @@ fn resolve_function_ty<'a>(
                     ty: ast::Type::Void,
                 },
             name: None,
-        }] => &[],
+        }] if !is_varargs => &[],
         params => params,
     };
 

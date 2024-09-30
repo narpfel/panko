@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_global_scope/test_error_declare_varargs_function_with_void_param.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot declare function parameter `<unnamed parameter of type `void`>` with incomplete type `void`
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_declare_varargs_function_with_void_param.c:1:7]
+   │
+ 1 │ int f(void, ...);
+   │       ──┬─  
+   │         ╰─── parameter declared here
+───╯
