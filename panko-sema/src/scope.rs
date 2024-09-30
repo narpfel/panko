@@ -407,6 +407,21 @@ fn resolve_function_ty<'a>(
     function_ty: &ast::FunctionType<'a>,
 ) -> FunctionType<'a> {
     let ast::FunctionType { params, return_type, is_varargs } = *function_ty;
+
+    let params = match params {
+        [ast::ParameterDeclaration {
+            loc: _,
+            ty:
+                ast::QualifiedType {
+                    is_const: false,
+                    is_volatile: false,
+                    ty: ast::Type::Void,
+                },
+            name: None,
+        }] => &[],
+        params => params,
+    };
+
     let params = scopes.sess.alloc_slice_fill_iter(params.iter().map(
         |&ast::ParameterDeclaration { loc, ty, name }| {
             let ty = resolve_ty(scopes, &ty);
