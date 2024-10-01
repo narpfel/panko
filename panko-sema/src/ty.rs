@@ -96,6 +96,7 @@ impl<'a> Type<'a> {
             is_const: false,
             is_volatile: false,
             ty: *self,
+            loc: Loc::synthesised(),
         }
     }
 
@@ -143,11 +144,12 @@ impl fmt::Display for Type<'_> {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy)]
 pub struct QualifiedType<'a> {
     pub(crate) is_const: bool,
     pub(crate) is_volatile: bool,
     pub ty: Type<'a>,
+    pub(crate) loc: Loc<'a>,
 }
 
 impl<'a> QualifiedType<'a> {
@@ -157,6 +159,21 @@ impl<'a> QualifiedType<'a> {
         self.to_string()
     }
 }
+
+impl PartialEq for QualifiedType<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        let Self { is_const, is_volatile, ty, loc: _ } = self;
+        let Self {
+            is_const: other_is_const,
+            is_volatile: other_is_volatile,
+            ty: other_ty,
+            loc: _,
+        } = other;
+        (is_const, is_volatile, ty) == (other_is_const, other_is_volatile, other_ty)
+    }
+}
+
+impl Eq for QualifiedType<'_> {}
 
 impl fmt::Display for QualifiedType<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

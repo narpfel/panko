@@ -12,6 +12,22 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
+Error: invalid function return type `fn() -> int`
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c:2:1]
+   │
+ 2 │ int a()();
+   │ ────┬────  
+   │     ╰────── declaration here
+───╯
+
+Error: invalid function return type `fn() -> int`
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c:8:1]
+   │
+ 8 │ int ((*c(void))())();
+   │ ──────────┬─────────  
+   │           ╰─────────── declaration here
+───╯
+
 Error: cannot declare function parameter `param` with incomplete type `void`
     ╭─[panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c:11:12]
     │

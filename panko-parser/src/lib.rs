@@ -427,6 +427,7 @@ struct Declarator<'a> {
 
 #[derive(Debug, Clone, Copy)]
 struct Pointer<'a> {
+    star: Token<'a>,
     qualifiers: &'a [TypeQualifier<'a>],
 }
 
@@ -443,6 +444,7 @@ enum DirectDeclarator<'a> {
 struct FunctionDeclarator<'a> {
     direct_declarator: &'a DirectDeclarator<'a>,
     parameter_type_list: ParameterTypeList<'a>,
+    close_paren: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]

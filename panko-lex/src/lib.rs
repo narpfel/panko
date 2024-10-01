@@ -3,6 +3,8 @@
 
 use std::ops::Range;
 use std::path::Path;
+use std::path::PathBuf;
+use std::sync::LazyLock;
 
 use bumpalo::Bump;
 use logos::Logos;
@@ -48,6 +50,17 @@ impl std::fmt::Debug for Loc<'_> {
 }
 
 impl<'a> Loc<'a> {
+    pub fn synthesised() -> Self {
+        static PATH: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from("<synthesised>"));
+        static SOURCE_FILE: LazyLock<SourceFile> =
+            LazyLock::new(|| SourceFile { file: &PATH, src: "<synthesised>" });
+
+        Self {
+            span: Span { start: 0, end: 0 },
+            source_file: &SOURCE_FILE,
+        }
+    }
+
     fn file(&self) -> &'a Path {
         self.source_file.file
     }
@@ -71,14 +84,10 @@ impl<'a> Loc<'a> {
     pub fn until(self, other: Self) -> Self {
         assert_eq!(self.file(), other.file());
         assert_eq!(self.src(), other.src());
-        assert!(self.span.end <= other.span.start);
-        Self {
-            span: Span {
-                start: self.span.start,
-                end: other.span.end,
-            },
-            ..self
-        }
+        let start = self.span.start.min(other.span.start);
+        let end = self.span.end.max(other.span.end);
+        assert!(start <= end);
+        Self { span: Span { start, end }, ..self }
     }
 
     pub fn report(&self, kind: ariadne::ReportKind<'a>) -> ariadne::ReportBuilder<'a, Self> {
@@ -112,6 +121,10 @@ impl<'a> Loc<'a> {
         }
 
         Cache(self.file(), ariadne::Source::from(self.src()))
+    }
+
+    pub fn loc(&self) -> Self {
+        *self
     }
 }
 

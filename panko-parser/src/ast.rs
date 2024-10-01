@@ -152,11 +152,12 @@ pub struct FunctionDefinition<'a> {
 
 // TODO: The instances for `PartialEq` and `Eq` are only needed until correct type checking is
 // implemented and should be removed afterwards.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy)]
 pub struct QualifiedType<'a> {
     pub is_const: bool,
     pub is_volatile: bool,
     pub ty: Type<'a>,
+    pub loc: Loc<'a>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -267,6 +268,21 @@ impl<'a> FunctionDefinition<'a> {
         }
     }
 }
+
+impl PartialEq for QualifiedType<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        let Self { is_const, is_volatile, ty, loc: _ } = self;
+        let Self {
+            is_const: other_is_const,
+            is_volatile: other_is_volatile,
+            ty: other_ty,
+            loc: _,
+        } = other;
+        (is_const, is_volatile, ty) == (other_is_const, other_is_volatile, other_ty)
+    }
+}
+
+impl Eq for QualifiedType<'_> {}
 
 impl fmt::Display for QualifiedType<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -505,6 +521,7 @@ fn parse_type_specifiers<'a>(
         is_const: const_qualifier.is_some(),
         is_volatile: volatile_qualifier.is_some(),
         ty,
+        loc: specifiers.loc(),
     }
 }
 
@@ -524,6 +541,7 @@ fn parse_declarator<'a>(
                 is_const: const_qualifier.is_some(),
                 is_volatile: volatile_qualifier.is_some(),
                 ty: Type::Pointer(sess.alloc(ty)),
+                loc: pointer.star.loc().until(ty.loc),
             };
         }
         match declarator.direct_declarator {
@@ -533,6 +551,7 @@ fn parse_declarator<'a>(
             DirectDeclarator::FunctionDeclarator(FunctionDeclarator {
                 direct_declarator,
                 parameter_type_list,
+                close_paren,
             }) => {
                 declarator = cst::Declarator {
                     pointers: None,
@@ -559,6 +578,7 @@ fn parse_declarator<'a>(
                         is_varargs: parameter_type_list.is_varargs,
                         return_type: sess.alloc(ty),
                     }),
+                    loc: ty.loc.until(close_paren.loc()),
                 };
             }
         }

@@ -58,6 +58,10 @@ enum Diagnostic<'a> {
     #[with(ty = at.ty)]
     #[diagnostics(at(colour = Red, label = "parameter declared here"))]
     ParameterWithIncompleteType { at: ParameterDeclaration<'a> },
+
+    #[error("invalid function return type `{ty}`")]
+    #[diagnostics(at(colour = Red, label = "declaration here"))]
+    InvalidFunctionReturnType { at: Loc<'a>, ty: QualifiedType<'a> },
 }
 
 #[derive(Debug)]
@@ -390,7 +394,7 @@ impl<'a> Scopes<'a> {
 }
 
 fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> QualifiedType<'a> {
-    let ast::QualifiedType { is_const, is_volatile, ty } = *ty;
+    let ast::QualifiedType { is_const, is_volatile, ty, loc } = *ty;
     let ty = match ty {
         ast::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ast::Type::Pointer(pointee) =>
@@ -399,7 +403,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             Type::Function(resolve_function_ty(scopes, &function_type)),
         ast::Type::Void => Type::Void,
     };
-    QualifiedType { is_const, is_volatile, ty }
+    QualifiedType { is_const, is_volatile, ty, loc }
 }
 
 fn resolve_function_ty<'a>(
@@ -416,6 +420,7 @@ fn resolve_function_ty<'a>(
                     is_const: false,
                     is_volatile: false,
                     ty: ast::Type::Void,
+                    loc: _,
                 },
             name: None,
         }] if !is_varargs => &[],
@@ -437,6 +442,14 @@ fn resolve_function_ty<'a>(
         },
     ));
     let return_type = scopes.sess.alloc(resolve_ty(scopes, return_type));
+
+    match return_type.ty {
+        Type::Arithmetic(_) | Type::Pointer(_) | Type::Void => (),
+        Type::Function(_) => scopes
+            .sess
+            .emit(Diagnostic::InvalidFunctionReturnType { at: return_type.loc, ty: *return_type }),
+    }
+
     FunctionType { params, return_type, is_varargs }
 }
 
@@ -467,6 +480,7 @@ fn resolve_function_definition<'a>(
             is_const: false,
             is_volatile: false,
             ty: Type::Function(function_ty),
+            loc: _,
         } => function_ty,
         QualifiedType { ty: Type::Function(_), .. } =>
             unreachable!("function types cannot be qualified"),

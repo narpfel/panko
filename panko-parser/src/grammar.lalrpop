@@ -127,7 +127,7 @@ Declarator: ast::Declarator<'a> = {
 }
 
 Pointer: ast::Pointer<'a> = {
-    "*" AttributeSpecifierSequence? <qualifiers:Many<TypeQualifier>> => ast::Pointer { <> },
+    <star:"*"> AttributeSpecifierSequence? <qualifiers:Many<TypeQualifier>> => ast::Pointer { <> },
 }
 
 DirectDeclarator: ast::DirectDeclarator<'a> = {
@@ -138,7 +138,7 @@ DirectDeclarator: ast::DirectDeclarator<'a> = {
 }
 
 FunctionDeclarator: ast::FunctionDeclarator<'a> = {
-    <direct_declarator:Bump<DirectDeclarator>> "(" <parameter_type_list:ParameterTypeList> ")" =>
+    <direct_declarator:Bump<DirectDeclarator>> "(" <parameter_type_list:ParameterTypeList> <close_paren:")"> =>
         ast::FunctionDeclarator { <> },
 }
 
@@ -176,7 +176,7 @@ DirectAbstractDeclarator: ast::DirectDeclarator<'a> = {
 
 FunctionAbstractDeclarator: ast::FunctionDeclarator<'a> = {
     <direct_declarator:Bump<DirectAbstractDeclarator>?>
-        "(" <parameter_type_list:ParameterTypeList> ")" => {
+        "(" <parameter_type_list:ParameterTypeList> <close_paren:")"> => {
             let direct_declarator = direct_declarator.unwrap_or(&ast::DirectDeclarator::Abstract);
             ast::FunctionDeclarator { <> }
         },

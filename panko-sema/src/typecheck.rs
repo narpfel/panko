@@ -703,6 +703,7 @@ fn typeck_expression<'a>(
                 is_const: _,
                 is_volatile: _,
                 ty: Type::Function(ty),
+                loc: _,
             })) = &callee.ty.ty
             else {
                 todo!("type error: uncallable");
