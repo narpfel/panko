@@ -38,6 +38,7 @@ impl PartialEq for ParameterDeclaration<'_> {
 }
 
 impl Eq for ParameterDeclaration<'_> {}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FunctionType<'a> {
     pub params: &'a [ParameterDeclaration<'a>],

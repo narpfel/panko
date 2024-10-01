@@ -560,6 +560,7 @@ fn resolve_declaration<'a>(
 ) -> Declaration<'a> {
     let ast::Declaration { ty, name, initialiser } = decl;
     let ty = resolve_ty(scopes, ty);
+
     let kind = if initialiser.is_some() {
         RefKind::Definition
     }
