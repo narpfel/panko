@@ -33,7 +33,7 @@ impl<'a> ParameterDeclaration<'a> {
 
 impl PartialEq for ParameterDeclaration<'_> {
     fn eq(&self, other: &Self) -> bool {
-        self.ty == other.ty
+        self.ty.ty == other.ty.ty
     }
 }
 
@@ -60,7 +60,7 @@ impl fmt::Display for FunctionType<'_> {
             params.iter().format_with(", ", |param, f| f(&format_args!(
                 "{}: {}",
                 param.name.map_or(NO_VALUE, |name| name.slice()),
-                param.ty,
+                param.ty.ty,
             ))),
             maybe_ellipsis,
             return_type,
