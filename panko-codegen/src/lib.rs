@@ -80,6 +80,13 @@ struct TypedRegister<'a> {
 }
 
 impl Register {
+    fn byte(self) -> TypedRegister<'static> {
+        TypedRegister {
+            ty: &const { Type::uchar() },
+            register: self,
+        }
+    }
+
     fn with_ty<'a>(self, ty: &'a Type<'a>) -> TypedRegister<'a> {
         TypedRegister { ty, register: self }
     }
@@ -128,10 +135,6 @@ struct Codegen<'a> {
 }
 
 impl<'a> Codegen<'a> {
-    fn op(&self, operand: &'a impl AsOperand) -> Operand<'a> {
-        operand.as_operand()
-    }
-
     fn block(&mut self, count: u64) {
         for _ in 0..count {
             self.code.push('\n');
@@ -164,25 +167,25 @@ impl<'a> Codegen<'a> {
         writeln!(self.code, "    {instr}").unwrap();
     }
 
-    // TODO: use a bespoke trait that is implemented by `LayoutedExpression` and `TypedRegister`
-    // instead of `Display`
-    fn emit_args(&mut self, instr: &str, args: &[&dyn Display]) {
+    fn emit_args(&mut self, instr: &str, operands: &[&dyn AsOperand]) {
         writeln!(
             self.code,
             "    {instr}{}{}",
-            if args.is_empty() { "" } else { " " },
-            args.iter().format(", "),
+            if operands.is_empty() { "" } else { " " },
+            operands.iter().map(|op| op.as_operand()).format(", "),
         )
         .unwrap();
     }
 
-    fn copy(&mut self, tgt: &Operand, src: &Operand) {
+    fn copy(&mut self, tgt: &impl AsOperand, src: &impl AsOperand) {
+        let tgt = tgt.as_operand();
+        let src = src.as_operand();
         let ty = tgt.ty();
         assert!(ty == src.ty());
         match ty {
             Type::Arithmetic(_) | Type::Pointer(_) => {
                 self.emit_args("mov", &[&Rax.with_ty(ty), &src]);
-                self.emit_args("mov", &[tgt, &Rax.with_ty(ty)]);
+                self.emit_args("mov", &[&tgt, &Rax.with_ty(ty)]);
             }
             Type::Function(_) | Type::Void => unreachable!(),
         }
@@ -202,13 +205,13 @@ impl<'a> Codegen<'a> {
             })),
         );
         if pointee_size < MAX_IMUL_IMMEDIATE {
-            self.emit_args("imul", &[&"r10", &self.op(integral), &pointee_size]);
+            self.emit_args("imul", &[&R10, integral, &pointee_size]);
         }
         else {
-            self.emit_args("movabs", &[&"r10", &pointee_size]);
-            self.emit_args("imul", &[&"r10", &self.op(integral)]);
+            self.emit_args("movabs", &[&R10, &pointee_size]);
+            self.emit_args("imul", &[&R10, integral]);
         }
-        self.emit_args(operation, &[&"rax", &"r10"]);
+        self.emit_args(operation, &[&Rax, &R10]);
     }
 
     fn function_definition(&mut self, def: &'a FunctionDefinition<'a>) {
@@ -228,13 +231,13 @@ impl<'a> Codegen<'a> {
         self.emit(&format!("jnz .L.{}.entry.sp_unaligned", def.name()));
 
         self.block(1);
-        self.emit_args("sub", &[&"rsp", &def.stack_size]);
+        self.emit_args("sub", &[&Rsp, &def.stack_size]);
         self.current_function = Some(def);
 
         for parameter in def.params.0.iter().zip_longest(ARGUMENT_REGISTERS) {
             match parameter {
                 EitherOrBoth::Both(param, register) =>
-                    self.emit_args("mov", &[&self.op(param), &register.with_ty(&param.ty.ty)]),
+                    self.emit_args("mov", &[param, &register.with_ty(&param.ty.ty)]),
                 EitherOrBoth::Left(_) => todo!("unimplemented: more than six arguments"),
                 EitherOrBoth::Right(_) => break,
             }
@@ -246,7 +249,7 @@ impl<'a> Codegen<'a> {
             Some(std::ptr::from_ref(def)),
             "`current_function` is not changed",
         );
-        self.emit_args("add", &[&"rsp", &def.stack_size]);
+        self.emit_args("add", &[&Rsp, &def.stack_size]);
         if def.is_main() {
             self.emit("xor eax, eax");
         }
@@ -318,7 +321,7 @@ impl<'a> Codegen<'a> {
                 if let Some(initialiser) = initialiser.as_ref() {
                     self.expr(initialiser);
                     if reference.slot() != initialiser.slot {
-                        self.copy(&self.op(reference), &self.op(initialiser));
+                        self.copy(reference, initialiser);
                     }
                 },
             Statement::Expression(expr) =>
@@ -330,10 +333,10 @@ impl<'a> Codegen<'a> {
                 if let Some(expr) = expr.as_ref() {
                     self.expr(expr);
                     if expr.ty.ty != Type::Void {
-                        self.emit_args("mov", &[&Rax.typed(expr), &self.op(expr)]);
+                        self.emit_args("mov", &[&Rax.typed(expr), expr]);
                     }
                 }
-                self.emit_args("add", &[&"rsp", &self.current_function.unwrap().stack_size]);
+                self.emit_args("add", &[&Rsp, &self.current_function.unwrap().stack_size]);
                 self.emit("ret");
             }
         }
@@ -343,7 +346,8 @@ impl<'a> Codegen<'a> {
         match expr.expr {
             Expression::Name(_reference) => (), // already in memory
             Expression::Integer(token) => {
-                self.emit_args("mov", &[&self.op(expr), &token.slice()]);
+                // TODO: real parsing (when building the AST)
+                self.emit_args("mov", &[expr, &token.slice().parse::<u64>().unwrap()]);
             }
             Expression::NoopTypeConversion(inner) => {
                 assert_eq!(expr.ty.ty.size(), inner.ty.ty.size());
@@ -352,32 +356,32 @@ impl<'a> Codegen<'a> {
             }
             Expression::Truncate(truncate) => {
                 self.expr(truncate);
-                self.emit_args("mov", &[&Rax.typed(truncate), &self.op(truncate)]);
-                self.emit_args("mov", &[&self.op(expr), &Rax.typed(expr)]);
+                self.emit_args("mov", &[&Rax.typed(truncate), truncate]);
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
             Expression::SignExtend(sign_extend) => {
                 self.expr(sign_extend);
-                self.emit_args("movsx", &[&Rax.typed(expr), &self.op(sign_extend)]);
-                self.emit_args("mov", &[&self.op(expr), &Rax.typed(expr)]);
+                self.emit_args("movsx", &[&Rax.typed(expr), sign_extend]);
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
             Expression::ZeroExtend(zero_extend) => {
                 self.expr(zero_extend);
-                self.emit_args("movzx", &[&Rax.typed(expr), &self.op(zero_extend)]);
-                self.emit_args("mov", &[&self.op(expr), &Rax.typed(expr)]);
+                self.emit_args("movzx", &[&Rax.typed(expr), zero_extend]);
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
             Expression::Assign { target, value } => match target.expr {
                 Expression::Name(_) => {
                     self.expr(target);
                     self.expr(value);
                     if target.slot != value.slot {
-                        self.copy(&self.op(target), &self.op(value));
+                        self.copy(target, value);
                     }
                 }
                 Expression::Deref(operand) => {
                     self.expr(operand);
                     self.expr(value);
-                    self.emit_args("mov", &[&R10.typed(operand), &self.op(operand)]);
-                    self.copy(&Operand::pointer(R10, operand), &self.op(value));
+                    self.emit_args("mov", &[&R10.typed(operand), operand]);
+                    self.copy(&Operand::pointer(R10, operand), value);
                 }
                 _ => unreachable!(),
             },
@@ -386,13 +390,13 @@ impl<'a> Codegen<'a> {
                 assert_eq!(lhs.ty.ty, Type::Arithmetic(Arithmetic::Integral(ty)));
 
                 let emit_arithmetic = |cg: &mut Self, operation| {
-                    cg.emit_args(operation, &[&Rax.typed(lhs), &cg.op(rhs)]);
+                    cg.emit_args(operation, &[&Rax.typed(lhs), rhs]);
                 };
                 let emit_comparison = |cg: &mut Self, operation| {
                     assert!(matches!(lhs.ty.ty, Type::Arithmetic(_) | Type::Pointer(_)));
                     emit_arithmetic(cg, "cmp");
-                    cg.emit_args(operation, &[&"al"]);
-                    cg.emit_args("movzx", &[&Rax.typed(expr), &"al"]);
+                    cg.emit_args(operation, &[&Rax.byte()]);
+                    cg.emit_args("movzx", &[&Rax.typed(expr), &Rax.byte()]);
                 };
                 let emit_sign_dependent_comparison =
                     |cg: &mut Self, operation_if_signed, operation_if_unsigned| {
@@ -406,7 +410,7 @@ impl<'a> Codegen<'a> {
                 self.expr(lhs);
                 self.expr(rhs);
 
-                self.emit_args("mov", &[&Rax.typed(lhs), &self.op(lhs)]);
+                self.emit_args("mov", &[&Rax.typed(lhs), lhs]);
 
                 match kind {
                     BinOpKind::Add => emit_arithmetic(self, "add"),
@@ -420,7 +424,7 @@ impl<'a> Codegen<'a> {
                         emit_sign_dependent_comparison(self, "setge", "setae"),
                 };
 
-                self.emit_args("mov", &[&self.op(expr), &Rax.typed(expr)]);
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
             Expression::PtrAdd { pointer, integral, pointee_size, order } => {
                 assert_eq!(
@@ -433,10 +437,10 @@ impl<'a> Codegen<'a> {
                 let (lhs, rhs) = order.select(pointer, integral);
                 self.expr(lhs);
                 self.expr(rhs);
-                self.emit_args("mov", &[&Rax.typed(pointer), &self.op(pointer)]);
+                self.emit_args("mov", &[&Rax.typed(pointer), pointer]);
                 match pointee_size {
                     size @ (1 | 2 | 4 | 8) => {
-                        self.emit_args("mov", &[&"r10", &self.op(integral)]);
+                        self.emit_args("mov", &[&R10, integral]);
                         self.emit_args(
                             "lea",
                             &[
@@ -451,20 +455,20 @@ impl<'a> Codegen<'a> {
                     }
                     size => self.emit_pointer_offset("add", size, integral),
                 }
-                self.emit_args("mov", &[&self.op(expr), &Rax.typed(pointer)]);
+                self.emit_args("mov", &[expr, &Rax.typed(pointer)]);
             }
             Expression::PtrSub { pointer, integral, pointee_size } => {
                 self.expr(pointer);
                 self.expr(integral);
-                self.emit_args("mov", &[&Rax.typed(pointer), &self.op(pointer)]);
+                self.emit_args("mov", &[&Rax.typed(pointer), pointer]);
                 self.emit_pointer_offset("sub", pointee_size, integral);
-                self.emit_args("mov", &[&self.op(expr), &Rax.typed(pointer)]);
+                self.emit_args("mov", &[expr, &Rax.typed(pointer)]);
             }
             Expression::PtrCmp { lhs, kind, rhs } => {
                 self.expr(lhs);
                 self.expr(rhs);
-                self.emit_args("mov", &[&Rax.typed(lhs), &self.op(lhs)]);
-                self.emit_args("cmp", &[&Rax.typed(lhs), &self.op(rhs)]);
+                self.emit_args("mov", &[&Rax.typed(lhs), lhs]);
+                self.emit_args("cmp", &[&Rax.typed(lhs), rhs]);
                 let operation = match kind {
                     PtrCmpKind::Equal => "sete",
                     PtrCmpKind::NotEqual => "setne",
@@ -473,15 +477,15 @@ impl<'a> Codegen<'a> {
                     PtrCmpKind::Greater => "seta",
                     PtrCmpKind::GreaterEqual => "setae",
                 };
-                self.emit_args(operation, &[&"al"]);
-                self.emit_args("movzx", &[&Rax.typed(expr), &"al"]);
-                self.emit_args("mov", &[&self.op(expr), &Rax.typed(expr)]);
+                self.emit_args(operation, &[&Rax.byte()]);
+                self.emit_args("movzx", &[&Rax.typed(expr), &Rax.byte()]);
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
             Expression::Addressof(operand) => {
                 match operand.expr {
                     Expression::Name(_) => {
-                        let memory_operand: &dyn Display = match operand.slot {
-                            Slot::Static(_) => &self.op(operand),
+                        let memory_operand: &dyn AsOperand = match operand.slot {
+                            Slot::Static(_) => operand,
                             Slot::Automatic(offset) => &Memory {
                                 pointer: Rsp,
                                 index: None,
@@ -490,20 +494,20 @@ impl<'a> Codegen<'a> {
                             Slot::Pointer { register: _ } => unreachable!("TODO???"),
                             Slot::Void => unreachable!(),
                         };
-                        self.emit_args("lea", &[&"rax", memory_operand]);
+                        self.emit_args("lea", &[&Rax, memory_operand]);
                     }
                     Expression::Deref(operand) => {
                         self.expr(operand);
-                        self.emit_args("mov", &[&Rax.typed(operand), &self.op(operand)]);
+                        self.emit_args("mov", &[&Rax.typed(operand), operand]);
                     }
                     _ => unreachable!(),
                 }
-                self.emit_args("mov", &[&self.op(expr), &"rax"]);
+                self.emit_args("mov", &[expr, &Rax]);
             }
             Expression::Deref(operand) => {
                 self.expr(operand);
-                self.emit_args("mov", &[&R10.typed(operand), &self.op(operand)]);
-                self.copy(&self.op(expr), &Operand::pointer(R10, operand));
+                self.emit_args("mov", &[&R10.typed(operand), operand]);
+                self.copy(expr, &Operand::pointer(R10, operand));
             }
             Expression::Call { callee, args, is_varargs } => {
                 self.expr(callee);
@@ -513,7 +517,7 @@ impl<'a> Codegen<'a> {
                 for argument in args.iter().zip_longest(ARGUMENT_REGISTERS) {
                     match argument {
                         EitherOrBoth::Both(arg, register) =>
-                            self.emit_args("mov", &[&register.typed(arg), &self.op(arg)]),
+                            self.emit_args("mov", &[&register.typed(arg), arg]),
                         EitherOrBoth::Left(_) => todo!("unimplemented: more than six arguments"),
                         EitherOrBoth::Right(_) => break,
                     }
@@ -530,10 +534,10 @@ impl<'a> Codegen<'a> {
                     self.emit("xor eax, eax");
                 }
 
-                self.emit_args(operation, &[&R10, &self.op(callee)]);
+                self.emit_args(operation, &[&R10, callee]);
                 self.emit("call r10");
                 if expr.ty.ty != Type::Void {
-                    self.emit_args("mov", &[&self.op(expr), &Rax.typed(expr)]);
+                    self.emit_args("mov", &[expr, &Rax.typed(expr)]);
                 }
             }
         }

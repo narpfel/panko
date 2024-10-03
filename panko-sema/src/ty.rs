@@ -78,6 +78,13 @@ pub enum Type<'a> {
 }
 
 impl<'a> Type<'a> {
+    pub const fn uchar() -> Self {
+        Self::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::Char,
+        }))
+    }
+
     pub fn int() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Signed,

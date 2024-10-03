@@ -7,6 +7,7 @@ use panko_sema::ty::Type;
 
 use crate::Register;
 use crate::Register::*;
+use crate::TypedRegister;
 use crate::MAX_ADDRESS_OFFSET;
 
 #[derive(Debug, Clone, Copy)]
@@ -58,9 +59,9 @@ impl fmt::Display for Memory<'_> {
 
 #[derive(Debug, Clone, Copy)]
 enum OperandKind<'a> {
-    #[expect(unused)]
     Register(Register),
     Pointer(Memory<'a>),
+    Immediate(u64),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -110,6 +111,7 @@ impl fmt::Display for Operand<'_> {
                 };
                 write!(f, "{ptr_type} ptr {memory}")
             }
+            OperandKind::Immediate(imm) => write!(f, "{imm}"),
         }
     }
 }
@@ -136,6 +138,18 @@ pub(super) trait AsOperand {
     fn as_operand(&self) -> Operand;
 }
 
+impl<'a> AsOperand for Operand<'a> {
+    fn as_operand(&self) -> Operand {
+        *self
+    }
+}
+
+impl<'a> AsOperand for &Operand<'a> {
+    fn as_operand(&self) -> Operand {
+        **self
+    }
+}
+
 impl<'a> AsOperand for LayoutedExpression<'a> {
     fn as_operand(&self) -> Operand {
         slot_as_operand(self.slot, self.ty.ty)
@@ -145,5 +159,42 @@ impl<'a> AsOperand for LayoutedExpression<'a> {
 impl<'a> AsOperand for Reference<'a> {
     fn as_operand(&self) -> Operand {
         slot_as_operand(self.slot(), self.ty.ty)
+    }
+}
+
+impl<'a> AsOperand for TypedRegister<'a> {
+    fn as_operand(&self) -> Operand {
+        let Self { register, ty } = *self;
+        Operand {
+            kind: OperandKind::Register(register),
+            ty: *ty,
+        }
+    }
+}
+
+impl AsOperand for Register {
+    fn as_operand(&self) -> Operand {
+        Operand {
+            kind: OperandKind::Register(*self),
+            ty: Type::ullong(),
+        }
+    }
+}
+
+impl AsOperand for u64 {
+    fn as_operand(&self) -> Operand {
+        Operand {
+            kind: OperandKind::Immediate(*self),
+            ty: Type::ullong(),
+        }
+    }
+}
+
+impl<'a> AsOperand for Memory<'a> {
+    fn as_operand(&self) -> Operand {
+        Operand {
+            kind: OperandKind::Pointer(*self),
+            ty: Type::ullong(),
+        }
     }
 }
