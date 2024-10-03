@@ -86,20 +86,25 @@ impl Display for TypedRegister<'_> {
             Type::Function(_) | Type::Void => unreachable!(),
         };
 
-        const REGISTERS: [[&str; 4]; 9] = [
-            ["al", "ax", "eax", "rax"],
-            ["cl", "cx", "ecx", "rcx"],
-            ["spl", "sp", "esp", "rsp"],
-            ["dil", "di", "edi", "rdi"],
-            ["sil", "si", "esi", "rsi"],
-            ["dl", "dx", "edx", "rdx"],
-            ["r8b", "r8w", "r8d", "r8"],
-            ["r9b", "r9w", "r9d", "r9"],
-            ["r10b", "r10w", "r10d", "r10"],
-        ];
-        let register_str =
-            REGISTERS[self.register as usize][usize::try_from(size.ilog2()).unwrap()];
-        write!(f, "{register_str}")
+        let names = match self.register {
+            Rax => ["al", "ax", "eax", "rax"],
+            Rcx => ["cl", "cx", "ecx", "rcx"],
+            Rsp => ["spl", "sp", "esp", "rsp"],
+            Rdi => ["dil", "di", "edi", "rdi"],
+            Rsi => ["sil", "si", "esi", "rsi"],
+            Rdx => ["dl", "dx", "edx", "rdx"],
+            R8 => ["r8b", "r8w", "r8d", "r8"],
+            R9 => ["r9b", "r9w", "r9d", "r9"],
+            R10 => ["r10b", "r10w", "r10d", "r10"],
+        };
+        let index = match size {
+            1 => 0,
+            2 => 1,
+            4 => 2,
+            8 => 3,
+            _ => unreachable!(),
+        };
+        write!(f, "{}", names[index])
     }
 }
 
