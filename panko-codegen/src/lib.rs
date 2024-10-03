@@ -189,7 +189,7 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[&Rax.with_ty(ty), &src]);
                 self.emit_args("mov", &[tgt, &Rax.with_ty(ty)]);
             }
-            Type::Function(_) | Type::Void => todo!(),
+            Type::Function(_) | Type::Void => unreachable!(),
         }
     }
 
