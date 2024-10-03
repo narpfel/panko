@@ -1,5 +1,3 @@
-use std::fmt;
-
 use bumpalo::Bump;
 use panko_lex::Token;
 use panko_parser as cst;
@@ -10,7 +8,6 @@ use crate::layout::stack::Stack;
 use crate::scope::Id;
 use crate::scope::RefKind;
 use crate::ty::QualifiedType;
-use crate::ty::Type;
 use crate::typecheck;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::PtrCmpKind;
@@ -134,12 +131,6 @@ pub enum Slot<'a> {
     Void,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct TypedSlot<'a> {
-    slot: Slot<'a>,
-    ty: &'a Type<'a>,
-}
-
 impl<'a> FunctionDefinition<'a> {
     pub fn is_main(&self) -> bool {
         self.name() == "main"
@@ -147,59 +138,6 @@ impl<'a> FunctionDefinition<'a> {
 
     pub fn name(&self) -> &'a str {
         self.reference.name()
-    }
-}
-
-impl<'a> LayoutedExpression<'a> {
-    pub fn typed_slot(&'a self) -> TypedSlot<'a> {
-        self.slot.typed(&self.ty.ty)
-    }
-}
-
-impl<'a> TypedSlot<'a> {
-    pub fn pointer(register: &'a str, expr: &'a LayoutedExpression<'a>) -> Self {
-        let Type::Pointer(ty) = expr.ty.ty
-        else {
-            unreachable!()
-        };
-        Self {
-            slot: Slot::Pointer { register },
-            ty: &ty.ty,
-        }
-    }
-
-    pub fn ty(&self) -> &'a Type<'a> {
-        self.ty
-    }
-}
-
-impl fmt::Display for TypedSlot<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let size = match self.ty {
-            Type::Arithmetic(_) | Type::Pointer(_) => self.ty.size(),
-            // Using a function results in a pointer to that function, so we need 8 bytes.
-            Type::Function(_) => 8,
-            Type::Void => unreachable!(),
-        };
-        const PTR_TYPES: [&str; 4] = ["byte", "word", "dword", "qword"];
-        let ptr_type = PTR_TYPES[usize::try_from(size.ilog2()).unwrap()];
-        match self.slot {
-            Slot::Static(s) => write!(f, "{ptr_type} ptr [rip + {s}@plt]"),
-            Slot::Automatic(stack_offset) => write!(f, "{ptr_type} ptr [rsp + {stack_offset}]"),
-            Slot::Pointer { register } => write!(f, "{ptr_type} ptr [{register}]"),
-            Slot::Void => unreachable!(),
-        }
-    }
-}
-
-impl<'a> Slot<'a> {
-    fn typed(self, ty: &'a Type<'a>) -> TypedSlot<'a> {
-        if let Slot::Automatic(offset) = self {
-            // TODO: For types with alignment > 8, we also need to take the stack pointer into
-            // account.
-            assert!(offset.is_multiple_of(ty.align()));
-        }
-        TypedSlot { slot: self, ty }
     }
 }
 
@@ -218,10 +156,6 @@ impl<'a> Reference<'a> {
 
     pub fn slot(&self) -> Slot<'a> {
         self.slot
-    }
-
-    pub fn typed_slot(&'a self) -> TypedSlot<'a> {
-        self.slot.typed(&self.ty.ty)
     }
 }
 

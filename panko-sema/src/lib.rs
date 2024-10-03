@@ -2,7 +2,6 @@
 #![feature(impl_trait_in_fn_trait_return)]
 #![feature(try_blocks)]
 #![feature(type_alias_impl_trait)]
-#![feature(unsigned_is_multiple_of)]
 
 pub use crate::layout::layout;
 pub use crate::scope::resolve_names;
