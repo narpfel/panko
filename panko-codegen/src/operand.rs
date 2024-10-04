@@ -125,7 +125,6 @@ fn slot_as_operand<'a>(slot: Slot<'a>, ty: Type<'a>) -> Operand<'a> {
             assert!(offset.is_multiple_of(ty.align()));
             (Rsp, Offset::Immediate(offset))
         }
-        Slot::Pointer { register: _ } => todo!(),
         Slot::Void => unreachable!(),
     };
     Operand {

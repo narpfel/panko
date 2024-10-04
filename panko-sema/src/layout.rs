@@ -123,11 +123,6 @@ pub struct Reference<'a> {
 pub enum Slot<'a> {
     Static(&'a str),
     Automatic(u64),
-    Pointer {
-        // TODO: This should be a `panko_codegen::Register`, but that would introduce a circular
-        // dependency between `panko_sema` and `panko_codegen`.
-        register: &'a str,
-    },
     Void,
 }
 

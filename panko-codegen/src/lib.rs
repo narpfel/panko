@@ -491,7 +491,6 @@ impl<'a> Codegen<'a> {
                                 index: None,
                                 offset: Offset::Immediate(offset),
                             },
-                            Slot::Pointer { register: _ } => unreachable!("TODO???"),
                             Slot::Void => unreachable!(),
                         };
                         self.emit_args("lea", &[&Rax, memory_operand]);
