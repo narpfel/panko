@@ -49,11 +49,15 @@ impl fmt::Display for Memory<'_> {
             offset,
             Offset::Immediate(0..=MAX_ADDRESS_OFFSET) | Offset::Plt(_),
         ));
-        write!(f, "[{pointer} + ")?;
+        write!(f, "[{pointer}")?;
         if let Some(Index { register: reg, size }) = index {
-            write!(f, "{size} * {reg} + ")?;
+            write!(f, " + {size} * {reg}")?;
         }
-        write!(f, "{offset}]")
+        match offset {
+            Offset::Immediate(0) => (),
+            offset => write!(f, "+ {offset}")?,
+        }
+        write!(f, "]")
     }
 }
 
