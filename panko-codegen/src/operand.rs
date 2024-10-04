@@ -54,7 +54,7 @@ impl fmt::Display for Memory<'_> {
         }
         match offset {
             Offset::Immediate(0) => (),
-            offset => write!(f, "+ {offset}")?,
+            offset => write!(f, " + {offset}")?,
         }
         write!(f, "]")
     }
