@@ -6,7 +6,6 @@ use panko_sema::layout::Slot;
 use panko_sema::ty::Type;
 
 use crate::Register;
-use crate::Register::*;
 use crate::TypedRegister;
 use crate::MAX_ADDRESS_OFFSET;
 
@@ -122,12 +121,12 @@ impl fmt::Display for Operand<'_> {
 
 fn slot_as_operand<'a>(slot: Slot<'a>, ty: Type<'a>) -> Operand<'a> {
     let (pointer, offset) = match slot {
-        Slot::Static(name) => (Rip, Offset::Plt(name)),
+        Slot::Static(name) => (Register::Rip, Offset::Plt(name)),
         Slot::Automatic(offset) => {
             // TODO: For types with alignment > 8, we also need to take the stack pointer into
             // account.
             assert!(offset.is_multiple_of(ty.align()));
-            (Rsp, Offset::Immediate(offset))
+            (Register::Rsp, Offset::Immediate(offset))
         }
         Slot::Void => unreachable!(),
     };
