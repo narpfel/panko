@@ -172,14 +172,17 @@ impl<'a> Codegen<'a> {
             self.code,
             "    {instr}{}{}",
             if operands.is_empty() { "" } else { " " },
-            operands.iter().map(|op| op.as_operand()).format(", "),
+            operands
+                .iter()
+                .map(|op| op.as_operand(try { self.current_function?.argument_area_size }))
+                .format(", "),
         )
         .unwrap();
     }
 
     fn copy(&mut self, tgt: &impl AsOperand, src: &impl AsOperand) {
-        let tgt = tgt.as_operand();
-        let src = src.as_operand();
+        let tgt = tgt.as_operand(try { self.current_function?.argument_area_size });
+        let src = src.as_operand(try { self.current_function?.argument_area_size });
         let ty = tgt.ty();
         assert!(ty == src.ty());
         match ty {
@@ -234,11 +237,26 @@ impl<'a> Codegen<'a> {
         self.emit_args("sub", &[&Rsp, &def.stack_size]);
         self.current_function = Some(def);
 
-        for parameter in def.params.0.iter().zip_longest(ARGUMENT_REGISTERS) {
+        for (i, parameter) in def
+            .params
+            .0
+            .iter()
+            .zip_longest(ARGUMENT_REGISTERS)
+            .enumerate()
+        {
             match parameter {
                 EitherOrBoth::Both(param, register) =>
                     self.emit_args("mov", &[param, &register.with_ty(&param.ty.ty)]),
-                EitherOrBoth::Left(_) => todo!("unimplemented: more than six arguments"),
+                EitherOrBoth::Left(param) => {
+                    self.copy(
+                        param,
+                        &Operand::stack_parameter_eightbyte(
+                            param.ty.ty,
+                            i - ARGUMENT_REGISTERS.len(),
+                            def.stack_size,
+                        ),
+                    );
+                }
                 EitherOrBoth::Right(_) => break,
             }
         }
@@ -513,11 +531,19 @@ impl<'a> Codegen<'a> {
                 for arg in args {
                     self.expr(arg);
                 }
-                for argument in args.iter().zip_longest(ARGUMENT_REGISTERS) {
+                for (i, argument) in args.iter().zip_longest(ARGUMENT_REGISTERS).enumerate() {
                     match argument {
                         EitherOrBoth::Both(arg, register) =>
                             self.emit_args("mov", &[&register.typed(arg), arg]),
-                        EitherOrBoth::Left(_) => todo!("unimplemented: more than six arguments"),
+                        EitherOrBoth::Left(arg) => {
+                            self.copy(
+                                &Operand::stack_argument_eightbyte(
+                                    arg.ty.ty,
+                                    i - ARGUMENT_REGISTERS.len(),
+                                ),
+                                arg,
+                            );
+                        }
                         EitherOrBoth::Right(_) => break,
                     }
                 }

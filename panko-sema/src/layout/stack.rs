@@ -1,6 +1,7 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
+use super::LayoutedExpression;
 use super::Reference;
 use super::Slot;
 use crate::nonempty;
@@ -41,6 +42,7 @@ impl Slots {
 pub(super) struct Stack<'a> {
     ids: HashMap<Id, Reference<'a>>,
     slots: Slots,
+    argument_area_size: u64,
 }
 
 impl<'a> Stack<'a> {
@@ -96,5 +98,19 @@ impl<'a> Stack<'a> {
 
     pub(super) fn temporary(&mut self, ty: Type<'a>) -> Slot<'a> {
         self.slots.add_slot(ty)
+    }
+
+    pub(super) fn function_arguments(&mut self, args: &[LayoutedExpression<'a>]) {
+        let argument_area_size = args
+            .iter()
+            // TODO: this is `panko_codegen::ARGUMENT_REGISTERS.len()`
+            .skip(6)
+            .map(|arg| arg.ty.ty.size().next_multiple_of(8))
+            .sum();
+        self.argument_area_size = self.argument_area_size.max(argument_area_size);
+    }
+
+    pub(super) fn argument_area_size(&self) -> u64 {
+        self.argument_area_size
     }
 }

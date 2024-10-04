@@ -43,6 +43,7 @@ pub struct FunctionDefinition<'a> {
     noreturn: Option<cst::FunctionSpecifier<'a>>,
     pub is_varargs: bool,
     pub stack_size: u64,
+    pub argument_area_size: u64,
     pub body: CompoundStatement<'a>,
 }
 
@@ -174,7 +175,8 @@ fn layout_function_definition<'a>(
     let body = layout_compound_statement(&mut stack, bump, body);
     // TODO: This depends on the ABI
     // unsure if this is correct, for now we check for correct alignment in the function prologue
-    let stack_size = stack.size().next_multiple_of(16) + 8;
+    let argument_area_size = stack.argument_area_size();
+    let stack_size = (stack.size() + argument_area_size).next_multiple_of(16) + 8;
     FunctionDefinition {
         reference,
         params,
@@ -182,6 +184,7 @@ fn layout_function_definition<'a>(
         inline,
         noreturn,
         stack_size,
+        argument_area_size,
         is_varargs,
         body,
     }
@@ -340,6 +343,8 @@ fn layout_expression_in_slot<'a>(
             let callee = bump.alloc(layout_expression(stack, bump, callee));
             let args = bump
                 .alloc_slice_fill_iter(args.iter().map(|arg| layout_expression(stack, bump, arg)));
+            // TODO: handle arguments that are not class INTEGER
+            stack.function_arguments(args);
             (slot, Expression::Call { callee, args, is_varargs })
         }
     };
