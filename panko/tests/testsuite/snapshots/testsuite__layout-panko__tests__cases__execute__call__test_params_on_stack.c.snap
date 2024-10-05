@@ -1,0 +1,55 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/call/test_params_on_stack.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int` (static f)) ∅)
+   (function-definition
+      (id~1 `fn(n: int) -> int` (static id))
+      (params
+         (n~2 `int` @0))
+      (compound-statement
+         (return (n~2 `int` @0))))
+   (function-definition
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (return
+            (call `int` @0 (f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int` (static f))
+               (1 `int` @4)
+               (2 `int` @8)
+               (3 `int` @12)
+               (4 `int` @16)
+               (5 `int` @20)
+               (6 `int` @24)
+               (7 `int` @28)
+               (8 `int` @32)
+               (9 `int` @36)
+               (call `int` @40 (id~1 `fn(n: int) -> int` (static id))
+                  (10 `int` @44))
+               (11 `int` @48)))))
+   (function-definition
+      (f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int` (static f))
+      (params
+         (a1~5 `int` @0)
+         (a2~6 `int` @4)
+         (a3~7 `int` @8)
+         (a4~8 `int` @12)
+         (a5~9 `int` @16)
+         (a6~10 `int` @20)
+         (a7~11 `int` @24)
+         (a8~12 `int` @28)
+         (a9~13 `int` @32)
+         (a10~14 `int` @36)
+         (a11~15 `int` @40))
+      (compound-statement
+         (return (a10~14 `int` @36)))))
+
+----- stderr -----

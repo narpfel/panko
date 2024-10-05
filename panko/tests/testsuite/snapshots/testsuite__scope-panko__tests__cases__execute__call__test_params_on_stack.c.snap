@@ -1,0 +1,55 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/call/test_params_on_stack.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int` ∅)
+   (function-definition
+      id~1 `fn(n: int) -> int`
+      (params
+         n~2 `int`)
+      (compound-statement
+         (return (name n~2 `int`))))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (return
+            (call (name f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int`)
+               1
+               2
+               3
+               4
+               5
+               6
+               7
+               8
+               9
+               (call (name id~1 `fn(n: int) -> int`)
+                  10)
+               11))))
+   (function-definition
+      f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int`
+      (params
+         a1~5 `int`
+         a2~6 `int`
+         a3~7 `int`
+         a4~8 `int`
+         a5~9 `int`
+         a6~10 `int`
+         a7~11 `int`
+         a8~12 `int`
+         a9~13 `int`
+         a10~14 `int`
+         a11~15 `int`)
+      (compound-statement
+         (return (name a10~14 `int`)))))
+
+----- stderr -----
