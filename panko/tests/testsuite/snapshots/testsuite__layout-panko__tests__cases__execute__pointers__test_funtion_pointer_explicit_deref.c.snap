@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/pointers/test_funtion_pointer_explicit_deref.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (f~0 `fn(x: int) -> int` (static f))
+      (params
+         (x~1 `int` @0))
+      (compound-statement
+         (return
+            (add `int` @4
+               (x~1 `int` @0)
+               (2 `int` @8)))))
+   (function-definition
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (definition (x~3 `int` @0) (40 `int` @0))
+         (definition (p~4 `ptr<fn(∅: int) -> int>` @8) (addressof `ptr<fn(x: int) -> int>` @8 (f~0 `fn(x: int) -> int` (static f))))
+         (return
+            (call `int` @16 (p~4 `ptr<fn(∅: int) -> int>` @8)
+               (x~3 `int` @0))))))
+
+----- stderr -----

@@ -680,19 +680,24 @@ fn typeck_expression<'a>(
                         },
                     }
                 }
-                UnaryOpKind::Deref =>
-                    if let Type::Pointer(pointee_ty) = operand.ty.ty {
-                        TypedExpression {
-                            ty: *pointee_ty,
-                            expr: Expression::Deref {
-                                star: operator.token,
-                                operand: sess.alloc(operand),
-                            },
-                        }
-                    }
-                    else {
-                        todo!("type error: cannot deref this expr");
+                UnaryOpKind::Deref => match operand.ty.ty {
+                    // TODO: ignoring derefs of functions might behave correctly, but all function
+                    // designators should be converted to pointers-to-function.
+                    Type::Pointer(QualifiedType {
+                        is_const: _,
+                        is_volatile: _,
+                        ty: Type::Function(_),
+                        loc: _,
+                    }) => operand,
+                    Type::Pointer(pointee_ty) => TypedExpression {
+                        ty: *pointee_ty,
+                        expr: Expression::Deref {
+                            star: operator.token,
+                            operand: sess.alloc(operand),
+                        },
                     },
+                    _ => todo!("type error: cannot deref this expr"),
+                },
             }
         }
         scope::Expression::Call { callee, args, close_paren } => {
