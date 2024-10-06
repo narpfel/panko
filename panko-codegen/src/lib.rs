@@ -305,6 +305,7 @@ impl<'a> Codegen<'a> {
                 Expression::Addressof(_) => todo!(),
                 Expression::Deref(_) => todo!(),
                 Expression::Call { .. } => todo!(),
+                Expression::Negate(_) => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -564,6 +565,12 @@ impl<'a> Codegen<'a> {
                 if expr.ty.ty != Type::Void {
                     self.emit_args("mov", &[expr, &Rax.typed(expr)]);
                 }
+            }
+            Expression::Negate(operand) => {
+                self.expr(operand);
+                self.emit_args("mov", &[&Rax.typed(operand), operand]);
+                self.emit_args("neg", &[&Rax.typed(operand)]);
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
         }
     }

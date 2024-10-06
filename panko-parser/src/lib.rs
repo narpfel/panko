@@ -564,6 +564,7 @@ pub struct UnaryOp<'a> {
 pub enum UnaryOpKind {
     Addressof,
     Deref,
+    Negate,
 }
 
 impl<'a> UnaryOp<'a> {
@@ -571,6 +572,7 @@ impl<'a> UnaryOp<'a> {
         match self.kind {
             UnaryOpKind::Addressof => "addressof",
             UnaryOpKind::Deref => "deref",
+            UnaryOpKind::Negate => "negate",
         }
     }
 

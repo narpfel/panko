@@ -78,7 +78,7 @@ fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
     );
     let expected_return_code = expected_return_codes.first().copied().unwrap_or(0);
 
-    let expected_print_re = Regex::new(r"(?m)^// \[\[print: (?P<output>.*?)\]\]$").unwrap();
+    let expected_print_re = Regex::new(r"(?m)^\s*// \[\[print: (?P<output>.*?)\]\]$").unwrap();
     let expected_output: String = expected_print_re
         .captures_iter(&source)
         .map(|captures| captures.name("output").unwrap().as_str().to_string() + "\n")

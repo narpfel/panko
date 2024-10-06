@@ -170,6 +170,10 @@ pub enum Expression<'a> {
         is_varargs: bool,
         close_paren: Token<'a>,
     },
+    Negate {
+        minus: Token<'a>,
+        operand: &'a TypedExpression<'a>,
+    },
 }
 
 impl TypedExpression<'_> {
@@ -198,7 +202,8 @@ impl TypedExpression<'_> {
             | Expression::PtrSub { .. }
             | Expression::PtrCmp { .. }
             | Expression::Addressof { .. }
-            | Expression::Call { .. } => false,
+            | Expression::Call { .. }
+            | Expression::Negate { .. } => false,
         }
     }
 
@@ -240,6 +245,7 @@ impl<'a> Expression<'a> {
                 is_varargs: _,
                 close_paren,
             } => callee.loc().until(close_paren.loc()),
+            Expression::Negate { minus, operand } => minus.loc().until(operand.loc()),
         }
     }
 
@@ -697,6 +703,21 @@ fn typeck_expression<'a>(
                         },
                     },
                     _ => todo!("type error: cannot deref this expr"),
+                },
+                UnaryOpKind::Negate => match operand.ty.ty {
+                    Type::Arithmetic(arithmetic) => {
+                        let result_ty =
+                            Type::Arithmetic(integral_promote(arithmetic)).unqualified();
+                        let operand = convert_as_if_by_assignment(sess, result_ty, operand);
+                        TypedExpression {
+                            ty: result_ty,
+                            expr: Expression::Negate {
+                                minus: operator.token,
+                                operand: sess.alloc(operand),
+                            },
+                        }
+                    }
+                    _ => todo!("type error: cannot negate"),
                 },
             }
         }

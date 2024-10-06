@@ -109,6 +109,7 @@ pub enum Expression<'a> {
         args: &'a [LayoutedExpression<'a>],
         is_varargs: bool,
     },
+    Negate(&'a LayoutedExpression<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -346,6 +347,11 @@ fn layout_expression_in_slot<'a>(
             // TODO: handle arguments that are not class INTEGER
             stack.function_arguments(args);
             (slot, Expression::Call { callee, args, is_varargs })
+        }
+        typecheck::Expression::Negate { minus: _, operand } => {
+            let slot = make_slot();
+            let operand = bump.alloc(layout_expression_in_slot(stack, bump, operand, Some(slot)));
+            (slot, Expression::Negate(operand))
         }
     };
     LayoutedExpression { ty, slot, expr }
