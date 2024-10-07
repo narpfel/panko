@@ -385,7 +385,11 @@ impl<'a> Codegen<'a> {
             }
             Expression::ZeroExtend(zero_extend) => {
                 self.expr(zero_extend);
-                self.emit_args("movzx", &[&Rax.typed(expr), zero_extend]);
+                match zero_extend.ty.ty.size() {
+                    1 | 2 => self.emit_args("movzx", &[&Rax.typed(expr), zero_extend]),
+                    4 => self.emit_args("mov", &[&Rax.typed(zero_extend), zero_extend]),
+                    _ => unreachable!(),
+                }
                 self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
             Expression::Assign { target, value } => match target.expr {
