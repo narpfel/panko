@@ -29,47 +29,91 @@ exit_code: 0
          main.unnamed_parameter.0~5 `int`
          argv~6 `ptr<ptr<char>>`)
       (compound-statement
-         (definition c~7 `unsigned char` (truncate (42 `int`) `unsigned char`))
-         (expression
-            (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
-               (argv~6 `ptr<ptr<char>>`)
-               (zero-extend (c~7 `unsigned char`) `unsigned long`)
-               `void`))
-         (definition s~8 `unsigned short` (zero-extend (c~7 `unsigned char`) `unsigned short`))
-         (expression
-            (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
-               (argv~6 `ptr<ptr<char>>`)
-               (zero-extend (s~8 `unsigned short`) `unsigned long`)
-               `void`))
-         (definition i~9 `unsigned int` (zero-extend (c~7 `unsigned char`) `unsigned int`))
-         (expression
-            (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
-               (argv~6 `ptr<ptr<char>>`)
-               (zero-extend (i~9 `unsigned int`) `unsigned long`)
-               `void`))
-         (definition j~10 `unsigned int` (zero-extend (s~8 `unsigned short`) `unsigned int`))
-         (expression
-            (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
-               (argv~6 `ptr<ptr<char>>`)
-               (zero-extend (j~10 `unsigned int`) `unsigned long`)
-               `void`))
-         (definition l~11 `unsigned long` (zero-extend (c~7 `unsigned char`) `unsigned long`))
-         (expression
-            (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
-               (argv~6 `ptr<ptr<char>>`)
-               (l~11 `unsigned long`)
-               `void`))
-         (definition m~12 `unsigned long` (zero-extend (s~8 `unsigned short`) `unsigned long`))
-         (expression
-            (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
-               (argv~6 `ptr<ptr<char>>`)
-               (m~12 `unsigned long`)
-               `void`))
-         (definition n~13 `unsigned long` (zero-extend (i~9 `unsigned int`) `unsigned long`))
-         (expression
-            (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
-               (argv~6 `ptr<ptr<char>>`)
-               (n~13 `unsigned long`)
-               `void`)))))
+         (compound-statement
+            (definition c~7 `unsigned char` (truncate (42 `int`) `unsigned char`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (zero-extend (c~7 `unsigned char`) `unsigned long`)
+                  `void`))
+            (definition s~8 `unsigned short` (zero-extend (c~7 `unsigned char`) `unsigned short`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (zero-extend (s~8 `unsigned short`) `unsigned long`)
+                  `void`))
+            (definition i~9 `unsigned int` (zero-extend (c~7 `unsigned char`) `unsigned int`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (zero-extend (i~9 `unsigned int`) `unsigned long`)
+                  `void`))
+            (definition j~10 `unsigned int` (zero-extend (s~8 `unsigned short`) `unsigned int`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (zero-extend (j~10 `unsigned int`) `unsigned long`)
+                  `void`))
+            (definition l~11 `unsigned long` (zero-extend (c~7 `unsigned char`) `unsigned long`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (l~11 `unsigned long`)
+                  `void`))
+            (definition m~12 `unsigned long` (zero-extend (s~8 `unsigned short`) `unsigned long`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (m~12 `unsigned long`)
+                  `void`))
+            (definition n~13 `unsigned long` (zero-extend (i~9 `unsigned int`) `unsigned long`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (n~13 `unsigned long`)
+                  `void`)))
+         (compound-statement
+            (definition c~14 `unsigned char` (truncate (250 `int`) `unsigned char`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (zero-extend (c~14 `unsigned char`) `unsigned long`)
+                  `void`))
+            (definition s~15 `unsigned short` (zero-extend (c~14 `unsigned char`) `unsigned short`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (zero-extend (s~15 `unsigned short`) `unsigned long`)
+                  `void`))
+            (definition i~16 `unsigned int` (zero-extend (c~14 `unsigned char`) `unsigned int`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (zero-extend (i~16 `unsigned int`) `unsigned long`)
+                  `void`))
+            (definition j~17 `unsigned int` (zero-extend (s~15 `unsigned short`) `unsigned int`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (zero-extend (j~17 `unsigned int`) `unsigned long`)
+                  `void`))
+            (definition l~18 `unsigned long` (zero-extend (c~14 `unsigned char`) `unsigned long`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (l~18 `unsigned long`)
+                  `void`))
+            (definition m~19 `unsigned long` (zero-extend (s~15 `unsigned short`) `unsigned long`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (m~19 `unsigned long`)
+                  `void`))
+            (definition n~20 `unsigned long` (zero-extend (i~16 `unsigned int`) `unsigned long`))
+            (expression
+               (call (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
+                  (argv~6 `ptr<ptr<char>>`)
+                  (n~20 `unsigned long`)
+                  `void`))))))
 
 ----- stderr -----
