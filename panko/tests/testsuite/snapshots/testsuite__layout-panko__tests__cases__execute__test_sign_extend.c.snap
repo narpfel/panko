@@ -1,0 +1,108 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_sign_extend.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition
+      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+      (params
+         (argv~2 `ptr<ptr<char>>` @0)
+         (l~3 `long` @8))
+      (compound-statement
+         (expression
+            (call `int` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf))
+               (noop-type-conversion `ptr<char const>` @24
+                  (deref `ptr<char>` @24
+                     (ptr-add `ptr<ptr<char>>` @32
+                        (argv~2 `ptr<ptr<char>>` @0)
+                        (sign-extend `unsigned long long` @40 (1 `int` @48)))))
+               (l~3 `long` @8)))))
+   (function-definition
+      (main~4 `fn(∅: int, argv: ptr<ptr<char>>) -> int` (static main))
+      (params
+         (main.unnamed_parameter.0~5 `int` @0)
+         (argv~6 `ptr<ptr<char>>` @8))
+      (compound-statement
+         (compound-statement
+            (definition (c~7 `signed char` @16) (truncate `signed char` @16 (negate `int` @20 (42 `int` @20))))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (sign-extend `long` @24 (c~7 `signed char` @16))))
+            (definition (s~8 `short` @18) (sign-extend `short` @18 (c~7 `signed char` @16)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (sign-extend `long` @24 (s~8 `short` @18))))
+            (definition (i~9 `int` @20) (sign-extend `int` @20 (c~7 `signed char` @16)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (sign-extend `long` @24 (i~9 `int` @20))))
+            (definition (j~10 `int` @24) (sign-extend `int` @24 (s~8 `short` @18)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (sign-extend `long` @32 (j~10 `int` @24))))
+            (definition (l~11 `long` @32) (sign-extend `long` @32 (c~7 `signed char` @16)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (l~11 `long` @32)))
+            (definition (m~12 `long` @40) (sign-extend `long` @40 (s~8 `short` @18)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (m~12 `long` @40)))
+            (definition (n~13 `long` @48) (sign-extend `long` @48 (i~9 `int` @20)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (n~13 `long` @48))))
+         (compound-statement
+            (definition (c~14 `signed char` @16) (truncate `signed char` @16 (42 `int` @20)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (sign-extend `long` @24 (c~14 `signed char` @16))))
+            (definition (s~15 `short` @18) (sign-extend `short` @18 (c~14 `signed char` @16)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (sign-extend `long` @24 (s~15 `short` @18))))
+            (definition (i~16 `int` @20) (sign-extend `int` @20 (c~14 `signed char` @16)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (sign-extend `long` @24 (i~16 `int` @20))))
+            (definition (j~17 `int` @24) (sign-extend `int` @24 (s~15 `short` @18)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (sign-extend `long` @32 (j~17 `int` @24))))
+            (definition (l~18 `long` @32) (sign-extend `long` @32 (c~14 `signed char` @16)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (l~18 `long` @32)))
+            (definition (m~19 `long` @40) (sign-extend `long` @40 (s~15 `short` @18)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (m~19 `long` @40)))
+            (definition (n~20 `long` @48) (sign-extend `long` @48 (i~16 `int` @20)))
+            (expression
+               (call `void` @void (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
+                  (argv~6 `ptr<ptr<char>>` @8)
+                  (n~20 `long` @48)))))))
+
+----- stderr -----
