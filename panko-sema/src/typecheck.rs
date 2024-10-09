@@ -450,7 +450,11 @@ fn typeck_arithmetic_binop<'a>(
     let Arithmetic::Integral(integral_ty) = perform_usual_arithmetic_conversions(lhs_ty, rhs_ty);
     let common_ty = Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified();
     let ty = match kind {
-        BinOpKind::Add | BinOpKind::Subtract => common_ty,
+        BinOpKind::Multiply
+        | BinOpKind::Divide
+        | BinOpKind::Modulo
+        | BinOpKind::Add
+        | BinOpKind::Subtract => common_ty,
         BinOpKind::Equal
         | BinOpKind::NotEqual
         | BinOpKind::Less
@@ -566,7 +570,11 @@ fn typeck_ptrcmp<'a>(
         todo!("type error: cannot compare pointers of incompatible types");
     }
     let kind = match kind {
-        BinOpKind::Add | BinOpKind::Subtract => unreachable!(),
+        BinOpKind::Multiply
+        | BinOpKind::Divide
+        | BinOpKind::Modulo
+        | BinOpKind::Add
+        | BinOpKind::Subtract => unreachable!(),
         BinOpKind::Equal => PtrCmpKind::Equal,
         BinOpKind::NotEqual => PtrCmpKind::NotEqual,
         BinOpKind::Less => PtrCmpKind::Less,

@@ -1,0 +1,1462 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arithmetic/test_multiplicative_ops.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      (params
+         main.unnamed_parameter.0~2 `int`
+         argv~3 `ptr<ptr<char>>`)
+      (compound-statement
+         (compound-statement
+            (definition lhs~4 `signed char` 74)
+            (definition rhs~5 `int` 1095810364)
+            (definition res~6 `int` (multiply (name lhs~4 `signed char`) (name rhs~5 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~6 `int`))))
+         (compound-statement
+            (definition lhs~7 `signed char` (negate 39))
+            (definition rhs~8 `int` 220952599)
+            (definition res~9 `int` (multiply (name lhs~7 `signed char`) (name rhs~8 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~9 `int`))))
+         (compound-statement
+            (definition lhs~10 `signed char` (negate 24))
+            (definition rhs~11 `int` 1085561991)
+            (definition res~12 `int` (multiply (name lhs~10 `signed char`) (name rhs~11 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~12 `int`))))
+         (compound-statement
+            (definition lhs~13 `signed char` 31)
+            (definition rhs~14 `int` 535356770)
+            (definition res~15 `int` (multiply (name lhs~13 `signed char`) (name rhs~14 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~15 `int`))))
+         (compound-statement
+            (definition lhs~16 `signed char` (negate 38))
+            (definition rhs~17 `int` 335489304)
+            (definition res~18 `int` (multiply (name lhs~16 `signed char`) (name rhs~17 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~18 `int`))))
+         (compound-statement
+            (definition lhs~19 `signed char` (negate 50))
+            (definition rhs~20 `int` (negate 200379493))
+            (definition res~21 `int` (multiply (name lhs~19 `signed char`) (name rhs~20 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~21 `int`))))
+         (compound-statement
+            (definition lhs~22 `signed char` (negate 79))
+            (definition rhs~23 `int` 1063100910)
+            (definition res~24 `int` (multiply (name lhs~22 `signed char`) (name rhs~23 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~24 `int`))))
+         (compound-statement
+            (definition lhs~25 `signed char` (negate 43))
+            (definition rhs~26 `int` 1433830872)
+            (definition res~27 `int` (multiply (name lhs~25 `signed char`) (name rhs~26 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~27 `int`))))
+         (compound-statement
+            (definition lhs~28 `signed char` (negate 59))
+            (definition rhs~29 `int` (negate 1565065243))
+            (definition res~30 `int` (multiply (name lhs~28 `signed char`) (name rhs~29 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~30 `int`))))
+         (compound-statement
+            (definition lhs~31 `signed char` 7)
+            (definition rhs~32 `int` 1314541822)
+            (definition res~33 `int` (multiply (name lhs~31 `signed char`) (name rhs~32 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~33 `int`))))
+         (compound-statement
+            (definition lhs~34 `signed char` 22)
+            (definition rhs~35 `int` 2130723222)
+            (definition res~36 `int` (divide (name lhs~34 `signed char`) (name rhs~35 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~36 `int`))))
+         (compound-statement
+            (definition lhs~37 `signed char` 20)
+            (definition rhs~38 `int` (negate 526338596))
+            (definition res~39 `int` (divide (name lhs~37 `signed char`) (name rhs~38 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~39 `int`))))
+         (compound-statement
+            (definition lhs~40 `signed char` 124)
+            (definition rhs~41 `int` (negate 1624152800))
+            (definition res~42 `int` (divide (name lhs~40 `signed char`) (name rhs~41 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~42 `int`))))
+         (compound-statement
+            (definition lhs~43 `signed char` 3)
+            (definition rhs~44 `int` (negate 386789464))
+            (definition res~45 `int` (divide (name lhs~43 `signed char`) (name rhs~44 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~45 `int`))))
+         (compound-statement
+            (definition lhs~46 `signed char` 85)
+            (definition rhs~47 `int` (negate 1178379746))
+            (definition res~48 `int` (divide (name lhs~46 `signed char`) (name rhs~47 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~48 `int`))))
+         (compound-statement
+            (definition lhs~49 `signed char` 117)
+            (definition rhs~50 `int` 1133021937)
+            (definition res~51 `int` (divide (name lhs~49 `signed char`) (name rhs~50 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~51 `int`))))
+         (compound-statement
+            (definition lhs~52 `signed char` (negate 88))
+            (definition rhs~53 `int` (negate 765693828))
+            (definition res~54 `int` (divide (name lhs~52 `signed char`) (name rhs~53 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~54 `int`))))
+         (compound-statement
+            (definition lhs~55 `signed char` 16)
+            (definition rhs~56 `int` 75762238)
+            (definition res~57 `int` (divide (name lhs~55 `signed char`) (name rhs~56 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~57 `int`))))
+         (compound-statement
+            (definition lhs~58 `signed char` (negate 113))
+            (definition rhs~59 `int` 1362494507)
+            (definition res~60 `int` (divide (name lhs~58 `signed char`) (name rhs~59 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~60 `int`))))
+         (compound-statement
+            (definition lhs~61 `signed char` 72)
+            (definition rhs~62 `int` 1218267917)
+            (definition res~63 `int` (divide (name lhs~61 `signed char`) (name rhs~62 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~63 `int`))))
+         (compound-statement
+            (definition lhs~64 `signed char` (negate 85))
+            (definition rhs~65 `int` (negate 1617910420))
+            (definition res~66 `int` (modulo (name lhs~64 `signed char`) (name rhs~65 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~66 `int`))))
+         (compound-statement
+            (definition lhs~67 `signed char` (negate 61))
+            (definition rhs~68 `int` (negate 2140800499))
+            (definition res~69 `int` (modulo (name lhs~67 `signed char`) (name rhs~68 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~69 `int`))))
+         (compound-statement
+            (definition lhs~70 `signed char` 44)
+            (definition rhs~71 `int` 520461062)
+            (definition res~72 `int` (modulo (name lhs~70 `signed char`) (name rhs~71 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~72 `int`))))
+         (compound-statement
+            (definition lhs~73 `signed char` (negate 26))
+            (definition rhs~74 `int` (negate 648125865))
+            (definition res~75 `int` (modulo (name lhs~73 `signed char`) (name rhs~74 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~75 `int`))))
+         (compound-statement
+            (definition lhs~76 `signed char` 83)
+            (definition rhs~77 `int` 1008864711)
+            (definition res~78 `int` (modulo (name lhs~76 `signed char`) (name rhs~77 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~78 `int`))))
+         (compound-statement
+            (definition lhs~79 `signed char` 110)
+            (definition rhs~80 `int` (negate 2047720568))
+            (definition res~81 `int` (modulo (name lhs~79 `signed char`) (name rhs~80 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~81 `int`))))
+         (compound-statement
+            (definition lhs~82 `signed char` 64)
+            (definition rhs~83 `int` (negate 1334554146))
+            (definition res~84 `int` (modulo (name lhs~82 `signed char`) (name rhs~83 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~84 `int`))))
+         (compound-statement
+            (definition lhs~85 `signed char` (negate 43))
+            (definition rhs~86 `int` (negate 432510322))
+            (definition res~87 `int` (modulo (name lhs~85 `signed char`) (name rhs~86 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~87 `int`))))
+         (compound-statement
+            (definition lhs~88 `signed char` (negate 51))
+            (definition rhs~89 `int` 318297158)
+            (definition res~90 `int` (modulo (name lhs~88 `signed char`) (name rhs~89 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~90 `int`))))
+         (compound-statement
+            (definition lhs~91 `signed char` 116)
+            (definition rhs~92 `int` 1264634008)
+            (definition res~93 `int` (modulo (name lhs~91 `signed char`) (name rhs~92 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~93 `int`))))
+         (compound-statement
+            (definition lhs~94 `int` 1241245592)
+            (definition rhs~95 `signed char` (negate 9))
+            (definition res~96 `int` (multiply (name lhs~94 `int`) (name rhs~95 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~96 `int`))))
+         (compound-statement
+            (definition lhs~97 `int` (negate 1404875231))
+            (definition rhs~98 `signed char` (negate 85))
+            (definition res~99 `int` (multiply (name lhs~97 `int`) (name rhs~98 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~99 `int`))))
+         (compound-statement
+            (definition lhs~100 `int` (negate 2034668286))
+            (definition rhs~101 `signed char` 78)
+            (definition res~102 `int` (multiply (name lhs~100 `int`) (name rhs~101 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~102 `int`))))
+         (compound-statement
+            (definition lhs~103 `int` (negate 1534926537))
+            (definition rhs~104 `signed char` (negate 112))
+            (definition res~105 `int` (multiply (name lhs~103 `int`) (name rhs~104 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~105 `int`))))
+         (compound-statement
+            (definition lhs~106 `int` 991799229)
+            (definition rhs~107 `signed char` 15)
+            (definition res~108 `int` (multiply (name lhs~106 `int`) (name rhs~107 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~108 `int`))))
+         (compound-statement
+            (definition lhs~109 `int` (negate 1571135137))
+            (definition rhs~110 `signed char` (negate 3))
+            (definition res~111 `int` (multiply (name lhs~109 `int`) (name rhs~110 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~111 `int`))))
+         (compound-statement
+            (definition lhs~112 `int` 1039078959)
+            (definition rhs~113 `signed char` 12)
+            (definition res~114 `int` (multiply (name lhs~112 `int`) (name rhs~113 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~114 `int`))))
+         (compound-statement
+            (definition lhs~115 `int` 417462966)
+            (definition rhs~116 `signed char` (negate 8))
+            (definition res~117 `int` (multiply (name lhs~115 `int`) (name rhs~116 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~117 `int`))))
+         (compound-statement
+            (definition lhs~118 `int` 1643922295)
+            (definition rhs~119 `signed char` (negate 30))
+            (definition res~120 `int` (multiply (name lhs~118 `int`) (name rhs~119 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~120 `int`))))
+         (compound-statement
+            (definition lhs~121 `int` 651307866)
+            (definition rhs~122 `signed char` 121)
+            (definition res~123 `int` (multiply (name lhs~121 `int`) (name rhs~122 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~123 `int`))))
+         (compound-statement
+            (definition lhs~124 `int` (negate 996391813))
+            (definition rhs~125 `signed char` (negate 70))
+            (definition res~126 `int` (divide (name lhs~124 `int`) (name rhs~125 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~126 `int`))))
+         (compound-statement
+            (definition lhs~127 `int` (negate 1905165617))
+            (definition rhs~128 `signed char` (negate 30))
+            (definition res~129 `int` (divide (name lhs~127 `int`) (name rhs~128 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~129 `int`))))
+         (compound-statement
+            (definition lhs~130 `int` (negate 82884916))
+            (definition rhs~131 `signed char` (negate 90))
+            (definition res~132 `int` (divide (name lhs~130 `int`) (name rhs~131 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~132 `int`))))
+         (compound-statement
+            (definition lhs~133 `int` 821756556)
+            (definition rhs~134 `signed char` (negate 98))
+            (definition res~135 `int` (divide (name lhs~133 `int`) (name rhs~134 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~135 `int`))))
+         (compound-statement
+            (definition lhs~136 `int` (negate 1066721212))
+            (definition rhs~137 `signed char` 58)
+            (definition res~138 `int` (divide (name lhs~136 `int`) (name rhs~137 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~138 `int`))))
+         (compound-statement
+            (definition lhs~139 `int` (negate 2098581132))
+            (definition rhs~140 `signed char` (negate 89))
+            (definition res~141 `int` (divide (name lhs~139 `int`) (name rhs~140 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~141 `int`))))
+         (compound-statement
+            (definition lhs~142 `int` 1259711911)
+            (definition rhs~143 `signed char` (negate 116))
+            (definition res~144 `int` (divide (name lhs~142 `int`) (name rhs~143 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~144 `int`))))
+         (compound-statement
+            (definition lhs~145 `int` (negate 524946600))
+            (definition rhs~146 `signed char` (negate 95))
+            (definition res~147 `int` (divide (name lhs~145 `int`) (name rhs~146 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~147 `int`))))
+         (compound-statement
+            (definition lhs~148 `int` 1884303693)
+            (definition rhs~149 `signed char` (negate 63))
+            (definition res~150 `int` (divide (name lhs~148 `int`) (name rhs~149 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~150 `int`))))
+         (compound-statement
+            (definition lhs~151 `int` 1698350784)
+            (definition rhs~152 `signed char` 63)
+            (definition res~153 `int` (divide (name lhs~151 `int`) (name rhs~152 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~153 `int`))))
+         (compound-statement
+            (definition lhs~154 `int` (negate 2139711910))
+            (definition rhs~155 `signed char` (negate 22))
+            (definition res~156 `int` (modulo (name lhs~154 `int`) (name rhs~155 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~156 `int`))))
+         (compound-statement
+            (definition lhs~157 `int` (negate 566489291))
+            (definition rhs~158 `signed char` (negate 102))
+            (definition res~159 `int` (modulo (name lhs~157 `int`) (name rhs~158 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~159 `int`))))
+         (compound-statement
+            (definition lhs~160 `int` (negate 344552210))
+            (definition rhs~161 `signed char` (negate 7))
+            (definition res~162 `int` (modulo (name lhs~160 `int`) (name rhs~161 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~162 `int`))))
+         (compound-statement
+            (definition lhs~163 `int` 233013792)
+            (definition rhs~164 `signed char` 92)
+            (definition res~165 `int` (modulo (name lhs~163 `int`) (name rhs~164 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~165 `int`))))
+         (compound-statement
+            (definition lhs~166 `int` 2038675348)
+            (definition rhs~167 `signed char` (negate 9))
+            (definition res~168 `int` (modulo (name lhs~166 `int`) (name rhs~167 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~168 `int`))))
+         (compound-statement
+            (definition lhs~169 `int` 1240442094)
+            (definition rhs~170 `signed char` 13)
+            (definition res~171 `int` (modulo (name lhs~169 `int`) (name rhs~170 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~171 `int`))))
+         (compound-statement
+            (definition lhs~172 `int` 774661860)
+            (definition rhs~173 `signed char` (negate 46))
+            (definition res~174 `int` (modulo (name lhs~172 `int`) (name rhs~173 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~174 `int`))))
+         (compound-statement
+            (definition lhs~175 `int` 274143535)
+            (definition rhs~176 `signed char` 54)
+            (definition res~177 `int` (modulo (name lhs~175 `int`) (name rhs~176 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~177 `int`))))
+         (compound-statement
+            (definition lhs~178 `int` (negate 143878682))
+            (definition rhs~179 `signed char` (negate 98))
+            (definition res~180 `int` (modulo (name lhs~178 `int`) (name rhs~179 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~180 `int`))))
+         (compound-statement
+            (definition lhs~181 `int` 120136605)
+            (definition rhs~182 `signed char` 88)
+            (definition res~183 `int` (modulo (name lhs~181 `int`) (name rhs~182 `signed char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~183 `int`))))
+         (compound-statement
+            (definition lhs~184 `unsigned char` 221)
+            (definition rhs~185 `unsigned int` 3356079800)
+            (definition res~186 `unsigned int` (multiply (name lhs~184 `unsigned char`) (name rhs~185 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~186 `unsigned int`))))
+         (compound-statement
+            (definition lhs~187 `unsigned char` 148)
+            (definition rhs~188 `unsigned int` 2143909894)
+            (definition res~189 `unsigned int` (multiply (name lhs~187 `unsigned char`) (name rhs~188 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~189 `unsigned int`))))
+         (compound-statement
+            (definition lhs~190 `unsigned char` 167)
+            (definition rhs~191 `unsigned int` 4055620795)
+            (definition res~192 `unsigned int` (multiply (name lhs~190 `unsigned char`) (name rhs~191 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~192 `unsigned int`))))
+         (compound-statement
+            (definition lhs~193 `unsigned char` 72)
+            (definition rhs~194 `unsigned int` 344239587)
+            (definition res~195 `unsigned int` (multiply (name lhs~193 `unsigned char`) (name rhs~194 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~195 `unsigned int`))))
+         (compound-statement
+            (definition lhs~196 `unsigned char` 95)
+            (definition rhs~197 `unsigned int` 3788785085)
+            (definition res~198 `unsigned int` (multiply (name lhs~196 `unsigned char`) (name rhs~197 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~198 `unsigned int`))))
+         (compound-statement
+            (definition lhs~199 `unsigned char` 134)
+            (definition rhs~200 `unsigned int` 2389282163)
+            (definition res~201 `unsigned int` (multiply (name lhs~199 `unsigned char`) (name rhs~200 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~201 `unsigned int`))))
+         (compound-statement
+            (definition lhs~202 `unsigned char` 186)
+            (definition rhs~203 `unsigned int` 1860696443)
+            (definition res~204 `unsigned int` (multiply (name lhs~202 `unsigned char`) (name rhs~203 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~204 `unsigned int`))))
+         (compound-statement
+            (definition lhs~205 `unsigned char` 109)
+            (definition rhs~206 `unsigned int` 2279274733)
+            (definition res~207 `unsigned int` (multiply (name lhs~205 `unsigned char`) (name rhs~206 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~207 `unsigned int`))))
+         (compound-statement
+            (definition lhs~208 `unsigned char` 122)
+            (definition rhs~209 `unsigned int` 2790188657)
+            (definition res~210 `unsigned int` (multiply (name lhs~208 `unsigned char`) (name rhs~209 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~210 `unsigned int`))))
+         (compound-statement
+            (definition lhs~211 `unsigned char` 37)
+            (definition rhs~212 `unsigned int` 588755674)
+            (definition res~213 `unsigned int` (multiply (name lhs~211 `unsigned char`) (name rhs~212 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~213 `unsigned int`))))
+         (compound-statement
+            (definition lhs~214 `unsigned char` 58)
+            (definition rhs~215 `unsigned int` 1368033447)
+            (definition res~216 `unsigned int` (divide (name lhs~214 `unsigned char`) (name rhs~215 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~216 `unsigned int`))))
+         (compound-statement
+            (definition lhs~217 `unsigned char` 65)
+            (definition rhs~218 `unsigned int` 1237336755)
+            (definition res~219 `unsigned int` (divide (name lhs~217 `unsigned char`) (name rhs~218 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~219 `unsigned int`))))
+         (compound-statement
+            (definition lhs~220 `unsigned char` 253)
+            (definition rhs~221 `unsigned int` 2888507760)
+            (definition res~222 `unsigned int` (divide (name lhs~220 `unsigned char`) (name rhs~221 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~222 `unsigned int`))))
+         (compound-statement
+            (definition lhs~223 `unsigned char` 95)
+            (definition rhs~224 `unsigned int` 2352884500)
+            (definition res~225 `unsigned int` (divide (name lhs~223 `unsigned char`) (name rhs~224 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~225 `unsigned int`))))
+         (compound-statement
+            (definition lhs~226 `unsigned char` 170)
+            (definition rhs~227 `unsigned int` 1621420794)
+            (definition res~228 `unsigned int` (divide (name lhs~226 `unsigned char`) (name rhs~227 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~228 `unsigned int`))))
+         (compound-statement
+            (definition lhs~229 `unsigned char` 19)
+            (definition rhs~230 `unsigned int` 2911396732)
+            (definition res~231 `unsigned int` (divide (name lhs~229 `unsigned char`) (name rhs~230 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~231 `unsigned int`))))
+         (compound-statement
+            (definition lhs~232 `unsigned char` 159)
+            (definition rhs~233 `unsigned int` 2345210453)
+            (definition res~234 `unsigned int` (divide (name lhs~232 `unsigned char`) (name rhs~233 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~234 `unsigned int`))))
+         (compound-statement
+            (definition lhs~235 `unsigned char` 31)
+            (definition rhs~236 `unsigned int` 954918160)
+            (definition res~237 `unsigned int` (divide (name lhs~235 `unsigned char`) (name rhs~236 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~237 `unsigned int`))))
+         (compound-statement
+            (definition lhs~238 `unsigned char` 228)
+            (definition rhs~239 `unsigned int` 1926245250)
+            (definition res~240 `unsigned int` (divide (name lhs~238 `unsigned char`) (name rhs~239 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~240 `unsigned int`))))
+         (compound-statement
+            (definition lhs~241 `unsigned char` 247)
+            (definition rhs~242 `unsigned int` 2998210528)
+            (definition res~243 `unsigned int` (divide (name lhs~241 `unsigned char`) (name rhs~242 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~243 `unsigned int`))))
+         (compound-statement
+            (definition lhs~244 `unsigned char` 110)
+            (definition rhs~245 `unsigned int` 1840167084)
+            (definition res~246 `unsigned int` (modulo (name lhs~244 `unsigned char`) (name rhs~245 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~246 `unsigned int`))))
+         (compound-statement
+            (definition lhs~247 `unsigned char` 199)
+            (definition rhs~248 `unsigned int` 2800079115)
+            (definition res~249 `unsigned int` (modulo (name lhs~247 `unsigned char`) (name rhs~248 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~249 `unsigned int`))))
+         (compound-statement
+            (definition lhs~250 `unsigned char` 192)
+            (definition rhs~251 `unsigned int` 2863657021)
+            (definition res~252 `unsigned int` (modulo (name lhs~250 `unsigned char`) (name rhs~251 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~252 `unsigned int`))))
+         (compound-statement
+            (definition lhs~253 `unsigned char` 36)
+            (definition rhs~254 `unsigned int` 109876255)
+            (definition res~255 `unsigned int` (modulo (name lhs~253 `unsigned char`) (name rhs~254 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~255 `unsigned int`))))
+         (compound-statement
+            (definition lhs~256 `unsigned char` 106)
+            (definition rhs~257 `unsigned int` 100414635)
+            (definition res~258 `unsigned int` (modulo (name lhs~256 `unsigned char`) (name rhs~257 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~258 `unsigned int`))))
+         (compound-statement
+            (definition lhs~259 `unsigned char` 71)
+            (definition rhs~260 `unsigned int` 3842679516)
+            (definition res~261 `unsigned int` (modulo (name lhs~259 `unsigned char`) (name rhs~260 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~261 `unsigned int`))))
+         (compound-statement
+            (definition lhs~262 `unsigned char` 77)
+            (definition rhs~263 `unsigned int` 1135558079)
+            (definition res~264 `unsigned int` (modulo (name lhs~262 `unsigned char`) (name rhs~263 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~264 `unsigned int`))))
+         (compound-statement
+            (definition lhs~265 `unsigned char` 136)
+            (definition rhs~266 `unsigned int` 1104401059)
+            (definition res~267 `unsigned int` (modulo (name lhs~265 `unsigned char`) (name rhs~266 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~267 `unsigned int`))))
+         (compound-statement
+            (definition lhs~268 `unsigned char` 87)
+            (definition rhs~269 `unsigned int` 725243276)
+            (definition res~270 `unsigned int` (modulo (name lhs~268 `unsigned char`) (name rhs~269 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~270 `unsigned int`))))
+         (compound-statement
+            (definition lhs~271 `unsigned char` 163)
+            (definition rhs~272 `unsigned int` 99060050)
+            (definition res~273 `unsigned int` (modulo (name lhs~271 `unsigned char`) (name rhs~272 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~273 `unsigned int`))))
+         (compound-statement
+            (definition lhs~274 `unsigned int` 3821878247)
+            (definition rhs~275 `unsigned char` 103)
+            (definition res~276 `unsigned int` (multiply (name lhs~274 `unsigned int`) (name rhs~275 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~276 `unsigned int`))))
+         (compound-statement
+            (definition lhs~277 `unsigned int` 3129907773)
+            (definition rhs~278 `unsigned char` 22)
+            (definition res~279 `unsigned int` (multiply (name lhs~277 `unsigned int`) (name rhs~278 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~279 `unsigned int`))))
+         (compound-statement
+            (definition lhs~280 `unsigned int` 1140330580)
+            (definition rhs~281 `unsigned char` 139)
+            (definition res~282 `unsigned int` (multiply (name lhs~280 `unsigned int`) (name rhs~281 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~282 `unsigned int`))))
+         (compound-statement
+            (definition lhs~283 `unsigned int` 457870325)
+            (definition rhs~284 `unsigned char` 83)
+            (definition res~285 `unsigned int` (multiply (name lhs~283 `unsigned int`) (name rhs~284 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~285 `unsigned int`))))
+         (compound-statement
+            (definition lhs~286 `unsigned int` 4261681089)
+            (definition rhs~287 `unsigned char` 142)
+            (definition res~288 `unsigned int` (multiply (name lhs~286 `unsigned int`) (name rhs~287 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~288 `unsigned int`))))
+         (compound-statement
+            (definition lhs~289 `unsigned int` 3950196219)
+            (definition rhs~290 `unsigned char` 56)
+            (definition res~291 `unsigned int` (multiply (name lhs~289 `unsigned int`) (name rhs~290 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~291 `unsigned int`))))
+         (compound-statement
+            (definition lhs~292 `unsigned int` 2950160282)
+            (definition rhs~293 `unsigned char` 132)
+            (definition res~294 `unsigned int` (multiply (name lhs~292 `unsigned int`) (name rhs~293 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~294 `unsigned int`))))
+         (compound-statement
+            (definition lhs~295 `unsigned int` 3481837387)
+            (definition rhs~296 `unsigned char` 190)
+            (definition res~297 `unsigned int` (multiply (name lhs~295 `unsigned int`) (name rhs~296 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~297 `unsigned int`))))
+         (compound-statement
+            (definition lhs~298 `unsigned int` 2632772191)
+            (definition rhs~299 `unsigned char` 227)
+            (definition res~300 `unsigned int` (multiply (name lhs~298 `unsigned int`) (name rhs~299 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~300 `unsigned int`))))
+         (compound-statement
+            (definition lhs~301 `unsigned int` 3596525884)
+            (definition rhs~302 `unsigned char` 160)
+            (definition res~303 `unsigned int` (multiply (name lhs~301 `unsigned int`) (name rhs~302 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~303 `unsigned int`))))
+         (compound-statement
+            (definition lhs~304 `unsigned int` 1432529869)
+            (definition rhs~305 `unsigned char` 201)
+            (definition res~306 `unsigned int` (divide (name lhs~304 `unsigned int`) (name rhs~305 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~306 `unsigned int`))))
+         (compound-statement
+            (definition lhs~307 `unsigned int` 2926028971)
+            (definition rhs~308 `unsigned char` 47)
+            (definition res~309 `unsigned int` (divide (name lhs~307 `unsigned int`) (name rhs~308 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~309 `unsigned int`))))
+         (compound-statement
+            (definition lhs~310 `unsigned int` 764668370)
+            (definition rhs~311 `unsigned char` 235)
+            (definition res~312 `unsigned int` (divide (name lhs~310 `unsigned int`) (name rhs~311 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~312 `unsigned int`))))
+         (compound-statement
+            (definition lhs~313 `unsigned int` 2047870516)
+            (definition rhs~314 `unsigned char` 205)
+            (definition res~315 `unsigned int` (divide (name lhs~313 `unsigned int`) (name rhs~314 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~315 `unsigned int`))))
+         (compound-statement
+            (definition lhs~316 `unsigned int` 986986816)
+            (definition rhs~317 `unsigned char` 74)
+            (definition res~318 `unsigned int` (divide (name lhs~316 `unsigned int`) (name rhs~317 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~318 `unsigned int`))))
+         (compound-statement
+            (definition lhs~319 `unsigned int` 3645566492)
+            (definition rhs~320 `unsigned char` 195)
+            (definition res~321 `unsigned int` (divide (name lhs~319 `unsigned int`) (name rhs~320 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~321 `unsigned int`))))
+         (compound-statement
+            (definition lhs~322 `unsigned int` 3612188356)
+            (definition rhs~323 `unsigned char` 162)
+            (definition res~324 `unsigned int` (divide (name lhs~322 `unsigned int`) (name rhs~323 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~324 `unsigned int`))))
+         (compound-statement
+            (definition lhs~325 `unsigned int` 2400582198)
+            (definition rhs~326 `unsigned char` 223)
+            (definition res~327 `unsigned int` (divide (name lhs~325 `unsigned int`) (name rhs~326 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~327 `unsigned int`))))
+         (compound-statement
+            (definition lhs~328 `unsigned int` 1576840474)
+            (definition rhs~329 `unsigned char` 248)
+            (definition res~330 `unsigned int` (divide (name lhs~328 `unsigned int`) (name rhs~329 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~330 `unsigned int`))))
+         (compound-statement
+            (definition lhs~331 `unsigned int` 1044594415)
+            (definition rhs~332 `unsigned char` 154)
+            (definition res~333 `unsigned int` (divide (name lhs~331 `unsigned int`) (name rhs~332 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~333 `unsigned int`))))
+         (compound-statement
+            (definition lhs~334 `unsigned int` 2142168554)
+            (definition rhs~335 `unsigned char` 253)
+            (definition res~336 `unsigned int` (modulo (name lhs~334 `unsigned int`) (name rhs~335 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~336 `unsigned int`))))
+         (compound-statement
+            (definition lhs~337 `unsigned int` 1250014288)
+            (definition rhs~338 `unsigned char` 30)
+            (definition res~339 `unsigned int` (modulo (name lhs~337 `unsigned int`) (name rhs~338 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~339 `unsigned int`))))
+         (compound-statement
+            (definition lhs~340 `unsigned int` 3234742362)
+            (definition rhs~341 `unsigned char` 225)
+            (definition res~342 `unsigned int` (modulo (name lhs~340 `unsigned int`) (name rhs~341 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~342 `unsigned int`))))
+         (compound-statement
+            (definition lhs~343 `unsigned int` 701309745)
+            (definition rhs~344 `unsigned char` 162)
+            (definition res~345 `unsigned int` (modulo (name lhs~343 `unsigned int`) (name rhs~344 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~345 `unsigned int`))))
+         (compound-statement
+            (definition lhs~346 `unsigned int` 4070485465)
+            (definition rhs~347 `unsigned char` 83)
+            (definition res~348 `unsigned int` (modulo (name lhs~346 `unsigned int`) (name rhs~347 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~348 `unsigned int`))))
+         (compound-statement
+            (definition lhs~349 `unsigned int` 182410960)
+            (definition rhs~350 `unsigned char` 234)
+            (definition res~351 `unsigned int` (modulo (name lhs~349 `unsigned int`) (name rhs~350 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~351 `unsigned int`))))
+         (compound-statement
+            (definition lhs~352 `unsigned int` 212920129)
+            (definition rhs~353 `unsigned char` 248)
+            (definition res~354 `unsigned int` (modulo (name lhs~352 `unsigned int`) (name rhs~353 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~354 `unsigned int`))))
+         (compound-statement
+            (definition lhs~355 `unsigned int` 1444163668)
+            (definition rhs~356 `unsigned char` 198)
+            (definition res~357 `unsigned int` (modulo (name lhs~355 `unsigned int`) (name rhs~356 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~357 `unsigned int`))))
+         (compound-statement
+            (definition lhs~358 `unsigned int` 1751208024)
+            (definition rhs~359 `unsigned char` 246)
+            (definition res~360 `unsigned int` (modulo (name lhs~358 `unsigned int`) (name rhs~359 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~360 `unsigned int`))))
+         (compound-statement
+            (definition lhs~361 `unsigned int` 1143288797)
+            (definition rhs~362 `unsigned char` 231)
+            (definition res~363 `unsigned int` (modulo (name lhs~361 `unsigned int`) (name rhs~362 `unsigned char`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~363 `unsigned int`))))
+         (compound-statement
+            (definition lhs~364 `int` (negate 2015750594))
+            (definition rhs~365 `int` (negate 430906186))
+            (definition res~366 `int` (multiply (name lhs~364 `int`) (name rhs~365 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~366 `int`))))
+         (compound-statement
+            (definition lhs~367 `int` (negate 532421455))
+            (definition rhs~368 `int` 541355389)
+            (definition res~369 `int` (multiply (name lhs~367 `int`) (name rhs~368 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~369 `int`))))
+         (compound-statement
+            (definition lhs~370 `int` (negate 1375576302))
+            (definition rhs~371 `int` (negate 1351114224))
+            (definition res~372 `int` (multiply (name lhs~370 `int`) (name rhs~371 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~372 `int`))))
+         (compound-statement
+            (definition lhs~373 `int` (negate 1102735862))
+            (definition rhs~374 `int` (negate 1413057312))
+            (definition res~375 `int` (multiply (name lhs~373 `int`) (name rhs~374 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~375 `int`))))
+         (compound-statement
+            (definition lhs~376 `int` 540812634)
+            (definition rhs~377 `int` 1291228103)
+            (definition res~378 `int` (multiply (name lhs~376 `int`) (name rhs~377 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~378 `int`))))
+         (compound-statement
+            (definition lhs~379 `int` 263928669)
+            (definition rhs~380 `int` (negate 927331211))
+            (definition res~381 `int` (multiply (name lhs~379 `int`) (name rhs~380 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~381 `int`))))
+         (compound-statement
+            (definition lhs~382 `int` (negate 1288687871))
+            (definition rhs~383 `int` 1671089401)
+            (definition res~384 `int` (multiply (name lhs~382 `int`) (name rhs~383 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~384 `int`))))
+         (compound-statement
+            (definition lhs~385 `int` (negate 1558867448))
+            (definition rhs~386 `int` 842668270)
+            (definition res~387 `int` (multiply (name lhs~385 `int`) (name rhs~386 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~387 `int`))))
+         (compound-statement
+            (definition lhs~388 `int` 247313622)
+            (definition rhs~389 `int` (negate 955261236))
+            (definition res~390 `int` (multiply (name lhs~388 `int`) (name rhs~389 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~390 `int`))))
+         (compound-statement
+            (definition lhs~391 `int` 552302116)
+            (definition rhs~392 `int` 533292454)
+            (definition res~393 `int` (multiply (name lhs~391 `int`) (name rhs~392 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~393 `int`))))
+         (compound-statement
+            (definition lhs~394 `int` 1146106468)
+            (definition rhs~395 `int` (negate 250231275))
+            (definition res~396 `int` (divide (name lhs~394 `int`) (name rhs~395 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~396 `int`))))
+         (compound-statement
+            (definition lhs~397 `int` 187376103)
+            (definition rhs~398 `int` 155181467)
+            (definition res~399 `int` (divide (name lhs~397 `int`) (name rhs~398 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~399 `int`))))
+         (compound-statement
+            (definition lhs~400 `int` 896126206)
+            (definition rhs~401 `int` (negate 237357416))
+            (definition res~402 `int` (divide (name lhs~400 `int`) (name rhs~401 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~402 `int`))))
+         (compound-statement
+            (definition lhs~403 `int` (negate 647136556))
+            (definition rhs~404 `int` 1205640257)
+            (definition res~405 `int` (divide (name lhs~403 `int`) (name rhs~404 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~405 `int`))))
+         (compound-statement
+            (definition lhs~406 `int` (negate 657404533))
+            (definition rhs~407 `int` 110556297)
+            (definition res~408 `int` (divide (name lhs~406 `int`) (name rhs~407 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~408 `int`))))
+         (compound-statement
+            (definition lhs~409 `int` 405434342)
+            (definition rhs~410 `int` 1308249221)
+            (definition res~411 `int` (divide (name lhs~409 `int`) (name rhs~410 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~411 `int`))))
+         (compound-statement
+            (definition lhs~412 `int` (negate 172080891))
+            (definition rhs~413 `int` 1999684074)
+            (definition res~414 `int` (divide (name lhs~412 `int`) (name rhs~413 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~414 `int`))))
+         (compound-statement
+            (definition lhs~415 `int` (negate 1062093219))
+            (definition rhs~416 `int` (negate 35025876))
+            (definition res~417 `int` (divide (name lhs~415 `int`) (name rhs~416 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~417 `int`))))
+         (compound-statement
+            (definition lhs~418 `int` (negate 1147643045))
+            (definition rhs~419 `int` 1952154378)
+            (definition res~420 `int` (divide (name lhs~418 `int`) (name rhs~419 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~420 `int`))))
+         (compound-statement
+            (definition lhs~421 `int` 832295358)
+            (definition rhs~422 `int` (negate 1007747797))
+            (definition res~423 `int` (divide (name lhs~421 `int`) (name rhs~422 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~423 `int`))))
+         (compound-statement
+            (definition lhs~424 `int` 766192899)
+            (definition rhs~425 `int` (negate 1227615481))
+            (definition res~426 `int` (modulo (name lhs~424 `int`) (name rhs~425 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~426 `int`))))
+         (compound-statement
+            (definition lhs~427 `int` 1721459721)
+            (definition rhs~428 `int` (negate 1448818021))
+            (definition res~429 `int` (modulo (name lhs~427 `int`) (name rhs~428 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~429 `int`))))
+         (compound-statement
+            (definition lhs~430 `int` (negate 481354795))
+            (definition rhs~431 `int` (negate 1922161984))
+            (definition res~432 `int` (modulo (name lhs~430 `int`) (name rhs~431 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~432 `int`))))
+         (compound-statement
+            (definition lhs~433 `int` (negate 1338778267))
+            (definition rhs~434 `int` 1423163830)
+            (definition res~435 `int` (modulo (name lhs~433 `int`) (name rhs~434 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~435 `int`))))
+         (compound-statement
+            (definition lhs~436 `int` (negate 1939618890))
+            (definition rhs~437 `int` 331074794)
+            (definition res~438 `int` (modulo (name lhs~436 `int`) (name rhs~437 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~438 `int`))))
+         (compound-statement
+            (definition lhs~439 `int` (negate 465205881))
+            (definition rhs~440 `int` 1912009880)
+            (definition res~441 `int` (modulo (name lhs~439 `int`) (name rhs~440 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~441 `int`))))
+         (compound-statement
+            (definition lhs~442 `int` 152470989)
+            (definition rhs~443 `int` 89137728)
+            (definition res~444 `int` (modulo (name lhs~442 `int`) (name rhs~443 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~444 `int`))))
+         (compound-statement
+            (definition lhs~445 `int` (negate 165181365))
+            (definition rhs~446 `int` (negate 646476654))
+            (definition res~447 `int` (modulo (name lhs~445 `int`) (name rhs~446 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~447 `int`))))
+         (compound-statement
+            (definition lhs~448 `int` (negate 1603887395))
+            (definition rhs~449 `int` (negate 292853647))
+            (definition res~450 `int` (modulo (name lhs~448 `int`) (name rhs~449 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~450 `int`))))
+         (compound-statement
+            (definition lhs~451 `int` (negate 785488071))
+            (definition rhs~452 `int` (negate 1455144215))
+            (definition res~453 `int` (modulo (name lhs~451 `int`) (name rhs~452 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 3))
+                  (name res~453 `int`))))
+         (compound-statement
+            (definition lhs~454 `unsigned int` 3470280314)
+            (definition rhs~455 `unsigned int` 195359260)
+            (definition res~456 `unsigned int` (multiply (name lhs~454 `unsigned int`) (name rhs~455 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~456 `unsigned int`))))
+         (compound-statement
+            (definition lhs~457 `unsigned int` 1341893414)
+            (definition rhs~458 `unsigned int` 1633549130)
+            (definition res~459 `unsigned int` (multiply (name lhs~457 `unsigned int`) (name rhs~458 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~459 `unsigned int`))))
+         (compound-statement
+            (definition lhs~460 `unsigned int` 2072520114)
+            (definition rhs~461 `unsigned int` 178812277)
+            (definition res~462 `unsigned int` (multiply (name lhs~460 `unsigned int`) (name rhs~461 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~462 `unsigned int`))))
+         (compound-statement
+            (definition lhs~463 `unsigned int` 1238220340)
+            (definition rhs~464 `unsigned int` 1367327492)
+            (definition res~465 `unsigned int` (multiply (name lhs~463 `unsigned int`) (name rhs~464 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~465 `unsigned int`))))
+         (compound-statement
+            (definition lhs~466 `unsigned int` 1880450380)
+            (definition rhs~467 `unsigned int` 3214827302)
+            (definition res~468 `unsigned int` (multiply (name lhs~466 `unsigned int`) (name rhs~467 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~468 `unsigned int`))))
+         (compound-statement
+            (definition lhs~469 `unsigned int` 4241199250)
+            (definition rhs~470 `unsigned int` 3974509551)
+            (definition res~471 `unsigned int` (multiply (name lhs~469 `unsigned int`) (name rhs~470 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~471 `unsigned int`))))
+         (compound-statement
+            (definition lhs~472 `unsigned int` 4082807693)
+            (definition rhs~473 `unsigned int` 4126906806)
+            (definition res~474 `unsigned int` (multiply (name lhs~472 `unsigned int`) (name rhs~473 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~474 `unsigned int`))))
+         (compound-statement
+            (definition lhs~475 `unsigned int` 27040486)
+            (definition rhs~476 `unsigned int` 915042028)
+            (definition res~477 `unsigned int` (multiply (name lhs~475 `unsigned int`) (name rhs~476 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~477 `unsigned int`))))
+         (compound-statement
+            (definition lhs~478 `unsigned int` 3198221414)
+            (definition rhs~479 `unsigned int` 573202128)
+            (definition res~480 `unsigned int` (multiply (name lhs~478 `unsigned int`) (name rhs~479 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~480 `unsigned int`))))
+         (compound-statement
+            (definition lhs~481 `unsigned int` 2888469990)
+            (definition rhs~482 `unsigned int` 2012195590)
+            (definition res~483 `unsigned int` (multiply (name lhs~481 `unsigned int`) (name rhs~482 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~483 `unsigned int`))))
+         (compound-statement
+            (definition lhs~484 `unsigned int` 2072282458)
+            (definition rhs~485 `unsigned int` 1441452130)
+            (definition res~486 `unsigned int` (divide (name lhs~484 `unsigned int`) (name rhs~485 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~486 `unsigned int`))))
+         (compound-statement
+            (definition lhs~487 `unsigned int` 2200029653)
+            (definition rhs~488 `unsigned int` 3148300494)
+            (definition res~489 `unsigned int` (divide (name lhs~487 `unsigned int`) (name rhs~488 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~489 `unsigned int`))))
+         (compound-statement
+            (definition lhs~490 `unsigned int` 4031479772)
+            (definition rhs~491 `unsigned int` 981663985)
+            (definition res~492 `unsigned int` (divide (name lhs~490 `unsigned int`) (name rhs~491 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~492 `unsigned int`))))
+         (compound-statement
+            (definition lhs~493 `unsigned int` 3409953383)
+            (definition rhs~494 `unsigned int` 1864749459)
+            (definition res~495 `unsigned int` (divide (name lhs~493 `unsigned int`) (name rhs~494 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~495 `unsigned int`))))
+         (compound-statement
+            (definition lhs~496 `unsigned int` 1003848748)
+            (definition rhs~497 `unsigned int` 2779959558)
+            (definition res~498 `unsigned int` (divide (name lhs~496 `unsigned int`) (name rhs~497 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~498 `unsigned int`))))
+         (compound-statement
+            (definition lhs~499 `unsigned int` 1056775542)
+            (definition rhs~500 `unsigned int` 2059174382)
+            (definition res~501 `unsigned int` (divide (name lhs~499 `unsigned int`) (name rhs~500 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~501 `unsigned int`))))
+         (compound-statement
+            (definition lhs~502 `unsigned int` 2858273880)
+            (definition rhs~503 `unsigned int` 3346649347)
+            (definition res~504 `unsigned int` (divide (name lhs~502 `unsigned int`) (name rhs~503 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~504 `unsigned int`))))
+         (compound-statement
+            (definition lhs~505 `unsigned int` 2199716413)
+            (definition rhs~506 `unsigned int` 2949603016)
+            (definition res~507 `unsigned int` (divide (name lhs~505 `unsigned int`) (name rhs~506 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~507 `unsigned int`))))
+         (compound-statement
+            (definition lhs~508 `unsigned int` 810165642)
+            (definition rhs~509 `unsigned int` 241323840)
+            (definition res~510 `unsigned int` (divide (name lhs~508 `unsigned int`) (name rhs~509 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~510 `unsigned int`))))
+         (compound-statement
+            (definition lhs~511 `unsigned int` 3303349263)
+            (definition rhs~512 `unsigned int` 2707269606)
+            (definition res~513 `unsigned int` (divide (name lhs~511 `unsigned int`) (name rhs~512 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~513 `unsigned int`))))
+         (compound-statement
+            (definition lhs~514 `unsigned int` 1146446010)
+            (definition rhs~515 `unsigned int` 3689339677)
+            (definition res~516 `unsigned int` (modulo (name lhs~514 `unsigned int`) (name rhs~515 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~516 `unsigned int`))))
+         (compound-statement
+            (definition lhs~517 `unsigned int` 673552128)
+            (definition rhs~518 `unsigned int` 2666725966)
+            (definition res~519 `unsigned int` (modulo (name lhs~517 `unsigned int`) (name rhs~518 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~519 `unsigned int`))))
+         (compound-statement
+            (definition lhs~520 `unsigned int` 1631912914)
+            (definition rhs~521 `unsigned int` 1970178955)
+            (definition res~522 `unsigned int` (modulo (name lhs~520 `unsigned int`) (name rhs~521 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~522 `unsigned int`))))
+         (compound-statement
+            (definition lhs~523 `unsigned int` 3677461164)
+            (definition rhs~524 `unsigned int` 1235300700)
+            (definition res~525 `unsigned int` (modulo (name lhs~523 `unsigned int`) (name rhs~524 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~525 `unsigned int`))))
+         (compound-statement
+            (definition lhs~526 `unsigned int` 3678341959)
+            (definition rhs~527 `unsigned int` 474172301)
+            (definition res~528 `unsigned int` (modulo (name lhs~526 `unsigned int`) (name rhs~527 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~528 `unsigned int`))))
+         (compound-statement
+            (definition lhs~529 `unsigned int` 3471160058)
+            (definition rhs~530 `unsigned int` 2574189654)
+            (definition res~531 `unsigned int` (modulo (name lhs~529 `unsigned int`) (name rhs~530 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~531 `unsigned int`))))
+         (compound-statement
+            (definition lhs~532 `unsigned int` 2451701930)
+            (definition rhs~533 `unsigned int` 2410568531)
+            (definition res~534 `unsigned int` (modulo (name lhs~532 `unsigned int`) (name rhs~533 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~534 `unsigned int`))))
+         (compound-statement
+            (definition lhs~535 `unsigned int` 3158817002)
+            (definition rhs~536 `unsigned int` 1878300766)
+            (definition res~537 `unsigned int` (modulo (name lhs~535 `unsigned int`) (name rhs~536 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~537 `unsigned int`))))
+         (compound-statement
+            (definition lhs~538 `unsigned int` 1190413219)
+            (definition rhs~539 `unsigned int` 1090018827)
+            (definition res~540 `unsigned int` (modulo (name lhs~538 `unsigned int`) (name rhs~539 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~540 `unsigned int`))))
+         (compound-statement
+            (definition lhs~541 `unsigned int` 1378928665)
+            (definition rhs~542 `unsigned int` 505183221)
+            (definition res~543 `unsigned int` (modulo (name lhs~541 `unsigned int`) (name rhs~542 `unsigned int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (deref (add (name argv~3 `ptr<ptr<char>>`) 7))
+                  (name res~543 `unsigned int`)))))))
+
+----- stderr -----

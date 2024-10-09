@@ -61,6 +61,9 @@ extern {
         "+" => Token { kind: panko_lex::TokenKind::Plus, .. },
         "-" => Token { kind: panko_lex::TokenKind::Minus, .. },
 
+        "/" => Token { kind: panko_lex::TokenKind::Slash, .. },
+        "%" => Token { kind: panko_lex::TokenKind::Percent, .. },
+
         "==" => Token { kind: panko_lex::TokenKind::EqualEqual, .. },
         "!=" => Token { kind: panko_lex::TokenKind::BangEqual, .. },
 
@@ -330,8 +333,16 @@ CastExpression: ast::Expression<'a> = {
     UnaryExpression,
 }
 
+MultiplicativeOperator: ast::BinOpKind = {
+    "*" => ast::BinOpKind::Multiply,
+    "/" => ast::BinOpKind::Divide,
+    "%" => ast::BinOpKind::Modulo,
+}
+
 MultiplicativeExpression: ast::Expression<'a> = {
     CastExpression,
+    <lhs:Bump<MultiplicativeExpression>> <kind:MultiplicativeOperator> <rhs:Bump<CastExpression>> =>
+        ast::Expression::BinOp { <> },
 }
 
 AdditiveOperator: ast::BinOpKind = {

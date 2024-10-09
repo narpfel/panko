@@ -529,6 +529,9 @@ pub enum Expression<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub enum BinOpKind {
+    Multiply,
+    Divide,
+    Modulo,
     Add,
     Subtract,
     Equal,
@@ -542,6 +545,9 @@ pub enum BinOpKind {
 impl BinOpKind {
     pub fn str(self) -> &'static str {
         match self {
+            BinOpKind::Multiply => "multiply",
+            BinOpKind::Divide => "divide",
+            BinOpKind::Modulo => "modulo",
             BinOpKind::Add => "add",
             BinOpKind::Subtract => "subtract",
             BinOpKind::Equal => "equal",

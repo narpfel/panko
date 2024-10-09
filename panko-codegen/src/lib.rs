@@ -415,6 +415,14 @@ impl<'a> Codegen<'a> {
                 let emit_arithmetic = |cg: &mut Self, operation| {
                     cg.emit_args(operation, &[&Rax.typed(lhs), rhs]);
                 };
+                let emit_sign_dependent_arithmetic =
+                    |cg: &mut Self, operation_if_signed, operation_if_unsigned| {
+                        let operation = match ty.signedness {
+                            Signedness::Signed => operation_if_signed,
+                            Signedness::Unsigned => operation_if_unsigned,
+                        };
+                        emit_arithmetic(cg, operation);
+                    };
                 let emit_comparison = |cg: &mut Self, operation| {
                     assert!(matches!(lhs.ty.ty, Type::Arithmetic(_) | Type::Pointer(_)));
                     emit_arithmetic(cg, "cmp");
@@ -436,6 +444,32 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[&Rax.typed(lhs), lhs]);
 
                 match kind {
+                    BinOpKind::Multiply => emit_arithmetic(self, "imul"),
+                    BinOpKind::Divide | BinOpKind::Modulo => {
+                        let prepare_upper_half = match ty.signedness {
+                            Signedness::Signed => match ty.size() {
+                                1 => "movsx ax, al",
+                                2 => "cwd",
+                                4 => "cdq",
+                                8 => "cqo",
+                                _ => unreachable!(),
+                            },
+                            Signedness::Unsigned => match ty.size() {
+                                1 => "movzx ax, al",
+                                2 | 4 | 8 => "xor edx, edx",
+                                _ => unreachable!(),
+                            },
+                        };
+                        self.emit(prepare_upper_half);
+                        emit_sign_dependent_arithmetic(self, "idiv", "div");
+                        if matches!(kind, BinOpKind::Modulo) {
+                            match ty.size() {
+                                1 => self.emit("mov al, ah"),
+                                2 | 4 | 8 => self.emit_args("mov", &[&Rax, &Rdx]),
+                                _ => unreachable!(),
+                            }
+                        }
+                    }
                     BinOpKind::Add => emit_arithmetic(self, "add"),
                     BinOpKind::Subtract => emit_arithmetic(self, "sub"),
                     BinOpKind::Equal => emit_comparison(self, "sete"),

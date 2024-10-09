@@ -455,6 +455,12 @@ impl Arithmetic {
     }
 }
 
+impl Integral {
+    pub fn size(&self) -> u64 {
+        self.kind.size()
+    }
+}
+
 impl IntegralKind {
     fn size(&self) -> u64 {
         match self {
