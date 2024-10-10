@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/assignment/test_assignment_to_derefd_void_ptr.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      f~0 `fn() -> void`
+      (compound-statement))
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition x~2 `int` 42)
+         (definition p~3 `ptr<void>` (addressof (name x~2 `int`)))
+         (expression (assign (deref (name p~3 `ptr<void>`)) (call (name f~0 `fn() -> void`)))))))
+
+----- stderr -----

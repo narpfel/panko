@@ -190,8 +190,7 @@ impl<'a> TypedExpression<'a> {
             Expression::Name(reference) =>
                 reference.ty.ty.is_object() && !matches!(reference.ty.ty, Type::Void),
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.is_lvalue(),
-            // TODO: only for pointers to object, pointers to function not implemented yet
-            Expression::Deref { .. } => true,
+            Expression::Deref { .. } => self.ty.ty.is_object() && !matches!(self.ty.ty, Type::Void),
             Expression::Integer(_)
             | Expression::NoopTypeConversion(_)
             | Expression::Truncate(_)

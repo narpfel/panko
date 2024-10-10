@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/assignment/test_assignment_to_derefd_void_ptr.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to this expression because it is not an lvalue
+   ╭─[panko/tests/cases/assignment/test_assignment_to_derefd_void_ptr.c:6:5]
+   │
+ 6 │     *p = f();
+   │     ─┬  
+   │      ╰── this expression is not an lvalue
+───╯
