@@ -22,7 +22,7 @@ exit_code: 0
       (compound-statement
          (definition (x~3 `int` @0) (42 `int` @0))
          (definition (y~4 `int` @4)
-            (call `int` @4 (f~0 `fn(x: int) -> int` (static f))
+            (call `int` @4 (addressof `ptr<fn(x: int) -> int>` @8 (f~0 `fn(x: int) -> int` (static f)))
                (x~3 `int` @0)))
          (return (y~4 `int` @4)))))
 

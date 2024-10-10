@@ -17,8 +17,8 @@ exit_code: 0
          (declaration (isalnum~1 `fn(∅: int) -> int` (static isalnum)) ∅)
          (return
             (not-equal `int` @0
-               (call `int` @0 (isalnum~1 `fn(∅: int) -> int` (static isalnum))
-                  (100 `int` @4))
-               (0 `int` @8))))))
+               (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (isalnum~1 `fn(∅: int) -> int` (static isalnum)))
+                  (100 `int` @16))
+               (0 `int` @20))))))
 
 ----- stderr -----

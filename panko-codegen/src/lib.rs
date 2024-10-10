@@ -586,11 +586,6 @@ impl<'a> Codegen<'a> {
                         EitherOrBoth::Right(_) => break,
                     }
                 }
-                let operation = match callee.ty.ty {
-                    Type::Function(_) => "lea",
-                    Type::Pointer(_) => "mov",
-                    _ => unreachable!(),
-                };
 
                 if is_varargs {
                     // varargs functions pass an upper bound <= 8 of the number of vector registers
@@ -598,8 +593,7 @@ impl<'a> Codegen<'a> {
                     self.emit("xor eax, eax");
                 }
 
-                self.emit_args(operation, &[&R10, callee]);
-                self.emit("call r10");
+                self.emit_args("call", &[callee]);
                 if expr.ty.ty != Type::Void {
                     self.emit_args("mov", &[expr, &Rax.typed(expr)]);
                 }

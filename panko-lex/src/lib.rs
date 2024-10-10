@@ -16,6 +16,10 @@ pub struct Token<'a> {
 }
 
 impl<'a> Token<'a> {
+    pub fn synthesised(kind: TokenKind, loc: Loc<'a>) -> Self {
+        Self { kind, loc }
+    }
+
     pub fn loc(&self) -> Loc<'a> {
         self.loc
     }

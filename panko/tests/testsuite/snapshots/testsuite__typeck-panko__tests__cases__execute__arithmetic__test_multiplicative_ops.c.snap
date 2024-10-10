@@ -23,7 +23,7 @@ exit_code: 0
             (definition rhs~5 `int` (1095810364 `int`))
             (definition res~6 `int` (multiply (sign-extend (lhs~4 `signed char`) `int`) (rhs~5 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~6 `int`)
                   `int`)))
@@ -32,7 +32,7 @@ exit_code: 0
             (definition rhs~8 `int` (220952599 `int`))
             (definition res~9 `int` (multiply (sign-extend (lhs~7 `signed char`) `int`) (rhs~8 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~9 `int`)
                   `int`)))
@@ -41,7 +41,7 @@ exit_code: 0
             (definition rhs~11 `int` (1085561991 `int`))
             (definition res~12 `int` (multiply (sign-extend (lhs~10 `signed char`) `int`) (rhs~11 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~12 `int`)
                   `int`)))
@@ -50,7 +50,7 @@ exit_code: 0
             (definition rhs~14 `int` (535356770 `int`))
             (definition res~15 `int` (multiply (sign-extend (lhs~13 `signed char`) `int`) (rhs~14 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~15 `int`)
                   `int`)))
@@ -59,7 +59,7 @@ exit_code: 0
             (definition rhs~17 `int` (335489304 `int`))
             (definition res~18 `int` (multiply (sign-extend (lhs~16 `signed char`) `int`) (rhs~17 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~18 `int`)
                   `int`)))
@@ -68,7 +68,7 @@ exit_code: 0
             (definition rhs~20 `int` (negate (200379493 `int`) `int`))
             (definition res~21 `int` (multiply (sign-extend (lhs~19 `signed char`) `int`) (rhs~20 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~21 `int`)
                   `int`)))
@@ -77,7 +77,7 @@ exit_code: 0
             (definition rhs~23 `int` (1063100910 `int`))
             (definition res~24 `int` (multiply (sign-extend (lhs~22 `signed char`) `int`) (rhs~23 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~24 `int`)
                   `int`)))
@@ -86,7 +86,7 @@ exit_code: 0
             (definition rhs~26 `int` (1433830872 `int`))
             (definition res~27 `int` (multiply (sign-extend (lhs~25 `signed char`) `int`) (rhs~26 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~27 `int`)
                   `int`)))
@@ -95,7 +95,7 @@ exit_code: 0
             (definition rhs~29 `int` (negate (1565065243 `int`) `int`))
             (definition res~30 `int` (multiply (sign-extend (lhs~28 `signed char`) `int`) (rhs~29 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~30 `int`)
                   `int`)))
@@ -104,7 +104,7 @@ exit_code: 0
             (definition rhs~32 `int` (1314541822 `int`))
             (definition res~33 `int` (multiply (sign-extend (lhs~31 `signed char`) `int`) (rhs~32 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~33 `int`)
                   `int`)))
@@ -113,7 +113,7 @@ exit_code: 0
             (definition rhs~35 `int` (2130723222 `int`))
             (definition res~36 `int` (divide (sign-extend (lhs~34 `signed char`) `int`) (rhs~35 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~36 `int`)
                   `int`)))
@@ -122,7 +122,7 @@ exit_code: 0
             (definition rhs~38 `int` (negate (526338596 `int`) `int`))
             (definition res~39 `int` (divide (sign-extend (lhs~37 `signed char`) `int`) (rhs~38 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~39 `int`)
                   `int`)))
@@ -131,7 +131,7 @@ exit_code: 0
             (definition rhs~41 `int` (negate (1624152800 `int`) `int`))
             (definition res~42 `int` (divide (sign-extend (lhs~40 `signed char`) `int`) (rhs~41 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~42 `int`)
                   `int`)))
@@ -140,7 +140,7 @@ exit_code: 0
             (definition rhs~44 `int` (negate (386789464 `int`) `int`))
             (definition res~45 `int` (divide (sign-extend (lhs~43 `signed char`) `int`) (rhs~44 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~45 `int`)
                   `int`)))
@@ -149,7 +149,7 @@ exit_code: 0
             (definition rhs~47 `int` (negate (1178379746 `int`) `int`))
             (definition res~48 `int` (divide (sign-extend (lhs~46 `signed char`) `int`) (rhs~47 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~48 `int`)
                   `int`)))
@@ -158,7 +158,7 @@ exit_code: 0
             (definition rhs~50 `int` (1133021937 `int`))
             (definition res~51 `int` (divide (sign-extend (lhs~49 `signed char`) `int`) (rhs~50 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~51 `int`)
                   `int`)))
@@ -167,7 +167,7 @@ exit_code: 0
             (definition rhs~53 `int` (negate (765693828 `int`) `int`))
             (definition res~54 `int` (divide (sign-extend (lhs~52 `signed char`) `int`) (rhs~53 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~54 `int`)
                   `int`)))
@@ -176,7 +176,7 @@ exit_code: 0
             (definition rhs~56 `int` (75762238 `int`))
             (definition res~57 `int` (divide (sign-extend (lhs~55 `signed char`) `int`) (rhs~56 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~57 `int`)
                   `int`)))
@@ -185,7 +185,7 @@ exit_code: 0
             (definition rhs~59 `int` (1362494507 `int`))
             (definition res~60 `int` (divide (sign-extend (lhs~58 `signed char`) `int`) (rhs~59 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~60 `int`)
                   `int`)))
@@ -194,7 +194,7 @@ exit_code: 0
             (definition rhs~62 `int` (1218267917 `int`))
             (definition res~63 `int` (divide (sign-extend (lhs~61 `signed char`) `int`) (rhs~62 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~63 `int`)
                   `int`)))
@@ -203,7 +203,7 @@ exit_code: 0
             (definition rhs~65 `int` (negate (1617910420 `int`) `int`))
             (definition res~66 `int` (modulo (sign-extend (lhs~64 `signed char`) `int`) (rhs~65 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~66 `int`)
                   `int`)))
@@ -212,7 +212,7 @@ exit_code: 0
             (definition rhs~68 `int` (negate (2140800499 `int`) `int`))
             (definition res~69 `int` (modulo (sign-extend (lhs~67 `signed char`) `int`) (rhs~68 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~69 `int`)
                   `int`)))
@@ -221,7 +221,7 @@ exit_code: 0
             (definition rhs~71 `int` (520461062 `int`))
             (definition res~72 `int` (modulo (sign-extend (lhs~70 `signed char`) `int`) (rhs~71 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~72 `int`)
                   `int`)))
@@ -230,7 +230,7 @@ exit_code: 0
             (definition rhs~74 `int` (negate (648125865 `int`) `int`))
             (definition res~75 `int` (modulo (sign-extend (lhs~73 `signed char`) `int`) (rhs~74 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~75 `int`)
                   `int`)))
@@ -239,7 +239,7 @@ exit_code: 0
             (definition rhs~77 `int` (1008864711 `int`))
             (definition res~78 `int` (modulo (sign-extend (lhs~76 `signed char`) `int`) (rhs~77 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~78 `int`)
                   `int`)))
@@ -248,7 +248,7 @@ exit_code: 0
             (definition rhs~80 `int` (negate (2047720568 `int`) `int`))
             (definition res~81 `int` (modulo (sign-extend (lhs~79 `signed char`) `int`) (rhs~80 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~81 `int`)
                   `int`)))
@@ -257,7 +257,7 @@ exit_code: 0
             (definition rhs~83 `int` (negate (1334554146 `int`) `int`))
             (definition res~84 `int` (modulo (sign-extend (lhs~82 `signed char`) `int`) (rhs~83 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~84 `int`)
                   `int`)))
@@ -266,7 +266,7 @@ exit_code: 0
             (definition rhs~86 `int` (negate (432510322 `int`) `int`))
             (definition res~87 `int` (modulo (sign-extend (lhs~85 `signed char`) `int`) (rhs~86 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~87 `int`)
                   `int`)))
@@ -275,7 +275,7 @@ exit_code: 0
             (definition rhs~89 `int` (318297158 `int`))
             (definition res~90 `int` (modulo (sign-extend (lhs~88 `signed char`) `int`) (rhs~89 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~90 `int`)
                   `int`)))
@@ -284,7 +284,7 @@ exit_code: 0
             (definition rhs~92 `int` (1264634008 `int`))
             (definition res~93 `int` (modulo (sign-extend (lhs~91 `signed char`) `int`) (rhs~92 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~93 `int`)
                   `int`)))
@@ -293,7 +293,7 @@ exit_code: 0
             (definition rhs~95 `signed char` (truncate (negate (9 `int`) `int`) `signed char`))
             (definition res~96 `int` (multiply (lhs~94 `int`) (sign-extend (rhs~95 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~96 `int`)
                   `int`)))
@@ -302,7 +302,7 @@ exit_code: 0
             (definition rhs~98 `signed char` (truncate (negate (85 `int`) `int`) `signed char`))
             (definition res~99 `int` (multiply (lhs~97 `int`) (sign-extend (rhs~98 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~99 `int`)
                   `int`)))
@@ -311,7 +311,7 @@ exit_code: 0
             (definition rhs~101 `signed char` (truncate (78 `int`) `signed char`))
             (definition res~102 `int` (multiply (lhs~100 `int`) (sign-extend (rhs~101 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~102 `int`)
                   `int`)))
@@ -320,7 +320,7 @@ exit_code: 0
             (definition rhs~104 `signed char` (truncate (negate (112 `int`) `int`) `signed char`))
             (definition res~105 `int` (multiply (lhs~103 `int`) (sign-extend (rhs~104 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~105 `int`)
                   `int`)))
@@ -329,7 +329,7 @@ exit_code: 0
             (definition rhs~107 `signed char` (truncate (15 `int`) `signed char`))
             (definition res~108 `int` (multiply (lhs~106 `int`) (sign-extend (rhs~107 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~108 `int`)
                   `int`)))
@@ -338,7 +338,7 @@ exit_code: 0
             (definition rhs~110 `signed char` (truncate (negate (3 `int`) `int`) `signed char`))
             (definition res~111 `int` (multiply (lhs~109 `int`) (sign-extend (rhs~110 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~111 `int`)
                   `int`)))
@@ -347,7 +347,7 @@ exit_code: 0
             (definition rhs~113 `signed char` (truncate (12 `int`) `signed char`))
             (definition res~114 `int` (multiply (lhs~112 `int`) (sign-extend (rhs~113 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~114 `int`)
                   `int`)))
@@ -356,7 +356,7 @@ exit_code: 0
             (definition rhs~116 `signed char` (truncate (negate (8 `int`) `int`) `signed char`))
             (definition res~117 `int` (multiply (lhs~115 `int`) (sign-extend (rhs~116 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~117 `int`)
                   `int`)))
@@ -365,7 +365,7 @@ exit_code: 0
             (definition rhs~119 `signed char` (truncate (negate (30 `int`) `int`) `signed char`))
             (definition res~120 `int` (multiply (lhs~118 `int`) (sign-extend (rhs~119 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~120 `int`)
                   `int`)))
@@ -374,7 +374,7 @@ exit_code: 0
             (definition rhs~122 `signed char` (truncate (121 `int`) `signed char`))
             (definition res~123 `int` (multiply (lhs~121 `int`) (sign-extend (rhs~122 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~123 `int`)
                   `int`)))
@@ -383,7 +383,7 @@ exit_code: 0
             (definition rhs~125 `signed char` (truncate (negate (70 `int`) `int`) `signed char`))
             (definition res~126 `int` (divide (lhs~124 `int`) (sign-extend (rhs~125 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~126 `int`)
                   `int`)))
@@ -392,7 +392,7 @@ exit_code: 0
             (definition rhs~128 `signed char` (truncate (negate (30 `int`) `int`) `signed char`))
             (definition res~129 `int` (divide (lhs~127 `int`) (sign-extend (rhs~128 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~129 `int`)
                   `int`)))
@@ -401,7 +401,7 @@ exit_code: 0
             (definition rhs~131 `signed char` (truncate (negate (90 `int`) `int`) `signed char`))
             (definition res~132 `int` (divide (lhs~130 `int`) (sign-extend (rhs~131 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~132 `int`)
                   `int`)))
@@ -410,7 +410,7 @@ exit_code: 0
             (definition rhs~134 `signed char` (truncate (negate (98 `int`) `int`) `signed char`))
             (definition res~135 `int` (divide (lhs~133 `int`) (sign-extend (rhs~134 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~135 `int`)
                   `int`)))
@@ -419,7 +419,7 @@ exit_code: 0
             (definition rhs~137 `signed char` (truncate (58 `int`) `signed char`))
             (definition res~138 `int` (divide (lhs~136 `int`) (sign-extend (rhs~137 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~138 `int`)
                   `int`)))
@@ -428,7 +428,7 @@ exit_code: 0
             (definition rhs~140 `signed char` (truncate (negate (89 `int`) `int`) `signed char`))
             (definition res~141 `int` (divide (lhs~139 `int`) (sign-extend (rhs~140 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~141 `int`)
                   `int`)))
@@ -437,7 +437,7 @@ exit_code: 0
             (definition rhs~143 `signed char` (truncate (negate (116 `int`) `int`) `signed char`))
             (definition res~144 `int` (divide (lhs~142 `int`) (sign-extend (rhs~143 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~144 `int`)
                   `int`)))
@@ -446,7 +446,7 @@ exit_code: 0
             (definition rhs~146 `signed char` (truncate (negate (95 `int`) `int`) `signed char`))
             (definition res~147 `int` (divide (lhs~145 `int`) (sign-extend (rhs~146 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~147 `int`)
                   `int`)))
@@ -455,7 +455,7 @@ exit_code: 0
             (definition rhs~149 `signed char` (truncate (negate (63 `int`) `int`) `signed char`))
             (definition res~150 `int` (divide (lhs~148 `int`) (sign-extend (rhs~149 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~150 `int`)
                   `int`)))
@@ -464,7 +464,7 @@ exit_code: 0
             (definition rhs~152 `signed char` (truncate (63 `int`) `signed char`))
             (definition res~153 `int` (divide (lhs~151 `int`) (sign-extend (rhs~152 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~153 `int`)
                   `int`)))
@@ -473,7 +473,7 @@ exit_code: 0
             (definition rhs~155 `signed char` (truncate (negate (22 `int`) `int`) `signed char`))
             (definition res~156 `int` (modulo (lhs~154 `int`) (sign-extend (rhs~155 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~156 `int`)
                   `int`)))
@@ -482,7 +482,7 @@ exit_code: 0
             (definition rhs~158 `signed char` (truncate (negate (102 `int`) `int`) `signed char`))
             (definition res~159 `int` (modulo (lhs~157 `int`) (sign-extend (rhs~158 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~159 `int`)
                   `int`)))
@@ -491,7 +491,7 @@ exit_code: 0
             (definition rhs~161 `signed char` (truncate (negate (7 `int`) `int`) `signed char`))
             (definition res~162 `int` (modulo (lhs~160 `int`) (sign-extend (rhs~161 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~162 `int`)
                   `int`)))
@@ -500,7 +500,7 @@ exit_code: 0
             (definition rhs~164 `signed char` (truncate (92 `int`) `signed char`))
             (definition res~165 `int` (modulo (lhs~163 `int`) (sign-extend (rhs~164 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~165 `int`)
                   `int`)))
@@ -509,7 +509,7 @@ exit_code: 0
             (definition rhs~167 `signed char` (truncate (negate (9 `int`) `int`) `signed char`))
             (definition res~168 `int` (modulo (lhs~166 `int`) (sign-extend (rhs~167 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~168 `int`)
                   `int`)))
@@ -518,7 +518,7 @@ exit_code: 0
             (definition rhs~170 `signed char` (truncate (13 `int`) `signed char`))
             (definition res~171 `int` (modulo (lhs~169 `int`) (sign-extend (rhs~170 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~171 `int`)
                   `int`)))
@@ -527,7 +527,7 @@ exit_code: 0
             (definition rhs~173 `signed char` (truncate (negate (46 `int`) `int`) `signed char`))
             (definition res~174 `int` (modulo (lhs~172 `int`) (sign-extend (rhs~173 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~174 `int`)
                   `int`)))
@@ -536,7 +536,7 @@ exit_code: 0
             (definition rhs~176 `signed char` (truncate (54 `int`) `signed char`))
             (definition res~177 `int` (modulo (lhs~175 `int`) (sign-extend (rhs~176 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~177 `int`)
                   `int`)))
@@ -545,7 +545,7 @@ exit_code: 0
             (definition rhs~179 `signed char` (truncate (negate (98 `int`) `int`) `signed char`))
             (definition res~180 `int` (modulo (lhs~178 `int`) (sign-extend (rhs~179 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~180 `int`)
                   `int`)))
@@ -554,7 +554,7 @@ exit_code: 0
             (definition rhs~182 `signed char` (truncate (88 `int`) `signed char`))
             (definition res~183 `int` (modulo (lhs~181 `int`) (sign-extend (rhs~182 `signed char`) `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~183 `int`)
                   `int`)))
@@ -563,7 +563,7 @@ exit_code: 0
             (definition rhs~185 `unsigned int` (noop-type-conversion (3356079800 `int`) `unsigned int`))
             (definition res~186 `unsigned int` (multiply (zero-extend (lhs~184 `unsigned char`) `unsigned int`) (rhs~185 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~186 `unsigned int`)
                   `int`)))
@@ -572,7 +572,7 @@ exit_code: 0
             (definition rhs~188 `unsigned int` (noop-type-conversion (2143909894 `int`) `unsigned int`))
             (definition res~189 `unsigned int` (multiply (zero-extend (lhs~187 `unsigned char`) `unsigned int`) (rhs~188 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~189 `unsigned int`)
                   `int`)))
@@ -581,7 +581,7 @@ exit_code: 0
             (definition rhs~191 `unsigned int` (noop-type-conversion (4055620795 `int`) `unsigned int`))
             (definition res~192 `unsigned int` (multiply (zero-extend (lhs~190 `unsigned char`) `unsigned int`) (rhs~191 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~192 `unsigned int`)
                   `int`)))
@@ -590,7 +590,7 @@ exit_code: 0
             (definition rhs~194 `unsigned int` (noop-type-conversion (344239587 `int`) `unsigned int`))
             (definition res~195 `unsigned int` (multiply (zero-extend (lhs~193 `unsigned char`) `unsigned int`) (rhs~194 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~195 `unsigned int`)
                   `int`)))
@@ -599,7 +599,7 @@ exit_code: 0
             (definition rhs~197 `unsigned int` (noop-type-conversion (3788785085 `int`) `unsigned int`))
             (definition res~198 `unsigned int` (multiply (zero-extend (lhs~196 `unsigned char`) `unsigned int`) (rhs~197 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~198 `unsigned int`)
                   `int`)))
@@ -608,7 +608,7 @@ exit_code: 0
             (definition rhs~200 `unsigned int` (noop-type-conversion (2389282163 `int`) `unsigned int`))
             (definition res~201 `unsigned int` (multiply (zero-extend (lhs~199 `unsigned char`) `unsigned int`) (rhs~200 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~201 `unsigned int`)
                   `int`)))
@@ -617,7 +617,7 @@ exit_code: 0
             (definition rhs~203 `unsigned int` (noop-type-conversion (1860696443 `int`) `unsigned int`))
             (definition res~204 `unsigned int` (multiply (zero-extend (lhs~202 `unsigned char`) `unsigned int`) (rhs~203 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~204 `unsigned int`)
                   `int`)))
@@ -626,7 +626,7 @@ exit_code: 0
             (definition rhs~206 `unsigned int` (noop-type-conversion (2279274733 `int`) `unsigned int`))
             (definition res~207 `unsigned int` (multiply (zero-extend (lhs~205 `unsigned char`) `unsigned int`) (rhs~206 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~207 `unsigned int`)
                   `int`)))
@@ -635,7 +635,7 @@ exit_code: 0
             (definition rhs~209 `unsigned int` (noop-type-conversion (2790188657 `int`) `unsigned int`))
             (definition res~210 `unsigned int` (multiply (zero-extend (lhs~208 `unsigned char`) `unsigned int`) (rhs~209 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~210 `unsigned int`)
                   `int`)))
@@ -644,7 +644,7 @@ exit_code: 0
             (definition rhs~212 `unsigned int` (noop-type-conversion (588755674 `int`) `unsigned int`))
             (definition res~213 `unsigned int` (multiply (zero-extend (lhs~211 `unsigned char`) `unsigned int`) (rhs~212 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~213 `unsigned int`)
                   `int`)))
@@ -653,7 +653,7 @@ exit_code: 0
             (definition rhs~215 `unsigned int` (noop-type-conversion (1368033447 `int`) `unsigned int`))
             (definition res~216 `unsigned int` (divide (zero-extend (lhs~214 `unsigned char`) `unsigned int`) (rhs~215 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~216 `unsigned int`)
                   `int`)))
@@ -662,7 +662,7 @@ exit_code: 0
             (definition rhs~218 `unsigned int` (noop-type-conversion (1237336755 `int`) `unsigned int`))
             (definition res~219 `unsigned int` (divide (zero-extend (lhs~217 `unsigned char`) `unsigned int`) (rhs~218 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~219 `unsigned int`)
                   `int`)))
@@ -671,7 +671,7 @@ exit_code: 0
             (definition rhs~221 `unsigned int` (noop-type-conversion (2888507760 `int`) `unsigned int`))
             (definition res~222 `unsigned int` (divide (zero-extend (lhs~220 `unsigned char`) `unsigned int`) (rhs~221 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~222 `unsigned int`)
                   `int`)))
@@ -680,7 +680,7 @@ exit_code: 0
             (definition rhs~224 `unsigned int` (noop-type-conversion (2352884500 `int`) `unsigned int`))
             (definition res~225 `unsigned int` (divide (zero-extend (lhs~223 `unsigned char`) `unsigned int`) (rhs~224 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~225 `unsigned int`)
                   `int`)))
@@ -689,7 +689,7 @@ exit_code: 0
             (definition rhs~227 `unsigned int` (noop-type-conversion (1621420794 `int`) `unsigned int`))
             (definition res~228 `unsigned int` (divide (zero-extend (lhs~226 `unsigned char`) `unsigned int`) (rhs~227 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~228 `unsigned int`)
                   `int`)))
@@ -698,7 +698,7 @@ exit_code: 0
             (definition rhs~230 `unsigned int` (noop-type-conversion (2911396732 `int`) `unsigned int`))
             (definition res~231 `unsigned int` (divide (zero-extend (lhs~229 `unsigned char`) `unsigned int`) (rhs~230 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~231 `unsigned int`)
                   `int`)))
@@ -707,7 +707,7 @@ exit_code: 0
             (definition rhs~233 `unsigned int` (noop-type-conversion (2345210453 `int`) `unsigned int`))
             (definition res~234 `unsigned int` (divide (zero-extend (lhs~232 `unsigned char`) `unsigned int`) (rhs~233 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~234 `unsigned int`)
                   `int`)))
@@ -716,7 +716,7 @@ exit_code: 0
             (definition rhs~236 `unsigned int` (noop-type-conversion (954918160 `int`) `unsigned int`))
             (definition res~237 `unsigned int` (divide (zero-extend (lhs~235 `unsigned char`) `unsigned int`) (rhs~236 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~237 `unsigned int`)
                   `int`)))
@@ -725,7 +725,7 @@ exit_code: 0
             (definition rhs~239 `unsigned int` (noop-type-conversion (1926245250 `int`) `unsigned int`))
             (definition res~240 `unsigned int` (divide (zero-extend (lhs~238 `unsigned char`) `unsigned int`) (rhs~239 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~240 `unsigned int`)
                   `int`)))
@@ -734,7 +734,7 @@ exit_code: 0
             (definition rhs~242 `unsigned int` (noop-type-conversion (2998210528 `int`) `unsigned int`))
             (definition res~243 `unsigned int` (divide (zero-extend (lhs~241 `unsigned char`) `unsigned int`) (rhs~242 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~243 `unsigned int`)
                   `int`)))
@@ -743,7 +743,7 @@ exit_code: 0
             (definition rhs~245 `unsigned int` (noop-type-conversion (1840167084 `int`) `unsigned int`))
             (definition res~246 `unsigned int` (modulo (zero-extend (lhs~244 `unsigned char`) `unsigned int`) (rhs~245 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~246 `unsigned int`)
                   `int`)))
@@ -752,7 +752,7 @@ exit_code: 0
             (definition rhs~248 `unsigned int` (noop-type-conversion (2800079115 `int`) `unsigned int`))
             (definition res~249 `unsigned int` (modulo (zero-extend (lhs~247 `unsigned char`) `unsigned int`) (rhs~248 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~249 `unsigned int`)
                   `int`)))
@@ -761,7 +761,7 @@ exit_code: 0
             (definition rhs~251 `unsigned int` (noop-type-conversion (2863657021 `int`) `unsigned int`))
             (definition res~252 `unsigned int` (modulo (zero-extend (lhs~250 `unsigned char`) `unsigned int`) (rhs~251 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~252 `unsigned int`)
                   `int`)))
@@ -770,7 +770,7 @@ exit_code: 0
             (definition rhs~254 `unsigned int` (noop-type-conversion (109876255 `int`) `unsigned int`))
             (definition res~255 `unsigned int` (modulo (zero-extend (lhs~253 `unsigned char`) `unsigned int`) (rhs~254 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~255 `unsigned int`)
                   `int`)))
@@ -779,7 +779,7 @@ exit_code: 0
             (definition rhs~257 `unsigned int` (noop-type-conversion (100414635 `int`) `unsigned int`))
             (definition res~258 `unsigned int` (modulo (zero-extend (lhs~256 `unsigned char`) `unsigned int`) (rhs~257 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~258 `unsigned int`)
                   `int`)))
@@ -788,7 +788,7 @@ exit_code: 0
             (definition rhs~260 `unsigned int` (noop-type-conversion (3842679516 `int`) `unsigned int`))
             (definition res~261 `unsigned int` (modulo (zero-extend (lhs~259 `unsigned char`) `unsigned int`) (rhs~260 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~261 `unsigned int`)
                   `int`)))
@@ -797,7 +797,7 @@ exit_code: 0
             (definition rhs~263 `unsigned int` (noop-type-conversion (1135558079 `int`) `unsigned int`))
             (definition res~264 `unsigned int` (modulo (zero-extend (lhs~262 `unsigned char`) `unsigned int`) (rhs~263 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~264 `unsigned int`)
                   `int`)))
@@ -806,7 +806,7 @@ exit_code: 0
             (definition rhs~266 `unsigned int` (noop-type-conversion (1104401059 `int`) `unsigned int`))
             (definition res~267 `unsigned int` (modulo (zero-extend (lhs~265 `unsigned char`) `unsigned int`) (rhs~266 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~267 `unsigned int`)
                   `int`)))
@@ -815,7 +815,7 @@ exit_code: 0
             (definition rhs~269 `unsigned int` (noop-type-conversion (725243276 `int`) `unsigned int`))
             (definition res~270 `unsigned int` (modulo (zero-extend (lhs~268 `unsigned char`) `unsigned int`) (rhs~269 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~270 `unsigned int`)
                   `int`)))
@@ -824,7 +824,7 @@ exit_code: 0
             (definition rhs~272 `unsigned int` (noop-type-conversion (99060050 `int`) `unsigned int`))
             (definition res~273 `unsigned int` (modulo (zero-extend (lhs~271 `unsigned char`) `unsigned int`) (rhs~272 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~273 `unsigned int`)
                   `int`)))
@@ -833,7 +833,7 @@ exit_code: 0
             (definition rhs~275 `unsigned char` (truncate (103 `int`) `unsigned char`))
             (definition res~276 `unsigned int` (multiply (lhs~274 `unsigned int`) (zero-extend (rhs~275 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~276 `unsigned int`)
                   `int`)))
@@ -842,7 +842,7 @@ exit_code: 0
             (definition rhs~278 `unsigned char` (truncate (22 `int`) `unsigned char`))
             (definition res~279 `unsigned int` (multiply (lhs~277 `unsigned int`) (zero-extend (rhs~278 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~279 `unsigned int`)
                   `int`)))
@@ -851,7 +851,7 @@ exit_code: 0
             (definition rhs~281 `unsigned char` (truncate (139 `int`) `unsigned char`))
             (definition res~282 `unsigned int` (multiply (lhs~280 `unsigned int`) (zero-extend (rhs~281 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~282 `unsigned int`)
                   `int`)))
@@ -860,7 +860,7 @@ exit_code: 0
             (definition rhs~284 `unsigned char` (truncate (83 `int`) `unsigned char`))
             (definition res~285 `unsigned int` (multiply (lhs~283 `unsigned int`) (zero-extend (rhs~284 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~285 `unsigned int`)
                   `int`)))
@@ -869,7 +869,7 @@ exit_code: 0
             (definition rhs~287 `unsigned char` (truncate (142 `int`) `unsigned char`))
             (definition res~288 `unsigned int` (multiply (lhs~286 `unsigned int`) (zero-extend (rhs~287 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~288 `unsigned int`)
                   `int`)))
@@ -878,7 +878,7 @@ exit_code: 0
             (definition rhs~290 `unsigned char` (truncate (56 `int`) `unsigned char`))
             (definition res~291 `unsigned int` (multiply (lhs~289 `unsigned int`) (zero-extend (rhs~290 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~291 `unsigned int`)
                   `int`)))
@@ -887,7 +887,7 @@ exit_code: 0
             (definition rhs~293 `unsigned char` (truncate (132 `int`) `unsigned char`))
             (definition res~294 `unsigned int` (multiply (lhs~292 `unsigned int`) (zero-extend (rhs~293 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~294 `unsigned int`)
                   `int`)))
@@ -896,7 +896,7 @@ exit_code: 0
             (definition rhs~296 `unsigned char` (truncate (190 `int`) `unsigned char`))
             (definition res~297 `unsigned int` (multiply (lhs~295 `unsigned int`) (zero-extend (rhs~296 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~297 `unsigned int`)
                   `int`)))
@@ -905,7 +905,7 @@ exit_code: 0
             (definition rhs~299 `unsigned char` (truncate (227 `int`) `unsigned char`))
             (definition res~300 `unsigned int` (multiply (lhs~298 `unsigned int`) (zero-extend (rhs~299 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~300 `unsigned int`)
                   `int`)))
@@ -914,7 +914,7 @@ exit_code: 0
             (definition rhs~302 `unsigned char` (truncate (160 `int`) `unsigned char`))
             (definition res~303 `unsigned int` (multiply (lhs~301 `unsigned int`) (zero-extend (rhs~302 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~303 `unsigned int`)
                   `int`)))
@@ -923,7 +923,7 @@ exit_code: 0
             (definition rhs~305 `unsigned char` (truncate (201 `int`) `unsigned char`))
             (definition res~306 `unsigned int` (divide (lhs~304 `unsigned int`) (zero-extend (rhs~305 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~306 `unsigned int`)
                   `int`)))
@@ -932,7 +932,7 @@ exit_code: 0
             (definition rhs~308 `unsigned char` (truncate (47 `int`) `unsigned char`))
             (definition res~309 `unsigned int` (divide (lhs~307 `unsigned int`) (zero-extend (rhs~308 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~309 `unsigned int`)
                   `int`)))
@@ -941,7 +941,7 @@ exit_code: 0
             (definition rhs~311 `unsigned char` (truncate (235 `int`) `unsigned char`))
             (definition res~312 `unsigned int` (divide (lhs~310 `unsigned int`) (zero-extend (rhs~311 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~312 `unsigned int`)
                   `int`)))
@@ -950,7 +950,7 @@ exit_code: 0
             (definition rhs~314 `unsigned char` (truncate (205 `int`) `unsigned char`))
             (definition res~315 `unsigned int` (divide (lhs~313 `unsigned int`) (zero-extend (rhs~314 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~315 `unsigned int`)
                   `int`)))
@@ -959,7 +959,7 @@ exit_code: 0
             (definition rhs~317 `unsigned char` (truncate (74 `int`) `unsigned char`))
             (definition res~318 `unsigned int` (divide (lhs~316 `unsigned int`) (zero-extend (rhs~317 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~318 `unsigned int`)
                   `int`)))
@@ -968,7 +968,7 @@ exit_code: 0
             (definition rhs~320 `unsigned char` (truncate (195 `int`) `unsigned char`))
             (definition res~321 `unsigned int` (divide (lhs~319 `unsigned int`) (zero-extend (rhs~320 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~321 `unsigned int`)
                   `int`)))
@@ -977,7 +977,7 @@ exit_code: 0
             (definition rhs~323 `unsigned char` (truncate (162 `int`) `unsigned char`))
             (definition res~324 `unsigned int` (divide (lhs~322 `unsigned int`) (zero-extend (rhs~323 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~324 `unsigned int`)
                   `int`)))
@@ -986,7 +986,7 @@ exit_code: 0
             (definition rhs~326 `unsigned char` (truncate (223 `int`) `unsigned char`))
             (definition res~327 `unsigned int` (divide (lhs~325 `unsigned int`) (zero-extend (rhs~326 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~327 `unsigned int`)
                   `int`)))
@@ -995,7 +995,7 @@ exit_code: 0
             (definition rhs~329 `unsigned char` (truncate (248 `int`) `unsigned char`))
             (definition res~330 `unsigned int` (divide (lhs~328 `unsigned int`) (zero-extend (rhs~329 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~330 `unsigned int`)
                   `int`)))
@@ -1004,7 +1004,7 @@ exit_code: 0
             (definition rhs~332 `unsigned char` (truncate (154 `int`) `unsigned char`))
             (definition res~333 `unsigned int` (divide (lhs~331 `unsigned int`) (zero-extend (rhs~332 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~333 `unsigned int`)
                   `int`)))
@@ -1013,7 +1013,7 @@ exit_code: 0
             (definition rhs~335 `unsigned char` (truncate (253 `int`) `unsigned char`))
             (definition res~336 `unsigned int` (modulo (lhs~334 `unsigned int`) (zero-extend (rhs~335 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~336 `unsigned int`)
                   `int`)))
@@ -1022,7 +1022,7 @@ exit_code: 0
             (definition rhs~338 `unsigned char` (truncate (30 `int`) `unsigned char`))
             (definition res~339 `unsigned int` (modulo (lhs~337 `unsigned int`) (zero-extend (rhs~338 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~339 `unsigned int`)
                   `int`)))
@@ -1031,7 +1031,7 @@ exit_code: 0
             (definition rhs~341 `unsigned char` (truncate (225 `int`) `unsigned char`))
             (definition res~342 `unsigned int` (modulo (lhs~340 `unsigned int`) (zero-extend (rhs~341 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~342 `unsigned int`)
                   `int`)))
@@ -1040,7 +1040,7 @@ exit_code: 0
             (definition rhs~344 `unsigned char` (truncate (162 `int`) `unsigned char`))
             (definition res~345 `unsigned int` (modulo (lhs~343 `unsigned int`) (zero-extend (rhs~344 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~345 `unsigned int`)
                   `int`)))
@@ -1049,7 +1049,7 @@ exit_code: 0
             (definition rhs~347 `unsigned char` (truncate (83 `int`) `unsigned char`))
             (definition res~348 `unsigned int` (modulo (lhs~346 `unsigned int`) (zero-extend (rhs~347 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~348 `unsigned int`)
                   `int`)))
@@ -1058,7 +1058,7 @@ exit_code: 0
             (definition rhs~350 `unsigned char` (truncate (234 `int`) `unsigned char`))
             (definition res~351 `unsigned int` (modulo (lhs~349 `unsigned int`) (zero-extend (rhs~350 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~351 `unsigned int`)
                   `int`)))
@@ -1067,7 +1067,7 @@ exit_code: 0
             (definition rhs~353 `unsigned char` (truncate (248 `int`) `unsigned char`))
             (definition res~354 `unsigned int` (modulo (lhs~352 `unsigned int`) (zero-extend (rhs~353 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~354 `unsigned int`)
                   `int`)))
@@ -1076,7 +1076,7 @@ exit_code: 0
             (definition rhs~356 `unsigned char` (truncate (198 `int`) `unsigned char`))
             (definition res~357 `unsigned int` (modulo (lhs~355 `unsigned int`) (zero-extend (rhs~356 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~357 `unsigned int`)
                   `int`)))
@@ -1085,7 +1085,7 @@ exit_code: 0
             (definition rhs~359 `unsigned char` (truncate (246 `int`) `unsigned char`))
             (definition res~360 `unsigned int` (modulo (lhs~358 `unsigned int`) (zero-extend (rhs~359 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~360 `unsigned int`)
                   `int`)))
@@ -1094,7 +1094,7 @@ exit_code: 0
             (definition rhs~362 `unsigned char` (truncate (231 `int`) `unsigned char`))
             (definition res~363 `unsigned int` (modulo (lhs~361 `unsigned int`) (zero-extend (rhs~362 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~363 `unsigned int`)
                   `int`)))
@@ -1103,7 +1103,7 @@ exit_code: 0
             (definition rhs~365 `int` (negate (430906186 `int`) `int`))
             (definition res~366 `int` (multiply (lhs~364 `int`) (rhs~365 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~366 `int`)
                   `int`)))
@@ -1112,7 +1112,7 @@ exit_code: 0
             (definition rhs~368 `int` (541355389 `int`))
             (definition res~369 `int` (multiply (lhs~367 `int`) (rhs~368 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~369 `int`)
                   `int`)))
@@ -1121,7 +1121,7 @@ exit_code: 0
             (definition rhs~371 `int` (negate (1351114224 `int`) `int`))
             (definition res~372 `int` (multiply (lhs~370 `int`) (rhs~371 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~372 `int`)
                   `int`)))
@@ -1130,7 +1130,7 @@ exit_code: 0
             (definition rhs~374 `int` (negate (1413057312 `int`) `int`))
             (definition res~375 `int` (multiply (lhs~373 `int`) (rhs~374 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~375 `int`)
                   `int`)))
@@ -1139,7 +1139,7 @@ exit_code: 0
             (definition rhs~377 `int` (1291228103 `int`))
             (definition res~378 `int` (multiply (lhs~376 `int`) (rhs~377 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~378 `int`)
                   `int`)))
@@ -1148,7 +1148,7 @@ exit_code: 0
             (definition rhs~380 `int` (negate (927331211 `int`) `int`))
             (definition res~381 `int` (multiply (lhs~379 `int`) (rhs~380 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~381 `int`)
                   `int`)))
@@ -1157,7 +1157,7 @@ exit_code: 0
             (definition rhs~383 `int` (1671089401 `int`))
             (definition res~384 `int` (multiply (lhs~382 `int`) (rhs~383 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~384 `int`)
                   `int`)))
@@ -1166,7 +1166,7 @@ exit_code: 0
             (definition rhs~386 `int` (842668270 `int`))
             (definition res~387 `int` (multiply (lhs~385 `int`) (rhs~386 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~387 `int`)
                   `int`)))
@@ -1175,7 +1175,7 @@ exit_code: 0
             (definition rhs~389 `int` (negate (955261236 `int`) `int`))
             (definition res~390 `int` (multiply (lhs~388 `int`) (rhs~389 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~390 `int`)
                   `int`)))
@@ -1184,7 +1184,7 @@ exit_code: 0
             (definition rhs~392 `int` (533292454 `int`))
             (definition res~393 `int` (multiply (lhs~391 `int`) (rhs~392 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~393 `int`)
                   `int`)))
@@ -1193,7 +1193,7 @@ exit_code: 0
             (definition rhs~395 `int` (negate (250231275 `int`) `int`))
             (definition res~396 `int` (divide (lhs~394 `int`) (rhs~395 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~396 `int`)
                   `int`)))
@@ -1202,7 +1202,7 @@ exit_code: 0
             (definition rhs~398 `int` (155181467 `int`))
             (definition res~399 `int` (divide (lhs~397 `int`) (rhs~398 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~399 `int`)
                   `int`)))
@@ -1211,7 +1211,7 @@ exit_code: 0
             (definition rhs~401 `int` (negate (237357416 `int`) `int`))
             (definition res~402 `int` (divide (lhs~400 `int`) (rhs~401 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~402 `int`)
                   `int`)))
@@ -1220,7 +1220,7 @@ exit_code: 0
             (definition rhs~404 `int` (1205640257 `int`))
             (definition res~405 `int` (divide (lhs~403 `int`) (rhs~404 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~405 `int`)
                   `int`)))
@@ -1229,7 +1229,7 @@ exit_code: 0
             (definition rhs~407 `int` (110556297 `int`))
             (definition res~408 `int` (divide (lhs~406 `int`) (rhs~407 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~408 `int`)
                   `int`)))
@@ -1238,7 +1238,7 @@ exit_code: 0
             (definition rhs~410 `int` (1308249221 `int`))
             (definition res~411 `int` (divide (lhs~409 `int`) (rhs~410 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~411 `int`)
                   `int`)))
@@ -1247,7 +1247,7 @@ exit_code: 0
             (definition rhs~413 `int` (1999684074 `int`))
             (definition res~414 `int` (divide (lhs~412 `int`) (rhs~413 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~414 `int`)
                   `int`)))
@@ -1256,7 +1256,7 @@ exit_code: 0
             (definition rhs~416 `int` (negate (35025876 `int`) `int`))
             (definition res~417 `int` (divide (lhs~415 `int`) (rhs~416 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~417 `int`)
                   `int`)))
@@ -1265,7 +1265,7 @@ exit_code: 0
             (definition rhs~419 `int` (1952154378 `int`))
             (definition res~420 `int` (divide (lhs~418 `int`) (rhs~419 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~420 `int`)
                   `int`)))
@@ -1274,7 +1274,7 @@ exit_code: 0
             (definition rhs~422 `int` (negate (1007747797 `int`) `int`))
             (definition res~423 `int` (divide (lhs~421 `int`) (rhs~422 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~423 `int`)
                   `int`)))
@@ -1283,7 +1283,7 @@ exit_code: 0
             (definition rhs~425 `int` (negate (1227615481 `int`) `int`))
             (definition res~426 `int` (modulo (lhs~424 `int`) (rhs~425 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~426 `int`)
                   `int`)))
@@ -1292,7 +1292,7 @@ exit_code: 0
             (definition rhs~428 `int` (negate (1448818021 `int`) `int`))
             (definition res~429 `int` (modulo (lhs~427 `int`) (rhs~428 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~429 `int`)
                   `int`)))
@@ -1301,7 +1301,7 @@ exit_code: 0
             (definition rhs~431 `int` (negate (1922161984 `int`) `int`))
             (definition res~432 `int` (modulo (lhs~430 `int`) (rhs~431 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~432 `int`)
                   `int`)))
@@ -1310,7 +1310,7 @@ exit_code: 0
             (definition rhs~434 `int` (1423163830 `int`))
             (definition res~435 `int` (modulo (lhs~433 `int`) (rhs~434 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~435 `int`)
                   `int`)))
@@ -1319,7 +1319,7 @@ exit_code: 0
             (definition rhs~437 `int` (331074794 `int`))
             (definition res~438 `int` (modulo (lhs~436 `int`) (rhs~437 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~438 `int`)
                   `int`)))
@@ -1328,7 +1328,7 @@ exit_code: 0
             (definition rhs~440 `int` (1912009880 `int`))
             (definition res~441 `int` (modulo (lhs~439 `int`) (rhs~440 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~441 `int`)
                   `int`)))
@@ -1337,7 +1337,7 @@ exit_code: 0
             (definition rhs~443 `int` (89137728 `int`))
             (definition res~444 `int` (modulo (lhs~442 `int`) (rhs~443 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~444 `int`)
                   `int`)))
@@ -1346,7 +1346,7 @@ exit_code: 0
             (definition rhs~446 `int` (negate (646476654 `int`) `int`))
             (definition res~447 `int` (modulo (lhs~445 `int`) (rhs~446 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~447 `int`)
                   `int`)))
@@ -1355,7 +1355,7 @@ exit_code: 0
             (definition rhs~449 `int` (negate (292853647 `int`) `int`))
             (definition res~450 `int` (modulo (lhs~448 `int`) (rhs~449 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~450 `int`)
                   `int`)))
@@ -1364,7 +1364,7 @@ exit_code: 0
             (definition rhs~452 `int` (negate (1455144215 `int`) `int`))
             (definition res~453 `int` (modulo (lhs~451 `int`) (rhs~452 `int`) `int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (3 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~453 `int`)
                   `int`)))
@@ -1373,7 +1373,7 @@ exit_code: 0
             (definition rhs~455 `unsigned int` (noop-type-conversion (195359260 `int`) `unsigned int`))
             (definition res~456 `unsigned int` (multiply (lhs~454 `unsigned int`) (rhs~455 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~456 `unsigned int`)
                   `int`)))
@@ -1382,7 +1382,7 @@ exit_code: 0
             (definition rhs~458 `unsigned int` (noop-type-conversion (1633549130 `int`) `unsigned int`))
             (definition res~459 `unsigned int` (multiply (lhs~457 `unsigned int`) (rhs~458 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~459 `unsigned int`)
                   `int`)))
@@ -1391,7 +1391,7 @@ exit_code: 0
             (definition rhs~461 `unsigned int` (noop-type-conversion (178812277 `int`) `unsigned int`))
             (definition res~462 `unsigned int` (multiply (lhs~460 `unsigned int`) (rhs~461 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~462 `unsigned int`)
                   `int`)))
@@ -1400,7 +1400,7 @@ exit_code: 0
             (definition rhs~464 `unsigned int` (noop-type-conversion (1367327492 `int`) `unsigned int`))
             (definition res~465 `unsigned int` (multiply (lhs~463 `unsigned int`) (rhs~464 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~465 `unsigned int`)
                   `int`)))
@@ -1409,7 +1409,7 @@ exit_code: 0
             (definition rhs~467 `unsigned int` (noop-type-conversion (3214827302 `int`) `unsigned int`))
             (definition res~468 `unsigned int` (multiply (lhs~466 `unsigned int`) (rhs~467 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~468 `unsigned int`)
                   `int`)))
@@ -1418,7 +1418,7 @@ exit_code: 0
             (definition rhs~470 `unsigned int` (noop-type-conversion (3974509551 `int`) `unsigned int`))
             (definition res~471 `unsigned int` (multiply (lhs~469 `unsigned int`) (rhs~470 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~471 `unsigned int`)
                   `int`)))
@@ -1427,7 +1427,7 @@ exit_code: 0
             (definition rhs~473 `unsigned int` (noop-type-conversion (4126906806 `int`) `unsigned int`))
             (definition res~474 `unsigned int` (multiply (lhs~472 `unsigned int`) (rhs~473 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~474 `unsigned int`)
                   `int`)))
@@ -1436,7 +1436,7 @@ exit_code: 0
             (definition rhs~476 `unsigned int` (noop-type-conversion (915042028 `int`) `unsigned int`))
             (definition res~477 `unsigned int` (multiply (lhs~475 `unsigned int`) (rhs~476 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~477 `unsigned int`)
                   `int`)))
@@ -1445,7 +1445,7 @@ exit_code: 0
             (definition rhs~479 `unsigned int` (noop-type-conversion (573202128 `int`) `unsigned int`))
             (definition res~480 `unsigned int` (multiply (lhs~478 `unsigned int`) (rhs~479 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~480 `unsigned int`)
                   `int`)))
@@ -1454,7 +1454,7 @@ exit_code: 0
             (definition rhs~482 `unsigned int` (noop-type-conversion (2012195590 `int`) `unsigned int`))
             (definition res~483 `unsigned int` (multiply (lhs~481 `unsigned int`) (rhs~482 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~483 `unsigned int`)
                   `int`)))
@@ -1463,7 +1463,7 @@ exit_code: 0
             (definition rhs~485 `unsigned int` (noop-type-conversion (1441452130 `int`) `unsigned int`))
             (definition res~486 `unsigned int` (divide (lhs~484 `unsigned int`) (rhs~485 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~486 `unsigned int`)
                   `int`)))
@@ -1472,7 +1472,7 @@ exit_code: 0
             (definition rhs~488 `unsigned int` (noop-type-conversion (3148300494 `int`) `unsigned int`))
             (definition res~489 `unsigned int` (divide (lhs~487 `unsigned int`) (rhs~488 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~489 `unsigned int`)
                   `int`)))
@@ -1481,7 +1481,7 @@ exit_code: 0
             (definition rhs~491 `unsigned int` (noop-type-conversion (981663985 `int`) `unsigned int`))
             (definition res~492 `unsigned int` (divide (lhs~490 `unsigned int`) (rhs~491 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~492 `unsigned int`)
                   `int`)))
@@ -1490,7 +1490,7 @@ exit_code: 0
             (definition rhs~494 `unsigned int` (noop-type-conversion (1864749459 `int`) `unsigned int`))
             (definition res~495 `unsigned int` (divide (lhs~493 `unsigned int`) (rhs~494 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~495 `unsigned int`)
                   `int`)))
@@ -1499,7 +1499,7 @@ exit_code: 0
             (definition rhs~497 `unsigned int` (noop-type-conversion (2779959558 `int`) `unsigned int`))
             (definition res~498 `unsigned int` (divide (lhs~496 `unsigned int`) (rhs~497 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~498 `unsigned int`)
                   `int`)))
@@ -1508,7 +1508,7 @@ exit_code: 0
             (definition rhs~500 `unsigned int` (noop-type-conversion (2059174382 `int`) `unsigned int`))
             (definition res~501 `unsigned int` (divide (lhs~499 `unsigned int`) (rhs~500 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~501 `unsigned int`)
                   `int`)))
@@ -1517,7 +1517,7 @@ exit_code: 0
             (definition rhs~503 `unsigned int` (noop-type-conversion (3346649347 `int`) `unsigned int`))
             (definition res~504 `unsigned int` (divide (lhs~502 `unsigned int`) (rhs~503 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~504 `unsigned int`)
                   `int`)))
@@ -1526,7 +1526,7 @@ exit_code: 0
             (definition rhs~506 `unsigned int` (noop-type-conversion (2949603016 `int`) `unsigned int`))
             (definition res~507 `unsigned int` (divide (lhs~505 `unsigned int`) (rhs~506 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~507 `unsigned int`)
                   `int`)))
@@ -1535,7 +1535,7 @@ exit_code: 0
             (definition rhs~509 `unsigned int` (noop-type-conversion (241323840 `int`) `unsigned int`))
             (definition res~510 `unsigned int` (divide (lhs~508 `unsigned int`) (rhs~509 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~510 `unsigned int`)
                   `int`)))
@@ -1544,7 +1544,7 @@ exit_code: 0
             (definition rhs~512 `unsigned int` (noop-type-conversion (2707269606 `int`) `unsigned int`))
             (definition res~513 `unsigned int` (divide (lhs~511 `unsigned int`) (rhs~512 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~513 `unsigned int`)
                   `int`)))
@@ -1553,7 +1553,7 @@ exit_code: 0
             (definition rhs~515 `unsigned int` (noop-type-conversion (3689339677 `int`) `unsigned int`))
             (definition res~516 `unsigned int` (modulo (lhs~514 `unsigned int`) (rhs~515 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~516 `unsigned int`)
                   `int`)))
@@ -1562,7 +1562,7 @@ exit_code: 0
             (definition rhs~518 `unsigned int` (noop-type-conversion (2666725966 `int`) `unsigned int`))
             (definition res~519 `unsigned int` (modulo (lhs~517 `unsigned int`) (rhs~518 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~519 `unsigned int`)
                   `int`)))
@@ -1571,7 +1571,7 @@ exit_code: 0
             (definition rhs~521 `unsigned int` (noop-type-conversion (1970178955 `int`) `unsigned int`))
             (definition res~522 `unsigned int` (modulo (lhs~520 `unsigned int`) (rhs~521 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~522 `unsigned int`)
                   `int`)))
@@ -1580,7 +1580,7 @@ exit_code: 0
             (definition rhs~524 `unsigned int` (noop-type-conversion (1235300700 `int`) `unsigned int`))
             (definition res~525 `unsigned int` (modulo (lhs~523 `unsigned int`) (rhs~524 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~525 `unsigned int`)
                   `int`)))
@@ -1589,7 +1589,7 @@ exit_code: 0
             (definition rhs~527 `unsigned int` (noop-type-conversion (474172301 `int`) `unsigned int`))
             (definition res~528 `unsigned int` (modulo (lhs~526 `unsigned int`) (rhs~527 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~528 `unsigned int`)
                   `int`)))
@@ -1598,7 +1598,7 @@ exit_code: 0
             (definition rhs~530 `unsigned int` (noop-type-conversion (2574189654 `int`) `unsigned int`))
             (definition res~531 `unsigned int` (modulo (lhs~529 `unsigned int`) (rhs~530 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~531 `unsigned int`)
                   `int`)))
@@ -1607,7 +1607,7 @@ exit_code: 0
             (definition rhs~533 `unsigned int` (noop-type-conversion (2410568531 `int`) `unsigned int`))
             (definition res~534 `unsigned int` (modulo (lhs~532 `unsigned int`) (rhs~533 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~534 `unsigned int`)
                   `int`)))
@@ -1616,7 +1616,7 @@ exit_code: 0
             (definition rhs~536 `unsigned int` (noop-type-conversion (1878300766 `int`) `unsigned int`))
             (definition res~537 `unsigned int` (modulo (lhs~535 `unsigned int`) (rhs~536 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~537 `unsigned int`)
                   `int`)))
@@ -1625,7 +1625,7 @@ exit_code: 0
             (definition rhs~539 `unsigned int` (noop-type-conversion (1090018827 `int`) `unsigned int`))
             (definition res~540 `unsigned int` (modulo (lhs~538 `unsigned int`) (rhs~539 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~540 `unsigned int`)
                   `int`)))
@@ -1634,7 +1634,7 @@ exit_code: 0
             (definition rhs~542 `unsigned int` (noop-type-conversion (505183221 `int`) `unsigned int`))
             (definition res~543 `unsigned int` (modulo (lhs~541 `unsigned int`) (rhs~542 `unsigned int`) `unsigned int`))
             (expression
-               (call (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (7 `int`) `unsigned long long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (res~543 `unsigned int`)
                   `int`))))))

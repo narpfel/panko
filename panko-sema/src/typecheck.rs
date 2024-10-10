@@ -176,8 +176,8 @@ pub enum Expression<'a> {
     },
 }
 
-impl TypedExpression<'_> {
-    fn loc(&self) -> Loc {
+impl<'a> TypedExpression<'a> {
+    fn loc(&self) -> Loc<'a> {
         self.expr.loc()
     }
 
@@ -213,7 +213,7 @@ impl TypedExpression<'_> {
 }
 
 impl<'a> Expression<'a> {
-    fn loc(&self) -> Loc {
+    fn loc(&self) -> Loc<'a> {
         match self {
             Expression::Name(reference) => reference.loc(),
             Expression::Integer(token) => token.loc(),
@@ -332,7 +332,11 @@ fn typeck_declaration<'a>(
 ) -> Declaration<'a> {
     let scope::Declaration { reference, initialiser } = *declaration;
     let initialiser = initialiser.as_ref().map(|initialiser| {
-        convert_as_if_by_assignment(sess, reference.ty, typeck_expression(sess, initialiser))
+        convert_as_if_by_assignment(
+            sess,
+            reference.ty,
+            typeck_expression(sess, initialiser, Context::Default),
+        )
     });
     Declaration { reference, initialiser }
 }
@@ -360,11 +364,13 @@ fn typeck_statement<'a>(
         scope::Statement::Declaration(decl) =>
             Statement::Declaration(typeck_declaration(sess, decl)),
         scope::Statement::Expression(expr) =>
-            Statement::Expression(try { typeck_expression(sess, expr.as_ref()?) }),
+            Statement::Expression(try { typeck_expression(sess, expr.as_ref()?, Context::Default) }),
         scope::Statement::Compound(stmt) =>
             Statement::Compound(typeck_compound_statement(sess, stmt, function)),
         scope::Statement::Return { return_: _, expr } => {
-            let expr = expr.as_ref().map(|expr| typeck_expression(sess, expr));
+            let expr = expr
+                .as_ref()
+                .map(|expr| typeck_expression(sess, expr, Context::Default));
             let expr = match expr {
                 Some(expr) => Some(convert_as_if_by_assignment(
                     sess,
@@ -592,11 +598,18 @@ fn typeck_ptrcmp<'a>(
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+enum Context {
+    Default,
+    Addressof,
+}
+
 fn typeck_expression<'a>(
     sess: &'a Session<'a>,
     expr: &scope::Expression<'a>,
+    context: Context,
 ) -> TypedExpression<'a> {
-    match expr {
+    let expr = match expr {
         scope::Expression::Name(reference) => TypedExpression {
             ty: reference.ty,
             expr: Expression::Name(*reference),
@@ -607,7 +620,7 @@ fn typeck_expression<'a>(
             expr: Expression::Integer(*token),
         },
         scope::Expression::Parenthesised { open_paren, expr, close_paren } => {
-            let expr = sess.alloc(typeck_expression(sess, expr));
+            let expr = sess.alloc(typeck_expression(sess, expr, context));
             TypedExpression {
                 ty: expr.ty,
                 expr: Expression::Parenthesised {
@@ -618,7 +631,7 @@ fn typeck_expression<'a>(
             }
         }
         scope::Expression::Assign { target, value } => {
-            let target = sess.alloc(typeck_expression(sess, target));
+            let target = sess.alloc(typeck_expression(sess, target, Context::Default));
             if !target.is_modifiable_lvalue() {
                 if !target.is_lvalue() {
                     sess.emit(Diagnostic::AssignmentToNonLValue { at: &target.expr })
@@ -634,7 +647,7 @@ fn typeck_expression<'a>(
                     }
                 }
             }
-            let value = typeck_expression(sess, value);
+            let value = typeck_expression(sess, value, Context::Default);
             let value = sess.alloc(convert_as_if_by_assignment(sess, target.ty, value));
             TypedExpression {
                 // TODO: `ty` is the type that `target` would have after lvalue conversion, so it
@@ -644,8 +657,8 @@ fn typeck_expression<'a>(
             }
         }
         scope::Expression::BinOp { lhs, kind, rhs } => {
-            let lhs = typeck_expression(sess, lhs);
-            let rhs = typeck_expression(sess, rhs);
+            let lhs = typeck_expression(sess, lhs, Context::Default);
+            let rhs = typeck_expression(sess, rhs, Context::Default);
             match (lhs.ty.ty, rhs.ty.ty) {
                 (Type::Arithmetic(lhs_ty), Type::Arithmetic(rhs_ty)) =>
                     typeck_arithmetic_binop(sess, *kind, lhs, rhs, lhs_ty, rhs_ty),
@@ -675,7 +688,11 @@ fn typeck_expression<'a>(
             }
         }
         scope::Expression::UnaryOp { operator, operand } => {
-            let operand = typeck_expression(sess, operand);
+            let context = match operator.kind {
+                UnaryOpKind::Addressof => Context::Addressof,
+                _ => Context::Default,
+            };
+            let operand = typeck_expression(sess, operand, context);
             match operator.kind {
                 UnaryOpKind::Addressof => {
                     let is_function_designator = false; // TODO
@@ -730,7 +747,7 @@ fn typeck_expression<'a>(
             }
         }
         scope::Expression::Call { callee, args, close_paren } => {
-            let callee = typeck_expression(sess, callee);
+            let callee = typeck_expression(sess, callee, Context::Default);
 
             let (Type::Function(ty)
             | Type::Pointer(QualifiedType {
@@ -765,11 +782,11 @@ fn typeck_expression<'a>(
                 .zip_longest(params)
                 .map(|arg_param| match arg_param {
                     EitherOrBoth::Both(arg, param) => {
-                        let arg = typeck_expression(sess, arg);
+                        let arg = typeck_expression(sess, arg, Context::Default);
                         convert_as_if_by_assignment(sess, param.ty, arg)
                     }
                     EitherOrBoth::Left(arg) => {
-                        let arg = typeck_expression(sess, arg);
+                        let arg = typeck_expression(sess, arg, Context::Default);
                         let ty = default_argument_promote(arg).unqualified();
                         convert_as_if_by_assignment(sess, ty, arg)
                     }
@@ -786,6 +803,20 @@ fn typeck_expression<'a>(
                 },
             }
         }
+    };
+
+    match context {
+        Context::Default => match expr.ty.ty {
+            ty @ Type::Function(_) => TypedExpression {
+                ty: Type::Pointer(sess.alloc(ty.unqualified())).unqualified(),
+                expr: Expression::Addressof {
+                    ampersand: Token::synthesised(panko_lex::TokenKind::And, expr.loc()),
+                    operand: sess.alloc(expr),
+                },
+            },
+            _ => expr,
+        },
+        Context::Addressof => expr,
     }
 }
 

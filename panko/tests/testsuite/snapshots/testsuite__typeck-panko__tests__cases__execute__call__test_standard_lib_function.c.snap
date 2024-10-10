@@ -17,7 +17,7 @@ exit_code: 0
          (declaration isalnum~1 `fn(∅: int) -> int` ∅)
          (return
             (not-equal
-               (call (isalnum~1 `fn(∅: int) -> int`)
+               (call (addressof (isalnum~1 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
                   (100 `int`)
                   `int`)
                (0 `int`)

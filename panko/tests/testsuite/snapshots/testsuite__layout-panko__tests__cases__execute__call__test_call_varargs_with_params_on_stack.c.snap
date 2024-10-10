@@ -19,23 +19,23 @@ exit_code: 0
          (argv~3 `ptr<ptr<char>>` @8))
       (compound-statement
          (expression
-            (call `int` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf))
-               (noop-type-conversion `ptr<char const>` @24
-                  (deref `ptr<char>` @24
-                     (ptr-add `ptr<ptr<char>>` @32
+            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (deref `ptr<char>` @32
+                     (ptr-add `ptr<ptr<char>>` @40
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @40 (1 `int` @48)))))
-               (1 `int` @40)
-               (2 `int` @44)
-               (3 `int` @48)
-               (4 `int` @52)
-               (5 `int` @56)
-               (6 `int` @60)
-               (7 `int` @64)
-               (8 `int` @68)
-               (9 `int` @72)
-               (add `int` @76
+                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+               (1 `int` @48)
+               (2 `int` @52)
+               (3 `int` @56)
+               (4 `int` @60)
+               (5 `int` @64)
+               (6 `int` @68)
+               (7 `int` @72)
+               (8 `int` @76)
+               (9 `int` @80)
+               (add `int` @84
                   (argc~2 `int` @0)
-                  (42 `int` @80)))))))
+                  (42 `int` @88)))))))
 
 ----- stderr -----

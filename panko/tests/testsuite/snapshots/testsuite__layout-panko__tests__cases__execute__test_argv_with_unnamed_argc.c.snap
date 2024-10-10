@@ -20,11 +20,11 @@ exit_code: 0
       (compound-statement
          (return
             (truncate `int` @16
-               (call `unsigned long` @24 (strlen~0 `fn(∅: ptr<char const>) -> unsigned long` (static strlen))
-                  (noop-type-conversion `ptr<char const>` @32
-                     (deref `ptr<char>` @32
-                        (ptr-add `ptr<ptr<char>>` @40
+               (call `unsigned long` @24 (addressof `ptr<fn(∅: ptr<char const>) -> unsigned long>` @32 (strlen~0 `fn(∅: ptr<char const>) -> unsigned long` (static strlen)))
+                  (noop-type-conversion `ptr<char const>` @40
+                     (deref `ptr<char>` @40
+                        (ptr-add `ptr<ptr<char>>` @48
                            (argv~3 `ptr<ptr<char>>` @8)
-                           (sign-extend `unsigned long long` @48 (1 `int` @56)))))))))))
+                           (sign-extend `unsigned long long` @56 (1 `int` @64)))))))))))
 
 ----- stderr -----

@@ -22,7 +22,7 @@ exit_code: 0
       main~3 `fn() -> int`
       (compound-statement
          (return
-            (call (f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int`)
+            (call (addressof (f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int`) `ptr<fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int>`)
                (1 `int`)
                (2 `int`)
                (3 `int`)
@@ -32,7 +32,7 @@ exit_code: 0
                (7 `int`)
                (8 `int`)
                (9 `int`)
-               (call (id~1 `fn(n: int) -> int`)
+               (call (addressof (id~1 `fn(n: int) -> int`) `ptr<fn(n: int) -> int>`)
                   (10 `int`)
                   `int`)
                (11 `int`)
