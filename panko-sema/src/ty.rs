@@ -133,11 +133,19 @@ impl<'a> Type<'a> {
         self.size() == ty.size() && self.align() == ty.align()
     }
 
+    pub(crate) fn is_object(&self) -> bool {
+        !self.is_function()
+    }
+
     pub(crate) fn is_complete(&self) -> bool {
         match self {
             Type::Arithmetic(_) | Type::Pointer(_) | Type::Function(_) => true,
             Type::Void => false,
         }
+    }
+
+    pub(crate) fn is_function(&self) -> bool {
+        matches!(self, Type::Function(_))
     }
 }
 

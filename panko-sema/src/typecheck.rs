@@ -187,7 +187,8 @@ impl<'a> TypedExpression<'a> {
 
     fn is_lvalue(&self) -> bool {
         match self.expr {
-            Expression::Name(_) => true,
+            Expression::Name(reference) =>
+                reference.ty.ty.is_object() && !matches!(reference.ty.ty, Type::Void),
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.is_lvalue(),
             // TODO: only for pointers to object, pointers to function not implemented yet
             Expression::Deref { .. } => true,
@@ -695,12 +696,13 @@ fn typeck_expression<'a>(
             let operand = typeck_expression(sess, operand, context);
             match operator.kind {
                 UnaryOpKind::Addressof => {
-                    let is_function_designator = false; // TODO
-                    let is_result_of_deref = false; // TODO
+                    let is_function_designator = operand.ty.ty.is_function();
+                    // requirement “the result of a [] or unary * operator” is checked by
+                    // `is_lvalue`.
                     let is_lvalue = operand.is_lvalue()
                         // TODO
                         /* && !operand.is_bitfield() && !operand.has_register_storage_class() */;
-                    if !(is_function_designator || is_result_of_deref || is_lvalue) {
+                    if !(is_function_designator || is_lvalue) {
                         todo!("type error: cannot take address of this expr");
                     }
                     TypedExpression {
