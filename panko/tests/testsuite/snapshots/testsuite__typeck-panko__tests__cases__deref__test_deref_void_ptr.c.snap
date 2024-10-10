@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/deref/test_deref_void_ptr.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: dereference of pointer to `void`
+   ╭─[panko/tests/cases/deref/test_deref_void_ptr.c:8:6]
+   │
+ 8 │     *p;
+   │      ┬  
+   │      ╰── this expression has type `ptr<void>`
+───╯

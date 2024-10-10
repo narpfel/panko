@@ -70,6 +70,11 @@ enum Diagnostic<'a> {
     #[error("cannot assign to this expression because it is not an lvalue")]
     #[diagnostics(at(colour = Red, label = "this expression is not an lvalue"))]
     AssignmentToNonLValue { at: &'a Expression<'a> },
+
+    #[error("dereference of pointer to `void`")]
+    #[diagnostics(at(colour = Red, label = "this expression has type `{ty}`"))]
+    #[with(ty = at.ty.ty)]
+    DerefOfVoidPtr { at: TypedExpression<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -713,13 +718,18 @@ fn typeck_expression<'a>(
                     }
                 }
                 UnaryOpKind::Deref => match operand.ty.ty {
-                    Type::Pointer(pointee_ty) => TypedExpression {
-                        ty: *pointee_ty,
-                        expr: Expression::Deref {
-                            star: operator.token,
-                            operand: sess.alloc(operand),
-                        },
-                    },
+                    Type::Pointer(pointee_ty) => {
+                        if matches!(pointee_ty.ty, Type::Void) {
+                            sess.emit(Diagnostic::DerefOfVoidPtr { at: operand });
+                        }
+                        TypedExpression {
+                            ty: *pointee_ty,
+                            expr: Expression::Deref {
+                                star: operator.token,
+                                operand: sess.alloc(operand),
+                            },
+                        }
+                    }
                     _ => todo!("type error: cannot deref this expr"),
                 },
                 UnaryOpKind::Negate => match operand.ty.ty {

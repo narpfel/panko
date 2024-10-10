@@ -19,3 +19,11 @@ Error: cannot assign to this expression because it is not an lvalue
    │     ─┬  
    │      ╰── this expression is not an lvalue
 ───╯
+
+Error: dereference of pointer to `void`
+   ╭─[panko/tests/cases/assignment/test_assignment_to_derefd_void_ptr.c:6:6]
+   │
+ 6 │     *p = f();
+   │      ┬  
+   │      ╰── this expression has type `ptr<void>`
+───╯
