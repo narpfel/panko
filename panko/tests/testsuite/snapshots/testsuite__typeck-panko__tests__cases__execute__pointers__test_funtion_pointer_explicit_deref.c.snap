@@ -23,7 +23,7 @@ exit_code: 0
          (definition x~3 `int` (40 `int`))
          (definition p~4 `ptr<fn(∅: int) -> int>` (addressof (f~0 `fn(x: int) -> int`) `ptr<fn(x: int) -> int>`))
          (return
-            (call (p~4 `ptr<fn(∅: int) -> int>` `ptr<fn(∅: int) -> int>`)
+            (call (addressof (deref (addressof (deref (addressof (deref (addressof (deref (p~4 `ptr<fn(∅: int) -> int>`) `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`) `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`) `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`) `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>` `ptr<fn(∅: int) -> int>`)
                (x~3 `int`)
                `int`)))))
 

@@ -712,14 +712,6 @@ fn typeck_expression<'a>(
                     }
                 }
                 UnaryOpKind::Deref => match operand.ty.ty {
-                    // TODO: ignoring derefs of functions might behave correctly, but all function
-                    // designators should be converted to pointers-to-function.
-                    Type::Pointer(QualifiedType {
-                        is_const: _,
-                        is_volatile: _,
-                        ty: Type::Function(_),
-                        loc: _,
-                    }) => operand,
                     Type::Pointer(pointee_ty) => TypedExpression {
                         ty: *pointee_ty,
                         expr: Expression::Deref {
