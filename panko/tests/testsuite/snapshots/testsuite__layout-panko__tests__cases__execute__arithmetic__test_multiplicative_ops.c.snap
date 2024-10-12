@@ -920,7 +920,7 @@ exit_code: 0
                   (res~183 `int` @24))))
          (compound-statement
             (definition (lhs~184 `unsigned char` @16) (truncate `unsigned char` @16 (221 `int` @20)))
-            (definition (rhs~185 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (3356079800 `int` @20)))
+            (definition (rhs~185 `unsigned int` @20) (truncate `unsigned int` @20 (3356079800 `long` @24)))
             (definition (res~186 `unsigned int` @24)
                (multiply `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~184 `unsigned char` @16))
@@ -950,7 +950,7 @@ exit_code: 0
                   (res~189 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~190 `unsigned char` @16) (truncate `unsigned char` @16 (167 `int` @20)))
-            (definition (rhs~191 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (4055620795 `int` @20)))
+            (definition (rhs~191 `unsigned int` @20) (truncate `unsigned int` @20 (4055620795 `long` @24)))
             (definition (res~192 `unsigned int` @24)
                (multiply `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~190 `unsigned char` @16))
@@ -980,7 +980,7 @@ exit_code: 0
                   (res~195 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~196 `unsigned char` @16) (truncate `unsigned char` @16 (95 `int` @20)))
-            (definition (rhs~197 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (3788785085 `int` @20)))
+            (definition (rhs~197 `unsigned int` @20) (truncate `unsigned int` @20 (3788785085 `long` @24)))
             (definition (res~198 `unsigned int` @24)
                (multiply `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~196 `unsigned char` @16))
@@ -995,7 +995,7 @@ exit_code: 0
                   (res~198 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~199 `unsigned char` @16) (truncate `unsigned char` @16 (134 `int` @20)))
-            (definition (rhs~200 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2389282163 `int` @20)))
+            (definition (rhs~200 `unsigned int` @20) (truncate `unsigned int` @20 (2389282163 `long` @24)))
             (definition (res~201 `unsigned int` @24)
                (multiply `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~199 `unsigned char` @16))
@@ -1025,7 +1025,7 @@ exit_code: 0
                   (res~204 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~205 `unsigned char` @16) (truncate `unsigned char` @16 (109 `int` @20)))
-            (definition (rhs~206 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2279274733 `int` @20)))
+            (definition (rhs~206 `unsigned int` @20) (truncate `unsigned int` @20 (2279274733 `long` @24)))
             (definition (res~207 `unsigned int` @24)
                (multiply `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~205 `unsigned char` @16))
@@ -1040,7 +1040,7 @@ exit_code: 0
                   (res~207 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~208 `unsigned char` @16) (truncate `unsigned char` @16 (122 `int` @20)))
-            (definition (rhs~209 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2790188657 `int` @20)))
+            (definition (rhs~209 `unsigned int` @20) (truncate `unsigned int` @20 (2790188657 `long` @24)))
             (definition (res~210 `unsigned int` @24)
                (multiply `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~208 `unsigned char` @16))
@@ -1100,7 +1100,7 @@ exit_code: 0
                   (res~219 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~220 `unsigned char` @16) (truncate `unsigned char` @16 (253 `int` @20)))
-            (definition (rhs~221 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2888507760 `int` @20)))
+            (definition (rhs~221 `unsigned int` @20) (truncate `unsigned int` @20 (2888507760 `long` @24)))
             (definition (res~222 `unsigned int` @24)
                (divide `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~220 `unsigned char` @16))
@@ -1115,7 +1115,7 @@ exit_code: 0
                   (res~222 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~223 `unsigned char` @16) (truncate `unsigned char` @16 (95 `int` @20)))
-            (definition (rhs~224 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2352884500 `int` @20)))
+            (definition (rhs~224 `unsigned int` @20) (truncate `unsigned int` @20 (2352884500 `long` @24)))
             (definition (res~225 `unsigned int` @24)
                (divide `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~223 `unsigned char` @16))
@@ -1145,7 +1145,7 @@ exit_code: 0
                   (res~228 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~229 `unsigned char` @16) (truncate `unsigned char` @16 (19 `int` @20)))
-            (definition (rhs~230 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2911396732 `int` @20)))
+            (definition (rhs~230 `unsigned int` @20) (truncate `unsigned int` @20 (2911396732 `long` @24)))
             (definition (res~231 `unsigned int` @24)
                (divide `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~229 `unsigned char` @16))
@@ -1160,7 +1160,7 @@ exit_code: 0
                   (res~231 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~232 `unsigned char` @16) (truncate `unsigned char` @16 (159 `int` @20)))
-            (definition (rhs~233 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2345210453 `int` @20)))
+            (definition (rhs~233 `unsigned int` @20) (truncate `unsigned int` @20 (2345210453 `long` @24)))
             (definition (res~234 `unsigned int` @24)
                (divide `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~232 `unsigned char` @16))
@@ -1205,7 +1205,7 @@ exit_code: 0
                   (res~240 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~241 `unsigned char` @16) (truncate `unsigned char` @16 (247 `int` @20)))
-            (definition (rhs~242 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2998210528 `int` @20)))
+            (definition (rhs~242 `unsigned int` @20) (truncate `unsigned int` @20 (2998210528 `long` @24)))
             (definition (res~243 `unsigned int` @24)
                (divide `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~241 `unsigned char` @16))
@@ -1235,7 +1235,7 @@ exit_code: 0
                   (res~246 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~247 `unsigned char` @16) (truncate `unsigned char` @16 (199 `int` @20)))
-            (definition (rhs~248 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2800079115 `int` @20)))
+            (definition (rhs~248 `unsigned int` @20) (truncate `unsigned int` @20 (2800079115 `long` @24)))
             (definition (res~249 `unsigned int` @24)
                (modulo `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~247 `unsigned char` @16))
@@ -1250,7 +1250,7 @@ exit_code: 0
                   (res~249 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~250 `unsigned char` @16) (truncate `unsigned char` @16 (192 `int` @20)))
-            (definition (rhs~251 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2863657021 `int` @20)))
+            (definition (rhs~251 `unsigned int` @20) (truncate `unsigned int` @20 (2863657021 `long` @24)))
             (definition (res~252 `unsigned int` @24)
                (modulo `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~250 `unsigned char` @16))
@@ -1295,7 +1295,7 @@ exit_code: 0
                   (res~258 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~259 `unsigned char` @16) (truncate `unsigned char` @16 (71 `int` @20)))
-            (definition (rhs~260 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (3842679516 `int` @20)))
+            (definition (rhs~260 `unsigned int` @20) (truncate `unsigned int` @20 (3842679516 `long` @24)))
             (definition (res~261 `unsigned int` @24)
                (modulo `unsigned int` @24
                   (zero-extend `unsigned int` @24 (lhs~259 `unsigned char` @16))
@@ -1369,7 +1369,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~273 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~274 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3821878247 `int` @16)))
+            (definition (lhs~274 `unsigned int` @16) (truncate `unsigned int` @16 (3821878247 `long` @24)))
             (definition (rhs~275 `unsigned char` @20) (truncate `unsigned char` @20 (103 `int` @24)))
             (definition (res~276 `unsigned int` @24)
                (multiply `unsigned int` @24
@@ -1384,7 +1384,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~276 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~277 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3129907773 `int` @16)))
+            (definition (lhs~277 `unsigned int` @16) (truncate `unsigned int` @16 (3129907773 `long` @24)))
             (definition (rhs~278 `unsigned char` @20) (truncate `unsigned char` @20 (22 `int` @24)))
             (definition (res~279 `unsigned int` @24)
                (multiply `unsigned int` @24
@@ -1429,7 +1429,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~285 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~286 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (4261681089 `int` @16)))
+            (definition (lhs~286 `unsigned int` @16) (truncate `unsigned int` @16 (4261681089 `long` @24)))
             (definition (rhs~287 `unsigned char` @20) (truncate `unsigned char` @20 (142 `int` @24)))
             (definition (res~288 `unsigned int` @24)
                (multiply `unsigned int` @24
@@ -1444,7 +1444,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~288 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~289 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3950196219 `int` @16)))
+            (definition (lhs~289 `unsigned int` @16) (truncate `unsigned int` @16 (3950196219 `long` @24)))
             (definition (rhs~290 `unsigned char` @20) (truncate `unsigned char` @20 (56 `int` @24)))
             (definition (res~291 `unsigned int` @24)
                (multiply `unsigned int` @24
@@ -1459,7 +1459,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~291 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~292 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (2950160282 `int` @16)))
+            (definition (lhs~292 `unsigned int` @16) (truncate `unsigned int` @16 (2950160282 `long` @24)))
             (definition (rhs~293 `unsigned char` @20) (truncate `unsigned char` @20 (132 `int` @24)))
             (definition (res~294 `unsigned int` @24)
                (multiply `unsigned int` @24
@@ -1474,7 +1474,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~294 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~295 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3481837387 `int` @16)))
+            (definition (lhs~295 `unsigned int` @16) (truncate `unsigned int` @16 (3481837387 `long` @24)))
             (definition (rhs~296 `unsigned char` @20) (truncate `unsigned char` @20 (190 `int` @24)))
             (definition (res~297 `unsigned int` @24)
                (multiply `unsigned int` @24
@@ -1489,7 +1489,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~297 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~298 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (2632772191 `int` @16)))
+            (definition (lhs~298 `unsigned int` @16) (truncate `unsigned int` @16 (2632772191 `long` @24)))
             (definition (rhs~299 `unsigned char` @20) (truncate `unsigned char` @20 (227 `int` @24)))
             (definition (res~300 `unsigned int` @24)
                (multiply `unsigned int` @24
@@ -1504,7 +1504,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~300 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~301 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3596525884 `int` @16)))
+            (definition (lhs~301 `unsigned int` @16) (truncate `unsigned int` @16 (3596525884 `long` @24)))
             (definition (rhs~302 `unsigned char` @20) (truncate `unsigned char` @20 (160 `int` @24)))
             (definition (res~303 `unsigned int` @24)
                (multiply `unsigned int` @24
@@ -1534,7 +1534,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~306 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~307 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (2926028971 `int` @16)))
+            (definition (lhs~307 `unsigned int` @16) (truncate `unsigned int` @16 (2926028971 `long` @24)))
             (definition (rhs~308 `unsigned char` @20) (truncate `unsigned char` @20 (47 `int` @24)))
             (definition (res~309 `unsigned int` @24)
                (divide `unsigned int` @24
@@ -1594,7 +1594,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~318 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~319 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3645566492 `int` @16)))
+            (definition (lhs~319 `unsigned int` @16) (truncate `unsigned int` @16 (3645566492 `long` @24)))
             (definition (rhs~320 `unsigned char` @20) (truncate `unsigned char` @20 (195 `int` @24)))
             (definition (res~321 `unsigned int` @24)
                (divide `unsigned int` @24
@@ -1609,7 +1609,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~321 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~322 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3612188356 `int` @16)))
+            (definition (lhs~322 `unsigned int` @16) (truncate `unsigned int` @16 (3612188356 `long` @24)))
             (definition (rhs~323 `unsigned char` @20) (truncate `unsigned char` @20 (162 `int` @24)))
             (definition (res~324 `unsigned int` @24)
                (divide `unsigned int` @24
@@ -1624,7 +1624,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~324 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~325 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (2400582198 `int` @16)))
+            (definition (lhs~325 `unsigned int` @16) (truncate `unsigned int` @16 (2400582198 `long` @24)))
             (definition (rhs~326 `unsigned char` @20) (truncate `unsigned char` @20 (223 `int` @24)))
             (definition (res~327 `unsigned int` @24)
                (divide `unsigned int` @24
@@ -1699,7 +1699,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~339 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~340 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3234742362 `int` @16)))
+            (definition (lhs~340 `unsigned int` @16) (truncate `unsigned int` @16 (3234742362 `long` @24)))
             (definition (rhs~341 `unsigned char` @20) (truncate `unsigned char` @20 (225 `int` @24)))
             (definition (res~342 `unsigned int` @24)
                (modulo `unsigned int` @24
@@ -1729,7 +1729,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~345 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~346 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (4070485465 `int` @16)))
+            (definition (lhs~346 `unsigned int` @16) (truncate `unsigned int` @16 (4070485465 `long` @24)))
             (definition (rhs~347 `unsigned char` @20) (truncate `unsigned char` @20 (83 `int` @24)))
             (definition (res~348 `unsigned int` @24)
                (modulo `unsigned int` @24
@@ -2269,7 +2269,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (3 `int` @64)))))
                   (res~453 `int` @24))))
          (compound-statement
-            (definition (lhs~454 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3470280314 `int` @16)))
+            (definition (lhs~454 `unsigned int` @16) (truncate `unsigned int` @16 (3470280314 `long` @24)))
             (definition (rhs~455 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (195359260 `int` @20)))
             (definition (res~456 `unsigned int` @24)
                (multiply `unsigned int` @24
@@ -2330,7 +2330,7 @@ exit_code: 0
                   (res~465 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~466 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (1880450380 `int` @16)))
-            (definition (rhs~467 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (3214827302 `int` @20)))
+            (definition (rhs~467 `unsigned int` @20) (truncate `unsigned int` @20 (3214827302 `long` @24)))
             (definition (res~468 `unsigned int` @24)
                (multiply `unsigned int` @24
                   (lhs~466 `unsigned int` @16)
@@ -2344,8 +2344,8 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~468 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~469 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (4241199250 `int` @16)))
-            (definition (rhs~470 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (3974509551 `int` @20)))
+            (definition (lhs~469 `unsigned int` @16) (truncate `unsigned int` @16 (4241199250 `long` @24)))
+            (definition (rhs~470 `unsigned int` @20) (truncate `unsigned int` @20 (3974509551 `long` @24)))
             (definition (res~471 `unsigned int` @24)
                (multiply `unsigned int` @24
                   (lhs~469 `unsigned int` @16)
@@ -2359,8 +2359,8 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~471 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~472 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (4082807693 `int` @16)))
-            (definition (rhs~473 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (4126906806 `int` @20)))
+            (definition (lhs~472 `unsigned int` @16) (truncate `unsigned int` @16 (4082807693 `long` @24)))
+            (definition (rhs~473 `unsigned int` @20) (truncate `unsigned int` @20 (4126906806 `long` @24)))
             (definition (res~474 `unsigned int` @24)
                (multiply `unsigned int` @24
                   (lhs~472 `unsigned int` @16)
@@ -2389,7 +2389,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~477 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~478 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3198221414 `int` @16)))
+            (definition (lhs~478 `unsigned int` @16) (truncate `unsigned int` @16 (3198221414 `long` @24)))
             (definition (rhs~479 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (573202128 `int` @20)))
             (definition (res~480 `unsigned int` @24)
                (multiply `unsigned int` @24
@@ -2404,7 +2404,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~480 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~481 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (2888469990 `int` @16)))
+            (definition (lhs~481 `unsigned int` @16) (truncate `unsigned int` @16 (2888469990 `long` @24)))
             (definition (rhs~482 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2012195590 `int` @20)))
             (definition (res~483 `unsigned int` @24)
                (multiply `unsigned int` @24
@@ -2434,8 +2434,8 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~486 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~487 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (2200029653 `int` @16)))
-            (definition (rhs~488 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (3148300494 `int` @20)))
+            (definition (lhs~487 `unsigned int` @16) (truncate `unsigned int` @16 (2200029653 `long` @24)))
+            (definition (rhs~488 `unsigned int` @20) (truncate `unsigned int` @20 (3148300494 `long` @24)))
             (definition (res~489 `unsigned int` @24)
                (divide `unsigned int` @24
                   (lhs~487 `unsigned int` @16)
@@ -2449,7 +2449,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~489 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~490 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (4031479772 `int` @16)))
+            (definition (lhs~490 `unsigned int` @16) (truncate `unsigned int` @16 (4031479772 `long` @24)))
             (definition (rhs~491 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (981663985 `int` @20)))
             (definition (res~492 `unsigned int` @24)
                (divide `unsigned int` @24
@@ -2464,7 +2464,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~492 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~493 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3409953383 `int` @16)))
+            (definition (lhs~493 `unsigned int` @16) (truncate `unsigned int` @16 (3409953383 `long` @24)))
             (definition (rhs~494 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (1864749459 `int` @20)))
             (definition (res~495 `unsigned int` @24)
                (divide `unsigned int` @24
@@ -2480,7 +2480,7 @@ exit_code: 0
                   (res~495 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~496 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (1003848748 `int` @16)))
-            (definition (rhs~497 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2779959558 `int` @20)))
+            (definition (rhs~497 `unsigned int` @20) (truncate `unsigned int` @20 (2779959558 `long` @24)))
             (definition (res~498 `unsigned int` @24)
                (divide `unsigned int` @24
                   (lhs~496 `unsigned int` @16)
@@ -2509,8 +2509,8 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~501 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~502 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (2858273880 `int` @16)))
-            (definition (rhs~503 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (3346649347 `int` @20)))
+            (definition (lhs~502 `unsigned int` @16) (truncate `unsigned int` @16 (2858273880 `long` @24)))
+            (definition (rhs~503 `unsigned int` @20) (truncate `unsigned int` @20 (3346649347 `long` @24)))
             (definition (res~504 `unsigned int` @24)
                (divide `unsigned int` @24
                   (lhs~502 `unsigned int` @16)
@@ -2524,8 +2524,8 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~504 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~505 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (2199716413 `int` @16)))
-            (definition (rhs~506 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2949603016 `int` @20)))
+            (definition (lhs~505 `unsigned int` @16) (truncate `unsigned int` @16 (2199716413 `long` @24)))
+            (definition (rhs~506 `unsigned int` @20) (truncate `unsigned int` @20 (2949603016 `long` @24)))
             (definition (res~507 `unsigned int` @24)
                (divide `unsigned int` @24
                   (lhs~505 `unsigned int` @16)
@@ -2554,8 +2554,8 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~510 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~511 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3303349263 `int` @16)))
-            (definition (rhs~512 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2707269606 `int` @20)))
+            (definition (lhs~511 `unsigned int` @16) (truncate `unsigned int` @16 (3303349263 `long` @24)))
+            (definition (rhs~512 `unsigned int` @20) (truncate `unsigned int` @20 (2707269606 `long` @24)))
             (definition (res~513 `unsigned int` @24)
                (divide `unsigned int` @24
                   (lhs~511 `unsigned int` @16)
@@ -2570,7 +2570,7 @@ exit_code: 0
                   (res~513 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~514 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (1146446010 `int` @16)))
-            (definition (rhs~515 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (3689339677 `int` @20)))
+            (definition (rhs~515 `unsigned int` @20) (truncate `unsigned int` @20 (3689339677 `long` @24)))
             (definition (res~516 `unsigned int` @24)
                (modulo `unsigned int` @24
                   (lhs~514 `unsigned int` @16)
@@ -2585,7 +2585,7 @@ exit_code: 0
                   (res~516 `unsigned int` @24))))
          (compound-statement
             (definition (lhs~517 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (673552128 `int` @16)))
-            (definition (rhs~518 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2666725966 `int` @20)))
+            (definition (rhs~518 `unsigned int` @20) (truncate `unsigned int` @20 (2666725966 `long` @24)))
             (definition (res~519 `unsigned int` @24)
                (modulo `unsigned int` @24
                   (lhs~517 `unsigned int` @16)
@@ -2614,7 +2614,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~522 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~523 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3677461164 `int` @16)))
+            (definition (lhs~523 `unsigned int` @16) (truncate `unsigned int` @16 (3677461164 `long` @24)))
             (definition (rhs~524 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (1235300700 `int` @20)))
             (definition (res~525 `unsigned int` @24)
                (modulo `unsigned int` @24
@@ -2629,7 +2629,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~525 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~526 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3678341959 `int` @16)))
+            (definition (lhs~526 `unsigned int` @16) (truncate `unsigned int` @16 (3678341959 `long` @24)))
             (definition (rhs~527 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (474172301 `int` @20)))
             (definition (res~528 `unsigned int` @24)
                (modulo `unsigned int` @24
@@ -2644,8 +2644,8 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~528 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~529 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3471160058 `int` @16)))
-            (definition (rhs~530 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2574189654 `int` @20)))
+            (definition (lhs~529 `unsigned int` @16) (truncate `unsigned int` @16 (3471160058 `long` @24)))
+            (definition (rhs~530 `unsigned int` @20) (truncate `unsigned int` @20 (2574189654 `long` @24)))
             (definition (res~531 `unsigned int` @24)
                (modulo `unsigned int` @24
                   (lhs~529 `unsigned int` @16)
@@ -2659,8 +2659,8 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~531 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~532 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (2451701930 `int` @16)))
-            (definition (rhs~533 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (2410568531 `int` @20)))
+            (definition (lhs~532 `unsigned int` @16) (truncate `unsigned int` @16 (2451701930 `long` @24)))
+            (definition (rhs~533 `unsigned int` @20) (truncate `unsigned int` @20 (2410568531 `long` @24)))
             (definition (res~534 `unsigned int` @24)
                (modulo `unsigned int` @24
                   (lhs~532 `unsigned int` @16)
@@ -2674,7 +2674,7 @@ exit_code: 0
                            (sign-extend `unsigned long long` @56 (7 `int` @64)))))
                   (res~534 `unsigned int` @24))))
          (compound-statement
-            (definition (lhs~535 `unsigned int` @16) (noop-type-conversion `unsigned int` @16 (3158817002 `int` @16)))
+            (definition (lhs~535 `unsigned int` @16) (truncate `unsigned int` @16 (3158817002 `long` @24)))
             (definition (rhs~536 `unsigned int` @20) (noop-type-conversion `unsigned int` @20 (1878300766 `int` @20)))
             (definition (res~537 `unsigned int` @24)
                (modulo `unsigned int` @24

@@ -289,10 +289,8 @@ impl<'a> Codegen<'a> {
         match initialiser {
             Some(initialiser) => match initialiser {
                 Expression::Name(_) => todo!(),
-                Expression::Integer(token) => self.constant(
-                    &token.slice().parse::<u128>().unwrap().to_le_bytes()
-                        [..usize::try_from(ty.size()).unwrap()],
-                ),
+                Expression::Integer(value) =>
+                    self.constant(&value.to_le_bytes()[..usize::try_from(ty.size()).unwrap()]),
                 Expression::NoopTypeConversion(_) => todo!(),
                 Expression::Truncate(_) => todo!(),
                 Expression::SignExtend(_) => todo!(),
@@ -364,9 +362,9 @@ impl<'a> Codegen<'a> {
     fn expr(&mut self, expr: &LayoutedExpression) {
         match expr.expr {
             Expression::Name(_reference) => (), // already in memory
-            Expression::Integer(token) => {
-                // TODO: real parsing (when building the AST)
-                self.emit_args("mov", &[expr, &token.slice().parse::<u64>().unwrap()]);
+            Expression::Integer(value) => {
+                self.emit_args("movabs", &[&Rax, &value]);
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
             Expression::NoopTypeConversion(inner) => {
                 assert_eq!(expr.ty.ty.size(), inner.ty.ty.size());

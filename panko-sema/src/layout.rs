@@ -1,5 +1,4 @@
 use bumpalo::Bump;
-use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast::Integral;
 use panko_parser::BinOpKind;
@@ -71,7 +70,7 @@ pub struct LayoutedExpression<'a> {
 #[derive(Debug, Clone, Copy)]
 pub enum Expression<'a> {
     Name(Reference<'a>),
-    Integer(Token<'a>),
+    Integer(u64),
     NoopTypeConversion(&'a LayoutedExpression<'a>),
     Truncate(&'a LayoutedExpression<'a>),
     SignExtend(&'a LayoutedExpression<'a>),
@@ -260,7 +259,8 @@ fn layout_expression_in_slot<'a>(
             let reference = stack.add(name);
             (reference.slot(), Expression::Name(reference))
         }
-        typecheck::Expression::Integer(integer) => (make_slot(), Expression::Integer(integer)),
+        typecheck::Expression::Integer { value, token: _ } =>
+            (make_slot(), Expression::Integer(value)),
         typecheck::Expression::NoopTypeConversion(expr) => {
             let expr = layout_expression_in_slot(stack, bump, expr, target_slot);
             (expr.slot, Expression::NoopTypeConversion(bump.alloc(expr)))

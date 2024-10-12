@@ -560,7 +560,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~184 `unsigned char` (truncate (221 `int`) `unsigned char`))
-            (definition rhs~185 `unsigned int` (noop-type-conversion (3356079800 `int`) `unsigned int`))
+            (definition rhs~185 `unsigned int` (truncate (3356079800 `long`) `unsigned int`))
             (definition res~186 `unsigned int` (multiply (zero-extend (lhs~184 `unsigned char`) `unsigned int`) (rhs~185 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -578,7 +578,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~190 `unsigned char` (truncate (167 `int`) `unsigned char`))
-            (definition rhs~191 `unsigned int` (noop-type-conversion (4055620795 `int`) `unsigned int`))
+            (definition rhs~191 `unsigned int` (truncate (4055620795 `long`) `unsigned int`))
             (definition res~192 `unsigned int` (multiply (zero-extend (lhs~190 `unsigned char`) `unsigned int`) (rhs~191 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -596,7 +596,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~196 `unsigned char` (truncate (95 `int`) `unsigned char`))
-            (definition rhs~197 `unsigned int` (noop-type-conversion (3788785085 `int`) `unsigned int`))
+            (definition rhs~197 `unsigned int` (truncate (3788785085 `long`) `unsigned int`))
             (definition res~198 `unsigned int` (multiply (zero-extend (lhs~196 `unsigned char`) `unsigned int`) (rhs~197 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -605,7 +605,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~199 `unsigned char` (truncate (134 `int`) `unsigned char`))
-            (definition rhs~200 `unsigned int` (noop-type-conversion (2389282163 `int`) `unsigned int`))
+            (definition rhs~200 `unsigned int` (truncate (2389282163 `long`) `unsigned int`))
             (definition res~201 `unsigned int` (multiply (zero-extend (lhs~199 `unsigned char`) `unsigned int`) (rhs~200 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -623,7 +623,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~205 `unsigned char` (truncate (109 `int`) `unsigned char`))
-            (definition rhs~206 `unsigned int` (noop-type-conversion (2279274733 `int`) `unsigned int`))
+            (definition rhs~206 `unsigned int` (truncate (2279274733 `long`) `unsigned int`))
             (definition res~207 `unsigned int` (multiply (zero-extend (lhs~205 `unsigned char`) `unsigned int`) (rhs~206 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -632,7 +632,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~208 `unsigned char` (truncate (122 `int`) `unsigned char`))
-            (definition rhs~209 `unsigned int` (noop-type-conversion (2790188657 `int`) `unsigned int`))
+            (definition rhs~209 `unsigned int` (truncate (2790188657 `long`) `unsigned int`))
             (definition res~210 `unsigned int` (multiply (zero-extend (lhs~208 `unsigned char`) `unsigned int`) (rhs~209 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -668,7 +668,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~220 `unsigned char` (truncate (253 `int`) `unsigned char`))
-            (definition rhs~221 `unsigned int` (noop-type-conversion (2888507760 `int`) `unsigned int`))
+            (definition rhs~221 `unsigned int` (truncate (2888507760 `long`) `unsigned int`))
             (definition res~222 `unsigned int` (divide (zero-extend (lhs~220 `unsigned char`) `unsigned int`) (rhs~221 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -677,7 +677,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~223 `unsigned char` (truncate (95 `int`) `unsigned char`))
-            (definition rhs~224 `unsigned int` (noop-type-conversion (2352884500 `int`) `unsigned int`))
+            (definition rhs~224 `unsigned int` (truncate (2352884500 `long`) `unsigned int`))
             (definition res~225 `unsigned int` (divide (zero-extend (lhs~223 `unsigned char`) `unsigned int`) (rhs~224 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -695,7 +695,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~229 `unsigned char` (truncate (19 `int`) `unsigned char`))
-            (definition rhs~230 `unsigned int` (noop-type-conversion (2911396732 `int`) `unsigned int`))
+            (definition rhs~230 `unsigned int` (truncate (2911396732 `long`) `unsigned int`))
             (definition res~231 `unsigned int` (divide (zero-extend (lhs~229 `unsigned char`) `unsigned int`) (rhs~230 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -704,7 +704,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~232 `unsigned char` (truncate (159 `int`) `unsigned char`))
-            (definition rhs~233 `unsigned int` (noop-type-conversion (2345210453 `int`) `unsigned int`))
+            (definition rhs~233 `unsigned int` (truncate (2345210453 `long`) `unsigned int`))
             (definition res~234 `unsigned int` (divide (zero-extend (lhs~232 `unsigned char`) `unsigned int`) (rhs~233 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -731,7 +731,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~241 `unsigned char` (truncate (247 `int`) `unsigned char`))
-            (definition rhs~242 `unsigned int` (noop-type-conversion (2998210528 `int`) `unsigned int`))
+            (definition rhs~242 `unsigned int` (truncate (2998210528 `long`) `unsigned int`))
             (definition res~243 `unsigned int` (divide (zero-extend (lhs~241 `unsigned char`) `unsigned int`) (rhs~242 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -749,7 +749,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~247 `unsigned char` (truncate (199 `int`) `unsigned char`))
-            (definition rhs~248 `unsigned int` (noop-type-conversion (2800079115 `int`) `unsigned int`))
+            (definition rhs~248 `unsigned int` (truncate (2800079115 `long`) `unsigned int`))
             (definition res~249 `unsigned int` (modulo (zero-extend (lhs~247 `unsigned char`) `unsigned int`) (rhs~248 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -758,7 +758,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~250 `unsigned char` (truncate (192 `int`) `unsigned char`))
-            (definition rhs~251 `unsigned int` (noop-type-conversion (2863657021 `int`) `unsigned int`))
+            (definition rhs~251 `unsigned int` (truncate (2863657021 `long`) `unsigned int`))
             (definition res~252 `unsigned int` (modulo (zero-extend (lhs~250 `unsigned char`) `unsigned int`) (rhs~251 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -785,7 +785,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~259 `unsigned char` (truncate (71 `int`) `unsigned char`))
-            (definition rhs~260 `unsigned int` (noop-type-conversion (3842679516 `int`) `unsigned int`))
+            (definition rhs~260 `unsigned int` (truncate (3842679516 `long`) `unsigned int`))
             (definition res~261 `unsigned int` (modulo (zero-extend (lhs~259 `unsigned char`) `unsigned int`) (rhs~260 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -829,7 +829,7 @@ exit_code: 0
                   (res~273 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~274 `unsigned int` (noop-type-conversion (3821878247 `int`) `unsigned int`))
+            (definition lhs~274 `unsigned int` (truncate (3821878247 `long`) `unsigned int`))
             (definition rhs~275 `unsigned char` (truncate (103 `int`) `unsigned char`))
             (definition res~276 `unsigned int` (multiply (lhs~274 `unsigned int`) (zero-extend (rhs~275 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -838,7 +838,7 @@ exit_code: 0
                   (res~276 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~277 `unsigned int` (noop-type-conversion (3129907773 `int`) `unsigned int`))
+            (definition lhs~277 `unsigned int` (truncate (3129907773 `long`) `unsigned int`))
             (definition rhs~278 `unsigned char` (truncate (22 `int`) `unsigned char`))
             (definition res~279 `unsigned int` (multiply (lhs~277 `unsigned int`) (zero-extend (rhs~278 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -865,7 +865,7 @@ exit_code: 0
                   (res~285 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~286 `unsigned int` (noop-type-conversion (4261681089 `int`) `unsigned int`))
+            (definition lhs~286 `unsigned int` (truncate (4261681089 `long`) `unsigned int`))
             (definition rhs~287 `unsigned char` (truncate (142 `int`) `unsigned char`))
             (definition res~288 `unsigned int` (multiply (lhs~286 `unsigned int`) (zero-extend (rhs~287 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -874,7 +874,7 @@ exit_code: 0
                   (res~288 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~289 `unsigned int` (noop-type-conversion (3950196219 `int`) `unsigned int`))
+            (definition lhs~289 `unsigned int` (truncate (3950196219 `long`) `unsigned int`))
             (definition rhs~290 `unsigned char` (truncate (56 `int`) `unsigned char`))
             (definition res~291 `unsigned int` (multiply (lhs~289 `unsigned int`) (zero-extend (rhs~290 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -883,7 +883,7 @@ exit_code: 0
                   (res~291 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~292 `unsigned int` (noop-type-conversion (2950160282 `int`) `unsigned int`))
+            (definition lhs~292 `unsigned int` (truncate (2950160282 `long`) `unsigned int`))
             (definition rhs~293 `unsigned char` (truncate (132 `int`) `unsigned char`))
             (definition res~294 `unsigned int` (multiply (lhs~292 `unsigned int`) (zero-extend (rhs~293 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -892,7 +892,7 @@ exit_code: 0
                   (res~294 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~295 `unsigned int` (noop-type-conversion (3481837387 `int`) `unsigned int`))
+            (definition lhs~295 `unsigned int` (truncate (3481837387 `long`) `unsigned int`))
             (definition rhs~296 `unsigned char` (truncate (190 `int`) `unsigned char`))
             (definition res~297 `unsigned int` (multiply (lhs~295 `unsigned int`) (zero-extend (rhs~296 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -901,7 +901,7 @@ exit_code: 0
                   (res~297 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~298 `unsigned int` (noop-type-conversion (2632772191 `int`) `unsigned int`))
+            (definition lhs~298 `unsigned int` (truncate (2632772191 `long`) `unsigned int`))
             (definition rhs~299 `unsigned char` (truncate (227 `int`) `unsigned char`))
             (definition res~300 `unsigned int` (multiply (lhs~298 `unsigned int`) (zero-extend (rhs~299 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -910,7 +910,7 @@ exit_code: 0
                   (res~300 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~301 `unsigned int` (noop-type-conversion (3596525884 `int`) `unsigned int`))
+            (definition lhs~301 `unsigned int` (truncate (3596525884 `long`) `unsigned int`))
             (definition rhs~302 `unsigned char` (truncate (160 `int`) `unsigned char`))
             (definition res~303 `unsigned int` (multiply (lhs~301 `unsigned int`) (zero-extend (rhs~302 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -928,7 +928,7 @@ exit_code: 0
                   (res~306 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~307 `unsigned int` (noop-type-conversion (2926028971 `int`) `unsigned int`))
+            (definition lhs~307 `unsigned int` (truncate (2926028971 `long`) `unsigned int`))
             (definition rhs~308 `unsigned char` (truncate (47 `int`) `unsigned char`))
             (definition res~309 `unsigned int` (divide (lhs~307 `unsigned int`) (zero-extend (rhs~308 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -964,7 +964,7 @@ exit_code: 0
                   (res~318 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~319 `unsigned int` (noop-type-conversion (3645566492 `int`) `unsigned int`))
+            (definition lhs~319 `unsigned int` (truncate (3645566492 `long`) `unsigned int`))
             (definition rhs~320 `unsigned char` (truncate (195 `int`) `unsigned char`))
             (definition res~321 `unsigned int` (divide (lhs~319 `unsigned int`) (zero-extend (rhs~320 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -973,7 +973,7 @@ exit_code: 0
                   (res~321 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~322 `unsigned int` (noop-type-conversion (3612188356 `int`) `unsigned int`))
+            (definition lhs~322 `unsigned int` (truncate (3612188356 `long`) `unsigned int`))
             (definition rhs~323 `unsigned char` (truncate (162 `int`) `unsigned char`))
             (definition res~324 `unsigned int` (divide (lhs~322 `unsigned int`) (zero-extend (rhs~323 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -982,7 +982,7 @@ exit_code: 0
                   (res~324 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~325 `unsigned int` (noop-type-conversion (2400582198 `int`) `unsigned int`))
+            (definition lhs~325 `unsigned int` (truncate (2400582198 `long`) `unsigned int`))
             (definition rhs~326 `unsigned char` (truncate (223 `int`) `unsigned char`))
             (definition res~327 `unsigned int` (divide (lhs~325 `unsigned int`) (zero-extend (rhs~326 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -1027,7 +1027,7 @@ exit_code: 0
                   (res~339 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~340 `unsigned int` (noop-type-conversion (3234742362 `int`) `unsigned int`))
+            (definition lhs~340 `unsigned int` (truncate (3234742362 `long`) `unsigned int`))
             (definition rhs~341 `unsigned char` (truncate (225 `int`) `unsigned char`))
             (definition res~342 `unsigned int` (modulo (lhs~340 `unsigned int`) (zero-extend (rhs~341 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -1045,7 +1045,7 @@ exit_code: 0
                   (res~345 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~346 `unsigned int` (noop-type-conversion (4070485465 `int`) `unsigned int`))
+            (definition lhs~346 `unsigned int` (truncate (4070485465 `long`) `unsigned int`))
             (definition rhs~347 `unsigned char` (truncate (83 `int`) `unsigned char`))
             (definition res~348 `unsigned int` (modulo (lhs~346 `unsigned int`) (zero-extend (rhs~347 `unsigned char`) `unsigned int`) `unsigned int`))
             (expression
@@ -1369,7 +1369,7 @@ exit_code: 0
                   (res~453 `int`)
                   `int`)))
          (compound-statement
-            (definition lhs~454 `unsigned int` (noop-type-conversion (3470280314 `int`) `unsigned int`))
+            (definition lhs~454 `unsigned int` (truncate (3470280314 `long`) `unsigned int`))
             (definition rhs~455 `unsigned int` (noop-type-conversion (195359260 `int`) `unsigned int`))
             (definition res~456 `unsigned int` (multiply (lhs~454 `unsigned int`) (rhs~455 `unsigned int`) `unsigned int`))
             (expression
@@ -1406,7 +1406,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~466 `unsigned int` (noop-type-conversion (1880450380 `int`) `unsigned int`))
-            (definition rhs~467 `unsigned int` (noop-type-conversion (3214827302 `int`) `unsigned int`))
+            (definition rhs~467 `unsigned int` (truncate (3214827302 `long`) `unsigned int`))
             (definition res~468 `unsigned int` (multiply (lhs~466 `unsigned int`) (rhs~467 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -1414,8 +1414,8 @@ exit_code: 0
                   (res~468 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~469 `unsigned int` (noop-type-conversion (4241199250 `int`) `unsigned int`))
-            (definition rhs~470 `unsigned int` (noop-type-conversion (3974509551 `int`) `unsigned int`))
+            (definition lhs~469 `unsigned int` (truncate (4241199250 `long`) `unsigned int`))
+            (definition rhs~470 `unsigned int` (truncate (3974509551 `long`) `unsigned int`))
             (definition res~471 `unsigned int` (multiply (lhs~469 `unsigned int`) (rhs~470 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -1423,8 +1423,8 @@ exit_code: 0
                   (res~471 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~472 `unsigned int` (noop-type-conversion (4082807693 `int`) `unsigned int`))
-            (definition rhs~473 `unsigned int` (noop-type-conversion (4126906806 `int`) `unsigned int`))
+            (definition lhs~472 `unsigned int` (truncate (4082807693 `long`) `unsigned int`))
+            (definition rhs~473 `unsigned int` (truncate (4126906806 `long`) `unsigned int`))
             (definition res~474 `unsigned int` (multiply (lhs~472 `unsigned int`) (rhs~473 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -1441,7 +1441,7 @@ exit_code: 0
                   (res~477 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~478 `unsigned int` (noop-type-conversion (3198221414 `int`) `unsigned int`))
+            (definition lhs~478 `unsigned int` (truncate (3198221414 `long`) `unsigned int`))
             (definition rhs~479 `unsigned int` (noop-type-conversion (573202128 `int`) `unsigned int`))
             (definition res~480 `unsigned int` (multiply (lhs~478 `unsigned int`) (rhs~479 `unsigned int`) `unsigned int`))
             (expression
@@ -1450,7 +1450,7 @@ exit_code: 0
                   (res~480 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~481 `unsigned int` (noop-type-conversion (2888469990 `int`) `unsigned int`))
+            (definition lhs~481 `unsigned int` (truncate (2888469990 `long`) `unsigned int`))
             (definition rhs~482 `unsigned int` (noop-type-conversion (2012195590 `int`) `unsigned int`))
             (definition res~483 `unsigned int` (multiply (lhs~481 `unsigned int`) (rhs~482 `unsigned int`) `unsigned int`))
             (expression
@@ -1468,8 +1468,8 @@ exit_code: 0
                   (res~486 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~487 `unsigned int` (noop-type-conversion (2200029653 `int`) `unsigned int`))
-            (definition rhs~488 `unsigned int` (noop-type-conversion (3148300494 `int`) `unsigned int`))
+            (definition lhs~487 `unsigned int` (truncate (2200029653 `long`) `unsigned int`))
+            (definition rhs~488 `unsigned int` (truncate (3148300494 `long`) `unsigned int`))
             (definition res~489 `unsigned int` (divide (lhs~487 `unsigned int`) (rhs~488 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -1477,7 +1477,7 @@ exit_code: 0
                   (res~489 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~490 `unsigned int` (noop-type-conversion (4031479772 `int`) `unsigned int`))
+            (definition lhs~490 `unsigned int` (truncate (4031479772 `long`) `unsigned int`))
             (definition rhs~491 `unsigned int` (noop-type-conversion (981663985 `int`) `unsigned int`))
             (definition res~492 `unsigned int` (divide (lhs~490 `unsigned int`) (rhs~491 `unsigned int`) `unsigned int`))
             (expression
@@ -1486,7 +1486,7 @@ exit_code: 0
                   (res~492 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~493 `unsigned int` (noop-type-conversion (3409953383 `int`) `unsigned int`))
+            (definition lhs~493 `unsigned int` (truncate (3409953383 `long`) `unsigned int`))
             (definition rhs~494 `unsigned int` (noop-type-conversion (1864749459 `int`) `unsigned int`))
             (definition res~495 `unsigned int` (divide (lhs~493 `unsigned int`) (rhs~494 `unsigned int`) `unsigned int`))
             (expression
@@ -1496,7 +1496,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~496 `unsigned int` (noop-type-conversion (1003848748 `int`) `unsigned int`))
-            (definition rhs~497 `unsigned int` (noop-type-conversion (2779959558 `int`) `unsigned int`))
+            (definition rhs~497 `unsigned int` (truncate (2779959558 `long`) `unsigned int`))
             (definition res~498 `unsigned int` (divide (lhs~496 `unsigned int`) (rhs~497 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -1513,8 +1513,8 @@ exit_code: 0
                   (res~501 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~502 `unsigned int` (noop-type-conversion (2858273880 `int`) `unsigned int`))
-            (definition rhs~503 `unsigned int` (noop-type-conversion (3346649347 `int`) `unsigned int`))
+            (definition lhs~502 `unsigned int` (truncate (2858273880 `long`) `unsigned int`))
+            (definition rhs~503 `unsigned int` (truncate (3346649347 `long`) `unsigned int`))
             (definition res~504 `unsigned int` (divide (lhs~502 `unsigned int`) (rhs~503 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -1522,8 +1522,8 @@ exit_code: 0
                   (res~504 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~505 `unsigned int` (noop-type-conversion (2199716413 `int`) `unsigned int`))
-            (definition rhs~506 `unsigned int` (noop-type-conversion (2949603016 `int`) `unsigned int`))
+            (definition lhs~505 `unsigned int` (truncate (2199716413 `long`) `unsigned int`))
+            (definition rhs~506 `unsigned int` (truncate (2949603016 `long`) `unsigned int`))
             (definition res~507 `unsigned int` (divide (lhs~505 `unsigned int`) (rhs~506 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -1540,8 +1540,8 @@ exit_code: 0
                   (res~510 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~511 `unsigned int` (noop-type-conversion (3303349263 `int`) `unsigned int`))
-            (definition rhs~512 `unsigned int` (noop-type-conversion (2707269606 `int`) `unsigned int`))
+            (definition lhs~511 `unsigned int` (truncate (3303349263 `long`) `unsigned int`))
+            (definition rhs~512 `unsigned int` (truncate (2707269606 `long`) `unsigned int`))
             (definition res~513 `unsigned int` (divide (lhs~511 `unsigned int`) (rhs~512 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -1550,7 +1550,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~514 `unsigned int` (noop-type-conversion (1146446010 `int`) `unsigned int`))
-            (definition rhs~515 `unsigned int` (noop-type-conversion (3689339677 `int`) `unsigned int`))
+            (definition rhs~515 `unsigned int` (truncate (3689339677 `long`) `unsigned int`))
             (definition res~516 `unsigned int` (modulo (lhs~514 `unsigned int`) (rhs~515 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -1559,7 +1559,7 @@ exit_code: 0
                   `int`)))
          (compound-statement
             (definition lhs~517 `unsigned int` (noop-type-conversion (673552128 `int`) `unsigned int`))
-            (definition rhs~518 `unsigned int` (noop-type-conversion (2666725966 `int`) `unsigned int`))
+            (definition rhs~518 `unsigned int` (truncate (2666725966 `long`) `unsigned int`))
             (definition res~519 `unsigned int` (modulo (lhs~517 `unsigned int`) (rhs~518 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -1576,7 +1576,7 @@ exit_code: 0
                   (res~522 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~523 `unsigned int` (noop-type-conversion (3677461164 `int`) `unsigned int`))
+            (definition lhs~523 `unsigned int` (truncate (3677461164 `long`) `unsigned int`))
             (definition rhs~524 `unsigned int` (noop-type-conversion (1235300700 `int`) `unsigned int`))
             (definition res~525 `unsigned int` (modulo (lhs~523 `unsigned int`) (rhs~524 `unsigned int`) `unsigned int`))
             (expression
@@ -1585,7 +1585,7 @@ exit_code: 0
                   (res~525 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~526 `unsigned int` (noop-type-conversion (3678341959 `int`) `unsigned int`))
+            (definition lhs~526 `unsigned int` (truncate (3678341959 `long`) `unsigned int`))
             (definition rhs~527 `unsigned int` (noop-type-conversion (474172301 `int`) `unsigned int`))
             (definition res~528 `unsigned int` (modulo (lhs~526 `unsigned int`) (rhs~527 `unsigned int`) `unsigned int`))
             (expression
@@ -1594,8 +1594,8 @@ exit_code: 0
                   (res~528 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~529 `unsigned int` (noop-type-conversion (3471160058 `int`) `unsigned int`))
-            (definition rhs~530 `unsigned int` (noop-type-conversion (2574189654 `int`) `unsigned int`))
+            (definition lhs~529 `unsigned int` (truncate (3471160058 `long`) `unsigned int`))
+            (definition rhs~530 `unsigned int` (truncate (2574189654 `long`) `unsigned int`))
             (definition res~531 `unsigned int` (modulo (lhs~529 `unsigned int`) (rhs~530 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -1603,8 +1603,8 @@ exit_code: 0
                   (res~531 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~532 `unsigned int` (noop-type-conversion (2451701930 `int`) `unsigned int`))
-            (definition rhs~533 `unsigned int` (noop-type-conversion (2410568531 `int`) `unsigned int`))
+            (definition lhs~532 `unsigned int` (truncate (2451701930 `long`) `unsigned int`))
+            (definition rhs~533 `unsigned int` (truncate (2410568531 `long`) `unsigned int`))
             (definition res~534 `unsigned int` (modulo (lhs~532 `unsigned int`) (rhs~533 `unsigned int`) `unsigned int`))
             (expression
                (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
@@ -1612,7 +1612,7 @@ exit_code: 0
                   (res~534 `unsigned int`)
                   `int`)))
          (compound-statement
-            (definition lhs~535 `unsigned int` (noop-type-conversion (3158817002 `int`) `unsigned int`))
+            (definition lhs~535 `unsigned int` (truncate (3158817002 `long`) `unsigned int`))
             (definition rhs~536 `unsigned int` (noop-type-conversion (1878300766 `int`) `unsigned int`))
             (definition res~537 `unsigned int` (modulo (lhs~535 `unsigned int`) (rhs~536 `unsigned int`) `unsigned int`))
             (expression

@@ -7,6 +7,7 @@ use std::path::PathBuf;
 use std::sync::LazyLock;
 
 use bumpalo::Bump;
+use logos::Lexer;
 use logos::Logos;
 
 #[derive(Clone, Copy)]
@@ -155,6 +156,47 @@ struct Span {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Logos)]
+pub enum IntegerSuffix {
+    None,
+    #[regex("[uU]")]
+    Unsigned,
+    #[regex("[uU][lL]|[lL][uU]")]
+    UnsignedLong,
+    #[regex("[uU](ll|LL)|(ll|LL)[uU]")]
+    UnsignedLongLong,
+    #[regex("[lL]")]
+    Long,
+    #[regex("ll|LL")]
+    LongLong,
+    #[regex("wb|WB")]
+    BitInt,
+    #[regex("[uU](wb|WB)|(wb|WB)[uU]")]
+    UnsignedBitInt,
+    #[regex(r"[\p{XID_start}_]\p{XID_continue}*", priority = 0)]
+    Invalid,
+}
+
+fn lex_integer_suffix(src: &str) -> (usize, IntegerSuffix) {
+    let mut lexer = IntegerSuffix::lexer(src).spanned();
+    match lexer.next() {
+        None | Some((Err(()), _)) => (0, IntegerSuffix::None),
+        Some((Ok(suffix), span)) => (span.end, suffix),
+    }
+}
+
+fn lex_integer(lexer: &mut Lexer<TokenKind>) -> Integer {
+    let (suffix_len, suffix) = lex_integer_suffix(lexer.remainder());
+    lexer.bump(suffix_len);
+    Integer { suffix, suffix_len }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Integer {
+    pub suffix: IntegerSuffix,
+    pub suffix_len: usize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Logos)]
 #[logos(skip r"[ \n\r\t\f]+")]
 #[logos(skip r"//[^\n]*\n?")]
 pub enum TokenKind {
@@ -266,8 +308,12 @@ pub enum TokenKind {
     Identifier,
     #[regex(r#""[^"]*""#)]
     String,
-    #[regex(r"[0-9]+")]
-    Integer,
+
+    #[regex("[1-9]('?[0-9])*", lex_integer)]
+    #[regex("0('?[0-7])*", lex_integer)]
+    #[regex("0[xX][0-9a-fA-F]('?[0-9a-fA-F])*", lex_integer)]
+    #[regex("0[bB][01]('?[01])*", lex_integer)]
+    Integer(Integer),
 
     #[token("alignas")]
     #[token("_Alignas")]
@@ -509,5 +555,19 @@ mod test {
         #[case] expected: impl for<'a> FnOnce(TokenIter<'a>),
     ) {
         expected(lex(&bump, Path::new("<src>"), src))
+    }
+
+    #[rstest]
+    #[case::no_suffix_at_end_of_input("", 0, IntegerSuffix::None)]
+    #[case::no_suffix("+ 42", 0, IntegerSuffix::None)]
+    #[case::no_suffix_then_unsigned(" u", 0, IntegerSuffix::None)]
+    #[case::unsigned("u)", 1, IntegerSuffix::Unsigned)]
+    #[case::ullong("uLL ", 3, IntegerSuffix::UnsignedLongLong)]
+    fn test_integer_suffix_lexer(
+        #[case] src: &str,
+        #[case] suffix_len: usize,
+        #[case] expected: IntegerSuffix,
+    ) {
+        pretty_assertions::assert_eq!(lex_integer_suffix(src), (suffix_len, expected));
     }
 }

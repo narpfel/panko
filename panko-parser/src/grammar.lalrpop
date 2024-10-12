@@ -77,7 +77,7 @@ extern {
         "..." => Token { kind: panko_lex::TokenKind::Ellipsis, .. },
 
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
-        Integer => Token { kind: panko_lex::TokenKind::Integer, .. },
+        Integer => Token { kind: panko_lex::TokenKind::Integer(_), .. },
     }
 }
 

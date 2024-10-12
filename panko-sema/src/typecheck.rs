@@ -4,8 +4,11 @@ use ariadne::Color::Blue;
 use ariadne::Color::Red;
 use itertools::EitherOrBoth;
 use itertools::Itertools as _;
+use panko_lex::Integer;
+use panko_lex::IntegerSuffix;
 use panko_lex::Loc;
 use panko_lex::Token;
+use panko_lex::TokenKind;
 use panko_parser as cst;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Integral;
@@ -125,7 +128,10 @@ pub struct TypedExpression<'a> {
 #[derive(Debug, Clone, Copy)]
 pub enum Expression<'a> {
     Name(Reference<'a>),
-    Integer(Token<'a>),
+    Integer {
+        value: u64,
+        token: Token<'a>,
+    },
     NoopTypeConversion(&'a TypedExpression<'a>),
     Truncate(&'a TypedExpression<'a>),
     SignExtend(&'a TypedExpression<'a>),
@@ -196,7 +202,7 @@ impl<'a> TypedExpression<'a> {
                 reference.ty.ty.is_object() && !matches!(reference.ty.ty, Type::Void),
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.is_lvalue(),
             Expression::Deref { .. } => self.ty.ty.is_object() && !matches!(self.ty.ty, Type::Void),
-            Expression::Integer(_)
+            Expression::Integer { .. }
             | Expression::NoopTypeConversion(_)
             | Expression::Truncate(_)
             | Expression::SignExtend(_)
@@ -221,7 +227,7 @@ impl<'a> Expression<'a> {
     fn loc(&self) -> Loc<'a> {
         match self {
             Expression::Name(reference) => reference.loc(),
-            Expression::Integer(token) => token.loc(),
+            Expression::Integer { value: _, token } => token.loc(),
             Expression::NoopTypeConversion(inner)
             | Expression::Truncate(inner)
             | Expression::SignExtend(inner)
@@ -619,11 +625,33 @@ fn typeck_expression<'a>(
             ty: reference.ty,
             expr: Expression::Name(*reference),
         },
-        scope::Expression::Integer(token) => TypedExpression {
-            // TODO: resolve to correct type depending on the actual value in `_token`
-            ty: Type::int().unqualified(),
-            expr: Expression::Integer(*token),
-        },
+        scope::Expression::Integer(token) => {
+            let TokenKind::Integer(Integer { suffix, suffix_len }) = token.kind
+            else {
+                unreachable!()
+            };
+            let number = &token.slice()[..token.slice().len() - suffix_len];
+            let number: String = number.chars().filter(|&c| c != '\'').collect();
+            let value = number.parse().unwrap_or_else(|err| {
+                todo!("emit diagnostic: integer constant too large: {err:?}")
+            });
+            let (signedness, kind) = match suffix {
+                IntegerSuffix::None => (Signedness::Signed, IntegralKind::Int),
+                IntegerSuffix::Unsigned => (Signedness::Unsigned, IntegralKind::Int),
+                IntegerSuffix::UnsignedLong => (Signedness::Unsigned, IntegralKind::Long),
+                IntegerSuffix::UnsignedLongLong => (Signedness::Unsigned, IntegralKind::LongLong),
+                IntegerSuffix::Long => (Signedness::Signed, IntegralKind::Long),
+                IntegerSuffix::LongLong => (Signedness::Signed, IntegralKind::LongLong),
+                IntegerSuffix::BitInt => todo!("unimplemented: `_BitInt`"),
+                IntegerSuffix::UnsignedBitInt => todo!("unimplemented: `unsigned _BitInt`"),
+                IntegerSuffix::Invalid => todo!("emit error: invalid integer suffix"),
+            };
+            let integral_ty = grow_to_fit(signedness, kind, value);
+            TypedExpression {
+                ty: Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified(),
+                expr: Expression::Integer { value, token: *token },
+            }
+        }
         scope::Expression::Parenthesised { open_paren, expr, close_paren } => {
             let expr = sess.alloc(typeck_expression(sess, expr, context));
             TypedExpression {
@@ -821,6 +849,41 @@ fn typeck_expression<'a>(
         },
         Context::Addressof => expr,
     }
+}
+
+fn grow_to_fit(signedness: Signedness, kind: IntegralKind, value: u64) -> Integral {
+    const POSSIBLE_TYS: [Integral; 6] = [
+        Integral {
+            signedness: Signedness::Signed,
+            kind: IntegralKind::Int,
+        },
+        Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::Int,
+        },
+        Integral {
+            signedness: Signedness::Signed,
+            kind: IntegralKind::Long,
+        },
+        Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::Long,
+        },
+        Integral {
+            signedness: Signedness::Signed,
+            kind: IntegralKind::LongLong,
+        },
+        Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::LongLong,
+        },
+    ];
+    POSSIBLE_TYS
+        .into_iter()
+        .filter(|ty| ty.signedness == signedness)
+        .filter(|ty| ty.kind >= kind)
+        .find(|ty| ty.can_represent(value))
+        .unwrap_or_else(|| todo!("emit error: integer constant cannot be represented"))
 }
 
 pub fn resolve_types<'a>(

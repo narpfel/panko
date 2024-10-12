@@ -180,7 +180,7 @@ pub struct Integral {
     pub kind: IntegralKind,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum IntegralKind {
     PlainChar,
     /// explicitly `signed char` or `unsigned char`
@@ -458,6 +458,33 @@ impl Arithmetic {
 impl Integral {
     pub fn size(&self) -> u64 {
         self.kind.size()
+    }
+
+    pub fn can_represent<T>(&self, value: T) -> bool
+    where
+        i8: TryFrom<T>,
+        i16: TryFrom<T>,
+        i32: TryFrom<T>,
+        i64: TryFrom<T>,
+        u8: TryFrom<T>,
+        u16: TryFrom<T>,
+        u32: TryFrom<T>,
+        u64: TryFrom<T>,
+    {
+        match (self.signedness, self.kind) {
+            (Signedness::Signed, IntegralKind::PlainChar) => i8::try_from(value).is_ok(),
+            (Signedness::Signed, IntegralKind::Char) => i8::try_from(value).is_ok(),
+            (Signedness::Signed, IntegralKind::Short) => i16::try_from(value).is_ok(),
+            (Signedness::Signed, IntegralKind::Int) => i32::try_from(value).is_ok(),
+            (Signedness::Signed, IntegralKind::Long) => i64::try_from(value).is_ok(),
+            (Signedness::Signed, IntegralKind::LongLong) => i64::try_from(value).is_ok(),
+            (Signedness::Unsigned, IntegralKind::PlainChar) => unreachable!(),
+            (Signedness::Unsigned, IntegralKind::Char) => u8::try_from(value).is_ok(),
+            (Signedness::Unsigned, IntegralKind::Short) => u16::try_from(value).is_ok(),
+            (Signedness::Unsigned, IntegralKind::Int) => u32::try_from(value).is_ok(),
+            (Signedness::Unsigned, IntegralKind::Long) => u64::try_from(value).is_ok(),
+            (Signedness::Unsigned, IntegralKind::LongLong) => u64::try_from(value).is_ok(),
+        }
     }
 }
 
