@@ -1,7 +1,9 @@
 use std::cmp::Ordering;
+use std::fmt::Display;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
+use ariadne::Fmt as _;
 use itertools::EitherOrBoth;
 use itertools::Itertools as _;
 use panko_lex::Integer;
@@ -31,6 +33,20 @@ use crate::ty::Type;
 mod as_sexpr;
 #[cfg(test)]
 mod tests;
+
+// TODO: this should be in `panko_report`
+trait Sliced {
+    fn slice(&self) -> String;
+}
+
+impl<T> Sliced for T
+where
+    T: Display,
+{
+    fn slice(&self) -> String {
+        self.to_string()
+    }
+}
 
 #[derive(Debug, Report)]
 #[exit_code(1)]
@@ -78,6 +94,11 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "this expression has type `{ty}`"))]
     #[with(ty = at.ty.ty)]
     DerefOfVoidPtr { at: TypedExpression<'a> },
+
+    #[error("invalid integer suffix `{suffix}`")]
+    #[diagnostics(at(colour = Red, label = "invalid integer suffix"))]
+    #[with(suffix = suffix.fg(Red))]
+    InvalidIntegerSuffix { at: Token<'a>, suffix: &'a str },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -626,13 +647,13 @@ fn typeck_expression<'a>(
             expr: Expression::Name(*reference),
         },
         scope::Expression::Integer(token) => {
-            let TokenKind::Integer(Integer { suffix, suffix_len }) = token.kind
+            let TokenKind::Integer(Integer { suffix, suffix_len, base, prefix_len }) = token.kind
             else {
                 unreachable!()
             };
-            let number = &token.slice()[..token.slice().len() - suffix_len];
+            let number = &token.slice()[prefix_len..token.slice().len() - suffix_len];
             let number: String = number.chars().filter(|&c| c != '\'').collect();
-            let value = number.parse().unwrap_or_else(|err| {
+            let value = u64::from_str_radix(&number, base).unwrap_or_else(|err| {
                 todo!("emit diagnostic: integer constant too large: {err:?}")
             });
             let (signedness, kind) = match suffix {
@@ -644,9 +665,15 @@ fn typeck_expression<'a>(
                 IntegerSuffix::LongLong => (Signedness::Signed, IntegralKind::LongLong),
                 IntegerSuffix::BitInt => todo!("unimplemented: `_BitInt`"),
                 IntegerSuffix::UnsignedBitInt => todo!("unimplemented: `unsigned _BitInt`"),
-                IntegerSuffix::Invalid => todo!("emit error: invalid integer suffix"),
+                IntegerSuffix::Invalid => {
+                    sess.emit(Diagnostic::InvalidIntegerSuffix {
+                        at: *token,
+                        suffix: &token.slice()[token.slice().len() - suffix_len..],
+                    });
+                    (Signedness::Signed, IntegralKind::Int)
+                }
             };
-            let integral_ty = grow_to_fit(signedness, kind, value);
+            let integral_ty = grow_to_fit(signedness, kind, base, value);
             TypedExpression {
                 ty: Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified(),
                 expr: Expression::Integer { value, token: *token },
@@ -851,7 +878,7 @@ fn typeck_expression<'a>(
     }
 }
 
-fn grow_to_fit(signedness: Signedness, kind: IntegralKind, value: u64) -> Integral {
+fn grow_to_fit(signedness: Signedness, kind: IntegralKind, base: u32, value: u64) -> Integral {
     const POSSIBLE_TYS: [Integral; 6] = [
         Integral {
             signedness: Signedness::Signed,
@@ -880,7 +907,7 @@ fn grow_to_fit(signedness: Signedness, kind: IntegralKind, value: u64) -> Integr
     ];
     POSSIBLE_TYS
         .into_iter()
-        .filter(|ty| ty.signedness == signedness)
+        .filter(|ty| base != 10 || ty.signedness == signedness)
         .filter(|ty| ty.kind >= kind)
         .find(|ty| ty.can_represent(value))
         .unwrap_or_else(|| todo!("emit error: integer constant cannot be represented"))

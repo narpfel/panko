@@ -184,16 +184,25 @@ fn lex_integer_suffix(src: &str) -> (usize, IntegerSuffix) {
     }
 }
 
-fn lex_integer(lexer: &mut Lexer<TokenKind>) -> Integer {
+fn lex_integer(lexer: &mut Lexer<TokenKind>, base: u32) -> Integer {
     let (suffix_len, suffix) = lex_integer_suffix(lexer.remainder());
     lexer.bump(suffix_len);
-    Integer { suffix, suffix_len }
+    let prefix_len = match base {
+        10 => 0,
+        8 => 0,
+        16 => 2,
+        2 => 2,
+        _ => unreachable!(),
+    };
+    Integer { suffix, suffix_len, base, prefix_len }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Integer {
     pub suffix: IntegerSuffix,
     pub suffix_len: usize,
+    pub base: u32,
+    pub prefix_len: usize,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Logos)]
@@ -309,10 +318,32 @@ pub enum TokenKind {
     #[regex(r#""[^"]*""#)]
     String,
 
-    #[regex("[1-9]('?[0-9])*", lex_integer)]
-    #[regex("0('?[0-7])*", lex_integer)]
-    #[regex("0[xX][0-9a-fA-F]('?[0-9a-fA-F])*", lex_integer)]
-    #[regex("0[bB][01]('?[01])*", lex_integer)]
+    #[regex("[1-9]('?[0-9])*", |lexer| lex_integer(lexer, 10))]
+    #[regex("0[bB]0('?[01])*", |lexer| lex_integer(lexer, 2))]
+    #[regex("0[bB]1('?[01])*", |lexer| lex_integer(lexer, 2))]
+    #[regex("0[xX]0('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]1('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]2('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]3('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]4('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]5('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]6('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]7('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]8('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]9('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]a('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]b('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]c('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]d('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]e('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]f('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]A('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]B('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]C('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]D('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]E('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0[xX]F('?[0-9a-fA-F])*", |lexer| lex_integer(lexer, 16))]
+    #[regex("0('?[0-7])*", |lexer| lex_integer(lexer, 8))]
     Integer(Integer),
 
     #[token("alignas")]
@@ -543,6 +574,63 @@ mod test {
     }
 
     const FULLWIDTH_NUMBER_4_LEN: usize = '４'.len_utf8();
+
+    #[rstest]
+    #[case::zero_b_literal("0b", &[
+        TokenKind::Integer(Integer {
+            suffix: IntegerSuffix::Invalid,
+            suffix_len: 1,
+            base: 8,
+            prefix_len: 0,
+        })
+    ])]
+    #[case::zero_x_literal("0x", &[
+        TokenKind::Integer(Integer {
+            suffix: IntegerSuffix::Invalid,
+            suffix_len: 1,
+            base: 8,
+            prefix_len: 0,
+        })
+    ])]
+    #[case::invalid_suffix("123abc", &[
+        TokenKind::Integer(Integer {
+            suffix: IntegerSuffix::Invalid,
+            suffix_len: 3,
+            base: 10,
+            prefix_len: 0,
+        })
+    ])]
+    #[case::invalid_suffix("0bcd123abc", &[
+        TokenKind::Integer(Integer {
+            suffix: IntegerSuffix::Invalid,
+            suffix_len: 9,
+            base: 8,
+            prefix_len: 0,
+        })
+    ])]
+    #[case::invalid_suffix("0xcd123xyz", &[
+        TokenKind::Integer(Integer {
+            suffix: IntegerSuffix::Invalid,
+            suffix_len: 3,
+            base: 16,
+            prefix_len: 2,
+        })
+    ])]
+    #[case::invalid_suffix("0xqd123abc", &[
+        TokenKind::Integer(Integer {
+            suffix: IntegerSuffix::Invalid,
+            suffix_len: 9,
+            base: 8,
+            prefix_len: 0,
+        })
+    ])]
+    fn test_lexer(bump: Bump, #[case] src: &str, #[case] expected: &[TokenKind]) {
+        let tokens = lex(&bump, Path::new("<src>"), src)
+            .map(|token| Ok(token?.kind))
+            .collect::<Result<Vec<_>, Error>>()
+            .unwrap();
+        pretty_assertions::assert_eq!(tokens, expected);
+    }
 
     #[rstest]
     #[case::unicode_number(

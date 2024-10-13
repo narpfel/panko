@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/literal/test_integer_literal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (expression (42 `int`))
+         (expression (0x42 `int`))
+         (expression (042 `int`))
+         (expression (0 `int`))
+         (expression (0b1010'1010 `int`)))))
+
+----- stderr -----

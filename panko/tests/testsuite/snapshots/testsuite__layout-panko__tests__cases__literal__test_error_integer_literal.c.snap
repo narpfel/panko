@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/literal/test_error_integer_literal.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid integer suffix `b`
+   ╭─[panko/tests/cases/literal/test_error_integer_literal.c:2:5]
+   │
+ 2 │     0b + 0x + 42;
+   │     ─┬  
+   │      ╰── invalid integer suffix
+───╯
+
+Error: invalid integer suffix `x`
+   ╭─[panko/tests/cases/literal/test_error_integer_literal.c:2:10]
+   │
+ 2 │     0b + 0x + 42;
+   │          ─┬  
+   │           ╰── invalid integer suffix
+───╯
+
+Error: invalid integer suffix `abc`
+   ╭─[panko/tests/cases/literal/test_error_integer_literal.c:3:5]
+   │
+ 3 │     123abc;
+   │     ───┬──  
+   │        ╰──── invalid integer suffix
+───╯
