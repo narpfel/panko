@@ -1314,4 +1314,435 @@ int main(int, char** argv) {
         printf(*(argv + 7), res);
     }
 
+    // i64 * i64 => i64
+    {
+        long lhs = 8693895650676104854l;
+        long rhs = -9210448806406086459l;
+        long res = lhs * rhs;
+        // [[print: 3949525112220879214]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 3852218072788319756l;
+        long rhs = 6038785365373106752l;
+        long res = lhs * rhs;
+        // [[print: -3887303906961769728]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 4329326210619886551l;
+        long rhs = -751694812474308796l;
+        long res = lhs * rhs;
+        // [[print: 3917816509652272668]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 3367641107910633022l;
+        long rhs = 7005942295561524850l;
+        long res = lhs * rhs;
+        // [[print: 7677327215696665500]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 2369409124965624724l;
+        long rhs = 5168674689620045011l;
+        long res = lhs * rhs;
+        // [[print: -1125381486643029252]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = -5960877397176118903l;
+        long rhs = 1868901794435888396l;
+        long res = lhs * rhs;
+        // [[print: 8823594532926582636]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = -9083571232433765473l;
+        long rhs = 4275778136828602513l;
+        long res = lhs * rhs;
+        // [[print: -840256979165108977]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 5230325721733772920l;
+        long rhs = 3572312526048500035l;
+        long res = lhs * rhs;
+        // [[print: -15618267725792920]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 1938366336964283071l;
+        long rhs = -1327723995940152966l;
+        long res = lhs * rhs;
+        // [[print: -6540765844994275834]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 8422974732487425674l;
+        long rhs = 8977890074141384144l;
+        long res = lhs * rhs;
+        // [[print: -9000462151440535008]]
+        printf(*(argv + 4), res);
+    }
+
+    // i64 / i64 => i64
+    {
+        long lhs = -4356553818966558372l;
+        long rhs = 6107844752273128996l;
+        long res = lhs / rhs;
+        // [[print: 0]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 343468043862241649l;
+        long rhs = -1127306164008471050l;
+        long res = lhs / rhs;
+        // [[print: 0]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = -8169972164321832590l;
+        long rhs = 4138267040784965673l;
+        long res = lhs / rhs;
+        // [[print: -1]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 8929576787703721770l;
+        long rhs = -6808180949780772281l;
+        long res = lhs / rhs;
+        // [[print: -1]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 3725463129829649846l;
+        long rhs = 7234139953535968638l;
+        long res = lhs / rhs;
+        // [[print: 0]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 5211038055324802581l;
+        long rhs = -4514422406008176802l;
+        long res = lhs / rhs;
+        // [[print: -1]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = -4515107208570639306l;
+        long rhs = 8799947802399710525l;
+        long res = lhs / rhs;
+        // [[print: 0]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 1774503400711083447l;
+        long rhs = -1705246229572899660l;
+        long res = lhs / rhs;
+        // [[print: -1]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = -1325818399425167488l;
+        long rhs = 8644853956170686944l;
+        long res = lhs / rhs;
+        // [[print: 0]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 2404949585935789943l;
+        long rhs = 4462061189636511185l;
+        long res = lhs / rhs;
+        // [[print: 0]]
+        printf(*(argv + 4), res);
+    }
+
+    // i64 % i64 => i64
+    {
+        long lhs = 369678111416920381l;
+        long rhs = 3145891578630653634l;
+        long res = lhs % rhs;
+        // [[print: 369678111416920381]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 5276714759242191168l;
+        long rhs = 467820817131781224l;
+        long res = lhs % rhs;
+        // [[print: 130685770792597704]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = -5043244574111327292l;
+        long rhs = -4153899801548086248l;
+        long res = lhs % rhs;
+        // [[print: -889344772563241044]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 4338111674103894516l;
+        long rhs = -1940415753101670911l;
+        long res = lhs % rhs;
+        // [[print: 457280167900552694]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 7622249138978959582l;
+        long rhs = -856375757889220625l;
+        long res = lhs % rhs;
+        // [[print: 771243075865194582]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 3112496970703051706l;
+        long rhs = 5483895243792502155l;
+        long res = lhs % rhs;
+        // [[print: 3112496970703051706]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = -8939109388963344526l;
+        long rhs = -5327103787383171124l;
+        long res = lhs % rhs;
+        // [[print: -3612005601580173402]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = -6606992652424070216l;
+        long rhs = -5929024355323790657l;
+        long res = lhs % rhs;
+        // [[print: -677968297100279559]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = -6543952435032898330l;
+        long rhs = -7702235069244720889l;
+        long res = lhs % rhs;
+        // [[print: -6543952435032898330]]
+        printf(*(argv + 4), res);
+    }
+    {
+        long lhs = 159499294734786970l;
+        long rhs = 7899785618031991532l;
+        long res = lhs % rhs;
+        // [[print: 159499294734786970]]
+        printf(*(argv + 4), res);
+    }
+
+    // u64 * u64 => u64
+    {
+        unsigned long lhs = 17137002774199399196ul;
+        unsigned long rhs = 125008252145229122ul;
+        unsigned long res = lhs * rhs;
+        // [[print: 4930327417582770488]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 2930859240439992633ul;
+        unsigned long rhs = 7901344412723400650ul;
+        unsigned long res = lhs * rhs;
+        // [[print: 4337746333023776250]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 4131379000418104304ul;
+        unsigned long rhs = 4517164791312827831ul;
+        unsigned long res = lhs * rhs;
+        // [[print: 4373493585374941328]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 1295692225296656010ul;
+        unsigned long rhs = 14325054760287086452ul;
+        unsigned long res = lhs * rhs;
+        // [[print: 18441862886769523848]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 4199277357104694601ul;
+        unsigned long rhs = 10475931042792673375ul;
+        unsigned long res = lhs * rhs;
+        // [[print: 2349873931930994199]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 10054778563222469122ul;
+        unsigned long rhs = 17020619688831797423ul;
+        unsigned long res = lhs * rhs;
+        // [[print: 4472887803408742238]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 6952194905378593346ul;
+        unsigned long rhs = 5898834864672382833ul;
+        unsigned long res = lhs * rhs;
+        // [[print: 3430399577075848482]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 3279326738609710518ul;
+        unsigned long rhs = 6733919162239856902ul;
+        unsigned long res = lhs * rhs;
+        // [[print: 11272453579685017668]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 9276747504007293876ul;
+        unsigned long rhs = 11187299012035384371ul;
+        unsigned long res = lhs * rhs;
+        // [[print: 13338305952161875164]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 12068432416426131522ul;
+        unsigned long rhs = 10008288182111345064ul;
+        unsigned long res = lhs * rhs;
+        // [[print: 1541678277040250192]]
+        printf(*(argv + 8), res);
+    }
+
+    // u64 / u64 => u64
+    {
+        unsigned long lhs = 4085249150986604270ul;
+        unsigned long rhs = 5046802737401643931ul;
+        unsigned long res = lhs / rhs;
+        // [[print: 0]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 14975849710219743501ul;
+        unsigned long rhs = 335506038548129591ul;
+        unsigned long res = lhs / rhs;
+        // [[print: 44]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 6536295906544257131ul;
+        unsigned long rhs = 4633968658702193930ul;
+        unsigned long res = lhs / rhs;
+        // [[print: 1]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 10468455395548239286ul;
+        unsigned long rhs = 11551167554854845946ul;
+        unsigned long res = lhs / rhs;
+        // [[print: 0]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 13724698637101063064ul;
+        unsigned long rhs = 10461684568846711708ul;
+        unsigned long res = lhs / rhs;
+        // [[print: 1]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 12281631553606451301ul;
+        unsigned long rhs = 2136986742799870450ul;
+        unsigned long res = lhs / rhs;
+        // [[print: 5]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 5346559006955280627ul;
+        unsigned long rhs = 7956597436367228727ul;
+        unsigned long res = lhs / rhs;
+        // [[print: 0]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 7994589845122601817ul;
+        unsigned long rhs = 7104090023861257947ul;
+        unsigned long res = lhs / rhs;
+        // [[print: 1]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 4748232909278171686ul;
+        unsigned long rhs = 5708643199990920057ul;
+        unsigned long res = lhs / rhs;
+        // [[print: 0]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 12741326960292955520ul;
+        unsigned long rhs = 4827992696387970008ul;
+        unsigned long res = lhs / rhs;
+        // [[print: 2]]
+        printf(*(argv + 8), res);
+    }
+
+    // u64 % u64 => u64
+    {
+        unsigned long lhs = 7514328652579307660ul;
+        unsigned long rhs = 8274970788685243477ul;
+        unsigned long res = lhs % rhs;
+        // [[print: 7514328652579307660]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 7848697727370129266ul;
+        unsigned long rhs = 7544491022090836365ul;
+        unsigned long res = lhs % rhs;
+        // [[print: 304206705279292901]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 11748636109022179036ul;
+        unsigned long rhs = 8820520316607311112ul;
+        unsigned long res = lhs % rhs;
+        // [[print: 2928115792414867924]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 14547762828940502017ul;
+        unsigned long rhs = 1137842701411732047ul;
+        unsigned long res = lhs % rhs;
+        // [[print: 893650411999717453]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 6237645773677191117ul;
+        unsigned long rhs = 13035425409304936462ul;
+        unsigned long res = lhs % rhs;
+        // [[print: 6237645773677191117]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 4487609682211858618ul;
+        unsigned long rhs = 12534844070979965872ul;
+        unsigned long res = lhs % rhs;
+        // [[print: 4487609682211858618]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 1070685649123136925ul;
+        unsigned long rhs = 16800458940634209661ul;
+        unsigned long res = lhs % rhs;
+        // [[print: 1070685649123136925]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 16580031721005081947ul;
+        unsigned long rhs = 5021531047459019183ul;
+        unsigned long res = lhs % rhs;
+        // [[print: 1515438578628024398]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 8754119968219087390ul;
+        unsigned long rhs = 13983701473647029653ul;
+        unsigned long res = lhs % rhs;
+        // [[print: 8754119968219087390]]
+        printf(*(argv + 8), res);
+    }
+    {
+        unsigned long lhs = 9858738859602000821ul;
+        unsigned long rhs = 9417950180237282937ul;
+        unsigned long res = lhs % rhs;
+        // [[print: 440788679364717884]]
+        printf(*(argv + 8), res);
+    }
 }
