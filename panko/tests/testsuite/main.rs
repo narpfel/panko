@@ -44,7 +44,7 @@ fn test(
     #[case] snapshot_name_prefix: &str,
     #[case] step: &str,
     #[files("tests/cases/**/test_*.c")]
-    #[exclude("/test_long_.*\\.c$")]
+    #[exclude("/test_nosnapshot_.*\\.c$")]
     filename: PathBuf,
 ) {
     let filename = relative_to(
