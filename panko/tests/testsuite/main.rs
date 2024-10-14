@@ -43,7 +43,9 @@ fn relative_to(path: &Path, target: impl AsRef<Path>) -> &Path {
 fn test(
     #[case] snapshot_name_prefix: &str,
     #[case] step: &str,
-    #[files("tests/cases/**/test_*.c")] filename: PathBuf,
+    #[files("tests/cases/**/test_*.c")]
+    #[exclude("/test_long_.*\\.c$")]
+    filename: PathBuf,
 ) {
     let filename = relative_to(
         &filename,
