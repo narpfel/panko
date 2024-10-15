@@ -61,6 +61,7 @@ extern {
         "+" => Token { kind: panko_lex::TokenKind::Plus, .. },
         "-" => Token { kind: panko_lex::TokenKind::Minus, .. },
         "~" => Token { kind: panko_lex::TokenKind::Tilde, .. },
+        "!" => Token { kind: panko_lex::TokenKind::Bang, .. },
 
         "/" => Token { kind: panko_lex::TokenKind::Slash, .. },
         "%" => Token { kind: panko_lex::TokenKind::Percent, .. },
@@ -325,6 +326,7 @@ UnaryOperator: ast::UnaryOp<'a> = {
     "+" => ast::UnaryOp { kind: ast::UnaryOpKind::Plus, token: <> },
     "-" => ast::UnaryOp { kind: ast::UnaryOpKind::Negate, token: <> },
     "~" => ast::UnaryOp { kind: ast::UnaryOpKind::Compl, token: <> },
+    "!" => ast::UnaryOp { kind: ast::UnaryOpKind::Not, token: <> },
 }
 
 UnaryExpression: ast::Expression<'a> = {

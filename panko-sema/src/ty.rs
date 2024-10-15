@@ -147,6 +147,13 @@ impl<'a> Type<'a> {
     pub(crate) fn is_function(&self) -> bool {
         matches!(self, Type::Function(_))
     }
+
+    pub(crate) fn is_scalar(&self) -> bool {
+        matches!(
+            self,
+            Type::Arithmetic(_) | Type::Pointer(_), // TODO: | Type::Nullptr
+        )
+    }
 }
 
 impl fmt::Display for Type<'_> {

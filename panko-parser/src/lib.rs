@@ -573,6 +573,7 @@ pub enum UnaryOpKind {
     Plus,
     Negate,
     Compl,
+    Not,
 }
 
 impl<'a> UnaryOp<'a> {
@@ -583,6 +584,7 @@ impl<'a> UnaryOp<'a> {
             UnaryOpKind::Plus => "plus",
             UnaryOpKind::Negate => "negate",
             UnaryOpKind::Compl => "compl",
+            UnaryOpKind::Not => "not",
         }
     }
 

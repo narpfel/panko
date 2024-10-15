@@ -1,0 +1,90 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arithmetic/test_unary_not.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      (params
+         main.unnamed_parameter.0~2 `int`
+         argv~3 `ptr<ptr<char>>`)
+      (compound-statement
+         (definition i~4 `int` 42)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (not (name i~4 `int`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (not (not (name i~4 `int`)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (not (not (not (name i~4 `int`))))))
+         (definition j~5 `int` (not (name i~4 `int`)))
+         (definition k~6 `int` (not (not (name i~4 `int`))))
+         (definition l~7 `int` (not (not (not (name i~4 `int`)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (name j~5 `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (name k~6 `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (name l~7 `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (not 0)))
+         (definition p~8 `ptr<int>` (addressof (name i~4 `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (not (name p~8 `ptr<int>`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (not (not (name p~8 `ptr<int>`)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (not (not (not (name p~8 `ptr<int>`))))))
+         (definition c~9 `char` 42)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (not (name c~9 `char`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (not (not (name c~9 `char`)))))
+         (definition c2~10 `char` 0)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (not (name c2~10 `char`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (not (not (name c2~10 `char`)))))
+         (definition c3~11 `char` (not 27))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (name c3~11 `char`))))))
+
+----- stderr -----

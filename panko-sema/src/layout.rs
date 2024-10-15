@@ -110,6 +110,7 @@ pub enum Expression<'a> {
     },
     Negate(&'a LayoutedExpression<'a>),
     Compl(&'a LayoutedExpression<'a>),
+    Not(&'a LayoutedExpression<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -358,6 +359,12 @@ fn layout_expression_in_slot<'a>(
             let slot = make_slot();
             let operand = bump.alloc(layout_expression_in_slot(stack, bump, operand, Some(slot)));
             (slot, Expression::Compl(operand))
+        }
+        typecheck::Expression::Not { not: _, operand } => {
+            let slot = make_slot();
+            let operand_slot = ty.ty.is_slot_compatible(&operand.ty.ty).then_some(slot);
+            let operand = layout_expression_in_slot(stack, bump, operand, operand_slot);
+            (slot, Expression::Not(bump.alloc(operand)))
         }
     };
     LayoutedExpression { ty, slot, expr }

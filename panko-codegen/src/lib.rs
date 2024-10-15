@@ -305,6 +305,7 @@ impl<'a> Codegen<'a> {
                 Expression::Call { .. } => todo!(),
                 Expression::Negate(_) => todo!(),
                 Expression::Compl(_) => todo!(),
+                Expression::Not(_) => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -607,6 +608,13 @@ impl<'a> Codegen<'a> {
                 self.expr(operand);
                 self.emit_args("mov", &[&Rax.typed(operand), operand]);
                 self.emit_args("not", &[&Rax.typed(operand)]);
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
+            }
+            Expression::Not(operand) => {
+                self.expr(operand);
+                self.emit_args("cmp", &[operand, &0]);
+                self.emit_args("sete", &[&Rax.byte()]);
+                self.emit_args("movzx", &[&Rax.typed(expr), &Rax.byte()]);
                 self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
         }

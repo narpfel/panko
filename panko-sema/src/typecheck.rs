@@ -210,6 +210,10 @@ pub enum Expression<'a> {
         compl: Token<'a>,
         operand: &'a TypedExpression<'a>,
     },
+    Not {
+        not: Token<'a>,
+        operand: &'a TypedExpression<'a>,
+    },
 }
 
 impl<'a> TypedExpression<'a> {
@@ -240,7 +244,8 @@ impl<'a> TypedExpression<'a> {
             | Expression::Addressof { .. }
             | Expression::Call { .. }
             | Expression::Negate { .. }
-            | Expression::Compl { .. } => false,
+            | Expression::Compl { .. }
+            | Expression::Not { .. } => false,
         }
     }
 
@@ -284,6 +289,7 @@ impl<'a> Expression<'a> {
             } => callee.loc().until(close_paren.loc()),
             Expression::Negate { minus, operand } => minus.loc().until(operand.loc()),
             Expression::Compl { compl, operand } => compl.loc().until(operand.loc()),
+            Expression::Not { not, operand } => not.loc().until(operand.loc()),
         }
     }
 
@@ -832,6 +838,19 @@ fn typeck_expression<'a>(
                     }
                     _ => todo!("type error: cannot be operand to unary compl"),
                 },
+                UnaryOpKind::Not =>
+                    if operand.ty.ty.is_scalar() {
+                        TypedExpression {
+                            ty: Type::int().unqualified(),
+                            expr: Expression::Not {
+                                not: operator.token,
+                                operand: sess.alloc(operand),
+                            },
+                        }
+                    }
+                    else {
+                        todo!("type error: cannot be operand to unary not");
+                    },
             }
         }
         scope::Expression::Call { callee, args, close_paren } => {
