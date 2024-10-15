@@ -787,6 +787,14 @@ fn typeck_expression<'a>(
                     }
                     _ => todo!("type error: cannot deref this expr"),
                 },
+                UnaryOpKind::Plus => match operand.ty.ty {
+                    Type::Arithmetic(arithmetic) => {
+                        let result_ty =
+                            Type::Arithmetic(integral_promote(arithmetic)).unqualified();
+                        convert_as_if_by_assignment(sess, result_ty, operand)
+                    }
+                    _ => todo!("type error: cannot be operand to unary plus"),
+                },
                 UnaryOpKind::Negate => match operand.ty.ty {
                     Type::Arithmetic(arithmetic) => {
                         let result_ty =

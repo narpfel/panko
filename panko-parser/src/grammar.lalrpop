@@ -321,6 +321,7 @@ ArgumentExpressionList = { CommaSep<AssignmentExpression> }
 UnaryOperator: ast::UnaryOp<'a> = {
     "&" => ast::UnaryOp { kind: ast::UnaryOpKind::Addressof, token: <> },
     "*" => ast::UnaryOp { kind: ast::UnaryOpKind::Deref, token: <> },
+    "+" => ast::UnaryOp { kind: ast::UnaryOpKind::Plus, token: <> },
     "-" => ast::UnaryOp { kind: ast::UnaryOpKind::Negate, token: <> },
 }
 
