@@ -119,6 +119,7 @@ impl AsSExpr for Expression<'_> {
                 is_varargs,
             } => SExpr::new("call").inherit(callee).lines(*args),
             Expression::Negate(operand) => SExpr::new("negate").inherit(operand),
+            Expression::Compl(operand) => SExpr::new("compl").inherit(operand),
         }
     }
 }

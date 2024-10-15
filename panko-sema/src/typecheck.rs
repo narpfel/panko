@@ -206,6 +206,10 @@ pub enum Expression<'a> {
         minus: Token<'a>,
         operand: &'a TypedExpression<'a>,
     },
+    Compl {
+        compl: Token<'a>,
+        operand: &'a TypedExpression<'a>,
+    },
 }
 
 impl<'a> TypedExpression<'a> {
@@ -235,7 +239,8 @@ impl<'a> TypedExpression<'a> {
             | Expression::PtrCmp { .. }
             | Expression::Addressof { .. }
             | Expression::Call { .. }
-            | Expression::Negate { .. } => false,
+            | Expression::Negate { .. }
+            | Expression::Compl { .. } => false,
         }
     }
 
@@ -278,6 +283,7 @@ impl<'a> Expression<'a> {
                 close_paren,
             } => callee.loc().until(close_paren.loc()),
             Expression::Negate { minus, operand } => minus.loc().until(operand.loc()),
+            Expression::Compl { compl, operand } => compl.loc().until(operand.loc()),
         }
     }
 
@@ -809,6 +815,22 @@ fn typeck_expression<'a>(
                         }
                     }
                     _ => todo!("type error: cannot negate"),
+                },
+                UnaryOpKind::Compl => match operand.ty.ty {
+                    Type::Arithmetic(Arithmetic::Integral(integral)) => {
+                        let result_ty =
+                            Type::Arithmetic(integral_promote(Arithmetic::Integral(integral)))
+                                .unqualified();
+                        let operand = convert_as_if_by_assignment(sess, result_ty, operand);
+                        TypedExpression {
+                            ty: result_ty,
+                            expr: Expression::Compl {
+                                compl: operator.token,
+                                operand: sess.alloc(operand),
+                            },
+                        }
+                    }
+                    _ => todo!("type error: cannot be operand to unary compl"),
                 },
             }
         }

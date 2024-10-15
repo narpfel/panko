@@ -112,6 +112,7 @@ impl AsSExpr for Expression<'_> {
                 close_paren: _,
             } => SExpr::new("call").inherit(callee).lines(*args),
             Expression::Negate { minus: _, operand } => SExpr::new("negate").inherit(operand),
+            Expression::Compl { compl: _, operand } => SExpr::new("compl").inherit(operand),
         }
     }
 }

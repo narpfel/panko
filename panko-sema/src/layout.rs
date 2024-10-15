@@ -109,6 +109,7 @@ pub enum Expression<'a> {
         is_varargs: bool,
     },
     Negate(&'a LayoutedExpression<'a>),
+    Compl(&'a LayoutedExpression<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -352,6 +353,11 @@ fn layout_expression_in_slot<'a>(
             let slot = make_slot();
             let operand = bump.alloc(layout_expression_in_slot(stack, bump, operand, Some(slot)));
             (slot, Expression::Negate(operand))
+        }
+        typecheck::Expression::Compl { compl: _, operand } => {
+            let slot = make_slot();
+            let operand = bump.alloc(layout_expression_in_slot(stack, bump, operand, Some(slot)));
+            (slot, Expression::Compl(operand))
         }
     };
     LayoutedExpression { ty, slot, expr }
