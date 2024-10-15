@@ -214,6 +214,11 @@ pub enum Expression<'a> {
         not: Token<'a>,
         operand: &'a TypedExpression<'a>,
     },
+    Sizeof {
+        sizeof: Token<'a>,
+        operand: &'a TypedExpression<'a>,
+        size: u64,
+    },
 }
 
 impl<'a> TypedExpression<'a> {
@@ -245,7 +250,8 @@ impl<'a> TypedExpression<'a> {
             | Expression::Call { .. }
             | Expression::Negate { .. }
             | Expression::Compl { .. }
-            | Expression::Not { .. } => false,
+            | Expression::Not { .. }
+            | Expression::Sizeof { .. } => false,
         }
     }
 
@@ -290,6 +296,7 @@ impl<'a> Expression<'a> {
             Expression::Negate { minus, operand } => minus.loc().until(operand.loc()),
             Expression::Compl { compl, operand } => compl.loc().until(operand.loc()),
             Expression::Not { not, operand } => not.loc().until(operand.loc()),
+            Expression::Sizeof { sizeof, operand, size: _ } => sizeof.loc().until(operand.loc()),
         }
     }
 
@@ -646,6 +653,7 @@ fn typeck_ptrcmp<'a>(
 enum Context {
     Default,
     Addressof,
+    Sizeof,
 }
 
 fn typeck_expression<'a>(
@@ -762,6 +770,7 @@ fn typeck_expression<'a>(
         scope::Expression::UnaryOp { operator, operand } => {
             let context = match operator.kind {
                 UnaryOpKind::Addressof => Context::Addressof,
+                UnaryOpKind::Sizeof => Context::Sizeof,
                 _ => Context::Default,
             };
             let operand = typeck_expression(sess, operand, context);
@@ -851,6 +860,23 @@ fn typeck_expression<'a>(
                     else {
                         todo!("type error: cannot be operand to unary not");
                     },
+                UnaryOpKind::Sizeof => {
+                    let ty = operand.ty.ty;
+                    if !ty.is_complete() {
+                        todo!("type error: cannot take size of incomplete type `{ty:?}`");
+                    }
+                    if ty.is_function() {
+                        todo!("type error: cannot take size of function");
+                    }
+                    TypedExpression {
+                        ty: Type::ulong().unqualified(),
+                        expr: Expression::Sizeof {
+                            sizeof: operator.token,
+                            operand: sess.alloc(operand),
+                            size: ty.size(),
+                        },
+                    }
+                }
             }
         }
         scope::Expression::Call { callee, args, close_paren } => {
@@ -923,7 +949,7 @@ fn typeck_expression<'a>(
             },
             _ => expr,
         },
-        Context::Addressof => expr,
+        Context::Sizeof | Context::Addressof => expr,
     }
 }
 

@@ -114,6 +114,9 @@ impl AsSExpr for Expression<'_> {
             Expression::Negate { minus: _, operand } => SExpr::new("negate").inherit(operand),
             Expression::Compl { compl: _, operand } => SExpr::new("compl").inherit(operand),
             Expression::Not { not: _, operand } => SExpr::new("not").inherit(operand),
+            Expression::Sizeof { sizeof: _, operand, size } => SExpr::new("sizeof")
+                .inline_string(size.to_string())
+                .inherit(operand),
         }
     }
 }

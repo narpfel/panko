@@ -58,6 +58,8 @@ extern {
 
         "return" => Token { kind: panko_lex::TokenKind::Return, .. },
 
+        "sizeof" => Token { kind: panko_lex::TokenKind::Sizeof, .. },
+
         "+" => Token { kind: panko_lex::TokenKind::Plus, .. },
         "-" => Token { kind: panko_lex::TokenKind::Minus, .. },
         "~" => Token { kind: panko_lex::TokenKind::Tilde, .. },
@@ -332,6 +334,10 @@ UnaryOperator: ast::UnaryOp<'a> = {
 UnaryExpression: ast::Expression<'a> = {
     PostfixExpression,
     <operator:UnaryOperator> <operand:Bump<CastExpression>> => ast::Expression::UnaryOp { <> },
+    <sizeof:"sizeof"> <operand:Bump<UnaryExpression>> => ast::Expression::UnaryOp {
+        operator: ast::UnaryOp { kind: ast::UnaryOpKind::Sizeof, token: sizeof },
+        operand,
+    },
 }
 
 CastExpression: ast::Expression<'a> = {

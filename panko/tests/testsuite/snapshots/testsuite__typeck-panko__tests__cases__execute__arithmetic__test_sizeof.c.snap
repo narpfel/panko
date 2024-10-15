@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/arithmetic/test_sizeof.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition p~2 `ptr<int>`
+            (noop-type-conversion
+               (call (addressof (calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`) `ptr<fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>>`)
+                  (sign-extend (1 `int`) `unsigned long`)
+                  (sizeof 4 (deref (p~2 `ptr<int>`) `int`) `unsigned long`)
+                  `ptr<void>`)
+               `ptr<int>`))
+         (return (truncate (add (sign-extend (deref (p~2 `ptr<int>`) `int`) `unsigned long`) (sizeof 8 (addressof (calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`) `ptr<fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>>`) `unsigned long`) `unsigned long`) `int`)))))
+
+----- stderr -----

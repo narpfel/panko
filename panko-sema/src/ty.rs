@@ -92,6 +92,13 @@ impl<'a> Type<'a> {
         }))
     }
 
+    pub fn ulong() -> Self {
+        Self::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::Long,
+        }))
+    }
+
     pub fn ullong() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Unsigned,
