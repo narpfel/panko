@@ -117,6 +117,9 @@ impl AsSExpr for Expression<'_> {
             Expression::Sizeof { sizeof: _, operand, size } => SExpr::new("sizeof")
                 .inline_string(size.to_string())
                 .inherit(operand),
+            Expression::SizeofTy { sizeof: _, ty, size, close_paren: _ } => SExpr::new("sizeof")
+                .inline_string(size.to_string())
+                .inherit(ty),
         }
     }
 }

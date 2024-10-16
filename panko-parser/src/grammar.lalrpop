@@ -1,9 +1,9 @@
-use bumpalo::Bump;
 use panko_lex::Token;
 
 use crate as ast;
+use crate::ast::Session;
 
-grammar<'a>(bump: &'a Bump);
+grammar<'a>(sess: &'a Session<'a>);
 
 extern {
     type Error = ast::Error<'a>;
@@ -166,6 +166,29 @@ ParameterDeclaration: ast::ParameterDeclaration<'a> = {
 ParameterDeclarator: Option<ast::Declarator<'a>> = {
     Declarator => Some(<>),
     AbstractDeclarator?,
+}
+
+DeclarationSpecifierTypeSpecifierQualifier: ast::DeclarationSpecifier<'a> = {
+    TypeSpecifierQualifier => ast::DeclarationSpecifier::TypeSpecifierQualifier(<>),
+}
+
+SpecifierQualifierList: ast::DeclarationSpecifiers<'a> = {
+    <Some<DeclarationSpecifierTypeSpecifierQualifier>> AttributeSpecifierSequence? =>
+        ast::DeclarationSpecifiers(<>),
+}
+
+TypeName: crate::ast::QualifiedType<'a> = {
+    <specifier_qualifier_list:SpecifierQualifierList> <abstract_declarator:AbstractDeclarator?> => {
+        let ty = crate::ast::parse_type_specifiers(sess, specifier_qualifier_list);
+        match abstract_declarator {
+            None => ty,
+            Some(abstract_declarator) => {
+                let (ty, name) = crate::ast::parse_declarator(sess, ty, abstract_declarator);
+                assert!(name.is_none());
+                ty
+            },
+        }
+    },
 }
 
 AbstractDeclarator: ast::Declarator<'a> = {
@@ -338,6 +361,7 @@ UnaryExpression: ast::Expression<'a> = {
         operator: ast::UnaryOp { kind: ast::UnaryOpKind::Sizeof, token: sizeof },
         operand,
     },
+    <sizeof:"sizeof"> "(" <ty:TypeName> <close_paren:")"> => ast::Expression::Sizeof { <> },
 }
 
 CastExpression: ast::Expression<'a> = {
@@ -409,15 +433,15 @@ Expression: ast::Expression<'a> = {
 }
 
 Bump<T>: &'a T = {
-    T => bump.alloc(<>),
+    T => sess.alloc(<>),
 }
 
 Some<T>: &'a [T] = {
-    T+ => bump.alloc_slice_copy(&<>),
+    T+ => sess.alloc_slice_copy(&<>),
 }
 
 Many<T>: &'a [T] = {
-    T* => bump.alloc_slice_copy(&<>),
+    T* => sess.alloc_slice_copy(&<>),
 }
 
 CommaSep<T>: &'a [T] = {
@@ -429,6 +453,6 @@ CommaSep<T>: &'a [T] = {
 NonEmptyCommaSep<T>: &'a [T] = {
     <mut v:(<T> ",")*> <e:T> => {
         v.push(e);
-        bump.alloc_slice_copy(&v)
+        sess.alloc_slice_copy(&v)
     },
 }

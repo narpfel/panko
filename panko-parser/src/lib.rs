@@ -15,6 +15,8 @@ use panko_lex::TokenIter;
 use panko_lex::TokenKind;
 use panko_report::Report;
 
+use crate::ast::QualifiedType;
+
 mod as_sexpr;
 pub mod ast;
 pub mod sexpr_builder;
@@ -525,6 +527,11 @@ pub enum Expression<'a> {
         args: &'a [Expression<'a>],
         close_paren: Token<'a>,
     },
+    Sizeof {
+        sizeof: Token<'a>,
+        ty: QualifiedType<'a>,
+        close_paren: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -600,12 +607,13 @@ pub fn parse<'a>(
     tokens: TokenIter<'a>,
 ) -> Result<ast::TranslationUnit<'a>, Box<dyn Report + 'a>> {
     let parser = grammar::TranslationUnitParser::new();
-    let parse_tree = parser
-        .parse(sess.bump, tokens.map(|token| Ok(token?)))
-        .map_err(|err| match err {
-            ParseError::UnrecognizedToken { token, expected } =>
-                Error::UnrecognisedToken { at: token.1, expected: Strings(expected) },
-            err => todo!("{err:#?}"),
-        })?;
+    let parse_tree =
+        parser
+            .parse(sess, tokens.map(|token| Ok(token?)))
+            .map_err(|err| match err {
+                ParseError::UnrecognizedToken { token, expected } =>
+                    Error::UnrecognisedToken { at: token.1, expected: Strings(expected) },
+                err => todo!("{err:#?}"),
+            })?;
     Ok(ast::from_parse_tree(sess, parse_tree))
 }

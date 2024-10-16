@@ -523,7 +523,7 @@ impl fmt::Display for Signedness {
     }
 }
 
-fn parse_type_specifiers<'a>(
+pub(crate) fn parse_type_specifiers<'a>(
     sess: &'a Session<'a>,
     specifiers: cst::DeclarationSpecifiers<'a>,
 ) -> QualifiedType<'a> {
@@ -558,7 +558,7 @@ fn parse_type_specifiers<'a>(
     }
 }
 
-fn parse_declarator<'a>(
+pub(crate) fn parse_declarator<'a>(
     sess: &'a Session<'a>,
     mut ty: QualifiedType<'a>,
     mut declarator: cst::Declarator<'a>,

@@ -88,6 +88,8 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new(operator.str()).inherit(operand),
             Expression::Call { callee, args, close_paren: _ } =>
                 SExpr::new("call").inherit(callee).lines(*args),
+            Expression::Sizeof { sizeof: _, ty, close_paren: _ } =>
+                SExpr::new("sizeof").inherit(ty),
         }
     }
 }

@@ -219,6 +219,12 @@ pub enum Expression<'a> {
         operand: &'a TypedExpression<'a>,
         size: u64,
     },
+    SizeofTy {
+        sizeof: Token<'a>,
+        ty: QualifiedType<'a>,
+        size: u64,
+        close_paren: Token<'a>,
+    },
 }
 
 impl<'a> TypedExpression<'a> {
@@ -251,7 +257,8 @@ impl<'a> TypedExpression<'a> {
             | Expression::Negate { .. }
             | Expression::Compl { .. }
             | Expression::Not { .. }
-            | Expression::Sizeof { .. } => false,
+            | Expression::Sizeof { .. }
+            | Expression::SizeofTy { .. } => false,
         }
     }
 
@@ -297,6 +304,8 @@ impl<'a> Expression<'a> {
             Expression::Compl { compl, operand } => compl.loc().until(operand.loc()),
             Expression::Not { not, operand } => not.loc().until(operand.loc()),
             Expression::Sizeof { sizeof, operand, size: _ } => sizeof.loc().until(operand.loc()),
+            Expression::SizeofTy { sizeof, ty: _, size: _, close_paren } =>
+                sizeof.loc().until(close_paren.loc()),
         }
     }
 
@@ -649,6 +658,15 @@ fn typeck_ptrcmp<'a>(
     }
 }
 
+fn check_ty_can_sizeof(ty: Type<'_>) {
+    if !ty.is_complete() {
+        todo!("type error: cannot take size of incomplete type `{ty:?}`");
+    }
+    if ty.is_function() {
+        todo!("type error: cannot take size of function");
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 enum Context {
     Default,
@@ -862,12 +880,7 @@ fn typeck_expression<'a>(
                     },
                 UnaryOpKind::Sizeof => {
                     let ty = operand.ty.ty;
-                    if !ty.is_complete() {
-                        todo!("type error: cannot take size of incomplete type `{ty:?}`");
-                    }
-                    if ty.is_function() {
-                        todo!("type error: cannot take size of function");
-                    }
+                    check_ty_can_sizeof(ty);
                     TypedExpression {
                         ty: Type::ulong().unqualified(),
                         expr: Expression::Sizeof {
@@ -932,6 +945,18 @@ fn typeck_expression<'a>(
                     callee: sess.alloc(callee),
                     args: sess.alloc_slice_fill_iter(args),
                     is_varargs,
+                    close_paren: *close_paren,
+                },
+            }
+        }
+        scope::Expression::Sizeof { sizeof, ty, close_paren } => {
+            check_ty_can_sizeof(ty.ty);
+            TypedExpression {
+                ty: Type::ulong().unqualified(),
+                expr: Expression::SizeofTy {
+                    sizeof: *sizeof,
+                    ty: *ty,
+                    size: ty.ty.size(),
                     close_paren: *close_paren,
                 },
             }

@@ -149,6 +149,11 @@ pub(crate) enum Expression<'a> {
         args: &'a [Expression<'a>],
         close_paren: Token<'a>,
     },
+    Sizeof {
+        sizeof: Token<'a>,
+        ty: QualifiedType<'a>,
+        close_paren: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -226,6 +231,8 @@ impl<'a> Expression<'a> {
             Expression::UnaryOp { operator, operand } => operator.loc().until(operand.loc()),
             Expression::Call { callee, args: _, close_paren } =>
                 callee.loc().until(close_paren.loc()),
+            Expression::Sizeof { sizeof, ty: _, close_paren } =>
+                sizeof.loc().until(close_paren.loc()),
         }
     }
 }
@@ -644,6 +651,11 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             args: scopes
                 .sess
                 .alloc_slice_fill_iter(args.iter().map(|arg| resolve_expr(scopes, arg))),
+            close_paren: *close_paren,
+        },
+        ast::Expression::Sizeof { sizeof, ty, close_paren } => Expression::Sizeof {
+            sizeof: *sizeof,
+            ty: resolve_ty(scopes, ty),
             close_paren: *close_paren,
         },
     }
