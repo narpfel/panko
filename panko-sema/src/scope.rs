@@ -225,7 +225,7 @@ impl<'a> Statement<'a> {
 }
 
 impl<'a> Expression<'a> {
-    fn loc(&self) -> Loc<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
         match self {
             Expression::Name(name) => name.loc(),
             Expression::Integer(token) => token.loc(),

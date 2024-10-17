@@ -99,6 +99,16 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "invalid integer suffix"))]
     #[with(suffix = suffix.fg(Red))]
     InvalidIntegerSuffix { at: Token<'a>, suffix: &'a str },
+
+    #[error("invalid application of `{op}` to {kind} `{ty}`")]
+    #[diagnostics(at(colour = Red, label = "in this expression"), op(colour = Red))]
+    #[with(ty = ty.fg(Blue))]
+    InvalidSizeofOrAlignof {
+        op: Token<'a>,
+        at: scope::Expression<'a>,
+        kind: &'static str,
+        ty: QualifiedType<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -667,12 +677,32 @@ fn typeck_ptrcmp<'a>(
     }
 }
 
-fn check_ty_can_sizeof(ty: Type<'_>) {
-    if !ty.is_complete() {
-        todo!("type error: cannot take size of incomplete type `{ty:?}`");
+fn check_ty_can_sizeof<'a>(
+    sess: &'a Session<'a>,
+    ty: &QualifiedType<'a>,
+    at: &scope::Expression<'a>,
+    op: &Token<'a>,
+) -> QualifiedType<'a> {
+    if !ty.ty.is_complete() {
+        sess.emit(Diagnostic::InvalidSizeofOrAlignof {
+            op: *op,
+            at: *at,
+            kind: "incomplete type",
+            ty: *ty,
+        });
+        Type::int().unqualified()
     }
-    if ty.is_function() {
-        todo!("type error: cannot take size of function");
+    else if ty.ty.is_function() {
+        sess.emit(Diagnostic::InvalidSizeofOrAlignof {
+            op: *op,
+            at: *at,
+            kind: "function type",
+            ty: *ty,
+        });
+        Type::int().unqualified()
+    }
+    else {
+        *ty
     }
 }
 
@@ -888,14 +918,13 @@ fn typeck_expression<'a>(
                         todo!("type error: cannot be operand to unary not");
                     },
                 UnaryOpKind::Sizeof => {
-                    let ty = operand.ty.ty;
-                    check_ty_can_sizeof(ty);
+                    let ty = check_ty_can_sizeof(sess, &operand.ty, expr, &operator.token);
                     TypedExpression {
                         ty: Type::ulong().unqualified(),
                         expr: Expression::Sizeof {
                             sizeof: operator.token,
                             operand: sess.alloc(operand),
-                            size: ty.size(),
+                            size: ty.ty.size(),
                         },
                     }
                 }
@@ -959,24 +988,24 @@ fn typeck_expression<'a>(
             }
         }
         scope::Expression::Sizeof { sizeof, ty, close_paren } => {
-            check_ty_can_sizeof(ty.ty);
+            let ty = check_ty_can_sizeof(sess, ty, expr, sizeof);
             TypedExpression {
                 ty: Type::ulong().unqualified(),
                 expr: Expression::SizeofTy {
                     sizeof: *sizeof,
-                    ty: *ty,
+                    ty,
                     size: ty.ty.size(),
                     close_paren: *close_paren,
                 },
             }
         }
         scope::Expression::Alignof { alignof, ty, close_paren } => {
-            check_ty_can_sizeof(ty.ty);
+            let ty = check_ty_can_sizeof(sess, ty, expr, alignof);
             TypedExpression {
                 ty: Type::ulong().unqualified(),
                 expr: Expression::Alignof {
                     alignof: *alignof,
-                    ty: *ty,
+                    ty,
                     align: ty.ty.align(),
                     close_paren: *close_paren,
                 },

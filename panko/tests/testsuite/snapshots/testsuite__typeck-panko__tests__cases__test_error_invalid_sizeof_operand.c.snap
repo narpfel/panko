@@ -1,0 +1,67 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_invalid_sizeof_operand.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid application of `sizeof` to function type `fn() -> int`
+   ╭─[panko/tests/cases/test_error_invalid_sizeof_operand.c:4:5]
+   │
+ 4 │     sizeof main;
+   │     ─────┬─────  
+   │          │       
+   │          ╰─────── in this expression
+───╯
+
+Error: invalid application of `sizeof` to incomplete type `void`
+   ╭─[panko/tests/cases/test_error_invalid_sizeof_operand.c:5:5]
+   │
+ 5 │     sizeof(void);
+   │     ──────┬─────  
+   │           │       
+   │           ╰─────── in this expression
+───╯
+
+Error: invalid application of `sizeof` to incomplete type `void`
+   ╭─[panko/tests/cases/test_error_invalid_sizeof_operand.c:6:5]
+   │
+ 6 │     sizeof f();
+   │     ─────┬────  
+   │          │      
+   │          ╰────── in this expression
+───╯
+
+Error: invalid application of `sizeof` to function type `fn() -> int`
+   ╭─[panko/tests/cases/test_error_invalid_sizeof_operand.c:7:5]
+   │
+ 7 │     sizeof(int());
+   │     ──────┬──────  
+   │           │        
+   │           ╰──────── in this expression
+───╯
+
+Error: invalid application of `alignof` to incomplete type `void`
+   ╭─[panko/tests/cases/test_error_invalid_sizeof_operand.c:9:5]
+   │
+ 9 │     alignof(void);
+   │     ──────┬──────  
+   │           │        
+   │           ╰──────── in this expression
+───╯
+
+Error: invalid application of `alignof` to function type `fn() -> int`
+    ╭─[panko/tests/cases/test_error_invalid_sizeof_operand.c:10:5]
+    │
+ 10 │     alignof(int());
+    │     ───────┬──────  
+    │            │        
+    │            ╰──────── in this expression
+────╯

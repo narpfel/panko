@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/test_error_invalid_sizeof_operand.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration f~0 `fn() -> void` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (expression (sizeof (name main~1 `fn() -> int`)))
+         (expression (sizeof `void`))
+         (expression (sizeof (call (name f~0 `fn() -> void`))))
+         (expression (sizeof `fn() -> int`))
+         (expression (alignof `void`))
+         (expression (alignof `fn() -> int`)))))
+
+----- stderr -----
