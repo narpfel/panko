@@ -90,6 +90,8 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new("call").inherit(callee).lines(*args),
             Expression::Sizeof { sizeof: _, ty, close_paren: _ } =>
                 SExpr::new("sizeof").inherit(ty),
+            Expression::Alignof { alignof: _, ty, close_paren: _ } =>
+                SExpr::new("alignof").inherit(ty),
         }
     }
 }

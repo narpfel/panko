@@ -225,6 +225,12 @@ pub enum Expression<'a> {
         size: u64,
         close_paren: Token<'a>,
     },
+    Alignof {
+        alignof: Token<'a>,
+        ty: QualifiedType<'a>,
+        align: u64,
+        close_paren: Token<'a>,
+    },
 }
 
 impl<'a> TypedExpression<'a> {
@@ -258,7 +264,8 @@ impl<'a> TypedExpression<'a> {
             | Expression::Compl { .. }
             | Expression::Not { .. }
             | Expression::Sizeof { .. }
-            | Expression::SizeofTy { .. } => false,
+            | Expression::SizeofTy { .. }
+            | Expression::Alignof { .. } => false,
         }
     }
 
@@ -306,6 +313,8 @@ impl<'a> Expression<'a> {
             Expression::Sizeof { sizeof, operand, size: _ } => sizeof.loc().until(operand.loc()),
             Expression::SizeofTy { sizeof, ty: _, size: _, close_paren } =>
                 sizeof.loc().until(close_paren.loc()),
+            Expression::Alignof { alignof, ty: _, align: _, close_paren } =>
+                alignof.loc().until(close_paren.loc()),
         }
     }
 
@@ -957,6 +966,18 @@ fn typeck_expression<'a>(
                     sizeof: *sizeof,
                     ty: *ty,
                     size: ty.ty.size(),
+                    close_paren: *close_paren,
+                },
+            }
+        }
+        scope::Expression::Alignof { alignof, ty, close_paren } => {
+            check_ty_can_sizeof(ty.ty);
+            TypedExpression {
+                ty: Type::ulong().unqualified(),
+                expr: Expression::Alignof {
+                    alignof: *alignof,
+                    ty: *ty,
+                    align: ty.ty.align(),
                     close_paren: *close_paren,
                 },
             }

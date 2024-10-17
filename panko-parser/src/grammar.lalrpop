@@ -59,6 +59,7 @@ extern {
         "return" => Token { kind: panko_lex::TokenKind::Return, .. },
 
         "sizeof" => Token { kind: panko_lex::TokenKind::Sizeof, .. },
+        "alignof" => Token { kind: panko_lex::TokenKind::Alignof, .. },
 
         "+" => Token { kind: panko_lex::TokenKind::Plus, .. },
         "-" => Token { kind: panko_lex::TokenKind::Minus, .. },
@@ -362,6 +363,7 @@ UnaryExpression: ast::Expression<'a> = {
         operand,
     },
     <sizeof:"sizeof"> "(" <ty:TypeName> <close_paren:")"> => ast::Expression::Sizeof { <> },
+    <alignof:"alignof"> "(" <ty:TypeName> <close_paren:")"> => ast::Expression::Alignof { <> },
 }
 
 CastExpression: ast::Expression<'a> = {

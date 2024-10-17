@@ -532,6 +532,11 @@ pub enum Expression<'a> {
         ty: QualifiedType<'a>,
         close_paren: Token<'a>,
     },
+    Alignof {
+        alignof: Token<'a>,
+        ty: QualifiedType<'a>,
+        close_paren: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]

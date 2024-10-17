@@ -366,10 +366,21 @@ fn layout_expression_in_slot<'a>(
             let operand = layout_expression_in_slot(stack, bump, operand, operand_slot);
             (slot, Expression::Not(bump.alloc(operand)))
         }
-        typecheck::Expression::Sizeof { sizeof: _, operand: _, size }
-        | typecheck::Expression::SizeofTy { sizeof: _, ty: _, size, close_paren: _ } => {
+        typecheck::Expression::Sizeof { sizeof: _, operand: _, size: value }
+        | typecheck::Expression::SizeofTy {
+            sizeof: _,
+            ty: _,
+            size: value,
+            close_paren: _,
+        }
+        | typecheck::Expression::Alignof {
+            alignof: _,
+            ty: _,
+            align: value,
+            close_paren: _,
+        } => {
             let slot = make_slot();
-            (slot, Expression::Integer(size))
+            (slot, Expression::Integer(value))
         }
     };
     LayoutedExpression { ty, slot, expr }

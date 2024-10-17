@@ -1,0 +1,62 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arithmetic/test_alignof.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      (params
+         main.unnamed_parameter.0~2 `int`
+         argv~3 `ptr<ptr<char>>`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (alignof `char`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (alignof `char const`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (alignof `ptr<char const>`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (alignof `ptr<char>`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (alignof `ptr<fn(∅: int, ∅: int) -> void>`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (alignof `unsigned short`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (alignof `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (alignof `long`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (alignof `long long`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (alignof `ptr<void>`))))))
+
+----- stderr -----
