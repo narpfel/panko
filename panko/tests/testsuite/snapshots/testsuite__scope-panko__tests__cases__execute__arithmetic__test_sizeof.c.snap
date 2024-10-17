@@ -11,14 +11,74 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (declaration calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>` ∅)
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration calloc~1 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>` ∅)
    (function-definition
-      main~1 `fn() -> int`
+      main~2 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      (params
+         main.unnamed_parameter.0~3 `int`
+         argv~4 `ptr<ptr<char>>`)
       (compound-statement
-         (definition p~2 `ptr<int>`
-            (call (name calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof `char`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof `char const`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof `ptr<char const>`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof `ptr<char>`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof `ptr<fn(∅: int, ∅: int) -> void>`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof `unsigned short`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof `long`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof `long long`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof `ptr<void>`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof 42)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof 42u)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof 42l)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
+               (sizeof (sizeof 42))))
+         (definition p~5 `ptr<int>`
+            (call (name calloc~1 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`)
                1
-               (sizeof (deref (name p~2 `ptr<int>`)))))
-         (return (add (deref (name p~2 `ptr<int>`)) (sizeof (addressof (name calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`))))))))
+               (sizeof (deref (name p~5 `ptr<int>`)))))
+         (return (add (deref (name p~5 `ptr<int>`)) (sizeof (addressof (name calloc~1 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`))))))))
 
 ----- stderr -----
