@@ -231,6 +231,8 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new("sizeof").inherit(ty),
             Expression::Alignof { alignof: _, ty, close_paren: _ } =>
                 SExpr::new("alignof").inherit(ty),
+            Expression::Cast { open_paren: _, ty, expr } =>
+                SExpr::new("cast").inherit(ty).inherit(expr),
         }
     }
 }

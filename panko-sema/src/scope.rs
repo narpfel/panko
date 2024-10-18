@@ -159,6 +159,11 @@ pub(crate) enum Expression<'a> {
         ty: QualifiedType<'a>,
         close_paren: Token<'a>,
     },
+    Cast {
+        open_paren: Token<'a>,
+        ty: QualifiedType<'a>,
+        expr: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -240,6 +245,7 @@ impl<'a> Expression<'a> {
                 sizeof.loc().until(close_paren.loc()),
             Expression::Alignof { alignof, ty: _, close_paren } =>
                 alignof.loc().until(close_paren.loc()),
+            Expression::Cast { open_paren, ty: _, expr } => open_paren.loc().until(expr.loc()),
         }
     }
 }
@@ -669,6 +675,11 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             alignof: *alignof,
             ty: resolve_ty(scopes, ty),
             close_paren: *close_paren,
+        },
+        ast::Expression::Cast { open_paren, ty, expr } => Expression::Cast {
+            open_paren: *open_paren,
+            ty: resolve_ty(scopes, ty),
+            expr: scopes.sess.alloc(resolve_expr(scopes, expr)),
         },
     }
 }

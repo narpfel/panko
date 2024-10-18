@@ -75,6 +75,7 @@ pub enum Expression<'a> {
     Truncate(&'a LayoutedExpression<'a>),
     SignExtend(&'a LayoutedExpression<'a>),
     ZeroExtend(&'a LayoutedExpression<'a>),
+    VoidCast(&'a LayoutedExpression<'a>),
     Assign {
         target: &'a LayoutedExpression<'a>,
         value: &'a LayoutedExpression<'a>,
@@ -278,6 +279,10 @@ fn layout_expression_in_slot<'a>(
         typecheck::Expression::ZeroExtend(zero_extend) => (
             make_slot(),
             Expression::ZeroExtend(bump.alloc(layout_expression(stack, bump, zero_extend))),
+        ),
+        typecheck::Expression::VoidCast(expr) => (
+            make_slot(),
+            Expression::VoidCast(bump.alloc(layout_expression(stack, bump, expr))),
         ),
         typecheck::Expression::Parenthesised { open_paren: _, expr, close_paren: _ } =>
             return layout_expression_in_slot(stack, bump, expr, target_slot),

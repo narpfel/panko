@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::fmt::Display;
+use std::fmt;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
@@ -41,7 +41,7 @@ trait Sliced {
 
 impl<T> Sliced for T
 where
-    T: Display,
+    T: ToString,
 {
     fn slice(&self) -> String {
         self.to_string()
@@ -53,12 +53,13 @@ where
 enum Diagnostic<'a> {
     // TODO: colourise types
     // TODO: types should be printed in C syntax, not in their SExpr debug repr
-    #[error("invalid implicit conversion from `{from_ty}` to `{to_ty}`")]
-    #[diagnostics(at(colour = Red, label = "this is of type `{from_ty}`, which cannot be implicitly converted to `{to_ty}`"))]
-    InvalidImplicitConversion {
+    #[error("invalid {kind} conversion from `{from_ty}` to `{to_ty}`")]
+    #[diagnostics(at(colour = Red, label = "this is of type `{from_ty}`, which cannot be {kind}ly converted to `{to_ty}`"))]
+    InvalidConversion {
         at: TypedExpression<'a>,
         from_ty: Type<'a>,
         to_ty: Type<'a>,
+        kind: ConversionKind,
     },
 
     #[error("`{return_}` statement without value in non-`void` function `{name}` returning `{return_ty}`")]
@@ -164,9 +165,13 @@ pub enum Expression<'a> {
         token: Token<'a>,
     },
     NoopTypeConversion(&'a TypedExpression<'a>),
+    // TODO: `Truncate`, `SignExtend`, `ZeroExtend` and `VoidCast` lose location information when
+    // representing an explicit cast. They should take an optional location (or better:
+    // `TypedExpression` should have a `loc`).
     Truncate(&'a TypedExpression<'a>),
     SignExtend(&'a TypedExpression<'a>),
     ZeroExtend(&'a TypedExpression<'a>),
+    VoidCast(&'a TypedExpression<'a>),
     Parenthesised {
         open_paren: Token<'a>,
         expr: &'a TypedExpression<'a>,
@@ -263,6 +268,7 @@ impl<'a> TypedExpression<'a> {
             | Expression::Truncate(_)
             | Expression::SignExtend(_)
             | Expression::ZeroExtend(_)
+            | Expression::VoidCast(_)
             | Expression::Assign { .. }
             | Expression::IntegralBinOp { .. }
             | Expression::PtrAdd { .. }
@@ -292,7 +298,8 @@ impl<'a> Expression<'a> {
             Expression::NoopTypeConversion(inner)
             | Expression::Truncate(inner)
             | Expression::SignExtend(inner)
-            | Expression::ZeroExtend(inner) => inner.loc(),
+            | Expression::ZeroExtend(inner)
+            | Expression::VoidCast(inner) => inner.loc(),
             Expression::Assign { target, value } => target.loc().until(value.loc()),
             Expression::Parenthesised { open_paren, expr: _, close_paren } =>
                 open_paren.loc().until(close_paren.loc()),
@@ -337,47 +344,92 @@ impl<'a> Expression<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum ConversionKind {
+    Implicit,
+    Explicit,
+}
+
+impl fmt::Display for ConversionKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = match self {
+            Self::Implicit => "implicit",
+            Self::Explicit => "explicit",
+        };
+        write!(f, "{s}")
+    }
+}
+
+fn convert<'a>(
+    sess: &'a Session<'a>,
+    target: QualifiedType<'a>,
+    expr: TypedExpression<'a>,
+    kind: ConversionKind,
+) -> TypedExpression<'a> {
+    // TODO: forbid ptr <=> float
+    // TODO: only allow nullptr => {bool, void, ptr<T>}
+    // TODO: if target is nullptr_t, expr must be nullptr or a null pointer constant
+    // TODO: check that target is a scalar type or void
+    // TODO: check that expr_ty is a scalar type when target_ty != void
+    let target_ty = target.ty;
+    let expr_ty = expr.ty.ty;
+    let extend_kind = match expr_ty {
+        Type::Arithmetic(arithmetic) => match arithmetic.signedness() {
+            Signedness::Signed => Expression::SignExtend,
+            Signedness::Unsigned => Expression::ZeroExtend,
+        },
+        _ => Expression::ZeroExtend,
+    };
+    let convert = || {
+        let cast = match target_ty.size().cmp(&expr_ty.size()) {
+            Ordering::Less => Expression::Truncate,
+            Ordering::Equal => Expression::NoopTypeConversion,
+            Ordering::Greater => extend_kind,
+        };
+        cast(sess.alloc(expr))
+    };
+
+    let expr = match (target_ty, expr_ty) {
+        (Type::Void, Type::Void) => return expr,
+        (Type::Void, _) if kind == ConversionKind::Explicit =>
+            Expression::VoidCast(sess.alloc(expr)),
+
+        (Type::Arithmetic(_), Type::Arithmetic(_)) | (Type::Pointer(_), Type::Pointer(_)) =>
+            if kind == ConversionKind::Implicit && target_ty == expr_ty {
+                return expr;
+            }
+            else {
+                convert()
+            },
+        // TODO: clang (but not gcc) allows implicitly converting `Type::Function(_)` to
+        // `Type::Pointer(_)` (with a warning).
+        // TODO: handle nullptr literals
+        (Type::Function(_), _) => todo!("[{}] = {}", target.as_sexpr(), expr.as_sexpr()),
+
+        (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(_))
+        | (Type::Pointer(_), Type::Arithmetic(Arithmetic::Integral(_)))
+            if kind == ConversionKind::Explicit =>
+            convert(),
+
+        _ => {
+            sess.emit(Diagnostic::InvalidConversion {
+                at: expr,
+                from_ty: expr_ty,
+                to_ty: target_ty,
+                kind,
+            });
+            expr.expr
+        }
+    };
+    TypedExpression { ty: target_ty.unqualified(), expr }
+}
+
 fn convert_as_if_by_assignment<'a>(
     sess: &'a Session<'a>,
     target: QualifiedType<'a>,
     expr: TypedExpression<'a>,
 ) -> TypedExpression<'a> {
-    let target_ty = target.ty;
-    let expr_ty = expr.ty.ty;
-    let conversion = match (target_ty, expr_ty) {
-        (Type::Arithmetic(_), Type::Arithmetic(_)) | (Type::Pointer(_), Type::Pointer(_))
-            if expr_ty == target_ty =>
-            return expr,
-        (Type::Arithmetic(_), Type::Arithmetic(source_arithmetic)) => {
-            let expr_kind = match target_ty.size().cmp(&expr_ty.size()) {
-                Ordering::Less => Expression::Truncate,
-                Ordering::Equal => Expression::NoopTypeConversion,
-                Ordering::Greater => match source_arithmetic.signedness() {
-                    Signedness::Signed => Expression::SignExtend,
-                    Signedness::Unsigned => Expression::ZeroExtend,
-                },
-            };
-            expr_kind(sess.alloc(expr))
-        }
-        (Type::Pointer(_), Type::Pointer(_)) => Expression::NoopTypeConversion(sess.alloc(expr)),
-        // TODO: clang (but not gcc) allows implicitly converting `Type::Function(_)` to
-        // `Type::Pointer(_)` (with a warning).
-        // TODO: handle nullptr literals
-        (Type::Function(_), _) => todo!("[{}] = {}", target.as_sexpr(), expr.as_sexpr()),
-        (Type::Void, Type::Void) => return expr,
-        _ => {
-            sess.emit(Diagnostic::InvalidImplicitConversion {
-                at: expr,
-                from_ty: expr_ty,
-                to_ty: target_ty,
-            });
-            expr.expr
-        }
-    };
-    TypedExpression {
-        ty: target_ty.unqualified(),
-        expr: conversion,
-    }
+    convert(sess, target, expr, ConversionKind::Implicit)
 }
 
 fn typeck_function_definition<'a>(
@@ -1010,6 +1062,11 @@ fn typeck_expression<'a>(
                     close_paren: *close_paren,
                 },
             }
+        }
+        scope::Expression::Cast { open_paren: _, ty, expr } => {
+            let expr = typeck_expression(sess, expr, Context::Default);
+            let ty = ty.ty.unqualified();
+            convert(sess, ty, expr, ConversionKind::Explicit)
         }
     };
 

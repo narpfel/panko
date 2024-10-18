@@ -537,6 +537,11 @@ pub enum Expression<'a> {
         ty: QualifiedType<'a>,
         close_paren: Token<'a>,
     },
+    Cast {
+        open_paren: Token<'a>,
+        ty: QualifiedType<'a>,
+        expr: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]

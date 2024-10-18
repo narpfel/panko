@@ -83,6 +83,7 @@ impl AsSExpr for Expression<'_> {
             Expression::Truncate(truncate) => SExpr::new("truncate").inherit(truncate),
             Expression::SignExtend(sign_extend) => SExpr::new("sign-extend").inherit(sign_extend),
             Expression::ZeroExtend(zero_extend) => SExpr::new("zero-extend").inherit(zero_extend),
+            Expression::VoidCast(expr) => SExpr::new("void-cast").inherit(expr),
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.as_sexpr(),
             Expression::Assign { target, value } =>
                 SExpr::new("assign").inherit(target).inherit(value),

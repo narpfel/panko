@@ -368,6 +368,7 @@ UnaryExpression: ast::Expression<'a> = {
 
 CastExpression: ast::Expression<'a> = {
     UnaryExpression,
+    <open_paren:"("> <ty:TypeName> ")" <expr:Bump<CastExpression>> => ast::Expression::Cast { <> },
 }
 
 MultiplicativeOperator: ast::BinOpKind = {
