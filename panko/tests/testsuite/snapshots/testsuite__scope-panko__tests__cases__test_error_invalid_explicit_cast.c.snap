@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/test_error_invalid_explicit_cast.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration f~0 `fn() -> void` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (expression (cast `int` (call (name f~0 `fn() -> void`))))
+         (expression (cast `int` (cast `void` 42))))))
+
+----- stderr -----

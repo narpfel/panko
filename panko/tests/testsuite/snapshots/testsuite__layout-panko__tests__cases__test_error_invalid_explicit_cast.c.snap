@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/test_error_invalid_explicit_cast.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid explicit conversion from `void` to `int`
+   ╭─[panko/tests/cases/test_error_invalid_explicit_cast.c:4:11]
+   │
+ 4 │     (int) f();
+   │           ─┬─  
+   │            ╰─── this is of type `void`, which cannot be explicitly converted to `int`
+───╯
+
+Error: invalid explicit conversion from `void` to `int`
+   ╭─[panko/tests/cases/test_error_invalid_explicit_cast.c:5:16]
+   │
+ 5 │     (int)(void)42;
+   │                ─┬  
+   │                 ╰── this is of type `void`, which cannot be explicitly converted to `int`
+───╯

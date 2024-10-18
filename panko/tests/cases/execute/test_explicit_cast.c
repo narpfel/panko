@@ -3,7 +3,22 @@
 
 int printf(char const*, ...);
 
-int main(int, char** argv) {
+void f(char const* fmt) {
+    printf(fmt, 123);
+}
+
+int g() {
+    return 42;
+}
+
+int main(int argc, char** argv) {
+    // [[print: 123]]
+    (void) f(*(argv + 2));
+    (void) 42;
+    (void) g();
+    (void) argc;
+    (void) argv;
+
     // [[print: (nil)]]
     printf(*(argv + 1), (void*)0);
     // [[print: (nil)]]
