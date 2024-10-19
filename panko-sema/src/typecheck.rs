@@ -83,10 +83,16 @@ enum Diagnostic<'a> {
         at(colour = Red, label = "this value is `const`"),
         decl(colour = Blue, label = "note: `{decl}` declared here")
     )]
-    AssignmentToConst {
+    AssignmentToConstName {
         at: &'a Expression<'a>,
         decl: Reference<'a>,
     },
+
+    #[error("cannot assign to `const` expression")]
+    #[diagnostics(
+        at(colour = Red, label = "this value is `const`"),
+    )]
+    AssignmentToConst { at: Expression<'a> },
 
     #[error("cannot assign to this expression because it is not an lvalue")]
     #[diagnostics(at(colour = Red, label = "this expression is not an lvalue"))]
@@ -829,11 +835,14 @@ fn typeck_expression<'a>(
                 else {
                     assert!(!target.is_modifiable());
                     match target.expr.unwrap_parens() {
-                        Expression::Name(reference) => sess.emit(Diagnostic::AssignmentToConst {
-                            at: &target.expr,
-                            decl: reference.at_decl(),
-                        }),
-                        _ => todo!("for pointer derefs and const struct members etc."),
+                        Expression::Name(reference) =>
+                            sess.emit(Diagnostic::AssignmentToConstName {
+                                at: &target.expr,
+                                decl: reference.at_decl(),
+                            }),
+                        Expression::Deref { .. } =>
+                            sess.emit(Diagnostic::AssignmentToConst { at: target.expr }),
+                        _ => todo!("for const struct members etc."),
                     }
                 }
             }

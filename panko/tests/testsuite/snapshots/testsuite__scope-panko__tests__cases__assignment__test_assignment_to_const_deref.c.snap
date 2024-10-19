@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/assignment/test_assignment_to_const_deref.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition p~1 `ptr<long const>` (cast `ptr<long>` 0))
+         (expression (assign (deref (name p~1 `ptr<long const>`)) 42))
+         (expression (assign (deref (add (name p~1 `ptr<long const>`) 1)) 42))
+         (expression (assign (subscript (name p~1 `ptr<long const>`) 0) 42))
+         (expression (assign (subscript (name p~1 `ptr<long const>`) 1) 27))
+         (expression (assign (subscript (name p~1 `ptr<long const>`) 42) 0)))))
+
+----- stderr -----

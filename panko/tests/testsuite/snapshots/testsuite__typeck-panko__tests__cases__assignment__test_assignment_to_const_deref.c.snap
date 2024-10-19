@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/assignment/test_assignment_to_const_deref.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to `const` expression
+   ╭─[panko/tests/cases/assignment/test_assignment_to_const_deref.c:3:5]
+   │
+ 3 │     *p = 42;
+   │     ─┬  
+   │      ╰── this value is `const`
+───╯
+
+Error: cannot assign to `const` expression
+   ╭─[panko/tests/cases/assignment/test_assignment_to_const_deref.c:4:5]
+   │
+ 4 │     *(p + 1) = 42;
+   │     ────┬───  
+   │         ╰───── this value is `const`
+───╯
+
+Error: cannot assign to `const` expression
+   ╭─[panko/tests/cases/assignment/test_assignment_to_const_deref.c:5:5]
+   │
+ 5 │     p[0] = 42;
+   │     ──┬─  
+   │       ╰─── this value is `const`
+───╯
+
+Error: cannot assign to `const` expression
+   ╭─[panko/tests/cases/assignment/test_assignment_to_const_deref.c:6:5]
+   │
+ 6 │     p[1] = 27;
+   │     ──┬─  
+   │       ╰─── this value is `const`
+───╯
+
+Error: cannot assign to `const` expression
+   ╭─[panko/tests/cases/assignment/test_assignment_to_const_deref.c:7:5]
+   │
+ 7 │     (p[42]) = 0;
+   │     ───┬───  
+   │        ╰───── this value is `const`
+───╯
