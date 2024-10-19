@@ -7,6 +7,7 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::process::ExitStatus;
 use std::process::Output;
+use std::sync::LazyLock;
 
 use insta_cmd::assert_cmd_snapshot;
 use insta_cmd::get_cargo_bin;
@@ -61,6 +62,22 @@ fn test(
     );
 }
 
+fn expand_escape_sequences(s: &str) -> String {
+    static EXPAND_ESCAPE_SEQUENCES_RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"\\[0\\n]").unwrap());
+
+    EXPAND_ESCAPE_SEQUENCES_RE
+        .replace_all(s, |captures: &Captures| {
+            match captures.get(0).unwrap().as_str() {
+                r"\0" => "\0",
+                r"\\" => "\\",
+                r"\n" => "\n",
+                _ => unreachable!(),
+            }
+        })
+        .into_owned()
+}
+
 #[rstest]
 fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
     let source = std::fs::read_to_string(&filename).unwrap();
@@ -83,24 +100,16 @@ fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
     let expected_print_re = Regex::new(r"(?m)^\s*// \[\[print: (?P<output>.*?)\]\]$").unwrap();
     let expected_output: String = expected_print_re
         .captures_iter(&source)
-        .map(|captures| captures.name("output").unwrap().as_str().to_string() + "\n")
+        .map(|captures| {
+            expand_escape_sequences(&(captures.name("output").unwrap().as_str().to_string() + "\n"))
+        })
         .collect();
 
     let cmdline_arguments_re = Regex::new(r"(?m)^// \[\[arg: (?P<arg>.*?)\]\]$").unwrap();
-    let expand_escape_sequences_re = Regex::new(r"\\[\\n]").unwrap();
 
     let cmdline_arguments = cmdline_arguments_re
         .captures_iter(&source)
-        .map(|captures| {
-            expand_escape_sequences_re.replace_all(
-                captures.name("arg").unwrap().as_str(),
-                |captures: &Captures| match captures.get(0).unwrap().as_str() {
-                    r"\\" => "\\",
-                    r"\n" => "\n",
-                    _ => unreachable!(),
-                },
-            )
-        })
+        .map(|captures| expand_escape_sequences(captures.name("arg").unwrap().as_str()))
         .collect_vec();
 
     let filename = relative_to(
