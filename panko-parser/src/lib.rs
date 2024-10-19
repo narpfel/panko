@@ -542,6 +542,11 @@ pub enum Expression<'a> {
         ty: QualifiedType<'a>,
         expr: &'a Expression<'a>,
     },
+    Subscript {
+        lhs: &'a Expression<'a>,
+        rhs: &'a Expression<'a>,
+        close_bracket: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]

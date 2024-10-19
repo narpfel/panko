@@ -20,6 +20,9 @@ extern {
         ")" => Token { kind: panko_lex::TokenKind::RParen, .. },
         "{" => Token { kind: panko_lex::TokenKind::LBrace, .. },
         "}" => Token { kind: panko_lex::TokenKind::RBrace, .. },
+        "[" => Token { kind: panko_lex::TokenKind::LBracket, .. },
+        "]" => Token { kind: panko_lex::TokenKind::RBracket, .. },
+
 
         // StorageClassSpecifierToken
         "auto" => Token { kind: panko_lex::TokenKind::Auto, .. },
@@ -342,6 +345,8 @@ PostfixExpression: ast::Expression<'a> = {
     PrimaryExpression,
     <callee:Bump<PostfixExpression>> "(" <args:ArgumentExpressionList> <close_paren:")"> =>
         ast::Expression::Call { <> },
+    <lhs:Bump<PostfixExpression>> "[" <rhs:Bump<Expression>> <close_bracket:"]"> =>
+        ast::Expression::Subscript { <> },
 }
 
 ArgumentExpressionList = { CommaSep<AssignmentExpression> }

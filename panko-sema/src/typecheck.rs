@@ -19,6 +19,7 @@ use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::sexpr_builder::AsSExpr as _;
 use panko_parser::BinOpKind;
+use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_report::Report;
 use variant_types::IntoVariant as _;
@@ -1068,6 +1069,18 @@ fn typeck_expression<'a>(
             let ty = ty.ty.unqualified();
             convert(sess, ty, expr, ConversionKind::Explicit)
         }
+        scope::Expression::Subscript { lhs, rhs, close_bracket } => typeck_expression(
+            sess,
+            &scope::Expression::UnaryOp {
+                operator: UnaryOp {
+                    kind: UnaryOpKind::Deref,
+                    // TODO: Is this cheating?
+                    token: *close_bracket,
+                },
+                operand: sess.alloc(scope::Expression::BinOp { lhs, kind: BinOpKind::Add, rhs }),
+            },
+            Context::Default,
+        ),
     };
 
     match context {

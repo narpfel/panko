@@ -233,6 +233,8 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new("alignof").inherit(ty),
             Expression::Cast { open_paren: _, ty, expr } =>
                 SExpr::new("cast").inherit(ty).inherit(expr),
+            Expression::Subscript { lhs, rhs, close_bracket: _ } =>
+                SExpr::new("subscript").inherit(lhs).inherit(rhs),
         }
     }
 }

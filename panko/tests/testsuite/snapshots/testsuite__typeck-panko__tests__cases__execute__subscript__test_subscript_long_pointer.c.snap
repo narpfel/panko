@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/subscript/test_subscript_long_pointer.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition p~2 `ptr<long>`
+            (noop-type-conversion
+               (call (addressof (calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`) `ptr<fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>>`)
+                  (sign-extend (2 `int`) `unsigned long`)
+                  (sizeof 8 `long` `unsigned long`)
+                  `ptr<void>`)
+               `ptr<long>`))
+         (expression (assign (deref (ptr-add (p~2 `ptr<long>`) (sign-extend (0 `int`) `unsigned long long`) `ptr<long>`) `long`) (sign-extend (42 `int`) `long`) `long`))
+         (expression (assign (deref (ptr-add (p~2 `ptr<long>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<long>`) `long`) (sign-extend (27 `int`) `long`) `long`))
+         (return (truncate (add (deref (ptr-add (p~2 `ptr<long>`) (sign-extend (0 `int`) `unsigned long long`) `ptr<long>`) `long`) (deref (ptr-add (sign-extend (1 `int`) `unsigned long long`) (p~2 `ptr<long>`) `ptr<long>`) `long`) `long`) `int`)))))
+
+----- stderr -----

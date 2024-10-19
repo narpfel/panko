@@ -164,6 +164,11 @@ pub(crate) enum Expression<'a> {
         ty: QualifiedType<'a>,
         expr: &'a Expression<'a>,
     },
+    Subscript {
+        lhs: &'a Expression<'a>,
+        rhs: &'a Expression<'a>,
+        close_bracket: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -246,6 +251,8 @@ impl<'a> Expression<'a> {
             Expression::Alignof { alignof, ty: _, close_paren } =>
                 alignof.loc().until(close_paren.loc()),
             Expression::Cast { open_paren, ty: _, expr } => open_paren.loc().until(expr.loc()),
+            Expression::Subscript { lhs, rhs: _, close_bracket } =>
+                lhs.loc().until(close_bracket.loc()),
         }
     }
 }
@@ -680,6 +687,11 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             open_paren: *open_paren,
             ty: resolve_ty(scopes, ty),
             expr: scopes.sess.alloc(resolve_expr(scopes, expr)),
+        },
+        ast::Expression::Subscript { lhs, rhs, close_bracket } => Expression::Subscript {
+            lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
+            rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),
+            close_bracket: *close_bracket,
         },
     }
 }
