@@ -117,6 +117,16 @@ enum Diagnostic<'a> {
         kind: &'static str,
         ty: QualifiedType<'a>,
     },
+
+    #[error(
+        "cannot dereference this expression with type `{ty}` (pointer or array type required)"
+    )]
+    #[diagnostics(at(colour = Red, label = "in this expression"))]
+    #[with(ty = ty.fg(Red))]
+    CannotDeref {
+        at: scope::Expression<'a>,
+        ty: QualifiedType<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -925,7 +935,15 @@ fn typeck_expression<'a>(
                             },
                         }
                     }
-                    _ => todo!("type error: cannot deref this expr"),
+                    _ => {
+                        sess.emit(Diagnostic::CannotDeref { at: *expr, ty: operand.ty });
+                        // TODO: This should be an error expression
+                        TypedExpression {
+                            ty: Type::int().unqualified(),
+                            // TODO: this location is fake
+                            expr: Expression::Integer { value: 0, token: operator.token },
+                        }
+                    }
                 },
                 UnaryOpKind::Plus => match operand.ty.ty {
                     Type::Arithmetic(arithmetic) => {

@@ -1,0 +1,61 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/deref/test_deref_of_non_pointer.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot dereference this expression with type `int` (pointer or array type required)
+   ╭─[panko/tests/cases/deref/test_deref_of_non_pointer.c:3:5]
+   │
+ 3 │     *a = 2;
+   │     ─┬  
+   │      ╰── in this expression
+───╯
+
+Error: cannot assign to this expression because it is not an lvalue
+   ╭─[panko/tests/cases/deref/test_deref_of_non_pointer.c:3:5]
+   │
+ 3 │     *a = 2;
+   │     ┬  
+   │     ╰── this expression is not an lvalue
+───╯
+
+Error: cannot dereference this expression with type `int` (pointer or array type required)
+   ╭─[panko/tests/cases/deref/test_deref_of_non_pointer.c:4:5]
+   │
+ 4 │     *42;
+   │     ─┬─  
+   │      ╰─── in this expression
+───╯
+
+Error: cannot dereference this expression with type `int` (pointer or array type required)
+   ╭─[panko/tests/cases/deref/test_deref_of_non_pointer.c:5:5]
+   │
+ 5 │     42[27];
+   │     ───┬──  
+   │        ╰──── in this expression
+───╯
+
+Error: cannot dereference this expression with type `int` (pointer or array type required)
+   ╭─[panko/tests/cases/deref/test_deref_of_non_pointer.c:6:5]
+   │
+ 6 │     42[a] = a;
+   │     ──┬──  
+   │       ╰──── in this expression
+───╯
+
+Error: cannot assign to this expression because it is not an lvalue
+   ╭─[panko/tests/cases/deref/test_deref_of_non_pointer.c:6:9]
+   │
+ 6 │     42[a] = a;
+   │         ┬  
+   │         ╰── this expression is not an lvalue
+───╯
