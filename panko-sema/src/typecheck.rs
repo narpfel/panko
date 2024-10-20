@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 use std::fmt;
 
 use ariadne::Color::Blue;
+use ariadne::Color::Green;
 use ariadne::Color::Red;
 use ariadne::Fmt as _;
 use itertools::EitherOrBoth;
@@ -127,6 +128,30 @@ enum Diagnostic<'a> {
     CannotDeref {
         at: scope::Expression<'a>,
         ty: QualifiedType<'a>,
+    },
+
+    #[error("duplicate `{at}` association in {generic} selection")]
+    #[diagnostics(
+        generic(colour = Green, label = "in this {generic} selection"),
+        previous_default(colour = Blue, label = "first `{previous_default}` here"),
+        at(colour = Red, label = "duplicate `{at}`"),
+    )]
+    GenericWithDuplicateDefault {
+        at: Token<'a>,
+        previous_default: Token<'a>,
+        generic: Token<'a>,
+    },
+
+    #[error("duplicate association for type `{at}` in {generic} selection")]
+    #[diagnostics(
+        generic(colour = Green, label = "in this {generic} selection"),
+        previous(colour = Blue, label = "previous association for `{previous}` here"),
+        at(colour = Red, label = "this type is duplicated in this {generic} selection"),
+    )]
+    GenericWithDuplicateType {
+        at: QualifiedType<'a>,
+        previous: QualifiedType<'a>,
+        generic: Token<'a>,
     },
 }
 
@@ -1110,7 +1135,7 @@ fn typeck_expression<'a>(
             Context::Default,
         ),
         scope::Expression::Generic {
-            generic: _,
+            generic,
             selector,
             assocs,
             close_paren: _,
@@ -1125,11 +1150,16 @@ fn typeck_expression<'a>(
                     GenericAssociation::Default { default, expr } => Some((default, expr)),
                 })
                 .at_most_one()
-                .unwrap_or_else(|duplicate_defaults| {
-                    todo!(
-                        "type error: more than one default association: {:?}",
-                        duplicate_defaults.collect_vec(),
-                    )
+                .unwrap_or_else(|mut duplicate_defaults| {
+                    let first = duplicate_defaults.next();
+                    for (default, _) in duplicate_defaults {
+                        sess.emit(Diagnostic::GenericWithDuplicateDefault {
+                            at: *default,
+                            previous_default: *first.unwrap().0,
+                            generic: *generic,
+                        });
+                    }
+                    first
                 })
                 .map(|default| default.1);
 
@@ -1140,13 +1170,19 @@ fn typeck_expression<'a>(
                     GenericAssociation::Ty { ty, expr } => Some((ty, expr)),
                     GenericAssociation::Default { default: _, expr: _ } => None,
                 })
-                .into_grouping_map()
-                .reduce(|_expr, ty, duplicate| {
-                    todo!("type error: duplicate type selector `{ty}` in generic selection at `{duplicate:?}`")
+                .into_grouping_map_by(|(&ty, _expr)| ty)
+                .reduce(|first, _ty, duplicate| {
+                    sess.emit(Diagnostic::GenericWithDuplicateType {
+                        at: *duplicate.0,
+                        previous: *first.0,
+                        generic: *generic,
+                    });
+                    first
                 });
 
             let expr = assocs
                 .get(&selector_ty)
+                .map(|(_ty, expr)| expr)
                 .or(default.as_ref())
                 .unwrap_or_else(|| {
                     todo!("type error: no match in generic selection with controlling type `{selector_ty}`")

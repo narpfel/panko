@@ -196,6 +196,10 @@ impl<'a> QualifiedType<'a> {
     pub(crate) fn slice(&self) -> String {
         self.to_string()
     }
+
+    pub(crate) fn loc(&self) -> Loc {
+        self.loc
+    }
 }
 
 impl PartialEq for QualifiedType<'_> {
