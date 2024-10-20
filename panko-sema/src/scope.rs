@@ -62,6 +62,10 @@ enum Diagnostic<'a> {
     #[error("invalid function return type `{ty}`")]
     #[diagnostics(at(colour = Red, label = "declaration here"))]
     InvalidFunctionReturnType { at: Loc<'a>, ty: QualifiedType<'a> },
+
+    #[error("use of undeclared identifier `{at}`")]
+    #[diagnostics(at(colour = Red, label = "this name has not been declared"))]
+    UndeclaredName { at: Token<'a> },
 }
 
 #[derive(Debug)]
@@ -641,11 +645,14 @@ fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> State
 
 fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expression<'a> {
     match expr {
-        ast::Expression::Name(name) => Expression::Name(
-            scopes
-                .lookup(name.slice(), name.loc())
-                .unwrap_or_else(|| todo!("name error: {name:#?}")),
-        ),
+        ast::Expression::Name(name) => scopes
+            .lookup(name.slice(), name.loc())
+            .map(Expression::Name)
+            .unwrap_or_else(|| {
+                scopes.sess.emit(Diagnostic::UndeclaredName { at: *name });
+                // TODO: use an error expression here
+                Expression::Integer(*name)
+            }),
         ast::Expression::Integer(integer) => Expression::Integer(*integer),
         ast::Expression::Parenthesised { open_paren, expr, close_paren } =>
             Expression::Parenthesised {

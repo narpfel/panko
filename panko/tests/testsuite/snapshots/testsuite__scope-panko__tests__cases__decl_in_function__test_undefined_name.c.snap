@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/decl_in_function/test_undefined_name.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: use of undeclared identifier `a`
+   ╭─[panko/tests/cases/decl_in_function/test_undefined_name.c:2:13]
+   │
+ 2 │     int b = a + 42;
+   │             ┬  
+   │             ╰── this name has not been declared
+───╯
+
+Error: use of undeclared identifier `something`
+   ╭─[panko/tests/cases/decl_in_function/test_undefined_name.c:3:6]
+   │
+ 3 │     *something = 42;
+   │      ────┬────  
+   │          ╰────── this name has not been declared
+───╯
+
+Error: use of undeclared identifier `undefined_name`
+   ╭─[panko/tests/cases/decl_in_function/test_undefined_name.c:4:12]
+   │
+ 4 │     return undefined_name;
+   │            ───────┬──────  
+   │                   ╰──────── this name has not been declared
+───╯
