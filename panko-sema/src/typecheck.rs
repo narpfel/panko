@@ -1161,7 +1161,7 @@ fn typeck_expression<'a>(
                     }
                     first
                 })
-                .map(|default| default.1);
+                .map(|(_default_token, expr)| expr);
 
             let assocs = assocs
                 .0
