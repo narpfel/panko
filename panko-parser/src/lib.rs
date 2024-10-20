@@ -547,6 +547,12 @@ pub enum Expression<'a> {
         rhs: &'a Expression<'a>,
         close_bracket: Token<'a>,
     },
+    Generic {
+        generic: Token<'a>,
+        selector: &'a Expression<'a>,
+        assocs: GenericAssocList<'a>,
+        close_paren: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -615,6 +621,21 @@ impl<'a> UnaryOp<'a> {
     pub fn loc(&self) -> Loc<'a> {
         self.token.loc()
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GenericAssocList<'a>(pub &'a [GenericAssociation<'a>]);
+
+#[derive(Debug, Clone, Copy)]
+pub enum GenericAssociation<'a> {
+    Ty {
+        ty: QualifiedType<'a>,
+        expr: Expression<'a>,
+    },
+    Default {
+        default: Token<'a>,
+        expr: Expression<'a>,
+    },
 }
 
 pub fn parse<'a>(

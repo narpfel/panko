@@ -121,6 +121,7 @@ impl<'a> Session<'a> {
 }
 
 pub type Expression<'a> = cst::Expression<'a>;
+pub type GenericAssociation<'a> = cst::GenericAssociation<'a>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {

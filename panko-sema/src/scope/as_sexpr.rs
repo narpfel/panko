@@ -9,6 +9,7 @@ use super::Declaration;
 use super::Expression;
 use super::ExternalDeclaration;
 use super::FunctionDefinition;
+use super::GenericAssociation;
 use super::ParamRefs;
 use super::Reference;
 use super::Statement;
@@ -96,6 +97,12 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new("cast").inherit(ty).inherit(expr),
             Expression::Subscript { lhs, rhs, close_bracket: _ } =>
                 SExpr::new("subscript").inherit(lhs).inherit(rhs),
+            Expression::Generic {
+                generic: _,
+                selector,
+                assocs,
+                close_paren: _,
+            } => SExpr::new("generic").lines([selector]).lines(assocs.0),
         }
     }
 }
@@ -103,5 +110,15 @@ impl AsSExpr for Expression<'_> {
 impl AsSExpr for Reference<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::string(format!("{} `{}`", self.unique_name(), self.ty))
+    }
+}
+
+impl AsSExpr for GenericAssociation<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let (ty, expr): (&dyn AsSExpr, _) = match self {
+            GenericAssociation::Ty { ty, expr } => (ty, expr),
+            GenericAssociation::Default { default, expr } => (default, expr),
+        };
+        SExpr::new("assoc").inherit(ty).inherit(expr)
     }
 }

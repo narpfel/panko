@@ -15,6 +15,7 @@ use crate::ExternalDeclaration;
 use crate::FunctionDeclarator;
 use crate::FunctionDefinition;
 use crate::FunctionSpecifier;
+use crate::GenericAssociation;
 use crate::InitDeclarator;
 use crate::JumpStatement;
 use crate::ParameterDeclaration;
@@ -235,6 +236,22 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new("cast").inherit(ty).inherit(expr),
             Expression::Subscript { lhs, rhs, close_bracket: _ } =>
                 SExpr::new("subscript").inherit(lhs).inherit(rhs),
+            Expression::Generic {
+                generic: _,
+                selector,
+                assocs,
+                close_paren: _,
+            } => SExpr::new("generic").lines([selector]).lines(assocs.0),
         }
+    }
+}
+
+impl AsSExpr for GenericAssociation<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let (ty, expr): (&dyn AsSExpr, _) = match self {
+            Self::Ty { ty, expr } => (ty, expr),
+            Self::Default { default, expr } => (default, expr),
+        };
+        SExpr::new("assoc").inherit(ty).inherit(expr)
     }
 }

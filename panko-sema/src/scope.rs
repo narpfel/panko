@@ -173,6 +173,12 @@ pub(crate) enum Expression<'a> {
         rhs: &'a Expression<'a>,
         close_bracket: Token<'a>,
     },
+    Generic {
+        generic: Token<'a>,
+        selector: &'a Expression<'a>,
+        assocs: GenericAssocList<'a>,
+        close_paren: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -200,6 +206,21 @@ pub enum StorageDuration {
     Static,
     Automatic,
     // TODO: thread local
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct GenericAssocList<'a>(pub(crate) &'a [GenericAssociation<'a>]);
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum GenericAssociation<'a> {
+    Ty {
+        ty: QualifiedType<'a>,
+        expr: Expression<'a>,
+    },
+    Default {
+        default: Token<'a>,
+        expr: Expression<'a>,
+    },
 }
 
 impl<'a> FunctionDefinition<'a> {
@@ -257,6 +278,12 @@ impl<'a> Expression<'a> {
             Expression::Cast { open_paren, ty: _, expr } => open_paren.loc().until(expr.loc()),
             Expression::Subscript { lhs, rhs: _, close_bracket } =>
                 lhs.loc().until(close_bracket.loc()),
+            Expression::Generic {
+                generic,
+                selector: _,
+                assocs: _,
+                close_paren,
+            } => generic.loc().until(close_paren.loc()),
         }
     }
 }
@@ -643,6 +670,22 @@ fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> State
     }
 }
 
+fn resolve_assoc<'a>(
+    scopes: &mut Scopes<'a>,
+    assoc: &ast::GenericAssociation<'a>,
+) -> GenericAssociation<'a> {
+    match assoc {
+        ast::GenericAssociation::Ty { ty, expr } => GenericAssociation::Ty {
+            ty: resolve_ty(scopes, ty),
+            expr: resolve_expr(scopes, expr),
+        },
+        ast::GenericAssociation::Default { default, expr } => GenericAssociation::Default {
+            default: *default,
+            expr: resolve_expr(scopes, expr),
+        },
+    }
+}
+
 fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expression<'a> {
     match expr {
         ast::Expression::Name(name) => scopes
@@ -700,6 +743,15 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),
             close_bracket: *close_bracket,
         },
+        ast::Expression::Generic { generic, selector, assocs, close_paren } =>
+            Expression::Generic {
+                generic: *generic,
+                selector: scopes.sess.alloc(resolve_expr(scopes, selector)),
+                assocs: GenericAssocList(scopes.sess.alloc_slice_fill_iter(
+                    assocs.0.iter().map(|assoc| resolve_assoc(scopes, assoc)),
+                )),
+                close_paren: *close_paren,
+            },
     }
 }
 

@@ -25,6 +25,7 @@ use panko_report::Report;
 use variant_types::IntoVariant as _;
 
 use crate::scope;
+use crate::scope::GenericAssociation;
 use crate::scope::ParamRefs;
 use crate::scope::Reference;
 use crate::ty::FunctionType;
@@ -1108,6 +1109,33 @@ fn typeck_expression<'a>(
             },
             Context::Default,
         ),
+        scope::Expression::Generic {
+            generic: _,
+            selector,
+            assocs,
+            close_paren: _,
+        } => {
+            let selector = typeck_expression(sess, selector, Context::Default);
+            let selector_ty = selector.ty.ty.unqualified();
+            let expr = assocs
+                .0
+                .iter()
+                .find_map(|assoc| match assoc {
+                    GenericAssociation::Ty { ty, expr } => (*ty == selector_ty).then_some(expr),
+                    GenericAssociation::Default { default: _, expr: _ } => None,
+                })
+                .unwrap_or_else(|| {
+                    assocs
+                        .0
+                        .iter()
+                        .find_map(|assoc| match assoc {
+                            GenericAssociation::Ty { ty: _, expr: _ } => None,
+                            GenericAssociation::Default { default: _, expr } => Some(expr),
+                        })
+                        .unwrap_or_else(|| todo!("type error: no match in generic selection"))
+                });
+            typeck_expression(sess, expr, context)
+        }
     };
 
     match context {
