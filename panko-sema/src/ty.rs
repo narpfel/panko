@@ -1,5 +1,7 @@
 use std::borrow::Cow;
 use std::fmt;
+use std::hash::Hash;
+use std::hash::Hasher;
 
 use itertools::Itertools as _;
 use panko_lex::Loc;
@@ -39,7 +41,13 @@ impl PartialEq for ParameterDeclaration<'_> {
 
 impl Eq for ParameterDeclaration<'_> {}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+impl Hash for ParameterDeclaration<'_> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.ty.ty.hash(state)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct FunctionType<'a> {
     pub params: &'a [ParameterDeclaration<'a>],
     pub return_type: &'a QualifiedType<'a>,
@@ -68,7 +76,7 @@ impl fmt::Display for FunctionType<'_> {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Type<'a> {
     Arithmetic(Arithmetic),
     Pointer(&'a QualifiedType<'a>),
@@ -204,6 +212,13 @@ impl PartialEq for QualifiedType<'_> {
 }
 
 impl Eq for QualifiedType<'_> {}
+
+impl Hash for QualifiedType<'_> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Self { is_const, is_volatile, ty, loc: _ } = self;
+        (is_const, is_volatile, ty).hash(state)
+    }
+}
 
 impl fmt::Display for QualifiedType<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

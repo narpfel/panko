@@ -170,18 +170,18 @@ pub enum Type<'a> {
     // TODO
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Arithmetic {
     Integral(Integral),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Integral {
     pub signedness: Signedness,
     pub kind: IntegralKind,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum IntegralKind {
     PlainChar,
     /// explicitly `signed char` or `unsigned char`
@@ -192,7 +192,7 @@ pub enum IntegralKind {
     LongLong,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Signedness {
     Signed,
     Unsigned,

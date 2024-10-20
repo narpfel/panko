@@ -1117,23 +1117,41 @@ fn typeck_expression<'a>(
         } => {
             let selector = typeck_expression(sess, selector, Context::Default);
             let selector_ty = selector.ty.ty.unqualified();
-            let expr = assocs
+            let default = assocs
                 .0
                 .iter()
-                .find_map(|assoc| match assoc {
-                    GenericAssociation::Ty { ty, expr } => (*ty == selector_ty).then_some(expr),
+                .filter_map(|assoc| match assoc {
+                    GenericAssociation::Ty { ty: _, expr: _ } => None,
+                    GenericAssociation::Default { default, expr } => Some((default, expr)),
+                })
+                .at_most_one()
+                .unwrap_or_else(|duplicate_defaults| {
+                    todo!(
+                        "type error: more than one default association: {:?}",
+                        duplicate_defaults.collect_vec(),
+                    )
+                })
+                .map(|default| default.1);
+
+            let assocs = assocs
+                .0
+                .iter()
+                .filter_map(|assoc| match assoc {
+                    GenericAssociation::Ty { ty, expr } => Some((ty, expr)),
                     GenericAssociation::Default { default: _, expr: _ } => None,
                 })
-                .unwrap_or_else(|| {
-                    assocs
-                        .0
-                        .iter()
-                        .find_map(|assoc| match assoc {
-                            GenericAssociation::Ty { ty: _, expr: _ } => None,
-                            GenericAssociation::Default { default: _, expr } => Some(expr),
-                        })
-                        .unwrap_or_else(|| todo!("type error: no match in generic selection"))
+                .into_grouping_map()
+                .reduce(|_expr, ty, duplicate| {
+                    todo!("type error: duplicate type selector `{ty}` in generic selection at `{duplicate:?}`")
                 });
+
+            let expr = assocs
+                .get(&selector_ty)
+                .or(default.as_ref())
+                .unwrap_or_else(|| {
+                    todo!("type error: no match in generic selection with controlling type `{selector_ty}`")
+                });
+
             typeck_expression(sess, expr, context)
         }
     };
