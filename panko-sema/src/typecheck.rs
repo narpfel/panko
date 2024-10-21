@@ -164,6 +164,16 @@ enum Diagnostic<'a> {
         at: TypedExpression<'a>,
         expr: scope::Expression<'a>,
     },
+
+    #[error("the type of a {generic} association shall be a complete object type other than a variably modified type")]
+    #[diagnostics(
+        generic(colour = Green, label = "in this {generic} selection"),
+        at(colour = Red, label = "this type is not allowed in a {generic} association"),
+    )]
+    GenericWithInvalidType {
+        at: QualifiedType<'a>,
+        generic: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1178,7 +1188,16 @@ fn typeck_expression<'a>(
                 .0
                 .iter()
                 .filter_map(|assoc| match assoc {
-                    GenericAssociation::Ty { ty, expr } => Some((ty, expr)),
+                    GenericAssociation::Ty { ty, expr } => {
+                        // TODO: `ty` shall not be a variably modified type.
+                        if !(ty.ty.is_object() && ty.ty.is_complete()) {
+                            sess.emit(Diagnostic::GenericWithInvalidType {
+                                at: *ty,
+                                generic: *generic,
+                            });
+                        }
+                        Some((ty, expr))
+                    }
                     GenericAssociation::Default { default: _, expr: _ } => None,
                 })
                 .into_grouping_map_by(|(&ty, _expr)| ty)
