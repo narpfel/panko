@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/generic/test_generic_selection.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (return
+            (generic
+               123
+               (assoc `char` 1)
+               (assoc `short` 2)
+               (assoc `int` 42)
+               (assoc `int const` 3)
+               (assoc `unsigned int` 4)
+               (assoc `ptr<int>` 5)
+               (assoc `ptr<ptr<int>>` 6)
+               (assoc `ptr<int const>` 7))))))
+
+----- stderr -----

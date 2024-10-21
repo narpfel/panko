@@ -1,0 +1,75 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/test_error_invalid_generic_selection.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to this expression because it is not an lvalue
+   ╭─[panko/tests/cases/test_error_invalid_generic_selection.c:5:37]
+   │
+ 5 │     _Generic(main, int: a, default: 27, int: a, int const*: b, default: 42) = 123;
+   │                                     ─┬  
+   │                                      ╰── this expression is not an lvalue
+───╯
+
+Error: duplicate association for type `int` in _Generic selection
+   ╭─[panko/tests/cases/test_error_invalid_generic_selection.c:5:41]
+   │
+ 5 │     _Generic(main, int: a, default: 27, int: a, int const*: b, default: 42) = 123;
+   │     ────┬───       ─┬─                  ─┬─  
+   │         │           │                    ╰─── this type is duplicated in this _Generic selection
+   │         │           │                        
+   │         │           ╰──────────────────────── previous association for `int` here
+   │         │                                    
+   │         ╰──────────────────────────────────── in this _Generic selection
+───╯
+
+Error: duplicate `default` association in _Generic selection
+   ╭─[panko/tests/cases/test_error_invalid_generic_selection.c:5:64]
+   │
+ 5 │     _Generic(main, int: a, default: 27, int: a, int const*: b, default: 42) = 123;
+   │     ────┬───               ───┬───                             ───┬───  
+   │         │                     │                                   ╰───── duplicate `default`
+   │         │                     │                                         
+   │         │                     ╰───────────────────────────────────────── first `default` here
+   │         │                                                               
+   │         ╰─────────────────────────────────────────────────────────────── in this _Generic selection
+───╯
+
+Error: controlling expression does not match any type in this _Generic selection
+   ╭─[panko/tests/cases/test_error_invalid_generic_selection.c:6:14]
+   │
+ 6 │     _Generic(&a, int: 42, long: 27);
+   │     ──────────┬────┬───────────────  
+   │               │    ╰───────────────── in this _Generic selection
+   │               │                      
+   │               ╰────────────────────── controlling expression has type `ptr<int>`
+───╯
+
+Error: the type of a _Generic association shall be a complete object type other than a variably modified type
+   ╭─[panko/tests/cases/test_error_invalid_generic_selection.c:7:18]
+   │
+ 7 │     _Generic(42, int(): 1, void: 2, default: 3);
+   │     ────┬───     ──┬──  
+   │         │          ╰──── this type is not allowed in a _Generic association
+   │         │               
+   │         ╰─────────────── in this _Generic selection
+───╯
+
+Error: the type of a _Generic association shall be a complete object type other than a variably modified type
+   ╭─[panko/tests/cases/test_error_invalid_generic_selection.c:7:28]
+   │
+ 7 │     _Generic(42, int(): 1, void: 2, default: 3);
+   │     ────┬───               ──┬─  
+   │         │                    ╰─── this type is not allowed in a _Generic association
+   │         │                        
+   │         ╰──────────────────────── in this _Generic selection
+───╯

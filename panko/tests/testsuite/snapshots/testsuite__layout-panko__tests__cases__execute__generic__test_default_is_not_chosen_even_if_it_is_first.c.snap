@@ -1,0 +1,19 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/generic/test_default_is_not_chosen_even_if_it_is_first.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (return (5 `int` @0)))))
+
+----- stderr -----

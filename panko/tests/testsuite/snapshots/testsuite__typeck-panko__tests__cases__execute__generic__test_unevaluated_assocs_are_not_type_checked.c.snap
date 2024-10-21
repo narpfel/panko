@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/generic/test_unevaluated_assocs_are_not_type_checked.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `int` (42 `int`))
+         (definition p~2 `ptr<int>` (addressof (a~1 `int`) `ptr<int>`))
+         (return (42 `int`)))))
+
+----- stderr -----

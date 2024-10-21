@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/generic/test_default_is_chosen_if_no_match.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (c~1 `char` @0) (truncate `char` @0 (0 `int` @4)))
+         (return (42 `int` @4)))))
+
+----- stderr -----

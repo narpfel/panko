@@ -1,0 +1,43 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/test_error_invalid_generic_selection.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~1 `int` 42)
+         (definition b~2 `int` 27)
+         (definition p~3 `ptr<int const> const` (addressof (name b~2 `int`)))
+         (expression
+            (assign
+               (generic
+                  (name main~0 `fn() -> int`)
+                  (assoc `int` (name a~1 `int`))
+                  (assoc default 27)
+                  (assoc `int` (name a~1 `int`))
+                  (assoc `ptr<int const>` (name b~2 `int`))
+                  (assoc default 42))
+               123))
+         (expression
+            (generic
+               (addressof (name a~1 `int`))
+               (assoc `int` 42)
+               (assoc `long` 27)))
+         (expression
+            (generic
+               42
+               (assoc `fn() -> int` 1)
+               (assoc `void` 2)
+               (assoc default 3)))
+         (return (name a~1 `int`)))))
+
+----- stderr -----
