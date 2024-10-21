@@ -153,6 +153,17 @@ enum Diagnostic<'a> {
         previous: QualifiedType<'a>,
         generic: Token<'a>,
     },
+
+    #[error("controlling expression does not match any type in this {generic} selection")]
+    #[diagnostics(
+        at(colour = Red, label = "controlling expression has type `{ty}`"),
+        expr(colour = Blue, label = "in this {generic} selection"),
+    )]
+    #[with(ty = at.ty.ty, generic = "_Generic".fg(Blue))]
+    GenericWithoutMatch {
+        at: TypedExpression<'a>,
+        expr: scope::Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1180,15 +1191,19 @@ fn typeck_expression<'a>(
                     first
                 });
 
-            let expr = assocs
+            assocs
                 .get(&selector_ty)
                 .map(|(_ty, expr)| expr)
                 .or(default.as_ref())
+                .map(|expr| typeck_expression(sess, expr, context))
                 .unwrap_or_else(|| {
-                    todo!("type error: no match in generic selection with controlling type `{selector_ty}`")
-                });
-
-            typeck_expression(sess, expr, context)
+                    sess.emit(Diagnostic::GenericWithoutMatch { at: selector, expr: *expr });
+                    // TODO: this should be an error expression
+                    TypedExpression {
+                        ty: Type::int().unqualified(),
+                        expr: Expression::Integer { value: 0, token: *generic },
+                    }
+                })
         }
     };
 
