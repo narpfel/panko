@@ -1,0 +1,99 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arithmetic/test_shift.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      (params
+         main.unnamed_parameter.0~2 `int`
+         argv~3 `ptr<ptr<char>>`)
+      (compound-statement
+         (definition i~4 `int` 42)
+         (definition one~5 `char` 1)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (right-shift (name i~4 `int`) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (right-shift 42 (name one~5 `char`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (right-shift (name i~4 `int`) 2)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (right-shift (name i~4 `int`) 10)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (left-shift (name i~4 `int`) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (left-shift (name i~4 `int`) (name one~5 `char`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (left-shift (name i~4 `int`) 10)))
+         (definition u~6 `unsigned int` 0xffff'ffff)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 2)
+               (left-shift (name u~6 `unsigned int`) (name one~5 `char`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 2)
+               (right-shift (name u~6 `unsigned int`) (name one~5 `char`))))
+         (definition n~7 `int` (name u~6 `unsigned int`))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 2)
+               (left-shift (name n~7 `int`) (name one~5 `char`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 2)
+               (right-shift (name n~7 `int`) (name one~5 `char`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 2)
+               (left-shift (name n~7 `int`) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 2)
+               (right-shift (name n~7 `int`) 0)))
+         (definition l~8 `long` 0xa5a5'a5a5'a5a5'a5a5l)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 3)
+               (left-shift (name l~8 `long`) 16)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 3)
+               (right-shift (name l~8 `long`) 16)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 3)
+               (right-shift (cast `unsigned long` (name l~8 `long`)) 16)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 3)
+               (left-shift (name l~8 `long`) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 3)
+               (right-shift (name l~8 `long`) 0))))))
+
+----- stderr -----

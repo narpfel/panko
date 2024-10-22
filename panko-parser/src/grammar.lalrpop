@@ -85,6 +85,9 @@ extern {
 
         "&" => Token { kind: panko_lex::TokenKind::And, .. },
 
+        "<<" => Token { kind: panko_lex::TokenKind::LessLess, .. },
+        ">>" => Token { kind: panko_lex::TokenKind::GreaterGreater, .. },
+
         "..." => Token { kind: panko_lex::TokenKind::Ellipsis, .. },
 
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
@@ -415,8 +418,15 @@ AdditiveExpression: ast::Expression<'a> = {
         ast::Expression::BinOp { <> },
 }
 
+ShiftOperator: ast::BinOpKind = {
+    "<<" => ast::BinOpKind::LeftShift,
+    ">>" => ast::BinOpKind::RightShift,
+}
+
 ShiftExpression: ast::Expression<'a> = {
     AdditiveExpression,
+    <lhs:Bump<ShiftExpression>> <kind:ShiftOperator> <rhs:Bump<AdditiveExpression>> =>
+        ast::Expression::BinOp { <> },
 }
 
 RelationalOperator: ast::BinOpKind = {

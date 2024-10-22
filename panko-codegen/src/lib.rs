@@ -411,7 +411,9 @@ impl<'a> Codegen<'a> {
                 _ => unreachable!(),
             },
             Expression::IntegralBinOp { ty, lhs, kind, rhs } => {
-                assert_eq!(lhs.ty, rhs.ty);
+                if !matches!(kind, BinOpKind::LeftShift | BinOpKind::RightShift) {
+                    assert_eq!(lhs.ty, rhs.ty);
+                }
                 assert_eq!(lhs.ty.ty, Type::Arithmetic(Arithmetic::Integral(ty)));
 
                 let emit_arithmetic = |cg: &mut Self, operation| {
@@ -425,6 +427,14 @@ impl<'a> Codegen<'a> {
                         };
                         emit_arithmetic(cg, operation);
                     };
+                let emit_shift = |cg: &mut Self, operation_if_signed, operation_if_unsigned| {
+                    let operation = match ty.signedness {
+                        Signedness::Signed => operation_if_signed,
+                        Signedness::Unsigned => operation_if_unsigned,
+                    };
+                    cg.emit_args("mov", &[&Rcx.typed(rhs), rhs]);
+                    cg.emit_args(operation, &[&Rax.typed(lhs), &Rcx.byte()]);
+                };
                 let emit_comparison = |cg: &mut Self, operation| {
                     assert!(matches!(lhs.ty.ty, Type::Arithmetic(_) | Type::Pointer(_)));
                     emit_arithmetic(cg, "cmp");
@@ -481,6 +491,8 @@ impl<'a> Codegen<'a> {
                     BinOpKind::Greater => emit_sign_dependent_comparison(self, "setg", "seta"),
                     BinOpKind::GreaterEqual =>
                         emit_sign_dependent_comparison(self, "setge", "setae"),
+                    BinOpKind::LeftShift => emit_shift(self, "shl", "shl"),
+                    BinOpKind::RightShift => emit_shift(self, "sar", "shr"),
                 };
 
                 self.emit_args("mov", &[expr, &Rax.typed(expr)]);

@@ -656,6 +656,8 @@ fn typeck_arithmetic_binop<'a>(
         | BinOpKind::Modulo
         | BinOpKind::Add
         | BinOpKind::Subtract => common_ty,
+        BinOpKind::LeftShift | BinOpKind::RightShift =>
+            return typeck_integral_shift(sess, kind, lhs, rhs, lhs_ty, rhs_ty),
         BinOpKind::Equal
         | BinOpKind::NotEqual
         | BinOpKind::Less
@@ -669,6 +671,31 @@ fn typeck_arithmetic_binop<'a>(
         ty,
         expr: Expression::IntegralBinOp {
             ty: integral_ty,
+            lhs: sess.alloc(lhs),
+            kind,
+            rhs: sess.alloc(rhs),
+        },
+    }
+}
+
+fn typeck_integral_shift<'a>(
+    sess: &'a Session<'a>,
+    kind: BinOpKind,
+    lhs: TypedExpression<'a>,
+    rhs: TypedExpression<'a>,
+    lhs_ty: Arithmetic,
+    rhs_ty: Arithmetic,
+) -> TypedExpression<'a> {
+    assert!(matches!(kind, BinOpKind::LeftShift | BinOpKind::RightShift));
+    let lhs_ty @ Arithmetic::Integral(lhs_integral) = integral_promote(lhs_ty);
+    let lhs_ty = Type::Arithmetic(lhs_ty).unqualified();
+    let rhs_ty = Type::Arithmetic(integral_promote(rhs_ty)).unqualified();
+    let lhs = convert_as_if_by_assignment(sess, lhs_ty, lhs);
+    let rhs = convert_as_if_by_assignment(sess, rhs_ty, rhs);
+    TypedExpression {
+        ty: lhs_ty,
+        expr: Expression::IntegralBinOp {
+            ty: lhs_integral,
             lhs: sess.alloc(lhs),
             kind,
             rhs: sess.alloc(rhs),
@@ -775,7 +802,9 @@ fn typeck_ptrcmp<'a>(
         | BinOpKind::Divide
         | BinOpKind::Modulo
         | BinOpKind::Add
-        | BinOpKind::Subtract => unreachable!(),
+        | BinOpKind::Subtract
+        | BinOpKind::LeftShift
+        | BinOpKind::RightShift => unreachable!(),
         BinOpKind::Equal => PtrCmpKind::Equal,
         BinOpKind::NotEqual => PtrCmpKind::NotEqual,
         BinOpKind::Less => PtrCmpKind::Less,
