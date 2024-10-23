@@ -84,6 +84,8 @@ extern {
         ">=" => Token { kind: panko_lex::TokenKind::GreaterEqual, .. },
 
         "&" => Token { kind: panko_lex::TokenKind::And, .. },
+        "^" => Token { kind: panko_lex::TokenKind::Hat, .. },
+        "|" => Token { kind: panko_lex::TokenKind::Pipe, .. },
 
         "<<" => Token { kind: panko_lex::TokenKind::LessLess, .. },
         ">>" => Token { kind: panko_lex::TokenKind::GreaterGreater, .. },
@@ -453,8 +455,38 @@ EqualityExpression: ast::Expression<'a> = {
         ast::Expression::BinOp { <> },
 }
 
-ConditionalExpression: ast::Expression<'a> = {
+BitAndOperator: ast::BinOpKind = {
+    "&" => ast::BinOpKind::BitAnd,
+}
+
+BitAndExpression: ast::Expression<'a> = {
     EqualityExpression,
+    <lhs:Bump<BitAndExpression>> <kind:BitAndOperator> <rhs:Bump<EqualityExpression>> =>
+        ast::Expression::BinOp { <> },
+}
+
+BitXorOperator: ast::BinOpKind = {
+    "^" => ast::BinOpKind::BitXor,
+}
+
+BitXorExpression: ast::Expression<'a> = {
+    BitAndExpression,
+    <lhs:Bump<BitXorExpression>> <kind:BitXorOperator> <rhs:Bump<BitAndExpression>> =>
+        ast::Expression::BinOp { <> },
+}
+
+BitOrOperator: ast::BinOpKind = {
+    "|" => ast::BinOpKind::BitOr,
+}
+
+BitOrExpression: ast::Expression<'a> = {
+    BitXorExpression,
+    <lhs:Bump<BitOrExpression>> <kind:BitOrOperator> <rhs:Bump<BitXorExpression>> =>
+        ast::Expression::BinOp { <> },
+}
+
+ConditionalExpression: ast::Expression<'a> = {
+    BitOrExpression,
 }
 
 AssignmentExpression: ast::Expression<'a> = {

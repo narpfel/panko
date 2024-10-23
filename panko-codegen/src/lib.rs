@@ -493,6 +493,9 @@ impl<'a> Codegen<'a> {
                         emit_sign_dependent_comparison(self, "setge", "setae"),
                     BinOpKind::LeftShift => emit_shift(self, "shl", "shl"),
                     BinOpKind::RightShift => emit_shift(self, "sar", "shr"),
+                    BinOpKind::BitAnd => emit_arithmetic(self, "and"),
+                    BinOpKind::BitXor => emit_arithmetic(self, "xor"),
+                    BinOpKind::BitOr => emit_arithmetic(self, "or"),
                 };
 
                 self.emit_args("mov", &[expr, &Rax.typed(expr)]);

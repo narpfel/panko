@@ -655,7 +655,10 @@ fn typeck_arithmetic_binop<'a>(
         | BinOpKind::Divide
         | BinOpKind::Modulo
         | BinOpKind::Add
-        | BinOpKind::Subtract => common_ty,
+        | BinOpKind::Subtract
+        | BinOpKind::BitAnd
+        | BinOpKind::BitXor
+        | BinOpKind::BitOr => common_ty,
         BinOpKind::LeftShift | BinOpKind::RightShift =>
             return typeck_integral_shift(sess, kind, lhs, rhs, lhs_ty, rhs_ty),
         BinOpKind::Equal
@@ -804,7 +807,10 @@ fn typeck_ptrcmp<'a>(
         | BinOpKind::Add
         | BinOpKind::Subtract
         | BinOpKind::LeftShift
-        | BinOpKind::RightShift => unreachable!(),
+        | BinOpKind::RightShift
+        | BinOpKind::BitAnd
+        | BinOpKind::BitXor
+        | BinOpKind::BitOr => unreachable!(),
         BinOpKind::Equal => PtrCmpKind::Equal,
         BinOpKind::NotEqual => PtrCmpKind::NotEqual,
         BinOpKind::Less => PtrCmpKind::Less,

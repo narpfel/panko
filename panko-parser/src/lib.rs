@@ -570,6 +570,9 @@ pub enum BinOpKind {
     GreaterEqual,
     LeftShift,
     RightShift,
+    BitAnd,
+    BitXor,
+    BitOr,
 }
 
 impl BinOpKind {
@@ -588,6 +591,9 @@ impl BinOpKind {
             BinOpKind::GreaterEqual => "greater-equal",
             BinOpKind::LeftShift => "left-shift",
             BinOpKind::RightShift => "right-shift",
+            BinOpKind::BitAnd => "bit-and",
+            BinOpKind::BitXor => "bit-xor",
+            BinOpKind::BitOr => "bit-or",
         }
     }
 }
