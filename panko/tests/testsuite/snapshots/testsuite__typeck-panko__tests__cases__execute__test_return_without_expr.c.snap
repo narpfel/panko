@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/test_return_without_expr.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration exit~0 `fn(∅: int) -> void` ∅)
+   (function-definition
+      f~1 `fn() -> void`
+      (compound-statement
+         (return ∅)
+         (expression
+            (call (addressof (exit~0 `fn(∅: int) -> void`) `ptr<fn(∅: int) -> void>`)
+               (42 `int`)
+               `void`))))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (expression (call (addressof (f~1 `fn() -> void`) `ptr<fn() -> void>`) `void`)))))
+
+----- stderr -----
