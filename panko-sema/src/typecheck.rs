@@ -19,6 +19,7 @@ use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::sexpr_builder::AsSExpr as _;
+use panko_parser::BinOp;
 use panko_parser::BinOpKind;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
@@ -248,7 +249,7 @@ pub enum Expression<'a> {
     IntegralBinOp {
         ty: Integral,
         lhs: &'a TypedExpression<'a>,
-        kind: BinOpKind,
+        op: BinOp<'a>,
         rhs: &'a TypedExpression<'a>,
     },
     PtrAdd {
@@ -373,7 +374,7 @@ impl<'a> Expression<'a> {
             Expression::Assign { target, value } => target.loc().until(value.loc()),
             Expression::Parenthesised { open_paren, expr: _, close_paren } =>
                 open_paren.loc().until(close_paren.loc()),
-            Expression::IntegralBinOp { ty: _, lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::IntegralBinOp { ty: _, lhs, op: _, rhs } => lhs.loc().until(rhs.loc()),
             Expression::PtrAdd {
                 pointer,
                 integral,
@@ -649,7 +650,7 @@ fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) 
 
 fn typeck_arithmetic_binop<'a>(
     sess: &'a Session<'a>,
-    kind: BinOpKind,
+    op: BinOp<'a>,
     lhs: TypedExpression<'a>,
     rhs: TypedExpression<'a>,
     lhs_ty: Arithmetic,
@@ -657,7 +658,7 @@ fn typeck_arithmetic_binop<'a>(
 ) -> TypedExpression<'a> {
     let Arithmetic::Integral(integral_ty) = perform_usual_arithmetic_conversions(lhs_ty, rhs_ty);
     let common_ty = Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified();
-    let ty = match kind {
+    let ty = match op.kind {
         BinOpKind::Multiply
         | BinOpKind::Divide
         | BinOpKind::Modulo
@@ -667,7 +668,7 @@ fn typeck_arithmetic_binop<'a>(
         | BinOpKind::BitXor
         | BinOpKind::BitOr => common_ty,
         BinOpKind::LeftShift | BinOpKind::RightShift =>
-            return typeck_integral_shift(sess, kind, lhs, rhs, lhs_ty, rhs_ty),
+            return typeck_integral_shift(sess, op, lhs, rhs, lhs_ty, rhs_ty),
         BinOpKind::Equal
         | BinOpKind::NotEqual
         | BinOpKind::Less
@@ -682,7 +683,7 @@ fn typeck_arithmetic_binop<'a>(
         expr: Expression::IntegralBinOp {
             ty: integral_ty,
             lhs: sess.alloc(lhs),
-            kind,
+            op,
             rhs: sess.alloc(rhs),
         },
     }
@@ -690,13 +691,16 @@ fn typeck_arithmetic_binop<'a>(
 
 fn typeck_integral_shift<'a>(
     sess: &'a Session<'a>,
-    kind: BinOpKind,
+    op: BinOp<'a>,
     lhs: TypedExpression<'a>,
     rhs: TypedExpression<'a>,
     lhs_ty: Arithmetic,
     rhs_ty: Arithmetic,
 ) -> TypedExpression<'a> {
-    assert!(matches!(kind, BinOpKind::LeftShift | BinOpKind::RightShift));
+    assert!(matches!(
+        op.kind,
+        BinOpKind::LeftShift | BinOpKind::RightShift,
+    ));
     let lhs_ty @ Arithmetic::Integral(lhs_integral) = integral_promote(lhs_ty);
     let lhs_ty = Type::Arithmetic(lhs_ty).unqualified();
     let rhs_ty = Type::Arithmetic(integral_promote(rhs_ty)).unqualified();
@@ -707,7 +711,7 @@ fn typeck_integral_shift<'a>(
         expr: Expression::IntegralBinOp {
             ty: lhs_integral,
             lhs: sess.alloc(lhs),
-            kind,
+            op,
             rhs: sess.alloc(rhs),
         },
     }
@@ -800,14 +804,14 @@ impl PtrCmpKind {
 fn typeck_ptrcmp<'a>(
     sess: &'a Session<'a>,
     lhs: TypedExpression<'a>,
-    kind: BinOpKind,
+    op: BinOp<'a>,
     rhs: TypedExpression<'a>,
 ) -> TypedExpression<'a> {
     // TODO: should check for type compatibility, not exact equality
     if lhs.ty.ty != rhs.ty.ty {
         todo!("type error: cannot compare pointers of incompatible types");
     }
-    let kind = match kind {
+    let kind = match op.kind {
         BinOpKind::Multiply
         | BinOpKind::Divide
         | BinOpKind::Modulo
@@ -976,24 +980,24 @@ fn typeck_expression<'a>(
                 expr: Expression::Assign { target, value },
             }
         }
-        scope::Expression::BinOp { lhs, kind, rhs } => {
+        scope::Expression::BinOp { lhs, op, rhs } => {
             let lhs = typeck_expression(sess, lhs, Context::Default);
             let rhs = typeck_expression(sess, rhs, Context::Default);
             match (lhs.ty.ty, rhs.ty.ty) {
                 (Type::Arithmetic(lhs_ty), Type::Arithmetic(rhs_ty)) =>
-                    typeck_arithmetic_binop(sess, *kind, lhs, rhs, lhs_ty, rhs_ty),
+                    typeck_arithmetic_binop(sess, *op, lhs, rhs, lhs_ty, rhs_ty),
                 (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(pointee_ty))
-                    if matches!(kind, BinOpKind::Add) =>
+                    if matches!(op.kind, BinOpKind::Add) =>
                     typeck_ptradd(sess, rhs, pointee_ty, lhs, PtrAddOrder::IntegralFirst),
                 (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
-                    if matches!(kind, BinOpKind::Add) =>
+                    if matches!(op.kind, BinOpKind::Add) =>
                     typeck_ptradd(sess, lhs, pointee_ty, rhs, PtrAddOrder::PtrFirst),
                 (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
-                    if matches!(kind, BinOpKind::Subtract) =>
+                    if matches!(op.kind, BinOpKind::Subtract) =>
                     typeck_ptrsub(sess, lhs, pointee_ty, rhs),
                 (Type::Pointer(_), Type::Pointer(_))
                     if matches!(
-                        kind,
+                        op.kind,
                         BinOpKind::Equal
                             | BinOpKind::NotEqual
                             | BinOpKind::Less
@@ -1001,9 +1005,9 @@ fn typeck_expression<'a>(
                             | BinOpKind::Greater
                             | BinOpKind::GreaterEqual
                     ) =>
-                    typeck_ptrcmp(sess, lhs, *kind, rhs),
+                    typeck_ptrcmp(sess, lhs, *op, rhs),
                 (Type::Pointer(lhs_pointee_ty), Type::Pointer(rhs_pointee_ty))
-                    if matches!(kind, BinOpKind::Subtract) =>
+                    if matches!(op.kind, BinOpKind::Subtract) =>
                     typeck_ptrdiff(sess, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
                 _ => todo!("type error"),
             }
@@ -1216,7 +1220,15 @@ fn typeck_expression<'a>(
                     // TODO: Is this cheating?
                     token: *close_bracket,
                 },
-                operand: sess.alloc(scope::Expression::BinOp { lhs, kind: BinOpKind::Add, rhs }),
+                operand: sess.alloc(scope::Expression::BinOp {
+                    lhs,
+                    op: BinOp {
+                        kind: BinOpKind::Add,
+                        // TODO: Also cheating?
+                        token: *close_bracket,
+                    },
+                    rhs,
+                }),
             },
             Context::Default,
         ),

@@ -9,7 +9,7 @@ use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast;
 use panko_parser::ast::Session;
-use panko_parser::BinOpKind;
+use panko_parser::BinOp;
 use panko_parser::UnaryOp;
 use panko_report::Report;
 
@@ -141,7 +141,7 @@ pub(crate) enum Expression<'a> {
     },
     BinOp {
         lhs: &'a Expression<'a>,
-        kind: BinOpKind,
+        op: BinOp<'a>,
         rhs: &'a Expression<'a>,
     },
     UnaryOp {
@@ -267,7 +267,7 @@ impl<'a> Expression<'a> {
             Expression::Parenthesised { open_paren, expr: _, close_paren } =>
                 open_paren.loc().until(close_paren.loc()),
             Expression::Assign { target, value } => target.loc().until(value.loc()),
-            Expression::BinOp { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::BinOp { lhs, op: _, rhs } => lhs.loc().until(rhs.loc()),
             Expression::UnaryOp { operator, operand } => operator.loc().until(operand.loc()),
             Expression::Call { callee, args: _, close_paren } =>
                 callee.loc().until(close_paren.loc()),
@@ -707,9 +707,9 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             target: scopes.sess.alloc(resolve_expr(scopes, target)),
             value: scopes.sess.alloc(resolve_expr(scopes, value)),
         },
-        ast::Expression::BinOp { lhs, kind, rhs } => Expression::BinOp {
+        ast::Expression::BinOp { lhs, op, rhs } => Expression::BinOp {
             lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
-            kind: *kind,
+            op: *op,
             rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),
         },
         ast::Expression::UnaryOp { operator, operand } => Expression::UnaryOp {

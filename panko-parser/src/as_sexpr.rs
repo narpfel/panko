@@ -222,8 +222,7 @@ impl AsSExpr for Expression<'_> {
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.as_sexpr(),
             Expression::Assign { target, value } =>
                 SExpr::new("assign").inherit(target).inherit(value),
-            Expression::BinOp { lhs, kind, rhs } =>
-                SExpr::new(kind.str()).inherit(lhs).inherit(rhs),
+            Expression::BinOp { lhs, op, rhs } => SExpr::new(op.str()).inherit(lhs).inherit(rhs),
             Expression::UnaryOp { operator, operand } =>
                 SExpr::new(operator.str()).inherit(operand),
             Expression::Call { callee, args, close_paren: _ } =>

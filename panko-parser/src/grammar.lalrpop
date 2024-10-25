@@ -397,91 +397,91 @@ CastExpression: ast::Expression<'a> = {
     <open_paren:"("> <ty:TypeName> ")" <expr:Bump<CastExpression>> => ast::Expression::Cast { <> },
 }
 
-MultiplicativeOperator: ast::BinOpKind = {
-    "*" => ast::BinOpKind::Multiply,
-    "/" => ast::BinOpKind::Divide,
-    "%" => ast::BinOpKind::Modulo,
+MultiplicativeOperator: ast::BinOp<'a> = {
+    "*" => ast::BinOp { kind: ast::BinOpKind::Multiply, token: <> },
+    "/" => ast::BinOp { kind: ast::BinOpKind::Divide, token: <> },
+    "%" => ast::BinOp { kind: ast::BinOpKind::Modulo, token: <> },
 }
 
 MultiplicativeExpression: ast::Expression<'a> = {
     CastExpression,
-    <lhs:Bump<MultiplicativeExpression>> <kind:MultiplicativeOperator> <rhs:Bump<CastExpression>> =>
+    <lhs:Bump<MultiplicativeExpression>> <op:MultiplicativeOperator> <rhs:Bump<CastExpression>> =>
         ast::Expression::BinOp { <> },
 }
 
-AdditiveOperator: ast::BinOpKind = {
-    "+" => ast::BinOpKind::Add,
-    "-" => ast::BinOpKind::Subtract,
+AdditiveOperator: ast::BinOp<'a> = {
+    "+" => ast::BinOp { kind: ast::BinOpKind::Add, token: <> },
+    "-" => ast::BinOp { kind: ast::BinOpKind::Subtract, token: <> },
 }
 
 AdditiveExpression: ast::Expression<'a> = {
     MultiplicativeExpression,
-    <lhs:Bump<AdditiveExpression>> <kind:AdditiveOperator> <rhs:Bump<MultiplicativeExpression>> =>
+    <lhs:Bump<AdditiveExpression>> <op:AdditiveOperator> <rhs:Bump<MultiplicativeExpression>> =>
         ast::Expression::BinOp { <> },
 }
 
-ShiftOperator: ast::BinOpKind = {
-    "<<" => ast::BinOpKind::LeftShift,
-    ">>" => ast::BinOpKind::RightShift,
+ShiftOperator: ast::BinOp<'a> = {
+    "<<" => ast::BinOp { kind: ast::BinOpKind::LeftShift, token: <> },
+    ">>" => ast::BinOp { kind: ast::BinOpKind::RightShift, token: <> },
 }
 
 ShiftExpression: ast::Expression<'a> = {
     AdditiveExpression,
-    <lhs:Bump<ShiftExpression>> <kind:ShiftOperator> <rhs:Bump<AdditiveExpression>> =>
+    <lhs:Bump<ShiftExpression>> <op:ShiftOperator> <rhs:Bump<AdditiveExpression>> =>
         ast::Expression::BinOp { <> },
 }
 
-RelationalOperator: ast::BinOpKind = {
-    "<" => ast::BinOpKind::Less,
-    "<=" => ast::BinOpKind::LessEqual,
-    ">" => ast::BinOpKind::Greater,
-    ">=" => ast::BinOpKind::GreaterEqual,
+RelationalOperator: ast::BinOp<'a> = {
+    "<" => ast::BinOp { kind: ast::BinOpKind::Less, token: <> },
+    "<=" => ast::BinOp { kind: ast::BinOpKind::LessEqual, token: <> },
+    ">" => ast::BinOp { kind: ast::BinOpKind::Greater, token: <> },
+    ">=" => ast::BinOp { kind: ast::BinOpKind::GreaterEqual, token: <> },
 }
 
 RelationalExpression: ast::Expression<'a> = {
     ShiftExpression,
-    <lhs:Bump<RelationalExpression>> <kind:RelationalOperator> <rhs:Bump<ShiftExpression>> =>
+    <lhs:Bump<RelationalExpression>> <op:RelationalOperator> <rhs:Bump<ShiftExpression>> =>
         ast::Expression::BinOp { <> },
 }
 
-EqualityOperator: ast::BinOpKind = {
-    "==" => ast::BinOpKind::Equal,
-    "!=" => ast::BinOpKind::NotEqual,
+EqualityOperator: ast::BinOp<'a> = {
+    "==" => ast::BinOp { kind: ast::BinOpKind::Equal, token: <> },
+    "!=" => ast::BinOp { kind: ast::BinOpKind::NotEqual, token: <> },
 }
 
 EqualityExpression: ast::Expression<'a> = {
     RelationalExpression,
-    <lhs:Bump<EqualityExpression>> <kind:EqualityOperator> <rhs:Bump<RelationalExpression>> =>
+    <lhs:Bump<EqualityExpression>> <op:EqualityOperator> <rhs:Bump<RelationalExpression>> =>
         ast::Expression::BinOp { <> },
 }
 
-BitAndOperator: ast::BinOpKind = {
-    "&" => ast::BinOpKind::BitAnd,
+BitAndOperator: ast::BinOp<'a> = {
+    "&" => ast::BinOp { kind: ast::BinOpKind::BitAnd, token: <> },
 }
 
 BitAndExpression: ast::Expression<'a> = {
     EqualityExpression,
-    <lhs:Bump<BitAndExpression>> <kind:BitAndOperator> <rhs:Bump<EqualityExpression>> =>
+    <lhs:Bump<BitAndExpression>> <op:BitAndOperator> <rhs:Bump<EqualityExpression>> =>
         ast::Expression::BinOp { <> },
 }
 
-BitXorOperator: ast::BinOpKind = {
-    "^" => ast::BinOpKind::BitXor,
+BitXorOperator: ast::BinOp<'a> = {
+    "^" => ast::BinOp { kind: ast::BinOpKind::BitXor, token: <> },
 }
 
 BitXorExpression: ast::Expression<'a> = {
     BitAndExpression,
-    <lhs:Bump<BitXorExpression>> <kind:BitXorOperator> <rhs:Bump<BitAndExpression>> =>
+    <lhs:Bump<BitXorExpression>> <op:BitXorOperator> <rhs:Bump<BitAndExpression>> =>
         ast::Expression::BinOp { <> },
 }
 
-BitOrOperator: ast::BinOpKind = {
-    "|" => ast::BinOpKind::BitOr,
+BitOrOperator: ast::BinOp<'a> = {
+    "|" => ast::BinOp { kind: ast::BinOpKind::BitOr, token: <> },
 }
 
 BitOrExpression: ast::Expression<'a> = {
     BitXorExpression,
-    <lhs:Bump<BitOrExpression>> <kind:BitOrOperator> <rhs:Bump<BitXorExpression>> =>
+    <lhs:Bump<BitOrExpression>> <op:BitOrOperator> <rhs:Bump<BitXorExpression>> =>
         ast::Expression::BinOp { <> },
 }
 

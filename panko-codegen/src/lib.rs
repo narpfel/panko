@@ -411,8 +411,8 @@ impl<'a> Codegen<'a> {
                 }
                 _ => unreachable!(),
             },
-            Expression::IntegralBinOp { ty, lhs, kind, rhs } => {
-                if !matches!(kind, BinOpKind::LeftShift | BinOpKind::RightShift) {
+            Expression::IntegralBinOp { ty, lhs, op, rhs } => {
+                if !matches!(op.kind, BinOpKind::LeftShift | BinOpKind::RightShift) {
                     assert_eq!(lhs.ty, rhs.ty);
                 }
                 assert_eq!(lhs.ty.ty, Type::Arithmetic(Arithmetic::Integral(ty)));
@@ -456,7 +456,7 @@ impl<'a> Codegen<'a> {
 
                 self.emit_args("mov", &[&Rax.typed(lhs), lhs]);
 
-                match kind {
+                match op.kind {
                     BinOpKind::Multiply => emit_arithmetic(self, "imul"),
                     BinOpKind::Divide | BinOpKind::Modulo => {
                         let prepare_upper_half = match ty.signedness {
@@ -475,7 +475,7 @@ impl<'a> Codegen<'a> {
                         };
                         self.emit(prepare_upper_half);
                         emit_sign_dependent_arithmetic(self, "idiv", "div");
-                        if matches!(kind, BinOpKind::Modulo) {
+                        if matches!(op.kind, BinOpKind::Modulo) {
                             match ty.size() {
                                 1 => self.emit("mov al, ah"),
                                 2 | 4 | 8 => self.emit_args("mov", &[&Rax, &Rdx]),

@@ -515,7 +515,7 @@ pub enum Expression<'a> {
     },
     BinOp {
         lhs: &'a Expression<'a>,
-        kind: BinOpKind,
+        op: BinOp<'a>,
         rhs: &'a Expression<'a>,
     },
     UnaryOp {
@@ -576,7 +576,7 @@ pub enum BinOpKind {
 }
 
 impl BinOpKind {
-    pub fn str(self) -> &'static str {
+    fn str(self) -> &'static str {
         match self {
             BinOpKind::Multiply => "multiply",
             BinOpKind::Divide => "divide",
@@ -595,6 +595,18 @@ impl BinOpKind {
             BinOpKind::BitXor => "bit-xor",
             BinOpKind::BitOr => "bit-or",
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct BinOp<'a> {
+    pub kind: BinOpKind,
+    pub token: Token<'a>,
+}
+
+impl BinOp<'_> {
+    pub fn str(&self) -> &'static str {
+        self.kind.str()
     }
 }
 
