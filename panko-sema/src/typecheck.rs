@@ -3,6 +3,7 @@ use std::fmt;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Green;
+use ariadne::Color::Magenta;
 use ariadne::Color::Red;
 use ariadne::Fmt as _;
 use itertools::EitherOrBoth;
@@ -174,6 +175,19 @@ enum Diagnostic<'a> {
     GenericWithInvalidType {
         at: QualifiedType<'a>,
         generic: Token<'a>,
+    },
+
+    #[error("subtraction between pointers of incompatible types `{lhs_ty}` and `{rhs_ty}`")]
+    #[diagnostics(
+        lhs(colour = Blue, label = "this is of type `{lhs_ty}`"),
+        at(colour = Red),
+        rhs(colour = Magenta, label = "this is of type `{rhs_ty}`"),
+    )]
+    #[with(lhs_ty = lhs.ty, rhs_ty = rhs.ty)]
+    PtrDiffIncompatiblePointeeTypes {
+        at: Token<'a>,
+        lhs: TypedExpression<'a>,
+        rhs: TypedExpression<'a>,
     },
 }
 
@@ -841,23 +855,23 @@ fn typeck_ptrcmp<'a>(
 
 fn typeck_ptrdiff<'a>(
     sess: &'a Session<'a>,
+    op: &BinOp<'a>,
     lhs: TypedExpression<'a>,
     lhs_pointee_ty: &QualifiedType<'a>,
     rhs: TypedExpression<'a>,
     rhs_pointee_ty: &QualifiedType<'a>,
 ) -> TypedExpression<'a> {
     if lhs_pointee_ty.ty != rhs_pointee_ty.ty {
-        todo!("type error: subtraction between pointers of incompatible types");
+        sess.emit(Diagnostic::PtrDiffIncompatiblePointeeTypes { at: op.token, lhs, rhs });
+        // TODO: we should emit an error expression here
     }
-    else {
-        TypedExpression {
-            ty: Type::long().unqualified(),
-            expr: Expression::PtrDiff {
-                lhs: sess.alloc(lhs),
-                rhs: sess.alloc(rhs),
-                pointee_size: lhs_pointee_ty.ty.size(),
-            },
-        }
+    TypedExpression {
+        ty: Type::long().unqualified(),
+        expr: Expression::PtrDiff {
+            lhs: sess.alloc(lhs),
+            rhs: sess.alloc(rhs),
+            pointee_size: lhs_pointee_ty.ty.size(),
+        },
     }
 }
 
@@ -1008,7 +1022,7 @@ fn typeck_expression<'a>(
                     typeck_ptrcmp(sess, lhs, *op, rhs),
                 (Type::Pointer(lhs_pointee_ty), Type::Pointer(rhs_pointee_ty))
                     if matches!(op.kind, BinOpKind::Subtract) =>
-                    typeck_ptrdiff(sess, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
+                    typeck_ptrdiff(sess, op, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
                 _ => todo!("type error"),
             }
         }

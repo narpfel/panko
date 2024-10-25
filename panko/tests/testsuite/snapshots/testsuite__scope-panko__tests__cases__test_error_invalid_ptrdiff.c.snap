@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/test_error_invalid_ptrdiff.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition array~1 `ptr<int>` ∅)
+         (definition p~2 `ptr<char>` ∅)
+         (expression (subtract (name array~1 `ptr<int>`) (name p~2 `ptr<char>`))))))
+
+----- stderr -----

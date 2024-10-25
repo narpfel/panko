@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_invalid_ptrdiff.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: subtraction between pointers of incompatible types `ptr<int>` and `ptr<char>`
+   ╭─[panko/tests/cases/test_error_invalid_ptrdiff.c:4:11]
+   │
+ 4 │     array - p;
+   │     ──┬── ─ ┬  
+   │       │     ╰── this is of type `ptr<char>`
+   │       │        
+   │       ╰──────── this is of type `ptr<int>`
+───╯
