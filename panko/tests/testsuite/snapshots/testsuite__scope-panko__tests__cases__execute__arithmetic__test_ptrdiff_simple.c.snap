@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arithmetic/test_ptrdiff_simple.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition array~2 `ptr<int>`
+            (call (name calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`)
+               42
+               (sizeof (deref (name array~2 `ptr<int>`)))))
+         (definition ptrdiff~3 `unsigned long` (subtract (addressof (subscript (name array~2 `ptr<int>`) 10)) (addressof (subscript (name array~2 `ptr<int>`) 0))))
+         (return (name ptrdiff~3 `unsigned long`)))))
+
+----- stderr -----

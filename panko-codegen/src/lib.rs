@@ -300,6 +300,7 @@ impl<'a> Codegen<'a> {
                 Expression::IntegralBinOp { .. } => todo!(),
                 Expression::PtrAdd { .. } => todo!(),
                 Expression::PtrSub { .. } => todo!(),
+                Expression::PtrDiff { .. } => todo!(),
                 Expression::PtrCmp { .. } => todo!(),
                 Expression::Addressof(_) => todo!(),
                 Expression::Deref(_) => todo!(),
@@ -537,6 +538,16 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[&Rax.typed(pointer), pointer]);
                 self.emit_pointer_offset("sub", pointee_size, integral);
                 self.emit_args("mov", &[expr, &Rax.typed(pointer)]);
+            }
+            Expression::PtrDiff { lhs, rhs, pointee_size } => {
+                self.expr(lhs);
+                self.expr(rhs);
+                self.emit_args("mov", &[&Rax.typed(lhs), lhs]);
+                self.emit_args("sub", &[&Rax.typed(lhs), rhs]);
+                self.emit("cqo");
+                self.emit_args("movabs", &[&Rcx, &pointee_size]);
+                self.emit_args("idiv", &[&Rax, &Rcx]);
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
             Expression::PtrCmp { lhs, kind, rhs } => {
                 self.expr(lhs);

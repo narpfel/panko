@@ -100,6 +100,13 @@ impl<'a> Type<'a> {
         }))
     }
 
+    pub(crate) fn long() -> Self {
+        Self::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Signed,
+            kind: IntegralKind::Long,
+        }))
+    }
+
     pub fn ulong() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Unsigned,

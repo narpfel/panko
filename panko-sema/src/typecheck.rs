@@ -262,6 +262,11 @@ pub enum Expression<'a> {
         integral: &'a TypedExpression<'a>,
         pointee_size: u64,
     },
+    PtrDiff {
+        lhs: &'a TypedExpression<'a>,
+        rhs: &'a TypedExpression<'a>,
+        pointee_size: u64,
+    },
     PtrCmp {
         lhs: &'a TypedExpression<'a>,
         kind: PtrCmpKind,
@@ -337,6 +342,7 @@ impl<'a> TypedExpression<'a> {
             | Expression::IntegralBinOp { .. }
             | Expression::PtrAdd { .. }
             | Expression::PtrSub { .. }
+            | Expression::PtrDiff { .. }
             | Expression::PtrCmp { .. }
             | Expression::Addressof { .. }
             | Expression::Call { .. }
@@ -379,6 +385,7 @@ impl<'a> Expression<'a> {
             }
             Expression::PtrSub { pointer, integral, pointee_size: _ } =>
                 pointer.loc().until(integral.loc()),
+            Expression::PtrDiff { lhs, rhs, pointee_size: _ } => lhs.loc().until(rhs.loc()),
             Expression::PtrCmp { lhs, kind: _, rhs } => lhs.loc().until(rhs.loc()),
             Expression::Addressof { ampersand, operand } => ampersand.loc().until(operand.loc()),
             Expression::Deref { star, operand } => star.loc().until(operand.loc()),
@@ -828,6 +835,28 @@ fn typeck_ptrcmp<'a>(
     }
 }
 
+fn typeck_ptrdiff<'a>(
+    sess: &'a Session<'a>,
+    lhs: TypedExpression<'a>,
+    lhs_pointee_ty: &QualifiedType<'a>,
+    rhs: TypedExpression<'a>,
+    rhs_pointee_ty: &QualifiedType<'a>,
+) -> TypedExpression<'a> {
+    if lhs_pointee_ty.ty != rhs_pointee_ty.ty {
+        todo!("type error: subtraction between pointers of incompatible types");
+    }
+    else {
+        TypedExpression {
+            ty: Type::long().unqualified(),
+            expr: Expression::PtrDiff {
+                lhs: sess.alloc(lhs),
+                rhs: sess.alloc(rhs),
+                pointee_size: lhs_pointee_ty.ty.size(),
+            },
+        }
+    }
+}
+
 fn check_ty_can_sizeof<'a>(
     sess: &'a Session<'a>,
     ty: &QualifiedType<'a>,
@@ -973,8 +1002,9 @@ fn typeck_expression<'a>(
                             | BinOpKind::GreaterEqual
                     ) =>
                     typeck_ptrcmp(sess, lhs, *kind, rhs),
-                (Type::Pointer(_), Type::Pointer(_)) if matches!(kind, BinOpKind::Subtract) =>
-                    todo!(),
+                (Type::Pointer(lhs_pointee_ty), Type::Pointer(rhs_pointee_ty))
+                    if matches!(kind, BinOpKind::Subtract) =>
+                    typeck_ptrdiff(sess, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
                 _ => todo!("type error"),
             }
         }

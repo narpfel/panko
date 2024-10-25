@@ -97,6 +97,11 @@ pub enum Expression<'a> {
         integral: &'a LayoutedExpression<'a>,
         pointee_size: u64,
     },
+    PtrDiff {
+        lhs: &'a LayoutedExpression<'a>,
+        rhs: &'a LayoutedExpression<'a>,
+        pointee_size: u64,
+    },
     PtrCmp {
         lhs: &'a LayoutedExpression<'a>,
         kind: PtrCmpKind,
@@ -324,6 +329,12 @@ fn layout_expression_in_slot<'a>(
             let integral =
                 bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, integral)));
             (slot, Expression::PtrSub { pointer, integral, pointee_size })
+        }
+        typecheck::Expression::PtrDiff { lhs, rhs, pointee_size } => {
+            let slot = make_slot();
+            let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, Some(slot)));
+            let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
+            (slot, Expression::PtrDiff { lhs, rhs, pointee_size })
         }
         typecheck::Expression::PtrCmp { lhs, kind, rhs } => {
             let slot = make_slot();

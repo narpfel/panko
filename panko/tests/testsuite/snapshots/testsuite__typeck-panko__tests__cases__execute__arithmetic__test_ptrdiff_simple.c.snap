@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/arithmetic/test_ptrdiff_simple.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition array~2 `ptr<int>`
+            (noop-type-conversion
+               (call (addressof (calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`) `ptr<fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>>`)
+                  (sign-extend (42 `int`) `unsigned long`)
+                  (sizeof 4 (deref (array~2 `ptr<int>`) `int`) `unsigned long`)
+                  `ptr<void>`)
+               `ptr<int>`))
+         (definition ptrdiff~3 `unsigned long` (noop-type-conversion (ptr-diff (addressof (deref (ptr-add (array~2 `ptr<int>`) (sign-extend (10 `int`) `unsigned long long`) `ptr<int>`) `int`) `ptr<int>`) (addressof (deref (ptr-add (array~2 `ptr<int>`) (sign-extend (0 `int`) `unsigned long long`) `ptr<int>`) `int`) `ptr<int>`) `long`) `unsigned long`))
+         (return (truncate (ptrdiff~3 `unsigned long`) `int`)))))
+
+----- stderr -----
