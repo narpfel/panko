@@ -78,6 +78,7 @@ impl AsSExpr for Statement<'_> {
 impl AsSExpr for Expression<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
+            Expression::Error(_error) => SExpr::new("error"),
             Expression::Name(name) => SExpr::new("name").inherit(name),
             Expression::Integer(int) => SExpr::string(int.slice()),
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.as_sexpr(),

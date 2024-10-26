@@ -46,6 +46,14 @@ enum Diagnostic<'a> {
     DeclarationWithoutType { at: cst::DeclarationSpecifiers<'a> },
 }
 
+pub trait ErrorExpr<'a> {
+    fn from_error(error: &'a dyn Report) -> Self;
+}
+
+impl ErrorExpr<'_> for () {
+    fn from_error(_error: &dyn Report) -> Self {}
+}
+
 type Diagnostics<'a> = RefCell<Vec<&'a dyn Report>>;
 
 #[derive(Debug)]
@@ -85,11 +93,14 @@ impl<'a> Session<'a> {
         self.bump.alloc_str(s)
     }
 
-    pub fn emit<T>(&self, diagnostic: T)
+    pub fn emit<T, Expr>(&self, diagnostic: T) -> Expr
     where
         T: Report + 'a,
+        Expr: ErrorExpr<'a>,
     {
-        self.diagnostics.borrow_mut().push(self.alloc(diagnostic))
+        let diagnostic = self.alloc(diagnostic);
+        self.diagnostics.borrow_mut().push(diagnostic);
+        Expr::from_error(diagnostic)
     }
 
     fn diagnostics(&self) -> Ref<Vec<&'a dyn Report>> {
@@ -371,14 +382,14 @@ impl<'a> TypeQualifier<'a> {
         match self.kind {
             TypeQualifierKind::Const =>
                 if let Some(first) = *const_qualifier {
-                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier { at: self, first });
+                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier { at: self, first })
                 }
                 else {
                     *const_qualifier = Some(self);
                 },
             TypeQualifierKind::Volatile =>
                 if let Some(first) = *volatile_qualifier {
-                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier { at: self, first });
+                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier { at: self, first })
                 }
                 else {
                     *volatile_qualifier = Some(self);
@@ -544,7 +555,8 @@ pub(crate) fn parse_type_specifiers<'a>(
     }
 
     let ty = ty.unwrap_or_else(|| {
-        sess.emit(Diagnostic::DeclarationWithoutType { at: specifiers });
+        // TODO: implement `ErrorExpr` for `Type`
+        let () = sess.emit(Diagnostic::DeclarationWithoutType { at: specifiers });
         // FIXME: don’t use implicit int here, an explicit “type error” type will be better
         Type::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Signed,

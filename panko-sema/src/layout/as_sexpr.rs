@@ -88,6 +88,15 @@ impl AsSExpr for LayoutedExpression<'_> {
 impl AsSExpr for Expression<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
+            Expression::Error(error) => SExpr::new("error").inline_string(format!(
+                "\"{}\"",
+                error
+                    .to_string()
+                    .lines()
+                    .next()
+                    .unwrap_or("")
+                    .escape_debug(),
+            )),
             Expression::Name(reference) => SExpr::string(reference.unique_name()),
             Expression::Integer(int) => SExpr::string(int.to_string()),
             Expression::NoopTypeConversion(expr) =>

@@ -2,11 +2,13 @@ use bumpalo::Bump;
 use panko_parser as cst;
 use panko_parser::ast::Integral;
 use panko_parser::BinOp;
+use panko_report::Report;
 
 use crate::layout::stack::Stack;
 use crate::scope::Id;
 use crate::scope::RefKind;
 use crate::ty::QualifiedType;
+use crate::ty::Type;
 use crate::typecheck;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::PtrCmpKind;
@@ -69,6 +71,7 @@ pub struct LayoutedExpression<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub enum Expression<'a> {
+    Error(&'a dyn Report),
     Name(Reference<'a>),
     Integer(u64),
     NoopTypeConversion(&'a LayoutedExpression<'a>),
@@ -263,6 +266,8 @@ fn layout_expression_in_slot<'a>(
     let typecheck::TypedExpression { ty, expr } = *expr;
     let mut make_slot = || target_slot.unwrap_or_else(|| stack.temporary(ty.ty));
     let (slot, expr) = match expr {
+        typecheck::Expression::Error(error) =>
+            (stack.temporary(Type::Void), Expression::Error(error)),
         typecheck::Expression::Name(name) => {
             let reference = stack.add(name);
             (reference.slot(), Expression::Name(reference))
