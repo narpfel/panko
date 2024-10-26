@@ -6,6 +6,7 @@ use panko_sema::layout::Slot;
 use panko_sema::ty::Type;
 
 use crate::Register;
+use crate::StaticId;
 use crate::TypedRegister;
 use crate::MAX_ADDRESS_OFFSET;
 
@@ -13,6 +14,7 @@ use crate::MAX_ADDRESS_OFFSET;
 pub(super) enum Offset<'a> {
     Immediate(u64),
     Plt(&'a str),
+    Static(StaticId),
 }
 
 impl fmt::Display for Offset<'_> {
@@ -20,6 +22,7 @@ impl fmt::Display for Offset<'_> {
         match self {
             Offset::Immediate(immediate) => write!(f, "{immediate}"),
             Offset::Plt(name) => write!(f, "{name}@plt"),
+            Offset::Static(id) => write!(f, ".L.{id}"),
         }
     }
 }
@@ -46,7 +49,7 @@ impl fmt::Display for Memory<'_> {
         ));
         assert!(matches!(
             offset,
-            Offset::Immediate(0..=MAX_ADDRESS_OFFSET) | Offset::Plt(_),
+            Offset::Immediate(0..=MAX_ADDRESS_OFFSET) | Offset::Plt(_) | Offset::Static(_),
         ));
         write!(f, "[{pointer}")?;
         if let Some(Index { register: reg, size }) = index {
@@ -234,6 +237,19 @@ impl<'a> AsOperand for Memory<'a> {
         Operand {
             kind: OperandKind::Pointer(*self),
             ty: Type::ullong(),
+        }
+    }
+}
+
+impl AsOperand for StaticId {
+    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
+        Operand {
+            kind: OperandKind::Pointer(Memory {
+                pointer: Register::Rip,
+                index: None,
+                offset: Offset::Static(*self),
+            }),
+            ty: Type::ulong(),
         }
     }
 }

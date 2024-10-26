@@ -15,6 +15,7 @@ use panko_lex::Token;
 use panko_lex::TokenKind;
 use panko_parser as cst;
 use panko_parser::ast::Arithmetic;
+use panko_parser::ast::ErrorExpr;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
@@ -238,6 +239,7 @@ pub struct TypedExpression<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub enum Expression<'a> {
+    Error(&'a dyn Report),
     Name(Reference<'a>),
     Integer {
         value: u64,
@@ -343,6 +345,7 @@ impl<'a> TypedExpression<'a> {
 
     fn is_lvalue(&self) -> bool {
         match self.expr {
+            Expression::Error(_error) => false,
             Expression::Name(reference) =>
                 reference.ty.ty.is_object() && !matches!(reference.ty.ty, Type::Void),
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.is_lvalue(),
@@ -378,6 +381,7 @@ impl<'a> TypedExpression<'a> {
 impl<'a> Expression<'a> {
     fn loc(&self) -> Loc<'a> {
         match self {
+            Expression::Error(error) => error.location(),
             Expression::Name(reference) => reference.loc(),
             Expression::Integer { value: _, token } => token.loc(),
             Expression::NoopTypeConversion(inner)
@@ -427,6 +431,22 @@ impl<'a> Expression<'a> {
                 expr.expr.unwrap_parens(),
             _ => self,
         }
+    }
+}
+
+impl<'a> ErrorExpr<'a> for TypedExpression<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self {
+            // TODO: this should by `Type::Error`
+            ty: Type::Void.unqualified(),
+            expr: Expression::from_error(error),
+        }
+    }
+}
+
+impl<'a> ErrorExpr<'a> for Expression<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Error(error)
     }
 }
 
@@ -497,15 +517,12 @@ fn convert<'a>(
             if kind == ConversionKind::Explicit =>
             convert(),
 
-        _ => {
-            sess.emit(Diagnostic::InvalidConversion {
-                at: expr,
-                from_ty: expr_ty,
-                to_ty: target_ty,
-                kind,
-            });
-            expr.expr
-        }
+        _ => sess.emit(Diagnostic::InvalidConversion {
+            at: expr,
+            from_ty: expr_ty,
+            to_ty: target_ty,
+            kind,
+        }),
     };
     TypedExpression { ty: target_ty.unqualified(), expr }
 }
@@ -594,15 +611,16 @@ fn typeck_statement<'a>(
                     *function.return_ty(),
                     expr,
                 )),
-                None => {
+                None =>
                     if !matches!(function.return_ty().ty, Type::Void) {
-                        sess.emit(Diagnostic::ReturnWithoutValueInNonVoidFunction {
+                        Some(sess.emit(Diagnostic::ReturnWithoutValueInNonVoidFunction {
                             at: stmt.into_variant(),
                             function: *function,
-                        });
+                        }))
                     }
-                    None
-                }
+                    else {
+                        None
+                    },
             };
             Statement::Return(expr)
         }
@@ -861,18 +879,18 @@ fn typeck_ptrdiff<'a>(
     rhs: TypedExpression<'a>,
     rhs_pointee_ty: &QualifiedType<'a>,
 ) -> TypedExpression<'a> {
-    if lhs_pointee_ty.ty != rhs_pointee_ty.ty {
-        sess.emit(Diagnostic::PtrDiffIncompatiblePointeeTypes { at: op.token, lhs, rhs });
-        // TODO: we should emit an error expression here
+    let expr = if lhs_pointee_ty.ty != rhs_pointee_ty.ty {
+        sess.emit(Diagnostic::PtrDiffIncompatiblePointeeTypes { at: op.token, lhs, rhs })
     }
-    TypedExpression {
-        ty: Type::long().unqualified(),
-        expr: Expression::PtrDiff {
+    else {
+        Expression::PtrDiff {
             lhs: sess.alloc(lhs),
             rhs: sess.alloc(rhs),
             pointee_size: lhs_pointee_ty.ty.size(),
-        },
-    }
+        }
+    };
+
+    TypedExpression { ty: Type::long().unqualified(), expr }
 }
 
 fn check_ty_can_sizeof<'a>(
@@ -881,8 +899,9 @@ fn check_ty_can_sizeof<'a>(
     at: &scope::Expression<'a>,
     op: &Token<'a>,
 ) -> QualifiedType<'a> {
+    // TODO: the error cases should return `Type::Error`
     if !ty.ty.is_complete() {
-        sess.emit(Diagnostic::InvalidSizeofOrAlignof {
+        let () = sess.emit(Diagnostic::InvalidSizeofOrAlignof {
             op: *op,
             at: *at,
             kind: "incomplete type",
@@ -891,7 +910,7 @@ fn check_ty_can_sizeof<'a>(
         Type::int().unqualified()
     }
     else if ty.ty.is_function() {
-        sess.emit(Diagnostic::InvalidSizeofOrAlignof {
+        let () = sess.emit(Diagnostic::InvalidSizeofOrAlignof {
             op: *op,
             at: *at,
             kind: "function type",
@@ -917,6 +936,7 @@ fn typeck_expression<'a>(
     context: Context,
 ) -> TypedExpression<'a> {
     let expr = match expr {
+        scope::Expression::Error(error) => TypedExpression::from_error(*error),
         scope::Expression::Name(reference) => TypedExpression {
             ty: reference.ty,
             expr: Expression::Name(*reference),
@@ -941,7 +961,8 @@ fn typeck_expression<'a>(
                 IntegerSuffix::BitInt => todo!("unimplemented: `_BitInt`"),
                 IntegerSuffix::UnsignedBitInt => todo!("unimplemented: `unsigned _BitInt`"),
                 IntegerSuffix::Invalid => {
-                    sess.emit(Diagnostic::InvalidIntegerSuffix {
+                    // TODO: use the error
+                    let () = sess.emit(Diagnostic::InvalidIntegerSuffix {
                         at: *token,
                         suffix: &token.slice()[token.slice().len() - suffix_len..],
                     });
@@ -1055,7 +1076,7 @@ fn typeck_expression<'a>(
                 UnaryOpKind::Deref => match operand.ty.ty {
                     Type::Pointer(pointee_ty) => {
                         if matches!(pointee_ty.ty, Type::Void) {
-                            sess.emit(Diagnostic::DerefOfVoidPtr { at: operand });
+                            sess.emit(Diagnostic::DerefOfVoidPtr { at: operand })
                         }
                         TypedExpression {
                             ty: *pointee_ty,
@@ -1066,13 +1087,9 @@ fn typeck_expression<'a>(
                         }
                     }
                     _ => {
-                        sess.emit(Diagnostic::CannotDeref { at: *expr, ty: operand.ty });
-                        // TODO: This should be an error expression
-                        TypedExpression {
-                            ty: Type::int().unqualified(),
-                            // TODO: this location is fake
-                            expr: Expression::Integer { value: 0, token: operator.token },
-                        }
+                        let expr = sess.emit(Diagnostic::CannotDeref { at: *expr, ty: operand.ty });
+                        // TODO: should be `Type::Error`
+                        TypedExpression { ty: operand.ty, expr }
                     }
                 },
                 UnaryOpKind::Plus => match operand.ty.ty {
@@ -1269,7 +1286,7 @@ fn typeck_expression<'a>(
                             at: *default,
                             previous_default: *first.unwrap().0,
                             generic: *generic,
-                        });
+                        })
                     }
                     first
                 })
@@ -1285,7 +1302,7 @@ fn typeck_expression<'a>(
                             sess.emit(Diagnostic::GenericWithInvalidType {
                                 at: *ty,
                                 generic: *generic,
-                            });
+                            })
                         }
                         Some((ty, expr))
                     }
@@ -1293,7 +1310,7 @@ fn typeck_expression<'a>(
                 })
                 .into_grouping_map_by(|(&ty, _expr)| ty)
                 .reduce(|first, _ty, duplicate| {
-                    sess.emit(Diagnostic::GenericWithDuplicateType {
+                    let () = sess.emit(Diagnostic::GenericWithDuplicateType {
                         at: *duplicate.0,
                         previous: *first.0,
                         generic: *generic,
@@ -1307,12 +1324,9 @@ fn typeck_expression<'a>(
                 .or(default.as_ref())
                 .map(|expr| typeck_expression(sess, expr, context))
                 .unwrap_or_else(|| {
-                    sess.emit(Diagnostic::GenericWithoutMatch { at: selector, expr: *expr });
-                    // TODO: this should be an error expression
-                    TypedExpression {
-                        ty: Type::int().unqualified(),
-                        expr: Expression::Integer { value: 0, token: *generic },
-                    }
+                    let expr =
+                        sess.emit(Diagnostic::GenericWithoutMatch { at: selector, expr: *expr });
+                    TypedExpression { ty: Type::int().unqualified(), expr }
                 })
         }
     };

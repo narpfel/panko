@@ -8,6 +8,7 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::ast;
+use panko_parser::ast::ErrorExpr;
 use panko_parser::ast::Session;
 use panko_parser::BinOp;
 use panko_parser::UnaryOp;
@@ -128,6 +129,7 @@ pub(crate) enum Statement<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Expression<'a> {
+    Error(&'a dyn Report),
     Name(Reference<'a>),
     Integer(Token<'a>),
     Parenthesised {
@@ -262,6 +264,7 @@ impl<'a> Statement<'a> {
 impl<'a> Expression<'a> {
     pub(crate) fn loc(&self) -> Loc<'a> {
         match self {
+            Expression::Error(error) => error.location(),
             Expression::Name(name) => name.loc(),
             Expression::Integer(token) => token.loc(),
             Expression::Parenthesised { open_paren, expr: _, close_paren } =>
@@ -285,6 +288,12 @@ impl<'a> Expression<'a> {
                 close_paren,
             } => generic.loc().until(close_paren.loc()),
         }
+    }
+}
+
+impl<'a> ErrorExpr<'a> for Expression<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Error(error)
     }
 }
 
@@ -397,14 +406,14 @@ impl<'a> Scopes<'a> {
                     sess.emit(Diagnostic::AlreadyDefined {
                         at: reference,
                         previous_definition: previous_definition.at(previous_definition.loc),
-                    });
+                    })
                 }
                 if previous_definition.ty != ty {
                     sess.emit(Diagnostic::AlreadyDefinedWithDifferentType {
                         at: reference,
                         previous_definition: previous_definition
                             .at(previous_definition.usage_location),
-                    });
+                    })
                 }
                 if kind > previous_definition.kind {
                     previous_definition.name = name;
@@ -493,7 +502,7 @@ fn resolve_function_ty<'a>(
             if !ty.ty.is_complete() {
                 scopes
                     .sess
-                    .emit(Diagnostic::ParameterWithIncompleteType { at: param });
+                    .emit(Diagnostic::ParameterWithIncompleteType { at: param })
             }
 
             param
@@ -543,7 +552,8 @@ fn resolve_function_definition<'a>(
         QualifiedType { ty: Type::Function(_), .. } =>
             unreachable!("function types cannot be qualified"),
         non_function_ty => {
-            scopes
+            // TODO: this should be `Type::Error`
+            let () = scopes
                 .sess
                 .emit(Diagnostic::FunctionDeclaratorDoesNotHaveFunctionType { at: *name });
             FunctionType {
@@ -643,7 +653,7 @@ fn resolve_declaration<'a>(
     if !ty.ty.is_complete() {
         scopes
             .sess
-            .emit(Diagnostic::VariableWithIncompleteType { at: reference });
+            .emit(Diagnostic::VariableWithIncompleteType { at: reference })
     }
 
     Declaration {
@@ -691,11 +701,7 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::Name(name) => scopes
             .lookup(name.slice(), name.loc())
             .map(Expression::Name)
-            .unwrap_or_else(|| {
-                scopes.sess.emit(Diagnostic::UndeclaredName { at: *name });
-                // TODO: use an error expression here
-                Expression::Integer(*name)
-            }),
+            .unwrap_or_else(|| scopes.sess.emit(Diagnostic::UndeclaredName { at: *name })),
         ast::Expression::Integer(integer) => Expression::Integer(*integer),
         ast::Expression::Parenthesised { open_paren, expr, close_paren } =>
             Expression::Parenthesised {

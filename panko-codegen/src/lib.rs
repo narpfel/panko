@@ -1,6 +1,7 @@
 #![feature(try_blocks)]
 #![feature(unsigned_is_multiple_of)]
 
+use std::borrow::Cow;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Write as _;
@@ -126,12 +127,22 @@ impl Display for TypedRegister<'_> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+struct StaticId(u64);
+
+impl fmt::Display for StaticId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "static.{}", self.0)
+    }
+}
+
 #[derive(Debug, Default)]
 struct Codegen<'a> {
     tentative_definitions: IndexMap<&'a str, Type<'a>>,
     defined: IndexSet<&'a str>,
     current_function: Option<&'a FunctionDefinition<'a>>,
     code: String,
+    strings: Vec<(StaticId, Cow<'a, str>)>,
 }
 
 impl<'a> Codegen<'a> {
@@ -161,6 +172,12 @@ impl<'a> Codegen<'a> {
 
     fn constant(&mut self, constant: &[u8]) {
         writeln!(self.code, "    .byte {}", constant.iter().format(", ")).unwrap();
+    }
+
+    fn string(&mut self, s: Cow<'a, str>) -> StaticId {
+        let id = StaticId(self.strings.len().try_into().unwrap());
+        self.strings.push((id, s));
+        id
     }
 
     fn emit(&mut self, instr: &str) {
@@ -288,6 +305,7 @@ impl<'a> Codegen<'a> {
         self.label(name);
         match initialiser {
             Some(initialiser) => match initialiser {
+                Expression::Error(_) => todo!("ICE?"),
                 Expression::Name(_) => todo!(),
                 Expression::Integer(value) =>
                     self.constant(&value.to_le_bytes()[..usize::try_from(ty.size()).unwrap()]),
@@ -311,6 +329,27 @@ impl<'a> Codegen<'a> {
             },
             None => self.zero(ty.size()),
         }
+    }
+
+    fn string_literal_definition(&mut self, id: StaticId, value: &str) {
+        self.block(2);
+        let name = format!(".L.{id}");
+        self.directive("globl", &[&name]);
+        self.directive("data", &[]);
+        self.directive("type", &[&name, &"@object"]);
+        self.directive("size", &[&name, &value.len()]);
+        self.directive("align", &[&1]);
+        self.label(&name);
+        self.code.push_str(".asciz \"");
+        for byte in value.bytes() {
+            if byte.is_ascii_graphic() || byte == b' ' {
+                self.code.push(char::from(byte));
+            }
+            else {
+                write!(&mut self.code, "\\{byte:03o}").unwrap();
+            }
+        }
+        self.code.push_str("\"\n");
     }
 
     fn external_declaration(&mut self, decl: &Declaration<'a>) {
@@ -365,6 +404,14 @@ impl<'a> Codegen<'a> {
 
     fn expr(&mut self, expr: &LayoutedExpression) {
         match expr.expr {
+            Expression::Error(error) => {
+                let id = self.string(error.to_string().into());
+                self.emit_args("lea", &[&Rdi, &id]);
+                self.emit("mov rsi, qword ptr [rip + stderr@gotpcrel]");
+                self.emit("mov rsi, [rsi]");
+                self.emit("call fputs@plt");
+                self.emit("ud2");
+            }
             Expression::Name(_reference) => (), // already in memory
             Expression::Integer(value) => {
                 self.emit_args("movabs", &[&Rax, &value]);
@@ -663,6 +710,10 @@ pub fn emit(translation_unit: TranslationUnit) -> String {
     for (name, ty) in std::mem::take(&mut cg.tentative_definitions) {
         assert!(!cg.defined.contains(&name));
         cg.object_definition(name, ty, None);
+    }
+
+    for (id, value) in std::mem::take(&mut cg.strings) {
+        cg.string_literal_definition(id, &value);
     }
 
     cg.code
