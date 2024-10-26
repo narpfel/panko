@@ -343,7 +343,7 @@ impl<'a> Codegen<'a> {
         self.code.push_str(".asciz \"");
         for byte in value.bytes() {
             if byte.is_ascii_graphic() || byte == b' ' {
-                self.code.push(char::from(byte));
+                write!(&mut self.code, "{}", char::from(byte).escape_default()).unwrap();
             }
             else {
                 write!(&mut self.code, "\\{byte:03o}").unwrap();
