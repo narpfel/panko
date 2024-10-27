@@ -8,7 +8,6 @@ use crate::layout::stack::Stack;
 use crate::scope::Id;
 use crate::scope::RefKind;
 use crate::ty::QualifiedType;
-use crate::ty::Type;
 use crate::typecheck;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::PtrCmpKind;
@@ -266,8 +265,7 @@ fn layout_expression_in_slot<'a>(
     let typecheck::TypedExpression { ty, expr } = *expr;
     let mut make_slot = || target_slot.unwrap_or_else(|| stack.temporary(ty.ty));
     let (slot, expr) = match expr {
-        typecheck::Expression::Error(error) =>
-            (stack.temporary(Type::Void), Expression::Error(error)),
+        typecheck::Expression::Error(error) => (make_slot(), Expression::Error(error)),
         typecheck::Expression::Name(name) => {
             let reference = stack.add(name);
             (reference.slot(), Expression::Name(reference))
