@@ -57,10 +57,10 @@ where
 #[derive(Debug, Report)]
 #[exit_code(1)]
 enum Diagnostic<'a> {
-    // TODO: colourise types
     // TODO: types should be printed in C syntax, not in their SExpr debug repr
     #[error("invalid {kind} conversion from `{from_ty}` to `{to_ty}`")]
     #[diagnostics(at(colour = Red, label = "this is of type `{from_ty}`, which cannot be {kind}ly converted to `{to_ty}`"))]
+    #[with(from_ty = from_ty.fg(Blue), to_ty = to_ty.fg(Magenta))]
     InvalidConversion {
         at: TypedExpression<'a>,
         from_ty: Type<'a>,
