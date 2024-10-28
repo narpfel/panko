@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/test_value_of_assign_to_dereferenced_ptr.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition x~1 `int` (42 `int`))
+         (definition p~2 `ptr<int>` (addressof (x~1 `int`) `ptr<int>`))
+         (return (assign (deref (p~2 `ptr<int>`) `int`) (27 `int`) `int`)))))
+
+----- stderr -----

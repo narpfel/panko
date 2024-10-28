@@ -455,6 +455,9 @@ impl<'a> Codegen<'a> {
                     self.expr(value);
                     self.emit_args("mov", &[&R10.typed(operand), operand]);
                     self.copy(&Operand::pointer(R10, operand), value);
+                    if expr.slot != value.slot {
+                        self.copy(expr, value);
+                    }
                 }
                 _ => unreachable!(),
             },
