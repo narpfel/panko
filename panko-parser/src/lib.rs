@@ -1,4 +1,5 @@
 #![feature(coverage_attribute)]
+#![expect(clippy::empty_line_after_outer_attr)]
 
 use ariadne::Color::Red;
 use ast::Arithmetic;

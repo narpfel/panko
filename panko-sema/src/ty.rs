@@ -197,7 +197,7 @@ pub struct QualifiedType<'a> {
     pub(crate) loc: Loc<'a>,
 }
 
-impl<'a> QualifiedType<'a> {
+impl QualifiedType<'_> {
     // TODO: this is a temporary hack until the `Report` derive macro handles stringification
     // better
     pub(crate) fn slice(&self) -> String {

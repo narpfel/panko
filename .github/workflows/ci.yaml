@@ -22,7 +22,7 @@ jobs:
       - name: Install Rust nightly toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2024-08-27
+          toolchain: nightly-2024-10-28
           components: rustc-codegen-cranelift
       - name: Install `cargo-insta`
         run: |

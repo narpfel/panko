@@ -180,31 +180,31 @@ pub(super) trait AsOperand {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand;
 }
 
-impl<'a> AsOperand for Operand<'a> {
+impl AsOperand for Operand<'_> {
     fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
         *self
     }
 }
 
-impl<'a> AsOperand for &Operand<'a> {
+impl AsOperand for &Operand<'_> {
     fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
         **self
     }
 }
 
-impl<'a> AsOperand for LayoutedExpression<'a> {
+impl AsOperand for LayoutedExpression<'_> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
         slot_as_operand(self.slot, self.ty.ty, argument_area_size.unwrap())
     }
 }
 
-impl<'a> AsOperand for Reference<'a> {
+impl AsOperand for Reference<'_> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
         slot_as_operand(self.slot(), self.ty.ty, argument_area_size.unwrap())
     }
 }
 
-impl<'a> AsOperand for TypedRegister<'a> {
+impl AsOperand for TypedRegister<'_> {
     fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
         let Self { register, ty } = *self;
         Operand {
@@ -232,7 +232,7 @@ impl AsOperand for u64 {
     }
 }
 
-impl<'a> AsOperand for Memory<'a> {
+impl AsOperand for Memory<'_> {
     fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
         Operand {
             kind: OperandKind::Pointer(*self),
