@@ -20,7 +20,7 @@ indexmap = "2.6.0"
 itertools = "0.13.0"
 lalrpop = "0.22.0"
 lalrpop-util = { version = "0.22.0", features = ["unicode"] }
-logos = "0.14.2"
+logos = { version = "0.14.2", features = ["forbid_unsafe"] }
 proc-macro2 = "1.0.89"
 quote = "1.0.37"
 regex = "1.11.1"
