@@ -14,23 +14,23 @@ members = [
 
 [workspace.dependencies]
 bumpalo = "3.16.0"
-clap = { version = "4.5.16", features = ["derive"] }
+clap = { version = "4.5.20", features = ["derive"] }
 color-eyre = "0.6.3"
-indexmap = "2.4.0"
+indexmap = "2.6.0"
 itertools = "0.13.0"
 lalrpop = "0.22.0"
 lalrpop-util = { version = "0.22.0", features = ["unicode"] }
-logos = "0.14.1"
-proc-macro2 = "1.0.86"
+logos = "0.14.2"
+proc-macro2 = "1.0.89"
 quote = "1.0.37"
-regex = "1.10.6"
-syn = { version = "2.0.76", features = ["fold", "visit"] }
+regex = "1.11.1"
+syn = { version = "2.0.85", features = ["fold", "visit"] }
 variant-types = { git = "https://github.com/narpfel/crabbing-interpreters" }
 
 insta-cmd = "0.6.0"
-pretty_assertions = { version = "1.4.0", features = ["unstable"] }
-rstest = { version = "0.22.0", default-features = false }
-tempfile = "3.12.0"
+pretty_assertions = { version = "1.4.1", features = ["unstable"] }
+rstest = { version = "0.23.0", default-features = false }
+tempfile = "3.13.0"
 
 [workspace.dependencies.ariadne]
 git = "https://github.com/narpfel/ariadne"
