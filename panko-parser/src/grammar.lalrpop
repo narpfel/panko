@@ -90,6 +90,17 @@ extern {
         "<<" => Token { kind: panko_lex::TokenKind::LessLess, .. },
         ">>" => Token { kind: panko_lex::TokenKind::GreaterGreater, .. },
 
+        "*=" => Token { kind: panko_lex::TokenKind::StarEqual, ..},
+        "/=" => Token { kind: panko_lex::TokenKind::SlashEqual, ..},
+        "%=" => Token { kind: panko_lex::TokenKind::PercentEqual, ..},
+        "+=" => Token { kind: panko_lex::TokenKind::PlusEqual, ..},
+        "-=" => Token { kind: panko_lex::TokenKind::MinusEqual, ..},
+        "<<=" => Token { kind: panko_lex::TokenKind::LessLessEqual, ..},
+        ">>=" => Token { kind: panko_lex::TokenKind::GreaterGreaterEqual, ..},
+        "&=" => Token { kind: panko_lex::TokenKind::AndEqual, ..},
+        "^=" => Token { kind: panko_lex::TokenKind::HatEqual, ..},
+        "|=" => Token { kind: panko_lex::TokenKind::PipeEqual, ..},
+
         "..." => Token { kind: panko_lex::TokenKind::Ellipsis, .. },
 
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
@@ -489,9 +500,24 @@ ConditionalExpression: ast::Expression<'a> = {
     BitOrExpression,
 }
 
+CompoudAssignmentOperator: ast::BinOp<'a> = {
+    "*=" => ast::BinOp { kind: ast::BinOpKind::Multiply, token: <> },
+    "/=" => ast::BinOp { kind: ast::BinOpKind::Divide, token: <> },
+    "%=" => ast::BinOp { kind: ast::BinOpKind::Modulo, token: <> },
+    "+=" => ast::BinOp { kind: ast::BinOpKind::Add, token: <> },
+    "-=" => ast::BinOp { kind: ast::BinOpKind::Subtract, token: <> },
+    "<<=" => ast::BinOp { kind: ast::BinOpKind::LeftShift, token: <> },
+    ">>=" => ast::BinOp { kind: ast::BinOpKind::RightShift, token: <> },
+    "&=" => ast::BinOp { kind: ast::BinOpKind::BitAnd, token: <> },
+    "^=" => ast::BinOp { kind: ast::BinOpKind::BitXor, token: <> },
+    "|=" => ast::BinOp { kind: ast::BinOpKind::BitOr, token: <> },
+}
+
 AssignmentExpression: ast::Expression<'a> = {
     ConditionalExpression,
     <target:Bump<UnaryExpression>> "=" <value:Bump<AssignmentExpression>> => ast::Expression::Assign { <> },
+    <target:Bump<UnaryExpression>> <op:CompoudAssignmentOperator> <value:Bump<AssignmentExpression>> =>
+        ast::Expression::CompoundAssign { <> },
 }
 
 Expression: ast::Expression<'a> = {

@@ -127,6 +127,7 @@ impl AsSExpr for Expression<'_> {
             Expression::Alignof { alignof: _, ty, align, close_paren: _ } => SExpr::new("alignof")
                 .inline_string(align.to_string())
                 .inherit(ty),
+            Expression::Combine { first, second } => SExpr::new("combine").lines([first, second]),
         }
     }
 }

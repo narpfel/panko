@@ -141,6 +141,12 @@ pub(crate) enum Expression<'a> {
         target: &'a Expression<'a>,
         value: &'a Expression<'a>,
     },
+    CompoundAssign {
+        target: &'a Expression<'a>,
+        target_temporary: Reference<'a>,
+        op: BinOp<'a>,
+        value: &'a Expression<'a>,
+    },
     BinOp {
         lhs: &'a Expression<'a>,
         op: BinOp<'a>,
@@ -270,6 +276,12 @@ impl<'a> Expression<'a> {
             Expression::Parenthesised { open_paren, expr: _, close_paren } =>
                 open_paren.loc().until(close_paren.loc()),
             Expression::Assign { target, value } => target.loc().until(value.loc()),
+            Expression::CompoundAssign {
+                target,
+                target_temporary: _,
+                op: _,
+                value,
+            } => target.loc().until(value.loc()),
             Expression::BinOp { lhs, op: _, rhs } => lhs.loc().until(rhs.loc()),
             Expression::UnaryOp { operator, operand } => operator.loc().until(operand.loc()),
             Expression::Call { callee, args: _, close_paren } =>
@@ -425,6 +437,19 @@ impl<'a> Scopes<'a> {
                 entry.insert(reference);
                 reference
             }
+        }
+    }
+
+    fn temporary(&mut self, loc: Loc<'a>, ty: QualifiedType<'a>) -> Reference<'a> {
+        let id = self.id();
+        Reference {
+            name: "unnamed-temporary",
+            loc,
+            ty,
+            id,
+            usage_location: loc,
+            kind: RefKind::Definition,
+            storage_duration: StorageDuration::Automatic,
         }
     }
 
@@ -713,6 +738,18 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             target: scopes.sess.alloc(resolve_expr(scopes, target)),
             value: scopes.sess.alloc(resolve_expr(scopes, value)),
         },
+        ast::Expression::CompoundAssign { target, op, value } => {
+            let target = scopes.sess.alloc(resolve_expr(scopes, target));
+            // TODO: `Type::Void` is a placeholder here, it would be better to add
+            // `Type::Unresolved` or similar for this case
+            let target_temporary = scopes.temporary(target.loc(), Type::Void.unqualified());
+            Expression::CompoundAssign {
+                target,
+                target_temporary,
+                op: *op,
+                value: scopes.sess.alloc(resolve_expr(scopes, value)),
+            }
+        }
         ast::Expression::BinOp { lhs, op, rhs } => Expression::BinOp {
             lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
             op: *op,

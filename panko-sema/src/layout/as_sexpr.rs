@@ -133,6 +133,7 @@ impl AsSExpr for Expression<'_> {
             Expression::Negate(operand) => SExpr::new("negate").inherit(operand),
             Expression::Compl(operand) => SExpr::new("compl").inherit(operand),
             Expression::Not(operand) => SExpr::new("not").inherit(operand),
+            Expression::Combine { first, second } => SExpr::new("combine").lines([first, second]),
         }
     }
 }

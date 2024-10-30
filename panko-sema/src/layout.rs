@@ -119,6 +119,10 @@ pub enum Expression<'a> {
     Negate(&'a LayoutedExpression<'a>),
     Compl(&'a LayoutedExpression<'a>),
     Not(&'a LayoutedExpression<'a>),
+    Combine {
+        first: &'a LayoutedExpression<'a>,
+        second: &'a LayoutedExpression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -400,6 +404,11 @@ fn layout_expression_in_slot<'a>(
         } => {
             let slot = make_slot();
             (slot, Expression::Integer(value))
+        }
+        typecheck::Expression::Combine { first, second } => {
+            let second = bump.alloc(layout_expression_in_slot(stack, bump, second, target_slot));
+            let first = bump.alloc(layout_expression(stack, bump, first));
+            (second.slot, Expression::Combine { first, second })
         }
     };
     LayoutedExpression { ty, slot, expr }

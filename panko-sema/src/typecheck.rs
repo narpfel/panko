@@ -332,6 +332,10 @@ pub enum Expression<'a> {
         align: u64,
         close_paren: Token<'a>,
     },
+    Combine {
+        first: &'a TypedExpression<'a>,
+        second: &'a TypedExpression<'a>,
+    },
 }
 
 impl<'a> TypedExpression<'a> {
@@ -370,6 +374,7 @@ impl<'a> TypedExpression<'a> {
             | Expression::Sizeof { .. }
             | Expression::SizeofTy { .. }
             | Expression::Alignof { .. } => false,
+            Expression::Combine { first: _, second } => second.is_lvalue(),
         }
     }
 
@@ -422,6 +427,7 @@ impl<'a> Expression<'a> {
                 sizeof.loc().until(close_paren.loc()),
             Expression::Alignof { alignof, ty: _, align: _, close_paren } =>
                 alignof.loc().until(close_paren.loc()),
+            Expression::Combine { first, second } => first.loc().until(second.loc()),
         }
     }
 
@@ -677,6 +683,85 @@ fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) 
 
             Arithmetic::Integral(Integral { signedness: Signedness::Unsigned, kind })
         }
+    }
+}
+
+fn typeck_binop<'a>(
+    sess: &'a Session<'a>,
+    lhs: TypedExpression<'a>,
+    op: &BinOp<'a>,
+    rhs: TypedExpression<'a>,
+) -> TypedExpression<'a> {
+    match (lhs.ty.ty, rhs.ty.ty) {
+        (Type::Arithmetic(lhs_ty), Type::Arithmetic(rhs_ty)) =>
+            typeck_arithmetic_binop(sess, *op, lhs, rhs, lhs_ty, rhs_ty),
+        (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(pointee_ty))
+            if matches!(op.kind, BinOpKind::Add) =>
+            typeck_ptradd(sess, rhs, pointee_ty, lhs, PtrAddOrder::IntegralFirst),
+        (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
+            if matches!(op.kind, BinOpKind::Add) =>
+            typeck_ptradd(sess, lhs, pointee_ty, rhs, PtrAddOrder::PtrFirst),
+        (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
+            if matches!(op.kind, BinOpKind::Subtract) =>
+            typeck_ptrsub(sess, lhs, pointee_ty, rhs),
+        (Type::Pointer(_), Type::Pointer(_))
+            if matches!(
+                op.kind,
+                BinOpKind::Equal
+                    | BinOpKind::NotEqual
+                    | BinOpKind::Less
+                    | BinOpKind::LessEqual
+                    | BinOpKind::Greater
+                    | BinOpKind::GreaterEqual
+            ) =>
+            typeck_ptrcmp(sess, lhs, *op, rhs),
+        (Type::Pointer(lhs_pointee_ty), Type::Pointer(rhs_pointee_ty))
+            if matches!(op.kind, BinOpKind::Subtract) =>
+            typeck_ptrdiff(sess, op, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
+        _ => todo!("type error: {} <=> {}", lhs.ty.ty, rhs.ty.ty),
+    }
+}
+
+fn check_assignable<'a>(
+    target: &'a TypedExpression<'a>,
+    sess: &'a Session<'a>,
+) -> &'a TypedExpression<'a> {
+    if !target.is_modifiable_lvalue() {
+        let error = if !target.is_lvalue() {
+            sess.emit(Diagnostic::AssignmentToNonLValue { at: &target.expr })
+        }
+        else {
+            assert!(!target.is_modifiable());
+            match target.expr.unwrap_parens() {
+                Expression::Name(reference) => sess.emit(Diagnostic::AssignmentToConstName {
+                    at: &target.expr,
+                    decl: reference.at_decl(),
+                }),
+                Expression::Deref { .. } =>
+                    sess.emit(Diagnostic::AssignmentToConst { at: target.expr }),
+                _ => todo!("for const struct members etc."),
+            }
+        };
+        sess.alloc(TypedExpression { ty: target.ty, expr: error })
+    }
+    else {
+        target
+    }
+}
+
+fn typeck_assign<'a>(
+    target: &'a TypedExpression<'a>,
+    sess: &'a Session<'a>,
+    typeck_value: impl FnOnce() -> TypedExpression<'a>,
+) -> TypedExpression<'a> {
+    let target = check_assignable(target, sess);
+    let value = typeck_value();
+    let value = sess.alloc(convert_as_if_by_assignment(sess, target.ty, value));
+    TypedExpression {
+        // TODO: `ty` is the type that `target` would have after lvalue conversion, so it
+        // might be necessary to add a `NoopTypeConversion` here
+        ty: target.ty,
+        expr: Expression::Assign { target, value },
     }
 }
 
@@ -988,64 +1073,53 @@ fn typeck_expression<'a>(
         }
         scope::Expression::Assign { target, value } => {
             let target = sess.alloc(typeck_expression(sess, target, Context::Default));
-            if !target.is_modifiable_lvalue() {
-                if !target.is_lvalue() {
-                    sess.emit(Diagnostic::AssignmentToNonLValue { at: &target.expr })
-                }
-                else {
-                    assert!(!target.is_modifiable());
-                    match target.expr.unwrap_parens() {
-                        Expression::Name(reference) =>
-                            sess.emit(Diagnostic::AssignmentToConstName {
-                                at: &target.expr,
-                                decl: reference.at_decl(),
-                            }),
-                        Expression::Deref { .. } =>
-                            sess.emit(Diagnostic::AssignmentToConst { at: target.expr }),
-                        _ => todo!("for const struct members etc."),
-                    }
-                }
-            }
-            let value = typeck_expression(sess, value, Context::Default);
-            let value = sess.alloc(convert_as_if_by_assignment(sess, target.ty, value));
+            typeck_assign(target, sess, || {
+                typeck_expression(sess, value, Context::Default)
+            })
+        }
+        scope::Expression::CompoundAssign { target, target_temporary, op, value } => {
+            let target = sess.alloc(typeck_expression(sess, target, Context::Default));
+            let target = check_assignable(target, sess);
+            let ty = target.ty;
+            let target = sess.alloc(TypedExpression {
+                ty: Type::Pointer(&target.ty).unqualified(),
+                // TODO: `op.token` should not be included in the synthesised expr’s location
+                // TODO: this will fail for bitfields
+                expr: Expression::Addressof { ampersand: op.token, operand: target },
+            });
+            let target_addr = sess.alloc(TypedExpression {
+                ty: target.ty,
+                expr: Expression::Name(Reference { ty: target.ty, ..*target_temporary }),
+            });
+            let deref_target_addr = sess.alloc(TypedExpression {
+                ty,
+                // TODO: `op.token` should not be included in the synthesised expr’s location
+                expr: Expression::Deref { star: op.token, operand: target_addr },
+            });
+            let first = TypedExpression {
+                ty: target.ty,
+                expr: Expression::Assign { target: target_addr, value: target },
+            };
+            // TODO: when `target` is `const` this emits a duplicate “cannot assign to `const`”
+            // error because we already check that `target` is assignable
+            let second = typeck_assign(deref_target_addr, sess, || {
+                let value = typeck_expression(sess, value, Context::Default);
+                typeck_binop(sess, *deref_target_addr, op, value)
+            });
             TypedExpression {
                 // TODO: `ty` is the type that `target` would have after lvalue conversion, so it
                 // might be necessary to add a `NoopTypeConversion` here
-                ty: target.ty,
-                expr: Expression::Assign { target, value },
+                ty,
+                expr: Expression::Combine {
+                    first: sess.alloc(first),
+                    second: sess.alloc(second),
+                },
             }
         }
         scope::Expression::BinOp { lhs, op, rhs } => {
             let lhs = typeck_expression(sess, lhs, Context::Default);
             let rhs = typeck_expression(sess, rhs, Context::Default);
-            match (lhs.ty.ty, rhs.ty.ty) {
-                (Type::Arithmetic(lhs_ty), Type::Arithmetic(rhs_ty)) =>
-                    typeck_arithmetic_binop(sess, *op, lhs, rhs, lhs_ty, rhs_ty),
-                (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(pointee_ty))
-                    if matches!(op.kind, BinOpKind::Add) =>
-                    typeck_ptradd(sess, rhs, pointee_ty, lhs, PtrAddOrder::IntegralFirst),
-                (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
-                    if matches!(op.kind, BinOpKind::Add) =>
-                    typeck_ptradd(sess, lhs, pointee_ty, rhs, PtrAddOrder::PtrFirst),
-                (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
-                    if matches!(op.kind, BinOpKind::Subtract) =>
-                    typeck_ptrsub(sess, lhs, pointee_ty, rhs),
-                (Type::Pointer(_), Type::Pointer(_))
-                    if matches!(
-                        op.kind,
-                        BinOpKind::Equal
-                            | BinOpKind::NotEqual
-                            | BinOpKind::Less
-                            | BinOpKind::LessEqual
-                            | BinOpKind::Greater
-                            | BinOpKind::GreaterEqual
-                    ) =>
-                    typeck_ptrcmp(sess, lhs, *op, rhs),
-                (Type::Pointer(lhs_pointee_ty), Type::Pointer(rhs_pointee_ty))
-                    if matches!(op.kind, BinOpKind::Subtract) =>
-                    typeck_ptrdiff(sess, op, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
-                _ => todo!("type error"),
-            }
+            typeck_binop(sess, lhs, op, rhs)
         }
         scope::Expression::UnaryOp { operator, operand } => {
             let context = match operator.kind {

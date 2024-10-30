@@ -326,6 +326,7 @@ impl<'a> Codegen<'a> {
                 Expression::Negate(_) => todo!(),
                 Expression::Compl(_) => todo!(),
                 Expression::Not(_) => todo!(),
+                Expression::Combine { .. } => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -694,6 +695,11 @@ impl<'a> Codegen<'a> {
                 self.emit_args("sete", &[&Rax.byte()]);
                 self.emit_args("movzx", &[&Rax.typed(expr), &Rax.byte()]);
                 self.emit_args("mov", &[expr, &Rax.typed(expr)]);
+            }
+            Expression::Combine { first, second } => {
+                self.expr(first);
+                self.expr(second);
+                assert_eq!(expr.slot, second.slot);
             }
         }
     }

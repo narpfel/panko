@@ -513,6 +513,11 @@ pub enum Expression<'a> {
         target: &'a Expression<'a>,
         value: &'a Expression<'a>,
     },
+    CompoundAssign {
+        target: &'a Expression<'a>,
+        op: BinOp<'a>,
+        value: &'a Expression<'a>,
+    },
     BinOp {
         lhs: &'a Expression<'a>,
         op: BinOp<'a>,
