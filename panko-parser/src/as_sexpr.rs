@@ -245,6 +245,7 @@ impl AsSExpr for Expression<'_> {
                 assocs,
                 close_paren: _,
             } => SExpr::new("generic").lines([selector]).lines(assocs.0),
+            Expression::LogicalAnd { lhs, rhs } => SExpr::new("logical-and").lines([lhs, rhs]),
         }
     }
 }

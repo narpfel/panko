@@ -136,6 +136,15 @@ impl fmt::Display for StaticId {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+struct LabelId(u64);
+
+impl fmt::Display for LabelId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, ".L.{}", self.0)
+    }
+}
+
 #[derive(Debug, Default)]
 struct Codegen<'a> {
     tentative_definitions: IndexMap<&'a str, Type<'a>>,
@@ -143,6 +152,7 @@ struct Codegen<'a> {
     current_function: Option<&'a FunctionDefinition<'a>>,
     code: String,
     strings: Vec<(StaticId, Cow<'a, str>)>,
+    next_label_id: u64,
 }
 
 impl<'a> Codegen<'a> {
@@ -162,7 +172,7 @@ impl<'a> Codegen<'a> {
         .unwrap();
     }
 
-    fn label(&mut self, name: &str) {
+    fn label(&mut self, name: impl Display) {
         writeln!(self.code, "{name}:").unwrap();
     }
 
@@ -178,6 +188,12 @@ impl<'a> Codegen<'a> {
         let id = StaticId(self.strings.len().try_into().unwrap());
         self.strings.push((id, s));
         id
+    }
+
+    fn new_label(&mut self) -> LabelId {
+        let id = self.next_label_id;
+        self.next_label_id += 1;
+        LabelId(id)
     }
 
     fn emit(&mut self, instr: &str) {
@@ -291,7 +307,7 @@ impl<'a> Codegen<'a> {
         self.emit("ret");
 
         self.block(1);
-        self.label(&format!(".L.{}.entry.sp_unaligned", def.name()));
+        self.label(format!(".L.{}.entry.sp_unaligned", def.name()));
         self.emit("int3");
     }
 
@@ -327,6 +343,7 @@ impl<'a> Codegen<'a> {
                 Expression::Compl(_) => todo!(),
                 Expression::Not(_) => todo!(),
                 Expression::Combine { .. } => todo!(),
+                Expression::LogicalAnd { .. } => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -700,6 +717,18 @@ impl<'a> Codegen<'a> {
                 self.expr(first);
                 self.expr(second);
                 assert_eq!(expr.slot, second.slot);
+            }
+            Expression::LogicalAnd { lhs, rhs } => {
+                self.expr(lhs);
+                self.emit_args("cmp", &[lhs, &0]);
+                let label = self.new_label();
+                self.emit_args("jz", &[&label]);
+                self.expr(rhs);
+                self.emit_args("cmp", &[rhs, &0]);
+                self.label(label);
+                self.emit("setnz al");
+                self.emit("movzx eax, al");
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
         }
     }

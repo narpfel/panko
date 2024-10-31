@@ -5,6 +5,7 @@ use panko_sema::layout::Reference;
 use panko_sema::layout::Slot;
 use panko_sema::ty::Type;
 
+use crate::LabelId;
 use crate::Register;
 use crate::StaticId;
 use crate::TypedRegister;
@@ -68,6 +69,7 @@ enum OperandKind<'a> {
     Register(Register),
     Pointer(Memory<'a>),
     Immediate(u64),
+    Label(LabelId),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -152,6 +154,7 @@ impl fmt::Display for Operand<'_> {
                 write!(f, "{ptr_type} ptr {memory}")
             }
             OperandKind::Immediate(imm) => write!(f, "{imm}"),
+            OperandKind::Label(id) => write!(f, "{id}"),
         }
     }
 }
@@ -250,6 +253,15 @@ impl AsOperand for StaticId {
                 offset: Offset::Static(*self),
             }),
             ty: Type::ulong(),
+        }
+    }
+}
+
+impl AsOperand for LabelId {
+    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
+        Operand {
+            kind: OperandKind::Label(*self),
+            ty: Type::Void,
         }
     }
 }

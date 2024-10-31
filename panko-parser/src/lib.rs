@@ -558,6 +558,10 @@ pub enum Expression<'a> {
         assocs: GenericAssocList<'a>,
         close_paren: Token<'a>,
     },
+    LogicalAnd {
+        lhs: &'a Expression<'a>,
+        rhs: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]

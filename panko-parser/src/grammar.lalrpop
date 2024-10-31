@@ -101,6 +101,8 @@ extern {
         "^=" => Token { kind: panko_lex::TokenKind::HatEqual, ..},
         "|=" => Token { kind: panko_lex::TokenKind::PipeEqual, ..},
 
+        "&&" => Token { kind: panko_lex::TokenKind::AndAnd, .. },
+
         "..." => Token { kind: panko_lex::TokenKind::Ellipsis, .. },
 
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
@@ -496,8 +498,14 @@ BitOrExpression: ast::Expression<'a> = {
         ast::Expression::BinOp { <> },
 }
 
-ConditionalExpression: ast::Expression<'a> = {
+LogicalAndExpression: ast::Expression<'a> = {
     BitOrExpression,
+    <lhs:Bump<LogicalAndExpression>> "&&" <rhs:Bump<BitOrExpression>> =>
+        ast::Expression::LogicalAnd { <> },
+}
+
+ConditionalExpression: ast::Expression<'a> = {
+    LogicalAndExpression,
 }
 
 CompoudAssignmentOperator: ast::BinOp<'a> = {

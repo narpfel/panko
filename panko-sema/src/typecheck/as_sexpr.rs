@@ -128,6 +128,7 @@ impl AsSExpr for Expression<'_> {
                 .inline_string(align.to_string())
                 .inherit(ty),
             Expression::Combine { first, second } => SExpr::new("combine").lines([first, second]),
+            Expression::LogicalAnd { lhs, rhs } => SExpr::new("logical-and").lines([lhs, rhs]),
         }
     }
 }

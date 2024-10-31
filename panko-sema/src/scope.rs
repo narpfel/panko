@@ -187,6 +187,10 @@ pub(crate) enum Expression<'a> {
         assocs: GenericAssocList<'a>,
         close_paren: Token<'a>,
     },
+    LogicalAnd {
+        lhs: &'a Expression<'a>,
+        rhs: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -299,6 +303,7 @@ impl<'a> Expression<'a> {
                 assocs: _,
                 close_paren,
             } => generic.loc().until(close_paren.loc()),
+            Expression::LogicalAnd { lhs, rhs } => lhs.loc().until(rhs.loc()),
         }
     }
 }
@@ -795,6 +800,10 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
                 )),
                 close_paren: *close_paren,
             },
+        ast::Expression::LogicalAnd { lhs, rhs } => Expression::LogicalAnd {
+            lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
+            rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),
+        },
     }
 }
 
