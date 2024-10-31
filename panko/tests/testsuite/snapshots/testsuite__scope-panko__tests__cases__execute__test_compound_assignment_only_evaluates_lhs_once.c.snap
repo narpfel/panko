@@ -1,0 +1,40 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/test_compound_assignment_only_evaluates_lhs_once.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration putchar~0 `fn(∅: int) -> int` ∅)
+   (function-definition
+      f~1 `fn(p: ptr<int>) -> ptr<int>`
+      (params
+         p~2 `ptr<int>`)
+      (compound-statement
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               65))
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               10))
+         (return (name p~2 `ptr<int>`))))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (definition x~4 `int` 42)
+         (expression
+            (add-assign
+               (deref
+                  (call (name f~1 `fn(p: ptr<int>) -> ptr<int>`)
+                     (addressof (name x~4 `int`))))
+               27l))
+         (return (name x~4 `int`)))))
+
+----- stderr -----

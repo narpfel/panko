@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/test_compound_assignment_to_deref.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition x~1 `int` (42 `int`))
+         (definition p~2 `ptr<int>` (addressof (x~1 `int`) `ptr<int>`))
+         (expression
+            (combine
+               (assign (unnamed-temporary~3 `ptr<int>`) (addressof (deref (p~2 `ptr<int>`) `int`) `ptr<int>`) `ptr<int>`)
+               (assign (deref (unnamed-temporary~3 `ptr<int>`) `int`) (truncate (add (sign-extend (deref (unnamed-temporary~3 `ptr<int>`) `int`) `long`) (27l `long`) `long`) `int`) `int`)
+               `int`))
+         (return (x~1 `int`)))))
+
+----- stderr -----
