@@ -1,0 +1,78 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/logical-ops/test_logical_and.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration f~1 `fn() -> int` ∅)
+   (function-definition
+      main~2 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      (params
+         main.unnamed_parameter.0~3 `int`
+         argv~4 `ptr<ptr<char>>`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~4 `ptr<ptr<char>>`) 1)
+               (logical-and
+                  0
+                  0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~4 `ptr<ptr<char>>`) 1)
+               (logical-and
+                  0
+                  42)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~4 `ptr<ptr<char>>`) 1)
+               (logical-and
+                  27
+                  0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~4 `ptr<ptr<char>>`) 1)
+               (logical-and
+                  42
+                  27)))
+         (expression
+            (logical-and
+               0
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (subscript (name argv~4 `ptr<ptr<char>>`) 1)
+                  123)))
+         (expression
+            (logical-and
+               123
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (subscript (name argv~4 `ptr<ptr<char>>`) 1)
+                  456)))
+         (expression
+            (logical-and
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (subscript (name argv~4 `ptr<ptr<char>>`) 1)
+                  5)
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (subscript (name argv~4 `ptr<ptr<char>>`) 1)
+                  7)))
+         (expression
+            (logical-and
+               (call (name f~1 `fn() -> int`))
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (subscript (name argv~4 `ptr<ptr<char>>`) 1)
+                  1)))))
+   (function-definition
+      f~1 `fn() -> int`
+      (compound-statement
+         (return 0))))
+
+----- stderr -----
