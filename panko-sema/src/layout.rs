@@ -2,6 +2,7 @@ use bumpalo::Bump;
 use panko_parser as cst;
 use panko_parser::ast::Integral;
 use panko_parser::BinOp;
+use panko_parser::LogicalOp;
 use panko_report::Report;
 
 use crate::layout::stack::Stack;
@@ -123,12 +124,9 @@ pub enum Expression<'a> {
         first: &'a LayoutedExpression<'a>,
         second: &'a LayoutedExpression<'a>,
     },
-    LogicalAnd {
+    Logical {
         lhs: &'a LayoutedExpression<'a>,
-        rhs: &'a LayoutedExpression<'a>,
-    },
-    LogicalOr {
-        lhs: &'a LayoutedExpression<'a>,
+        op: LogicalOp<'a>,
         rhs: &'a LayoutedExpression<'a>,
     },
 }
@@ -418,19 +416,12 @@ fn layout_expression_in_slot<'a>(
             let first = bump.alloc(layout_expression(stack, bump, first));
             (second.slot, Expression::Combine { first, second })
         }
-        typecheck::Expression::LogicalAnd { lhs, rhs } => {
+        typecheck::Expression::Logical { lhs, op, rhs } => {
             let slot = make_slot();
             let lhs_slot = ty.ty.is_slot_compatible(&lhs.ty.ty).then_some(slot);
             let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, lhs_slot));
             let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
-            (slot, Expression::LogicalAnd { lhs, rhs })
-        }
-        typecheck::Expression::LogicalOr { lhs, rhs } => {
-            let slot = make_slot();
-            let lhs_slot = ty.ty.is_slot_compatible(&lhs.ty.ty).then_some(slot);
-            let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, lhs_slot));
-            let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
-            (slot, Expression::LogicalOr { lhs, rhs })
+            (slot, Expression::Logical { lhs, op, rhs })
         }
     };
     LayoutedExpression { ty, slot, expr }

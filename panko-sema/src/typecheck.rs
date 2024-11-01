@@ -23,6 +23,7 @@ use panko_parser::ast::Signedness;
 use panko_parser::sexpr_builder::AsSExpr as _;
 use panko_parser::BinOp;
 use panko_parser::BinOpKind;
+use panko_parser::LogicalOp;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_report::Report;
@@ -336,12 +337,9 @@ pub enum Expression<'a> {
         first: &'a TypedExpression<'a>,
         second: &'a TypedExpression<'a>,
     },
-    LogicalAnd {
+    Logical {
         lhs: &'a TypedExpression<'a>,
-        rhs: &'a TypedExpression<'a>,
-    },
-    LogicalOr {
-        lhs: &'a TypedExpression<'a>,
+        op: LogicalOp<'a>,
         rhs: &'a TypedExpression<'a>,
     },
 }
@@ -383,7 +381,7 @@ impl<'a> TypedExpression<'a> {
             | Expression::SizeofTy { .. }
             | Expression::Alignof { .. } => false,
             Expression::Combine { first: _, second } => second.is_lvalue(),
-            Expression::LogicalAnd { .. } | Expression::LogicalOr { .. } => false,
+            Expression::Logical { .. } => false,
         }
     }
 
@@ -437,8 +435,7 @@ impl<'a> Expression<'a> {
             Expression::Alignof { alignof, ty: _, align: _, close_paren } =>
                 alignof.loc().until(close_paren.loc()),
             Expression::Combine { first, second } => first.loc().until(second.loc()),
-            Expression::LogicalAnd { lhs, rhs } => lhs.loc().until(rhs.loc()),
-            Expression::LogicalOr { lhs, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::Logical { lhs, op: _, rhs } => lhs.loc().until(rhs.loc()),
         }
     }
 
@@ -1414,7 +1411,7 @@ fn typeck_expression<'a>(
                     TypedExpression { ty: Type::int().unqualified(), expr }
                 })
         }
-        scope::Expression::LogicalAnd { lhs, rhs } => {
+        scope::Expression::Logical { lhs, op, rhs } => {
             let lhs = typeck_expression(sess, lhs, Context::Default);
             if !lhs.ty.ty.is_scalar() {
                 todo!("type error: argument to logical and must be scalar");
@@ -1425,25 +1422,9 @@ fn typeck_expression<'a>(
             }
             TypedExpression {
                 ty: Type::int().unqualified(),
-                expr: Expression::LogicalAnd {
+                expr: Expression::Logical {
                     lhs: sess.alloc(lhs),
-                    rhs: sess.alloc(rhs),
-                },
-            }
-        }
-        scope::Expression::LogicalOr { lhs, rhs } => {
-            let lhs = typeck_expression(sess, lhs, Context::Default);
-            if !lhs.ty.ty.is_scalar() {
-                todo!("type error: argument to logical or must be scalar");
-            }
-            let rhs = typeck_expression(sess, rhs, Context::Default);
-            if !rhs.ty.ty.is_scalar() {
-                todo!("type error: argument to logical or must be scalar");
-            }
-            TypedExpression {
-                ty: Type::int().unqualified(),
-                expr: Expression::LogicalOr {
-                    lhs: sess.alloc(lhs),
+                    op: *op,
                     rhs: sess.alloc(rhs),
                 },
             }

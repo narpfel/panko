@@ -11,6 +11,7 @@ use panko_parser::ast;
 use panko_parser::ast::ErrorExpr;
 use panko_parser::ast::Session;
 use panko_parser::BinOp;
+use panko_parser::LogicalOp;
 use panko_parser::UnaryOp;
 use panko_report::Report;
 
@@ -187,12 +188,9 @@ pub(crate) enum Expression<'a> {
         assocs: GenericAssocList<'a>,
         close_paren: Token<'a>,
     },
-    LogicalAnd {
+    Logical {
         lhs: &'a Expression<'a>,
-        rhs: &'a Expression<'a>,
-    },
-    LogicalOr {
-        lhs: &'a Expression<'a>,
+        op: LogicalOp<'a>,
         rhs: &'a Expression<'a>,
     },
 }
@@ -307,8 +305,7 @@ impl<'a> Expression<'a> {
                 assocs: _,
                 close_paren,
             } => generic.loc().until(close_paren.loc()),
-            Expression::LogicalAnd { lhs, rhs } => lhs.loc().until(rhs.loc()),
-            Expression::LogicalOr { lhs, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::Logical { lhs, op: _, rhs } => lhs.loc().until(rhs.loc()),
         }
     }
 }
@@ -805,12 +802,9 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
                 )),
                 close_paren: *close_paren,
             },
-        ast::Expression::LogicalAnd { lhs, rhs } => Expression::LogicalAnd {
+        ast::Expression::Logical { lhs, op, rhs } => Expression::Logical {
             lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
-            rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),
-        },
-        ast::Expression::LogicalOr { lhs, rhs } => Expression::LogicalOr {
-            lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
+            op: *op,
             rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),
         },
     }

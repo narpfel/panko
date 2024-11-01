@@ -15,6 +15,7 @@ use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Signedness;
 use panko_parser::BinOpKind;
+use panko_parser::LogicalOpKind;
 use panko_sema::layout::CompoundStatement;
 use panko_sema::layout::Declaration;
 use panko_sema::layout::Expression;
@@ -343,8 +344,7 @@ impl<'a> Codegen<'a> {
                 Expression::Compl(_) => todo!(),
                 Expression::Not(_) => todo!(),
                 Expression::Combine { .. } => todo!(),
-                Expression::LogicalAnd { .. } => todo!(),
-                Expression::LogicalOr { .. } => todo!(),
+                Expression::Logical { .. } => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -719,23 +719,15 @@ impl<'a> Codegen<'a> {
                 self.expr(second);
                 assert_eq!(expr.slot, second.slot);
             }
-            Expression::LogicalAnd { lhs, rhs } => {
+            Expression::Logical { lhs, op, rhs } => {
                 self.expr(lhs);
                 self.emit_args("cmp", &[lhs, &0]);
                 let label = self.new_label();
-                self.emit_args("jz", &[&label]);
-                self.expr(rhs);
-                self.emit_args("cmp", &[rhs, &0]);
-                self.label(label);
-                self.emit("setnz al");
-                self.emit("movzx eax, al");
-                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
-            }
-            Expression::LogicalOr { lhs, rhs } => {
-                self.expr(lhs);
-                self.emit_args("cmp", &[lhs, &0]);
-                let label = self.new_label();
-                self.emit_args("jnz", &[&label]);
+                let operation = match op.kind() {
+                    LogicalOpKind::And => "jz",
+                    LogicalOpKind::Or => "jnz",
+                };
+                self.emit_args(operation, &[&label]);
                 self.expr(rhs);
                 self.emit_args("cmp", &[rhs, &0]);
                 self.label(label);

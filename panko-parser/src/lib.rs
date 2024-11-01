@@ -558,12 +558,9 @@ pub enum Expression<'a> {
         assocs: GenericAssocList<'a>,
         close_paren: Token<'a>,
     },
-    LogicalAnd {
+    Logical {
         lhs: &'a Expression<'a>,
-        rhs: &'a Expression<'a>,
-    },
-    LogicalOr {
-        lhs: &'a Expression<'a>,
+        op: LogicalOp<'a>,
         rhs: &'a Expression<'a>,
     },
 }
@@ -671,6 +668,35 @@ pub enum GenericAssociation<'a> {
         default: Token<'a>,
         expr: Expression<'a>,
     },
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct LogicalOp<'a> {
+    kind: LogicalOpKind,
+    token: Token<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum LogicalOpKind {
+    And,
+    Or,
+}
+
+impl<'a> LogicalOp<'a> {
+    pub fn kind(&self) -> LogicalOpKind {
+        self.kind
+    }
+
+    pub fn str(&self) -> &'static str {
+        match self.kind {
+            LogicalOpKind::And => "and",
+            LogicalOpKind::Or => "or",
+        }
+    }
+
+    pub fn loc(&self) -> Loc<'a> {
+        self.token.loc()
+    }
 }
 
 pub fn parse<'a>(

@@ -499,16 +499,24 @@ BitOrExpression: ast::Expression<'a> = {
         ast::Expression::BinOp { <> },
 }
 
+LogicalAndOperator: ast::LogicalOp<'a> = {
+    "&&" => ast::LogicalOp { kind: ast::LogicalOpKind::And, token: <> },
+}
+
 LogicalAndExpression: ast::Expression<'a> = {
     BitOrExpression,
-    <lhs:Bump<LogicalAndExpression>> "&&" <rhs:Bump<BitOrExpression>> =>
-        ast::Expression::LogicalAnd { <> },
+    <lhs:Bump<LogicalAndExpression>> <op:LogicalAndOperator> <rhs:Bump<BitOrExpression>> =>
+        ast::Expression::Logical { <> },
+}
+
+LogicalOrOperator: ast::LogicalOp<'a> = {
+    "||" => ast::LogicalOp { kind: ast::LogicalOpKind::Or, token: <> },
 }
 
 LogicalOrExpression: ast::Expression<'a> = {
     LogicalAndExpression,
-    <lhs:Bump<LogicalOrExpression>> "||" <rhs:Bump<LogicalAndExpression>> =>
-        ast::Expression::LogicalOr { <> },
+    <lhs:Bump<LogicalOrExpression>> <op:LogicalOrOperator> <rhs:Bump<LogicalAndExpression>> =>
+        ast::Expression::Logical { <> },
 }
 
 ConditionalExpression: ast::Expression<'a> = {
