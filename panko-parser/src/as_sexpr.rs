@@ -246,6 +246,7 @@ impl AsSExpr for Expression<'_> {
                 close_paren: _,
             } => SExpr::new("generic").lines([selector]).lines(assocs.0),
             Expression::LogicalAnd { lhs, rhs } => SExpr::new("logical-and").lines([lhs, rhs]),
+            Expression::LogicalOr { lhs, rhs } => SExpr::new("logical-or").lines([lhs, rhs]),
         }
     }
 }

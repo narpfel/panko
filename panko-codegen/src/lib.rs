@@ -344,6 +344,7 @@ impl<'a> Codegen<'a> {
                 Expression::Not(_) => todo!(),
                 Expression::Combine { .. } => todo!(),
                 Expression::LogicalAnd { .. } => todo!(),
+                Expression::LogicalOr { .. } => todo!(),
             },
             None => self.zero(ty.size()),
         }
@@ -723,6 +724,18 @@ impl<'a> Codegen<'a> {
                 self.emit_args("cmp", &[lhs, &0]);
                 let label = self.new_label();
                 self.emit_args("jz", &[&label]);
+                self.expr(rhs);
+                self.emit_args("cmp", &[rhs, &0]);
+                self.label(label);
+                self.emit("setnz al");
+                self.emit("movzx eax, al");
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
+            }
+            Expression::LogicalOr { lhs, rhs } => {
+                self.expr(lhs);
+                self.emit_args("cmp", &[lhs, &0]);
+                let label = self.new_label();
+                self.emit_args("jnz", &[&label]);
                 self.expr(rhs);
                 self.emit_args("cmp", &[rhs, &0]);
                 self.label(label);

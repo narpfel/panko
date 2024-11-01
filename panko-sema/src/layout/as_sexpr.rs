@@ -135,6 +135,7 @@ impl AsSExpr for Expression<'_> {
             Expression::Not(operand) => SExpr::new("not").inherit(operand),
             Expression::Combine { first, second } => SExpr::new("combine").lines([first, second]),
             Expression::LogicalAnd { lhs, rhs } => SExpr::new("logical-and").lines([lhs, rhs]),
+            Expression::LogicalOr { lhs, rhs } => SExpr::new("logical-or").lines([lhs, rhs]),
         }
     }
 }

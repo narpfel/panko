@@ -562,6 +562,10 @@ pub enum Expression<'a> {
         lhs: &'a Expression<'a>,
         rhs: &'a Expression<'a>,
     },
+    LogicalOr {
+        lhs: &'a Expression<'a>,
+        rhs: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]

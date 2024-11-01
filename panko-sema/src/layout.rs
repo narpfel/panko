@@ -127,6 +127,10 @@ pub enum Expression<'a> {
         lhs: &'a LayoutedExpression<'a>,
         rhs: &'a LayoutedExpression<'a>,
     },
+    LogicalOr {
+        lhs: &'a LayoutedExpression<'a>,
+        rhs: &'a LayoutedExpression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -420,6 +424,13 @@ fn layout_expression_in_slot<'a>(
             let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, lhs_slot));
             let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
             (slot, Expression::LogicalAnd { lhs, rhs })
+        }
+        typecheck::Expression::LogicalOr { lhs, rhs } => {
+            let slot = make_slot();
+            let lhs_slot = ty.ty.is_slot_compatible(&lhs.ty.ty).then_some(slot);
+            let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, lhs_slot));
+            let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
+            (slot, Expression::LogicalOr { lhs, rhs })
         }
     };
     LayoutedExpression { ty, slot, expr }

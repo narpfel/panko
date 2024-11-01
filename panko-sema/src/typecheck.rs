@@ -340,6 +340,10 @@ pub enum Expression<'a> {
         lhs: &'a TypedExpression<'a>,
         rhs: &'a TypedExpression<'a>,
     },
+    LogicalOr {
+        lhs: &'a TypedExpression<'a>,
+        rhs: &'a TypedExpression<'a>,
+    },
 }
 
 impl<'a> TypedExpression<'a> {
@@ -379,7 +383,7 @@ impl<'a> TypedExpression<'a> {
             | Expression::SizeofTy { .. }
             | Expression::Alignof { .. } => false,
             Expression::Combine { first: _, second } => second.is_lvalue(),
-            Expression::LogicalAnd { .. } => false,
+            Expression::LogicalAnd { .. } | Expression::LogicalOr { .. } => false,
         }
     }
 
@@ -434,6 +438,7 @@ impl<'a> Expression<'a> {
                 alignof.loc().until(close_paren.loc()),
             Expression::Combine { first, second } => first.loc().until(second.loc()),
             Expression::LogicalAnd { lhs, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::LogicalOr { lhs, rhs } => lhs.loc().until(rhs.loc()),
         }
     }
 
@@ -1421,6 +1426,23 @@ fn typeck_expression<'a>(
             TypedExpression {
                 ty: Type::int().unqualified(),
                 expr: Expression::LogicalAnd {
+                    lhs: sess.alloc(lhs),
+                    rhs: sess.alloc(rhs),
+                },
+            }
+        }
+        scope::Expression::LogicalOr { lhs, rhs } => {
+            let lhs = typeck_expression(sess, lhs, Context::Default);
+            if !lhs.ty.ty.is_scalar() {
+                todo!("type error: argument to logical or must be scalar");
+            }
+            let rhs = typeck_expression(sess, rhs, Context::Default);
+            if !rhs.ty.ty.is_scalar() {
+                todo!("type error: argument to logical or must be scalar");
+            }
+            TypedExpression {
+                ty: Type::int().unqualified(),
+                expr: Expression::LogicalOr {
                     lhs: sess.alloc(lhs),
                     rhs: sess.alloc(rhs),
                 },
