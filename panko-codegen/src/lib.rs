@@ -724,14 +724,14 @@ impl<'a> Codegen<'a> {
                 self.emit_args("cmp", &[lhs, &0]);
                 let label = self.new_label();
                 let operation = match op.kind() {
-                    LogicalOpKind::And => "jz",
-                    LogicalOpKind::Or => "jnz",
+                    LogicalOpKind::And => "je",
+                    LogicalOpKind::Or => "jne",
                 };
                 self.emit_args(operation, &[&label]);
                 self.expr(rhs);
                 self.emit_args("cmp", &[rhs, &0]);
                 self.label(label);
-                self.emit("setnz al");
+                self.emit("setne al");
                 self.emit("movzx eax, al");
                 self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
