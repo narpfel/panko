@@ -104,6 +104,9 @@ extern {
         "&&" => Token { kind: panko_lex::TokenKind::AndAnd, .. },
         "||" => Token { kind: panko_lex::TokenKind::PipePipe, .. },
 
+        "?" => Token { kind: panko_lex::TokenKind::QuestionMark, .. },
+        ":" => Token { kind: panko_lex::TokenKind::Colon, .. },
+
         "..." => Token { kind: panko_lex::TokenKind::Ellipsis, .. },
 
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
@@ -521,6 +524,8 @@ LogicalOrExpression: ast::Expression<'a> = {
 
 ConditionalExpression: ast::Expression<'a> = {
     LogicalOrExpression,
+    <condition:Bump<LogicalOrExpression>> "?" <then:Bump<Expression>> ":" <or_else:Bump<Expression>> =>
+        ast::Expression::Conditional { <> },
 }
 
 CompoudAssignmentOperator: ast::BinOp<'a> = {

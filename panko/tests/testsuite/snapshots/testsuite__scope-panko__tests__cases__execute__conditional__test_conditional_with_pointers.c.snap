@@ -1,0 +1,60 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/conditional/test_conditional_with_pointers.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition c_vp~1 `ptr<void const>` ∅)
+         (definition vp~2 `ptr<void>` ∅)
+         (definition c_ip~3 `ptr<int const>` ∅)
+         (definition v_ip~4 `ptr<int volatile>` ∅)
+         (definition ip~5 `ptr<int>` ∅)
+         (definition c_cp~6 `ptr<char const>` ∅)
+         (expression
+            (generic
+               (conditional
+                  0
+                  (name c_vp~1 `ptr<void const>`)
+                  (name c_ip~3 `ptr<int const>`))
+               (assoc `ptr<void const>` 0)))
+         (expression
+            (generic
+               (conditional
+                  0
+                  (name c_ip~3 `ptr<int const>`)
+                  (name v_ip~4 `ptr<int volatile>`))
+               (assoc `ptr<int const volatile>` 0)))
+         (expression
+            (generic
+               (conditional
+                  0
+                  (name vp~2 `ptr<void>`)
+                  (name c_cp~6 `ptr<char const>`))
+               (assoc `ptr<void const>` 0)))
+         (expression
+            (generic
+               (conditional
+                  0
+                  (name ip~5 `ptr<int>`)
+                  (name c_ip~3 `ptr<int const>`))
+               (assoc `ptr<int const>` 0)))
+         (expression
+            (generic
+               (conditional
+                  0
+                  (name vp~2 `ptr<void>`)
+                  (name ip~5 `ptr<int>`))
+               (assoc `ptr<void>` 0))))))
+
+----- stderr -----

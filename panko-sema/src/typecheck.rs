@@ -342,6 +342,11 @@ pub enum Expression<'a> {
         op: LogicalOp<'a>,
         rhs: &'a TypedExpression<'a>,
     },
+    Conditional {
+        condition: &'a TypedExpression<'a>,
+        then: &'a TypedExpression<'a>,
+        or_else: &'a TypedExpression<'a>,
+    },
 }
 
 impl<'a> TypedExpression<'a> {
@@ -381,7 +386,7 @@ impl<'a> TypedExpression<'a> {
             | Expression::SizeofTy { .. }
             | Expression::Alignof { .. } => false,
             Expression::Combine { first: _, second } => second.is_lvalue(),
-            Expression::Logical { .. } => false,
+            Expression::Logical { .. } | Expression::Conditional { .. } => false,
         }
     }
 
@@ -436,6 +441,8 @@ impl<'a> Expression<'a> {
                 alignof.loc().until(close_paren.loc()),
             Expression::Combine { first, second } => first.loc().until(second.loc()),
             Expression::Logical { lhs, op: _, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::Conditional { condition, then: _, or_else } =>
+                condition.loc().until(or_else.loc()),
         }
     }
 
@@ -1426,6 +1433,57 @@ fn typeck_expression<'a>(
                     lhs: sess.alloc(lhs),
                     op: *op,
                     rhs: sess.alloc(rhs),
+                },
+            }
+        }
+        scope::Expression::Conditional { condition, then, or_else } => {
+            let condition = typeck_expression(sess, condition, Context::Default);
+            if !condition.ty.ty.is_scalar() {
+                todo!("type error: first argument to ternary must be scalar");
+            }
+            let then = typeck_expression(sess, then, Context::Default);
+            let or_else = typeck_expression(sess, or_else, Context::Default);
+            // TODO: some rules are unimplemented
+            let result_ty = match (then.ty.ty, or_else.ty.ty) {
+                (Type::Arithmetic(then_ty), Type::Arithmetic(or_else_ty)) =>
+                    Type::Arithmetic(perform_usual_arithmetic_conversions(then_ty, or_else_ty)),
+                (Type::Void, Type::Void) => Type::Void,
+                (Type::Pointer(then_pointee), Type::Pointer(or_else_pointee))
+                    if then_pointee.ty == or_else_pointee.ty
+                        || then_pointee.ty == Type::Void
+                        || or_else_pointee.ty == Type::Void =>
+                    Type::Pointer(sess.alloc(QualifiedType {
+                        is_const: then_pointee.is_const | or_else_pointee.is_const,
+                        is_volatile: then_pointee.is_volatile | or_else_pointee.is_volatile,
+                        ty: if then_pointee.ty == Type::Void || or_else_pointee.ty == Type::Void {
+                            Type::Void
+                        }
+                        else {
+                            then_pointee.ty
+                        },
+                        loc: Loc::synthesised(),
+                    })),
+                (Type::Pointer(_), Type::Pointer(_)) => todo!(
+                    "type error: pointer type mismatch: `{}` != `{}`",
+                    then.ty.ty,
+                    or_else.ty.ty,
+                ),
+                (Type::Function(_), _) | (_, Type::Function(_)) => unreachable!(),
+                (Type::Arithmetic(_), Type::Pointer(_) | Type::Void)
+                | (Type::Pointer(_), Type::Arithmetic(_) | Type::Void)
+                | (Type::Void, _) => todo!(
+                    "type error: incompatible operand types for conditional expression: `{}` != `{}`",
+                    then.ty.ty,
+                    or_else.ty.ty,
+                ),
+            };
+            let result_ty = result_ty.unqualified();
+            TypedExpression {
+                ty: result_ty,
+                expr: Expression::Conditional {
+                    condition: sess.alloc(condition),
+                    then: sess.alloc(convert_as_if_by_assignment(sess, result_ty, then)),
+                    or_else: sess.alloc(convert_as_if_by_assignment(sess, result_ty, or_else)),
                 },
             }
         }

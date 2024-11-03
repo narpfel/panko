@@ -563,6 +563,11 @@ pub enum Expression<'a> {
         op: LogicalOp<'a>,
         rhs: &'a Expression<'a>,
     },
+    Conditional {
+        condition: &'a Expression<'a>,
+        then: &'a Expression<'a>,
+        or_else: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]

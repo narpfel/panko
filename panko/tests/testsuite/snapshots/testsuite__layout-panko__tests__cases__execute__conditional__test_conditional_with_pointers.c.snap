@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/conditional/test_conditional_with_pointers.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (c_vp~1 `ptr<void const>` @0) ∅)
+         (definition (vp~2 `ptr<void>` @8) ∅)
+         (definition (c_ip~3 `ptr<int const>` @16) ∅)
+         (definition (v_ip~4 `ptr<int volatile>` @24) ∅)
+         (definition (ip~5 `ptr<int>` @32) ∅)
+         (definition (c_cp~6 `ptr<char const>` @40) ∅)
+         (expression (0 `int` @48))
+         (expression (0 `int` @48))
+         (expression (0 `int` @48))
+         (expression (0 `int` @48))
+         (expression (0 `int` @48)))))
+
+----- stderr -----

@@ -193,6 +193,11 @@ pub(crate) enum Expression<'a> {
         op: LogicalOp<'a>,
         rhs: &'a Expression<'a>,
     },
+    Conditional {
+        condition: &'a Expression<'a>,
+        then: &'a Expression<'a>,
+        or_else: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -306,6 +311,8 @@ impl<'a> Expression<'a> {
                 close_paren,
             } => generic.loc().until(close_paren.loc()),
             Expression::Logical { lhs, op: _, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::Conditional { condition, then: _, or_else } =>
+                condition.loc().until(or_else.loc()),
         }
     }
 }
@@ -806,6 +813,11 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
             op: *op,
             rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),
+        },
+        ast::Expression::Conditional { condition, then, or_else } => Expression::Conditional {
+            condition: scopes.sess.alloc(resolve_expr(scopes, condition)),
+            then: scopes.sess.alloc(resolve_expr(scopes, then)),
+            or_else: scopes.sess.alloc(resolve_expr(scopes, or_else)),
         },
     }
 }

@@ -109,6 +109,8 @@ impl AsSExpr for Expression<'_> {
             } => SExpr::new("generic").lines([selector]).lines(assocs.0),
             Expression::Logical { lhs, op, rhs } =>
                 SExpr::new(format!("logical-{}", op.str())).lines([lhs, rhs]),
+            Expression::Conditional { condition, then, or_else } =>
+                SExpr::new("conditional").lines([condition, then, or_else]),
         }
     }
 }
