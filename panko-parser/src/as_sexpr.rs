@@ -249,6 +249,7 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new(format!("logical-{}", op.str())).lines([lhs, rhs]),
             Expression::Conditional { condition, then, or_else } =>
                 SExpr::new("conditional").lines([condition, then, or_else]),
+            Expression::Comma { lhs, rhs } => SExpr::new("comma").lines([lhs, rhs]),
         }
     }
 }

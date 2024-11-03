@@ -1487,6 +1487,17 @@ fn typeck_expression<'a>(
                 },
             }
         }
+        scope::Expression::Comma { lhs, rhs } => {
+            let lhs = typeck_expression(sess, lhs, Context::Default);
+            let rhs = typeck_expression(sess, rhs, Context::Default);
+            TypedExpression {
+                ty: rhs.ty,
+                expr: Expression::Combine {
+                    first: sess.alloc(lhs),
+                    second: sess.alloc(rhs),
+                },
+            }
+        }
     };
 
     match context {

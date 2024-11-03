@@ -568,6 +568,10 @@ pub enum Expression<'a> {
         then: &'a Expression<'a>,
         or_else: &'a Expression<'a>,
     },
+    Comma {
+        lhs: &'a Expression<'a>,
+        rhs: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]

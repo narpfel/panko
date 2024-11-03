@@ -198,6 +198,10 @@ pub(crate) enum Expression<'a> {
         then: &'a Expression<'a>,
         or_else: &'a Expression<'a>,
     },
+    Comma {
+        lhs: &'a Expression<'a>,
+        rhs: &'a Expression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -313,6 +317,7 @@ impl<'a> Expression<'a> {
             Expression::Logical { lhs, op: _, rhs } => lhs.loc().until(rhs.loc()),
             Expression::Conditional { condition, then: _, or_else } =>
                 condition.loc().until(or_else.loc()),
+            Expression::Comma { lhs, rhs } => lhs.loc().until(rhs.loc()),
         }
     }
 }
@@ -818,6 +823,10 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             condition: scopes.sess.alloc(resolve_expr(scopes, condition)),
             then: scopes.sess.alloc(resolve_expr(scopes, then)),
             or_else: scopes.sess.alloc(resolve_expr(scopes, or_else)),
+        },
+        ast::Expression::Comma { lhs, rhs } => Expression::Comma {
+            lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
+            rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),
         },
     }
 }

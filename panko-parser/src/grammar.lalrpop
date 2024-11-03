@@ -550,6 +550,7 @@ AssignmentExpression: ast::Expression<'a> = {
 
 Expression: ast::Expression<'a> = {
     AssignmentExpression,
+    <lhs:Bump<Expression>> "," <rhs:Bump<AssignmentExpression>> => ast::Expression::Comma { <> },
 }
 
 Bump<T>: &'a T = {
