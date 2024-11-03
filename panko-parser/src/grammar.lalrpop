@@ -524,7 +524,7 @@ LogicalOrExpression: ast::Expression<'a> = {
 
 ConditionalExpression: ast::Expression<'a> = {
     LogicalOrExpression,
-    <condition:Bump<LogicalOrExpression>> "?" <then:Bump<Expression>> ":" <or_else:Bump<Expression>> =>
+    <condition:Bump<LogicalOrExpression>> "?" <then:Bump<Expression>> ":" <or_else:Bump<ConditionalExpression>> =>
         ast::Expression::Conditional { <> },
 }
 
