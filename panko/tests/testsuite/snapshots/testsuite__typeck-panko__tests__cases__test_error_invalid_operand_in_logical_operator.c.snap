@@ -1,0 +1,50 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_invalid_operand_in_logical_operator.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: logical or operator expects a scalar value as operand
+   ╭─[panko/tests/cases/test_error_invalid_operand_in_logical_operator.c:4:11]
+   │
+ 4 │     42 || f();
+   │     ───────┬─  
+   │            │   
+   │            ╰─── this is of type `void`
+───╯
+
+Error: logical and operator expects a scalar value as operand
+   ╭─[panko/tests/cases/test_error_invalid_operand_in_logical_operator.c:5:5]
+   │
+ 5 │     f() && f();
+   │     ─┬────────  
+   │      │          
+   │      ╰────────── this is of type `void`
+───╯
+
+Error: logical and operator expects a scalar value as operand
+   ╭─[panko/tests/cases/test_error_invalid_operand_in_logical_operator.c:5:12]
+   │
+ 5 │     f() && f();
+   │     ────────┬─  
+   │             │   
+   │             ╰─── this is of type `void`
+───╯
+
+Error: logical and operator expects a scalar value as operand
+   ╭─[panko/tests/cases/test_error_invalid_operand_in_logical_operator.c:6:5]
+   │
+ 6 │     f() && 27;
+   │     ─┬───────  
+   │      │         
+   │      ╰───────── this is of type `void`
+───╯

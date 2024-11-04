@@ -1,0 +1,34 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/test_error_invalid_operand_in_logical_operator.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      f~0 `fn() -> void`
+      (compound-statement))
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (expression
+            (logical-or
+               42
+               (call (name f~0 `fn() -> void`))))
+         (expression
+            (logical-and
+               (call (name f~0 `fn() -> void`))
+               (call (name f~0 `fn() -> void`))))
+         (expression
+            (logical-and
+               (call (name f~0 `fn() -> void`))
+               27)))))
+
+----- stderr -----

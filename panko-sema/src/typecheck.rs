@@ -191,6 +191,15 @@ enum Diagnostic<'a> {
         lhs: TypedExpression<'a>,
         rhs: TypedExpression<'a>,
     },
+
+    #[error("{kind} operator expects a scalar value as operand")]
+    #[diagnostics(at(colour = Red, label = "this is of type `{ty}`"), expr(colour = Blue))]
+    #[with(ty = at.ty, kind = kind.fg(Blue))]
+    ScalarExpected {
+        at: TypedExpression<'a>,
+        expr: scope::Expression<'a>,
+        kind: &'a str,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1419,14 +1428,17 @@ fn typeck_expression<'a>(
                 })
         }
         scope::Expression::Logical { lhs, op, rhs } => {
-            let lhs = typeck_expression(sess, lhs, Context::Default);
-            if !lhs.ty.ty.is_scalar() {
-                todo!("type error: argument to logical and must be scalar");
-            }
-            let rhs = typeck_expression(sess, rhs, Context::Default);
-            if !rhs.ty.ty.is_scalar() {
-                todo!("type error: argument to logical and must be scalar");
-            }
+            let check_scalar = |operand: TypedExpression<'a>| {
+                if operand.ty.ty.is_scalar() {
+                    operand
+                }
+                else {
+                    let kind = sess.alloc_str(&format!("logical {}", op.str()));
+                    sess.emit(Diagnostic::ScalarExpected { at: operand, expr: *expr, kind })
+                }
+            };
+            let lhs = check_scalar(typeck_expression(sess, lhs, Context::Default));
+            let rhs = check_scalar(typeck_expression(sess, rhs, Context::Default));
             TypedExpression {
                 ty: Type::int().unqualified(),
                 expr: Expression::Logical {
