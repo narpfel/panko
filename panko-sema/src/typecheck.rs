@@ -1240,7 +1240,11 @@ fn typeck_expression<'a>(
                         }
                     }
                     else {
-                        todo!("type error: cannot be operand to unary not");
+                        sess.emit(Diagnostic::ScalarExpected {
+                            at: operand,
+                            expr: *expr,
+                            kind: "unary not",
+                        })
                     },
                 UnaryOpKind::Sizeof => {
                     let ty = check_ty_can_sizeof(sess, &operand.ty, expr, &operator.token);

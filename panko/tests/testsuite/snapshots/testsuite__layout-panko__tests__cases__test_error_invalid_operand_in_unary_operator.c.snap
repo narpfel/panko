@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/test_error_invalid_operand_in_unary_operator.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unary not operator expects a scalar value as operand
+   ╭─[panko/tests/cases/test_error_invalid_operand_in_unary_operator.c:4:9]
+   │
+ 4 │     !   f();
+   │     ─────┬─  
+   │          │   
+   │          ╰─── this is of type `void`
+───╯
