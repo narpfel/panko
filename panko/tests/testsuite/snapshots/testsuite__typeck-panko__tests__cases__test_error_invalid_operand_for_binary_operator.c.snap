@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_invalid_operand_for_binary_operator.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid operands to binary operator `+`
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_binary_operator.c:4:9]
+   │
+ 4 │     f() + 42;
+   │     ─┬─ ─ ─┬  
+   │      │     ╰── this is of type `int`
+   │      │        
+   │      ╰──────── this is of type `void`
+───╯

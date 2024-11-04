@@ -200,6 +200,20 @@ enum Diagnostic<'a> {
         expr: scope::Expression<'a>,
         kind: &'a str,
     },
+
+    #[error("invalid operands to binary operator `{op_token}`")]
+    #[diagnostics(
+        lhs(colour = Blue, label = "this is of type `{lhs_ty}`"),
+        // TODO: include message showing what was expected
+        at(colour = Red),
+        rhs(colour = Magenta, label = "this is of type `{rhs_ty}`"),
+    )]
+    #[with(op_token = at.token, lhs_ty = lhs.ty, rhs_ty = rhs.ty)]
+    InvalidOperandsForBinaryOperator {
+        at: BinOp<'a>,
+        lhs: TypedExpression<'a>,
+        rhs: TypedExpression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -742,7 +756,7 @@ fn typeck_binop<'a>(
         (Type::Pointer(lhs_pointee_ty), Type::Pointer(rhs_pointee_ty))
             if matches!(op.kind, BinOpKind::Subtract) =>
             typeck_ptrdiff(sess, op, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
-        _ => todo!("type error: {} <=> {}", lhs.ty.ty, rhs.ty.ty),
+        _ => sess.emit(Diagnostic::InvalidOperandsForBinaryOperator { at: *op, lhs, rhs }),
     }
 }
 

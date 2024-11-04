@@ -623,9 +623,13 @@ pub struct BinOp<'a> {
     pub token: Token<'a>,
 }
 
-impl BinOp<'_> {
+impl<'a> BinOp<'a> {
     pub fn str(&self) -> &'static str {
         self.kind.str()
+    }
+
+    pub fn loc(&self) -> Loc<'a> {
+        self.token.loc()
     }
 }
 
