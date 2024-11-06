@@ -392,14 +392,17 @@ impl RefKind {
 #[derive(Debug, Clone, Copy)]
 pub enum IncrementFixity<'a> {
     Prefix,
-    Postfix(Reference<'a>),
+    Postfix {
+        pointer: Reference<'a>,
+        copy: Reference<'a>,
+    },
 }
 
 impl IncrementFixity<'_> {
     fn str(&self) -> &'static str {
         match self {
             IncrementFixity::Prefix => "pre",
-            IncrementFixity::Postfix(_) => "post",
+            IncrementFixity::Postfix { pointer: _, copy: _ } => "post",
         }
     }
 }
@@ -868,9 +871,11 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
                 operand,
                 fixity: match fixity {
                     cst::IncrementFixity::Prefix => IncrementFixity::Prefix,
-                    cst::IncrementFixity::Postfix => IncrementFixity::Postfix(
-                        scopes.temporary(operand.loc(), Type::Void.unqualified()),
-                    ),
+                    cst::IncrementFixity::Postfix => IncrementFixity::Postfix {
+                        // TODO: same as in `CompoundAssign`, these types are placeholders
+                        pointer: scopes.temporary(operand.loc(), Type::Void.unqualified()),
+                        copy: scopes.temporary(operand.loc(), Type::Void.unqualified()),
+                    },
                 },
                 reference,
             }

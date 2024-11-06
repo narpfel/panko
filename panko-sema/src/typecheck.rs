@@ -1048,6 +1048,76 @@ fn check_ty_can_sizeof<'a>(
     }
 }
 
+fn desugar_postfix_increment<'a>(
+    sess: &'a Session<'a>,
+    op: BinOp<'a>,
+    operand: &'a scope::Expression<'a>,
+    reference: &Reference<'a>,
+    pointer: &Reference<'a>,
+    copy: &Reference<'a>,
+) -> scope::Expression<'a> {
+    // `x++` is mostly equivalent to the following expression, so we use that as a desugaring:
+    // __pointer = &x, __copy = *__pointer, *__pointer += 1, __copy
+
+    // TODO: this desugaring has the same problem as for `CompoundAssign`: bitfields
+    // are not supported.
+
+    let token = op.token;
+
+    // TODO: we only typecheck to get the type
+    let ty = typeck_expression(sess, operand, Context::Default).ty;
+    let pointer = sess.alloc(scope::Expression::Name(Reference {
+        ty: Type::Pointer(sess.alloc(ty)).unqualified(),
+        ..*pointer
+    }));
+    let copy = sess.alloc(scope::Expression::Name(Reference { ty, ..*copy }));
+
+    scope::Expression::Comma {
+        lhs: sess.alloc(scope::Expression::Comma {
+            lhs: sess.alloc(scope::Expression::Comma {
+                // pointer = &operand
+                lhs: sess.alloc(scope::Expression::Assign {
+                    target: pointer,
+                    value: sess.alloc(scope::Expression::UnaryOp {
+                        operator: UnaryOp { kind: UnaryOpKind::Addressof, token },
+                        operand,
+                    }),
+                }),
+                // copy = *pointer
+                rhs: sess.alloc(scope::Expression::Assign {
+                    target: copy,
+                    value: sess.alloc(scope::Expression::UnaryOp {
+                        operator: UnaryOp { kind: UnaryOpKind::Deref, token },
+                        operand: pointer,
+                    }),
+                }),
+            }),
+            // *pointer <op>= 1
+            rhs: sess.alloc(scope::Expression::CompoundAssign {
+                target: sess.alloc(scope::Expression::UnaryOp {
+                    operator: UnaryOp { kind: UnaryOpKind::Deref, token },
+                    operand: pointer,
+                }),
+                target_temporary: *reference,
+                op,
+                value: sess.alloc(scope::Expression::Integer {
+                    value: "1",
+                    token: Token::synthesised(
+                        TokenKind::Integer(panko_lex::Integer {
+                            suffix: IntegerSuffix::None,
+                            suffix_len: 0,
+                            base: 10,
+                            prefix_len: 0,
+                        }),
+                        token.loc(),
+                    ),
+                }),
+            }),
+        }),
+        rhs: copy,
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 enum Context {
     Default,
@@ -1542,11 +1612,12 @@ fn typeck_expression<'a>(
                 IncrementOpKind::Increment => BinOpKind::Add,
                 IncrementOpKind::Decrement => BinOpKind::Subtract,
             };
+            let op = BinOp { kind, token: operator.token() };
             let expr = match fixity {
                 IncrementFixity::Prefix => scope::Expression::CompoundAssign {
                     target: operand,
                     target_temporary: *reference,
-                    op: BinOp { kind, token: operator.token() },
+                    op,
                     value: sess.alloc(scope::Expression::Integer {
                         value: "1",
                         token: Token::synthesised(
@@ -1560,7 +1631,8 @@ fn typeck_expression<'a>(
                         ),
                     }),
                 },
-                IncrementFixity::Postfix(_reference) => todo!("unimplemented"),
+                IncrementFixity::Postfix { pointer, copy } =>
+                    desugar_postfix_increment(sess, op, operand, reference, pointer, copy),
             };
             typeck_expression(sess, &expr, Context::Default)
         }
