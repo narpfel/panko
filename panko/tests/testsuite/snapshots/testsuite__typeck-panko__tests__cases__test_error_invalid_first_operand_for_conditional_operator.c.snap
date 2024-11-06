@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_invalid_first_operand_for_conditional_operator.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: ternary operator expects a scalar value as operand
+   ╭─[panko/tests/cases/test_error_invalid_first_operand_for_conditional_operator.c:4:5]
+   │
+ 4 │     f() ? 0 : 1;
+   │     ─┬─────────  
+   │      │           
+   │      ╰─────────── this is of type `void`
+───╯

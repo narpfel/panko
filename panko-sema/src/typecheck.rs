@@ -1470,9 +1470,16 @@ fn typeck_expression<'a>(
         }
         scope::Expression::Conditional { condition, then, or_else } => {
             let condition = typeck_expression(sess, condition, Context::Default);
-            if !condition.ty.ty.is_scalar() {
-                todo!("type error: first argument to ternary must be scalar");
+            let condition = if condition.ty.ty.is_scalar() {
+                condition
             }
+            else {
+                sess.emit(Diagnostic::ScalarExpected {
+                    at: condition,
+                    expr: *expr,
+                    kind: "ternary",
+                })
+            };
             let then = typeck_expression(sess, then, Context::Default);
             let or_else = typeck_expression(sess, or_else, Context::Default);
             // TODO: some rules are unimplemented
