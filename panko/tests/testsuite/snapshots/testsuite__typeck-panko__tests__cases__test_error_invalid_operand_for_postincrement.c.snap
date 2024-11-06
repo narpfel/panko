@@ -1,0 +1,96 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_invalid_operand_for_postincrement.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot take address of this expression because it is not an lvalue
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:9:5]
+   │
+ 9 │     f()++;
+   │     ─┬─  
+   │      ╰─── this expression is not an lvalue
+───╯
+
+Error: invalid implicit conversion from `void` to `ptr<void>`
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:9:5]
+   │
+ 9 │     f()++;
+   │     ─┬─  
+   │      ╰─── this is of type `void`, which cannot be implicitly converted to `ptr<void>`
+───╯
+
+Error: cannot assign to this expression because it is not an lvalue
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:9:5]
+   │
+ 9 │     f()++;
+   │     ─┬─  
+   │      ╰─── this expression is not an lvalue
+───╯
+
+Error: dereference of pointer to `void`
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:9:5]
+   │
+ 9 │     f()++;
+   │     ─┬─  
+   │      ╰─── this expression has type `ptr<void>`
+───╯
+
+Error: dereference of pointer to `void`
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:9:5]
+   │
+ 9 │     f()++;
+   │     ─┬─  
+   │      ╰─── this expression has type `ptr<void>`
+───╯
+
+Error: cannot assign to this expression because it is not an lvalue
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:9:5]
+   │
+ 9 │     f()++;
+   │     ──┬──  
+   │       ╰──── this expression is not an lvalue
+───╯
+
+Error: cannot assign to this expression because it is not an lvalue
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:9:5]
+   │
+ 9 │     f()++;
+   │     ──┬──  
+   │       ╰──── this expression is not an lvalue
+───╯
+
+Error: invalid operands to binary operator `++`
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:9:8]
+   │
+ 9 │     f()++;
+   │     ──┬─┬  
+   │       │ ╰── this is of type `int`
+   │       │    
+   │       ╰──── this is of type `void`
+───╯
+
+Error: cannot take address of this expression because it is not an lvalue
+    ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:10:5]
+    │
+ 10 │     returns_int()++;
+    │     ──────┬──────  
+    │           ╰──────── this expression is not an lvalue
+────╯
+
+Error: invalid implicit conversion from `void` to `ptr<int>`
+    ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:10:5]
+    │
+ 10 │     returns_int()++;
+    │     ──────┬──────  
+    │           ╰──────── this is of type `void`, which cannot be implicitly converted to `ptr<int>`
+────╯
