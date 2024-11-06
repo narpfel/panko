@@ -572,6 +572,11 @@ pub enum Expression<'a> {
         lhs: &'a Expression<'a>,
         rhs: &'a Expression<'a>,
     },
+    Increment {
+        operator: IncrementOp<'a>,
+        operand: &'a Expression<'a>,
+        fixity: IncrementFixity,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -709,6 +714,54 @@ impl<'a> LogicalOp<'a> {
 
     pub fn loc(&self) -> Loc<'a> {
         self.token.loc()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct IncrementOp<'a> {
+    kind: IncrementOpKind,
+    token: Token<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum IncrementOpKind {
+    Increment,
+    Decrement,
+}
+
+impl<'a> IncrementOp<'a> {
+    pub fn str(&self) -> &'static str {
+        match self.kind {
+            IncrementOpKind::Increment => "increment",
+            IncrementOpKind::Decrement => "decrement",
+        }
+    }
+
+    pub fn loc(&self) -> Loc<'a> {
+        self.token.loc()
+    }
+
+    pub fn kind(&self) -> IncrementOpKind {
+        self.kind
+    }
+
+    pub fn token(&self) -> Token<'a> {
+        self.token
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum IncrementFixity {
+    Prefix,
+    Postfix,
+}
+
+impl IncrementFixity {
+    pub fn str(&self) -> &'static str {
+        match self {
+            IncrementFixity::Prefix => "pre",
+            IncrementFixity::Postfix => "post",
+        }
     }
 }
 

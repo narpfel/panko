@@ -250,6 +250,8 @@ impl AsSExpr for Expression<'_> {
             Expression::Conditional { condition, then, or_else } =>
                 SExpr::new("conditional").lines([condition, then, or_else]),
             Expression::Comma { lhs, rhs } => SExpr::new("comma").lines([lhs, rhs]),
+            Expression::Increment { operator, operand, fixity } =>
+                SExpr::new(format!("{}-{}", fixity.str(), operator.str())).inherit(operand),
         }
     }
 }

@@ -1,0 +1,40 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/test_error_invalid_operand_for_preincrement.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to this expression because it is not an lvalue
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_preincrement.c:5:5]
+   │
+ 5 │     ++f();
+   │     ──┬──  
+   │       ╰──── this expression is not an lvalue
+───╯
+
+Error: invalid operands to binary operator `++`
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_preincrement.c:5:5]
+   │
+ 5 │     ++f();
+   │     ─┬┬──  
+   │      ╰───── this is of type `int`
+   │       │    
+   │       ╰──── this is of type `void`
+───╯
+
+Error: cannot assign to this expression because it is not an lvalue
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_preincrement.c:5:7]
+   │
+ 5 │     ++f();
+   │       ─┬─  
+   │        ╰─── this expression is not an lvalue
+───╯

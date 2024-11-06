@@ -1,0 +1,69 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/arithmetic/test_preincrement.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration putchar~0 `fn(∅: int) -> int` ∅)
+   (declaration printf~1 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      f~2 `fn(p: ptr<int>) -> ptr<int>`
+      (params
+         p~3 `ptr<int>`)
+      (compound-statement
+         (expression
+            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+               (65 `int`)
+               `int`))
+         (expression
+            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+               (10 `int`)
+               `int`))
+         (return (p~3 `ptr<int>`))))
+   (function-definition
+      main~4 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      (params
+         main.unnamed_parameter.0~5 `int`
+         argv~6 `ptr<ptr<char>>`)
+      (compound-statement
+         (definition x~7 `int` (42 `int`))
+         (expression
+            (call (addressof (printf~1 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (noop-type-conversion (deref (ptr-add (argv~6 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
+               (combine
+                  (assign (unnamed-temporary~8 `ptr<int>`) (addressof (x~7 `int`) `ptr<int>`) `ptr<int>`)
+                  (assign (deref (unnamed-temporary~8 `ptr<int>`) `int`) (add (deref (unnamed-temporary~8 `ptr<int>`) `int`) (++ `int`) `int`) `int`)
+                  `int`)
+               `int`))
+         (expression
+            (call (addressof (printf~1 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (noop-type-conversion (deref (ptr-add (argv~6 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
+               (x~7 `int`)
+               `int`))
+         (expression
+            (call (addressof (printf~1 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (noop-type-conversion (deref (ptr-add (argv~6 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
+               (combine
+                  (assign (unnamed-temporary~9 `ptr<int>`)
+                     (addressof
+                        (deref
+                           (call (addressof (f~2 `fn(p: ptr<int>) -> ptr<int>`) `ptr<fn(p: ptr<int>) -> ptr<int>>`)
+                              (addressof (x~7 `int`) `ptr<int>`)
+                              `ptr<int>`)
+                           `int`)
+                        `ptr<int>`)
+                     `ptr<int>`)
+                  (assign (deref (unnamed-temporary~9 `ptr<int>`) `int`) (add (deref (unnamed-temporary~9 `ptr<int>`) `int`) (++ `int`) `int`) `int`)
+                  `int`)
+               `int`))
+         (return (x~7 `int`)))))
+
+----- stderr -----

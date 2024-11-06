@@ -11,6 +11,7 @@ use panko_parser::ast;
 use panko_parser::ast::ErrorExpr;
 use panko_parser::ast::Session;
 use panko_parser::BinOp;
+use panko_parser::IncrementOp;
 use panko_parser::LogicalOp;
 use panko_parser::UnaryOp;
 use panko_report::Report;
@@ -205,6 +206,12 @@ pub(crate) enum Expression<'a> {
         lhs: &'a Expression<'a>,
         rhs: &'a Expression<'a>,
     },
+    Increment {
+        operator: IncrementOp<'a>,
+        operand: &'a Expression<'a>,
+        fixity: IncrementFixity<'a>,
+        reference: Reference<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -321,6 +328,12 @@ impl<'a> Expression<'a> {
             Expression::Conditional { condition, then: _, or_else } =>
                 condition.loc().until(or_else.loc()),
             Expression::Comma { lhs, rhs } => lhs.loc().until(rhs.loc()),
+            Expression::Increment {
+                operator,
+                operand,
+                fixity: _,
+                reference: _,
+            } => operator.loc().until(operand.loc()),
         }
     }
 }
@@ -372,6 +385,21 @@ impl RefKind {
             RefKind::Declaration => "declaration",
             RefKind::TentativeDefinition => "tentative-definition",
             RefKind::Definition => "definition",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum IncrementFixity<'a> {
+    Prefix,
+    Postfix(Reference<'a>),
+}
+
+impl IncrementFixity<'_> {
+    fn str(&self) -> &'static str {
+        match self {
+            IncrementFixity::Prefix => "pre",
+            IncrementFixity::Postfix(_) => "post",
         }
     }
 }
@@ -832,6 +860,21 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
             rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),
         },
+        ast::Expression::Increment { operator, operand, fixity } => {
+            let operand = scopes.sess.alloc(resolve_expr(scopes, operand));
+            let reference = scopes.temporary(operand.loc(), Type::Void.unqualified());
+            Expression::Increment {
+                operator: *operator,
+                operand,
+                fixity: match fixity {
+                    cst::IncrementFixity::Prefix => IncrementFixity::Prefix,
+                    cst::IncrementFixity::Postfix => IncrementFixity::Postfix(
+                        scopes.temporary(operand.loc(), Type::Void.unqualified()),
+                    ),
+                },
+                reference,
+            }
+        }
     }
 }
 

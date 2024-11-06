@@ -107,6 +107,9 @@ extern {
         "?" => Token { kind: panko_lex::TokenKind::QuestionMark, .. },
         ":" => Token { kind: panko_lex::TokenKind::Colon, .. },
 
+        "++" => Token { kind: panko_lex::TokenKind::PlusPlus, .. },
+        "--" => Token { kind: panko_lex::TokenKind::MinusMinus, ..},
+
         "..." => Token { kind: panko_lex::TokenKind::Ellipsis, .. },
 
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
@@ -379,12 +382,19 @@ GenericAssociation: ast::GenericAssociation<'a> = {
     <default:"default"> ":" <expr:AssignmentExpression> => ast::GenericAssociation::Default { <> },
 }
 
+IncrementOperator: ast::IncrementOp<'a> = {
+    "++" => ast::IncrementOp { kind: ast::IncrementOpKind::Increment, token: <> },
+    "--" => ast::IncrementOp { kind: ast::IncrementOpKind::Decrement, token: <> },
+}
+
 PostfixExpression: ast::Expression<'a> = {
     PrimaryExpression,
     <callee:Bump<PostfixExpression>> "(" <args:ArgumentExpressionList> <close_paren:")"> =>
         ast::Expression::Call { <> },
     <lhs:Bump<PostfixExpression>> "[" <rhs:Bump<Expression>> <close_bracket:"]"> =>
         ast::Expression::Subscript { <> },
+    <operand:Bump<PostfixExpression>> <operator:IncrementOperator> =>
+        ast::Expression::Increment { <>, fixity: ast::IncrementFixity::Postfix },
 }
 
 ArgumentExpressionList = { CommaSep<AssignmentExpression> }
@@ -407,6 +417,8 @@ UnaryExpression: ast::Expression<'a> = {
     },
     <sizeof:"sizeof"> "(" <ty:TypeName> <close_paren:")"> => ast::Expression::Sizeof { <> },
     <alignof:"alignof"> "(" <ty:TypeName> <close_paren:")"> => ast::Expression::Alignof { <> },
+    <operator:IncrementOperator> <operand:Bump<UnaryExpression>> =>
+        ast::Expression::Increment { <>, fixity: ast::IncrementFixity::Prefix },
 }
 
 CastExpression: ast::Expression<'a> = {

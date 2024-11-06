@@ -23,6 +23,7 @@ use panko_parser::ast::Signedness;
 use panko_parser::sexpr_builder::AsSExpr as _;
 use panko_parser::BinOp;
 use panko_parser::BinOpKind;
+use panko_parser::IncrementOpKind;
 use panko_parser::LogicalOp;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
@@ -31,6 +32,7 @@ use variant_types::IntoVariant as _;
 
 use crate::scope;
 use crate::scope::GenericAssociation;
+use crate::scope::IncrementFixity;
 use crate::scope::ParamRefs;
 use crate::scope::Reference;
 use crate::ty::FunctionType;
@@ -1527,6 +1529,33 @@ fn typeck_expression<'a>(
                     second: sess.alloc(rhs),
                 },
             }
+        }
+        scope::Expression::Increment { operator, operand, fixity, reference } => {
+            let kind = match operator.kind() {
+                IncrementOpKind::Increment => BinOpKind::Add,
+                IncrementOpKind::Decrement => BinOpKind::Subtract,
+            };
+            let expr = match fixity {
+                IncrementFixity::Prefix => scope::Expression::CompoundAssign {
+                    target: operand,
+                    target_temporary: *reference,
+                    op: BinOp { kind, token: operator.token() },
+                    value: sess.alloc(scope::Expression::Integer {
+                        value: "1",
+                        token: Token::synthesised(
+                            TokenKind::Integer(panko_lex::Integer {
+                                suffix: IntegerSuffix::None,
+                                suffix_len: 0,
+                                base: 10,
+                                prefix_len: 0,
+                            }),
+                            operator.token().loc(),
+                        ),
+                    }),
+                },
+                IncrementFixity::Postfix(_reference) => todo!("unimplemented"),
+            };
+            typeck_expression(sess, &expr, Context::Default)
         }
     };
 
