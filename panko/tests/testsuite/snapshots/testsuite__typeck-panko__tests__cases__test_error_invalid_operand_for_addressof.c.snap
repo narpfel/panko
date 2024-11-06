@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_invalid_operand_for_addressof.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot take address of this expression because it is not an lvalue
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_addressof.c:5:6]
+   │
+ 5 │     &42;
+   │      ─┬  
+   │       ╰── this expression is not an lvalue
+───╯
+
+Error: cannot take address of this expression because it is not an lvalue
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_addressof.c:6:6]
+   │
+ 6 │     &f();
+   │      ─┬─  
+   │       ╰─── this expression is not an lvalue
+───╯

@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/test_error_invalid_operand_for_addressof.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration f~0 `fn() -> int` ∅)
+   (declaration pf~1 `fn() -> ptr<int>` ∅)
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (expression (addressof 42))
+         (expression (addressof (call (name f~0 `fn() -> int`))))
+         (expression (addressof (deref (call (name pf~1 `fn() -> ptr<int>`))))))))
+
+----- stderr -----

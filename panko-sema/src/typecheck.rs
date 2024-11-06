@@ -126,6 +126,14 @@ enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
     },
 
+    #[error("cannot take address of this expression because it is {reason}")]
+    #[diagnostics(at(colour = Red, label = "this expression is {reason}"))]
+    #[with(reason = reason.fg(Red))]
+    CannotTakeAddress {
+        at: TypedExpression<'a>,
+        reason: &'a str,
+    },
+
     #[error(
         "cannot dereference this expression with type `{ty}` (pointer or array type required)"
     )]
@@ -1247,14 +1255,20 @@ fn typeck_expression<'a>(
                         // TODO
                         /* && !operand.is_bitfield() && !operand.has_register_storage_class() */;
                     if !(is_function_designator || is_lvalue) {
-                        todo!("type error: cannot take address of this expr");
+                        // TODO: update error message for bitfields and `register` storage class
+                        sess.emit(Diagnostic::CannotTakeAddress {
+                            at: operand,
+                            reason: "not an lvalue",
+                        })
                     }
-                    TypedExpression {
-                        ty: Type::Pointer(sess.alloc(operand.ty)).unqualified(),
-                        expr: Expression::Addressof {
-                            ampersand: operator.token,
-                            operand: sess.alloc(operand),
-                        },
+                    else {
+                        TypedExpression {
+                            ty: Type::Pointer(sess.alloc(operand.ty)).unqualified(),
+                            expr: Expression::Addressof {
+                                ampersand: operator.token,
+                                operand: sess.alloc(operand),
+                            },
+                        }
                     }
                 }
                 UnaryOpKind::Deref => match operand.ty.ty {
