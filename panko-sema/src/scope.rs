@@ -132,7 +132,10 @@ pub(crate) enum Statement<'a> {
 pub(crate) enum Expression<'a> {
     Error(&'a dyn Report),
     Name(Reference<'a>),
-    Integer(Token<'a>),
+    Integer {
+        value: &'a str,
+        token: Token<'a>,
+    },
     Parenthesised {
         open_paren: Token<'a>,
         expr: &'a Expression<'a>,
@@ -287,7 +290,7 @@ impl<'a> Expression<'a> {
         match self {
             Expression::Error(error) => error.location(),
             Expression::Name(name) => name.loc(),
-            Expression::Integer(token) => token.loc(),
+            Expression::Integer { value: _, token } => token.loc(),
             Expression::Parenthesised { open_paren, expr: _, close_paren } =>
                 open_paren.loc().until(close_paren.loc()),
             Expression::Assign { target, value } => target.loc().until(value.loc()),
@@ -746,7 +749,8 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             .lookup(name.slice(), name.loc())
             .map(Expression::Name)
             .unwrap_or_else(|| scopes.sess.emit(Diagnostic::UndeclaredName { at: *name })),
-        ast::Expression::Integer(integer) => Expression::Integer(*integer),
+        ast::Expression::Integer(token) =>
+            Expression::Integer { value: token.slice(), token: *token },
         ast::Expression::Parenthesised { open_paren, expr, close_paren } =>
             Expression::Parenthesised {
                 open_paren: *open_paren,

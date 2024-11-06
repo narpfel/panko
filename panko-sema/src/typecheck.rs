@@ -1064,14 +1064,14 @@ fn typeck_expression<'a>(
             ty: reference.ty,
             expr: Expression::Name(*reference),
         },
-        scope::Expression::Integer(token) => {
+        scope::Expression::Integer { value, token } => {
             let TokenKind::Integer(Integer { suffix, suffix_len, base, prefix_len }) = token.kind
             else {
                 unreachable!()
             };
-            let number = &token.slice()[prefix_len..token.slice().len() - suffix_len];
+            let number = &value[prefix_len..value.len() - suffix_len];
             let number: String = number.chars().filter(|&c| c != '\'').collect();
-            let value = u64::from_str_radix(&number, base).unwrap_or_else(|err| {
+            let parsed_value = u64::from_str_radix(&number, base).unwrap_or_else(|err| {
                 todo!("emit diagnostic: integer constant too large: {err:?}")
             });
             let (signedness, kind) = match suffix {
@@ -1087,15 +1087,15 @@ fn typeck_expression<'a>(
                     // TODO: use the error
                     let () = sess.emit(Diagnostic::InvalidIntegerSuffix {
                         at: *token,
-                        suffix: &token.slice()[token.slice().len() - suffix_len..],
+                        suffix: &value[value.len() - suffix_len..],
                     });
                     (Signedness::Signed, IntegralKind::Int)
                 }
             };
-            let integral_ty = grow_to_fit(signedness, kind, base, value);
+            let integral_ty = grow_to_fit(signedness, kind, base, parsed_value);
             TypedExpression {
                 ty: Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified(),
-                expr: Expression::Integer { value, token: *token },
+                expr: Expression::Integer { value: parsed_value, token: *token },
             }
         }
         scope::Expression::Parenthesised { open_paren, expr, close_paren } => {

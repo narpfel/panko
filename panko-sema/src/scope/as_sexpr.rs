@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::iter;
 
 use itertools::Either;
@@ -80,7 +81,7 @@ impl AsSExpr for Expression<'_> {
         match self {
             Expression::Error(_error) => SExpr::new("error"),
             Expression::Name(name) => SExpr::new("name").inherit(name),
-            Expression::Integer(int) => SExpr::string(int.slice()),
+            Expression::Integer { value, token: _ } => SExpr::string(Cow::Borrowed(*value)),
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.as_sexpr(),
             Expression::Assign { target, value } =>
                 SExpr::new("assign").inherit(target).inherit(value),
