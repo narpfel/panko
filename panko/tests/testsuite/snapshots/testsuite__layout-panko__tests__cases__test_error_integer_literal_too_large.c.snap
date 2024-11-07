@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/test_error_integer_literal_too_large.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: integer literal too large
+   ╭─[panko/tests/cases/test_error_integer_literal_too_large.c:5:5]
+   │
+ 5 │     0x1'0000'0000'0000'0000;
+   │     ───────────┬───────────  
+   │                ╰───────────── this literal does not fit any integer type
+───╯

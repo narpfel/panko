@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::fmt;
+use std::num::IntErrorKind;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Green;
@@ -224,6 +225,10 @@ enum Diagnostic<'a> {
         lhs: TypedExpression<'a>,
         rhs: TypedExpression<'a>,
     },
+
+    #[error("integer literal too large")]
+    #[diagnostics(at(colour = Red, label = "this literal does not fit any integer type"))]
+    IntegerLiteralTooLarge { at: Token<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1151,9 +1156,6 @@ fn typeck_expression<'a>(
             };
             let number = &value[prefix_len..value.len() - suffix_len];
             let number: String = number.chars().filter(|&c| c != '\'').collect();
-            let parsed_value = u64::from_str_radix(&number, base).unwrap_or_else(|err| {
-                todo!("emit diagnostic: integer constant too large: {err:?}")
-            });
             let (signedness, kind) = match suffix {
                 IntegerSuffix::None => (Signedness::Signed, IntegralKind::Int),
                 IntegerSuffix::Unsigned => (Signedness::Unsigned, IntegralKind::Int),
@@ -1172,10 +1174,19 @@ fn typeck_expression<'a>(
                     (Signedness::Signed, IntegralKind::Int)
                 }
             };
-            let integral_ty = grow_to_fit(signedness, kind, base, parsed_value);
-            TypedExpression {
-                ty: Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified(),
-                expr: Expression::Integer { value: parsed_value, token: *token },
+            match u64::from_str_radix(&number, base) {
+                Ok(parsed_value) => {
+                    let integral_ty = grow_to_fit(signedness, kind, base, parsed_value);
+                    TypedExpression {
+                        ty: Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified(),
+                        expr: Expression::Integer { value: parsed_value, token: *token },
+                    }
+                }
+                Err(error) => match error.kind() {
+                    IntErrorKind::PosOverflow =>
+                        sess.emit(Diagnostic::IntegerLiteralTooLarge { at: *token }),
+                    _ => unreachable!(),
+                },
             }
         }
         scope::Expression::Parenthesised { open_paren, expr, close_paren } => {
