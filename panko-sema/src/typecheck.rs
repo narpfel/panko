@@ -1526,6 +1526,8 @@ fn typeck_expression<'a>(
                 })
                 .into_grouping_map_by(|(&ty, _expr)| ty)
                 .reduce(|first, _ty, duplicate| {
+                    // intentionally ignored because we can continue translation with first
+                    // duplicate
                     let () = sess.emit(Diagnostic::GenericWithDuplicateType {
                         at: *duplicate.0,
                         previous: *first.0,
