@@ -6,6 +6,7 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/subscript/test_subscript_long_pointer.c
+snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -22,8 +23,8 @@ exit_code: 0
                   (sizeof 8 `long` `unsigned long`)
                   `ptr<void>`)
                `ptr<long>`))
-         (expression (assign (deref (ptr-add (p~2 `ptr<long>`) (sign-extend (0 `int`) `unsigned long long`) `ptr<long>`) `long`) (sign-extend (42 `int`) `long`) `long`))
-         (expression (assign (deref (ptr-add (p~2 `ptr<long>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<long>`) `long`) (sign-extend (27 `int`) `long`) `long`))
-         (return (truncate (add (deref (ptr-add (p~2 `ptr<long>`) (sign-extend (0 `int`) `unsigned long long`) `ptr<long>`) `long`) (deref (ptr-add (sign-extend (1 `int`) `unsigned long long`) (p~2 `ptr<long>`) `ptr<long>`) `long`) `long`) `int`)))))
+         (expression (assign (deref (ptr-add (p~2 `ptr<long>`) (sign-extend (0 `int`) `unsigned long`) `ptr<long>`) `long`) (sign-extend (42 `int`) `long`) `long`))
+         (expression (assign (deref (ptr-add (p~2 `ptr<long>`) (sign-extend (1 `int`) `unsigned long`) `ptr<long>`) `long`) (sign-extend (27 `int`) `long`) `long`))
+         (return (truncate (add (deref (ptr-add (p~2 `ptr<long>`) (sign-extend (0 `int`) `unsigned long`) `ptr<long>`) `long`) (deref (ptr-add (sign-extend (1 `int`) `unsigned long`) (p~2 `ptr<long>`) `ptr<long>`) `long`) `long`) `int`)))))
 
 ----- stderr -----

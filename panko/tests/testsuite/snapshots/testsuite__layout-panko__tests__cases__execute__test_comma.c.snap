@@ -26,14 +26,14 @@ exit_code: 0
                      (deref `ptr<char>` @64
                         (ptr-add `ptr<ptr<char>>` @72
                            (argv~3 `ptr<ptr<char>>` @8)
-                           (sign-extend `unsigned long long` @80 (1 `int` @88)))))
+                           (sign-extend `unsigned long` @80 (1 `int` @88)))))
                   (42 `int` @80))
                (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                   (noop-type-conversion `ptr<char const>` @32
                      (deref `ptr<char>` @32
                         (ptr-add `ptr<ptr<char>>` @40
                            (argv~3 `ptr<ptr<char>>` @8)
-                           (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                           (sign-extend `unsigned long` @48 (1 `int` @56)))))
                   (27 `int` @48))))
          (expression
             (combine `int` @16
@@ -43,7 +43,7 @@ exit_code: 0
                      (deref `ptr<char>` @32
                         (ptr-add `ptr<ptr<char>>` @40
                            (argv~3 `ptr<ptr<char>>` @8)
-                           (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                           (sign-extend `unsigned long` @48 (1 `int` @56)))))
                   (123 `int` @48))))
          (expression
             (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
@@ -51,7 +51,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (combine `int` @48
                   (combine `int` @56
                      (combine `int` @60

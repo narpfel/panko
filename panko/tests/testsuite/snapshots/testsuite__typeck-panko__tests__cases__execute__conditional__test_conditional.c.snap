@@ -21,7 +21,7 @@ exit_code: 0
       (compound-statement
          (expression
             (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
+               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (conditional
                   (0 `int`)
                   (42 `int`)

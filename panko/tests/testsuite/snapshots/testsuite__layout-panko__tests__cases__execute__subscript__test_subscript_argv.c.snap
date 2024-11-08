@@ -6,6 +6,7 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/subscript/test_subscript_argv.c
+snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -24,60 +25,60 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (sign-extend `int` @48
                   (deref `char` @52
                      (ptr-add `ptr<char>` @56
                         (deref `ptr<char>` @56
                            (ptr-add `ptr<ptr<char>>` @64
                               (argv~3 `ptr<ptr<char>>` @8)
-                              (sign-extend `unsigned long long` @72 (1 `int` @80))))
-                        (sign-extend `unsigned long long` @72 (0 `int` @80)))))))
+                              (sign-extend `unsigned long` @72 (1 `int` @80))))
+                        (sign-extend `unsigned long` @72 (0 `int` @80)))))))
          (expression
             (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (sign-extend `int` @48
                   (deref `char` @52
                      (ptr-add `ptr<char>` @56
                         (deref `ptr<char>` @56
                            (ptr-add `ptr<ptr<char>>` @64
                               (argv~3 `ptr<ptr<char>>` @8)
-                              (sign-extend `unsigned long long` @72 (1 `int` @80))))
-                        (sign-extend `unsigned long long` @72 (1 `int` @80)))))))
+                              (sign-extend `unsigned long` @72 (1 `int` @80))))
+                        (sign-extend `unsigned long` @72 (1 `int` @80)))))))
          (expression
             (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (sign-extend `int` @48
                   (deref `char` @52
                      (ptr-add `ptr<char>` @56
                         (deref `ptr<char>` @56
                            (ptr-add `ptr<ptr<char>>` @64
                               (argv~3 `ptr<ptr<char>>` @8)
-                              (sign-extend `unsigned long long` @72 (1 `int` @80))))
-                        (sign-extend `unsigned long long` @72 (2 `int` @80)))))))
+                              (sign-extend `unsigned long` @72 (1 `int` @80))))
+                        (sign-extend `unsigned long` @72 (2 `int` @80)))))))
          (expression
             (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (sign-extend `int` @48
                   (deref `char` @52
                      (ptr-add `ptr<char>` @56
                         (deref `ptr<char>` @56
                            (ptr-add `ptr<ptr<char>>` @64
                               (argv~3 `ptr<ptr<char>>` @8)
-                              (sign-extend `unsigned long long` @72 (1 `int` @80))))
-                        (sign-extend `unsigned long long` @72 (3 `int` @80)))))))
+                              (sign-extend `unsigned long` @72 (1 `int` @80))))
+                        (sign-extend `unsigned long` @72 (3 `int` @80)))))))
          (expression
             (assign `char` @16
                (deref `char` @16
@@ -85,8 +86,8 @@ exit_code: 0
                      (deref `ptr<char>` @24
                         (ptr-add `ptr<ptr<char>>` @32
                            (argv~3 `ptr<ptr<char>>` @8)
-                           (sign-extend `unsigned long long` @40 (1 `int` @48))))
-                     (sign-extend `unsigned long long` @40 (1 `int` @48))))
+                           (sign-extend `unsigned long` @40 (1 `int` @48))))
+                     (sign-extend `unsigned long` @40 (1 `int` @48))))
                (truncate `char` @40 (115 `int` @48))))
          (expression
             (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
@@ -94,10 +95,10 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (deref `ptr<char>` @48
                   (ptr-add `ptr<ptr<char>>` @56
                      (argv~3 `ptr<ptr<char>>` @8)
-                     (sign-extend `unsigned long long` @64 (1 `int` @72)))))))))
+                     (sign-extend `unsigned long` @64 (1 `int` @72)))))))))
 
 ----- stderr -----

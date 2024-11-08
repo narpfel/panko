@@ -221,7 +221,7 @@ impl AsOperand for Register {
     fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
         Operand {
             kind: OperandKind::Register(*self),
-            ty: Type::ullong(),
+            ty: Type::size_t(),
         }
     }
 }
@@ -230,7 +230,7 @@ impl AsOperand for u64 {
     fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
         Operand {
             kind: OperandKind::Immediate(*self),
-            ty: Type::ullong(),
+            ty: Type::size_t(),
         }
     }
 }
@@ -239,7 +239,7 @@ impl AsOperand for Memory<'_> {
     fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
         Operand {
             kind: OperandKind::Pointer(*self),
-            ty: Type::ullong(),
+            ty: Type::size_t(),
         }
     }
 }
@@ -252,7 +252,7 @@ impl AsOperand for StaticId {
                 index: None,
                 offset: Offset::Static(*self),
             }),
-            ty: Type::ulong(),
+            ty: Type::size_t(),
         }
     }
 }

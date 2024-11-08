@@ -914,7 +914,7 @@ fn typeck_ptradd<'a>(
         integral.ty.ty,
         Type::Arithmetic(Arithmetic::Integral(_)),
     ));
-    let integral = convert_as_if_by_assignment(sess, Type::ullong().unqualified(), integral);
+    let integral = convert_as_if_by_assignment(sess, Type::size_t().unqualified(), integral);
     TypedExpression {
         ty: pointer.ty.ty.unqualified(),
         expr: Expression::PtrAdd {
@@ -937,7 +937,7 @@ fn typeck_ptrsub<'a>(
         integral.ty.ty,
         Type::Arithmetic(Arithmetic::Integral(_)),
     ));
-    let integral = convert_as_if_by_assignment(sess, Type::ullong().unqualified(), integral);
+    let integral = convert_as_if_by_assignment(sess, Type::size_t().unqualified(), integral);
     TypedExpression {
         ty: pointer.ty.ty.unqualified(),
         expr: Expression::PtrSub {
@@ -1028,7 +1028,10 @@ fn typeck_ptrdiff<'a>(
         }
     };
 
-    TypedExpression { ty: Type::long().unqualified(), expr }
+    TypedExpression {
+        ty: Type::ptrdiff_t().unqualified(),
+        expr,
+    }
 }
 
 fn check_ty_can_sizeof<'a>(
@@ -1360,7 +1363,7 @@ fn typeck_expression<'a>(
                 UnaryOpKind::Sizeof => {
                     let ty = check_ty_can_sizeof(sess, &operand.ty, expr, &operator.token);
                     TypedExpression {
-                        ty: Type::ulong().unqualified(),
+                        ty: Type::size_t().unqualified(),
                         expr: Expression::Sizeof {
                             sizeof: operator.token,
                             operand: sess.alloc(operand),
@@ -1430,7 +1433,7 @@ fn typeck_expression<'a>(
         scope::Expression::Sizeof { sizeof, ty, close_paren } => {
             let ty = check_ty_can_sizeof(sess, ty, expr, sizeof);
             TypedExpression {
-                ty: Type::ulong().unqualified(),
+                ty: Type::size_t().unqualified(),
                 expr: Expression::SizeofTy {
                     sizeof: *sizeof,
                     ty,
@@ -1442,7 +1445,7 @@ fn typeck_expression<'a>(
         scope::Expression::Alignof { alignof, ty, close_paren } => {
             let ty = check_ty_can_sizeof(sess, ty, expr, alignof);
             TypedExpression {
-                ty: Type::ulong().unqualified(),
+                ty: Type::size_t().unqualified(),
                 expr: Expression::Alignof {
                     alignof: *alignof,
                     ty,

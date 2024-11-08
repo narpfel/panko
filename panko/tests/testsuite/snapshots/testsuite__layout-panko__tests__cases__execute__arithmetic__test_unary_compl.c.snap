@@ -6,6 +6,7 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/arithmetic/test_unary_compl.c
+snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -26,7 +27,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @56 (1 `int` @64)))))
+                        (sign-extend `unsigned long` @56 (1 `int` @64)))))
                (compl_0~5 `int` @20)))
          (expression
             (call `int` @24 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
@@ -34,7 +35,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @56 (2 `int` @64)))))
+                        (sign-extend `unsigned long` @56 (2 `int` @64)))))
                (compl `int` @56 (0 `int` @56))))
          (expression
             (call `int` @24 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
@@ -42,7 +43,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @56 (3 `int` @64)))))
+                        (sign-extend `unsigned long` @56 (3 `int` @64)))))
                (compl `long` @56 (42 `long` @56))))
          (expression
             (call `int` @24 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
@@ -50,7 +51,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @56 (4 `int` @64)))))
+                        (sign-extend `unsigned long` @56 (4 `int` @64)))))
                (compl `unsigned long` @56 (42 `unsigned long` @56))))
          (definition (l~6 `long` @24) (zero-extend `long` @24 (compl `unsigned int` @32 (42 `unsigned int` @32))))
          (expression
@@ -59,7 +60,7 @@ exit_code: 0
                   (deref `ptr<char>` @48
                      (ptr-add `ptr<ptr<char>>` @56
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @64 (3 `int` @72)))))
+                        (sign-extend `unsigned long` @64 (3 `int` @72)))))
                (l~6 `long` @24))))))
 
 ----- stderr -----

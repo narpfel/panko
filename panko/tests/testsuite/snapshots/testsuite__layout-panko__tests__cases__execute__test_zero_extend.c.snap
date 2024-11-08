@@ -6,6 +6,7 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/test_zero_extend.c
+snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -24,7 +25,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~2 `ptr<ptr<char>>` @0)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (l~3 `unsigned long` @8)))))
    (function-definition
       (main~4 `fn(∅: int, argv: ptr<ptr<char>>) -> int` (static main))

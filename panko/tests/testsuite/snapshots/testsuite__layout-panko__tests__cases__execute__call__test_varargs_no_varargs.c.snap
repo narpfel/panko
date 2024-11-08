@@ -6,6 +6,7 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/call/test_varargs_no_varargs.c
+snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -24,6 +25,6 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56))))))))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56))))))))))
 
 ----- stderr -----

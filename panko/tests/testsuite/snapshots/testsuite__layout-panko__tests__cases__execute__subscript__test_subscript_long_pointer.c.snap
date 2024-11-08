@@ -6,6 +6,7 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/subscript/test_subscript_long_pointer.c
+snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -25,14 +26,14 @@ exit_code: 0
                (deref `long` @8
                   (ptr-add `ptr<long>` @16
                      (p~2 `ptr<long>` @0)
-                     (sign-extend `unsigned long long` @24 (0 `int` @32))))
+                     (sign-extend `unsigned long` @24 (0 `int` @32))))
                (sign-extend `long` @24 (42 `int` @32))))
          (expression
             (assign `long` @8
                (deref `long` @8
                   (ptr-add `ptr<long>` @16
                      (p~2 `ptr<long>` @0)
-                     (sign-extend `unsigned long long` @24 (1 `int` @32))))
+                     (sign-extend `unsigned long` @24 (1 `int` @32))))
                (sign-extend `long` @24 (27 `int` @32))))
          (return
             (truncate `int` @8
@@ -40,10 +41,10 @@ exit_code: 0
                   (deref `long` @16
                      (ptr-add `ptr<long>` @24
                         (p~2 `ptr<long>` @0)
-                        (sign-extend `unsigned long long` @32 (0 `int` @40))))
+                        (sign-extend `unsigned long` @32 (0 `int` @40))))
                   (deref `long` @32
                      (ptr-add `ptr<long>` @40
-                        (sign-extend `unsigned long long` @40 (1 `int` @48))
+                        (sign-extend `unsigned long` @40 (1 `int` @48))
                         (p~2 `ptr<long>` @0)))))))))
 
 ----- stderr -----

@@ -100,24 +100,27 @@ impl<'a> Type<'a> {
         }))
     }
 
-    pub(crate) fn long() -> Self {
+    pub(crate) fn ptrdiff_t() -> Self {
+        // TODO: this is platform dependent
+        Self::long()
+    }
+
+    pub fn size_t() -> Self {
+        // TODO: this is platform dependent
+        Self::ulong()
+    }
+
+    fn long() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Signed,
             kind: IntegralKind::Long,
         }))
     }
 
-    pub fn ulong() -> Self {
+    fn ulong() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Unsigned,
             kind: IntegralKind::Long,
-        }))
-    }
-
-    pub fn ullong() -> Self {
-        Self::Arithmetic(Arithmetic::Integral(Integral {
-            signedness: Signedness::Unsigned,
-            kind: IntegralKind::LongLong,
         }))
     }
 

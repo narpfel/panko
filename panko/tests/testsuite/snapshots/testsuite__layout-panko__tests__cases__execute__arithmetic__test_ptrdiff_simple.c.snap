@@ -6,6 +6,7 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/arithmetic/test_ptrdiff_simple.c
+snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -27,12 +28,12 @@ exit_code: 0
                      (deref `int` @8
                         (ptr-add `ptr<int>` @16
                            (array~2 `ptr<int>` @0)
-                           (sign-extend `unsigned long long` @24 (10 `int` @32)))))
+                           (sign-extend `unsigned long` @24 (10 `int` @32)))))
                   (addressof `ptr<int>` @24
                      (deref `int` @24
                         (ptr-add `ptr<int>` @32
                            (array~2 `ptr<int>` @0)
-                           (sign-extend `unsigned long long` @40 (0 `int` @48))))))))
+                           (sign-extend `unsigned long` @40 (0 `int` @48))))))))
          (return (truncate `int` @16 (ptrdiff~3 `unsigned long` @8))))))
 
 ----- stderr -----

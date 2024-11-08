@@ -37,7 +37,7 @@ exit_code: 0
          (definition x~7 `int` (42 `int`))
          (expression
             (call (addressof (printf~1 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~6 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
+               (noop-type-conversion (deref (ptr-add (argv~6 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (combine
                   (assign (unnamed-temporary~8 `ptr<int>`) (addressof (x~7 `int`) `ptr<int>`) `ptr<int>`)
                   (assign (deref (unnamed-temporary~8 `ptr<int>`) `int`) (add (deref (unnamed-temporary~8 `ptr<int>`) `int`) (++ `int`) `int`) `int`)
@@ -45,12 +45,12 @@ exit_code: 0
                `int`))
          (expression
             (call (addressof (printf~1 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~6 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
+               (noop-type-conversion (deref (ptr-add (argv~6 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (x~7 `int`)
                `int`))
          (expression
             (call (addressof (printf~1 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~6 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
+               (noop-type-conversion (deref (ptr-add (argv~6 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (combine
                   (assign (unnamed-temporary~9 `ptr<int>`)
                      (addressof

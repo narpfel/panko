@@ -6,6 +6,7 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/test_ptr_addressof.c
+snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -31,12 +32,12 @@ exit_code: 0
                   (ptr-equal `int` @28
                      (ptr-add `ptr<int>` @32
                         (p1~3 `ptr<int>` @8)
-                        (sign-extend `unsigned long long` @40 (1 `int` @48)))
+                        (sign-extend `unsigned long` @40 (1 `int` @48)))
                      (p2~4 `ptr<int>` @16)))
                (ptr-equal `int` @28
                   (ptr-sub `ptr<int>` @32
                      (p2~4 `ptr<int>` @16)
-                     (sign-extend `unsigned long long` @40 (1 `int` @48)))
+                     (sign-extend `unsigned long` @40 (1 `int` @48)))
                   (p1~3 `ptr<int>` @8)))))))
 
 ----- stderr -----

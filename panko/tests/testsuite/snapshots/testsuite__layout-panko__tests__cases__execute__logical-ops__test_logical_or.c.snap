@@ -27,7 +27,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~5 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (logical-or `int` @48
                   (0 `int` @48)
                   (0 `int` @52))))
@@ -37,7 +37,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~5 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (logical-or `int` @48
                   (0 `int` @48)
                   (42 `int` @52))))
@@ -47,7 +47,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~5 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (logical-or `int` @48
                   (27 `int` @48)
                   (0 `int` @52))))
@@ -57,7 +57,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~5 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (logical-or `int` @48
                   (42 `int` @48)
                   (27 `int` @52))))
@@ -69,7 +69,7 @@ exit_code: 0
                      (deref `ptr<char>` @32
                         (ptr-add `ptr<ptr<char>>` @40
                            (argv~5 `ptr<ptr<char>>` @8)
-                           (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                           (sign-extend `unsigned long` @48 (1 `int` @56)))))
                   (123 `int` @48))))
          (expression
             (logical-or `int` @16
@@ -79,7 +79,7 @@ exit_code: 0
                      (deref `ptr<char>` @32
                         (ptr-add `ptr<ptr<char>>` @40
                            (argv~5 `ptr<ptr<char>>` @8)
-                           (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                           (sign-extend `unsigned long` @48 (1 `int` @56)))))
                   (456 `int` @48))))
          (expression
             (logical-or `int` @16
@@ -88,14 +88,14 @@ exit_code: 0
                      (deref `ptr<char>` @32
                         (ptr-add `ptr<ptr<char>>` @40
                            (argv~5 `ptr<ptr<char>>` @8)
-                           (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                           (sign-extend `unsigned long` @48 (1 `int` @56)))))
                   (5 `int` @48))
                (call `int` @52 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                   (noop-type-conversion `ptr<char const>` @64
                      (deref `ptr<char>` @64
                         (ptr-add `ptr<ptr<char>>` @72
                            (argv~5 `ptr<ptr<char>>` @8)
-                           (sign-extend `unsigned long long` @80 (1 `int` @88)))))
+                           (sign-extend `unsigned long` @80 (1 `int` @88)))))
                   (7 `int` @80))))
          (expression
             (logical-or `int` @16
@@ -105,7 +105,7 @@ exit_code: 0
                      (deref `ptr<char>` @48
                         (ptr-add `ptr<ptr<char>>` @56
                            (argv~5 `ptr<ptr<char>>` @8)
-                           (sign-extend `unsigned long long` @64 (1 `int` @72)))))
+                           (sign-extend `unsigned long` @64 (1 `int` @72)))))
                   (1 `int` @64))))
          (expression
             (logical-or `int` @16
@@ -115,7 +115,7 @@ exit_code: 0
                      (deref `ptr<char>` @48
                         (ptr-add `ptr<ptr<char>>` @56
                            (argv~5 `ptr<ptr<char>>` @8)
-                           (sign-extend `unsigned long long` @64 (1 `int` @72)))))
+                           (sign-extend `unsigned long` @64 (1 `int` @72)))))
                   (2 `int` @64))))))
    (function-definition
       (f~1 `fn() -> int` (static f))

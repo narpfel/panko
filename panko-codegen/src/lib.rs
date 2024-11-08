@@ -11,8 +11,6 @@ use indexmap::IndexSet;
 use itertools::EitherOrBoth;
 use itertools::Itertools as _;
 use panko_parser::ast::Arithmetic;
-use panko_parser::ast::Integral;
-use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Signedness;
 use panko_parser::BinOpKind;
 use panko_parser::LogicalOpKind;
@@ -234,13 +232,7 @@ impl<'a> Codegen<'a> {
         pointee_size: u64,
         integral: &LayoutedExpression,
     ) {
-        assert_eq!(
-            integral.ty.ty,
-            Type::Arithmetic(Arithmetic::Integral(Integral {
-                signedness: Signedness::Unsigned,
-                kind: IntegralKind::LongLong
-            })),
-        );
+        assert_eq!(integral.ty.ty, Type::size_t());
         if pointee_size < MAX_IMUL_IMMEDIATE {
             self.emit_args("imul", &[&R10, integral, &pointee_size]);
         }
@@ -572,13 +564,7 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
             Expression::PtrAdd { pointer, integral, pointee_size, order } => {
-                assert_eq!(
-                    integral.ty.ty,
-                    Type::Arithmetic(Arithmetic::Integral(Integral {
-                        signedness: Signedness::Unsigned,
-                        kind: IntegralKind::LongLong
-                    })),
-                );
+                assert_eq!(integral.ty.ty, Type::size_t());
                 let (lhs, rhs) = order.select(pointer, integral);
                 self.expr(lhs);
                 self.expr(rhs);

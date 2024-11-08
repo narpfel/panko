@@ -6,6 +6,7 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/arithmetic/test_negation.c
+snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -24,7 +25,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @48 (1 `int` @56)))))
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (negate `int` @48 (42 `int` @48))))
          (definition (l~4 `long` @16) (sign-extend `long` @16 (27 `int` @24)))
          (expression
@@ -33,7 +34,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @56 (2 `int` @64)))))
+                        (sign-extend `unsigned long` @56 (2 `int` @64)))))
                (negate `long` @56 (l~4 `long` @16))))
          (definition (s~5 `unsigned short` @24) (truncate `unsigned short` @24 (5 `int` @28)))
          (expression
@@ -42,7 +43,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long long` @56 (1 `int` @64)))))
+                        (sign-extend `unsigned long` @56 (1 `int` @64)))))
                (negate `int` @56 (zero-extend `int` @56 (s~5 `unsigned short` @24))))))))
 
 ----- stderr -----

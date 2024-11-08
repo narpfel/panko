@@ -6,6 +6,7 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/arithmetic/test_ptrdiff_simple.c
+snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -22,7 +23,7 @@ exit_code: 0
                   (sizeof 4 (deref (array~2 `ptr<int>`) `int`) `unsigned long`)
                   `ptr<void>`)
                `ptr<int>`))
-         (definition ptrdiff~3 `unsigned long` (noop-type-conversion (ptr-diff (addressof (deref (ptr-add (array~2 `ptr<int>`) (sign-extend (10 `int`) `unsigned long long`) `ptr<int>`) `int`) `ptr<int>`) (addressof (deref (ptr-add (array~2 `ptr<int>`) (sign-extend (0 `int`) `unsigned long long`) `ptr<int>`) `int`) `ptr<int>`) `long`) `unsigned long`))
+         (definition ptrdiff~3 `unsigned long` (noop-type-conversion (ptr-diff (addressof (deref (ptr-add (array~2 `ptr<int>`) (sign-extend (10 `int`) `unsigned long`) `ptr<int>`) `int`) `ptr<int>`) (addressof (deref (ptr-add (array~2 `ptr<int>`) (sign-extend (0 `int`) `unsigned long`) `ptr<int>`) `int`) `ptr<int>`) `long`) `unsigned long`))
          (return (truncate (ptrdiff~3 `unsigned long`) `int`)))))
 
 ----- stderr -----
