@@ -21,7 +21,6 @@ use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
-use panko_parser::sexpr_builder::AsSExpr as _;
 use panko_parser::BinOp;
 use panko_parser::BinOpKind;
 use panko_parser::IncrementOpKind;
@@ -229,6 +228,16 @@ enum Diagnostic<'a> {
     #[error("integer literal too large")]
     #[diagnostics(at(colour = Red, label = "this literal does not fit any integer type"))]
     IntegerLiteralTooLarge { at: Token<'a> },
+
+    #[error("functions must have a body, not an initialiser")]
+    #[diagnostics(
+        ty(colour = Blue, label = "in this function definition"),
+        at(colour = Red, label = "functions must have a body (or remove this to declare the function)"),
+    )]
+    IllegalInitialiserForFunction {
+        at: TypedExpression<'a>,
+        ty: QualifiedType<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -569,7 +578,8 @@ fn convert<'a>(
         // TODO: clang (but not gcc) allows implicitly converting `Type::Function(_)` to
         // `Type::Pointer(_)` (with a warning).
         // TODO: handle nullptr literals
-        (Type::Function(_), _) => todo!("[{}] = {}", target.as_sexpr(), expr.as_sexpr()),
+        (Type::Function(_), _) =>
+            sess.emit(Diagnostic::IllegalInitialiserForFunction { at: expr, ty: target }),
 
         (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(_))
         | (Type::Pointer(_), Type::Arithmetic(Arithmetic::Integral(_)))

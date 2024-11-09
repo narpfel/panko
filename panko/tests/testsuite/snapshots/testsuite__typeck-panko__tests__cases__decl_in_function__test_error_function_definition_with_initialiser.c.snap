@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/decl_in_function/test_error_function_definition_with_initialiser.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: functions must have a body, not an initialiser
+   ╭─[panko/tests/cases/decl_in_function/test_error_function_definition_with_initialiser.c:2:15]
+   │
+ 2 │     int f() = 42;
+   │     ───┬───   ─┬  
+   │        │       ╰── functions must have a body (or remove this to declare the function)
+   │        │          
+   │        ╰────────── in this function definition
+───╯
