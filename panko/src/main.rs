@@ -31,6 +31,9 @@ struct Args {
     print: Vec<Step>,
     #[arg(short, long)]
     output_filename: Option<PathBuf>,
+    /// emit debug info
+    #[arg(short('g'), long)]
+    debug: bool,
 }
 
 fn main() -> Result<()> {
@@ -81,10 +84,10 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    let code = panko_codegen::emit(translation_unit);
+    let code = panko_codegen::emit(translation_unit, args.debug);
 
     if args.print.contains(&Step::Codegen) {
-        println!("{code}");
+        println!("{}{}", code.0, code.1);
     }
     if let Some(Step::Codegen) = args.stop_after {
         return Ok(());
@@ -94,20 +97,23 @@ fn main() -> Result<()> {
         .output_filename
         .unwrap_or_else(|| args.filename.with_extension("S"));
 
-    File::create(&output_filename)
-        .wrap_err_with(|| {
+    write!(
+        File::create(&output_filename).wrap_err_with(|| {
             format!(
                 "could not create output file `{}`",
                 output_filename.display(),
             )
-        })?
-        .write_all(code.as_bytes())
-        .wrap_err_with(|| {
-            format!(
-                "could not write to output file `{}`",
-                output_filename.display(),
-            )
-        })?;
+        })?,
+        "{}{}",
+        code.0,
+        code.1,
+    )
+    .wrap_err_with(|| {
+        format!(
+            "could not write to output file `{}`",
+            output_filename.display(),
+        )
+    })?;
 
     let object_filename = output_filename.with_extension("o");
     Command::new("as")

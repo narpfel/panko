@@ -207,7 +207,7 @@ impl QualifiedType<'_> {
         self.to_string()
     }
 
-    pub(crate) fn loc(&self) -> Loc {
+    pub fn loc(&self) -> Loc {
         self.loc
     }
 }

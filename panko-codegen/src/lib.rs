@@ -1,15 +1,18 @@
 #![feature(try_blocks)]
+#![feature(impl_trait_in_assoc_type)]
 #![feature(unsigned_is_multiple_of)]
 
 use std::borrow::Cow;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Write as _;
+use std::mem;
 
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use itertools::EitherOrBoth;
 use itertools::Itertools as _;
+use panko_lex::Loc;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Signedness;
 use panko_parser::BinOpKind;
@@ -28,12 +31,14 @@ use panko_sema::ty::Type;
 use panko_sema::typecheck::PtrCmpKind;
 use Register::*;
 
+use crate::lineno::Linenos;
 use crate::operand::AsOperand;
 use crate::operand::Index;
 use crate::operand::Memory;
 use crate::operand::Offset;
 use crate::operand::Operand;
 
+mod lineno;
 mod operand;
 
 const MAX_IMUL_IMMEDIATE: u64 = 2_u64.pow(31);
@@ -152,6 +157,8 @@ struct Codegen<'a> {
     code: String,
     strings: Vec<(StaticId, Cow<'a, str>)>,
     next_label_id: u64,
+    debug: bool,
+    linenos: Linenos<'a>,
 }
 
 impl<'a> Codegen<'a> {
@@ -161,12 +168,23 @@ impl<'a> Codegen<'a> {
         }
     }
 
+    fn at(&mut self, loc: Loc<'a>) {
+        if self.debug {
+            let (file, line, column) = self.linenos.lookup(loc);
+            self.directive_with_sep("loc", " ", &[&file, &line, &column]);
+        }
+    }
+
     fn directive(&mut self, name: &str, args: &[&dyn Display]) {
+        self.directive_with_sep(name, ", ", args)
+    }
+
+    fn directive_with_sep(&mut self, name: &str, sep: &str, args: &[&dyn Display]) {
         writeln!(
             self.code,
             ".{name:7}{}{}",
             if args.is_empty() { "" } else { " " },
-            args.iter().format(", "),
+            args.iter().format(sep),
         )
         .unwrap();
     }
@@ -253,6 +271,9 @@ impl<'a> Codegen<'a> {
         self.directive("text", &[]);
         self.directive("type", &[&def.name(), &"@function"]);
         self.label(def.name());
+
+        // TODO: should use the `def`’s `loc`
+        self.at(def.reference.ty.loc());
 
         // check that rsp is correctly aligned
         self.emit("lea r10, [rsp + 8]");
@@ -381,13 +402,13 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    fn compound_statement(&mut self, stmts: CompoundStatement) {
+    fn compound_statement(&mut self, stmts: CompoundStatement<'a>) {
         for stmt in stmts.0 {
             self.stmt(stmt);
         }
     }
 
-    fn stmt(&mut self, stmt: &Statement) {
+    fn stmt(&mut self, stmt: &Statement<'a>) {
         match stmt {
             Statement::Declaration(Declaration { reference, initialiser }) =>
                 if let Some(initialiser) = initialiser.as_ref() {
@@ -414,7 +435,8 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    fn expr(&mut self, expr: &LayoutedExpression) {
+    fn expr(&mut self, expr: &LayoutedExpression<'a>) {
+        self.at(expr.loc);
         match expr.expr {
             Expression::Error(error) => {
                 let id = self.string(error.to_string().into());
@@ -516,8 +538,10 @@ impl<'a> Codegen<'a> {
                 self.expr(lhs);
                 self.expr(rhs);
 
+                self.at(lhs.loc);
                 self.emit_args("mov", &[&Rax.typed(lhs), lhs]);
 
+                self.at(op.token.loc());
                 match op.kind {
                     BinOpKind::Multiply => emit_arithmetic(self, "imul"),
                     BinOpKind::Divide | BinOpKind::Modulo => {
@@ -740,9 +764,11 @@ impl<'a> Codegen<'a> {
     }
 }
 
-pub fn emit(translation_unit: TranslationUnit) -> String {
-    let mut cg = Codegen::default();
-    cg.directive("intel_syntax", &[&"noprefix"]);
+pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String, String) {
+    let mut cg = Codegen {
+        debug: with_debug_info,
+        ..Codegen::default()
+    };
 
     for decl in translation_unit.decls {
         match decl {
@@ -751,14 +777,22 @@ pub fn emit(translation_unit: TranslationUnit) -> String {
         }
     }
 
-    for (name, ty) in std::mem::take(&mut cg.tentative_definitions) {
+    for (name, ty) in mem::take(&mut cg.tentative_definitions) {
         assert!(!cg.defined.contains(&name));
         cg.object_definition(name, ty, None);
     }
 
-    for (id, value) in std::mem::take(&mut cg.strings) {
+    for (id, value) in mem::take(&mut cg.strings) {
         cg.string_literal_definition(id, &value);
     }
 
-    cg.code
+    let code = mem::take(&mut cg.code);
+
+    cg.directive("intel_syntax", &[&"noprefix"]);
+    for (fileno, path) in &mem::take(&mut cg.linenos) {
+        // TODO: properly escape `path`
+        cg.directive_with_sep("file", " ", &[&fileno, &format!("\"{}\"", path.display())]);
+    }
+
+    (cg.code, code)
 }

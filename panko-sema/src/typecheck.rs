@@ -397,7 +397,7 @@ pub enum Expression<'a> {
 }
 
 impl<'a> TypedExpression<'a> {
-    fn loc(&self) -> Loc<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
         self.expr.loc()
     }
 

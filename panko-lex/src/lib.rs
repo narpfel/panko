@@ -66,11 +66,11 @@ impl<'a> Loc<'a> {
         }
     }
 
-    fn file(&self) -> &'a Path {
+    pub fn file(&self) -> &'a Path {
         self.source_file.file
     }
 
-    fn src(&self) -> &'a str {
+    pub fn src(&self) -> &'a str {
         self.source_file.src
     }
 

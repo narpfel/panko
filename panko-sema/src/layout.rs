@@ -1,4 +1,5 @@
 use bumpalo::Bump;
+use panko_lex::Loc;
 use panko_parser as cst;
 use panko_parser::ast::Integral;
 use panko_parser::BinOp;
@@ -35,7 +36,7 @@ pub struct Declaration<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct FunctionDefinition<'a> {
-    reference: Reference<'a>,
+    pub reference: Reference<'a>,
     pub params: ParamRefs<'a>,
     pub storage_class: Option<cst::StorageClassSpecifier<'a>>,
     #[expect(unused)]
@@ -67,6 +68,7 @@ pub struct LayoutedExpression<'a> {
     pub ty: QualifiedType<'a>,
     pub slot: Slot<'a>,
     pub expr: Expression<'a>,
+    pub loc: Loc<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -277,6 +279,7 @@ fn layout_expression_in_slot<'a>(
     expr: &typecheck::TypedExpression<'a>,
     target_slot: Option<Slot<'a>>,
 ) -> LayoutedExpression<'a> {
+    let loc = expr.loc();
     let typecheck::TypedExpression { ty, expr } = *expr;
     let mut make_slot = || target_slot.unwrap_or_else(|| stack.temporary(ty.ty));
     let (slot, expr) = match expr {
@@ -437,7 +440,7 @@ fn layout_expression_in_slot<'a>(
             (slot, Expression::Conditional { condition, then, or_else })
         }
     };
-    LayoutedExpression { ty, slot, expr }
+    LayoutedExpression { ty, slot, expr, loc }
 }
 
 pub fn layout<'a>(
