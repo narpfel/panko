@@ -22,3 +22,15 @@ Error: invalid operands to binary operator `+`
    │      │        
    │      ╰──────── this is of type `void`
 ───╯
+
+Error: comparison of pointers to incompatible types
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_binary_operator.c:8:8]
+   │
+ 8 │     &x == &c;
+   │     ─┬ ─┬ ─┬  
+   │      │  │  ╰── this is of type `ptr<char>`
+   │      │  │     
+   │      │  ╰───── pointer comparisons are only allowed between pointers to compatible types
+   │      │        
+   │      ╰──────── this is of type `ptr<int>`
+───╯

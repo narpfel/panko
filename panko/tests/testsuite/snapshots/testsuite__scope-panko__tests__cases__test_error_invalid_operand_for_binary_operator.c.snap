@@ -18,6 +18,9 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (expression (add (call (name f~0 `fn() -> void`)) 42)))))
+         (expression (add (call (name f~0 `fn() -> void`)) 42))
+         (definition x~2 `int` 42)
+         (definition c~3 `char` ∅)
+         (expression (equal (addressof (name x~2 `int`)) (addressof (name c~3 `char`)))))))
 
 ----- stderr -----

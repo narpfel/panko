@@ -238,6 +238,19 @@ enum Diagnostic<'a> {
         at: TypedExpression<'a>,
         ty: QualifiedType<'a>,
     },
+
+    #[error("comparison of pointers to incompatible types")]
+    #[diagnostics(
+        lhs(colour = Blue, label = "this is of type `{lhs_ty}`"),
+        at(colour = Red, label = "pointer comparisons are only allowed between pointers to compatible types"),
+        rhs(colour = Magenta, label = "this is of type `{rhs_ty}`"),
+    )]
+    #[with(lhs_ty = lhs.ty.ty, rhs_ty = rhs.ty.ty)]
+    IncompatibleTypesInPtrCmp {
+        lhs: TypedExpression<'a>,
+        at: Token<'a>,
+        rhs: TypedExpression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -989,7 +1002,7 @@ fn typeck_ptrcmp<'a>(
 ) -> TypedExpression<'a> {
     // TODO: should check for type compatibility, not exact equality
     if lhs.ty.ty != rhs.ty.ty {
-        todo!("type error: cannot compare pointers of incompatible types");
+        return sess.emit(Diagnostic::IncompatibleTypesInPtrCmp { at: op.token, lhs, rhs });
     }
     let kind = match op.kind {
         BinOpKind::Multiply
