@@ -1001,35 +1001,35 @@ fn typeck_ptrcmp<'a>(
     rhs: TypedExpression<'a>,
 ) -> TypedExpression<'a> {
     // TODO: should check for type compatibility, not exact equality
-    if lhs.ty.ty != rhs.ty.ty {
-        return sess.emit(Diagnostic::IncompatibleTypesInPtrCmp { at: op.token, lhs, rhs });
+    let expr = if lhs.ty.ty != rhs.ty.ty {
+        sess.emit(Diagnostic::IncompatibleTypesInPtrCmp { at: op.token, lhs, rhs })
     }
-    let kind = match op.kind {
-        BinOpKind::Multiply
-        | BinOpKind::Divide
-        | BinOpKind::Modulo
-        | BinOpKind::Add
-        | BinOpKind::Subtract
-        | BinOpKind::LeftShift
-        | BinOpKind::RightShift
-        | BinOpKind::BitAnd
-        | BinOpKind::BitXor
-        | BinOpKind::BitOr => unreachable!(),
-        BinOpKind::Equal => PtrCmpKind::Equal,
-        BinOpKind::NotEqual => PtrCmpKind::NotEqual,
-        BinOpKind::Less => PtrCmpKind::Less,
-        BinOpKind::LessEqual => PtrCmpKind::LessEqual,
-        BinOpKind::Greater => PtrCmpKind::Greater,
-        BinOpKind::GreaterEqual => PtrCmpKind::GreaterEqual,
-    };
-    TypedExpression {
-        ty: Type::int().unqualified(),
-        expr: Expression::PtrCmp {
+    else {
+        let kind = match op.kind {
+            BinOpKind::Multiply
+            | BinOpKind::Divide
+            | BinOpKind::Modulo
+            | BinOpKind::Add
+            | BinOpKind::Subtract
+            | BinOpKind::LeftShift
+            | BinOpKind::RightShift
+            | BinOpKind::BitAnd
+            | BinOpKind::BitXor
+            | BinOpKind::BitOr => unreachable!(),
+            BinOpKind::Equal => PtrCmpKind::Equal,
+            BinOpKind::NotEqual => PtrCmpKind::NotEqual,
+            BinOpKind::Less => PtrCmpKind::Less,
+            BinOpKind::LessEqual => PtrCmpKind::LessEqual,
+            BinOpKind::Greater => PtrCmpKind::Greater,
+            BinOpKind::GreaterEqual => PtrCmpKind::GreaterEqual,
+        };
+        Expression::PtrCmp {
             lhs: sess.alloc(lhs),
             kind,
             rhs: sess.alloc(rhs),
-        },
-    }
+        }
+    };
+    TypedExpression { ty: Type::int().unqualified(), expr }
 }
 
 fn typeck_ptrdiff<'a>(
