@@ -7,41 +7,16 @@ info:
     - "--stop-after=scopes"
     - panko/tests/cases/decl_in_global_scope/test_error_redeclaration_with_different_type.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit
+   (tentative-definition a~0 `int` ∅)
+   (tentative-definition a~0 `int const` ∅)
+   (tentative-definition f~2 `int` ∅)
+   (declaration f~2 `fn() -> int` ∅)
+   (declaration g~4 `fn(∅: int) -> int` ∅)
+   (declaration g~4 `fn(x: int) -> int` ∅)
+   (declaration g~4 `fn(∅: int, ∅: int) -> int` ∅))
 
 ----- stderr -----
-Error: redeclaration of `a` with different type: `int` vs. `int const`
-   ╭─[panko/tests/cases/decl_in_global_scope/test_error_redeclaration_with_different_type.c:2:11]
-   │
- 1 │ int a;
-   │     ┬  
-   │     ╰── previously declared here with type `int`
- 2 │ int const a;
-   │           ┬  
-   │           ╰── new declaration with different type `int const`
-───╯
-
-Error: redeclaration of `f` with different type: `int` vs. `fn() -> int`
-   ╭─[panko/tests/cases/decl_in_global_scope/test_error_redeclaration_with_different_type.c:5:5]
-   │
- 4 │ int f;
-   │     ┬  
-   │     ╰── previously declared here with type `int`
- 5 │ int f();
-   │     ┬  
-   │     ╰── new declaration with different type `fn() -> int`
-───╯
-
-Error: redeclaration of `g` with different type: `fn(∅: int) -> int` vs. `fn(∅: int, ∅: int) -> int`
-   ╭─[panko/tests/cases/decl_in_global_scope/test_error_redeclaration_with_different_type.c:9:5]
-   │
- 7 │ int g(int);
-   │     ┬  
-   │     ╰── previously declared here with type `fn(∅: int) -> int`
-   │ 
- 9 │ int g(int, int);
-   │     ┬  
-   │     ╰── new declaration with different type `fn(∅: int, ∅: int) -> int`
-───╯

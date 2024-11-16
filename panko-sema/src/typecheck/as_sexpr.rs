@@ -9,6 +9,8 @@ use super::Declaration;
 use super::Expression;
 use super::ExternalDeclaration;
 use super::FunctionDefinition;
+use super::ParamRefs;
+use super::Reference;
 use super::Statement;
 use super::TranslationUnit;
 use super::TypedExpression;
@@ -39,6 +41,12 @@ impl AsSExpr for FunctionDefinition<'_> {
                 Either::Right(iter::once(&self.params))
             })
             .lines([&self.body])
+    }
+}
+
+impl AsSExpr for ParamRefs<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("params").lines(self.0)
     }
 }
 
@@ -133,5 +141,11 @@ impl AsSExpr for Expression<'_> {
             Expression::Conditional { condition, then, or_else } =>
                 SExpr::new("conditional").lines([condition, then, or_else]),
         }
+    }
+}
+
+impl AsSExpr for Reference<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::string(format!("{} `{}`", self.unique_name(), self.ty))
     }
 }

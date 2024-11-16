@@ -5,10 +5,10 @@ use super::LayoutedExpression;
 use super::Reference;
 use super::Slot;
 use crate::nonempty;
-use crate::scope;
 use crate::scope::Id;
 use crate::scope::StorageDuration;
 use crate::ty::Type;
+use crate::typecheck;
 
 #[derive(Debug, Default)]
 struct Slots {
@@ -65,19 +65,19 @@ impl<'a> Stack<'a> {
         self.slots.pop()
     }
 
-    pub(super) fn add(&mut self, reference: scope::Reference<'a>) -> Reference<'a> {
+    pub(super) fn add(&mut self, reference: typecheck::Reference<'a>) -> Reference<'a> {
         self.add_at(reference, None)
     }
 
     pub(super) fn add_at(
         &mut self,
-        reference: scope::Reference<'a>,
+        reference: typecheck::Reference<'a>,
         maybe_slot: Option<Slot<'a>>,
     ) -> Reference<'a> {
         match self.ids.entry(reference.id) {
             Entry::Occupied(entry) => *entry.get(),
             Entry::Vacant(entry) => {
-                let scope::Reference {
+                let typecheck::Reference {
                     name,
                     loc: _,
                     ty,

@@ -32,9 +32,10 @@ use variant_types::IntoVariant as _;
 
 use crate::scope;
 use crate::scope::GenericAssociation;
+use crate::scope::Id;
 use crate::scope::IncrementFixity;
-use crate::scope::ParamRefs;
-use crate::scope::Reference;
+use crate::scope::RefKind;
+use crate::scope::StorageDuration;
 use crate::ty::FunctionType;
 use crate::ty::QualifiedType;
 use crate::ty::Type;
@@ -60,6 +61,17 @@ where
 #[derive(Debug, Report)]
 #[exit_code(1)]
 enum Diagnostic<'a> {
+    #[error("redeclaration of `{at}` with different type: `{original_ty}` vs. `{new_ty}`")]
+    #[with(original_ty = previous_definition.ty, new_ty = at.ty)]
+    #[diagnostics(
+        previous_definition(colour = Blue, label = "previously declared here with type `{original_ty}`"),
+        at(colour = Red, label = "new declaration with different type `{new_ty}`"),
+    )]
+    AlreadyDefinedWithDifferentType {
+        at: Reference<'a>,
+        previous_definition: Reference<'a>,
+    },
+
     // TODO: types should be printed in C syntax, not in their SExpr debug repr
     #[error("invalid {kind} conversion from `{from_ty}` to `{to_ty}`")]
     #[diagnostics(at(colour = Red, label = "this is of type `{from_ty}`, which cannot be {kind}ly converted to `{to_ty}`"))]
@@ -282,6 +294,9 @@ pub struct FunctionDefinition<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) struct ParamRefs<'a>(pub(crate) &'a [Reference<'a>]);
+
+#[derive(Debug, Clone, Copy)]
 pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
 
 #[derive(Debug, Clone, Copy)]
@@ -407,6 +422,54 @@ pub enum Expression<'a> {
         then: &'a TypedExpression<'a>,
         or_else: &'a TypedExpression<'a>,
     },
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Reference<'a> {
+    // TODO: The location of `name` points to where this name was declared. This is unused for now,
+    // but should be used in error messages to print e. g. “note: [...] was declared here:”.
+    pub(crate) name: &'a str,
+    pub(crate) loc: Loc<'a>,
+    pub(crate) ty: QualifiedType<'a>,
+    pub(crate) id: Id,
+    pub(crate) usage_location: Loc<'a>,
+    pub(crate) kind: RefKind,
+    pub(crate) storage_duration: StorageDuration,
+}
+
+impl<'a> Reference<'a> {
+    pub(crate) fn name(&self) -> &'a str {
+        self.name
+    }
+
+    pub fn unique_name(&self) -> String {
+        format!("{}~{}", self.name, self.id.0)
+    }
+
+    #[expect(
+        clippy::misnamed_getters,
+        reason = "`loc` should actually return the `usage_location` and not the `loc` where this reference was declared"
+    )]
+    pub fn loc(&self) -> Loc<'a> {
+        self.usage_location
+    }
+
+    pub(crate) fn slice(&self) -> &'a str {
+        self.name
+    }
+
+    pub fn kind(&self) -> RefKind {
+        self.kind
+    }
+
+    fn at(&self, location: Loc<'a>) -> Self {
+        assert_eq!(self.name, location.slice());
+        Self { usage_location: location, ..*self }
+    }
+
+    pub(crate) fn at_decl(&self) -> Self {
+        self.at(self.loc)
+    }
 }
 
 impl<'a> TypedExpression<'a> {
@@ -547,6 +610,38 @@ impl fmt::Display for ConversionKind {
     }
 }
 
+fn typeck_reference<'a>(sess: &'a Session<'a>, reference: scope::Reference<'a>) -> Reference<'a> {
+    let scope::Reference {
+        name,
+        loc,
+        ty,
+        id,
+        usage_location,
+        kind,
+        storage_duration,
+        previous_definition,
+    } = reference;
+    let reference = Reference {
+        name,
+        loc,
+        ty,
+        id,
+        usage_location,
+        kind,
+        storage_duration,
+    };
+    if let Some(previous_definition) = previous_definition {
+        let previous_definition = typeck_reference(sess, *previous_definition);
+        if previous_definition.ty != reference.ty {
+            sess.emit(Diagnostic::AlreadyDefinedWithDifferentType {
+                at: reference,
+                previous_definition,
+            })
+        }
+    }
+    reference
+}
+
 fn convert<'a>(
     sess: &'a Session<'a>,
     target: QualifiedType<'a>,
@@ -631,8 +726,12 @@ fn typeck_function_definition<'a>(
         body,
     } = *definition;
 
+    let params = ParamRefs(
+        sess.alloc_slice_fill_iter(params.0.iter().map(|&param| typeck_reference(sess, param))),
+    );
+
     FunctionDefinition {
-        reference,
+        reference: typeck_reference(sess, reference),
         params,
         storage_class,
         inline,
@@ -647,6 +746,7 @@ fn typeck_declaration<'a>(
     declaration: &scope::Declaration<'a>,
 ) -> Declaration<'a> {
     let scope::Declaration { reference, initialiser } = *declaration;
+    let reference = typeck_reference(sess, reference);
     let initialiser = initialiser.as_ref().map(|initialiser| {
         convert_as_if_by_assignment(
             sess,
@@ -1091,9 +1191,9 @@ fn desugar_postfix_increment<'a>(
     sess: &'a Session<'a>,
     op: BinOp<'a>,
     operand: &'a scope::Expression<'a>,
-    reference: &Reference<'a>,
-    pointer: &Reference<'a>,
-    copy: &Reference<'a>,
+    reference: &scope::Reference<'a>,
+    pointer: &scope::Reference<'a>,
+    copy: &scope::Reference<'a>,
 ) -> scope::Expression<'a> {
     // `x++` is mostly equivalent to the following expression, so we use that as a desugaring:
     // __pointer = &x, __copy = *__pointer, *__pointer += 1, __copy
@@ -1105,11 +1205,11 @@ fn desugar_postfix_increment<'a>(
 
     // TODO: we only typecheck to get the type
     let ty = typeck_expression(sess, operand, Context::Default).ty;
-    let pointer = sess.alloc(scope::Expression::Name(Reference {
+    let pointer = sess.alloc(scope::Expression::Name(scope::Reference {
         ty: Type::Pointer(sess.alloc(ty)).unqualified(),
         ..*pointer
     }));
-    let copy = sess.alloc(scope::Expression::Name(Reference { ty, ..*copy }));
+    let copy = sess.alloc(scope::Expression::Name(scope::Reference { ty, ..*copy }));
 
     scope::Expression::Comma {
         lhs: sess.alloc(scope::Expression::Comma {
@@ -1171,10 +1271,13 @@ fn typeck_expression<'a>(
 ) -> TypedExpression<'a> {
     let expr = match expr {
         scope::Expression::Error(error) => TypedExpression::from_error(*error),
-        scope::Expression::Name(reference) => TypedExpression {
-            ty: reference.ty,
-            expr: Expression::Name(*reference),
-        },
+        scope::Expression::Name(reference) => {
+            let reference = typeck_reference(sess, *reference);
+            TypedExpression {
+                ty: reference.ty,
+                expr: Expression::Name(reference),
+            }
+        }
         scope::Expression::Integer { value, token } => {
             let TokenKind::Integer(Integer { suffix, suffix_len, base, prefix_len }) = token.kind
             else {
@@ -1242,9 +1345,10 @@ fn typeck_expression<'a>(
                 // TODO: this will fail for bitfields
                 expr: Expression::Addressof { ampersand: op.token, operand: target },
             });
+            let target_temporary = typeck_reference(sess, *target_temporary);
             let target_addr = sess.alloc(TypedExpression {
                 ty: target.ty,
-                expr: Expression::Name(Reference { ty: target.ty, ..*target_temporary }),
+                expr: Expression::Name(Reference { ty: target.ty, ..target_temporary }),
             });
             let deref_target_addr = sess.alloc(TypedExpression {
                 ty,

@@ -41,17 +41,6 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "in this declaration"))]
     FunctionDeclaratorDoesNotHaveFunctionType { at: Token<'a> },
 
-    #[error("redeclaration of `{at}` with different type: `{original_ty}` vs. `{new_ty}`")]
-    #[with(original_ty = previous_definition.ty, new_ty = at.ty)]
-    #[diagnostics(
-        previous_definition(colour = Blue, label = "previously declared here with type `{original_ty}`"),
-        at(colour = Red, label = "new declaration with different type `{new_ty}`"),
-    )]
-    AlreadyDefinedWithDifferentType {
-        at: Reference<'a>,
-        previous_definition: Reference<'a>,
-    },
-
     #[error("cannot declare variable `{at}` with incomplete type `{ty}`")]
     #[with(ty = at.ty)]
     #[diagnostics(at(colour = Red, label = "declared here"))]
@@ -225,6 +214,7 @@ pub struct Reference<'a> {
     pub(crate) usage_location: Loc<'a>,
     pub(crate) kind: RefKind,
     pub(crate) storage_duration: StorageDuration,
+    pub(crate) previous_definition: Option<&'a Self>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -345,10 +335,6 @@ impl<'a> ErrorExpr<'a> for Expression<'a> {
 }
 
 impl<'a> Reference<'a> {
-    pub(crate) fn name(&self) -> &'a str {
-        self.name
-    }
-
     pub fn unique_name(&self) -> String {
         format!("{}~{}", self.name, self.id.0)
     }
@@ -368,14 +354,6 @@ impl<'a> Reference<'a> {
     fn at(&self, location: Loc<'a>) -> Self {
         assert_eq!(self.name, location.slice());
         Self { usage_location: location, ..*self }
-    }
-
-    pub fn kind(&self) -> RefKind {
-        self.kind
-    }
-
-    pub(crate) fn at_decl(&self) -> Self {
-        self.at(self.loc)
     }
 }
 
@@ -461,6 +439,7 @@ impl<'a> Scopes<'a> {
             usage_location: loc,
             kind,
             storage_duration,
+            previous_definition: None,
         };
         match self.lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
@@ -473,18 +452,21 @@ impl<'a> Scopes<'a> {
                         previous_definition: previous_definition.at(previous_definition.loc),
                     })
                 }
-                if previous_definition.ty != ty {
-                    sess.emit(Diagnostic::AlreadyDefinedWithDifferentType {
-                        at: reference,
-                        previous_definition: previous_definition
-                            .at(previous_definition.usage_location),
-                    })
-                }
+
+                let reference = Reference {
+                    id: previous_definition.id,
+                    previous_definition: Some(
+                        sess.alloc(previous_definition.at(previous_definition.usage_location)),
+                    ),
+                    ..reference
+                };
+
                 if kind > previous_definition.kind {
                     previous_definition.name = name;
                     previous_definition.kind = kind;
                 }
-                Reference { kind, ..*previous_definition }
+
+                reference
             }
             Entry::Vacant(entry) => {
                 entry.insert(reference);
@@ -503,6 +485,7 @@ impl<'a> Scopes<'a> {
             usage_location: loc,
             kind: RefKind::Definition,
             storage_duration: StorageDuration::Automatic,
+            previous_definition: None,
         }
     }
 
