@@ -158,17 +158,6 @@ impl<'a, TypeofExpr> Type<'a, TypeofExpr> {
         self.to_string()
     }
 
-    pub fn align(&self) -> u64 {
-        match self {
-            Type::Arithmetic(arithmetic) => arithmetic.size(),
-            Type::Pointer(_) => 8,
-            Type::Function(_) =>
-                unreachable!("functions are not objects and don’t have an alignment"),
-            Type::Void => unreachable!("void is not an object and doesn’t have an alignment"),
-            Type::Typeof { .. } => todo!(),
-        }
-    }
-
     pub(crate) fn is_object(&self) -> bool {
         !self.is_function()
     }
@@ -193,18 +182,29 @@ impl<'a, TypeofExpr> Type<'a, TypeofExpr> {
     }
 }
 
-impl<TypeofExpr> Type<'_, TypeofExpr> {
+impl Type<'_, !> {
     pub fn size(&self) -> u64 {
         match self {
             Type::Arithmetic(arithmetic) => arithmetic.size(),
             Type::Pointer(_) => 8,
             Type::Function(_) => unreachable!("functions are not objects and don’t have a size"),
             Type::Void => unreachable!("void is not an object and doesn’t have a size"),
-            Type::Typeof { .. } => todo!(),
+            Type::Typeof { expr, unqual: _ } => match *expr {},
         }
     }
 
-    pub(crate) fn is_slot_compatible(&self, ty: &Type<'_, TypeofExpr>) -> bool {
+    pub fn align(&self) -> u64 {
+        match self {
+            Type::Arithmetic(arithmetic) => arithmetic.size(),
+            Type::Pointer(_) => 8,
+            Type::Function(_) =>
+                unreachable!("functions are not objects and don’t have an alignment"),
+            Type::Void => unreachable!("void is not an object and doesn’t have an alignment"),
+            Type::Typeof { expr, unqual: _ } => match *expr {},
+        }
+    }
+
+    pub(crate) fn is_slot_compatible(&self, ty: &Type<'_, !>) -> bool {
         // TODO: This is more restrictive than necessary.
         self.size() == ty.size() && self.align() == ty.align()
     }
