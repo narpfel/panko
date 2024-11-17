@@ -1,5 +1,5 @@
-#![feature(type_alias_impl_trait)]
 #![feature(closure_lifetime_binder)]
+#![feature(type_alias_impl_trait)]
 
 use std::ops::Range;
 use std::path::Path;

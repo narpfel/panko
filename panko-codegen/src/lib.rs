@@ -1,5 +1,5 @@
-#![feature(try_blocks)]
 #![feature(impl_trait_in_assoc_type)]
+#![feature(try_blocks)]
 #![feature(unsigned_is_multiple_of)]
 
 use std::borrow::Cow;
