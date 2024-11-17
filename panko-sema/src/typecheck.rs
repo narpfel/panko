@@ -82,6 +82,10 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "parameter declared here"))]
     ParameterWithIncompleteType { at: ParameterDeclaration<'a, !> },
 
+    #[error("invalid function return type `{ty}`")]
+    #[diagnostics(at(colour = Red, label = "declaration here"))]
+    InvalidFunctionReturnType { at: Loc<'a>, ty: QualifiedType<'a> },
+
     // TODO: types should be printed in C syntax, not in their SExpr debug repr
     #[error("invalid {kind} conversion from `{from_ty}` to `{to_ty}`")]
     #[diagnostics(at(colour = Red, label = "this is of type `{from_ty}`, which cannot be {kind}ly converted to `{to_ty}`"))]
@@ -627,7 +631,16 @@ fn typeck_ty<'a>(sess: &'a Session<'a>, ty: scope::QualifiedType<'a>) -> Qualifi
     let ty = match ty {
         ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ty::Type::Pointer(pointee) => Type::Pointer(sess.alloc(typeck_ty(sess, *pointee))),
-        ty::Type::Function(FunctionType { params, return_type, is_varargs }) =>
+        ty::Type::Function(FunctionType { params, return_type, is_varargs }) => {
+            let return_type = sess.alloc(typeck_ty(sess, *return_type));
+            match return_type.ty {
+                Type::Arithmetic(_) | Type::Pointer(_) | Type::Void => (),
+                Type::Function(_) => sess.emit(Diagnostic::InvalidFunctionReturnType {
+                    at: return_type.loc,
+                    ty: *return_type,
+                }),
+                Type::Typeof { expr, unqual: _ } => match expr {},
+            }
             Type::Function(FunctionType {
                 params: sess.alloc_slice_fill_iter(params.iter().map(
                     |&ParameterDeclaration { loc, ty, name }| {
@@ -639,9 +652,10 @@ fn typeck_ty<'a>(sess: &'a Session<'a>, ty: scope::QualifiedType<'a>) -> Qualifi
                         param
                     },
                 )),
-                return_type: sess.alloc(typeck_ty(sess, *return_type)),
+                return_type,
                 is_varargs,
-            }),
+            })
+        }
         ty::Type::Void => Type::Void,
         ty::Type::Typeof { expr, unqual } => {
             let expr = typeck_expression(sess, expr, Context::Typeof);

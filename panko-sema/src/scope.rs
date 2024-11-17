@@ -38,11 +38,6 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "in this declaration"))]
     FunctionDeclaratorDoesNotHaveFunctionType { at: Token<'a> },
 
-    // TODO: This error case should be checked in `typecheck`
-    #[error("invalid function return type `{ty}`")]
-    #[diagnostics(at(colour = Red, label = "declaration here"))]
-    InvalidFunctionReturnType { at: Loc<'a>, ty: QualifiedType<'a> },
-
     #[error("use of undeclared identifier `{at}`")]
     #[diagnostics(at(colour = Red, label = "this name has not been declared"))]
     UndeclaredName { at: Token<'a> },
@@ -556,14 +551,6 @@ fn resolve_function_ty<'a>(
         },
     ));
     let return_type = scopes.sess.alloc(resolve_ty(scopes, return_type));
-
-    match return_type.ty {
-        Type::Arithmetic(_) | Type::Pointer(_) | Type::Void => (),
-        Type::Function(_) => scopes
-            .sess
-            .emit(Diagnostic::InvalidFunctionReturnType { at: return_type.loc, ty: *return_type }),
-        Type::Typeof { .. } => todo!(),
-    }
 
     FunctionType { params, return_type, is_varargs }
 }
