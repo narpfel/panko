@@ -260,3 +260,9 @@ where
         }
     }
 }
+
+impl AsSExpr for ! {
+    fn as_sexpr(&self) -> SExpr {
+        match *self {}
+    }
+}

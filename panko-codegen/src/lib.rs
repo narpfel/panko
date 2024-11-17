@@ -26,8 +26,8 @@ use panko_sema::layout::LayoutedExpression;
 use panko_sema::layout::Slot;
 use panko_sema::layout::Statement;
 use panko_sema::layout::TranslationUnit;
+use panko_sema::layout::Type;
 use panko_sema::scope::RefKind;
-use panko_sema::ty::Type;
 use panko_sema::typecheck::PtrCmpKind;
 use Register::*;
 
@@ -106,6 +106,7 @@ impl Display for TypedRegister<'_> {
         let size = match self.ty {
             Type::Arithmetic(_) | Type::Pointer(_) => self.ty.size(),
             Type::Function(_) | Type::Void => unreachable!(),
+            Type::Typeof { expr, unqual: _ } => match *expr {},
         };
 
         let names = match self.register {
@@ -241,6 +242,7 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[&tgt, &Rax.with_ty(ty)]);
             }
             Type::Function(_) | Type::Void => unreachable!(),
+            Type::Typeof { expr, unqual: _ } => match *expr {},
         }
     }
 

@@ -4,10 +4,10 @@ use std::collections::HashMap;
 use super::LayoutedExpression;
 use super::Reference;
 use super::Slot;
+use super::Type;
 use crate::nonempty;
 use crate::scope::Id;
 use crate::scope::StorageDuration;
-use crate::ty::Type;
 use crate::typecheck;
 
 #[derive(Debug, Default)]

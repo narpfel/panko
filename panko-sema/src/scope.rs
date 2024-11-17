@@ -17,10 +17,7 @@ use panko_parser::UnaryOp;
 use panko_report::Report;
 
 use crate::nonempty;
-use crate::ty::FunctionType;
-use crate::ty::ParameterDeclaration;
-use crate::ty::QualifiedType;
-use crate::ty::Type;
+use crate::ty;
 
 mod as_sexpr;
 
@@ -59,6 +56,11 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "this name has not been declared"))]
     UndeclaredName { at: Token<'a> },
 }
+
+type FunctionType<'a> = ty::FunctionType<'a, &'a Expression<'a>>;
+type ParameterDeclaration<'a> = ty::ParameterDeclaration<'a, &'a Expression<'a>>;
+pub(crate) type Type<'a> = ty::Type<'a, &'a Expression<'a>>;
+pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, &'a Expression<'a>>;
 
 #[derive(Debug)]
 enum OpenNewScope {
@@ -576,6 +578,7 @@ fn resolve_function_ty<'a>(
         Type::Function(_) => scopes
             .sess
             .emit(Diagnostic::InvalidFunctionReturnType { at: return_type.loc, ty: *return_type }),
+        Type::Typeof { .. } => todo!(),
     }
 
     FunctionType { params, return_type, is_varargs }
@@ -777,9 +780,15 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         },
         ast::Expression::CompoundAssign { target, op, value } => {
             let target = scopes.sess.alloc(resolve_expr(scopes, target));
-            // TODO: `Type::Void` is a placeholder here, it would be better to add
-            // `Type::Unresolved` or similar for this case
-            let target_temporary = scopes.temporary(target.loc(), Type::Void.unqualified());
+            let target_temporary = scopes.temporary(
+                target.loc(),
+                Type::Pointer(
+                    scopes
+                        .sess
+                        .alloc(Type::Typeof { expr: target, unqual: false }.unqualified()),
+                )
+                .unqualified(),
+            );
             Expression::CompoundAssign {
                 target,
                 target_temporary,
@@ -849,15 +858,20 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::Increment { operator, operand, fixity } => {
             let operand = scopes.sess.alloc(resolve_expr(scopes, operand));
             let reference = scopes.temporary(operand.loc(), Type::Void.unqualified());
+            let typeof_operand_unqual = Type::Typeof { expr: operand, unqual: true };
+            let typeof_operand = Type::Typeof { expr: operand, unqual: false };
             Expression::Increment {
                 operator: *operator,
                 operand,
                 fixity: match fixity {
                     cst::IncrementFixity::Prefix => IncrementFixity::Prefix,
                     cst::IncrementFixity::Postfix => IncrementFixity::Postfix {
-                        // TODO: same as in `CompoundAssign`, these types are placeholders
-                        pointer: scopes.temporary(operand.loc(), Type::Void.unqualified()),
-                        copy: scopes.temporary(operand.loc(), Type::Void.unqualified()),
+                        pointer: scopes.temporary(
+                            operand.loc(),
+                            Type::Pointer(scopes.sess.alloc(typeof_operand.unqualified()))
+                                .unqualified(),
+                        ),
+                        copy: scopes.temporary(operand.loc(), typeof_operand_unqual.unqualified()),
                     },
                 },
                 reference,

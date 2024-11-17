@@ -36,9 +36,9 @@ use crate::scope::Id;
 use crate::scope::IncrementFixity;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
+use crate::ty;
 use crate::ty::FunctionType;
-use crate::ty::QualifiedType;
-use crate::ty::Type;
+use crate::ty::ParameterDeclaration;
 
 mod as_sexpr;
 #[cfg(test)]
@@ -265,6 +265,9 @@ enum Diagnostic<'a> {
     },
 }
 
+type Type<'a> = ty::Type<'a, !>;
+pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, !>;
+
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
     pub decls: &'a [ExternalDeclaration<'a>],
@@ -463,7 +466,6 @@ impl<'a> Reference<'a> {
     }
 
     fn at(&self, location: Loc<'a>) -> Self {
-        assert_eq!(self.name, location.slice());
         Self { usage_location: location, ..*self }
     }
 
@@ -610,6 +612,42 @@ impl fmt::Display for ConversionKind {
     }
 }
 
+fn typeck_ty<'a>(sess: &'a Session<'a>, ty: scope::QualifiedType<'a>) -> QualifiedType<'a> {
+    let scope::QualifiedType { is_const, is_volatile, ty, loc } = ty;
+    let ty = match ty {
+        ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
+        ty::Type::Pointer(pointee) => Type::Pointer(sess.alloc(typeck_ty(sess, *pointee))),
+        ty::Type::Function(FunctionType { params, return_type, is_varargs }) =>
+            Type::Function(FunctionType {
+                params: sess.alloc_slice_fill_iter(params.iter().map(
+                    |&ParameterDeclaration { loc, ty, name }| ParameterDeclaration {
+                        loc,
+                        ty: typeck_ty(sess, ty),
+                        name,
+                    },
+                )),
+                return_type: sess.alloc(typeck_ty(sess, *return_type)),
+                is_varargs,
+            }),
+        ty::Type::Void => Type::Void,
+        ty::Type::Typeof { expr, unqual } => {
+            let expr = typeck_expression(sess, expr, Context::Typeof);
+            return if unqual {
+                expr.ty.ty.unqualified()
+            }
+            else {
+                QualifiedType {
+                    is_const: is_const | expr.ty.is_const,
+                    is_volatile: is_volatile | expr.ty.is_volatile,
+                    ty: expr.ty.ty,
+                    loc: expr.ty.loc,
+                }
+            };
+        }
+    };
+    QualifiedType { is_const, is_volatile, ty, loc }
+}
+
 fn typeck_reference<'a>(sess: &'a Session<'a>, reference: scope::Reference<'a>) -> Reference<'a> {
     let scope::Reference {
         name,
@@ -624,7 +662,7 @@ fn typeck_reference<'a>(sess: &'a Session<'a>, reference: scope::Reference<'a>) 
     let reference = Reference {
         name,
         loc,
-        ty,
+        ty: typeck_ty(sess, ty),
         id,
         usage_location,
         kind,
@@ -784,17 +822,14 @@ fn typeck_statement<'a>(
         scope::Statement::Compound(stmt) =>
             Statement::Compound(typeck_compound_statement(sess, stmt, function)),
         scope::Statement::Return { return_: _, expr } => {
+            let return_ty = typeck_ty(sess, *function.return_ty());
             let expr = expr
                 .as_ref()
                 .map(|expr| typeck_expression(sess, expr, Context::Default));
             let expr = match expr {
-                Some(expr) => Some(convert_as_if_by_assignment(
-                    sess,
-                    *function.return_ty(),
-                    expr,
-                )),
+                Some(expr) => Some(convert_as_if_by_assignment(sess, return_ty, expr)),
                 None =>
-                    if !matches!(function.return_ty().ty, Type::Void) {
+                    if !matches!(return_ty.ty, Type::Void) {
                         Some(sess.emit(Diagnostic::ReturnWithoutValueInNonVoidFunction {
                             at: stmt.into_variant(),
                             function: *function,
@@ -1203,13 +1238,8 @@ fn desugar_postfix_increment<'a>(
 
     let token = op.token;
 
-    // TODO: we only typecheck to get the type
-    let ty = typeck_expression(sess, operand, Context::Default).ty;
-    let pointer = sess.alloc(scope::Expression::Name(scope::Reference {
-        ty: Type::Pointer(sess.alloc(ty)).unqualified(),
-        ..*pointer
-    }));
-    let copy = sess.alloc(scope::Expression::Name(scope::Reference { ty, ..*copy }));
+    let pointer = sess.alloc(scope::Expression::Name(*pointer));
+    let copy = sess.alloc(scope::Expression::Name(*copy));
 
     scope::Expression::Comma {
         lhs: sess.alloc(scope::Expression::Comma {
@@ -1262,6 +1292,7 @@ enum Context {
     Default,
     Addressof,
     Sizeof,
+    Typeof,
 }
 
 fn typeck_expression<'a>(
@@ -1558,7 +1589,8 @@ fn typeck_expression<'a>(
             }
         }
         scope::Expression::Sizeof { sizeof, ty, close_paren } => {
-            let ty = check_ty_can_sizeof(sess, ty, expr, sizeof);
+            let ty = typeck_ty(sess, *ty);
+            let ty = check_ty_can_sizeof(sess, &ty, expr, sizeof);
             TypedExpression {
                 ty: Type::size_t().unqualified(),
                 expr: Expression::SizeofTy {
@@ -1570,7 +1602,8 @@ fn typeck_expression<'a>(
             }
         }
         scope::Expression::Alignof { alignof, ty, close_paren } => {
-            let ty = check_ty_can_sizeof(sess, ty, expr, alignof);
+            let ty = typeck_ty(sess, *ty);
+            let ty = check_ty_can_sizeof(sess, &ty, expr, alignof);
             TypedExpression {
                 ty: Type::size_t().unqualified(),
                 expr: Expression::Alignof {
@@ -1583,7 +1616,7 @@ fn typeck_expression<'a>(
         }
         scope::Expression::Cast { open_paren: _, ty, expr } => {
             let expr = typeck_expression(sess, expr, Context::Default);
-            let ty = ty.ty.unqualified();
+            let ty = typeck_ty(sess, ty.ty.unqualified());
             convert(sess, ty, expr, ConversionKind::Explicit)
         }
         scope::Expression::Subscript { lhs, rhs, close_bracket } => typeck_expression(
@@ -1640,10 +1673,11 @@ fn typeck_expression<'a>(
                 .iter()
                 .filter_map(|assoc| match assoc {
                     GenericAssociation::Ty { ty, expr } => {
+                        let ty = typeck_ty(sess, *ty);
                         // TODO: `ty` shall not be a variably modified type.
                         if !(ty.ty.is_object() && ty.ty.is_complete()) {
                             sess.emit(Diagnostic::GenericWithInvalidType {
-                                at: *ty,
+                                at: ty,
                                 generic: *generic,
                             })
                         }
@@ -1651,13 +1685,13 @@ fn typeck_expression<'a>(
                     }
                     GenericAssociation::Default { default: _, expr: _ } => None,
                 })
-                .into_grouping_map_by(|(&ty, _expr)| ty)
+                .into_grouping_map_by(|(ty, _expr)| *ty)
                 .reduce(|first, _ty, duplicate| {
                     // intentionally ignored because we can continue translation with first
                     // duplicate
                     let () = sess.emit(Diagnostic::GenericWithDuplicateType {
-                        at: *duplicate.0,
-                        previous: *first.0,
+                        at: duplicate.0,
+                        previous: first.0,
                         generic: *generic,
                     });
                     first
@@ -1806,7 +1840,7 @@ fn typeck_expression<'a>(
             },
             _ => expr,
         },
-        Context::Sizeof | Context::Addressof => expr,
+        Context::Sizeof | Context::Addressof | Context::Typeof => expr,
     }
 }
 

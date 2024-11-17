@@ -1,4 +1,5 @@
 #![feature(coverage_attribute)]
+#![feature(never_type)]
 
 use ariadne::Color::Red;
 use ast::Arithmetic;

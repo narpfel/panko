@@ -15,46 +15,58 @@ use panko_parser::sexpr_builder::SExpr;
 use panko_parser::NO_VALUE;
 
 #[derive(Debug, Clone, Copy)]
-pub struct ParameterDeclaration<'a> {
+pub struct ParameterDeclaration<'a, TypeofExpr> {
     pub loc: Loc<'a>,
-    pub ty: QualifiedType<'a>,
+    pub ty: QualifiedType<'a, TypeofExpr>,
     pub name: Option<Token<'a>>,
 }
 
-impl<'a> ParameterDeclaration<'a> {
+impl<'a, TypeofExpr> ParameterDeclaration<'a, TypeofExpr> {
     pub(crate) fn loc(&self) -> Loc<'a> {
         self.loc
     }
 
-    pub(crate) fn slice(&self) -> Cow<'a, str> {
+    pub(crate) fn slice(&self) -> Cow<'a, str>
+    where
+        TypeofExpr: AsSExpr,
+    {
         self.name
             .map(|name| Cow::Borrowed(name.slice()))
             .unwrap_or_else(|| Cow::Owned(format!("<unnamed parameter of type `{}`>", self.ty)))
     }
 }
 
-impl PartialEq for ParameterDeclaration<'_> {
+impl<TypeofExpr> PartialEq for ParameterDeclaration<'_, TypeofExpr>
+where
+    TypeofExpr: PartialEq,
+{
     fn eq(&self, other: &Self) -> bool {
         self.ty.ty == other.ty.ty
     }
 }
 
-impl Eq for ParameterDeclaration<'_> {}
+impl<TypeofExpr> Eq for ParameterDeclaration<'_, TypeofExpr> where TypeofExpr: Eq {}
 
-impl Hash for ParameterDeclaration<'_> {
+impl<TypeofExpr> Hash for ParameterDeclaration<'_, TypeofExpr>
+where
+    TypeofExpr: Hash,
+{
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.ty.ty.hash(state)
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct FunctionType<'a> {
-    pub params: &'a [ParameterDeclaration<'a>],
-    pub return_type: &'a QualifiedType<'a>,
+pub struct FunctionType<'a, TypeofExpr> {
+    pub params: &'a [ParameterDeclaration<'a, TypeofExpr>],
+    pub return_type: &'a QualifiedType<'a, TypeofExpr>,
     pub is_varargs: bool,
 }
 
-impl fmt::Display for FunctionType<'_> {
+impl<TypeofExpr> fmt::Display for FunctionType<'_, TypeofExpr>
+where
+    TypeofExpr: AsSExpr,
+{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { params, return_type, is_varargs } = *self;
         let maybe_ellipsis = match (is_varargs, params.is_empty()) {
@@ -77,15 +89,16 @@ impl fmt::Display for FunctionType<'_> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Type<'a> {
+pub enum Type<'a, TypeofExpr> {
     Arithmetic(Arithmetic),
-    Pointer(&'a QualifiedType<'a>),
-    Function(FunctionType<'a>),
+    Pointer(&'a QualifiedType<'a, TypeofExpr>),
+    Function(FunctionType<'a, TypeofExpr>),
     Void,
+    Typeof { expr: TypeofExpr, unqual: bool },
     // TODO
 }
 
-impl<'a> Type<'a> {
+impl<'a, TypeofExpr> Type<'a, TypeofExpr> {
     pub const fn uchar() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Unsigned,
@@ -124,7 +137,10 @@ impl<'a> Type<'a> {
         }))
     }
 
-    pub fn unqualified(&self) -> QualifiedType<'a> {
+    pub fn unqualified(&self) -> QualifiedType<'a, TypeofExpr>
+    where
+        TypeofExpr: Copy,
+    {
         QualifiedType {
             is_const: false,
             is_volatile: false,
@@ -135,27 +151,22 @@ impl<'a> Type<'a> {
 
     // TODO: this is a temporary hack until the `Report` derive macro handles stringification
     // better
-    pub fn slice(&self) -> String {
+    pub fn slice(&self) -> String
+    where
+        TypeofExpr: AsSExpr,
+    {
         self.to_string()
     }
 
-    pub fn size(&self) -> u64 {
+    pub fn align(&self) -> u64 {
         match self {
             Type::Arithmetic(arithmetic) => arithmetic.size(),
             Type::Pointer(_) => 8,
-            Type::Function(_) => unreachable!("functions are not objects and don’t have a size"),
-            Type::Void => unreachable!("void is not an object and doesn’t have a size"),
+            Type::Function(_) =>
+                unreachable!("functions are not objects and don’t have an alignment"),
+            Type::Void => unreachable!("void is not an object and doesn’t have an alignment"),
+            Type::Typeof { .. } => todo!(),
         }
-    }
-
-    pub fn align(&self) -> u64 {
-        // TODO: correct align
-        self.size()
-    }
-
-    pub(crate) fn is_slot_compatible(&self, ty: &Type) -> bool {
-        // TODO: This is more restrictive than necessary.
-        self.size() == ty.size() && self.align() == ty.align()
     }
 
     pub(crate) fn is_object(&self) -> bool {
@@ -166,6 +177,7 @@ impl<'a> Type<'a> {
         match self {
             Type::Arithmetic(_) | Type::Pointer(_) | Type::Function(_) => true,
             Type::Void => false,
+            Type::Typeof { .. } => todo!(),
         }
     }
 
@@ -181,29 +193,53 @@ impl<'a> Type<'a> {
     }
 }
 
-impl fmt::Display for Type<'_> {
+impl<TypeofExpr> Type<'_, TypeofExpr> {
+    pub fn size(&self) -> u64 {
+        match self {
+            Type::Arithmetic(arithmetic) => arithmetic.size(),
+            Type::Pointer(_) => 8,
+            Type::Function(_) => unreachable!("functions are not objects and don’t have a size"),
+            Type::Void => unreachable!("void is not an object and doesn’t have a size"),
+            Type::Typeof { .. } => todo!(),
+        }
+    }
+
+    pub(crate) fn is_slot_compatible(&self, ty: &Type<'_, TypeofExpr>) -> bool {
+        // TODO: This is more restrictive than necessary.
+        self.size() == ty.size() && self.align() == ty.align()
+    }
+}
+
+impl<TypeofExpr> fmt::Display for Type<'_, TypeofExpr>
+where
+    TypeofExpr: AsSExpr,
+{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Type::Arithmetic(Arithmetic::Integral(integral)) => write!(f, "{integral}"),
             Type::Pointer(pointee) => write!(f, "ptr<{pointee}>"),
             Type::Function(function) => write!(f, "{function}"),
             Type::Void => write!(f, "void"),
+            Type::Typeof { .. } => todo!(),
         }
     }
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct QualifiedType<'a> {
+pub struct QualifiedType<'a, TypeofExpr> {
     pub(crate) is_const: bool,
     pub(crate) is_volatile: bool,
-    pub ty: Type<'a>,
+    pub ty: Type<'a, TypeofExpr>,
     pub(crate) loc: Loc<'a>,
 }
 
-impl QualifiedType<'_> {
+impl<TypeofExpr> QualifiedType<'_, TypeofExpr> {
     // TODO: this is a temporary hack until the `Report` derive macro handles stringification
     // better
-    pub(crate) fn slice(&self) -> String {
+    pub(crate) fn slice(&self) -> String
+    where
+        TypeofExpr: AsSExpr,
+    {
         self.to_string()
     }
 
@@ -212,7 +248,10 @@ impl QualifiedType<'_> {
     }
 }
 
-impl PartialEq for QualifiedType<'_> {
+impl<TypeofExpr> PartialEq for QualifiedType<'_, TypeofExpr>
+where
+    TypeofExpr: PartialEq,
+{
     fn eq(&self, other: &Self) -> bool {
         let Self { is_const, is_volatile, ty, loc: _ } = self;
         let Self {
@@ -225,16 +264,22 @@ impl PartialEq for QualifiedType<'_> {
     }
 }
 
-impl Eq for QualifiedType<'_> {}
+impl<TypeofExpr> Eq for QualifiedType<'_, TypeofExpr> where TypeofExpr: Eq {}
 
-impl Hash for QualifiedType<'_> {
+impl<TypeofExpr> Hash for QualifiedType<'_, TypeofExpr>
+where
+    TypeofExpr: Hash,
+{
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Self { is_const, is_volatile, ty, loc: _ } = self;
         (is_const, is_volatile, ty).hash(state)
     }
 }
 
-impl fmt::Display for QualifiedType<'_> {
+impl<TypeofExpr> fmt::Display for QualifiedType<'_, TypeofExpr>
+where
+    TypeofExpr: AsSExpr,
+{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.ty.fmt(f)?;
         if self.is_const {
@@ -247,7 +292,10 @@ impl fmt::Display for QualifiedType<'_> {
     }
 }
 
-impl AsSExpr for QualifiedType<'_> {
+impl<TypeofExpr> AsSExpr for QualifiedType<'_, TypeofExpr>
+where
+    TypeofExpr: AsSExpr,
+{
     fn as_sexpr(&self) -> SExpr {
         SExpr::display(self)
     }

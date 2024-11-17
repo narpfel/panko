@@ -9,13 +9,16 @@ use panko_report::Report;
 use crate::layout::stack::Stack;
 use crate::scope::Id;
 use crate::scope::RefKind;
-use crate::ty::QualifiedType;
+use crate::ty;
 use crate::typecheck;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::PtrCmpKind;
 
 mod as_sexpr;
 mod stack;
+
+pub type Type<'a> = ty::Type<'a, !>;
+type QualifiedType<'a> = ty::QualifiedType<'a, !>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
