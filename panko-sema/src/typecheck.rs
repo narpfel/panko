@@ -72,6 +72,16 @@ enum Diagnostic<'a> {
         previous_definition: Reference<'a>,
     },
 
+    #[error("cannot declare variable `{at}` with incomplete type `{ty}`")]
+    #[with(ty = at.ty)]
+    #[diagnostics(at(colour = Red, label = "declared here"))]
+    VariableWithIncompleteType { at: Reference<'a> },
+
+    #[error("cannot declare function parameter `{at}` with incomplete type `{ty}`")]
+    #[with(ty = at.ty)]
+    #[diagnostics(at(colour = Red, label = "parameter declared here"))]
+    ParameterWithIncompleteType { at: ParameterDeclaration<'a, !> },
+
     // TODO: types should be printed in C syntax, not in their SExpr debug repr
     #[error("invalid {kind} conversion from `{from_ty}` to `{to_ty}`")]
     #[diagnostics(at(colour = Red, label = "this is of type `{from_ty}`, which cannot be {kind}ly converted to `{to_ty}`"))]
@@ -620,10 +630,13 @@ fn typeck_ty<'a>(sess: &'a Session<'a>, ty: scope::QualifiedType<'a>) -> Qualifi
         ty::Type::Function(FunctionType { params, return_type, is_varargs }) =>
             Type::Function(FunctionType {
                 params: sess.alloc_slice_fill_iter(params.iter().map(
-                    |&ParameterDeclaration { loc, ty, name }| ParameterDeclaration {
-                        loc,
-                        ty: typeck_ty(sess, ty),
-                        name,
+                    |&ParameterDeclaration { loc, ty, name }| {
+                        let ty = typeck_ty(sess, ty);
+                        let param = ParameterDeclaration { loc, ty, name };
+                        if !ty.ty.is_complete() {
+                            sess.emit(Diagnostic::ParameterWithIncompleteType { at: param })
+                        }
+                        param
                     },
                 )),
                 return_type: sess.alloc(typeck_ty(sess, *return_type)),
@@ -785,6 +798,9 @@ fn typeck_declaration<'a>(
 ) -> Declaration<'a> {
     let scope::Declaration { reference, initialiser } = *declaration;
     let reference = typeck_reference(sess, reference);
+    if !reference.ty.ty.is_complete() {
+        sess.emit(Diagnostic::VariableWithIncompleteType { at: reference })
+    }
     let initialiser = initialiser.as_ref().map(|initialiser| {
         convert_as_if_by_assignment(
             sess,

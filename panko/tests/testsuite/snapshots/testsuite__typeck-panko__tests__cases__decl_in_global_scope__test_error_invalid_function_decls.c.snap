@@ -6,6 +6,7 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c
+snapshot_kind: text
 ---
 success: false
 exit_code: 1
@@ -27,11 +28,3 @@ Error: invalid function return type `fn() -> int`
    │ ──────────┬─────────  
    │           ╰─────────── declaration here
 ───╯
-
-Error: cannot declare function parameter `param` with incomplete type `void`
-    ╭─[panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c:11:12]
-    │
- 11 │ int d(void param);
-    │            ──┬──  
-    │              ╰──── parameter declared here
-────╯

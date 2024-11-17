@@ -38,16 +38,7 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "in this declaration"))]
     FunctionDeclaratorDoesNotHaveFunctionType { at: Token<'a> },
 
-    #[error("cannot declare variable `{at}` with incomplete type `{ty}`")]
-    #[with(ty = at.ty)]
-    #[diagnostics(at(colour = Red, label = "declared here"))]
-    VariableWithIncompleteType { at: Reference<'a> },
-
-    #[error("cannot declare function parameter `{at}` with incomplete type `{ty}`")]
-    #[with(ty = at.ty)]
-    #[diagnostics(at(colour = Red, label = "parameter declared here"))]
-    ParameterWithIncompleteType { at: ParameterDeclaration<'a> },
-
+    // TODO: This error case should be checked in `typecheck`
     #[error("invalid function return type `{ty}`")]
     #[diagnostics(at(colour = Red, label = "declaration here"))]
     InvalidFunctionReturnType { at: Loc<'a>, ty: QualifiedType<'a> },
@@ -558,17 +549,10 @@ fn resolve_function_ty<'a>(
     };
 
     let params = scopes.sess.alloc_slice_fill_iter(params.iter().map(
-        |&ast::ParameterDeclaration { loc, ty, name }| {
-            let ty = resolve_ty(scopes, &ty);
-            let param = ParameterDeclaration { loc, ty, name };
-
-            if !ty.ty.is_complete() {
-                scopes
-                    .sess
-                    .emit(Diagnostic::ParameterWithIncompleteType { at: param })
-            }
-
-            param
+        |&ast::ParameterDeclaration { loc, ty, name }| ParameterDeclaration {
+            loc,
+            ty: resolve_ty(scopes, &ty),
+            name,
         },
     ));
     let return_type = scopes.sess.alloc(resolve_ty(scopes, return_type));
@@ -712,16 +696,8 @@ fn resolve_declaration<'a>(
         Type::Function(_) => StorageDuration::Static,
         _ => storage_duration,
     };
-    let reference = scopes.add(name.slice(), name.loc(), ty, kind, storage_duration);
-
-    if !ty.ty.is_complete() {
-        scopes
-            .sess
-            .emit(Diagnostic::VariableWithIncompleteType { at: reference })
-    }
-
     Declaration {
-        reference,
+        reference: scopes.add(name.slice(), name.loc(), ty, kind, storage_duration),
         initialiser: try { resolve_expr(scopes, initialiser.as_ref()?) },
     }
 }
