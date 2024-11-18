@@ -105,7 +105,7 @@ impl Display for TypedRegister<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let size = match self.ty {
             Type::Arithmetic(_) | Type::Pointer(_) => self.ty.size(),
-            Type::Function(_) | Type::Void => unreachable!(),
+            Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
             Type::Typeof { expr, unqual: _ } => match *expr {},
         };
 
@@ -241,7 +241,7 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[&Rax.with_ty(ty), &src]);
                 self.emit_args("mov", &[&tgt, &Rax.with_ty(ty)]);
             }
-            Type::Function(_) | Type::Void => unreachable!(),
+            Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
             Type::Typeof { expr, unqual: _ } => match *expr {},
         }
     }

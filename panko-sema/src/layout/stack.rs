@@ -1,6 +1,9 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
+use bumpalo::Bump;
+
+use super::layout_ty;
 use super::LayoutedExpression;
 use super::Reference;
 use super::Slot;
@@ -65,18 +68,23 @@ impl<'a> Stack<'a> {
         self.slots.pop()
     }
 
-    pub(super) fn add(&mut self, reference: typecheck::Reference<'a>) -> Reference<'a> {
-        self.add_at(reference, None)
+    pub(super) fn add(
+        &mut self,
+        bump: &'a Bump,
+        reference: typecheck::Reference<'a>,
+    ) -> Reference<'a> {
+        self.add_at(bump, reference, None)
     }
 
     pub(super) fn add_at(
         &mut self,
+        bump: &'a Bump,
         reference: typecheck::Reference<'a>,
         maybe_slot: Option<Slot<'a>>,
     ) -> Reference<'a> {
         match self.ids.entry(reference.id) {
             Entry::Occupied(entry) => *entry.get(),
-            Entry::Vacant(entry) => {
+            Entry::Vacant(_) => {
                 let typecheck::Reference {
                     name,
                     loc: _,
@@ -86,12 +94,16 @@ impl<'a> Stack<'a> {
                     kind,
                     storage_duration,
                 } = reference;
+                let ty = layout_ty(self, bump, ty);
                 let slot = match storage_duration {
                     StorageDuration::Static => Slot::Static(reference.name()),
                     StorageDuration::Automatic =>
                         maybe_slot.unwrap_or_else(|| self.slots.add_slot(ty.ty)),
                 };
-                *entry.insert(Reference { name, ty, id, kind, slot })
+                *self
+                    .ids
+                    .entry(reference.id)
+                    .or_insert(Reference { name, ty, id, kind, slot })
             }
         }
     }

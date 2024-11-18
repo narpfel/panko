@@ -142,6 +142,8 @@ impl fmt::Display for Operand<'_> {
                     Type::Arithmetic(_) | Type::Pointer(_) => self.ty.size(),
                     // Using a function results in a pointer to that function, so we need 8 bytes.
                     Type::Function(_) => 8,
+                    // Same for arrays.
+                    Type::Array(_) => 8,
                     Type::Void => unreachable!(),
                     Type::Typeof { expr, unqual: _ } => match expr {},
                 };

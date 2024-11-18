@@ -43,10 +43,11 @@ enum Diagnostic<'a> {
     UndeclaredName { at: Token<'a> },
 }
 
-type FunctionType<'a> = ty::FunctionType<'a, &'a Expression<'a>>;
-type ParameterDeclaration<'a> = ty::ParameterDeclaration<'a, &'a Expression<'a>>;
-pub(crate) type Type<'a> = ty::Type<'a, &'a Expression<'a>>;
-pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, &'a Expression<'a>>;
+type ArrayType<'a> = ty::ArrayType<'a, &'a Expression<'a>, Expression<'a>>;
+type FunctionType<'a> = ty::FunctionType<'a, &'a Expression<'a>, Expression<'a>>;
+type ParameterDeclaration<'a> = ty::ParameterDeclaration<'a, &'a Expression<'a>, Expression<'a>>;
+pub(crate) type Type<'a> = ty::Type<'a, &'a Expression<'a>, Expression<'a>>;
+pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, &'a Expression<'a>, Expression<'a>>;
 
 #[derive(Debug)]
 enum OpenNewScope {
@@ -515,6 +516,10 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
         ast::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ast::Type::Pointer(pointee) =>
             Type::Pointer(scopes.sess.alloc(resolve_ty(scopes, pointee))),
+        ast::Type::Array(ast::ArrayType { ty, size }) => Type::Array(ArrayType {
+            ty: scopes.sess.alloc(resolve_ty(scopes, ty)),
+            size: scopes.sess.alloc(resolve_expr(scopes, size)),
+        }),
         ast::Type::Function(function_type) =>
             Type::Function(resolve_function_ty(scopes, &function_type)),
         ast::Type::Void => Type::Void,

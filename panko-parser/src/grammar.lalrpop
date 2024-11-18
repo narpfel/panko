@@ -172,8 +172,15 @@ Pointer: ast::Pointer<'a> = {
 DirectDeclarator: ast::DirectDeclarator<'a> = {
     <Identifier> AttributeSpecifierSequence? => ast::DirectDeclarator::Identifier(<>),
     "(" <Bump<Declarator>> ")" => ast::DirectDeclarator::Parenthesised(<>),
-    // array-declarator attribute-specifier-sequence?
+    <ArrayDeclarator> AttributeSpecifierSequence? => ast::DirectDeclarator::ArrayDeclarator(<>),
     <FunctionDeclarator> AttributeSpecifierSequence? => ast::DirectDeclarator::FunctionDeclarator(<>),
+}
+
+ArrayDeclarator: ast::ArrayDeclarator<'a> = {
+    // TODO: incomplete
+    <direct_declarator:Bump<DirectDeclarator>>
+        "[" <type_qualifiers:Many<TypeQualifier>> <size:Expression> <close_bracket:"]"> =>
+            ast::ArrayDeclarator { <> },
 }
 
 FunctionDeclarator: ast::FunctionDeclarator<'a> = {

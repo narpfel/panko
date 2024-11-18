@@ -13,6 +13,8 @@ use panko_lex::Token;
 use panko_report::Report;
 
 use crate as cst;
+use crate::sexpr_builder::AsSExpr as _;
+use crate::ArrayDeclarator;
 use crate::BlockItem;
 use crate::DirectDeclarator;
 use crate::FunctionDeclarator;
@@ -174,6 +176,7 @@ pub struct QualifiedType<'a> {
 pub enum Type<'a> {
     Arithmetic(Arithmetic),
     Pointer(&'a QualifiedType<'a>),
+    Array(ArrayType<'a>),
     Function(FunctionType<'a>),
     Void,
     // TODO
@@ -205,6 +208,12 @@ pub enum IntegralKind {
 pub enum Signedness {
     Signed,
     Unsigned,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ArrayType<'a> {
+    pub ty: &'a QualifiedType<'a>,
+    pub size: &'a Expression<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -289,6 +298,7 @@ impl fmt::Display for Type<'_> {
         match self {
             Type::Arithmetic(Arithmetic::Integral(integral)) => write!(f, "{integral}"),
             Type::Pointer(pointee) => write!(f, "ptr<{pointee}>"),
+            Type::Array(array) => write!(f, "{array}"),
             Type::Function(function) => write!(f, "{function}"),
             Type::Void => write!(f, "void"),
         }
@@ -304,6 +314,13 @@ impl fmt::Display for Integral {
             write!(f, "{signedness} ")?;
         }
         write!(f, "{}", kind)
+    }
+}
+
+impl fmt::Display for ArrayType<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let Self { ty, size } = self;
+        write!(f, "array<{ty}; {size}>", size = size.as_sexpr())
     }
 }
 
@@ -569,6 +586,29 @@ pub(crate) fn parse_declarator<'a>(
             DirectDeclarator::Abstract => break None,
             DirectDeclarator::Identifier(name) => break Some(name),
             DirectDeclarator::Parenthesised(decl) => declarator = *decl,
+            DirectDeclarator::ArrayDeclarator(ArrayDeclarator {
+                direct_declarator,
+                type_qualifiers,
+                size,
+                close_bracket,
+            }) => {
+                if !type_qualifiers.is_empty() {
+                    todo!("array in function parameter not implemented");
+                }
+                declarator = cst::Declarator {
+                    pointers: None,
+                    direct_declarator: *direct_declarator,
+                };
+                ty = QualifiedType {
+                    is_const: false,
+                    is_volatile: false,
+                    ty: Type::Array(ArrayType {
+                        ty: sess.alloc(ty),
+                        size: sess.alloc(size),
+                    }),
+                    loc: ty.loc.until(close_bracket.loc()),
+                }
+            }
             DirectDeclarator::FunctionDeclarator(FunctionDeclarator {
                 direct_declarator,
                 parameter_type_list,

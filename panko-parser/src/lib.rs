@@ -439,8 +439,16 @@ enum DirectDeclarator<'a> {
     Abstract,
     Identifier(Token<'a>),
     Parenthesised(&'a Declarator<'a>),
-    // ArrayDeclarator(ArrayDeclarator<'a>),
+    ArrayDeclarator(ArrayDeclarator<'a>),
     FunctionDeclarator(FunctionDeclarator<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+struct ArrayDeclarator<'a> {
+    direct_declarator: &'a DirectDeclarator<'a>,
+    type_qualifiers: &'a [TypeQualifier<'a>],
+    size: Expression<'a>,
+    close_bracket: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]

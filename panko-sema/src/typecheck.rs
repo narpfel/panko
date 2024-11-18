@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::fmt;
+use std::hash::Hash;
 use std::num::IntErrorKind;
 
 use ariadne::Color::Blue;
@@ -37,6 +38,7 @@ use crate::scope::IncrementFixity;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
 use crate::ty;
+use crate::ty::ArrayType;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
 
@@ -80,7 +82,9 @@ enum Diagnostic<'a> {
     #[error("cannot declare function parameter `{at}` with incomplete type `{ty}`")]
     #[with(ty = at.ty)]
     #[diagnostics(at(colour = Red, label = "parameter declared here"))]
-    ParameterWithIncompleteType { at: ParameterDeclaration<'a, !> },
+    ParameterWithIncompleteType {
+        at: ParameterDeclaration<'a, !, ArraySize<TypedExpression<'a>>>,
+    },
 
     #[error("invalid function return type `{ty}`")]
     #[diagnostics(at(colour = Red, label = "declaration here"))]
@@ -279,8 +283,48 @@ enum Diagnostic<'a> {
     },
 }
 
-type Type<'a> = ty::Type<'a, !>;
-pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, !>;
+#[derive(Debug, Clone, Copy)]
+pub enum ArraySize<Expression> {
+    Constant(u64),
+    Variable(Expression),
+}
+
+impl<'a> TryFrom<TypedExpression<'a>> for ArraySize<TypedExpression<'a>> {
+    type Error = TypedExpression<'a>;
+
+    fn try_from(value: TypedExpression<'a>) -> Result<Self, Self::Error> {
+        // TODO: constexpr evaluate `value` here
+        match value.expr {
+            Expression::Integer { value, token: _ } => Ok(Self::Constant(value)),
+            _ => Err(value),
+        }
+    }
+}
+
+impl<Expression> PartialEq for ArraySize<Expression> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (ArraySize::Constant(self_size), ArraySize::Constant(other_size)) =>
+                self_size == other_size,
+            _ => todo!("type compatibility involving variably-modified types not implemented"),
+        }
+    }
+}
+
+impl<Expression> Eq for ArraySize<Expression> {}
+
+impl<Expression> Hash for ArraySize<Expression> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        match self {
+            ArraySize::Constant(size) => size.hash(state),
+            ArraySize::Variable(_) =>
+                todo!("type compatibility involving variably-modified types not implemented"),
+        }
+    }
+}
+
+type Type<'a> = ty::Type<'a, !, ArraySize<TypedExpression<'a>>>;
+pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, !, ArraySize<TypedExpression<'a>>>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
@@ -631,14 +675,22 @@ fn typeck_ty<'a>(sess: &'a Session<'a>, ty: scope::QualifiedType<'a>) -> Qualifi
     let ty = match ty {
         ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ty::Type::Pointer(pointee) => Type::Pointer(sess.alloc(typeck_ty(sess, *pointee))),
+        ty::Type::Array(ArrayType { ty, size }) => Type::Array(ArrayType {
+            ty: sess.alloc(typeck_ty(sess, *ty)),
+            size: sess.alloc(
+                ArraySize::try_from(typeck_expression(sess, size, Context::Default))
+                    .unwrap_or_else(|_| todo!("variable length array")),
+            ),
+        }),
         ty::Type::Function(FunctionType { params, return_type, is_varargs }) => {
             let return_type = sess.alloc(typeck_ty(sess, *return_type));
             match return_type.ty {
                 Type::Arithmetic(_) | Type::Pointer(_) | Type::Void => (),
-                Type::Function(_) => sess.emit(Diagnostic::InvalidFunctionReturnType {
-                    at: return_type.loc,
-                    ty: *return_type,
-                }),
+                Type::Array(_) | Type::Function(_) =>
+                    sess.emit(Diagnostic::InvalidFunctionReturnType {
+                        at: return_type.loc,
+                        ty: *return_type,
+                    }),
                 Type::Typeof { expr, unqual: _ } => match expr {},
             }
             Type::Function(FunctionType {
@@ -1798,6 +1850,7 @@ fn typeck_expression<'a>(
                     then.ty.ty,
                     or_else.ty.ty,
                 ),
+                (Type::Array(_), _) | (_, Type::Array(_)) => unreachable!(),
                 (Type::Function(_), _) | (_, Type::Function(_)) => unreachable!(),
                 (Type::Arithmetic(_), Type::Pointer(_) | Type::Void)
                 | (Type::Pointer(_), Type::Arithmetic(_) | Type::Void)
@@ -1867,6 +1920,16 @@ fn typeck_expression<'a>(
                     ampersand: Token::synthesised(panko_lex::TokenKind::And, expr.loc()),
                     operand: sess.alloc(expr),
                 },
+            },
+            ty @ Type::Array(array_type) => TypedExpression {
+                ty: Type::Pointer(array_type.ty).unqualified(),
+                expr: Expression::NoopTypeConversion(sess.alloc(TypedExpression {
+                    ty: Type::Pointer(sess.alloc(ty.unqualified())).unqualified(),
+                    expr: Expression::Addressof {
+                        ampersand: Token::synthesised(TokenKind::And, expr.loc()),
+                        operand: sess.alloc(expr),
+                    },
+                })),
             },
             _ => expr,
         },

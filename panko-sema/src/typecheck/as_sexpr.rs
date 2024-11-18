@@ -4,6 +4,7 @@ use itertools::Either;
 use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
 
+use super::ArraySize;
 use super::CompoundStatement;
 use super::Declaration;
 use super::Expression;
@@ -14,6 +15,18 @@ use super::Reference;
 use super::Statement;
 use super::TranslationUnit;
 use super::TypedExpression;
+
+impl<Expression> AsSExpr for ArraySize<Expression>
+where
+    Expression: AsSExpr,
+{
+    fn as_sexpr(&self) -> panko_parser::sexpr_builder::SExpr {
+        match self {
+            ArraySize::Constant(size) => SExpr::new("constexpr").inline_string(size.to_string()),
+            ArraySize::Variable(size) => SExpr::new("variable").inherit(size),
+        }
+    }
+}
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {

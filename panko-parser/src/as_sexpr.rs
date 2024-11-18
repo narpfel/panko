@@ -2,6 +2,7 @@
 
 use crate::sexpr_builder::AsSExpr;
 use crate::sexpr_builder::SExpr;
+use crate::ArrayDeclarator;
 use crate::BlockItem;
 use crate::CompoundStatement;
 use crate::Declaration;
@@ -131,9 +132,18 @@ impl AsSExpr for DirectDeclarator<'_> {
             DirectDeclarator::Abstract => ().as_sexpr(),
             DirectDeclarator::Identifier(ident) => SExpr::string(ident.slice()),
             DirectDeclarator::Parenthesised(declarator) => declarator.as_sexpr(),
+            DirectDeclarator::ArrayDeclarator(array_declarator) => array_declarator.as_sexpr(),
             DirectDeclarator::FunctionDeclarator(function_declarator) =>
                 function_declarator.as_sexpr(),
         }
+    }
+}
+
+impl AsSExpr for ArrayDeclarator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("array-declarator")
+            .inherit(&self.size)
+            .inherit(self.direct_declarator)
     }
 }
 
