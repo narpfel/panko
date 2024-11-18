@@ -162,14 +162,6 @@ impl<'a, TypeofExpr> Type<'a, TypeofExpr> {
         !self.is_function()
     }
 
-    pub(crate) fn is_complete(&self) -> bool {
-        match self {
-            Type::Arithmetic(_) | Type::Pointer(_) | Type::Function(_) => true,
-            Type::Void => false,
-            Type::Typeof { .. } => todo!(),
-        }
-    }
-
     pub(crate) fn is_function(&self) -> bool {
         matches!(self, Type::Function(_))
     }
@@ -207,6 +199,14 @@ impl Type<'_, !> {
     pub(crate) fn is_slot_compatible(&self, ty: &Type<'_, !>) -> bool {
         // TODO: This is more restrictive than necessary.
         self.size() == ty.size() && self.align() == ty.align()
+    }
+
+    pub(crate) fn is_complete(&self) -> bool {
+        match self {
+            Type::Arithmetic(_) | Type::Pointer(_) | Type::Function(_) => true,
+            Type::Void => false,
+            Type::Typeof { expr, unqual: _ } => match *expr {},
+        }
     }
 }
 
