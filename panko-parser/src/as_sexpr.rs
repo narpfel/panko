@@ -142,7 +142,7 @@ impl AsSExpr for DirectDeclarator<'_> {
 impl AsSExpr for ArrayDeclarator<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("array-declarator")
-            .inherit(&self.size)
+            .inherit(&self.length)
             .inherit(self.direct_declarator)
     }
 }

@@ -83,7 +83,7 @@ enum Diagnostic<'a> {
     #[with(ty = at.ty)]
     #[diagnostics(at(colour = Red, label = "parameter declared here"))]
     ParameterWithIncompleteType {
-        at: ParameterDeclaration<'a, !, ArraySize<TypedExpression<'a>>>,
+        at: ParameterDeclaration<'a, !, ArrayLength<TypedExpression<'a>>>,
     },
 
     #[error("invalid function return type `{ty}`")]
@@ -305,12 +305,12 @@ enum Diagnostic<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum ArraySize<Expression> {
+pub enum ArrayLength<Expression> {
     Constant(u64),
     Variable(Expression),
 }
 
-impl<'a> TryFrom<TypedExpression<'a>> for ArraySize<TypedExpression<'a>> {
+impl<'a> TryFrom<TypedExpression<'a>> for ArrayLength<TypedExpression<'a>> {
     type Error = TypedExpression<'a>;
 
     fn try_from(value: TypedExpression<'a>) -> Result<Self, Self::Error> {
@@ -322,30 +322,30 @@ impl<'a> TryFrom<TypedExpression<'a>> for ArraySize<TypedExpression<'a>> {
     }
 }
 
-impl<Expression> PartialEq for ArraySize<Expression> {
+impl<Expression> PartialEq for ArrayLength<Expression> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (ArraySize::Constant(self_size), ArraySize::Constant(other_size)) =>
-                self_size == other_size,
+            (ArrayLength::Constant(self_length), ArrayLength::Constant(other_length)) =>
+                self_length == other_length,
             _ => todo!("type compatibility involving variably-modified types not implemented"),
         }
     }
 }
 
-impl<Expression> Eq for ArraySize<Expression> {}
+impl<Expression> Eq for ArrayLength<Expression> {}
 
-impl<Expression> Hash for ArraySize<Expression> {
+impl<Expression> Hash for ArrayLength<Expression> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         match self {
-            ArraySize::Constant(size) => size.hash(state),
-            ArraySize::Variable(_) =>
+            ArrayLength::Constant(length) => length.hash(state),
+            ArrayLength::Variable(_) =>
                 todo!("type compatibility involving variably-modified types not implemented"),
         }
     }
 }
 
-type Type<'a> = ty::Type<'a, !, ArraySize<TypedExpression<'a>>>;
-pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, !, ArraySize<TypedExpression<'a>>>;
+type Type<'a> = ty::Type<'a, !, ArrayLength<TypedExpression<'a>>>;
+pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, !, ArrayLength<TypedExpression<'a>>>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
@@ -713,10 +713,10 @@ fn typeck_ty<'a>(sess: &'a Session<'a>, ty: scope::QualifiedType<'a>) -> Qualifi
     let ty = match ty {
         ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ty::Type::Pointer(pointee) => Type::Pointer(sess.alloc(typeck_ty(sess, *pointee))),
-        ty::Type::Array(ArrayType { ty, size }) => Type::Array(ArrayType {
+        ty::Type::Array(ArrayType { ty, length }) => Type::Array(ArrayType {
             ty: sess.alloc(typeck_ty(sess, *ty)),
-            size: sess.alloc(
-                ArraySize::try_from(typeck_expression(sess, size, Context::Default))
+            length: sess.alloc(
+                ArrayLength::try_from(typeck_expression(sess, length, Context::Default))
                     .unwrap_or_else(|_| todo!("variable length array")),
             ),
         }),
@@ -1654,14 +1654,14 @@ fn typeck_expression<'a>(
                     let expr = match operand.ty.ty {
                         Type::Array(ArrayType {
                             ty: _,
-                            size: &ArraySize::Constant(length),
+                            length: &ArrayLength::Constant(length),
                         }) => Expression::Lengthof {
                             lengthof: operator.token,
                             operand: sess.alloc(operand),
                             length,
                         },
-                        Type::Array(ArrayType { ty: _, size: ArraySize::Variable(_) }) =>
-                            todo!("_Lengthof of a variably-modified type"),
+                        Type::Array(ArrayType { ty: _, length: ArrayLength::Variable(_) }) =>
+                            todo!("`_Lengthof` of a variably-modified type"),
                         _ => sess
                             .emit(Diagnostic::InvalidLengthof { op: operator.token, at: operand }),
                     };
@@ -1744,14 +1744,14 @@ fn typeck_expression<'a>(
             let expr = match ty.ty {
                 Type::Array(ArrayType {
                     ty: _,
-                    size: &ArraySize::Constant(length),
+                    length: &ArrayLength::Constant(length),
                 }) => Expression::LengthofTy {
                     lengthof: *lengthof,
                     ty,
                     length,
                     close_paren: *close_paren,
                 },
-                Type::Array(ArrayType { ty: _, size: ArraySize::Variable(_) }) =>
+                Type::Array(ArrayType { ty: _, length: ArrayLength::Variable(_) }) =>
                     todo!("_Lengthof of a variably-modified type"),
                 _ => sess.emit(Diagnostic::InvalidLengthofTy { op: *lengthof, at: ty }),
             };

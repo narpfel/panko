@@ -213,7 +213,7 @@ pub enum Signedness {
 #[derive(Debug, Clone, Copy)]
 pub struct ArrayType<'a> {
     pub ty: &'a QualifiedType<'a>,
-    pub size: &'a Expression<'a>,
+    pub length: &'a Expression<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -319,8 +319,8 @@ impl fmt::Display for Integral {
 
 impl fmt::Display for ArrayType<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let Self { ty, size } = self;
-        write!(f, "array<{ty}; {size}>", size = size.as_sexpr())
+        let Self { ty, length } = self;
+        write!(f, "array<{ty}; {length}>", length = length.as_sexpr())
     }
 }
 
@@ -589,7 +589,7 @@ pub(crate) fn parse_declarator<'a>(
             DirectDeclarator::ArrayDeclarator(ArrayDeclarator {
                 direct_declarator,
                 type_qualifiers,
-                size,
+                length,
                 close_bracket,
             }) => {
                 if !type_qualifiers.is_empty() {
@@ -604,7 +604,7 @@ pub(crate) fn parse_declarator<'a>(
                     is_volatile: false,
                     ty: Type::Array(ArrayType {
                         ty: sess.alloc(ty),
-                        size: sess.alloc(size),
+                        length: sess.alloc(length),
                     }),
                     loc: ty.loc.until(close_bracket.loc()),
                 }

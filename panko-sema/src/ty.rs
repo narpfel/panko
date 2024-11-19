@@ -14,7 +14,7 @@ use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
 use panko_parser::NO_VALUE;
 
-use crate::typecheck::ArraySize;
+use crate::typecheck::ArrayLength;
 
 #[derive(Debug, Clone, Copy)]
 pub struct ParameterDeclaration<'a, TypeofExpr, Expression> {
@@ -69,7 +69,7 @@ where
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ArrayType<'a, TypeofExpr, Expression> {
     pub ty: &'a QualifiedType<'a, TypeofExpr, Expression>,
-    pub size: &'a Expression,
+    pub length: &'a Expression,
 }
 
 impl<TypeofExpr, Expression> fmt::Display for ArrayType<'_, TypeofExpr, Expression>
@@ -78,8 +78,8 @@ where
     Expression: AsSExpr,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let Self { ty, size } = self;
-        write!(f, "array<{ty}; {size}>", size = size.as_sexpr())
+        let Self { ty, length } = self;
+        write!(f, "array<{ty}; {length}>", length = length.as_sexpr())
     }
 }
 
@@ -205,16 +205,16 @@ impl<'a, TypeofExpr, Expression> Type<'a, TypeofExpr, Expression> {
     }
 }
 
-impl<Expression> Type<'_, !, ArraySize<Expression>> {
+impl<Expression> Type<'_, !, ArrayLength<Expression>> {
     pub fn size(&self) -> u64 {
         match self {
             Type::Arithmetic(arithmetic) => arithmetic.size(),
             Type::Pointer(_) => 8,
-            Type::Array(ArrayType { ty, size }) => {
+            Type::Array(ArrayType { ty, length }) => {
                 let elem_size = ty.ty.size();
-                let length = match size {
-                    ArraySize::Constant(size) => *size,
-                    ArraySize::Variable(_) => todo!("size of variable length array"),
+                let length = match length {
+                    ArrayLength::Constant(length) => *length,
+                    ArrayLength::Variable(_) => todo!("`sizeof` of variable length array"),
                 };
                 elem_size
                     .checked_mul(length)
@@ -238,7 +238,7 @@ impl<Expression> Type<'_, !, ArraySize<Expression>> {
         }
     }
 
-    pub(crate) fn is_slot_compatible<E>(&self, ty: &Type<'_, !, ArraySize<E>>) -> bool {
+    pub(crate) fn is_slot_compatible<E>(&self, ty: &Type<'_, !, ArrayLength<E>>) -> bool {
         // TODO: This is more restrictive than necessary.
         self.size() == ty.size() && self.align() == ty.align()
     }
@@ -247,7 +247,7 @@ impl<Expression> Type<'_, !, ArraySize<Expression>> {
         match self {
             Type::Arithmetic(_) | Type::Pointer(_) | Type::Function(_) => true,
             // TODO: is complete iff size is known
-            Type::Array(ArrayType { ty: _, size: _ }) => true,
+            Type::Array(ArrayType { ty: _, length: _ }) => true,
             Type::Void => false,
             Type::Typeof { expr, unqual: _ } => match *expr {},
         }

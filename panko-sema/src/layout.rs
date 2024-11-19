@@ -20,7 +20,7 @@ use crate::typecheck::PtrCmpKind;
 mod as_sexpr;
 mod stack;
 
-type ArraySize<'a> = typecheck::ArraySize<LayoutedExpression<'a>>;
+type ArraySize<'a> = typecheck::ArrayLength<LayoutedExpression<'a>>;
 pub type Type<'a> = ty::Type<'a, !, ArraySize<'a>>;
 type QualifiedType<'a> = ty::QualifiedType<'a, !, ArraySize<'a>>;
 
@@ -189,15 +189,15 @@ impl<'a> Reference<'a> {
     }
 }
 
-fn layout_array_size<'a>(
+fn layout_array_length<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
-    size: typecheck::ArraySize<typecheck::TypedExpression<'a>>,
+    length: typecheck::ArrayLength<typecheck::TypedExpression<'a>>,
 ) -> ArraySize<'a> {
-    match size {
-        typecheck::ArraySize::Constant(size) => ArraySize::Constant(size),
-        typecheck::ArraySize::Variable(size) =>
-            ArraySize::Variable(layout_expression(stack, bump, &size)),
+    match length {
+        typecheck::ArrayLength::Constant(length) => ArraySize::Constant(length),
+        typecheck::ArrayLength::Variable(length) =>
+            ArraySize::Variable(layout_expression(stack, bump, &length)),
     }
 }
 
@@ -210,9 +210,9 @@ fn layout_ty<'a>(
     let ty = match ty {
         ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ty::Type::Pointer(pointee) => Type::Pointer(bump.alloc(layout_ty(stack, bump, *pointee))),
-        ty::Type::Array(ArrayType { ty, size }) => Type::Array(ArrayType {
+        ty::Type::Array(ArrayType { ty, length }) => Type::Array(ArrayType {
             ty: bump.alloc(layout_ty(stack, bump, *ty)),
-            size: bump.alloc(layout_array_size(stack, bump, *size)),
+            length: bump.alloc(layout_array_length(stack, bump, *length)),
         }),
         ty::Type::Function(FunctionType { params, return_type, is_varargs }) =>
             Type::Function(FunctionType {

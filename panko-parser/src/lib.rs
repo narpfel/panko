@@ -447,7 +447,7 @@ enum DirectDeclarator<'a> {
 struct ArrayDeclarator<'a> {
     direct_declarator: &'a DirectDeclarator<'a>,
     type_qualifiers: &'a [TypeQualifier<'a>],
-    size: Expression<'a>,
+    length: Expression<'a>,
     close_bracket: Token<'a>,
 }
 
