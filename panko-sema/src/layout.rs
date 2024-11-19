@@ -454,10 +454,17 @@ fn layout_expression_in_slot<'a>(
             (slot, Expression::Not(bump.alloc(operand)))
         }
         typecheck::Expression::Sizeof { sizeof: _, operand: _, size: value }
+        | typecheck::Expression::Lengthof { lengthof: _, operand: _, length: value }
         | typecheck::Expression::SizeofTy {
             sizeof: _,
             ty: _,
             size: value,
+            close_paren: _,
+        }
+        | typecheck::Expression::LengthofTy {
+            lengthof: _,
+            ty: _,
+            length: value,
             close_paren: _,
         }
         | typecheck::Expression::Alignof {

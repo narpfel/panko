@@ -65,6 +65,7 @@ extern {
         "return" => Token { kind: panko_lex::TokenKind::Return, .. },
 
         "sizeof" => Token { kind: panko_lex::TokenKind::Sizeof, .. },
+        "_Lengthof" => Token { kind: panko_lex::TokenKind::Lengthof, ..},
         "alignof" => Token { kind: panko_lex::TokenKind::Alignof, .. },
 
         "+" => Token { kind: panko_lex::TokenKind::Plus, .. },
@@ -422,7 +423,13 @@ UnaryExpression: ast::Expression<'a> = {
         operator: ast::UnaryOp { kind: ast::UnaryOpKind::Sizeof, token: sizeof },
         operand,
     },
+    // TODO: `_Lengthof` basically duplicates all of the code for `sizeof`.
+    <lengthof:"_Lengthof"> <operand:Bump<UnaryExpression>> => ast::Expression::UnaryOp {
+        operator: ast::UnaryOp { kind: ast::UnaryOpKind::Lengthof, token: lengthof },
+        operand,
+    },
     <sizeof:"sizeof"> "(" <ty:TypeName> <close_paren:")"> => ast::Expression::Sizeof { <> },
+    <lengthof:"_Lengthof"> "(" <ty:TypeName> <close_paren:")"> => ast::Expression::Lengthof { <> },
     <alignof:"alignof"> "(" <ty:TypeName> <close_paren:")"> => ast::Expression::Alignof { <> },
     <operator:IncrementOperator> <operand:Bump<UnaryExpression>> =>
         ast::Expression::Increment { <>, fixity: ast::IncrementFixity::Prefix },

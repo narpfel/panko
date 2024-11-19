@@ -149,6 +149,11 @@ pub(crate) enum Expression<'a> {
         ty: QualifiedType<'a>,
         close_paren: Token<'a>,
     },
+    Lengthof {
+        lengthof: Token<'a>,
+        ty: QualifiedType<'a>,
+        close_paren: Token<'a>,
+    },
     Alignof {
         alignof: Token<'a>,
         ty: QualifiedType<'a>,
@@ -292,6 +297,8 @@ impl<'a> Expression<'a> {
                 callee.loc().until(close_paren.loc()),
             Expression::Sizeof { sizeof, ty: _, close_paren } =>
                 sizeof.loc().until(close_paren.loc()),
+            Expression::Lengthof { lengthof, ty: _, close_paren } =>
+                lengthof.loc().until(close_paren.loc()),
             Expression::Alignof { alignof, ty: _, close_paren } =>
                 alignof.loc().until(close_paren.loc()),
             Expression::Cast { open_paren, ty: _, expr } => open_paren.loc().until(expr.loc()),
@@ -783,6 +790,11 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         },
         ast::Expression::Sizeof { sizeof, ty, close_paren } => Expression::Sizeof {
             sizeof: *sizeof,
+            ty: resolve_ty(scopes, ty),
+            close_paren: *close_paren,
+        },
+        ast::Expression::Lengthof { lengthof, ty, close_paren } => Expression::Lengthof {
+            lengthof: *lengthof,
             ty: resolve_ty(scopes, ty),
             close_paren: *close_paren,
         },

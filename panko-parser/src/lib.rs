@@ -546,6 +546,11 @@ pub enum Expression<'a> {
         ty: QualifiedType<'a>,
         close_paren: Token<'a>,
     },
+    Lengthof {
+        lengthof: Token<'a>,
+        ty: QualifiedType<'a>,
+        close_paren: Token<'a>,
+    },
     Alignof {
         alignof: Token<'a>,
         ty: QualifiedType<'a>,
@@ -662,6 +667,7 @@ pub enum UnaryOpKind {
     Compl,
     Not,
     Sizeof,
+    Lengthof,
 }
 
 impl<'a> UnaryOp<'a> {
@@ -674,6 +680,7 @@ impl<'a> UnaryOp<'a> {
             UnaryOpKind::Compl => "compl",
             UnaryOpKind::Not => "not",
             UnaryOpKind::Sizeof => "sizeof",
+            UnaryOpKind::Lengthof => "lengthof",
         }
     }
 

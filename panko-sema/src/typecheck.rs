@@ -281,6 +281,27 @@ enum Diagnostic<'a> {
         at: Token<'a>,
         rhs: TypedExpression<'a>,
     },
+
+    #[error("`{op}` can only be applied to arrays, not `{ty}`")]
+    #[diagnostics(
+        op(colour = Blue),
+        at(colour = Red, label = "this expression is of type `{ty}`"),
+    )]
+    #[with(ty = at.ty)]
+    InvalidLengthof {
+        op: Token<'a>,
+        at: TypedExpression<'a>,
+    },
+
+    #[error("`{op}` can only be applied to arrays, not `{at}`")]
+    #[diagnostics(
+        op(colour = Blue),
+        at(colour = Red, label = "this type is `{at}`"),
+    )]
+    InvalidLengthofTy {
+        op: Token<'a>,
+        at: QualifiedType<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -457,10 +478,21 @@ pub enum Expression<'a> {
         operand: &'a TypedExpression<'a>,
         size: u64,
     },
+    Lengthof {
+        lengthof: Token<'a>,
+        operand: &'a TypedExpression<'a>,
+        length: u64,
+    },
     SizeofTy {
         sizeof: Token<'a>,
         ty: QualifiedType<'a>,
         size: u64,
+        close_paren: Token<'a>,
+    },
+    LengthofTy {
+        lengthof: Token<'a>,
+        ty: QualifiedType<'a>,
+        length: u64,
         close_paren: Token<'a>,
     },
     Alignof {
@@ -566,7 +598,9 @@ impl<'a> TypedExpression<'a> {
             | Expression::Compl { .. }
             | Expression::Not { .. }
             | Expression::Sizeof { .. }
+            | Expression::Lengthof { .. }
             | Expression::SizeofTy { .. }
+            | Expression::LengthofTy { .. }
             | Expression::Alignof { .. } => false,
             Expression::Combine { first: _, second } => second.is_lvalue(),
             Expression::Logical { .. } | Expression::Conditional { .. } => false,
@@ -618,8 +652,12 @@ impl<'a> Expression<'a> {
             Expression::Compl { compl, operand } => compl.loc().until(operand.loc()),
             Expression::Not { not, operand } => not.loc().until(operand.loc()),
             Expression::Sizeof { sizeof, operand, size: _ } => sizeof.loc().until(operand.loc()),
+            Expression::Lengthof { lengthof, operand, length: _ } =>
+                lengthof.loc().until(operand.loc()),
             Expression::SizeofTy { sizeof, ty: _, size: _, close_paren } =>
                 sizeof.loc().until(close_paren.loc()),
+            Expression::LengthofTy { lengthof, ty: _, length: _, close_paren } =>
+                lengthof.loc().until(close_paren.loc()),
             Expression::Alignof { alignof, ty: _, align: _, close_paren } =>
                 alignof.loc().until(close_paren.loc()),
             Expression::Combine { first, second } => first.loc().until(second.loc()),
@@ -1497,6 +1535,7 @@ fn typeck_expression<'a>(
             let context = match operator.kind {
                 UnaryOpKind::Addressof => Context::Addressof,
                 UnaryOpKind::Sizeof => Context::Sizeof,
+                UnaryOpKind::Lengthof => Context::Sizeof,
                 _ => Context::Default,
             };
             let operand = typeck_expression(sess, operand, context);
@@ -1611,6 +1650,23 @@ fn typeck_expression<'a>(
                         },
                     }
                 }
+                UnaryOpKind::Lengthof => {
+                    let expr = match operand.ty.ty {
+                        Type::Array(ArrayType {
+                            ty: _,
+                            size: &ArraySize::Constant(length),
+                        }) => Expression::Lengthof {
+                            lengthof: operator.token,
+                            operand: sess.alloc(operand),
+                            length,
+                        },
+                        Type::Array(ArrayType { ty: _, size: ArraySize::Variable(_) }) =>
+                            todo!("_Lengthof of a variably-modified type"),
+                        _ => sess
+                            .emit(Diagnostic::InvalidLengthof { op: operator.token, at: operand }),
+                    };
+                    TypedExpression { ty: Type::size_t().unqualified(), expr }
+                }
             }
         }
         scope::Expression::Call { callee, args, close_paren } => {
@@ -1682,6 +1738,24 @@ fn typeck_expression<'a>(
                     close_paren: *close_paren,
                 },
             }
+        }
+        scope::Expression::Lengthof { lengthof, ty, close_paren } => {
+            let ty = typeck_ty(sess, *ty);
+            let expr = match ty.ty {
+                Type::Array(ArrayType {
+                    ty: _,
+                    size: &ArraySize::Constant(length),
+                }) => Expression::LengthofTy {
+                    lengthof: *lengthof,
+                    ty,
+                    length,
+                    close_paren: *close_paren,
+                },
+                Type::Array(ArrayType { ty: _, size: ArraySize::Variable(_) }) =>
+                    todo!("_Lengthof of a variably-modified type"),
+                _ => sess.emit(Diagnostic::InvalidLengthofTy { op: *lengthof, at: ty }),
+            };
+            TypedExpression { ty: Type::size_t().unqualified(), expr }
         }
         scope::Expression::Alignof { alignof, ty, close_paren } => {
             let ty = typeck_ty(sess, *ty);

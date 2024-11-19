@@ -142,9 +142,16 @@ impl AsSExpr for Expression<'_> {
             Expression::Sizeof { sizeof: _, operand, size } => SExpr::new("sizeof")
                 .inline_string(size.to_string())
                 .inherit(operand),
+            Expression::Lengthof { lengthof: _, operand, length } => SExpr::new("lengthof")
+                .inline_string(length.to_string())
+                .inherit(operand),
             Expression::SizeofTy { sizeof: _, ty, size, close_paren: _ } => SExpr::new("sizeof")
                 .inline_string(size.to_string())
                 .inherit(ty),
+            Expression::LengthofTy { lengthof: _, ty, length, close_paren: _ } =>
+                SExpr::new("lengthof")
+                    .inline_string(length.to_string())
+                    .inherit(ty),
             Expression::Alignof { alignof: _, ty, align, close_paren: _ } => SExpr::new("alignof")
                 .inline_string(align.to_string())
                 .inherit(ty),

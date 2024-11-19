@@ -509,6 +509,9 @@ pub enum TokenKind {
 
     #[token("_Noreturn")]
     Noreturn,
+
+    #[token("_Lengthof")]
+    Lengthof,
 }
 
 #[derive(Debug, Clone, Copy)]
