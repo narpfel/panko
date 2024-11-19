@@ -210,12 +210,16 @@ impl<Expression> Type<'_, !, ArraySize<Expression>> {
         match self {
             Type::Arithmetic(arithmetic) => arithmetic.size(),
             Type::Pointer(_) => 8,
-            Type::Array(ArrayType { ty, size }) =>
-                ty.ty.size()
-                    * match size {
-                        ArraySize::Constant(size) => size,
-                        ArraySize::Variable(_) => todo!("size of variable length array"),
-                    },
+            Type::Array(ArrayType { ty, size }) => {
+                let elem_size = ty.ty.size();
+                let length = match size {
+                    ArraySize::Constant(size) => *size,
+                    ArraySize::Variable(_) => todo!("size of variable length array"),
+                };
+                elem_size
+                    .checked_mul(length)
+                    .unwrap_or_else(|| todo!("type is too large"))
+            }
             Type::Function(_) => unreachable!("functions are not objects and don’t have a size"),
             Type::Void => unreachable!("void is not an object and doesn’t have a size"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
