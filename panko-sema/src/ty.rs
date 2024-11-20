@@ -246,7 +246,7 @@ impl<Expression> Type<'_, !, ArrayLength<Expression>> {
     pub(crate) fn is_complete(&self) -> bool {
         match self {
             Type::Arithmetic(_) | Type::Pointer(_) | Type::Function(_) => true,
-            // TODO: is complete iff size is known
+            // TODO: is complete iff `length` is known
             Type::Array(ArrayType { ty: _, length: _ }) => true,
             Type::Void => false,
             Type::Typeof { expr, unqual: _ } => match *expr {},
