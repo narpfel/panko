@@ -86,6 +86,10 @@ enum Diagnostic<'a> {
         at: ParameterDeclaration<'a, !, ArrayLength<TypedExpression<'a>>>,
     },
 
+    #[error("array with incomplete element type `{at}`")]
+    #[diagnostics(at(colour = Red, label = "array element types must be complete"))]
+    ArrayWithIncompleteType { at: QualifiedType<'a> },
+
     #[error("invalid function return type `{ty}`")]
     #[diagnostics(at(colour = Red, label = "declaration here"))]
     InvalidFunctionReturnType { at: Loc<'a>, ty: QualifiedType<'a> },
@@ -713,13 +717,22 @@ fn typeck_ty<'a>(sess: &'a Session<'a>, ty: scope::QualifiedType<'a>) -> Qualifi
     let ty = match ty {
         ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ty::Type::Pointer(pointee) => Type::Pointer(sess.alloc(typeck_ty(sess, *pointee))),
-        ty::Type::Array(ArrayType { ty, length }) => Type::Array(ArrayType {
-            ty: sess.alloc(typeck_ty(sess, *ty)),
-            length: sess.alloc(
-                ArrayLength::try_from(typeck_expression(sess, length, Context::Default))
-                    .unwrap_or_else(|_| todo!("variable length array")),
-            ),
-        }),
+        ty::Type::Array(ArrayType { ty, length }) => {
+            let ty = sess.alloc(typeck_ty(sess, *ty));
+            if !ty.ty.is_complete() {
+                // TODO: this should be `Type::Error`
+                // TODO: this generates a new error for each *usage* of this ty, including usages
+                // of variables with this ty.
+                sess.emit(Diagnostic::ArrayWithIncompleteType { at: *ty })
+            }
+            Type::Array(ArrayType {
+                ty,
+                length: sess.alloc(
+                    ArrayLength::try_from(typeck_expression(sess, length, Context::Default))
+                        .unwrap_or_else(|_| todo!("variable length array")),
+                ),
+            })
+        }
         ty::Type::Function(FunctionType { params, return_type, is_varargs }) => {
             let return_type = sess.alloc(typeck_ty(sess, *return_type));
             match return_type.ty {
