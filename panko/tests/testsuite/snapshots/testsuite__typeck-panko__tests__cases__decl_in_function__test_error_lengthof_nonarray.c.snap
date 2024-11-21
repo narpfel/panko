@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/decl_in_function/test_error_lengthof_nonarray.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `_Lengthof` can only be applied to arrays, not `int`
+   ╭─[panko/tests/cases/decl_in_function/test_error_lengthof_nonarray.c:2:22]
+   │
+ 2 │     return _Lengthof 42;
+   │            ───────── ─┬  
+   │                       ╰── this expression is of type `int`
+───╯
