@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arrays/test_single_dimensional_array.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition xs~1 `array<int; 42>` ∅)
+         (expression (assign (subscript (name xs~1 `array<int; 42>`) 0) 1))
+         (expression (assign (subscript (name xs~1 `array<int; 42>`) 1) 2))
+         (expression (assign (subscript (name xs~1 `array<int; 42>`) 41) 3))
+         (return (add (subscript (name xs~1 `array<int; 42>`) 1) (subscript (name xs~1 `array<int; 42>`) 41))))))
+
+----- stderr -----
