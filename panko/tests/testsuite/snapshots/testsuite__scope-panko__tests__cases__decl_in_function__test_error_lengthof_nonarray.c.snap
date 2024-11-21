@@ -15,6 +15,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
+         (expression (lengthof `fn(∅: int) -> int`))
          (return (lengthof 42)))))
 
 ----- stderr -----
