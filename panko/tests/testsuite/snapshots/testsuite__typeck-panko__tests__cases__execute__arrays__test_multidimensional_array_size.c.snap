@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/arrays/test_multidimensional_array_size.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition xs~1 `array<array<int; (constexpr 3)>; (constexpr 5)>` ∅)
+         (return (truncate (sizeof 60 (xs~1 `array<array<int; (constexpr 3)>; (constexpr 5)>`) `unsigned long`) `int`)))))
+
+----- stderr -----

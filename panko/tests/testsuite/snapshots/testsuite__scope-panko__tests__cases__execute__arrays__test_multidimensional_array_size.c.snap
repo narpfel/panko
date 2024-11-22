@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arrays/test_multidimensional_array_size.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition xs~1 `array<array<int; 3>; 5>` ∅)
+         (return (sizeof (name xs~1 `array<array<int; 3>; 5>`))))))
+
+----- stderr -----
