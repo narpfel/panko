@@ -90,6 +90,10 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "array element types must be complete"))]
     ArrayWithIncompleteType { at: QualifiedType<'a> },
 
+    #[error("arrays of functions are not allowed")]
+    #[diagnostics(at(colour = Red, label = "element type is `{at}`"))]
+    ArrayOfFunctions { at: QualifiedType<'a> },
+
     #[error("invalid function return type `{ty}`")]
     #[diagnostics(at(colour = Red, label = "declaration here"))]
     InvalidFunctionReturnType { at: Loc<'a>, ty: QualifiedType<'a> },
@@ -724,6 +728,10 @@ fn typeck_ty<'a>(sess: &'a Session<'a>, ty: scope::QualifiedType<'a>) -> Qualifi
                 // TODO: this generates a new error for each *usage* of this ty, including usages
                 // of variables with this ty.
                 sess.emit(Diagnostic::ArrayWithIncompleteType { at: *ty })
+            }
+            if ty.ty.is_function() {
+                // TODO: this should be `Type::Error`
+                sess.emit(Diagnostic::ArrayOfFunctions { at: *ty })
             }
             Type::Array(ArrayType {
                 ty,
