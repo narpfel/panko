@@ -231,6 +231,8 @@ TypeName: crate::ast::QualifiedType<'a> = {
     },
 }
 
+// TODO: `AbstractDeclarator` basically copies the structure of `Declarator`,
+// which leads to a lot of duplication. Maybe a macro can reduce this?
 AbstractDeclarator: ast::Declarator<'a> = {
     Some<Pointer> => ast::Declarator { pointers: Some(<>), direct_declarator: ast::DirectDeclarator::Abstract },
     <pointers:Some<Pointer>?> <direct_declarator:DirectAbstractDeclarator>
