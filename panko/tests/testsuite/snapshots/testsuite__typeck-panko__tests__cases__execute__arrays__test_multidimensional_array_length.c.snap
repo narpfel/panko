@@ -19,6 +19,11 @@ exit_code: 0
          main.unnamed_parameter.0~2 `int`
          argv~3 `ptr<ptr<char>>`)
       (compound-statement
+         (expression
+            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
+               (lengthof 100 `array<array<ptr<long>; (constexpr 400)>; (constexpr 100)>` `unsigned long`)
+               `int`))
          (definition xs~4 `array<array<int; (constexpr 27)>; (constexpr 42)>` ∅)
          (expression
             (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)

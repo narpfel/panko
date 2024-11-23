@@ -241,9 +241,19 @@ AbstractDeclarator: ast::Declarator<'a> = {
 
 DirectAbstractDeclarator: ast::DirectDeclarator<'a> = {
     "(" <Bump<AbstractDeclarator>> ")" => ast::DirectDeclarator::Parenthesised(<>),
-    // array-abstract-declarator attribute-specifier-sequence?
-    <FunctionAbstractDeclarator> AttributeSpecifierSequence?
-        => ast::DirectDeclarator::FunctionDeclarator(<>),
+    <ArrayAbstractDeclarator> AttributeSpecifierSequence? =>
+        ast::DirectDeclarator::ArrayDeclarator(<>),
+    <FunctionAbstractDeclarator> AttributeSpecifierSequence? =>
+        ast::DirectDeclarator::FunctionDeclarator(<>),
+}
+
+ArrayAbstractDeclarator: ast::ArrayDeclarator<'a> = {
+    // TODO: incomplete
+    <direct_declarator:Bump<DirectAbstractDeclarator>?>
+        "[" <type_qualifiers:Many<TypeQualifier>> <length:Expression> <close_bracket:"]"> => {
+            let direct_declarator = direct_declarator.unwrap_or(&ast::DirectDeclarator::Abstract);
+            ast::ArrayDeclarator { <> }
+        },
 }
 
 FunctionAbstractDeclarator: ast::FunctionDeclarator<'a> = {
