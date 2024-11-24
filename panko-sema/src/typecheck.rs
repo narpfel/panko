@@ -940,13 +940,13 @@ fn typeck_declaration<'a>(
     if !reference.ty.ty.is_complete() {
         sess.emit(Diagnostic::VariableWithIncompleteType { at: reference })
     }
-    let initialiser = initialiser.as_ref().map(|initialiser| {
+    let initialiser = try {
         convert_as_if_by_assignment(
             sess,
             reference.ty,
-            typeck_expression(sess, initialiser, Context::Default),
+            typeck_expression(sess, &initialiser?, Context::Default),
         )
-    });
+    };
     Declaration { reference, initialiser }
 }
 
