@@ -1,0 +1,52 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/arrays/test_array_as_function_parameter.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (f~0 `fn(xs: ptr<int>) -> int` (static f))
+      (params
+         (xs~1 `ptr<int>` @0))
+      (compound-statement
+         (return
+            (add `int` @8
+               (deref `int` @8
+                  (ptr-add `ptr<int>` @16
+                     (xs~1 `ptr<int>` @0)
+                     (sign-extend `unsigned long` @24 (0 `int` @32))))
+               (deref `int` @24
+                  (ptr-add `ptr<int>` @32
+                     (xs~1 `ptr<int>` @0)
+                     (sign-extend `unsigned long` @40 (1 `int` @48))))))))
+   (function-definition
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (definition (xs~3 `array<int; (constexpr 2)>` @0) ∅)
+         (expression
+            (assign `int` @8
+               (deref `int` @8
+                  (ptr-add `ptr<int>` @16
+                     (noop-type-conversion `ptr<int>` @16 (addressof `ptr<array<int; (constexpr 2)>>` @16 (xs~3 `array<int; (constexpr 2)>` @0)))
+                     (sign-extend `unsigned long` @24 (0 `int` @32))))
+               (4 `int` @24)))
+         (expression
+            (assign `int` @8
+               (deref `int` @8
+                  (ptr-add `ptr<int>` @16
+                     (noop-type-conversion `ptr<int>` @16 (addressof `ptr<array<int; (constexpr 2)>>` @16 (xs~3 `array<int; (constexpr 2)>` @0)))
+                     (sign-extend `unsigned long` @24 (1 `int` @32))))
+               (6 `int` @24)))
+         (return
+            (call `int` @8 (addressof `ptr<fn(xs: ptr<int>) -> int>` @16 (f~0 `fn(xs: ptr<int>) -> int` (static f)))
+               (noop-type-conversion `ptr<int>` @24 (addressof `ptr<array<int; (constexpr 2)>>` @24 (xs~3 `array<int; (constexpr 2)>` @0))))))))
+
+----- stderr -----

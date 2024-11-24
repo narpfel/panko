@@ -209,6 +209,7 @@ pub struct Reference<'a> {
     pub(crate) kind: RefKind,
     pub(crate) storage_duration: StorageDuration,
     pub(crate) previous_definition: Option<&'a Self>,
+    pub(crate) is_parameter: IsParameter,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -216,6 +217,12 @@ pub enum RefKind {
     Declaration,
     TentativeDefinition,
     Definition,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum IsParameter {
+    Yes,
+    No,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -424,6 +431,7 @@ impl<'a> Scopes<'a> {
         ty: QualifiedType<'a>,
         kind: RefKind,
         storage_duration: StorageDuration,
+        is_parameter: IsParameter,
     ) -> Reference<'a> {
         let sess = self.sess;
         let id = self.id();
@@ -436,6 +444,7 @@ impl<'a> Scopes<'a> {
             kind,
             storage_duration,
             previous_definition: None,
+            is_parameter,
         };
         match self.lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
@@ -482,6 +491,7 @@ impl<'a> Scopes<'a> {
             kind: RefKind::Definition,
             storage_duration: StorageDuration::Automatic,
             previous_definition: None,
+            is_parameter: IsParameter::No,
         }
     }
 
@@ -586,6 +596,7 @@ fn resolve_function_definition<'a>(
         ty,
         RefKind::Definition,
         StorageDuration::Static,
+        IsParameter::No,
     );
     scopes.push();
 
@@ -631,6 +642,7 @@ fn resolve_function_definition<'a>(
                     param.ty,
                     RefKind::Definition,
                     StorageDuration::Automatic,
+                    IsParameter::Yes,
                 );
                 reference
             })
@@ -697,7 +709,14 @@ fn resolve_declaration<'a>(
         _ => storage_duration,
     };
     Declaration {
-        reference: scopes.add(name.slice(), name.loc(), ty, kind, storage_duration),
+        reference: scopes.add(
+            name.slice(),
+            name.loc(),
+            ty,
+            kind,
+            storage_duration,
+            IsParameter::No,
+        ),
         initialiser: try { resolve_expr(scopes, initialiser.as_ref()?) },
     }
 }

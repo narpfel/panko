@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arrays/test_array_as_function_parameter.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      f~0 `fn(xs: array<int; 2>) -> int`
+      (params
+         xs~1 `array<int; 2>`)
+      (compound-statement
+         (return (add (subscript (name xs~1 `array<int; 2>`) 0) (subscript (name xs~1 `array<int; 2>`) 1)))))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (definition xs~3 `array<int; 2>` ∅)
+         (expression (assign (subscript (name xs~3 `array<int; 2>`) 0) 4))
+         (expression (assign (subscript (name xs~3 `array<int; 2>`) 1) 6))
+         (return
+            (call (name f~0 `fn(xs: array<int; 2>) -> int`)
+               (name xs~3 `array<int; 2>`))))))
+
+----- stderr -----

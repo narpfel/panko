@@ -35,6 +35,7 @@ use crate::scope;
 use crate::scope::GenericAssociation;
 use crate::scope::Id;
 use crate::scope::IncrementFixity;
+use crate::scope::IsParameter;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
 use crate::ty;
@@ -716,13 +717,18 @@ impl fmt::Display for ConversionKind {
     }
 }
 
-fn typeck_ty<'a>(sess: &'a Session<'a>, ty: scope::QualifiedType<'a>) -> QualifiedType<'a> {
+fn typeck_ty<'a>(
+    sess: &'a Session<'a>,
+    ty: scope::QualifiedType<'a>,
+    is_parameter: IsParameter,
+) -> QualifiedType<'a> {
     let scope::QualifiedType { is_const, is_volatile, ty, loc } = ty;
     let ty = match ty {
         ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
-        ty::Type::Pointer(pointee) => Type::Pointer(sess.alloc(typeck_ty(sess, *pointee))),
+        ty::Type::Pointer(pointee) =>
+            Type::Pointer(sess.alloc(typeck_ty(sess, *pointee, IsParameter::No))),
         ty::Type::Array(ArrayType { ty, length }) => {
-            let ty = sess.alloc(typeck_ty(sess, *ty));
+            let ty = sess.alloc(typeck_ty(sess, *ty, IsParameter::No));
             if !ty.ty.is_complete() {
                 // TODO: this should be `Type::Error`
                 // TODO: this generates a new error for each *usage* of this ty, including usages
@@ -733,16 +739,23 @@ fn typeck_ty<'a>(sess: &'a Session<'a>, ty: scope::QualifiedType<'a>) -> Qualifi
                 // TODO: this should be `Type::Error`
                 sess.emit(Diagnostic::ArrayOfFunctions { at: *ty })
             }
-            Type::Array(ArrayType {
-                ty,
-                length: sess.alloc(
-                    ArrayLength::try_from(typeck_expression(sess, length, Context::Default))
-                        .unwrap_or_else(|_| todo!("variable length array")),
-                ),
-            })
+            let length = sess.alloc(
+                ArrayLength::try_from(typeck_expression(sess, length, Context::Default))
+                    .unwrap_or_else(|_| todo!("variable length array")),
+            );
+            match is_parameter {
+                IsParameter::Yes => {
+                    // TODO: use qualifiers specified in the array declarator
+                    if !matches!(length, ArrayLength::Constant(_)) {
+                        todo!("unimplemented: variably-modified type as function parameter");
+                    }
+                    Type::Pointer(ty)
+                }
+                IsParameter::No => Type::Array(ArrayType { ty, length }),
+            }
         }
         ty::Type::Function(FunctionType { params, return_type, is_varargs }) => {
-            let return_type = sess.alloc(typeck_ty(sess, *return_type));
+            let return_type = sess.alloc(typeck_ty(sess, *return_type, IsParameter::No));
             match return_type.ty {
                 Type::Arithmetic(_) | Type::Pointer(_) | Type::Void => (),
                 Type::Array(_) | Type::Function(_) =>
@@ -755,7 +768,7 @@ fn typeck_ty<'a>(sess: &'a Session<'a>, ty: scope::QualifiedType<'a>) -> Qualifi
             Type::Function(FunctionType {
                 params: sess.alloc_slice_fill_iter(params.iter().map(
                     |&ParameterDeclaration { loc, ty, name }| {
-                        let ty = typeck_ty(sess, ty);
+                        let ty = typeck_ty(sess, ty, IsParameter::Yes);
                         let param = ParameterDeclaration { loc, ty, name };
                         if !ty.ty.is_complete() {
                             sess.emit(Diagnostic::ParameterWithIncompleteType { at: param })
@@ -796,11 +809,12 @@ fn typeck_reference<'a>(sess: &'a Session<'a>, reference: scope::Reference<'a>) 
         kind,
         storage_duration,
         previous_definition,
+        is_parameter,
     } = reference;
     let reference = Reference {
         name,
         loc,
-        ty: typeck_ty(sess, ty),
+        ty: typeck_ty(sess, ty, is_parameter),
         id,
         usage_location,
         kind,
@@ -963,7 +977,8 @@ fn typeck_statement<'a>(
         scope::Statement::Compound(stmt) =>
             Statement::Compound(typeck_compound_statement(sess, stmt, function)),
         scope::Statement::Return { return_: _, expr } => {
-            let return_ty = typeck_ty(sess, *function.return_ty());
+            // TODO: why are we re-typechecking the return type for each return stmt?
+            let return_ty = typeck_ty(sess, *function.return_ty(), IsParameter::No);
             let expr = expr
                 .as_ref()
                 .map(|expr| typeck_expression(sess, expr, Context::Default));
@@ -1748,7 +1763,7 @@ fn typeck_expression<'a>(
             }
         }
         scope::Expression::Sizeof { sizeof, ty, close_paren } => {
-            let ty = typeck_ty(sess, *ty);
+            let ty = typeck_ty(sess, *ty, IsParameter::No);
             let ty = check_ty_can_sizeof(sess, &ty, expr, sizeof);
             TypedExpression {
                 ty: Type::size_t().unqualified(),
@@ -1761,7 +1776,7 @@ fn typeck_expression<'a>(
             }
         }
         scope::Expression::Lengthof { lengthof, ty, close_paren } => {
-            let ty = typeck_ty(sess, *ty);
+            let ty = typeck_ty(sess, *ty, IsParameter::No);
             let expr = match ty.ty {
                 Type::Array(ArrayType {
                     ty: _,
@@ -1779,7 +1794,7 @@ fn typeck_expression<'a>(
             TypedExpression { ty: Type::size_t().unqualified(), expr }
         }
         scope::Expression::Alignof { alignof, ty, close_paren } => {
-            let ty = typeck_ty(sess, *ty);
+            let ty = typeck_ty(sess, *ty, IsParameter::No);
             let ty = check_ty_can_sizeof(sess, &ty, expr, alignof);
             TypedExpression {
                 ty: Type::size_t().unqualified(),
@@ -1793,7 +1808,7 @@ fn typeck_expression<'a>(
         }
         scope::Expression::Cast { open_paren: _, ty, expr } => {
             let expr = typeck_expression(sess, expr, Context::Default);
-            let ty = typeck_ty(sess, ty.ty.unqualified());
+            let ty = typeck_ty(sess, ty.ty.unqualified(), IsParameter::No);
             convert(sess, ty, expr, ConversionKind::Explicit)
         }
         scope::Expression::Subscript { lhs, rhs, close_bracket } => typeck_expression(
@@ -1850,7 +1865,7 @@ fn typeck_expression<'a>(
                 .iter()
                 .filter_map(|assoc| match assoc {
                     GenericAssociation::Ty { ty, expr } => {
-                        let ty = typeck_ty(sess, *ty);
+                        let ty = typeck_ty(sess, *ty, IsParameter::No);
                         // TODO: `ty` shall not be a variably modified type.
                         if !(ty.ty.is_object() && ty.ty.is_complete()) {
                             sess.emit(Diagnostic::GenericWithInvalidType {

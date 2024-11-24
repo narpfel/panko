@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/arrays/test_multidimensional_array_as_parameter.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      f~0 `fn(xs: ptr<array<int; (constexpr 2)>>) -> int`
+      (params
+         xs~1 `ptr<array<int; (constexpr 2)>>`)
+      (compound-statement
+         (return (add (deref (ptr-add (noop-type-conversion (addressof (deref (ptr-add (xs~1 `ptr<array<int; (constexpr 2)>>`) (sign-extend (0 `int`) `unsigned long`) `ptr<array<int; (constexpr 2)>>`) `array<int; (constexpr 2)>`) `ptr<array<int; (constexpr 2)>>`) `ptr<int>`) (sign-extend (0 `int`) `unsigned long`) `ptr<int>`) `int`) (deref (ptr-add (noop-type-conversion (addressof (deref (ptr-add (xs~1 `ptr<array<int; (constexpr 2)>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<array<int; (constexpr 2)>>`) `array<int; (constexpr 2)>`) `ptr<array<int; (constexpr 2)>>`) `ptr<int>`) (sign-extend (1 `int`) `unsigned long`) `ptr<int>`) `int`) `int`))))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (definition xs~3 `array<array<int; (constexpr 2)>; (constexpr 2)>` ∅)
+         (expression (assign (deref (ptr-add (noop-type-conversion (addressof (deref (ptr-add (noop-type-conversion (addressof (xs~3 `array<array<int; (constexpr 2)>; (constexpr 2)>`) `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`) `ptr<array<int; (constexpr 2)>>`) (sign-extend (0 `int`) `unsigned long`) `ptr<array<int; (constexpr 2)>>`) `array<int; (constexpr 2)>`) `ptr<array<int; (constexpr 2)>>`) `ptr<int>`) (sign-extend (0 `int`) `unsigned long`) `ptr<int>`) `int`) (4 `int`) `int`))
+         (expression (assign (deref (ptr-add (noop-type-conversion (addressof (deref (ptr-add (noop-type-conversion (addressof (xs~3 `array<array<int; (constexpr 2)>; (constexpr 2)>`) `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`) `ptr<array<int; (constexpr 2)>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<array<int; (constexpr 2)>>`) `array<int; (constexpr 2)>`) `ptr<array<int; (constexpr 2)>>`) `ptr<int>`) (sign-extend (1 `int`) `unsigned long`) `ptr<int>`) `int`) (6 `int`) `int`))
+         (return
+            (call (addressof (f~0 `fn(xs: ptr<array<int; (constexpr 2)>>) -> int`) `ptr<fn(xs: ptr<array<int; (constexpr 2)>>) -> int>`)
+               (noop-type-conversion (addressof (xs~3 `array<array<int; (constexpr 2)>; (constexpr 2)>`) `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`) `ptr<array<int; (constexpr 2)>>`)
+               `int`)))))
+
+----- stderr -----
