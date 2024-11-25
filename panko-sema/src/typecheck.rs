@@ -937,7 +937,7 @@ fn typeck_declaration<'a>(
 ) -> Declaration<'a> {
     let scope::Declaration { reference, initialiser } = *declaration;
     let reference = typeck_reference(sess, reference);
-    if !reference.ty.ty.is_complete() {
+    if matches!(reference.kind, RefKind::Definition) && !reference.ty.ty.is_complete() {
         sess.emit(Diagnostic::VariableWithIncompleteType { at: reference })
     }
     let initialiser = try {
