@@ -180,7 +180,7 @@ DirectDeclarator: ast::DirectDeclarator<'a> = {
 ArrayDeclarator: ast::ArrayDeclarator<'a> = {
     // TODO: incomplete
     <direct_declarator:Bump<DirectDeclarator>>
-        "[" <type_qualifiers:Many<TypeQualifier>> <length:Expression> <close_bracket:"]"> =>
+        "[" <type_qualifiers:Many<TypeQualifier>> <length:AssignmentExpression> <close_bracket:"]"> =>
             ast::ArrayDeclarator { <> },
 }
 
@@ -250,7 +250,7 @@ DirectAbstractDeclarator: ast::DirectDeclarator<'a> = {
 ArrayAbstractDeclarator: ast::ArrayDeclarator<'a> = {
     // TODO: incomplete
     <direct_declarator:Bump<DirectAbstractDeclarator>?>
-        "[" <type_qualifiers:Many<TypeQualifier>> <length:Expression> <close_bracket:"]"> => {
+        "[" <type_qualifiers:Many<TypeQualifier>> <length:AssignmentExpression> <close_bracket:"]"> => {
             let direct_declarator = direct_declarator.unwrap_or(&ast::DirectDeclarator::Abstract);
             ast::ArrayDeclarator { <> }
         },
