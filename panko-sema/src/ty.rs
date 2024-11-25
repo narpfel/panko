@@ -69,7 +69,7 @@ where
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ArrayType<'a, TypeofExpr, LengthExpr> {
     pub ty: &'a QualifiedType<'a, TypeofExpr, LengthExpr>,
-    pub length: &'a LengthExpr,
+    pub length: Option<&'a LengthExpr>,
 }
 
 impl<TypeofExpr, LengthExpr> fmt::Display for ArrayType<'_, TypeofExpr, LengthExpr>
@@ -213,8 +213,11 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Array(ArrayType { ty, length }) => {
                 let elem_size = ty.ty.size();
                 let length = match length {
-                    ArrayLength::Constant(length) => *length,
-                    ArrayLength::Variable(_) => todo!("`sizeof` of variable length array"),
+                    Some(ArrayLength::Constant(length)) => *length,
+                    Some(ArrayLength::Variable(_)) => todo!("`sizeof` of variable length array"),
+                    None => unreachable!(
+                        "arrays without a length are incomplete types and don’t have a size"
+                    ),
                 };
                 elem_size
                     .checked_mul(length)
@@ -246,8 +249,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
     pub(crate) fn is_complete(&self) -> bool {
         match self {
             Type::Arithmetic(_) | Type::Pointer(_) | Type::Function(_) => true,
-            // TODO: is complete iff `length` is known
-            Type::Array(ArrayType { ty: _, length: _ }) => true,
+            Type::Array(ArrayType { ty: _, length }) => length.is_some(),
             Type::Void => false,
             Type::Typeof { expr, unqual: _ } => match *expr {},
         }

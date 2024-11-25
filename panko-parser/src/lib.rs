@@ -1,5 +1,6 @@
 #![feature(coverage_attribute)]
 #![feature(never_type)]
+#![feature(try_blocks)]
 
 use ariadne::Color::Red;
 use ast::Arithmetic;
@@ -447,7 +448,7 @@ enum DirectDeclarator<'a> {
 struct ArrayDeclarator<'a> {
     direct_declarator: &'a DirectDeclarator<'a>,
     type_qualifiers: &'a [TypeQualifier<'a>],
-    length: Expression<'a>,
+    length: Option<Expression<'a>>,
     close_bracket: Token<'a>,
 }
 

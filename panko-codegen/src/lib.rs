@@ -28,6 +28,7 @@ use panko_sema::layout::Statement;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::Type;
 use panko_sema::scope::RefKind;
+use panko_sema::ty::ArrayType;
 use panko_sema::typecheck::PtrCmpKind;
 use Register::*;
 
@@ -328,11 +329,18 @@ impl<'a> Codegen<'a> {
     }
 
     fn object_definition(&mut self, name: &str, ty: Type, initialiser: Option<&Expression>) {
+        let size = match ty {
+            // TODO: assert that this only happens in tentative definitions
+            // TODO: gcc and clang warn in this case
+            Type::Array(ArrayType { ty, length: None }) => ty.ty.size(),
+            _ => ty.size(),
+        };
+
         self.block(2);
         self.directive("globl", &[&name]);
         self.directive("data", &[]);
         self.directive("type", &[&name, &"@object"]);
-        self.directive("size", &[&name, &ty.size()]);
+        self.directive("size", &[&name, &size]);
         self.directive("align", &[&ty.align()]);
         self.label(name);
         match initialiser {
@@ -340,7 +348,7 @@ impl<'a> Codegen<'a> {
                 Expression::Error(_) => todo!("ICE?"),
                 Expression::Name(_) => todo!(),
                 Expression::Integer(value) =>
-                    self.constant(&value.to_le_bytes()[..usize::try_from(ty.size()).unwrap()]),
+                    self.constant(&value.to_le_bytes()[..usize::try_from(size).unwrap()]),
                 Expression::NoopTypeConversion(_) => todo!(),
                 Expression::Truncate(_) => todo!(),
                 Expression::SignExtend(_) => todo!(),
@@ -362,7 +370,7 @@ impl<'a> Codegen<'a> {
                 Expression::Logical { .. } => todo!(),
                 Expression::Conditional { .. } => todo!(),
             },
-            None => self.zero(ty.size()),
+            None => self.zero(size),
         }
     }
 

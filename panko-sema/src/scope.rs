@@ -535,7 +535,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             Type::Pointer(scopes.sess.alloc(resolve_ty(scopes, pointee))),
         ast::Type::Array(ast::ArrayType { ty, length }) => Type::Array(ArrayType {
             ty: scopes.sess.alloc(resolve_ty(scopes, ty)),
-            length: scopes.sess.alloc(resolve_expr(scopes, length)),
+            length: try { scopes.sess.alloc(resolve_expr(scopes, length?)) },
         }),
         ast::Type::Function(function_type) =>
             Type::Function(resolve_function_ty(scopes, &function_type)),

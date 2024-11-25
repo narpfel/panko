@@ -213,7 +213,7 @@ pub enum Signedness {
 #[derive(Debug, Clone, Copy)]
 pub struct ArrayType<'a> {
     pub ty: &'a QualifiedType<'a>,
-    pub length: &'a Expression<'a>,
+    pub length: Option<&'a Expression<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -604,7 +604,7 @@ pub(crate) fn parse_declarator<'a>(
                     is_volatile: false,
                     ty: Type::Array(ArrayType {
                         ty: sess.alloc(ty),
-                        length: sess.alloc(length),
+                        length: try { sess.alloc(length?) },
                     }),
                     loc: ty.loc.until(close_bracket.loc()),
                 }

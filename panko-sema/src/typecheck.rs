@@ -311,6 +311,29 @@ enum Diagnostic<'a> {
         op: Token<'a>,
         at: QualifiedType<'a>,
     },
+
+    #[error(
+        "`{op}` can only be applied to arrays of known length, but the operand has type `{ty}`"
+    )]
+    #[diagnostics(
+        op(colour = Blue),
+        at(colour = Red, label = "the type of this is `{ty}`, which has unknown length"),
+    )]
+    #[with(ty = at.ty)]
+    LengthofOfArrayOfUnknownLength {
+        op: Token<'a>,
+        at: TypedExpression<'a>,
+    },
+
+    #[error("`{op}` can only be applied to arrays of known length")]
+    #[diagnostics(
+        op(colour = Blue),
+        at(colour = Red, label = "`{at}` has unknown length"),
+    )]
+    LengthofOfArrayTyOfUnknownLength {
+        op: Token<'a>,
+        at: QualifiedType<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -739,14 +762,16 @@ fn typeck_ty<'a>(
                 // TODO: this should be `Type::Error`
                 sess.emit(Diagnostic::ArrayOfFunctions { at: *ty })
             }
-            let length = sess.alloc(
-                ArrayLength::try_from(typeck_expression(sess, length, Context::Default))
-                    .unwrap_or_else(|_| todo!("variable length array")),
-            );
+            let length = try {
+                sess.alloc(
+                    ArrayLength::try_from(typeck_expression(sess, length?, Context::Default))
+                        .unwrap_or_else(|_| todo!("variable length array")),
+                )
+            };
             match is_parameter {
                 IsParameter::Yes => {
                     // TODO: use qualifiers specified in the array declarator
-                    if !matches!(length, ArrayLength::Constant(_)) {
+                    if matches!(length, Some(ArrayLength::Variable(_))) {
                         todo!("unimplemented: variably-modified type as function parameter");
                     }
                     Type::Pointer(ty)
@@ -1688,16 +1713,19 @@ fn typeck_expression<'a>(
                 }
                 UnaryOpKind::Lengthof => {
                     let expr = match operand.ty.ty {
-                        Type::Array(ArrayType {
-                            ty: _,
-                            length: &ArrayLength::Constant(length),
-                        }) => Expression::Lengthof {
-                            lengthof: operator.token,
-                            operand: sess.alloc(operand),
-                            length,
+                        Type::Array(ArrayType { ty: _, length }) => match length {
+                            Some(&ArrayLength::Constant(length)) => Expression::Lengthof {
+                                lengthof: operator.token,
+                                operand: sess.alloc(operand),
+                                length,
+                            },
+                            Some(ArrayLength::Variable(_)) =>
+                                todo!("`_Lengthof` of a variably-modified type"),
+                            None => sess.emit(Diagnostic::LengthofOfArrayOfUnknownLength {
+                                op: operator.token,
+                                at: operand,
+                            }),
                         },
-                        Type::Array(ArrayType { ty: _, length: ArrayLength::Variable(_) }) =>
-                            todo!("`_Lengthof` of a variably-modified type"),
                         _ => sess
                             .emit(Diagnostic::InvalidLengthof { op: operator.token, at: operand }),
                     };
@@ -1778,17 +1806,20 @@ fn typeck_expression<'a>(
         scope::Expression::Lengthof { lengthof, ty, close_paren } => {
             let ty = typeck_ty(sess, *ty, IsParameter::No);
             let expr = match ty.ty {
-                Type::Array(ArrayType {
-                    ty: _,
-                    length: &ArrayLength::Constant(length),
-                }) => Expression::LengthofTy {
-                    lengthof: *lengthof,
-                    ty,
-                    length,
-                    close_paren: *close_paren,
+                Type::Array(ArrayType { ty: _, length }) => match length {
+                    Some(&ArrayLength::Constant(length)) => Expression::LengthofTy {
+                        lengthof: *lengthof,
+                        ty,
+                        length,
+                        close_paren: *close_paren,
+                    },
+                    Some(ArrayLength::Variable(_)) =>
+                        todo!("_Lengthof of a variably-modified type"),
+                    None => sess.emit(Diagnostic::LengthofOfArrayTyOfUnknownLength {
+                        op: *lengthof,
+                        at: ty,
+                    }),
                 },
-                Type::Array(ArrayType { ty: _, length: ArrayLength::Variable(_) }) =>
-                    todo!("_Lengthof of a variably-modified type"),
                 _ => sess.emit(Diagnostic::InvalidLengthofTy { op: *lengthof, at: ty }),
             };
             TypedExpression { ty: Type::size_t().unqualified(), expr }

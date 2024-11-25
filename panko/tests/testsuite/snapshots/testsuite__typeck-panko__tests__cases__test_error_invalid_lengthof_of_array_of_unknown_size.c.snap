@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_invalid_lengthof_of_array_of_unknown_size.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `_Lengthof` can only be applied to arrays of known length, but the operand has type `array<int; ∅>`
+   ╭─[panko/tests/cases/test_error_invalid_lengthof_of_array_of_unknown_size.c:4:15]
+   │
+ 4 │     _Lengthof xs;
+   │     ───────── ─┬  
+   │                ╰── the type of this is `array<int; ∅>`, which has unknown length
+───╯
+
+Error: `_Lengthof` can only be applied to arrays of known length
+   ╭─[panko/tests/cases/test_error_invalid_lengthof_of_array_of_unknown_size.c:5:15]
+   │
+ 5 │     _Lengthof(int[]);
+   │     ───────── ──┬──  
+   │                 ╰──── `array<int; ∅>` has unknown length
+───╯
