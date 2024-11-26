@@ -20,9 +20,9 @@ use crate::typecheck::PtrCmpKind;
 mod as_sexpr;
 mod stack;
 
-type ArraySize<'a> = typecheck::ArrayLength<&'a LayoutedExpression<'a>>;
-pub type Type<'a> = ty::Type<'a, !, ArraySize<'a>>;
-type QualifiedType<'a> = ty::QualifiedType<'a, !, ArraySize<'a>>;
+type ArrayLength<'a> = typecheck::ArrayLength<&'a LayoutedExpression<'a>>;
+pub type Type<'a> = ty::Type<'a, !, ArrayLength<'a>>;
+type QualifiedType<'a> = ty::QualifiedType<'a, !, ArrayLength<'a>>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
@@ -193,12 +193,12 @@ fn layout_array_length<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
     length: typecheck::ArrayLength<&'a typecheck::TypedExpression<'a>>,
-) -> ArraySize<'a> {
+) -> ArrayLength<'a> {
     match length {
-        typecheck::ArrayLength::Constant(length) => ArraySize::Constant(length),
+        typecheck::ArrayLength::Constant(length) => ArrayLength::Constant(length),
         typecheck::ArrayLength::Variable(length) =>
-            ArraySize::Variable(bump.alloc(layout_expression(stack, bump, length))),
-        typecheck::ArrayLength::Unknown => ArraySize::Unknown,
+            ArrayLength::Variable(bump.alloc(layout_expression(stack, bump, length))),
+        typecheck::ArrayLength::Unknown => ArrayLength::Unknown,
     }
 }
 
