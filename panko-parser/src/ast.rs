@@ -72,6 +72,10 @@ impl<'a> Session<'a> {
         }
     }
 
+    pub fn bump(&self) -> &'a Bump {
+        self.bump
+    }
+
     pub fn alloc<T>(&self, value: T) -> &'a T {
         self.bump.alloc(value)
     }

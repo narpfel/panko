@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arrays/test_define_already_declared_array.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (tentative-definition xs~0 `array<int; ∅>` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (expression (assign (subscript (name xs~0 `array<int; ∅>`) 0) 42))
+         (expression (assign (subscript (name xs~0 `array<int; ∅>`) 12345) 27))
+         (return (add (subscript (name xs~0 `array<int; ∅>`) 0) (subscript (name xs~0 `array<int; ∅>`) 12345)))))
+   (tentative-definition xs~0 `array<int; 12346>` ∅))
+
+----- stderr -----

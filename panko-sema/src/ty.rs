@@ -3,6 +3,7 @@ use std::fmt;
 use std::hash::Hash;
 use std::hash::Hasher;
 
+use bumpalo::Bump;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
@@ -294,6 +295,54 @@ impl<TypeofExpr, LengthExpr> QualifiedType<'_, TypeofExpr, LengthExpr> {
 
     pub fn loc(&self) -> Loc {
         self.loc
+    }
+}
+
+impl<'a, LengthExpr> QualifiedType<'a, !, ArrayLength<LengthExpr>>
+where
+    LengthExpr: Copy,
+{
+    pub(crate) fn composite_ty(&self, bump: &'a Bump, other: &Self) -> Option<Self> {
+        let Self { is_const, is_volatile, ty, loc } = self;
+        let Self {
+            is_const: other_is_const,
+            is_volatile: other_is_volatile,
+            ty: other_ty,
+            loc: _,
+        } = other;
+
+        if (is_const, is_volatile) != (other_is_const, other_is_volatile) {
+            return None;
+        }
+
+        let ty = match (ty, other_ty) {
+            (
+                Type::Array(ArrayType { ty, length }),
+                Type::Array(ArrayType { ty: other_ty, length: other_length }),
+            ) => {
+                let ty = bump.alloc(ty.composite_ty(bump, *other_ty)?);
+                let length = match (length, other_length) {
+                    (ArrayLength::Constant(length), ArrayLength::Constant(other_length))
+                        if length != other_length =>
+                        return None,
+                    (ArrayLength::Constant(length), _) | (_, ArrayLength::Constant(length)) =>
+                        ArrayLength::Constant(*length),
+                    (ArrayLength::Variable(length), _) | (_, ArrayLength::Variable(length)) =>
+                        ArrayLength::Variable(*length),
+                    (ArrayLength::Unknown, ArrayLength::Unknown) => ArrayLength::Unknown,
+                };
+                Type::Array(ArrayType { ty, length })
+            }
+            _ if ty == other_ty => *ty,
+            _ => return None,
+        };
+
+        Some(Self {
+            is_const: *is_const,
+            is_volatile: *is_volatile,
+            ty,
+            loc: *loc,
+        })
     }
 }
 

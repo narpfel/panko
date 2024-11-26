@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/arrays/test_define_already_declared_array.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (tentative-definition (xs~0 `array<int; ∅>` (static xs)) ∅)
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (assign `int` @0
+               (deref `int` @0
+                  (ptr-add `ptr<int>` @8
+                     (noop-type-conversion `ptr<int>` @8 (addressof `ptr<array<int; ∅>>` @8 (xs~0 `array<int; ∅>` (static xs))))
+                     (sign-extend `unsigned long` @16 (0 `int` @24))))
+               (42 `int` @16)))
+         (expression
+            (assign `int` @0
+               (deref `int` @0
+                  (ptr-add `ptr<int>` @8
+                     (noop-type-conversion `ptr<int>` @8 (addressof `ptr<array<int; ∅>>` @8 (xs~0 `array<int; ∅>` (static xs))))
+                     (sign-extend `unsigned long` @16 (12345 `int` @24))))
+               (27 `int` @16)))
+         (return
+            (add `int` @0
+               (deref `int` @0
+                  (ptr-add `ptr<int>` @8
+                     (noop-type-conversion `ptr<int>` @8 (addressof `ptr<array<int; ∅>>` @8 (xs~0 `array<int; ∅>` (static xs))))
+                     (sign-extend `unsigned long` @16 (0 `int` @24))))
+               (deref `int` @16
+                  (ptr-add `ptr<int>` @24
+                     (noop-type-conversion `ptr<int>` @24 (addressof `ptr<array<int; ∅>>` @24 (xs~0 `array<int; ∅>` (static xs))))
+                     (sign-extend `unsigned long` @32 (12345 `int` @40))))))))
+   (tentative-definition (xs~0 `array<int; (constexpr 12346)>` (static xs)) ∅))
+
+----- stderr -----

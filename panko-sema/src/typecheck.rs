@@ -859,16 +859,25 @@ fn typeck_reference<'a>(sess: &'a Session<'a>, reference: scope::Reference<'a>) 
         kind,
         storage_duration,
     };
-    if let Some(previous_definition) = previous_definition {
-        let previous_definition = typeck_reference(sess, *previous_definition);
-        if previous_definition.ty != reference.ty {
-            sess.emit(Diagnostic::AlreadyDefinedWithDifferentType {
-                at: reference,
-                previous_definition,
-            })
+    let ty = match previous_definition {
+        Some(previous_definition) => {
+            // TODO: this is quadratic in the number of previous decls for this name
+            let previous_definition = typeck_reference(sess, *previous_definition);
+            reference
+                .ty
+                .composite_ty(sess.bump(), &previous_definition.ty)
+                .unwrap_or_else(|| {
+                    // TODO: use this error to generate a `Type::Error`
+                    let () = sess.emit(Diagnostic::AlreadyDefinedWithDifferentType {
+                        at: reference,
+                        previous_definition,
+                    });
+                    reference.ty
+                })
         }
-    }
-    reference
+        None => reference.ty,
+    };
+    Reference { ty, ..reference }
 }
 
 fn convert<'a>(

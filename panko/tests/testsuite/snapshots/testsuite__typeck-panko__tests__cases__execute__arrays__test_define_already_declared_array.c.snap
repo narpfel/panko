@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/arrays/test_define_already_declared_array.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (tentative-definition xs~0 `array<int; ∅>` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (expression (assign (deref (ptr-add (noop-type-conversion (addressof (xs~0 `array<int; ∅>`) `ptr<array<int; ∅>>`) `ptr<int>`) (sign-extend (0 `int`) `unsigned long`) `ptr<int>`) `int`) (42 `int`) `int`))
+         (expression (assign (deref (ptr-add (noop-type-conversion (addressof (xs~0 `array<int; ∅>`) `ptr<array<int; ∅>>`) `ptr<int>`) (sign-extend (12345 `int`) `unsigned long`) `ptr<int>`) `int`) (27 `int`) `int`))
+         (return (add (deref (ptr-add (noop-type-conversion (addressof (xs~0 `array<int; ∅>`) `ptr<array<int; ∅>>`) `ptr<int>`) (sign-extend (0 `int`) `unsigned long`) `ptr<int>`) `int`) (deref (ptr-add (noop-type-conversion (addressof (xs~0 `array<int; ∅>`) `ptr<array<int; ∅>>`) `ptr<int>`) (sign-extend (12345 `int`) `unsigned long`) `ptr<int>`) `int`) `int`))))
+   (tentative-definition xs~0 `array<int; (constexpr 12346)>` ∅))
+
+----- stderr -----
