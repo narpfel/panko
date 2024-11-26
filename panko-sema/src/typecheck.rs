@@ -862,6 +862,7 @@ fn typeck_reference<'a>(sess: &'a Session<'a>, reference: scope::Reference<'a>) 
     let ty = match previous_definition {
         Some(previous_definition) => {
             // TODO: this is quadratic in the number of previous decls for this name
+            // TODO: this will also emit quadratically many error messages
             let previous_definition = typeck_reference(sess, *previous_definition);
             reference
                 .ty
