@@ -3,6 +3,7 @@ use std::iter;
 use itertools::Either;
 use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
+use panko_parser::NO_VALUE;
 
 use super::ArrayLength;
 use super::CompoundStatement;
@@ -25,6 +26,7 @@ where
             ArrayLength::Constant(length) =>
                 SExpr::new("constexpr").inline_string(length.to_string()),
             ArrayLength::Variable(length) => SExpr::new("variable").inherit(length),
+            ArrayLength::Unknown => SExpr::string(NO_VALUE),
         }
     }
 }

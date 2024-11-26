@@ -43,11 +43,13 @@ enum Diagnostic<'a> {
     UndeclaredName { at: Token<'a> },
 }
 
-type ArrayType<'a> = ty::ArrayType<'a, &'a Expression<'a>, Expression<'a>>;
-type FunctionType<'a> = ty::FunctionType<'a, &'a Expression<'a>, Expression<'a>>;
-type ParameterDeclaration<'a> = ty::ParameterDeclaration<'a, &'a Expression<'a>, Expression<'a>>;
-pub(crate) type Type<'a> = ty::Type<'a, &'a Expression<'a>, Expression<'a>>;
-pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, &'a Expression<'a>, Expression<'a>>;
+type TypeofExpr<'a> = &'a Expression<'a>;
+type LengthExpr<'a> = Option<&'a Expression<'a>>;
+type ArrayType<'a> = ty::ArrayType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
+type FunctionType<'a> = ty::FunctionType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
+type ParameterDeclaration<'a> = ty::ParameterDeclaration<'a, TypeofExpr<'a>, LengthExpr<'a>>;
+pub(crate) type Type<'a> = ty::Type<'a, TypeofExpr<'a>, LengthExpr<'a>>;
+pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
 
 #[derive(Debug)]
 enum OpenNewScope {

@@ -20,7 +20,7 @@ use crate::typecheck::PtrCmpKind;
 mod as_sexpr;
 mod stack;
 
-type ArraySize<'a> = typecheck::ArrayLength<LayoutedExpression<'a>>;
+type ArraySize<'a> = typecheck::ArrayLength<&'a LayoutedExpression<'a>>;
 pub type Type<'a> = ty::Type<'a, !, ArraySize<'a>>;
 type QualifiedType<'a> = ty::QualifiedType<'a, !, ArraySize<'a>>;
 
@@ -192,12 +192,13 @@ impl<'a> Reference<'a> {
 fn layout_array_length<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
-    length: typecheck::ArrayLength<typecheck::TypedExpression<'a>>,
+    length: typecheck::ArrayLength<&'a typecheck::TypedExpression<'a>>,
 ) -> ArraySize<'a> {
     match length {
         typecheck::ArrayLength::Constant(length) => ArraySize::Constant(length),
         typecheck::ArrayLength::Variable(length) =>
-            ArraySize::Variable(layout_expression(stack, bump, &length)),
+            ArraySize::Variable(bump.alloc(layout_expression(stack, bump, length))),
+        typecheck::ArrayLength::Unknown => ArraySize::Unknown,
     }
 }
 
@@ -212,7 +213,7 @@ fn layout_ty<'a>(
         ty::Type::Pointer(pointee) => Type::Pointer(bump.alloc(layout_ty(stack, bump, *pointee))),
         ty::Type::Array(ArrayType { ty, length }) => Type::Array(ArrayType {
             ty: bump.alloc(layout_ty(stack, bump, *ty)),
-            length: try { &*bump.alloc(layout_array_length(stack, bump, *length?)) },
+            length: layout_array_length(stack, bump, length),
         }),
         ty::Type::Function(FunctionType { params, return_type, is_varargs }) =>
             Type::Function(FunctionType {

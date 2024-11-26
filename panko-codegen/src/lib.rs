@@ -29,6 +29,7 @@ use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::Type;
 use panko_sema::scope::RefKind;
 use panko_sema::ty::ArrayType;
+use panko_sema::typecheck::ArrayLength;
 use panko_sema::typecheck::PtrCmpKind;
 use Register::*;
 
@@ -332,7 +333,7 @@ impl<'a> Codegen<'a> {
         let size = match ty {
             // TODO: assert that this only happens in tentative definitions
             // TODO: gcc and clang warn in this case
-            Type::Array(ArrayType { ty, length: None }) => ty.ty.size(),
+            Type::Array(ArrayType { ty, length: ArrayLength::Unknown }) => ty.ty.size(),
             _ => ty.size(),
         };
 
