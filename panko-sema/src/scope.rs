@@ -466,9 +466,9 @@ impl<'a> Scopes<'a> {
                     ..reference
                 };
 
-                if kind > previous_definition.kind {
-                    previous_definition.name = name;
-                    previous_definition.kind = kind;
+                if kind >= previous_definition.kind {
+                    // this builds a linked list of all previous definitions
+                    *previous_definition = reference;
                 }
 
                 reference
