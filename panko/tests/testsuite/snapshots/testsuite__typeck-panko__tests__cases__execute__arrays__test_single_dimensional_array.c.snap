@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/arrays/test_single_dimensional_array.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition xs~1 `array<int; (constexpr 42)>` ∅)
+         (expression (assign (deref (ptr-add (noop-type-conversion (addressof (xs~1 `array<int; (constexpr 42)>`) `ptr<array<int; (constexpr 42)>>`) `ptr<int>`) (sign-extend (0 `int`) `unsigned long`) `ptr<int>`) `int`) (1 `int`) `int`))
+         (expression (assign (deref (ptr-add (noop-type-conversion (addressof (xs~1 `array<int; (constexpr 42)>`) `ptr<array<int; (constexpr 42)>>`) `ptr<int>`) (sign-extend (1 `int`) `unsigned long`) `ptr<int>`) `int`) (2 `int`) `int`))
+         (expression (assign (deref (ptr-add (noop-type-conversion (addressof (xs~1 `array<int; (constexpr 42)>`) `ptr<array<int; (constexpr 42)>>`) `ptr<int>`) (sign-extend (41 `int`) `unsigned long`) `ptr<int>`) `int`) (3 `int`) `int`))
+         (return (add (deref (ptr-add (noop-type-conversion (addressof (xs~1 `array<int; (constexpr 42)>`) `ptr<array<int; (constexpr 42)>>`) `ptr<int>`) (sign-extend (1 `int`) `unsigned long`) `ptr<int>`) `int`) (deref (ptr-add (noop-type-conversion (addressof (xs~1 `array<int; (constexpr 42)>`) `ptr<array<int; (constexpr 42)>>`) `ptr<int>`) (sign-extend (41 `int`) `unsigned long`) `ptr<int>`) `int`) `int`)))))
+
+----- stderr -----

@@ -13,6 +13,8 @@ use panko_lex::Token;
 use panko_report::Report;
 
 use crate as cst;
+use crate::sexpr_builder::AsSExpr as _;
+use crate::ArrayDeclarator;
 use crate::BlockItem;
 use crate::DirectDeclarator;
 use crate::FunctionDeclarator;
@@ -68,6 +70,10 @@ impl<'a> Session<'a> {
             bump,
             diagnostics: Diagnostics::default(),
         }
+    }
+
+    pub fn bump(&self) -> &'a Bump {
+        self.bump
     }
 
     pub fn alloc<T>(&self, value: T) -> &'a T {
@@ -162,8 +168,6 @@ pub struct FunctionDefinition<'a> {
     pub body: CompoundStatement<'a>,
 }
 
-// TODO: The instances for `PartialEq` and `Eq` are only needed until correct type checking is
-// implemented and should be removed afterwards.
 #[derive(Debug, Clone, Copy)]
 pub struct QualifiedType<'a> {
     pub is_const: bool,
@@ -172,10 +176,11 @@ pub struct QualifiedType<'a> {
     pub loc: Loc<'a>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy)]
 pub enum Type<'a> {
     Arithmetic(Arithmetic),
     Pointer(&'a QualifiedType<'a>),
+    Array(ArrayType<'a>),
     Function(FunctionType<'a>),
     Void,
     // TODO
@@ -209,7 +214,13 @@ pub enum Signedness {
     Unsigned,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy)]
+pub struct ArrayType<'a> {
+    pub ty: &'a QualifiedType<'a>,
+    pub length: Option<&'a Expression<'a>>,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct FunctionType<'a> {
     pub params: &'a [ParameterDeclaration<'a>],
     pub return_type: &'a QualifiedType<'a>,
@@ -222,14 +233,6 @@ pub struct ParameterDeclaration<'a> {
     pub ty: QualifiedType<'a>,
     pub name: Option<Token<'a>>,
 }
-
-impl PartialEq for ParameterDeclaration<'_> {
-    fn eq(&self, other: &Self) -> bool {
-        self.ty == other.ty
-    }
-}
-
-impl Eq for ParameterDeclaration<'_> {}
 
 #[derive(Debug, Clone, Copy)]
 pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
@@ -281,21 +284,6 @@ impl<'a> FunctionDefinition<'a> {
     }
 }
 
-impl PartialEq for QualifiedType<'_> {
-    fn eq(&self, other: &Self) -> bool {
-        let Self { is_const, is_volatile, ty, loc: _ } = self;
-        let Self {
-            is_const: other_is_const,
-            is_volatile: other_is_volatile,
-            ty: other_ty,
-            loc: _,
-        } = other;
-        (is_const, is_volatile, ty) == (other_is_const, other_is_volatile, other_ty)
-    }
-}
-
-impl Eq for QualifiedType<'_> {}
-
 impl fmt::Display for QualifiedType<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.ty.fmt(f)?;
@@ -314,6 +302,7 @@ impl fmt::Display for Type<'_> {
         match self {
             Type::Arithmetic(Arithmetic::Integral(integral)) => write!(f, "{integral}"),
             Type::Pointer(pointee) => write!(f, "ptr<{pointee}>"),
+            Type::Array(array) => write!(f, "{array}"),
             Type::Function(function) => write!(f, "{function}"),
             Type::Void => write!(f, "void"),
         }
@@ -329,6 +318,13 @@ impl fmt::Display for Integral {
             write!(f, "{signedness} ")?;
         }
         write!(f, "{}", kind)
+    }
+}
+
+impl fmt::Display for ArrayType<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let Self { ty, length } = self;
+        write!(f, "array<{ty}; {length}>", length = length.as_sexpr())
     }
 }
 
@@ -594,6 +590,29 @@ pub(crate) fn parse_declarator<'a>(
             DirectDeclarator::Abstract => break None,
             DirectDeclarator::Identifier(name) => break Some(name),
             DirectDeclarator::Parenthesised(decl) => declarator = *decl,
+            DirectDeclarator::ArrayDeclarator(ArrayDeclarator {
+                direct_declarator,
+                type_qualifiers,
+                length,
+                close_bracket,
+            }) => {
+                if !type_qualifiers.is_empty() {
+                    todo!("array in function parameter not implemented");
+                }
+                declarator = cst::Declarator {
+                    pointers: None,
+                    direct_declarator: *direct_declarator,
+                };
+                ty = QualifiedType {
+                    is_const: false,
+                    is_volatile: false,
+                    ty: Type::Array(ArrayType {
+                        ty: sess.alloc(ty),
+                        length: try { sess.alloc(length?) },
+                    }),
+                    loc: ty.loc.until(close_bracket.loc()),
+                }
+            }
             DirectDeclarator::FunctionDeclarator(FunctionDeclarator {
                 direct_declarator,
                 parameter_type_list,

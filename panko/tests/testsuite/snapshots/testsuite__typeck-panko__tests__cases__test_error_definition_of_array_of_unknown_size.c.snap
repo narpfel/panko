@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_definition_of_array_of_unknown_size.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot declare variable `xs` with incomplete type `array<int; ∅>`
+   ╭─[panko/tests/cases/test_error_definition_of_array_of_unknown_size.c:2:9]
+   │
+ 2 │     int xs[];
+   │         ─┬  
+   │          ╰── declared here
+───╯

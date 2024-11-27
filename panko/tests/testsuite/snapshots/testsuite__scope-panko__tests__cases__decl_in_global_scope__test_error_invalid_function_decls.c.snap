@@ -6,32 +6,16 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c
+snapshot_kind: text
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit
+   (declaration a~0 `fn() -> fn() -> int` ∅)
+   (tentative-definition b~1 `ptr<fn() -> int>` ∅)
+   (declaration c~2 `fn() -> ptr<fn() -> fn() -> int>` ∅)
+   (declaration d~3 `fn(param: void) -> int` ∅)
+   (declaration e~4 `fn() -> int` ∅))
 
 ----- stderr -----
-Error: invalid function return type `fn() -> int`
-   ╭─[panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c:2:1]
-   │
- 2 │ int a()();
-   │ ────┬────  
-   │     ╰────── declaration here
-───╯
-
-Error: invalid function return type `fn() -> int`
-   ╭─[panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c:8:1]
-   │
- 8 │ int ((*c(void))())();
-   │ ──────────┬─────────  
-   │           ╰─────────── declaration here
-───╯
-
-Error: cannot declare function parameter `param` with incomplete type `void`
-    ╭─[panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c:11:12]
-    │
- 11 │ int d(void param);
-    │            ──┬──  
-    │              ╰──── parameter declared here
-────╯

@@ -17,10 +17,7 @@ use panko_parser::UnaryOp;
 use panko_report::Report;
 
 use crate::nonempty;
-use crate::ty::FunctionType;
-use crate::ty::ParameterDeclaration;
-use crate::ty::QualifiedType;
-use crate::ty::Type;
+use crate::ty;
 
 mod as_sexpr;
 
@@ -41,35 +38,18 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "in this declaration"))]
     FunctionDeclaratorDoesNotHaveFunctionType { at: Token<'a> },
 
-    #[error("redeclaration of `{at}` with different type: `{original_ty}` vs. `{new_ty}`")]
-    #[with(original_ty = previous_definition.ty, new_ty = at.ty)]
-    #[diagnostics(
-        previous_definition(colour = Blue, label = "previously declared here with type `{original_ty}`"),
-        at(colour = Red, label = "new declaration with different type `{new_ty}`"),
-    )]
-    AlreadyDefinedWithDifferentType {
-        at: Reference<'a>,
-        previous_definition: Reference<'a>,
-    },
-
-    #[error("cannot declare variable `{at}` with incomplete type `{ty}`")]
-    #[with(ty = at.ty)]
-    #[diagnostics(at(colour = Red, label = "declared here"))]
-    VariableWithIncompleteType { at: Reference<'a> },
-
-    #[error("cannot declare function parameter `{at}` with incomplete type `{ty}`")]
-    #[with(ty = at.ty)]
-    #[diagnostics(at(colour = Red, label = "parameter declared here"))]
-    ParameterWithIncompleteType { at: ParameterDeclaration<'a> },
-
-    #[error("invalid function return type `{ty}`")]
-    #[diagnostics(at(colour = Red, label = "declaration here"))]
-    InvalidFunctionReturnType { at: Loc<'a>, ty: QualifiedType<'a> },
-
     #[error("use of undeclared identifier `{at}`")]
     #[diagnostics(at(colour = Red, label = "this name has not been declared"))]
     UndeclaredName { at: Token<'a> },
 }
+
+type TypeofExpr<'a> = &'a Expression<'a>;
+type LengthExpr<'a> = Option<&'a Expression<'a>>;
+type ArrayType<'a> = ty::ArrayType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
+type FunctionType<'a> = ty::FunctionType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
+type ParameterDeclaration<'a> = ty::ParameterDeclaration<'a, TypeofExpr<'a>, LengthExpr<'a>>;
+pub(crate) type Type<'a> = ty::Type<'a, TypeofExpr<'a>, LengthExpr<'a>>;
+pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
 
 #[derive(Debug)]
 enum OpenNewScope {
@@ -171,6 +151,11 @@ pub(crate) enum Expression<'a> {
         ty: QualifiedType<'a>,
         close_paren: Token<'a>,
     },
+    Lengthof {
+        lengthof: Token<'a>,
+        ty: QualifiedType<'a>,
+        close_paren: Token<'a>,
+    },
     Alignof {
         alignof: Token<'a>,
         ty: QualifiedType<'a>,
@@ -225,6 +210,8 @@ pub struct Reference<'a> {
     pub(crate) usage_location: Loc<'a>,
     pub(crate) kind: RefKind,
     pub(crate) storage_duration: StorageDuration,
+    pub(crate) previous_definition: Option<&'a Self>,
+    pub(crate) is_parameter: IsParameter,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -232,6 +219,12 @@ pub enum RefKind {
     Declaration,
     TentativeDefinition,
     Definition,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum IsParameter {
+    Yes,
+    No,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -313,6 +306,8 @@ impl<'a> Expression<'a> {
                 callee.loc().until(close_paren.loc()),
             Expression::Sizeof { sizeof, ty: _, close_paren } =>
                 sizeof.loc().until(close_paren.loc()),
+            Expression::Lengthof { lengthof, ty: _, close_paren } =>
+                lengthof.loc().until(close_paren.loc()),
             Expression::Alignof { alignof, ty: _, close_paren } =>
                 alignof.loc().until(close_paren.loc()),
             Expression::Cast { open_paren, ty: _, expr } => open_paren.loc().until(expr.loc()),
@@ -345,10 +340,6 @@ impl<'a> ErrorExpr<'a> for Expression<'a> {
 }
 
 impl<'a> Reference<'a> {
-    pub(crate) fn name(&self) -> &'a str {
-        self.name
-    }
-
     pub fn unique_name(&self) -> String {
         format!("{}~{}", self.name, self.id.0)
     }
@@ -368,14 +359,6 @@ impl<'a> Reference<'a> {
     fn at(&self, location: Loc<'a>) -> Self {
         assert_eq!(self.name, location.slice());
         Self { usage_location: location, ..*self }
-    }
-
-    pub fn kind(&self) -> RefKind {
-        self.kind
-    }
-
-    pub(crate) fn at_decl(&self) -> Self {
-        self.at(self.loc)
     }
 }
 
@@ -450,6 +433,7 @@ impl<'a> Scopes<'a> {
         ty: QualifiedType<'a>,
         kind: RefKind,
         storage_duration: StorageDuration,
+        is_parameter: IsParameter,
     ) -> Reference<'a> {
         let sess = self.sess;
         let id = self.id();
@@ -461,6 +445,8 @@ impl<'a> Scopes<'a> {
             usage_location: loc,
             kind,
             storage_duration,
+            previous_definition: None,
+            is_parameter,
         };
         match self.lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
@@ -473,18 +459,21 @@ impl<'a> Scopes<'a> {
                         previous_definition: previous_definition.at(previous_definition.loc),
                     })
                 }
-                if previous_definition.ty != ty {
-                    sess.emit(Diagnostic::AlreadyDefinedWithDifferentType {
-                        at: reference,
-                        previous_definition: previous_definition
-                            .at(previous_definition.usage_location),
-                    })
+
+                let reference = Reference {
+                    id: previous_definition.id,
+                    previous_definition: Some(
+                        sess.alloc(previous_definition.at(previous_definition.usage_location)),
+                    ),
+                    ..reference
+                };
+
+                if kind >= previous_definition.kind {
+                    // this builds a linked list of all previous definitions
+                    *previous_definition = reference;
                 }
-                if kind > previous_definition.kind {
-                    previous_definition.name = name;
-                    previous_definition.kind = kind;
-                }
-                Reference { kind, ..*previous_definition }
+
+                reference
             }
             Entry::Vacant(entry) => {
                 entry.insert(reference);
@@ -503,6 +492,8 @@ impl<'a> Scopes<'a> {
             usage_location: loc,
             kind: RefKind::Definition,
             storage_duration: StorageDuration::Automatic,
+            previous_definition: None,
+            is_parameter: IsParameter::No,
         }
     }
 
@@ -544,6 +535,10 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
         ast::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ast::Type::Pointer(pointee) =>
             Type::Pointer(scopes.sess.alloc(resolve_ty(scopes, pointee))),
+        ast::Type::Array(ast::ArrayType { ty, length }) => Type::Array(ArrayType {
+            ty: scopes.sess.alloc(resolve_ty(scopes, ty)),
+            length: try { scopes.sess.alloc(resolve_expr(scopes, length?)) },
+        }),
         ast::Type::Function(function_type) =>
             Type::Function(resolve_function_ty(scopes, &function_type)),
         ast::Type::Void => Type::Void,
@@ -573,27 +568,13 @@ fn resolve_function_ty<'a>(
     };
 
     let params = scopes.sess.alloc_slice_fill_iter(params.iter().map(
-        |&ast::ParameterDeclaration { loc, ty, name }| {
-            let ty = resolve_ty(scopes, &ty);
-            let param = ParameterDeclaration { loc, ty, name };
-
-            if !ty.ty.is_complete() {
-                scopes
-                    .sess
-                    .emit(Diagnostic::ParameterWithIncompleteType { at: param })
-            }
-
-            param
+        |&ast::ParameterDeclaration { loc, ty, name }| ParameterDeclaration {
+            loc,
+            ty: resolve_ty(scopes, &ty),
+            name,
         },
     ));
     let return_type = scopes.sess.alloc(resolve_ty(scopes, return_type));
-
-    match return_type.ty {
-        Type::Arithmetic(_) | Type::Pointer(_) | Type::Void => (),
-        Type::Function(_) => scopes
-            .sess
-            .emit(Diagnostic::InvalidFunctionReturnType { at: return_type.loc, ty: *return_type }),
-    }
 
     FunctionType { params, return_type, is_varargs }
 }
@@ -617,6 +598,7 @@ fn resolve_function_definition<'a>(
         ty,
         RefKind::Definition,
         StorageDuration::Static,
+        IsParameter::No,
     );
     scopes.push();
 
@@ -629,6 +611,7 @@ fn resolve_function_definition<'a>(
         } => function_ty,
         QualifiedType { ty: Type::Function(_), .. } =>
             unreachable!("function types cannot be qualified"),
+        // TODO: what about `typeof`?
         non_function_ty => {
             // TODO: this should be `Type::Error`
             let () = scopes
@@ -661,6 +644,7 @@ fn resolve_function_definition<'a>(
                     param.ty,
                     RefKind::Definition,
                     StorageDuration::Automatic,
+                    IsParameter::Yes,
                 );
                 reference
             })
@@ -726,16 +710,15 @@ fn resolve_declaration<'a>(
         Type::Function(_) => StorageDuration::Static,
         _ => storage_duration,
     };
-    let reference = scopes.add(name.slice(), name.loc(), ty, kind, storage_duration);
-
-    if !ty.ty.is_complete() {
-        scopes
-            .sess
-            .emit(Diagnostic::VariableWithIncompleteType { at: reference })
-    }
-
     Declaration {
-        reference,
+        reference: scopes.add(
+            name.slice(),
+            name.loc(),
+            ty,
+            kind,
+            storage_duration,
+            IsParameter::No,
+        ),
         initialiser: try { resolve_expr(scopes, initialiser.as_ref()?) },
     }
 }
@@ -794,9 +777,15 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         },
         ast::Expression::CompoundAssign { target, op, value } => {
             let target = scopes.sess.alloc(resolve_expr(scopes, target));
-            // TODO: `Type::Void` is a placeholder here, it would be better to add
-            // `Type::Unresolved` or similar for this case
-            let target_temporary = scopes.temporary(target.loc(), Type::Void.unqualified());
+            let target_temporary = scopes.temporary(
+                target.loc(),
+                Type::Pointer(
+                    scopes
+                        .sess
+                        .alloc(Type::Typeof { expr: target, unqual: false }.unqualified()),
+                )
+                .unqualified(),
+            );
             Expression::CompoundAssign {
                 target,
                 target_temporary,
@@ -822,6 +811,11 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         },
         ast::Expression::Sizeof { sizeof, ty, close_paren } => Expression::Sizeof {
             sizeof: *sizeof,
+            ty: resolve_ty(scopes, ty),
+            close_paren: *close_paren,
+        },
+        ast::Expression::Lengthof { lengthof, ty, close_paren } => Expression::Lengthof {
+            lengthof: *lengthof,
             ty: resolve_ty(scopes, ty),
             close_paren: *close_paren,
         },
@@ -866,15 +860,20 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::Increment { operator, operand, fixity } => {
             let operand = scopes.sess.alloc(resolve_expr(scopes, operand));
             let reference = scopes.temporary(operand.loc(), Type::Void.unqualified());
+            let typeof_operand_unqual = Type::Typeof { expr: operand, unqual: true };
+            let typeof_operand = Type::Typeof { expr: operand, unqual: false };
             Expression::Increment {
                 operator: *operator,
                 operand,
                 fixity: match fixity {
                     cst::IncrementFixity::Prefix => IncrementFixity::Prefix,
                     cst::IncrementFixity::Postfix => IncrementFixity::Postfix {
-                        // TODO: same as in `CompoundAssign`, these types are placeholders
-                        pointer: scopes.temporary(operand.loc(), Type::Void.unqualified()),
-                        copy: scopes.temporary(operand.loc(), Type::Void.unqualified()),
+                        pointer: scopes.temporary(
+                            operand.loc(),
+                            Type::Pointer(scopes.sess.alloc(typeof_operand.unqualified()))
+                                .unqualified(),
+                        ),
+                        copy: scopes.temporary(operand.loc(), typeof_operand_unqual.unqualified()),
                     },
                 },
                 reference,

@@ -2,6 +2,7 @@
 
 use crate::sexpr_builder::AsSExpr;
 use crate::sexpr_builder::SExpr;
+use crate::ArrayDeclarator;
 use crate::BlockItem;
 use crate::CompoundStatement;
 use crate::Declaration;
@@ -131,9 +132,18 @@ impl AsSExpr for DirectDeclarator<'_> {
             DirectDeclarator::Abstract => ().as_sexpr(),
             DirectDeclarator::Identifier(ident) => SExpr::string(ident.slice()),
             DirectDeclarator::Parenthesised(declarator) => declarator.as_sexpr(),
+            DirectDeclarator::ArrayDeclarator(array_declarator) => array_declarator.as_sexpr(),
             DirectDeclarator::FunctionDeclarator(function_declarator) =>
                 function_declarator.as_sexpr(),
         }
+    }
+}
+
+impl AsSExpr for ArrayDeclarator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("array-declarator")
+            .inherit(&self.length)
+            .inherit(self.direct_declarator)
     }
 }
 
@@ -233,6 +243,8 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new("call").inherit(callee).lines(*args),
             Expression::Sizeof { sizeof: _, ty, close_paren: _ } =>
                 SExpr::new("sizeof").inherit(ty),
+            Expression::Lengthof { lengthof: _, ty, close_paren: _ } =>
+                SExpr::new("lengthof").inherit(ty),
             Expression::Alignof { alignof: _, ty, close_paren: _ } =>
                 SExpr::new("alignof").inherit(ty),
             Expression::Cast { open_paren: _, ty, expr } =>

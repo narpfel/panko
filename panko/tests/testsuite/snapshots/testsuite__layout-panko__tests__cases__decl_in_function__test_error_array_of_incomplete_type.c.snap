@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_function/test_error_array_of_incomplete_type.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: array with incomplete element type `void`
+   ╭─[panko/tests/cases/decl_in_function/test_error_array_of_incomplete_type.c:2:5]
+   │
+ 2 │     void array[42];
+   │     ──┬─  
+   │       ╰─── array element types must be complete
+───╯

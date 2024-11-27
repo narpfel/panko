@@ -3,7 +3,7 @@ use std::fmt;
 use panko_sema::layout::LayoutedExpression;
 use panko_sema::layout::Reference;
 use panko_sema::layout::Slot;
-use panko_sema::ty::Type;
+use panko_sema::layout::Type;
 
 use crate::LabelId;
 use crate::Register;
@@ -142,7 +142,10 @@ impl fmt::Display for Operand<'_> {
                     Type::Arithmetic(_) | Type::Pointer(_) => self.ty.size(),
                     // Using a function results in a pointer to that function, so we need 8 bytes.
                     Type::Function(_) => 8,
+                    // Same for arrays.
+                    Type::Array(_) => 8,
                     Type::Void => unreachable!(),
+                    Type::Typeof { expr, unqual: _ } => match expr {},
                 };
                 let ptr_type = match size {
                     1 => "byte",

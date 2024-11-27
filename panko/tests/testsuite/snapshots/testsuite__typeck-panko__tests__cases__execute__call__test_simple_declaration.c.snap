@@ -20,7 +20,7 @@ exit_code: 0
                (42 `int`)
                `int`))))
    (function-definition
-      f~0 `fn(∅: int) -> int`
+      f~0 `fn(x: int) -> int`
       (params
          x~3 `int`)
       (compound-statement

@@ -14,7 +14,7 @@ exit_code: 0
    (declaration f~0 `fn(∅: int) -> int` ∅)
    (declaration f~0 `fn(∅: int) -> int` ∅)
    (declaration f~0 `fn(∅: int) -> int` ∅)
-   (declaration f~0 `fn(∅: int) -> int` ∅)
+   (declaration f~0 `fn(x: int) -> int` ∅)
    (declaration f~0 `fn(∅: int) -> int` ∅))
 
 ----- stderr -----

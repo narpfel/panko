@@ -1,4 +1,6 @@
 #![feature(coverage_attribute)]
+#![feature(never_type)]
+#![feature(try_blocks)]
 
 use ariadne::Color::Red;
 use ast::Arithmetic;
@@ -438,8 +440,16 @@ enum DirectDeclarator<'a> {
     Abstract,
     Identifier(Token<'a>),
     Parenthesised(&'a Declarator<'a>),
-    // ArrayDeclarator(ArrayDeclarator<'a>),
+    ArrayDeclarator(ArrayDeclarator<'a>),
     FunctionDeclarator(FunctionDeclarator<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+struct ArrayDeclarator<'a> {
+    direct_declarator: &'a DirectDeclarator<'a>,
+    type_qualifiers: &'a [TypeQualifier<'a>],
+    length: Option<Expression<'a>>,
+    close_bracket: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -534,6 +544,11 @@ pub enum Expression<'a> {
     },
     Sizeof {
         sizeof: Token<'a>,
+        ty: QualifiedType<'a>,
+        close_paren: Token<'a>,
+    },
+    Lengthof {
+        lengthof: Token<'a>,
         ty: QualifiedType<'a>,
         close_paren: Token<'a>,
     },
@@ -653,6 +668,7 @@ pub enum UnaryOpKind {
     Compl,
     Not,
     Sizeof,
+    Lengthof,
 }
 
 impl<'a> UnaryOp<'a> {
@@ -665,6 +681,7 @@ impl<'a> UnaryOp<'a> {
             UnaryOpKind::Compl => "compl",
             UnaryOpKind::Not => "not",
             UnaryOpKind::Sizeof => "sizeof",
+            UnaryOpKind::Lengthof => "lengthof",
         }
     }
 

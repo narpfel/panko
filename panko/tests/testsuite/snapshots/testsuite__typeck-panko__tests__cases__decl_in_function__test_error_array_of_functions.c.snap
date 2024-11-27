@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/decl_in_function/test_error_array_of_functions.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: arrays of functions are not allowed
+   ╭─[panko/tests/cases/decl_in_function/test_error_array_of_functions.c:2:5]
+   │
+ 2 │     int functions[42](int, int);
+   │     ─────────────┬─────────────  
+   │                  ╰─────────────── element type is `fn(∅: int, ∅: int) -> int`
+───╯

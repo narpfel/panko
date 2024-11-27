@@ -6,6 +6,7 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/decl_in_global_scope/test_error_redeclaration_with_different_type.c
+snapshot_kind: text
 ---
 success: false
 exit_code: 1
@@ -34,13 +35,12 @@ Error: redeclaration of `f` with different type: `int` vs. `fn() -> int`
    │     ╰── new declaration with different type `fn() -> int`
 ───╯
 
-Error: redeclaration of `g` with different type: `fn(∅: int) -> int` vs. `fn(∅: int, ∅: int) -> int`
+Error: redeclaration of `g` with different type: `fn(x: int) -> int` vs. `fn(∅: int, ∅: int) -> int`
    ╭─[panko/tests/cases/decl_in_global_scope/test_error_redeclaration_with_different_type.c:9:5]
    │
- 7 │ int g(int);
+ 8 │ int g(int x);
    │     ┬  
-   │     ╰── previously declared here with type `fn(∅: int) -> int`
-   │ 
+   │     ╰── previously declared here with type `fn(x: int) -> int`
  9 │ int g(int, int);
    │     ┬  
    │     ╰── new declaration with different type `fn(∅: int, ∅: int) -> int`

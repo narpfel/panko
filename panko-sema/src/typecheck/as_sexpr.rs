@@ -3,15 +3,33 @@ use std::iter;
 use itertools::Either;
 use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
+use panko_parser::NO_VALUE;
 
+use super::ArrayLength;
 use super::CompoundStatement;
 use super::Declaration;
 use super::Expression;
 use super::ExternalDeclaration;
 use super::FunctionDefinition;
+use super::ParamRefs;
+use super::Reference;
 use super::Statement;
 use super::TranslationUnit;
 use super::TypedExpression;
+
+impl<Expression> AsSExpr for ArrayLength<Expression>
+where
+    Expression: AsSExpr,
+{
+    fn as_sexpr(&self) -> panko_parser::sexpr_builder::SExpr {
+        match self {
+            ArrayLength::Constant(length) =>
+                SExpr::new("constexpr").inline_string(length.to_string()),
+            ArrayLength::Variable(length) => SExpr::new("variable").inherit(length),
+            ArrayLength::Unknown => SExpr::string(NO_VALUE),
+        }
+    }
+}
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {
@@ -39,6 +57,12 @@ impl AsSExpr for FunctionDefinition<'_> {
                 Either::Right(iter::once(&self.params))
             })
             .lines([&self.body])
+    }
+}
+
+impl AsSExpr for ParamRefs<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("params").lines(self.0)
     }
 }
 
@@ -121,9 +145,16 @@ impl AsSExpr for Expression<'_> {
             Expression::Sizeof { sizeof: _, operand, size } => SExpr::new("sizeof")
                 .inline_string(size.to_string())
                 .inherit(operand),
+            Expression::Lengthof { lengthof: _, operand, length } => SExpr::new("lengthof")
+                .inline_string(length.to_string())
+                .inherit(operand),
             Expression::SizeofTy { sizeof: _, ty, size, close_paren: _ } => SExpr::new("sizeof")
                 .inline_string(size.to_string())
                 .inherit(ty),
+            Expression::LengthofTy { lengthof: _, ty, length, close_paren: _ } =>
+                SExpr::new("lengthof")
+                    .inline_string(length.to_string())
+                    .inherit(ty),
             Expression::Alignof { alignof: _, ty, align, close_paren: _ } => SExpr::new("alignof")
                 .inline_string(align.to_string())
                 .inherit(ty),
@@ -133,5 +164,11 @@ impl AsSExpr for Expression<'_> {
             Expression::Conditional { condition, then, or_else } =>
                 SExpr::new("conditional").lines([condition, then, or_else]),
         }
+    }
+}
+
+impl AsSExpr for Reference<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::string(format!("{} `{}`", self.unique_name(), self.ty))
     }
 }

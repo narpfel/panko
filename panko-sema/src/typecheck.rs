@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::fmt;
+use std::hash::Hash;
 use std::num::IntErrorKind;
 
 use ariadne::Color::Blue;
@@ -32,12 +33,15 @@ use variant_types::IntoVariant as _;
 
 use crate::scope;
 use crate::scope::GenericAssociation;
+use crate::scope::Id;
 use crate::scope::IncrementFixity;
-use crate::scope::ParamRefs;
-use crate::scope::Reference;
+use crate::scope::IsParameter;
+use crate::scope::RefKind;
+use crate::scope::StorageDuration;
+use crate::ty;
+use crate::ty::ArrayType;
 use crate::ty::FunctionType;
-use crate::ty::QualifiedType;
-use crate::ty::Type;
+use crate::ty::ParameterDeclaration;
 
 mod as_sexpr;
 #[cfg(test)]
@@ -60,6 +64,41 @@ where
 #[derive(Debug, Report)]
 #[exit_code(1)]
 enum Diagnostic<'a> {
+    #[error("redeclaration of `{at}` with different type: `{original_ty}` vs. `{new_ty}`")]
+    #[with(original_ty = previous_definition.ty, new_ty = at.ty)]
+    #[diagnostics(
+        previous_definition(colour = Blue, label = "previously declared here with type `{original_ty}`"),
+        at(colour = Red, label = "new declaration with different type `{new_ty}`"),
+    )]
+    AlreadyDefinedWithDifferentType {
+        at: Reference<'a>,
+        previous_definition: Reference<'a>,
+    },
+
+    #[error("cannot declare variable `{at}` with incomplete type `{ty}`")]
+    #[with(ty = at.ty)]
+    #[diagnostics(at(colour = Red, label = "declared here"))]
+    VariableWithIncompleteType { at: Reference<'a> },
+
+    #[error("cannot declare function parameter `{at}` with incomplete type `{ty}`")]
+    #[with(ty = at.ty)]
+    #[diagnostics(at(colour = Red, label = "parameter declared here"))]
+    ParameterWithIncompleteType {
+        at: ParameterDeclaration<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
+    },
+
+    #[error("array with incomplete element type `{at}`")]
+    #[diagnostics(at(colour = Red, label = "array element types must be complete"))]
+    ArrayWithIncompleteType { at: QualifiedType<'a> },
+
+    #[error("arrays of functions are not allowed")]
+    #[diagnostics(at(colour = Red, label = "element type is `{at}`"))]
+    ArrayOfFunctions { at: QualifiedType<'a> },
+
+    #[error("invalid function return type `{ty}`")]
+    #[diagnostics(at(colour = Red, label = "declaration here"))]
+    InvalidFunctionReturnType { at: Loc<'a>, ty: QualifiedType<'a> },
+
     // TODO: types should be printed in C syntax, not in their SExpr debug repr
     #[error("invalid {kind} conversion from `{from_ty}` to `{to_ty}`")]
     #[diagnostics(at(colour = Red, label = "this is of type `{from_ty}`, which cannot be {kind}ly converted to `{to_ty}`"))]
@@ -251,7 +290,104 @@ enum Diagnostic<'a> {
         at: Token<'a>,
         rhs: TypedExpression<'a>,
     },
+
+    #[error("`{op}` can only be applied to arrays, not `{ty}`")]
+    #[diagnostics(
+        op(colour = Blue),
+        at(colour = Red, label = "this expression is of type `{ty}`"),
+    )]
+    #[with(ty = at.ty)]
+    InvalidLengthof {
+        op: Token<'a>,
+        at: TypedExpression<'a>,
+    },
+
+    #[error("`{op}` can only be applied to arrays, not `{at}`")]
+    #[diagnostics(
+        op(colour = Blue),
+        at(colour = Red, label = "this type is `{at}`"),
+    )]
+    InvalidLengthofTy {
+        op: Token<'a>,
+        at: QualifiedType<'a>,
+    },
+
+    #[error(
+        "`{op}` can only be applied to arrays of known length, but the operand has type `{ty}`"
+    )]
+    #[diagnostics(
+        op(colour = Blue),
+        at(colour = Red, label = "the type of this is `{ty}`, which has unknown length"),
+    )]
+    #[with(ty = at.ty)]
+    LengthofOfArrayOfUnknownLength {
+        op: Token<'a>,
+        at: TypedExpression<'a>,
+    },
+
+    #[error("`{op}` can only be applied to arrays of known length")]
+    #[diagnostics(
+        op(colour = Blue),
+        at(colour = Red, label = "`{at}` has unknown length"),
+    )]
+    LengthofOfArrayTyOfUnknownLength {
+        op: Token<'a>,
+        at: QualifiedType<'a>,
+    },
 }
+
+#[derive(Debug, Clone, Copy)]
+pub enum ArrayLength<Expression> {
+    Constant(u64),
+    Variable(Expression),
+    Unknown,
+}
+
+impl<Expression> ArrayLength<Expression> {
+    pub(crate) fn is_known(&self) -> bool {
+        !matches!(self, Self::Unknown)
+    }
+}
+
+impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a>> {
+    type Error = &'a TypedExpression<'a>;
+
+    fn try_from(value: &'a TypedExpression<'a>) -> Result<Self, Self::Error> {
+        // TODO: constexpr evaluate `value` here
+        match value.expr {
+            Expression::Integer { value, token: _ } => Ok(Self::Constant(value)),
+            _ => Err(value),
+        }
+    }
+}
+
+impl<Expression> PartialEq for ArrayLength<Expression> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (ArrayLength::Constant(self_length), ArrayLength::Constant(other_length)) =>
+                self_length == other_length,
+            (ArrayLength::Unknown, _) | (_, ArrayLength::Unknown) => true,
+            _ => todo!("type compatibility involving variably-modified types not implemented"),
+        }
+    }
+}
+
+impl<Expression> Eq for ArrayLength<Expression> {}
+
+impl<Expression> Hash for ArrayLength<Expression> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        match self {
+            ArrayLength::Constant(length) => length.hash(state),
+            ArrayLength::Variable(_) =>
+                todo!("type compatibility involving variably-modified types not implemented"),
+            ArrayLength::Unknown =>
+                unreachable!("arrays of unknown length are not allowed in `_Generic`"),
+        }
+    }
+}
+
+type Type<'a> = ty::Type<'a, !, ArrayLength<&'a TypedExpression<'a>>>;
+pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, !, ArrayLength<&'a TypedExpression<'a>>>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
@@ -280,6 +416,9 @@ pub struct FunctionDefinition<'a> {
     pub(crate) is_varargs: bool,
     pub(crate) body: CompoundStatement<'a>,
 }
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct ParamRefs<'a>(pub(crate) &'a [Reference<'a>]);
 
 #[derive(Debug, Clone, Copy)]
 pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
@@ -381,10 +520,21 @@ pub enum Expression<'a> {
         operand: &'a TypedExpression<'a>,
         size: u64,
     },
+    Lengthof {
+        lengthof: Token<'a>,
+        operand: &'a TypedExpression<'a>,
+        length: u64,
+    },
     SizeofTy {
         sizeof: Token<'a>,
         ty: QualifiedType<'a>,
         size: u64,
+        close_paren: Token<'a>,
+    },
+    LengthofTy {
+        lengthof: Token<'a>,
+        ty: QualifiedType<'a>,
+        length: u64,
         close_paren: Token<'a>,
     },
     Alignof {
@@ -407,6 +557,53 @@ pub enum Expression<'a> {
         then: &'a TypedExpression<'a>,
         or_else: &'a TypedExpression<'a>,
     },
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Reference<'a> {
+    // TODO: The location of `name` points to where this name was declared. This is unused for now,
+    // but should be used in error messages to print e. g. “note: [...] was declared here:”.
+    pub(crate) name: &'a str,
+    pub(crate) loc: Loc<'a>,
+    pub(crate) ty: QualifiedType<'a>,
+    pub(crate) id: Id,
+    pub(crate) usage_location: Loc<'a>,
+    pub(crate) kind: RefKind,
+    pub(crate) storage_duration: StorageDuration,
+}
+
+impl<'a> Reference<'a> {
+    pub(crate) fn name(&self) -> &'a str {
+        self.name
+    }
+
+    pub fn unique_name(&self) -> String {
+        format!("{}~{}", self.name, self.id.0)
+    }
+
+    #[expect(
+        clippy::misnamed_getters,
+        reason = "`loc` should actually return the `usage_location` and not the `loc` where this reference was declared"
+    )]
+    pub fn loc(&self) -> Loc<'a> {
+        self.usage_location
+    }
+
+    pub(crate) fn slice(&self) -> &'a str {
+        self.name
+    }
+
+    pub fn kind(&self) -> RefKind {
+        self.kind
+    }
+
+    fn at(&self, location: Loc<'a>) -> Self {
+        Self { usage_location: location, ..*self }
+    }
+
+    pub(crate) fn at_decl(&self) -> Self {
+        self.at(self.loc)
+    }
 }
 
 impl<'a> TypedExpression<'a> {
@@ -443,7 +640,9 @@ impl<'a> TypedExpression<'a> {
             | Expression::Compl { .. }
             | Expression::Not { .. }
             | Expression::Sizeof { .. }
+            | Expression::Lengthof { .. }
             | Expression::SizeofTy { .. }
+            | Expression::LengthofTy { .. }
             | Expression::Alignof { .. } => false,
             Expression::Combine { first: _, second } => second.is_lvalue(),
             Expression::Logical { .. } | Expression::Conditional { .. } => false,
@@ -495,8 +694,12 @@ impl<'a> Expression<'a> {
             Expression::Compl { compl, operand } => compl.loc().until(operand.loc()),
             Expression::Not { not, operand } => not.loc().until(operand.loc()),
             Expression::Sizeof { sizeof, operand, size: _ } => sizeof.loc().until(operand.loc()),
+            Expression::Lengthof { lengthof, operand, length: _ } =>
+                lengthof.loc().until(operand.loc()),
             Expression::SizeofTy { sizeof, ty: _, size: _, close_paren } =>
                 sizeof.loc().until(close_paren.loc()),
+            Expression::LengthofTy { lengthof, ty: _, length: _, close_paren } =>
+                lengthof.loc().until(close_paren.loc()),
             Expression::Alignof { alignof, ty: _, align: _, close_paren } =>
                 alignof.loc().until(close_paren.loc()),
             Expression::Combine { first, second } => first.loc().until(second.loc()),
@@ -545,6 +748,137 @@ impl fmt::Display for ConversionKind {
         };
         write!(f, "{s}")
     }
+}
+
+fn typeck_ty<'a>(
+    sess: &'a Session<'a>,
+    ty: scope::QualifiedType<'a>,
+    is_parameter: IsParameter,
+) -> QualifiedType<'a> {
+    let scope::QualifiedType { is_const, is_volatile, ty, loc } = ty;
+    let ty = match ty {
+        ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
+        ty::Type::Pointer(pointee) =>
+            Type::Pointer(sess.alloc(typeck_ty(sess, *pointee, IsParameter::No))),
+        ty::Type::Array(ArrayType { ty, length }) => {
+            let ty = sess.alloc(typeck_ty(sess, *ty, IsParameter::No));
+            if !ty.ty.is_complete() {
+                // TODO: this should be `Type::Error`
+                // TODO: this generates a new error for each *usage* of this ty, including usages
+                // of variables with this ty.
+                sess.emit(Diagnostic::ArrayWithIncompleteType { at: *ty })
+            }
+            if ty.ty.is_function() {
+                // TODO: this should be `Type::Error`
+                sess.emit(Diagnostic::ArrayOfFunctions { at: *ty })
+            }
+            let length = length
+                .map(|length| {
+                    ArrayLength::try_from(sess.alloc(typeck_expression(
+                        sess,
+                        length,
+                        Context::Default,
+                    )))
+                    .unwrap_or_else(|_| todo!("variable length array"))
+                })
+                .unwrap_or(ArrayLength::Unknown);
+            match is_parameter {
+                IsParameter::Yes => {
+                    // TODO: use qualifiers specified in the array declarator
+                    if matches!(length, ArrayLength::Variable(_)) {
+                        todo!("unimplemented: variably-modified type as function parameter");
+                    }
+                    Type::Pointer(ty)
+                }
+                IsParameter::No => Type::Array(ArrayType { ty, length }),
+            }
+        }
+        ty::Type::Function(FunctionType { params, return_type, is_varargs }) => {
+            let return_type = sess.alloc(typeck_ty(sess, *return_type, IsParameter::No));
+            match return_type.ty {
+                Type::Arithmetic(_) | Type::Pointer(_) | Type::Void => (),
+                Type::Array(_) | Type::Function(_) =>
+                    sess.emit(Diagnostic::InvalidFunctionReturnType {
+                        at: return_type.loc,
+                        ty: *return_type,
+                    }),
+                Type::Typeof { expr, unqual: _ } => match expr {},
+            }
+            Type::Function(FunctionType {
+                params: sess.alloc_slice_fill_iter(params.iter().map(
+                    |&ParameterDeclaration { loc, ty, name }| {
+                        let ty = typeck_ty(sess, ty, IsParameter::Yes);
+                        let param = ParameterDeclaration { loc, ty, name };
+                        if !ty.ty.is_complete() {
+                            sess.emit(Diagnostic::ParameterWithIncompleteType { at: param })
+                        }
+                        param
+                    },
+                )),
+                return_type,
+                is_varargs,
+            })
+        }
+        ty::Type::Void => Type::Void,
+        ty::Type::Typeof { expr, unqual } => {
+            let expr = typeck_expression(sess, expr, Context::Typeof);
+            return if unqual {
+                expr.ty.ty.unqualified()
+            }
+            else {
+                QualifiedType {
+                    is_const: is_const | expr.ty.is_const,
+                    is_volatile: is_volatile | expr.ty.is_volatile,
+                    ty: expr.ty.ty,
+                    loc: expr.ty.loc,
+                }
+            };
+        }
+    };
+    QualifiedType { is_const, is_volatile, ty, loc }
+}
+
+fn typeck_reference<'a>(sess: &'a Session<'a>, reference: scope::Reference<'a>) -> Reference<'a> {
+    let scope::Reference {
+        name,
+        loc,
+        ty,
+        id,
+        usage_location,
+        kind,
+        storage_duration,
+        previous_definition,
+        is_parameter,
+    } = reference;
+    let reference = Reference {
+        name,
+        loc,
+        ty: typeck_ty(sess, ty, is_parameter),
+        id,
+        usage_location,
+        kind,
+        storage_duration,
+    };
+    let ty = match previous_definition {
+        Some(previous_definition) => {
+            // TODO: this is quadratic in the number of previous decls for this name
+            // TODO: this will also emit quadratically many error messages
+            let previous_definition = typeck_reference(sess, *previous_definition);
+            reference
+                .ty
+                .composite_ty(sess.bump(), &previous_definition.ty)
+                .unwrap_or_else(|| {
+                    // TODO: use this error to generate a `Type::Error`
+                    let () = sess.emit(Diagnostic::AlreadyDefinedWithDifferentType {
+                        at: reference,
+                        previous_definition,
+                    });
+                    reference.ty
+                })
+        }
+        None => reference.ty,
+    };
+    Reference { ty, ..reference }
 }
 
 fn convert<'a>(
@@ -631,8 +965,12 @@ fn typeck_function_definition<'a>(
         body,
     } = *definition;
 
+    let params = ParamRefs(
+        sess.alloc_slice_fill_iter(params.0.iter().map(|&param| typeck_reference(sess, param))),
+    );
+
     FunctionDefinition {
-        reference,
+        reference: typeck_reference(sess, reference),
         params,
         storage_class,
         inline,
@@ -647,13 +985,17 @@ fn typeck_declaration<'a>(
     declaration: &scope::Declaration<'a>,
 ) -> Declaration<'a> {
     let scope::Declaration { reference, initialiser } = *declaration;
-    let initialiser = initialiser.as_ref().map(|initialiser| {
+    let reference = typeck_reference(sess, reference);
+    if matches!(reference.kind, RefKind::Definition) && !reference.ty.ty.is_complete() {
+        sess.emit(Diagnostic::VariableWithIncompleteType { at: reference })
+    }
+    let initialiser = try {
         convert_as_if_by_assignment(
             sess,
             reference.ty,
-            typeck_expression(sess, initialiser, Context::Default),
+            typeck_expression(sess, &initialiser?, Context::Default),
         )
-    });
+    };
     Declaration { reference, initialiser }
 }
 
@@ -684,17 +1026,15 @@ fn typeck_statement<'a>(
         scope::Statement::Compound(stmt) =>
             Statement::Compound(typeck_compound_statement(sess, stmt, function)),
         scope::Statement::Return { return_: _, expr } => {
+            // TODO: why are we re-typechecking the return type for each return stmt?
+            let return_ty = typeck_ty(sess, *function.return_ty(), IsParameter::No);
             let expr = expr
                 .as_ref()
                 .map(|expr| typeck_expression(sess, expr, Context::Default));
             let expr = match expr {
-                Some(expr) => Some(convert_as_if_by_assignment(
-                    sess,
-                    *function.return_ty(),
-                    expr,
-                )),
+                Some(expr) => Some(convert_as_if_by_assignment(sess, return_ty, expr)),
                 None =>
-                    if !matches!(function.return_ty().ty, Type::Void) {
+                    if !matches!(return_ty.ty, Type::Void) {
                         Some(sess.emit(Diagnostic::ReturnWithoutValueInNonVoidFunction {
                             at: stmt.into_variant(),
                             function: *function,
@@ -1091,9 +1431,9 @@ fn desugar_postfix_increment<'a>(
     sess: &'a Session<'a>,
     op: BinOp<'a>,
     operand: &'a scope::Expression<'a>,
-    reference: &Reference<'a>,
-    pointer: &Reference<'a>,
-    copy: &Reference<'a>,
+    reference: &scope::Reference<'a>,
+    pointer: &scope::Reference<'a>,
+    copy: &scope::Reference<'a>,
 ) -> scope::Expression<'a> {
     // `x++` is mostly equivalent to the following expression, so we use that as a desugaring:
     // __pointer = &x, __copy = *__pointer, *__pointer += 1, __copy
@@ -1103,13 +1443,8 @@ fn desugar_postfix_increment<'a>(
 
     let token = op.token;
 
-    // TODO: we only typecheck to get the type
-    let ty = typeck_expression(sess, operand, Context::Default).ty;
-    let pointer = sess.alloc(scope::Expression::Name(Reference {
-        ty: Type::Pointer(sess.alloc(ty)).unqualified(),
-        ..*pointer
-    }));
-    let copy = sess.alloc(scope::Expression::Name(Reference { ty, ..*copy }));
+    let pointer = sess.alloc(scope::Expression::Name(*pointer));
+    let copy = sess.alloc(scope::Expression::Name(*copy));
 
     scope::Expression::Comma {
         lhs: sess.alloc(scope::Expression::Comma {
@@ -1162,6 +1497,7 @@ enum Context {
     Default,
     Addressof,
     Sizeof,
+    Typeof,
 }
 
 fn typeck_expression<'a>(
@@ -1171,10 +1507,13 @@ fn typeck_expression<'a>(
 ) -> TypedExpression<'a> {
     let expr = match expr {
         scope::Expression::Error(error) => TypedExpression::from_error(*error),
-        scope::Expression::Name(reference) => TypedExpression {
-            ty: reference.ty,
-            expr: Expression::Name(*reference),
-        },
+        scope::Expression::Name(reference) => {
+            let reference = typeck_reference(sess, *reference);
+            TypedExpression {
+                ty: reference.ty,
+                expr: Expression::Name(reference),
+            }
+        }
         scope::Expression::Integer { value, token } => {
             let TokenKind::Integer(Integer { suffix, suffix_len, base, prefix_len }) = token.kind
             else {
@@ -1242,9 +1581,10 @@ fn typeck_expression<'a>(
                 // TODO: this will fail for bitfields
                 expr: Expression::Addressof { ampersand: op.token, operand: target },
             });
+            let target_temporary = typeck_reference(sess, *target_temporary);
             let target_addr = sess.alloc(TypedExpression {
                 ty: target.ty,
-                expr: Expression::Name(Reference { ty: target.ty, ..*target_temporary }),
+                expr: Expression::Name(Reference { ty: target.ty, ..target_temporary }),
             });
             let deref_target_addr = sess.alloc(TypedExpression {
                 ty,
@@ -1280,6 +1620,7 @@ fn typeck_expression<'a>(
             let context = match operator.kind {
                 UnaryOpKind::Addressof => Context::Addressof,
                 UnaryOpKind::Sizeof => Context::Sizeof,
+                UnaryOpKind::Lengthof => Context::Sizeof,
                 _ => Context::Default,
             };
             let operand = typeck_expression(sess, operand, context);
@@ -1394,6 +1735,27 @@ fn typeck_expression<'a>(
                         },
                     }
                 }
+                UnaryOpKind::Lengthof => {
+                    let expr = match operand.ty.ty {
+                        Type::Array(ArrayType { ty: _, length }) => match length {
+                            ArrayLength::Constant(length) => Expression::Lengthof {
+                                lengthof: operator.token,
+                                operand: sess.alloc(operand),
+                                length,
+                            },
+                            ArrayLength::Variable(_) =>
+                                todo!("`_Lengthof` of a variably-modified type"),
+                            ArrayLength::Unknown =>
+                                sess.emit(Diagnostic::LengthofOfArrayOfUnknownLength {
+                                    op: operator.token,
+                                    at: operand,
+                                }),
+                        },
+                        _ => sess
+                            .emit(Diagnostic::InvalidLengthof { op: operator.token, at: operand }),
+                    };
+                    TypedExpression { ty: Type::size_t().unqualified(), expr }
+                }
             }
         }
         scope::Expression::Call { callee, args, close_paren } => {
@@ -1451,7 +1813,8 @@ fn typeck_expression<'a>(
             }
         }
         scope::Expression::Sizeof { sizeof, ty, close_paren } => {
-            let ty = check_ty_can_sizeof(sess, ty, expr, sizeof);
+            let ty = typeck_ty(sess, *ty, IsParameter::No);
+            let ty = check_ty_can_sizeof(sess, &ty, expr, sizeof);
             TypedExpression {
                 ty: Type::size_t().unqualified(),
                 expr: Expression::SizeofTy {
@@ -1462,8 +1825,30 @@ fn typeck_expression<'a>(
                 },
             }
         }
+        scope::Expression::Lengthof { lengthof, ty, close_paren } => {
+            let ty = typeck_ty(sess, *ty, IsParameter::No);
+            let expr = match ty.ty {
+                Type::Array(ArrayType { ty: _, length }) => match length {
+                    ArrayLength::Constant(length) => Expression::LengthofTy {
+                        lengthof: *lengthof,
+                        ty,
+                        length,
+                        close_paren: *close_paren,
+                    },
+                    ArrayLength::Variable(_) => todo!("_Lengthof of a variably-modified type"),
+                    ArrayLength::Unknown =>
+                        sess.emit(Diagnostic::LengthofOfArrayTyOfUnknownLength {
+                            op: *lengthof,
+                            at: ty,
+                        }),
+                },
+                _ => sess.emit(Diagnostic::InvalidLengthofTy { op: *lengthof, at: ty }),
+            };
+            TypedExpression { ty: Type::size_t().unqualified(), expr }
+        }
         scope::Expression::Alignof { alignof, ty, close_paren } => {
-            let ty = check_ty_can_sizeof(sess, ty, expr, alignof);
+            let ty = typeck_ty(sess, *ty, IsParameter::No);
+            let ty = check_ty_can_sizeof(sess, &ty, expr, alignof);
             TypedExpression {
                 ty: Type::size_t().unqualified(),
                 expr: Expression::Alignof {
@@ -1476,7 +1861,7 @@ fn typeck_expression<'a>(
         }
         scope::Expression::Cast { open_paren: _, ty, expr } => {
             let expr = typeck_expression(sess, expr, Context::Default);
-            let ty = ty.ty.unqualified();
+            let ty = typeck_ty(sess, ty.ty.unqualified(), IsParameter::No);
             convert(sess, ty, expr, ConversionKind::Explicit)
         }
         scope::Expression::Subscript { lhs, rhs, close_bracket } => typeck_expression(
@@ -1533,10 +1918,11 @@ fn typeck_expression<'a>(
                 .iter()
                 .filter_map(|assoc| match assoc {
                     GenericAssociation::Ty { ty, expr } => {
+                        let ty = typeck_ty(sess, *ty, IsParameter::No);
                         // TODO: `ty` shall not be a variably modified type.
                         if !(ty.ty.is_object() && ty.ty.is_complete()) {
                             sess.emit(Diagnostic::GenericWithInvalidType {
-                                at: *ty,
+                                at: ty,
                                 generic: *generic,
                             })
                         }
@@ -1544,13 +1930,13 @@ fn typeck_expression<'a>(
                     }
                     GenericAssociation::Default { default: _, expr: _ } => None,
                 })
-                .into_grouping_map_by(|(&ty, _expr)| ty)
+                .into_grouping_map_by(|(ty, _expr)| *ty)
                 .reduce(|first, _ty, duplicate| {
                     // intentionally ignored because we can continue translation with first
                     // duplicate
                     let () = sess.emit(Diagnostic::GenericWithDuplicateType {
-                        at: *duplicate.0,
-                        previous: *first.0,
+                        at: duplicate.0,
+                        previous: first.0,
                         generic: *generic,
                     });
                     first
@@ -1627,6 +2013,7 @@ fn typeck_expression<'a>(
                     then.ty.ty,
                     or_else.ty.ty,
                 ),
+                (Type::Array(_), _) | (_, Type::Array(_)) => unreachable!(),
                 (Type::Function(_), _) | (_, Type::Function(_)) => unreachable!(),
                 (Type::Arithmetic(_), Type::Pointer(_) | Type::Void)
                 | (Type::Pointer(_), Type::Arithmetic(_) | Type::Void)
@@ -1697,9 +2084,19 @@ fn typeck_expression<'a>(
                     operand: sess.alloc(expr),
                 },
             },
+            ty @ Type::Array(array_type) => TypedExpression {
+                ty: Type::Pointer(array_type.ty).unqualified(),
+                expr: Expression::NoopTypeConversion(sess.alloc(TypedExpression {
+                    ty: Type::Pointer(sess.alloc(ty.unqualified())).unqualified(),
+                    expr: Expression::Addressof {
+                        ampersand: Token::synthesised(TokenKind::And, expr.loc()),
+                        operand: sess.alloc(expr),
+                    },
+                })),
+            },
             _ => expr,
         },
-        Context::Sizeof | Context::Addressof => expr,
+        Context::Sizeof | Context::Addressof | Context::Typeof => expr,
     }
 }
 

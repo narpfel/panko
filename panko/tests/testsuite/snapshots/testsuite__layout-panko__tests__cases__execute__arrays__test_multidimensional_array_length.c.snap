@@ -1,0 +1,54 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/arrays/test_multidimensional_array_length.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition
+      (main~1 `fn(∅: int, argv: ptr<ptr<char>>) -> int` (static main))
+      (params
+         (main.unnamed_parameter.0~2 `int` @0)
+         (argv~3 `ptr<ptr<char>>` @8))
+      (compound-statement
+         (expression
+            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (deref `ptr<char>` @32
+                     (ptr-add `ptr<ptr<char>>` @40
+                        (argv~3 `ptr<ptr<char>>` @8)
+                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
+               (100 `unsigned long` @48)))
+         (definition (xs~4 `array<array<int; (constexpr 27)>; (constexpr 42)>` @16) ∅)
+         (expression
+            (call `int` @4552 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @4560 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @4568
+                  (deref `ptr<char>` @4568
+                     (ptr-add `ptr<ptr<char>>` @4576
+                        (argv~3 `ptr<ptr<char>>` @8)
+                        (sign-extend `unsigned long` @4584 (1 `int` @4592)))))
+               (42 `unsigned long` @4584)))
+         (expression
+            (call `int` @4552 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @4560 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @4568
+                  (deref `ptr<char>` @4568
+                     (ptr-add `ptr<ptr<char>>` @4576
+                        (argv~3 `ptr<ptr<char>>` @8)
+                        (sign-extend `unsigned long` @4584 (1 `int` @4592)))))
+               (27 `unsigned long` @4584)))
+         (definition (ys~5 `ptr<array<array<int; (constexpr 27)>; (constexpr 42)>>` @4552) ∅)
+         (return
+            (truncate `int` @4560
+               (add `unsigned long` @4568
+                  (42 `unsigned long` @4568)
+                  (27 `unsigned long` @4576)))))))
+
+----- stderr -----

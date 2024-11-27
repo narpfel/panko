@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arrays/test_tentative_definition_of_array_of_unknown_size.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (tentative-definition xs~0 `array<int; ∅>` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (expression (assign (subscript (name xs~0 `array<int; ∅>`) 0) 42))
+         (return (subscript (name xs~0 `array<int; ∅>`) 0)))))
+
+----- stderr -----

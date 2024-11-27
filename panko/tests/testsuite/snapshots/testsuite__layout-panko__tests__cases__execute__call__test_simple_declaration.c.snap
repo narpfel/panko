@@ -19,7 +19,7 @@ exit_code: 0
             (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (f~0 `fn(∅: int) -> int` (static f)))
                (42 `int` @16)))))
    (function-definition
-      (f~0 `fn(∅: int) -> int` (static f))
+      (f~0 `fn(x: int) -> int` (static f))
       (params
          (x~3 `int` @0))
       (compound-statement

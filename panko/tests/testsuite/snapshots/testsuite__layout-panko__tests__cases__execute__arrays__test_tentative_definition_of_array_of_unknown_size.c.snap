@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/arrays/test_tentative_definition_of_array_of_unknown_size.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (tentative-definition (xs~0 `array<int; ∅>` (static xs)) ∅)
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (assign `int` @0
+               (deref `int` @0
+                  (ptr-add `ptr<int>` @8
+                     (noop-type-conversion `ptr<int>` @8 (addressof `ptr<array<int; ∅>>` @8 (xs~0 `array<int; ∅>` (static xs))))
+                     (sign-extend `unsigned long` @16 (0 `int` @24))))
+               (42 `int` @16)))
+         (return
+            (deref `int` @0
+               (ptr-add `ptr<int>` @8
+                  (noop-type-conversion `ptr<int>` @8 (addressof `ptr<array<int; ∅>>` @8 (xs~0 `array<int; ∅>` (static xs))))
+                  (sign-extend `unsigned long` @16 (0 `int` @24))))))))
+
+----- stderr -----

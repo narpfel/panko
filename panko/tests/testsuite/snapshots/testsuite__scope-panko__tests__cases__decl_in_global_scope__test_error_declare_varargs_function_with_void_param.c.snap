@@ -6,16 +6,12 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/decl_in_global_scope/test_error_declare_varargs_function_with_void_param.c
+snapshot_kind: text
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit
+   (declaration f~0 `fn(∅: void, ...) -> int` ∅))
 
 ----- stderr -----
-Error: cannot declare function parameter `<unnamed parameter of type `void`>` with incomplete type `void`
-   ╭─[panko/tests/cases/decl_in_global_scope/test_error_declare_varargs_function_with_void_param.c:1:7]
-   │
- 1 │ int f(void, ...);
-   │       ──┬─  
-   │         ╰─── parameter declared here
-───╯

@@ -6,6 +6,7 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c
+snapshot_kind: text
 ---
 success: false
 exit_code: 1

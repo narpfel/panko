@@ -9,13 +9,20 @@ use panko_report::Report;
 use crate::layout::stack::Stack;
 use crate::scope::Id;
 use crate::scope::RefKind;
-use crate::ty::QualifiedType;
+use crate::ty;
+use crate::ty::ArrayType;
+use crate::ty::FunctionType;
+use crate::ty::ParameterDeclaration;
 use crate::typecheck;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::PtrCmpKind;
 
 mod as_sexpr;
 mod stack;
+
+type ArrayLength<'a> = typecheck::ArrayLength<&'a LayoutedExpression<'a>>;
+pub type Type<'a> = ty::Type<'a, !, ArrayLength<'a>>;
+type QualifiedType<'a> = ty::QualifiedType<'a, !, ArrayLength<'a>>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
@@ -182,6 +189,49 @@ impl<'a> Reference<'a> {
     }
 }
 
+fn layout_array_length<'a>(
+    stack: &mut Stack<'a>,
+    bump: &'a Bump,
+    length: typecheck::ArrayLength<&'a typecheck::TypedExpression<'a>>,
+) -> ArrayLength<'a> {
+    match length {
+        typecheck::ArrayLength::Constant(length) => ArrayLength::Constant(length),
+        typecheck::ArrayLength::Variable(length) =>
+            ArrayLength::Variable(bump.alloc(layout_expression(stack, bump, length))),
+        typecheck::ArrayLength::Unknown => ArrayLength::Unknown,
+    }
+}
+
+fn layout_ty<'a>(
+    stack: &mut Stack<'a>,
+    bump: &'a Bump,
+    ty: typecheck::QualifiedType<'a>,
+) -> QualifiedType<'a> {
+    let typecheck::QualifiedType { is_const, is_volatile, ty, loc } = ty;
+    let ty = match ty {
+        ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
+        ty::Type::Pointer(pointee) => Type::Pointer(bump.alloc(layout_ty(stack, bump, *pointee))),
+        ty::Type::Array(ArrayType { ty, length }) => Type::Array(ArrayType {
+            ty: bump.alloc(layout_ty(stack, bump, *ty)),
+            length: layout_array_length(stack, bump, length),
+        }),
+        ty::Type::Function(FunctionType { params, return_type, is_varargs }) =>
+            Type::Function(FunctionType {
+                params: bump.alloc_slice_fill_iter(params.iter().map(
+                    |&ParameterDeclaration { loc, ty, name }| ParameterDeclaration {
+                        loc,
+                        ty: layout_ty(stack, bump, ty),
+                        name,
+                    },
+                )),
+                return_type: bump.alloc(layout_ty(stack, bump, *return_type)),
+                is_varargs,
+            }),
+        ty::Type::Void => Type::Void,
+    };
+    QualifiedType { is_const, is_volatile, ty, loc }
+}
+
 fn layout_function_definition<'a>(
     bump: &'a Bump,
     def: &typecheck::FunctionDefinition<'a>,
@@ -196,9 +246,9 @@ fn layout_function_definition<'a>(
         is_varargs,
         body,
     } = *def;
-    let reference = stack.add(reference);
+    let reference = stack.add(bump, reference);
     let params =
-        ParamRefs(bump.alloc_slice_fill_iter(params.0.iter().map(|&param| stack.add(param))));
+        ParamRefs(bump.alloc_slice_fill_iter(params.0.iter().map(|&param| stack.add(bump, param))));
     let body = layout_compound_statement(&mut stack, bump, body);
     // TODO: This depends on the ABI
     // unsure if this is correct, for now we check for correct alignment in the function prologue
@@ -223,7 +273,7 @@ fn layout_declaration<'a>(
     decl: &typecheck::Declaration<'a>,
 ) -> Declaration<'a> {
     let typecheck::Declaration { reference, initialiser } = *decl;
-    let reference = stack.add(reference);
+    let reference = stack.add(bump, reference);
     let initialiser = stack.with_block(|stack| try {
         layout_expression_in_slot(stack, bump, initialiser.as_ref()?, Some(reference.slot))
     });
@@ -281,11 +331,12 @@ fn layout_expression_in_slot<'a>(
 ) -> LayoutedExpression<'a> {
     let loc = expr.loc();
     let typecheck::TypedExpression { ty, expr } = *expr;
+    let ty = layout_ty(stack, bump, ty);
     let mut make_slot = || target_slot.unwrap_or_else(|| stack.temporary(ty.ty));
     let (slot, expr) = match expr {
         typecheck::Expression::Error(error) => (make_slot(), Expression::Error(error)),
         typecheck::Expression::Name(name) => {
-            let reference = stack.add(name);
+            let reference = stack.add(bump, name);
             (reference.slot(), Expression::Name(reference))
         }
         typecheck::Expression::Integer { value, token: _ } =>
@@ -404,10 +455,17 @@ fn layout_expression_in_slot<'a>(
             (slot, Expression::Not(bump.alloc(operand)))
         }
         typecheck::Expression::Sizeof { sizeof: _, operand: _, size: value }
+        | typecheck::Expression::Lengthof { lengthof: _, operand: _, length: value }
         | typecheck::Expression::SizeofTy {
             sizeof: _,
             ty: _,
             size: value,
+            close_paren: _,
+        }
+        | typecheck::Expression::LengthofTy {
+            lengthof: _,
+            ty: _,
+            length: value,
             close_paren: _,
         }
         | typecheck::Expression::Alignof {
