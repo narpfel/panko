@@ -1399,18 +1399,15 @@ fn typeck_expression<'a>(
         scope::Expression::Call { callee, args, close_paren } => {
             let callee = typeck_expression(sess, callee, Context::Default);
 
-            let (Type::Function(ty)
-            | Type::Pointer(QualifiedType {
+            let Type::Pointer(&QualifiedType {
                 is_const: _,
                 is_volatile: _,
-                ty: Type::Function(ty),
+                ty: Type::Function(FunctionType { params, return_type, is_varargs }),
                 loc: _,
-            })) = &callee.ty.ty
+            }) = callee.ty.ty
             else {
                 todo!("type error: uncallable");
             };
-
-            let FunctionType { params, return_type, is_varargs } = *ty;
 
             if is_varargs {
                 if params.len() > args.len() {
