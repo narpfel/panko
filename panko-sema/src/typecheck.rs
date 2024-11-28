@@ -35,6 +35,7 @@ use crate::scope;
 use crate::scope::GenericAssociation;
 use crate::scope::Id;
 use crate::scope::IncrementFixity;
+use crate::scope::Initialiser;
 use crate::scope::IsParameter;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
@@ -403,7 +404,7 @@ pub enum ExternalDeclaration<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct Declaration<'a> {
     pub reference: Reference<'a>,
-    pub initialiser: Option<TypedExpression<'a>>,
+    pub initialiser: Option<Initialiser<'a, TypedExpression<'a>>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -990,11 +991,16 @@ fn typeck_declaration<'a>(
         sess.emit(Diagnostic::VariableWithIncompleteType { at: reference })
     }
     let initialiser = try {
-        convert_as_if_by_assignment(
-            sess,
-            reference.ty,
-            typeck_expression(sess, &initialiser?, Context::Default),
-        )
+        match initialiser? {
+            Initialiser::Braced { open_brace, close_brace } =>
+                Initialiser::Braced { open_brace, close_brace },
+            Initialiser::Expression(initialiser) =>
+                Initialiser::Expression(convert_as_if_by_assignment(
+                    sess,
+                    reference.ty,
+                    typeck_expression(sess, &initialiser, Context::Default),
+                )),
+        }
     };
     Declaration { reference, initialiser }
 }

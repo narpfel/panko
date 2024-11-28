@@ -27,6 +27,7 @@ use panko_sema::layout::Slot;
 use panko_sema::layout::Statement;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::Type;
+use panko_sema::scope::Initialiser;
 use panko_sema::scope::RefKind;
 use panko_sema::ty::ArrayType;
 use panko_sema::typecheck::ArrayLength;
@@ -329,7 +330,12 @@ impl<'a> Codegen<'a> {
         self.emit("int3");
     }
 
-    fn object_definition(&mut self, name: &str, ty: Type, initialiser: Option<&Expression>) {
+    fn object_definition(
+        &mut self,
+        name: &str,
+        ty: Type,
+        initialiser: Option<Initialiser<'_, &Expression>>,
+    ) {
         let size = match ty {
             // TODO: assert that this only happens in tentative definitions
             // TODO: gcc and clang warn in this case
@@ -345,7 +351,7 @@ impl<'a> Codegen<'a> {
         self.directive("align", &[&ty.align()]);
         self.label(name);
         match initialiser {
-            Some(initialiser) => match initialiser {
+            Some(Initialiser::Expression(initialiser)) => match initialiser {
                 Expression::Error(_) => todo!("ICE?"),
                 Expression::Name(_) => todo!(),
                 Expression::Integer(value) =>
@@ -371,6 +377,7 @@ impl<'a> Codegen<'a> {
                 Expression::Logical { .. } => todo!(),
                 Expression::Conditional { .. } => todo!(),
             },
+            Some(Initialiser::Braced { open_brace: _, close_brace: _ }) => self.zero(size),
             None => self.zero(size),
         }
     }
@@ -408,7 +415,16 @@ impl<'a> Codegen<'a> {
             RefKind::Definition => {
                 self.tentative_definitions.shift_remove(name);
                 self.defined.insert(name);
-                self.object_definition(name, ty, try { &decl.initialiser?.expr })
+                let initialiser = try {
+                    match decl.initialiser.as_ref()? {
+                        Initialiser::Braced { open_brace, close_brace } => Initialiser::Braced {
+                            open_brace: *open_brace,
+                            close_brace: *close_brace,
+                        },
+                        Initialiser::Expression(expr) => Initialiser::Expression(&expr.expr),
+                    }
+                };
+                self.object_definition(name, ty, initialiser)
             }
         }
     }
@@ -422,11 +438,27 @@ impl<'a> Codegen<'a> {
     fn stmt(&mut self, stmt: &Statement<'a>) {
         match stmt {
             Statement::Declaration(Declaration { reference, initialiser }) =>
-                if let Some(initialiser) = initialiser.as_ref() {
-                    self.expr(initialiser);
-                    if reference.slot() != initialiser.slot {
-                        self.copy(reference, initialiser);
+                match initialiser.as_ref() {
+                    Some(Initialiser::Expression(initialiser)) => {
+                        self.expr(initialiser);
+                        if reference.slot() != initialiser.slot {
+                            self.copy(reference, initialiser);
+                        }
                     }
+                    Some(Initialiser::Braced { open_brace: _, close_brace: _ }) => {
+                        self.emit("xor eax, eax");
+                        match reference.ty.ty.size() {
+                            1 | 2 | 4 | 8 => {
+                                self.emit_args("mov", &[reference, &Rax.with_ty(&reference.ty.ty)]);
+                            }
+                            size => {
+                                self.emit_args("lea", &[&Rdi, reference]);
+                                self.emit_args("movabs", &[&Rcx, &size]);
+                                self.emit("rep stosb");
+                            }
+                        }
+                    }
+                    None => (),
                 },
             Statement::Expression(expr) =>
                 if let Some(expr) = expr.as_ref() {

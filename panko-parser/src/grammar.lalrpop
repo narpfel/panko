@@ -264,9 +264,10 @@ FunctionAbstractDeclarator: ast::FunctionDeclarator<'a> = {
         },
 }
 
-Initialiser: ast::Expression<'a> = {
-    // TODO: incomplete: `braced-initializer` is missing
-    AssignmentExpression
+Initialiser: ast::Initialiser<'a> = {
+    // TODO: incomplete: `braced-initializer` can be nonempty
+    <open_brace:"{"> <close_brace:"}"> => ast::Initialiser::Braced { <> },
+    AssignmentExpression => ast::Initialiser::Expression(<>),
 }
 
 AttributeSpecifierSequence: () = {}

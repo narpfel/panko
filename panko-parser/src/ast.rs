@@ -19,6 +19,7 @@ use crate::BlockItem;
 use crate::DirectDeclarator;
 use crate::FunctionDeclarator;
 use crate::InitDeclarator;
+pub use crate::Initialiser;
 use crate::JumpStatement;
 use crate::PrimaryBlock;
 use crate::TypeQualifier;
@@ -155,7 +156,7 @@ pub enum ExternalDeclaration<'a> {
 pub struct Declaration<'a> {
     pub ty: QualifiedType<'a>,
     pub name: Token<'a>,
-    pub initialiser: Option<Expression<'a>>,
+    pub initialiser: Option<Initialiser<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]

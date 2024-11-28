@@ -18,6 +18,7 @@ use crate::FunctionDefinition;
 use crate::FunctionSpecifier;
 use crate::GenericAssociation;
 use crate::InitDeclarator;
+use crate::Initialiser;
 use crate::JumpStatement;
 use crate::ParameterDeclaration;
 use crate::Pointer;
@@ -28,6 +29,7 @@ use crate::TypeQualifier;
 use crate::TypeSpecifier;
 use crate::TypeSpecifierQualifier;
 use crate::UnlabeledStatement;
+use crate::NO_VALUE;
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {
@@ -108,6 +110,16 @@ impl AsSExpr for InitDeclarator<'_> {
         SExpr::new("init-declarator")
             .inherit(&self.declarator)
             .inherit(&self.initialiser)
+    }
+}
+
+impl AsSExpr for Initialiser<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Braced { open_brace: _, close_brace: _ } =>
+                SExpr::new("braced").inherit(&NO_VALUE),
+            Self::Expression(expr) => expr.as_sexpr(),
+        }
     }
 }
 

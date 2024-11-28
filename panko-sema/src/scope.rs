@@ -74,7 +74,16 @@ pub(crate) enum ExternalDeclaration<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Declaration<'a> {
     pub(crate) reference: Reference<'a>,
-    pub(crate) initialiser: Option<Expression<'a>>,
+    pub(crate) initialiser: Option<Initialiser<'a, Expression<'a>>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Initialiser<'a, Expression> {
+    Braced {
+        open_brace: Token<'a>,
+        close_brace: Token<'a>,
+    },
+    Expression(Expression),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -719,7 +728,16 @@ fn resolve_declaration<'a>(
             storage_duration,
             IsParameter::No,
         ),
-        initialiser: try { resolve_expr(scopes, initialiser.as_ref()?) },
+        initialiser: try {
+            match initialiser.as_ref()? {
+                ast::Initialiser::Braced { open_brace, close_brace } => Initialiser::Braced {
+                    open_brace: *open_brace,
+                    close_brace: *close_brace,
+                },
+                ast::Initialiser::Expression(initialiser) =>
+                    Initialiser::Expression(resolve_expr(scopes, initialiser)),
+            }
+        },
     }
 }
 

@@ -420,7 +420,16 @@ fn function_specifier_kind(token_kind: TokenKind) -> FunctionSpecifierKind {
 #[derive(Debug, Clone, Copy)]
 struct InitDeclarator<'a> {
     declarator: Declarator<'a>,
-    initialiser: Option<Expression<'a>>,
+    initialiser: Option<Initialiser<'a>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Initialiser<'a> {
+    Braced {
+        open_brace: Token<'a>,
+        close_brace: Token<'a>,
+    },
+    Expression(Expression<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]

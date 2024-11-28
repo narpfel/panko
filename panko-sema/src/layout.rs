@@ -8,6 +8,7 @@ use panko_report::Report;
 
 use crate::layout::stack::Stack;
 use crate::scope::Id;
+use crate::scope::Initialiser;
 use crate::scope::RefKind;
 use crate::ty;
 use crate::ty::ArrayType;
@@ -38,7 +39,7 @@ pub enum ExternalDeclaration<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct Declaration<'a> {
     pub reference: Reference<'a>,
-    pub initialiser: Option<LayoutedExpression<'a>>,
+    pub initialiser: Option<Initialiser<'a, LayoutedExpression<'a>>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -275,7 +276,13 @@ fn layout_declaration<'a>(
     let typecheck::Declaration { reference, initialiser } = *decl;
     let reference = stack.add(bump, reference);
     let initialiser = stack.with_block(|stack| try {
-        layout_expression_in_slot(stack, bump, initialiser.as_ref()?, Some(reference.slot))
+        match initialiser? {
+            Initialiser::Braced { open_brace, close_brace } =>
+                Initialiser::Braced { open_brace, close_brace },
+            Initialiser::Expression(initialiser) => Initialiser::Expression(
+                layout_expression_in_slot(stack, bump, &initialiser, Some(reference.slot)),
+            ),
+        }
     });
     Declaration { reference, initialiser }
 }

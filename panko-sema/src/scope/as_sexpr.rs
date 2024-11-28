@@ -4,6 +4,7 @@ use std::iter;
 use itertools::Either;
 use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
+use panko_parser::NO_VALUE;
 
 use super::CompoundStatement;
 use super::Declaration;
@@ -11,6 +12,7 @@ use super::Expression;
 use super::ExternalDeclaration;
 use super::FunctionDefinition;
 use super::GenericAssociation;
+use super::Initialiser;
 use super::ParamRefs;
 use super::Reference;
 use super::Statement;
@@ -56,6 +58,19 @@ impl AsSExpr for Declaration<'_> {
         SExpr::new(self.reference.kind.str())
             .inherit(&self.reference)
             .inherit(&self.initialiser)
+    }
+}
+
+impl<Expression> AsSExpr for Initialiser<'_, Expression>
+where
+    Expression: AsSExpr,
+{
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Braced { open_brace: _, close_brace: _ } =>
+                SExpr::new("braced").inherit(&NO_VALUE),
+            Self::Expression(expr) => expr.as_sexpr(),
+        }
     }
 }
 
