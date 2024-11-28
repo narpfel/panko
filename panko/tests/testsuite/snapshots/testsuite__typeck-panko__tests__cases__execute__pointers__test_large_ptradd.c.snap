@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/pointers/test_large_ptradd.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition xs~1 `array<array<int; (constexpr 123)>; (constexpr 123)>` ∅)
+         (expression (assign (deref (ptr-add (noop-type-conversion (addressof (deref (ptr-add (noop-type-conversion (addressof (xs~1 `array<array<int; (constexpr 123)>; (constexpr 123)>`) `ptr<array<array<int; (constexpr 123)>; (constexpr 123)>>`) `ptr<array<int; (constexpr 123)>>`) (sign-extend (122 `int`) `unsigned long`) `ptr<array<int; (constexpr 123)>>`) `array<int; (constexpr 123)>`) `ptr<array<int; (constexpr 123)>>`) `ptr<int>`) (sign-extend (122 `int`) `unsigned long`) `ptr<int>`) `int`) (42 `int`) `int`))
+         (return (deref (ptr-add (noop-type-conversion (addressof (deref (ptr-add (noop-type-conversion (addressof (xs~1 `array<array<int; (constexpr 123)>; (constexpr 123)>`) `ptr<array<array<int; (constexpr 123)>; (constexpr 123)>>`) `ptr<array<int; (constexpr 123)>>`) (sign-extend (122 `int`) `unsigned long`) `ptr<array<int; (constexpr 123)>>`) `array<int; (constexpr 123)>`) `ptr<array<int; (constexpr 123)>>`) `ptr<int>`) (sign-extend (122 `int`) `unsigned long`) `ptr<int>`) `int`)))))
+
+----- stderr -----
