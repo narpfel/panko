@@ -1,9 +1,9 @@
 use std::iter;
 
 use itertools::Either;
+use panko_parser::NO_VALUE;
 use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
-use panko_parser::NO_VALUE;
 
 use super::ArrayLength;
 use super::CompoundStatement;

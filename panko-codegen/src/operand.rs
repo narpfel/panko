@@ -6,10 +6,10 @@ use panko_sema::layout::Slot;
 use panko_sema::layout::Type;
 
 use crate::LabelId;
+use crate::MAX_ADDRESS_OFFSET;
 use crate::Register;
 use crate::StaticId;
 use crate::TypedRegister;
-use crate::MAX_ADDRESS_OFFSET;
 
 #[derive(Debug, Clone, Copy)]
 pub(super) enum Offset<'a> {

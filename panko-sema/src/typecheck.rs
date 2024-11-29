@@ -16,18 +16,18 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
 use panko_parser as cst;
-use panko_parser::ast::Arithmetic;
-use panko_parser::ast::ErrorExpr;
-use panko_parser::ast::Integral;
-use panko_parser::ast::IntegralKind;
-use panko_parser::ast::Session;
-use panko_parser::ast::Signedness;
 use panko_parser::BinOp;
 use panko_parser::BinOpKind;
 use panko_parser::IncrementOpKind;
 use panko_parser::LogicalOp;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
+use panko_parser::ast::Arithmetic;
+use panko_parser::ast::ErrorExpr;
+use panko_parser::ast::Integral;
+use panko_parser::ast::IntegralKind;
+use panko_parser::ast::Session;
+use panko_parser::ast::Signedness;
 use panko_report::Report;
 use variant_types::IntoVariant as _;
 
@@ -111,7 +111,9 @@ enum Diagnostic<'a> {
         kind: ConversionKind,
     },
 
-    #[error("`{return_}` statement without value in non-`void` function `{name}` returning `{return_ty}`")]
+    #[error(
+        "`{return_}` statement without value in non-`void` function `{name}` returning `{return_ty}`"
+    )]
     #[diagnostics(
         at(colour = Red, label = "`{return_}` statement here"),
         function(colour = Blue, label = "function `{name}` declared here"),
@@ -174,9 +176,7 @@ enum Diagnostic<'a> {
         reason: &'a str,
     },
 
-    #[error(
-        "cannot dereference this expression with type `{ty}` (pointer or array type required)"
-    )]
+    #[error("cannot dereference this expression with type `{ty}` (pointer or array type required)")]
     #[diagnostics(at(colour = Red, label = "in this expression"))]
     #[with(ty = ty.fg(Red))]
     CannotDeref {
@@ -219,7 +219,9 @@ enum Diagnostic<'a> {
         expr: scope::Expression<'a>,
     },
 
-    #[error("the type of a {generic} association shall be a complete object type other than a variably modified type")]
+    #[error(
+        "the type of a {generic} association shall be a complete object type other than a variably modified type"
+    )]
     #[diagnostics(
         generic(colour = Green, label = "in this {generic} selection"),
         at(colour = Red, label = "this type is not allowed in a {generic} association"),

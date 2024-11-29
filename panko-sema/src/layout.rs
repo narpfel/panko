@@ -1,9 +1,9 @@
 use bumpalo::Bump;
 use panko_lex::Loc;
 use panko_parser as cst;
-use panko_parser::ast::Integral;
 use panko_parser::BinOp;
 use panko_parser::LogicalOp;
+use panko_parser::ast::Integral;
 use panko_report::Report;
 
 use crate::layout::stack::Stack;
@@ -397,10 +397,12 @@ fn layout_expression_in_slot<'a>(
             let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, Some(slot)));
             let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
             let (pointer, integral) = order.select(lhs, rhs);
-            (
-                slot,
-                Expression::PtrAdd { pointer, integral, pointee_size, order },
-            )
+            (slot, Expression::PtrAdd {
+                pointer,
+                integral,
+                pointee_size,
+                order,
+            })
         }
         typecheck::Expression::PtrSub { pointer, integral, pointee_size } => {
             let slot = make_slot();

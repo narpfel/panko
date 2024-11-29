@@ -1,7 +1,5 @@
 #![coverage(off)]
 
-use crate::sexpr_builder::AsSExpr;
-use crate::sexpr_builder::SExpr;
 use crate::ArrayDeclarator;
 use crate::BlockItem;
 use crate::CompoundStatement;
@@ -20,6 +18,7 @@ use crate::GenericAssociation;
 use crate::InitDeclarator;
 use crate::Initialiser;
 use crate::JumpStatement;
+use crate::NO_VALUE;
 use crate::ParameterDeclaration;
 use crate::Pointer;
 use crate::PrimaryBlock;
@@ -29,7 +28,8 @@ use crate::TypeQualifier;
 use crate::TypeSpecifier;
 use crate::TypeSpecifierQualifier;
 use crate::UnlabeledStatement;
-use crate::NO_VALUE;
+use crate::sexpr_builder::AsSExpr;
+use crate::sexpr_builder::SExpr;
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {

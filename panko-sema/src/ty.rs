@@ -7,13 +7,13 @@ use bumpalo::Bump;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
+use panko_parser::NO_VALUE;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Signedness;
 use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
-use panko_parser::NO_VALUE;
 
 use crate::typecheck::ArrayLength;
 

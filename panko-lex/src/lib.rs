@@ -546,8 +546,8 @@ mod wrap_defining_use_for_token_iter {
     }
 }
 
-pub use wrap_defining_use_for_token_iter::lex;
 pub use wrap_defining_use_for_token_iter::TokenIter;
+pub use wrap_defining_use_for_token_iter::lex;
 
 #[cfg(test)]
 mod test {

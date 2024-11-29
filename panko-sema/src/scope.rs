@@ -1,5 +1,5 @@
-use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
@@ -7,13 +7,13 @@ use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
-use panko_parser::ast;
-use panko_parser::ast::ErrorExpr;
-use panko_parser::ast::Session;
 use panko_parser::BinOp;
 use panko_parser::IncrementOp;
 use panko_parser::LogicalOp;
 use panko_parser::UnaryOp;
+use panko_parser::ast;
+use panko_parser::ast::ErrorExpr;
+use panko_parser::ast::Session;
 use panko_report::Report;
 
 use crate::nonempty;
@@ -562,17 +562,19 @@ fn resolve_function_ty<'a>(
     let ast::FunctionType { params, return_type, is_varargs } = *function_ty;
 
     let params = match params {
-        [ast::ParameterDeclaration {
-            loc: _,
-            ty:
-                ast::QualifiedType {
-                    is_const: false,
-                    is_volatile: false,
-                    ty: ast::Type::Void,
-                    loc: _,
-                },
-            name: None,
-        }] if !is_varargs => &[],
+        [
+            ast::ParameterDeclaration {
+                loc: _,
+                ty:
+                    ast::QualifiedType {
+                        is_const: false,
+                        is_volatile: false,
+                        ty: ast::Type::Void,
+                        loc: _,
+                    },
+                name: None,
+            },
+        ] if !is_varargs => &[],
         params => params,
     };
 

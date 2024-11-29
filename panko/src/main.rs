@@ -8,8 +8,8 @@ use std::process::Command;
 use bumpalo::Bump;
 use clap::Parser;
 use clap::ValueEnum;
-use color_eyre::eyre::Context;
 use color_eyre::Result;
+use color_eyre::eyre::Context;
 use panko_parser::sexpr_builder::AsSExpr as _;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]

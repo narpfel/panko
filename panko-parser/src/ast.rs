@@ -13,7 +13,6 @@ use panko_lex::Token;
 use panko_report::Report;
 
 use crate as cst;
-use crate::sexpr_builder::AsSExpr as _;
 use crate::ArrayDeclarator;
 use crate::BlockItem;
 use crate::DirectDeclarator;
@@ -21,13 +20,14 @@ use crate::FunctionDeclarator;
 use crate::InitDeclarator;
 pub use crate::Initialiser;
 use crate::JumpStatement;
+use crate::NO_VALUE;
 use crate::PrimaryBlock;
 use crate::TypeQualifier;
 use crate::TypeQualifierKind;
 use crate::TypeSpecifierQualifier::Qualifier;
 use crate::TypeSpecifierQualifier::Specifier;
 use crate::UnlabeledStatement;
-use crate::NO_VALUE;
+use crate::sexpr_builder::AsSExpr as _;
 
 mod as_sexpr;
 

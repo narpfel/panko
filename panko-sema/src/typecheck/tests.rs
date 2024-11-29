@@ -1,6 +1,6 @@
-use rstest::rstest;
 use IntegralKind::*;
 use Signedness::*;
+use rstest::rstest;
 
 use super::*;
 

@@ -13,10 +13,10 @@ use indexmap::IndexSet;
 use itertools::EitherOrBoth;
 use itertools::Itertools as _;
 use panko_lex::Loc;
-use panko_parser::ast::Arithmetic;
-use panko_parser::ast::Signedness;
 use panko_parser::BinOpKind;
 use panko_parser::LogicalOpKind;
+use panko_parser::ast::Arithmetic;
+use panko_parser::ast::Signedness;
 use panko_sema::layout::CompoundStatement;
 use panko_sema::layout::Declaration;
 use panko_sema::layout::Expression;
@@ -32,8 +32,8 @@ use panko_sema::scope::RefKind;
 use panko_sema::ty::ArrayType;
 use panko_sema::typecheck::ArrayLength;
 use panko_sema::typecheck::PtrCmpKind;
-use Register::*;
 
+use crate::Register::*;
 use crate::lineno::Linenos;
 use crate::operand::AsOperand;
 use crate::operand::Index;
@@ -639,17 +639,11 @@ impl<'a> Codegen<'a> {
                 match pointee_size {
                     size @ (1 | 2 | 4 | 8) => {
                         self.emit_args("mov", &[&R10, integral]);
-                        self.emit_args(
-                            "lea",
-                            &[
-                                &Rax.typed(pointer),
-                                &Memory {
-                                    pointer: Rax,
-                                    index: Some(Index { register: R10, size }),
-                                    offset: Offset::Immediate(0),
-                                },
-                            ],
-                        );
+                        self.emit_args("lea", &[&Rax.typed(pointer), &Memory {
+                            pointer: Rax,
+                            index: Some(Index { register: R10, size }),
+                            offset: Offset::Immediate(0),
+                        }]);
                     }
                     size => self.emit_pointer_offset("add", size, integral),
                 }

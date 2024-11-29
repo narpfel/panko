@@ -1,13 +1,13 @@
-use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 
 use bumpalo::Bump;
 
-use super::layout_ty;
 use super::LayoutedExpression;
 use super::Reference;
 use super::Slot;
 use super::Type;
+use super::layout_ty;
 use crate::nonempty;
 use crate::scope::Id;
 use crate::scope::StorageDuration;
