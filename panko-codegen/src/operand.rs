@@ -5,6 +5,7 @@ use panko_sema::layout::Reference;
 use panko_sema::layout::Slot;
 use panko_sema::layout::Type;
 
+use crate::ByValue;
 use crate::LabelId;
 use crate::MAX_ADDRESS_OFFSET;
 use crate::Register;
@@ -67,7 +68,10 @@ impl fmt::Display for Memory<'_> {
 #[derive(Debug, Clone, Copy)]
 enum OperandKind<'a> {
     Register(Register),
-    Pointer(Memory<'a>),
+    Pointer {
+        address: Memory<'a>,
+        is_dereferenced: bool,
+    },
     Immediate(u64),
     Label(LabelId),
 }
@@ -81,11 +85,14 @@ pub(super) struct Operand<'a> {
 impl<'a> Operand<'a> {
     fn pointer_into_stack(ty: Type<'a>, offset: u64) -> Self {
         Self {
-            kind: OperandKind::Pointer(Memory {
-                pointer: Register::Rsp,
-                index: None,
-                offset: Offset::Immediate(offset),
-            }),
+            kind: OperandKind::Pointer {
+                address: Memory {
+                    pointer: Register::Rsp,
+                    index: None,
+                    offset: Offset::Immediate(offset),
+                },
+                is_dereferenced: false,
+            },
             ty,
         }
     }
@@ -96,11 +103,14 @@ impl<'a> Operand<'a> {
             unreachable!()
         };
         Self {
-            kind: OperandKind::Pointer(Memory {
-                pointer: register,
-                index: None,
-                offset: Offset::Immediate(0),
-            }),
+            kind: OperandKind::Pointer {
+                address: Memory {
+                    pointer: register,
+                    index: None,
+                    offset: Offset::Immediate(0),
+                },
+                is_dereferenced: false,
+            },
             ty: ty.ty,
         }
     }
@@ -137,13 +147,26 @@ impl fmt::Display for Operand<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
             OperandKind::Register(register) => write!(f, "{}", register.with_ty(self.ty())),
-            OperandKind::Pointer(memory) => {
+            OperandKind::Pointer { address: memory, is_dereferenced } => {
                 let size = match self.ty {
+                    // scalars are always dereferenced
                     Type::Arithmetic(_) | Type::Pointer(_) => self.ty.size(),
                     // Using a function results in a pointer to that function, so we need 8 bytes.
-                    Type::Function(_) => 8,
+                    Type::Function(_) =>
+                        if is_dereferenced {
+                            unreachable!()
+                        }
+                        else {
+                            8
+                        },
                     // Same for arrays.
-                    Type::Array(_) => 8,
+                    Type::Array(_) =>
+                        if is_dereferenced {
+                            self.ty.size()
+                        }
+                        else {
+                            8
+                        },
                     Type::Void => unreachable!(),
                     Type::Typeof { expr, unqual: _ } => match expr {},
                 };
@@ -162,7 +185,12 @@ impl fmt::Display for Operand<'_> {
     }
 }
 
-fn slot_as_operand<'a>(slot: Slot<'a>, ty: Type<'a>, argument_area_size: u64) -> Operand<'a> {
+fn slot_as_operand<'a>(
+    slot: Slot<'a>,
+    ty: Type<'a>,
+    argument_area_size: u64,
+    is_dereferenced: bool,
+) -> Operand<'a> {
     let (pointer, offset) = match slot {
         Slot::Static(name) => (Register::Rip, Offset::Plt(name)),
         Slot::Automatic(offset) => {
@@ -177,7 +205,10 @@ fn slot_as_operand<'a>(slot: Slot<'a>, ty: Type<'a>, argument_area_size: u64) ->
         Slot::Void => unreachable!(),
     };
     Operand {
-        kind: OperandKind::Pointer(Memory { pointer, index: None, offset }),
+        kind: OperandKind::Pointer {
+            address: Memory { pointer, index: None, offset },
+            is_dereferenced,
+        },
         ty,
     }
 }
@@ -200,13 +231,24 @@ impl AsOperand for &Operand<'_> {
 
 impl AsOperand for LayoutedExpression<'_> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
-        slot_as_operand(self.slot, self.ty.ty, argument_area_size.unwrap())
+        slot_as_operand(self.slot, self.ty.ty, argument_area_size.unwrap(), false)
     }
 }
 
 impl AsOperand for Reference<'_> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
-        slot_as_operand(self.slot(), self.ty.ty, argument_area_size.unwrap())
+        slot_as_operand(self.slot(), self.ty.ty, argument_area_size.unwrap(), false)
+    }
+}
+
+impl AsOperand for ByValue<&Reference<'_>> {
+    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
+        slot_as_operand(
+            self.0.slot(),
+            self.0.ty.ty,
+            argument_area_size.unwrap(),
+            true,
+        )
     }
 }
 
@@ -241,7 +283,7 @@ impl AsOperand for u64 {
 impl AsOperand for Memory<'_> {
     fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
         Operand {
-            kind: OperandKind::Pointer(*self),
+            kind: OperandKind::Pointer { address: *self, is_dereferenced: false },
             ty: Type::size_t(),
         }
     }
@@ -250,11 +292,14 @@ impl AsOperand for Memory<'_> {
 impl AsOperand for StaticId {
     fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
         Operand {
-            kind: OperandKind::Pointer(Memory {
-                pointer: Register::Rip,
-                index: None,
-                offset: Offset::Static(*self),
-            }),
+            kind: OperandKind::Pointer {
+                address: Memory {
+                    pointer: Register::Rip,
+                    index: None,
+                    offset: Offset::Static(*self),
+                },
+                is_dereferenced: false,
+            },
             ty: Type::size_t(),
         }
     }

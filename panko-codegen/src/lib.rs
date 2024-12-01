@@ -48,6 +48,8 @@ const MAX_IMUL_IMMEDIATE: u64 = 2_u64.pow(31);
 const MAX_ADDRESS_OFFSET: u64 = u32::MAX as _;
 const ARGUMENT_REGISTERS: [Register; 6] = [Rdi, Rsi, Rdx, Rcx, R8, R9];
 
+struct ByValue<T>(T);
+
 #[derive(Debug, Copy, Clone)]
 #[repr(u8)]
 enum Register {
@@ -88,11 +90,8 @@ struct TypedRegister<'a> {
 }
 
 impl Register {
-    fn byte(self) -> TypedRegister<'static> {
-        TypedRegister {
-            ty: &const { Type::uchar() },
-            register: self,
-        }
+    const fn byte(self) -> TypedRegister<'static> {
+        self.with_size(1)
     }
 
     fn with_ty<'a>(self, ty: &'a Type<'a>) -> TypedRegister<'a> {
@@ -101,6 +100,17 @@ impl Register {
 
     fn typed<'a>(self, expr: &'a LayoutedExpression<'a>) -> TypedRegister<'a> {
         TypedRegister { ty: &expr.ty.ty, register: self }
+    }
+
+    const fn with_size(self, size: u64) -> TypedRegister<'static> {
+        let ty = match size {
+            1 => const { &Type::uchar() },
+            2 => const { &Type::ushort() },
+            4 => const { &Type::uint() },
+            8 => const { &Type::size_t() },
+            _ => unreachable!(),
+        };
+        TypedRegister { ty, register: self }
     }
 }
 
@@ -448,8 +458,8 @@ impl<'a> Codegen<'a> {
                     Some(Initialiser::Braced { open_brace: _, close_brace: _ }) => {
                         self.emit("xor eax, eax");
                         match reference.ty.ty.size() {
-                            1 | 2 | 4 | 8 => {
-                                self.emit_args("mov", &[reference, &Rax.with_ty(&reference.ty.ty)]);
+                            size @ (1 | 2 | 4 | 8) => {
+                                self.emit_args("mov", &[&ByValue(reference), &Rax.with_size(size)]);
                             }
                             size => {
                                 self.emit_args("lea", &[&Rdi, reference]);

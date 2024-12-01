@@ -136,6 +136,20 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
         }))
     }
 
+    pub const fn ushort() -> Self {
+        Self::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::Short,
+        }))
+    }
+
+    pub const fn uint() -> Self {
+        Self::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::Int,
+        }))
+    }
+
     pub fn int() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Signed,
@@ -148,7 +162,7 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
         Self::long()
     }
 
-    pub fn size_t() -> Self {
+    pub const fn size_t() -> Self {
         // TODO: this is platform dependent
         Self::ulong()
     }
@@ -160,7 +174,7 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
         }))
     }
 
-    fn ulong() -> Self {
+    const fn ulong() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Unsigned,
             kind: IntegralKind::Long,
