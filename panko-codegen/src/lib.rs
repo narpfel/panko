@@ -540,7 +540,10 @@ impl<'a> Codegen<'a> {
             },
             Expression::IntegralBinOp { ty, lhs, op, rhs } => {
                 if !matches!(op.kind, BinOpKind::LeftShift | BinOpKind::RightShift) {
-                    assert_eq!(lhs.ty, rhs.ty);
+                    // TODO: at this point, `lhs.ty` and `rhs.ty` should both be unqualified due to
+                    // lvalue conversion. However, we don’t represent lvalue conversions in the
+                    // Ast. This should probably be fixed at some point.
+                    assert_eq!(lhs.ty.ty, rhs.ty.ty);
                 }
                 assert_eq!(lhs.ty.ty, Type::Arithmetic(Arithmetic::Integral(ty)));
 
