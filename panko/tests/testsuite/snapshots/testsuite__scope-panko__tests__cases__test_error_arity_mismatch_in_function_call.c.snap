@@ -1,0 +1,54 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/test_error_arity_mismatch_in_function_call.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      zero_params~0 `fn() -> void`
+      (compound-statement))
+   (function-definition
+      one_param~1 `fn(∅: int) -> void`
+      (params
+         one_param.unnamed_parameter.0~2 `int`)
+      (compound-statement))
+   (function-definition
+      two_params~3 `fn(∅: int, ∅: int) -> void`
+      (params
+         two_params.unnamed_parameter.0~4 `int`
+         two_params.unnamed_parameter.1~5 `int`)
+      (compound-statement))
+   (function-definition
+      returns_function_pointer~6 `fn() -> ptr<fn(∅: int, ∅: int) -> void>`
+      (compound-statement
+         (return (name two_params~3 `fn(∅: int, ∅: int) -> void`))))
+   (function-definition
+      varargs~7 `fn(∅: int, ∅: int, ...) -> void`
+      (params
+         varargs.unnamed_parameter.0~8 `int`
+         varargs.unnamed_parameter.1~9 `int`)
+      (compound-statement))
+   (function-definition
+      main~10 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name zero_params~0 `fn() -> void`)
+               1))
+         (expression (call (name one_param~1 `fn(∅: int) -> void`)))
+         (expression
+            (call (name two_params~3 `fn(∅: int, ∅: int) -> void`)
+               42))
+         (expression (call (call (name returns_function_pointer~6 `fn() -> ptr<fn(∅: int, ∅: int) -> void>`))))
+         (expression
+            (call (name varargs~7 `fn(∅: int, ∅: int, ...) -> void`)
+               42)))))
+
+----- stderr -----

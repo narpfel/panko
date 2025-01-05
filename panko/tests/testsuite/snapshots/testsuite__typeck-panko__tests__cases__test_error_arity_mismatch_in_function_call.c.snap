@@ -1,0 +1,54 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_arity_mismatch_in_function_call.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: argument count mismatch: too many arguments to function call (expected 0 but got 1)
+    ╭─[panko/tests/cases/test_error_arity_mismatch_in_function_call.c:12:5]
+    │
+ 12 │     zero_params(1);
+    │     ─────┬─────  
+    │          ╰─────── this callee expects 0 arguments
+────╯
+
+Error: argument count mismatch: too few arguments to function call (expected 1 but got 0)
+    ╭─[panko/tests/cases/test_error_arity_mismatch_in_function_call.c:13:5]
+    │
+ 13 │     one_param();
+    │     ────┬────  
+    │         ╰────── this callee expects 1 argument
+────╯
+
+Error: argument count mismatch: too few arguments to function call (expected 2 but got 1)
+    ╭─[panko/tests/cases/test_error_arity_mismatch_in_function_call.c:14:5]
+    │
+ 14 │     two_params(42);
+    │     ─────┬────  
+    │          ╰────── this callee expects 2 arguments
+────╯
+
+Error: argument count mismatch: too few arguments to function call (expected 2 but got 0)
+    ╭─[panko/tests/cases/test_error_arity_mismatch_in_function_call.c:15:5]
+    │
+ 15 │     returns_function_pointer()();
+    │     ─────────────┬────────────  
+    │                  ╰────────────── this callee expects 2 arguments
+────╯
+
+Error: argument count mismatch: too few arguments to function call (expected at least 2 but got 1)
+    ╭─[panko/tests/cases/test_error_arity_mismatch_in_function_call.c:16:5]
+    │
+ 16 │     varargs(42);
+    │     ───┬───  
+    │        ╰───── this callee expects 2 arguments
+────╯

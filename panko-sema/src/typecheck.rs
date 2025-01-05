@@ -337,6 +337,26 @@ enum Diagnostic<'a> {
         op: Token<'a>,
         at: QualifiedType<'a>,
     },
+
+    #[error(
+        "argument count mismatch: too {determiner} arguments to function call (expected {at_least}{expected} but got {actual})"
+    )]
+    #[diagnostics(
+        at(colour = Red, label = "this callee expects {expected} argument{maybe_plural_s}"),
+    )]
+    #[with(
+        at_least = if *is_varargs { "at least " } else { "" },
+        determiner = if expected > actual { "few" } else { "many" },
+        maybe_plural_s = if *expected != 1 { "s" } else { "" },
+        expected = expected.fg(Blue),
+        actual = actual.fg(Red),
+    )]
+    ArityMismatch {
+        at: TypedExpression<'a>,
+        expected: usize,
+        actual: usize,
+        is_varargs: bool,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1779,13 +1799,19 @@ fn typeck_expression<'a>(
                 todo!("type error: uncallable");
             };
 
-            if is_varargs {
-                if params.len() > args.len() {
-                    todo!("type error: argument count mismatch");
-                }
+            let has_arity_mismatch = if is_varargs {
+                params.len() > args.len()
             }
-            else if params.len() != args.len() {
-                todo!("type error: argument count mismatch");
+            else {
+                params.len() != args.len()
+            };
+            if has_arity_mismatch {
+                return sess.emit(Diagnostic::ArityMismatch {
+                    at: callee,
+                    expected: params.len(),
+                    actual: args.len(),
+                    is_varargs,
+                });
             }
 
             let default_argument_promote = |arg: TypedExpression<'a>| match arg.ty.ty {
