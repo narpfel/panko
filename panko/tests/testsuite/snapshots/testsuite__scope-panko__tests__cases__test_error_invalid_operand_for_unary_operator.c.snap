@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/test_error_invalid_operand_for_unary_operator.c
+snapshot_kind: text
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition p~1 `ptr<int>` ∅)
+         (expression (plus (name p~1 `ptr<int>`)))
+         (expression (plus (name main~0 `fn() -> int`))))))
+
+----- stderr -----

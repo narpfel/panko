@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_invalid_operand_for_unary_operator.c
+snapshot_kind: text
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot apply unary plus operator to expression with type `ptr<int>` (arithmetic type required)
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_unary_operator.c:3:5]
+   │
+ 3 │     +p;
+   │     ─┬  
+   │      ╰── in this expression
+───╯
+
+Error: cannot apply unary plus operator to expression with type `ptr<fn() -> int>` (arithmetic type required)
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_unary_operator.c:4:5]
+   │
+ 4 │     +main;
+   │     ──┬──  
+   │       ╰──── in this expression
+───╯

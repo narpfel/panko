@@ -184,6 +184,20 @@ enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
     },
 
+    #[error(
+        "cannot apply {operator_name} operator to expression with type `{ty}` (arithmetic type required)"
+    )]
+    #[diagnostics(at(colour = Red, label = "in this expression"))]
+    #[with(
+        ty = ty.fg(Red),
+        operator_name = operator_name.fg(Red),
+    )]
+    InvalidOperandForUnaryOperator {
+        at: scope::Expression<'a>,
+        ty: QualifiedType<'a>,
+        operator_name: &'a str,
+    },
+
     #[error("duplicate `{at}` association in {generic} selection")]
     #[diagnostics(
         generic(colour = Green, label = "in this {generic} selection"),
@@ -1702,7 +1716,15 @@ fn typeck_expression<'a>(
                             Type::Arithmetic(integral_promote(arithmetic)).unqualified();
                         convert_as_if_by_assignment(sess, result_ty, operand)
                     }
-                    _ => todo!("type error: cannot be operand to unary plus"),
+                    _ => TypedExpression {
+                        // TODO: should be `Type::Error`
+                        ty: operand.ty,
+                        expr: sess.emit(Diagnostic::InvalidOperandForUnaryOperator {
+                            at: *expr,
+                            ty: operand.ty,
+                            operator_name: "unary plus",
+                        }),
+                    },
                 },
                 UnaryOpKind::Negate => match operand.ty.ty {
                     Type::Arithmetic(arithmetic) => {
