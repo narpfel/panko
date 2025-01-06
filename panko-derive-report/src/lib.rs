@@ -164,6 +164,8 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
                 }
             }
 
+            // TODO: this should allow multiple string literals and concat them so that line breaks
+            // in longish error message strings are easier
             let error_msg = attr_value(&variant.attrs, "error")?
                 .map(|error_msg| gen_format(&colours, error_msg))
                 .ok_or_else(|| Error::new_spanned(variant, "`error` attribute missing"))?;
