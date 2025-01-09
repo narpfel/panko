@@ -17,6 +17,8 @@ exit_code: 0
       (compound-statement
          (definition p~1 `ptr<int>` ∅)
          (expression (plus (name p~1 `ptr<int>`)))
-         (expression (plus (name main~0 `fn() -> int`))))))
+         (expression (plus (name main~0 `fn() -> int`)))
+         (expression (negate (name p~1 `ptr<int>`)))
+         (expression (negate (name main~0 `fn() -> int`))))))
 
 ----- stderr -----

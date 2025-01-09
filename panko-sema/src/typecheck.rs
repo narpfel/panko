@@ -1739,7 +1739,15 @@ fn typeck_expression<'a>(
                             },
                         }
                     }
-                    _ => todo!("type error: cannot negate"),
+                    _ => TypedExpression {
+                        // TODO: should be `Type::Error`
+                        ty: operand.ty,
+                        expr: sess.emit(Diagnostic::InvalidOperandForUnaryOperator {
+                            at: *expr,
+                            ty: operand.ty,
+                            operator_name: "unary minus",
+                        }),
+                    },
                 },
                 UnaryOpKind::Compl => match operand.ty.ty {
                     Type::Arithmetic(Arithmetic::Integral(integral)) => {
