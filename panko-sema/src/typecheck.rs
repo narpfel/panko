@@ -185,17 +185,19 @@ enum Diagnostic<'a> {
     },
 
     #[error(
-        "cannot apply {operator_name} operator to expression with type `{ty}` (arithmetic type required)"
+        "cannot apply {operator_name} operator to expression with type `{ty}` ({expected_ty} type required)"
     )]
     #[diagnostics(at(colour = Red, label = "in this expression"))]
     #[with(
         ty = ty.fg(Red),
         operator_name = operator_name.fg(Red),
+        expected_ty = expected_ty.fg(Blue),
     )]
     InvalidOperandForUnaryOperator {
         at: scope::Expression<'a>,
         ty: QualifiedType<'a>,
         operator_name: &'a str,
+        expected_ty: &'a str,
     },
 
     #[error("duplicate `{at}` association in {generic} selection")]
@@ -1723,6 +1725,7 @@ fn typeck_expression<'a>(
                             at: *expr,
                             ty: operand.ty,
                             operator_name: "unary plus",
+                            expected_ty: "arithmetic",
                         }),
                     },
                 },
@@ -1746,6 +1749,7 @@ fn typeck_expression<'a>(
                             at: *expr,
                             ty: operand.ty,
                             operator_name: "unary minus",
+                            expected_ty: "arithmetic",
                         }),
                     },
                 },
@@ -1763,7 +1767,16 @@ fn typeck_expression<'a>(
                             },
                         }
                     }
-                    _ => todo!("type error: cannot be operand to unary compl"),
+                    _ => TypedExpression {
+                        // TODO: should be `Type::Error`
+                        ty: operand.ty,
+                        expr: sess.emit(Diagnostic::InvalidOperandForUnaryOperator {
+                            at: *expr,
+                            ty: operand.ty,
+                            operator_name: "bitwise complement",
+                            expected_ty: "integral",
+                        }),
+                    },
                 },
                 UnaryOpKind::Not =>
                     if operand.ty.ty.is_scalar() {

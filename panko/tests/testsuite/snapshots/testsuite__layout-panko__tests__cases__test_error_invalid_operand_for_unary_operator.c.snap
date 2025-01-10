@@ -44,3 +44,19 @@ Error: cannot apply unary minus operator to expression with type `ptr<fn() -> in
    │     ──┬──  
    │       ╰──── in this expression
 ───╯
+
+Error: cannot apply bitwise complement operator to expression with type `ptr<int>` (integral type required)
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_unary_operator.c:7:5]
+   │
+ 7 │     ~p;
+   │     ─┬  
+   │      ╰── in this expression
+───╯
+
+Error: cannot apply bitwise complement operator to expression with type `ptr<fn() -> int>` (integral type required)
+   ╭─[panko/tests/cases/test_error_invalid_operand_for_unary_operator.c:8:5]
+   │
+ 8 │     ~main;
+   │     ──┬──  
+   │       ╰──── in this expression
+───╯

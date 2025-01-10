@@ -19,6 +19,8 @@ exit_code: 0
          (expression (plus (name p~1 `ptr<int>`)))
          (expression (plus (name main~0 `fn() -> int`)))
          (expression (negate (name p~1 `ptr<int>`)))
-         (expression (negate (name main~0 `fn() -> int`))))))
+         (expression (negate (name main~0 `fn() -> int`)))
+         (expression (compl (name p~1 `ptr<int>`)))
+         (expression (compl (name main~0 `fn() -> int`))))))
 
 ----- stderr -----

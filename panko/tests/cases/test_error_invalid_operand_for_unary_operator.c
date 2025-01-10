@@ -4,4 +4,6 @@ int main() {
     +main;
     -p;
     -main;
+    ~p;
+    ~main;
 }
