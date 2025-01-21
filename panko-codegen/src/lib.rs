@@ -248,7 +248,7 @@ impl<'a> Codegen<'a> {
         let tgt = tgt.as_operand(try { self.current_function?.argument_area_size });
         let src = src.as_operand(try { self.current_function?.argument_area_size });
         let ty = tgt.ty();
-        assert!(ty == src.ty());
+        assert_eq!(ty, src.ty());
         match ty {
             Type::Arithmetic(_) | Type::Pointer(_) => {
                 self.emit_args("mov", &[&Rax.with_ty(ty), &src]);
