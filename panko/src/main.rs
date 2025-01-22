@@ -14,6 +14,7 @@ use panko_parser::sexpr_builder::AsSExpr as _;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 enum Step {
+    Ast,
     Scopes,
     Typeck,
     Layout,
@@ -55,6 +56,14 @@ fn main() -> Result<()> {
             std::process::exit(err.exit_code().into());
         }
     };
+
+    if args.print.contains(&Step::Ast) {
+        println!("{}", translation_unit.as_sexpr());
+    }
+    if let Some(Step::Ast) = args.stop_after {
+        return Ok(());
+    }
+
     let translation_unit = panko_sema::resolve_names(session, translation_unit);
     session.handle_diagnostics();
 
