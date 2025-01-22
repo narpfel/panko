@@ -175,7 +175,7 @@ impl fmt::Display for Operand<'_> {
                     2 => "word",
                     4 => "dword",
                     8 => "qword",
-                    _ => unreachable!(),
+                    _ => unreachable!("invalid pointee size {size}"),
                 };
                 write!(f, "{ptr_type} ptr {memory}")
             }
