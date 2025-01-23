@@ -2,12 +2,14 @@ use std::borrow::Cow;
 use std::iter;
 
 use itertools::Either;
-use panko_parser::NO_VALUE;
 use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
 
 use super::CompoundStatement;
 use super::Declaration;
+use super::DesignatedInitialiser;
+use super::Designation;
+use super::Designator;
 use super::Expression;
 use super::ExternalDeclaration;
 use super::FunctionDefinition;
@@ -67,9 +69,48 @@ where
 {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            Self::Braced { open_brace: _, close_brace: _ } =>
-                SExpr::new("braced").inherit(&NO_VALUE),
+            Self::Braced {
+                open_brace: _,
+                initialiser_list,
+                close_brace: _,
+            } => SExpr::new("braced").lines_explicit_empty(*initialiser_list),
             Self::Expression(expr) => expr.as_sexpr(),
+        }
+    }
+}
+
+impl<Expression> AsSExpr for DesignatedInitialiser<'_, Expression>
+where
+    Expression: AsSExpr,
+{
+    fn as_sexpr(&self) -> SExpr {
+        let Self { designation, initialiser } = self;
+        match designation {
+            Some(designation) => designation.as_sexpr().inherit(initialiser),
+            None => initialiser.as_sexpr(),
+        }
+    }
+}
+
+impl<Expression> AsSExpr for Designation<'_, Expression>
+where
+    Expression: AsSExpr,
+{
+    fn as_sexpr(&self) -> SExpr {
+        let Self(designators) = self;
+        SExpr::new("designation").inherit(designators)
+    }
+}
+
+impl<Expression> AsSExpr for Designator<'_, Expression>
+where
+    Expression: AsSExpr,
+{
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Bracketed { open_bracket: _, index, close_bracket: _ } =>
+                SExpr::new("index").inherit(index),
+            Self::Identifier { dot: _, ident } => SExpr::new("member").inherit(ident),
         }
     }
 }

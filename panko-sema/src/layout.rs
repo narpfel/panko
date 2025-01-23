@@ -8,15 +8,16 @@ use panko_report::Report;
 
 use crate::layout::stack::Stack;
 use crate::scope::Id;
-use crate::scope::Initialiser;
 use crate::scope::RefKind;
 use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
 use crate::typecheck;
+use crate::typecheck::Initialiser;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::PtrCmpKind;
+use crate::typecheck::SubobjectInitialiser;
 
 mod as_sexpr;
 mod stack;
@@ -162,6 +163,16 @@ pub enum Slot<'a> {
     Void,
 }
 
+impl<'a> Slot<'a> {
+    fn offset(&self, offset: u64) -> Slot<'a> {
+        match self {
+            Slot::Static(_) => todo!(),
+            Slot::Automatic(slot) => Self::Automatic(slot + offset),
+            Slot::Void => unreachable!("`void` slots have no subobjects"),
+        }
+    }
+}
+
 impl<'a> FunctionDefinition<'a> {
     pub fn is_main(&self) -> bool {
         self.name() == "main"
@@ -268,6 +279,34 @@ fn layout_function_definition<'a>(
     }
 }
 
+fn layout_initialiser_list<'a>(
+    stack: &mut Stack<'a>,
+    bump: &'a Bump,
+    reference: Reference<'a>,
+    initialiser_list: &[typecheck::SubobjectInitialiser<'a, typecheck::TypedExpression<'a>>],
+) -> &'a [SubobjectInitialiser<'a, LayoutedExpression<'a>>] {
+    let slot = reference.slot;
+    bump.alloc_slice_fill_iter(initialiser_list.iter().map(
+        |SubobjectInitialiser { subobject, initialiser }| {
+            let initialiser = match initialiser {
+                Initialiser::Braced {
+                    open_brace: _,
+                    initialiser_list: _,
+                    close_brace: _,
+                } => todo!(),
+                Initialiser::Expression(initialiser) =>
+                    Initialiser::Expression(layout_expression_in_slot(
+                        stack,
+                        bump,
+                        initialiser,
+                        Some(slot.offset(subobject.offset)),
+                    )),
+            };
+            SubobjectInitialiser { subobject: *subobject, initialiser }
+        },
+    ))
+}
+
 fn layout_declaration<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
@@ -277,8 +316,15 @@ fn layout_declaration<'a>(
     let reference = stack.add(bump, reference);
     let initialiser = stack.with_block(|stack| try {
         match initialiser? {
-            Initialiser::Braced { open_brace, close_brace } =>
-                Initialiser::Braced { open_brace, close_brace },
+            Initialiser::Braced {
+                open_brace,
+                initialiser_list,
+                close_brace,
+            } => Initialiser::Braced {
+                open_brace,
+                initialiser_list: layout_initialiser_list(stack, bump, reference, initialiser_list),
+                close_brace,
+            },
             Initialiser::Expression(initialiser) => Initialiser::Expression(
                 layout_expression_in_slot(stack, bump, &initialiser, Some(reference.slot)),
             ),

@@ -15,6 +15,7 @@ use panko_report::Report;
 use crate as cst;
 use crate::ArrayDeclarator;
 use crate::BlockItem;
+pub use crate::DesignatedInitialiser;
 use crate::DirectDeclarator;
 use crate::FunctionDeclarator;
 use crate::InitDeclarator;

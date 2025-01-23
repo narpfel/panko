@@ -31,11 +31,11 @@ use panko_parser::ast::Signedness;
 use panko_report::Report;
 use variant_types::IntoVariant as _;
 
+use crate::map_with::MapWithExt as _;
 use crate::scope;
 use crate::scope::GenericAssociation;
 use crate::scope::Id;
 use crate::scope::IncrementFixity;
-use crate::scope::Initialiser;
 use crate::scope::IsParameter;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
@@ -43,6 +43,8 @@ use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
+use crate::ty::subobjects::Subobject;
+use crate::ty::subobjects::Subobjects;
 
 mod as_sexpr;
 #[cfg(test)]
@@ -443,6 +445,22 @@ pub enum ExternalDeclaration<'a> {
 pub struct Declaration<'a> {
     pub reference: Reference<'a>,
     pub initialiser: Option<Initialiser<'a, TypedExpression<'a>>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Initialiser<'a, Expression> {
+    Braced {
+        open_brace: Token<'a>,
+        initialiser_list: &'a [SubobjectInitialiser<'a, Expression>],
+        close_brace: Token<'a>,
+    },
+    Expression(Expression),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct SubobjectInitialiser<'a, Expression> {
+    pub subobject: Subobject<'a>,
+    pub initialiser: Initialiser<'a, Expression>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1019,6 +1037,50 @@ fn typeck_function_definition<'a>(
     }
 }
 
+fn typeck_initialiser_list<'a>(
+    sess: &'a Session<'a>,
+    subobjects: &mut Subobjects<'a>,
+    initialiser_list: &[scope::DesignatedInitialiser<'a, scope::Expression<'a>>],
+) -> &'a [SubobjectInitialiser<'a, TypedExpression<'a>>] {
+    sess.alloc_slice_fill_iter(initialiser_list.iter().map_with(
+        subobjects,
+        |subobjects, scope::DesignatedInitialiser { designation, initialiser }| match designation {
+            Some(_) => todo!(),
+            None => SubobjectInitialiser {
+                subobject: subobjects.next_scalar().unwrap(),
+                initialiser: typeck_initialiser(sess, subobjects, **initialiser),
+            },
+        },
+    ))
+}
+
+fn typeck_initialiser<'a>(
+    sess: &'a Session<'a>,
+    subobjects: &mut Subobjects<'a>,
+    initialiser: scope::Initialiser<'a, scope::Expression<'a>>,
+) -> Initialiser<'a, TypedExpression<'a>> {
+    match initialiser {
+        scope::Initialiser::Braced {
+            open_brace,
+            initialiser_list,
+            close_brace,
+        } => {
+            // TODO: this should flatten the initialiser list
+            Initialiser::Braced {
+                open_brace,
+                initialiser_list: typeck_initialiser_list(sess, subobjects, initialiser_list),
+                close_brace,
+            }
+        }
+        scope::Initialiser::Expression(initialiser) =>
+            Initialiser::Expression(convert_as_if_by_assignment(
+                sess,
+                subobjects.current().unwrap().ty,
+                typeck_expression(sess, &initialiser, Context::Default),
+            )),
+    }
+}
+
 fn typeck_declaration<'a>(
     sess: &'a Session<'a>,
     declaration: &scope::Declaration<'a>,
@@ -1028,18 +1090,8 @@ fn typeck_declaration<'a>(
     if matches!(reference.kind, RefKind::Definition) && !reference.ty.ty.is_complete() {
         sess.emit(Diagnostic::VariableWithIncompleteType { at: reference })
     }
-    let initialiser = try {
-        match initialiser? {
-            Initialiser::Braced { open_brace, close_brace } =>
-                Initialiser::Braced { open_brace, close_brace },
-            Initialiser::Expression(initialiser) =>
-                Initialiser::Expression(convert_as_if_by_assignment(
-                    sess,
-                    reference.ty,
-                    typeck_expression(sess, &initialiser, Context::Default),
-                )),
-        }
-    };
+    let initialiser =
+        try { typeck_initialiser(sess, &mut Subobjects::new(reference.ty), initialiser?) };
     Declaration { reference, initialiser }
 }
 

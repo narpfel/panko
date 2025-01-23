@@ -78,12 +78,41 @@ pub(crate) struct Declaration<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum Initialiser<'a, Expression> {
+pub(crate) enum Initialiser<'a, Expression> {
     Braced {
         open_brace: Token<'a>,
+        initialiser_list: &'a [DesignatedInitialiser<'a, Expression>],
         close_brace: Token<'a>,
     },
     Expression(Expression),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct DesignatedInitialiser<'a, Expression> {
+    pub(crate) designation: Option<Designation<'a, Expression>>,
+    pub(crate) initialiser: &'a Initialiser<'a, Expression>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Designation<'a, Expression>(&'a [Designator<'a, Expression>]);
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum Designator<'a, Expression> {
+    Bracketed {
+        #[expect(
+            unused,
+            reason = "TODO: source locations for `Designator`s are not implemented"
+        )]
+        open_bracket: Token<'a>,
+        index: Expression,
+        #[expect(
+            unused,
+            reason = "TODO: source locations for `Designator`s are not implemented"
+        )]
+        close_bracket: Token<'a>,
+    },
+    #[expect(unused, reason = "TODO: `struct`s are not implemented")]
+    Identifier { dot: Token<'a>, ident: Token<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -694,6 +723,43 @@ fn resolve_compound_statement<'a>(
     stmts
 }
 
+fn resolve_initialiser<'a>(
+    scopes: &mut Scopes<'a>,
+    initialiser: &ast::DesignatedInitialiser<'a>,
+) -> DesignatedInitialiser<'a, Expression<'a>> {
+    let ast::DesignatedInitialiser { designation, initialiser } = initialiser;
+    let designation = try {
+        Designation(
+            scopes
+                .sess
+                .alloc_slice_fill_iter(designation.as_ref()?.0.iter().map(|designator| {
+                    match designator {
+                        cst::Designator::Bracketed { open_bracket, index, close_bracket } =>
+                            Designator::Bracketed {
+                                open_bracket: *open_bracket,
+                                index: resolve_expr(scopes, index),
+                                close_bracket: *close_bracket,
+                            },
+                        cst::Designator::Identifier { .. } => todo!(),
+                    }
+                })),
+        )
+    };
+    let initialiser = match initialiser {
+        ast::Initialiser::Braced {
+            open_brace: _,
+            initialiser_list: _,
+            close_brace: _,
+        } => todo!(),
+        ast::Initialiser::Expression(expression) =>
+            Initialiser::Expression(resolve_expr(scopes, expression)),
+    };
+    DesignatedInitialiser {
+        designation,
+        initialiser: scopes.sess.alloc(initialiser),
+    }
+}
+
 fn resolve_declaration<'a>(
     scopes: &mut Scopes<'a>,
     decl: &ast::Declaration<'a>,
@@ -732,8 +798,17 @@ fn resolve_declaration<'a>(
         ),
         initialiser: try {
             match initialiser.as_ref()? {
-                ast::Initialiser::Braced { open_brace, close_brace } => Initialiser::Braced {
+                ast::Initialiser::Braced {
+                    open_brace,
+                    initialiser_list,
+                    close_brace,
+                } => Initialiser::Braced {
                     open_brace: *open_brace,
+                    initialiser_list: scopes.sess.alloc_slice_fill_iter(
+                        initialiser_list
+                            .iter()
+                            .map(|initialiser| resolve_initialiser(scopes, initialiser)),
+                    ),
                     close_brace: *close_brace,
                 },
                 ast::Initialiser::Expression(initialiser) =>

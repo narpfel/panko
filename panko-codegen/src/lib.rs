@@ -27,11 +27,12 @@ use panko_sema::layout::Slot;
 use panko_sema::layout::Statement;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::Type;
-use panko_sema::scope::Initialiser;
 use panko_sema::scope::RefKind;
 use panko_sema::ty::ArrayType;
 use panko_sema::typecheck::ArrayLength;
+use panko_sema::typecheck::Initialiser;
 use panko_sema::typecheck::PtrCmpKind;
+use panko_sema::typecheck::SubobjectInitialiser;
 
 use crate::Register::*;
 use crate::lineno::Linenos;
@@ -387,7 +388,16 @@ impl<'a> Codegen<'a> {
                 Expression::Logical { .. } => todo!(),
                 Expression::Conditional { .. } => todo!(),
             },
-            Some(Initialiser::Braced { open_brace: _, close_brace: _ }) => self.zero(size),
+            Some(Initialiser::Braced {
+                open_brace: _,
+                initialiser_list,
+                close_brace: _,
+            }) => {
+                self.zero(size);
+                for _initialiser in initialiser_list {
+                    todo!()
+                }
+            }
             None => self.zero(size),
         }
     }
@@ -427,9 +437,17 @@ impl<'a> Codegen<'a> {
                 self.defined.insert(name);
                 let initialiser = try {
                     match decl.initialiser.as_ref()? {
-                        Initialiser::Braced { open_brace, close_brace } => Initialiser::Braced {
-                            open_brace: *open_brace,
-                            close_brace: *close_brace,
+                        Initialiser::Braced {
+                            open_brace,
+                            initialiser_list,
+                            close_brace,
+                        } => match initialiser_list {
+                            [] => Initialiser::Braced {
+                                open_brace: *open_brace,
+                                initialiser_list: &[],
+                                close_brace: *close_brace,
+                            },
+                            _ => todo!(),
                         },
                         Initialiser::Expression(expr) => Initialiser::Expression(&expr.expr),
                     }
@@ -455,7 +473,11 @@ impl<'a> Codegen<'a> {
                             self.copy(reference, initialiser);
                         }
                     }
-                    Some(Initialiser::Braced { open_brace: _, close_brace: _ }) => {
+                    Some(Initialiser::Braced {
+                        open_brace: _,
+                        initialiser_list,
+                        close_brace: _,
+                    }) => {
                         self.emit("xor eax, eax");
                         match reference.ty.ty.size() {
                             size @ (1 | 2 | 4 | 8) => {
@@ -466,6 +488,22 @@ impl<'a> Codegen<'a> {
                                 self.emit_args("movabs", &[&Rcx, &size]);
                                 self.emit("rep stosb");
                             }
+                        }
+                        for subobject_initialiser in *initialiser_list {
+                            let SubobjectInitialiser { subobject: _, initialiser } =
+                                subobject_initialiser;
+                            match *initialiser {
+                                Initialiser::Braced {
+                                    open_brace: _,
+                                    initialiser_list: _,
+                                    close_brace: _,
+                                } => todo!(),
+                                Initialiser::Expression(expr) => {
+                                    self.expr(&expr);
+                                    // TODO: if `expr` has a different slot than the subobject, we
+                                    // have to `copy` here.
+                                }
+                            };
                         }
                     }
                     None => (),
