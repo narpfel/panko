@@ -1,0 +1,85 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/test_flat_braced_init.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      (params
+         main.unnamed_parameter.0~2 `int`
+         argv~3 `ptr<ptr<char>>`)
+      (compound-statement
+         (definition x~4 `int`
+            (braced
+               3))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (name x~4 `int`)))
+         (definition y~5 `long`
+            (braced
+               (negate 42)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 2)
+               (name y~5 `long`)))
+         (definition xs~6 `array<int; 5>`
+            (braced
+               (negate 1)
+               (add (negate 5) (negate 2))
+               3
+               4
+               5))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (name xs~6 `array<int; 5>`) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (name xs~6 `array<int; 5>`) 1)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (name xs~6 `array<int; 5>`) 2)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (name xs~6 `array<int; 5>`) 3)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (name xs~6 `array<int; 5>`) 4)))
+         (definition ys~7 `array<array<int; 2>; 2>`
+            (braced
+               1
+               2
+               3
+               4))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name ys~7 `array<array<int; 2>; 2>`) 0) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name ys~7 `array<array<int; 2>; 2>`) 0) 1)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name ys~7 `array<array<int; 2>; 2>`) 1) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name ys~7 `array<array<int; 2>; 2>`) 1) 1))))))
+
+----- stderr -----
