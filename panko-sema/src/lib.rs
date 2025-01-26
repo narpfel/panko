@@ -10,8 +10,6 @@ pub use crate::scope::resolve_names;
 pub use crate::typecheck::resolve_types;
 
 pub mod layout;
-#[expect(unused)]
-mod map_with;
 mod nonempty;
 pub mod scope;
 pub mod ty;
