@@ -747,10 +747,18 @@ fn resolve_initialiser<'a>(
     };
     let initialiser = match initialiser {
         ast::Initialiser::Braced {
-            open_brace: _,
-            initialiser_list: _,
-            close_brace: _,
-        } => todo!(),
+            open_brace,
+            initialiser_list,
+            close_brace,
+        } => Initialiser::Braced {
+            open_brace: *open_brace,
+            initialiser_list: scopes.sess.alloc_slice_fill_iter(
+                initialiser_list
+                    .iter()
+                    .map(|initialiser| resolve_initialiser(scopes, initialiser)),
+            ),
+            close_brace: *close_brace,
+        },
         ast::Initialiser::Expression(expression) =>
             Initialiser::Expression(resolve_expr(scopes, expression)),
     };

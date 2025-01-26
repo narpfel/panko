@@ -84,9 +84,9 @@ where
         match self {
             Self::Braced {
                 open_brace: _,
-                initialiser_list,
+                subobject_initialisers,
                 close_brace: _,
-            } => SExpr::new("braced").lines_explicit_empty(*initialiser_list),
+            } => SExpr::new("braced").lines_explicit_empty(*subobject_initialisers),
             Self::Expression(expr) => expr.as_sexpr(),
         }
     }

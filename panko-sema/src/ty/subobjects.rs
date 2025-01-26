@@ -58,8 +58,7 @@ impl<'a> Subobjects<'a> {
         }
     }
 
-    #[cfg(test)]
-    fn leave_subobject(&mut self) {
+    pub(crate) fn leave_subobject(&mut self) {
         if let Some(queue) = self.stack.pop() {
             self.queue = queue;
         }

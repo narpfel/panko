@@ -279,34 +279,6 @@ fn layout_function_definition<'a>(
     }
 }
 
-fn layout_initialiser_list<'a>(
-    stack: &mut Stack<'a>,
-    bump: &'a Bump,
-    reference: Reference<'a>,
-    initialiser_list: &[typecheck::SubobjectInitialiser<'a, typecheck::TypedExpression<'a>>],
-) -> &'a [SubobjectInitialiser<'a, LayoutedExpression<'a>>] {
-    let slot = reference.slot;
-    bump.alloc_slice_fill_iter(initialiser_list.iter().map(
-        |SubobjectInitialiser { subobject, initialiser }| {
-            let initialiser = match initialiser {
-                Initialiser::Braced {
-                    open_brace: _,
-                    initialiser_list: _,
-                    close_brace: _,
-                } => todo!(),
-                Initialiser::Expression(initialiser) =>
-                    Initialiser::Expression(layout_expression_in_slot(
-                        stack,
-                        bump,
-                        initialiser,
-                        Some(slot.offset(subobject.offset)),
-                    )),
-            };
-            SubobjectInitialiser { subobject: *subobject, initialiser }
-        },
-    ))
-}
-
 fn layout_declaration<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
@@ -314,17 +286,32 @@ fn layout_declaration<'a>(
 ) -> Declaration<'a> {
     let typecheck::Declaration { reference, initialiser } = *decl;
     let reference = stack.add(bump, reference);
+    let slot = reference.slot();
     let initialiser = stack.with_block(|stack| try {
         match initialiser? {
             Initialiser::Braced {
                 open_brace,
-                initialiser_list,
+                subobject_initialisers,
                 close_brace,
-            } => Initialiser::Braced {
-                open_brace,
-                initialiser_list: layout_initialiser_list(stack, bump, reference, initialiser_list),
-                close_brace,
-            },
+            } => {
+                let subobject_initialisers =
+                    bump.alloc_slice_fill_iter(subobject_initialisers.iter().map(
+                        |SubobjectInitialiser { subobject, initialiser }| SubobjectInitialiser {
+                            subobject: *subobject,
+                            initialiser: layout_expression_in_slot(
+                                stack,
+                                bump,
+                                initialiser,
+                                Some(slot.offset(subobject.offset)),
+                            ),
+                        },
+                    ));
+                Initialiser::Braced {
+                    open_brace,
+                    subobject_initialisers,
+                    close_brace,
+                }
+            }
             Initialiser::Expression(initialiser) => Initialiser::Expression(
                 layout_expression_in_slot(stack, bump, &initialiser, Some(reference.slot)),
             ),

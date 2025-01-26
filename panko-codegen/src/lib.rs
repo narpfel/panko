@@ -390,11 +390,11 @@ impl<'a> Codegen<'a> {
             },
             Some(Initialiser::Braced {
                 open_brace: _,
-                initialiser_list,
+                subobject_initialisers,
                 close_brace: _,
             }) => {
                 self.zero(size);
-                for _initialiser in initialiser_list {
+                for _initialiser in subobject_initialisers {
                     todo!()
                 }
             }
@@ -439,12 +439,12 @@ impl<'a> Codegen<'a> {
                     match decl.initialiser.as_ref()? {
                         Initialiser::Braced {
                             open_brace,
-                            initialiser_list,
+                            subobject_initialisers,
                             close_brace,
-                        } => match initialiser_list {
+                        } => match subobject_initialisers {
                             [] => Initialiser::Braced {
                                 open_brace: *open_brace,
-                                initialiser_list: &[],
+                                subobject_initialisers: &[],
                                 close_brace: *close_brace,
                             },
                             _ => todo!(),
@@ -475,7 +475,7 @@ impl<'a> Codegen<'a> {
                     }
                     Some(Initialiser::Braced {
                         open_brace: _,
-                        initialiser_list,
+                        subobject_initialisers,
                         close_brace: _,
                     }) => {
                         self.emit("xor eax, eax");
@@ -489,21 +489,12 @@ impl<'a> Codegen<'a> {
                                 self.emit("rep stosb");
                             }
                         }
-                        for subobject_initialiser in *initialiser_list {
+                        for subobject_initialiser in *subobject_initialisers {
                             let SubobjectInitialiser { subobject: _, initialiser } =
                                 subobject_initialiser;
-                            match *initialiser {
-                                Initialiser::Braced {
-                                    open_brace: _,
-                                    initialiser_list: _,
-                                    close_brace: _,
-                                } => todo!(),
-                                Initialiser::Expression(expr) => {
-                                    self.expr(&expr);
-                                    // TODO: if `expr` has a different slot than the subobject, we
-                                    // have to `copy` here.
-                                }
-                            };
+                            self.expr(initialiser);
+                            // TODO: if `expr` has a different slot than the subobject, we
+                            // have to `copy` here.
                         }
                     }
                     None => (),
