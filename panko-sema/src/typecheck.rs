@@ -32,6 +32,7 @@ use panko_report::Report;
 use variant_types::IntoVariant as _;
 
 use crate::scope;
+use crate::scope::DesignatedInitialiser;
 use crate::scope::GenericAssociation;
 use crate::scope::Id;
 use crate::scope::IncrementFixity;
@@ -1048,9 +1049,9 @@ fn typeck_initialiser_list<'a>(
     sess: &'a Session<'a>,
     subobject_initialisers: &mut Vec<SubobjectInitialiser<'a>>,
     subobjects: &mut Subobjects<'a>,
-    initialiser_list: &[scope::DesignatedInitialiser<'a, scope::Expression<'a>>],
+    initialiser_list: &[DesignatedInitialiser<'a>],
 ) {
-    for scope::DesignatedInitialiser { designation, initialiser } in initialiser_list {
+    for DesignatedInitialiser { designation, initialiser } in initialiser_list {
         match designation {
             Some(_) => todo!(),
             None => match initialiser {

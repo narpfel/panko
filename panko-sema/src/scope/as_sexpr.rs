@@ -63,10 +63,7 @@ impl AsSExpr for Declaration<'_> {
     }
 }
 
-impl<Expression> AsSExpr for Initialiser<'_, Expression>
-where
-    Expression: AsSExpr,
-{
+impl AsSExpr for Initialiser<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Self::Braced {
@@ -79,10 +76,7 @@ where
     }
 }
 
-impl<Expression> AsSExpr for DesignatedInitialiser<'_, Expression>
-where
-    Expression: AsSExpr,
-{
+impl AsSExpr for DesignatedInitialiser<'_> {
     fn as_sexpr(&self) -> SExpr {
         let Self { designation, initialiser } = self;
         match designation {
@@ -92,20 +86,14 @@ where
     }
 }
 
-impl<Expression> AsSExpr for Designation<'_, Expression>
-where
-    Expression: AsSExpr,
-{
+impl AsSExpr for Designation<'_> {
     fn as_sexpr(&self) -> SExpr {
         let Self(designators) = self;
         SExpr::new("designation").inherit(designators)
     }
 }
 
-impl<Expression> AsSExpr for Designator<'_, Expression>
-where
-    Expression: AsSExpr,
-{
+impl AsSExpr for Designator<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Self::Bracketed { open_bracket: _, index, close_bracket: _ } =>

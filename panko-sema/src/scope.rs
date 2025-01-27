@@ -74,37 +74,37 @@ pub(crate) enum ExternalDeclaration<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Declaration<'a> {
     pub(crate) reference: Reference<'a>,
-    pub(crate) initialiser: Option<Initialiser<'a, Expression<'a>>>,
+    pub(crate) initialiser: Option<Initialiser<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum Initialiser<'a, Expression> {
+pub(crate) enum Initialiser<'a> {
     Braced {
         open_brace: Token<'a>,
-        initialiser_list: &'a [DesignatedInitialiser<'a, Expression>],
+        initialiser_list: &'a [DesignatedInitialiser<'a>],
         close_brace: Token<'a>,
     },
-    Expression(Expression),
+    Expression(Expression<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct DesignatedInitialiser<'a, Expression> {
-    pub(crate) designation: Option<Designation<'a, Expression>>,
-    pub(crate) initialiser: &'a Initialiser<'a, Expression>,
+pub(crate) struct DesignatedInitialiser<'a> {
+    pub(crate) designation: Option<Designation<'a>>,
+    pub(crate) initialiser: &'a Initialiser<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct Designation<'a, Expression>(&'a [Designator<'a, Expression>]);
+pub(crate) struct Designation<'a>(&'a [Designator<'a>]);
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum Designator<'a, Expression> {
+pub(crate) enum Designator<'a> {
     Bracketed {
         #[expect(
             unused,
             reason = "TODO: source locations for `Designator`s are not implemented"
         )]
         open_bracket: Token<'a>,
-        index: Expression,
+        index: Expression<'a>,
         #[expect(
             unused,
             reason = "TODO: source locations for `Designator`s are not implemented"
@@ -726,7 +726,7 @@ fn resolve_compound_statement<'a>(
 fn resolve_initialiser<'a>(
     scopes: &mut Scopes<'a>,
     initialiser: &ast::DesignatedInitialiser<'a>,
-) -> DesignatedInitialiser<'a, Expression<'a>> {
+) -> DesignatedInitialiser<'a> {
     let ast::DesignatedInitialiser { designation, initialiser } = initialiser;
     let designation = try {
         Designation(
