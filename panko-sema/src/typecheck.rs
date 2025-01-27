@@ -431,39 +431,47 @@ pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, !, ArrayLength<&'a Typ
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
-    pub decls: &'a [ExternalDeclaration<'a>],
+    pub(crate) decls: &'a [ExternalDeclaration<'a>],
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum ExternalDeclaration<'a> {
+pub(crate) enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Declaration<'a> {
-    pub reference: Reference<'a>,
-    pub initialiser: Option<Initialiser<'a, TypedExpression<'a>>>,
+pub(crate) struct Declaration<'a> {
+    pub(crate) reference: Reference<'a>,
+    pub(crate) initialiser: Option<Initialiser<'a, TypedExpression<'a>>>,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum Initialiser<'a, Expression> {
+pub(crate) enum Initialiser<'a, Expression> {
     Braced {
+        #[expect(
+            unused,
+            reason = "TODO: error messages that need this are not implemented"
+        )]
         open_brace: Token<'a>,
         subobject_initialisers: &'a [SubobjectInitialiser<'a, Expression>],
+        #[expect(
+            unused,
+            reason = "TODO: error messages that need this are not implemented"
+        )]
         close_brace: Token<'a>,
     },
     Expression(Expression),
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct SubobjectInitialiser<'a, Expression> {
-    pub subobject: Subobject<'a>,
-    pub initialiser: Expression,
+pub(crate) struct SubobjectInitialiser<'a, Expression> {
+    pub(crate) subobject: Subobject<'a>,
+    pub(crate) initialiser: Expression,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct FunctionDefinition<'a> {
+pub(crate) struct FunctionDefinition<'a> {
     pub(crate) reference: Reference<'a>,
     pub(crate) params: ParamRefs<'a>,
     pub(crate) storage_class: Option<cst::StorageClassSpecifier<'a>>,
@@ -477,10 +485,10 @@ pub struct FunctionDefinition<'a> {
 pub(crate) struct ParamRefs<'a>(pub(crate) &'a [Reference<'a>]);
 
 #[derive(Debug, Clone, Copy)]
-pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
+pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 
 #[derive(Debug, Clone, Copy)]
-pub enum Statement<'a> {
+pub(crate) enum Statement<'a> {
     Declaration(Declaration<'a>),
     Expression(Option<TypedExpression<'a>>),
     Compound(CompoundStatement<'a>),
@@ -488,13 +496,13 @@ pub enum Statement<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct TypedExpression<'a> {
+pub(crate) struct TypedExpression<'a> {
     pub(crate) ty: QualifiedType<'a>,
-    pub expr: Expression<'a>,
+    pub(crate) expr: Expression<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum Expression<'a> {
+pub(crate) enum Expression<'a> {
     Error(&'a dyn Report),
     Name(Reference<'a>),
     Integer {
@@ -616,7 +624,7 @@ pub enum Expression<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Reference<'a> {
+pub(crate) struct Reference<'a> {
     // TODO: The location of `name` points to where this name was declared. This is unused for now,
     // but should be used in error messages to print e. g. “note: [...] was declared here:”.
     pub(crate) name: &'a str,
@@ -633,7 +641,7 @@ impl<'a> Reference<'a> {
         self.name
     }
 
-    pub fn unique_name(&self) -> String {
+    pub(crate) fn unique_name(&self) -> String {
         format!("{}~{}", self.name, self.id.0)
     }
 
@@ -641,7 +649,7 @@ impl<'a> Reference<'a> {
         clippy::misnamed_getters,
         reason = "`loc` should actually return the `usage_location` and not the `loc` where this reference was declared"
     )]
-    pub fn loc(&self) -> Loc<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
         self.usage_location
     }
 
@@ -649,7 +657,7 @@ impl<'a> Reference<'a> {
         self.name
     }
 
-    pub fn kind(&self) -> RefKind {
+    pub(crate) fn kind(&self) -> RefKind {
         self.kind
     }
 

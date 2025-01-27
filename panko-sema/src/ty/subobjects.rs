@@ -5,7 +5,7 @@ use crate::ty::Type;
 use crate::typecheck::QualifiedType;
 
 #[derive(Debug, Clone, Copy)]
-pub struct Subobject<'a> {
+pub(crate) struct Subobject<'a> {
     pub(crate) ty: QualifiedType<'a>,
     pub(crate) offset: u64,
 }
