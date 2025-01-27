@@ -22,17 +22,19 @@ use panko_sema::layout::Declaration;
 use panko_sema::layout::Expression;
 use panko_sema::layout::ExternalDeclaration;
 use panko_sema::layout::FunctionDefinition;
+use panko_sema::layout::Initialiser;
 use panko_sema::layout::LayoutedExpression;
+use panko_sema::layout::Reference;
 use panko_sema::layout::Slot;
 use panko_sema::layout::Statement;
+use panko_sema::layout::Subobject;
+use panko_sema::layout::SubobjectInitialiser;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::Type;
 use panko_sema::scope::RefKind;
 use panko_sema::ty::ArrayType;
 use panko_sema::typecheck::ArrayLength;
-use panko_sema::typecheck::Initialiser;
 use panko_sema::typecheck::PtrCmpKind;
-use panko_sema::typecheck::SubobjectInitialiser;
 
 use crate::Register::*;
 use crate::lineno::Linenos;
@@ -161,6 +163,17 @@ struct LabelId(u64);
 impl fmt::Display for LabelId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, ".L.{}", self.0)
+    }
+}
+
+struct SubobjectAtReference<'a> {
+    reference: Reference<'a>,
+    subobject: Subobject<'a>,
+}
+
+impl<'a> SubobjectAtReference<'a> {
+    fn slot(&self) -> Slot<'a> {
+        self.reference.slot().offset(self.subobject.offset())
     }
 }
 
@@ -388,11 +401,7 @@ impl<'a> Codegen<'a> {
                 Expression::Logical { .. } => todo!(),
                 Expression::Conditional { .. } => todo!(),
             },
-            Some(Initialiser::Braced {
-                open_brace: _,
-                subobject_initialisers,
-                close_brace: _,
-            }) => {
+            Some(Initialiser::Braced { subobject_initialisers }) => {
                 self.zero(size);
                 for _initialiser in subobject_initialisers {
                     todo!()
@@ -437,18 +446,11 @@ impl<'a> Codegen<'a> {
                 self.defined.insert(name);
                 let initialiser = try {
                     match decl.initialiser.as_ref()? {
-                        Initialiser::Braced {
-                            open_brace,
-                            subobject_initialisers,
-                            close_brace,
-                        } => match subobject_initialisers {
-                            [] => Initialiser::Braced {
-                                open_brace: *open_brace,
-                                subobject_initialisers: &[],
-                                close_brace: *close_brace,
+                        Initialiser::Braced { subobject_initialisers } =>
+                            match subobject_initialisers {
+                                [] => Initialiser::Braced { subobject_initialisers: &[] },
+                                _ => todo!(),
                             },
-                            _ => todo!(),
-                        },
                         Initialiser::Expression(expr) => Initialiser::Expression(&expr.expr),
                     }
                 };
@@ -473,11 +475,7 @@ impl<'a> Codegen<'a> {
                             self.copy(reference, initialiser);
                         }
                     }
-                    Some(Initialiser::Braced {
-                        open_brace: _,
-                        subobject_initialisers,
-                        close_brace: _,
-                    }) => {
+                    Some(Initialiser::Braced { subobject_initialisers }) => {
                         self.emit("xor eax, eax");
                         match reference.ty.ty.size() {
                             size @ (1 | 2 | 4 | 8) => {
@@ -489,13 +487,19 @@ impl<'a> Codegen<'a> {
                                 self.emit("rep stosb");
                             }
                         }
-                        for subobject_initialiser in *subobject_initialisers {
-                            let SubobjectInitialiser { subobject: _, initialiser } =
-                                subobject_initialiser;
-                            self.expr(initialiser);
-                            // TODO: if `expr` has a different slot than the subobject, we
-                            // have to `copy` here.
-                        }
+                        subobject_initialisers.iter().for_each(
+                            |SubobjectInitialiser { subobject, initialiser }| {
+                                self.expr(initialiser);
+
+                                let tgt = SubobjectAtReference {
+                                    reference: *reference,
+                                    subobject: *subobject,
+                                };
+                                if tgt.slot() != initialiser.slot {
+                                    self.copy(&tgt, initialiser);
+                                }
+                            },
+                        );
                     }
                     None => (),
                 },

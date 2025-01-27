@@ -14,10 +14,8 @@ use crate::ty::ArrayType;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
 use crate::typecheck;
-use crate::typecheck::Initialiser;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::PtrCmpKind;
-use crate::typecheck::SubobjectInitialiser;
 
 mod as_sexpr;
 mod stack;
@@ -41,6 +39,36 @@ pub enum ExternalDeclaration<'a> {
 pub struct Declaration<'a> {
     pub reference: Reference<'a>,
     pub initialiser: Option<Initialiser<'a, LayoutedExpression<'a>>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Initialiser<'a, Expression> {
+    Braced {
+        subobject_initialisers: &'a [SubobjectInitialiser<'a, Expression>],
+    },
+    Expression(Expression),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct SubobjectInitialiser<'a, Expression> {
+    pub subobject: Subobject<'a>,
+    pub initialiser: Expression,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Subobject<'a> {
+    pub(crate) ty: QualifiedType<'a>,
+    pub(crate) offset: u64,
+}
+
+impl<'a> Subobject<'a> {
+    pub fn ty(&self) -> &QualifiedType<'a> {
+        &self.ty
+    }
+
+    pub fn offset(&self) -> u64 {
+        self.offset
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -164,7 +192,7 @@ pub enum Slot<'a> {
 }
 
 impl<'a> Slot<'a> {
-    fn offset(&self, offset: u64) -> Slot<'a> {
+    pub fn offset(&self, offset: u64) -> Slot<'a> {
         match self {
             Slot::Static(_) => todo!(),
             Slot::Automatic(slot) => Self::Automatic(slot + offset),
@@ -289,30 +317,31 @@ fn layout_declaration<'a>(
     let slot = reference.slot();
     let initialiser = stack.with_block(|stack| try {
         match initialiser? {
-            Initialiser::Braced {
-                open_brace,
+            typecheck::Initialiser::Braced {
+                open_brace: _,
                 subobject_initialisers,
-                close_brace,
+                close_brace: _,
             } => {
-                let subobject_initialisers =
-                    bump.alloc_slice_fill_iter(subobject_initialisers.iter().map(
-                        |SubobjectInitialiser { subobject, initialiser }| SubobjectInitialiser {
-                            subobject: *subobject,
+                let subobject_initialisers = bump.alloc_slice_fill_iter(
+                    subobject_initialisers.iter().map(|subobject_initialiser| {
+                        let typecheck::SubobjectInitialiser {
+                            subobject: ty::subobjects::Subobject { ty, offset },
+                            initialiser,
+                        } = *subobject_initialiser;
+                        SubobjectInitialiser {
+                            subobject: Subobject { ty: layout_ty(stack, bump, ty), offset },
                             initialiser: layout_expression_in_slot(
                                 stack,
                                 bump,
-                                initialiser,
-                                Some(slot.offset(subobject.offset)),
+                                &initialiser,
+                                Some(slot.offset(offset)),
                             ),
-                        },
-                    ));
-                Initialiser::Braced {
-                    open_brace,
-                    subobject_initialisers,
-                    close_brace,
-                }
+                        }
+                    }),
+                );
+                Initialiser::Braced { subobject_initialisers }
             }
-            Initialiser::Expression(initialiser) => Initialiser::Expression(
+            typecheck::Initialiser::Expression(initialiser) => Initialiser::Expression(
                 layout_expression_in_slot(stack, bump, &initialiser, Some(reference.slot)),
             ),
         }
