@@ -76,10 +76,7 @@ impl AsSExpr for Declaration<'_> {
     }
 }
 
-impl<Expression> AsSExpr for Initialiser<'_, Expression>
-where
-    Expression: AsSExpr,
-{
+impl AsSExpr for Initialiser<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Self::Braced {
@@ -92,10 +89,7 @@ where
     }
 }
 
-impl<Expression> AsSExpr for SubobjectInitialiser<'_, Expression>
-where
-    Expression: AsSExpr,
-{
+impl AsSExpr for SubobjectInitialiser<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("subobject")
             .inline_string(format!("+{}", self.subobject.offset))

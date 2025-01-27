@@ -443,31 +443,31 @@ pub(crate) enum ExternalDeclaration<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Declaration<'a> {
     pub(crate) reference: Reference<'a>,
-    pub(crate) initialiser: Option<Initialiser<'a, TypedExpression<'a>>>,
+    pub(crate) initialiser: Option<Initialiser<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum Initialiser<'a, Expression> {
+pub(crate) enum Initialiser<'a> {
     Braced {
         #[expect(
             unused,
             reason = "TODO: error messages that need this are not implemented"
         )]
         open_brace: Token<'a>,
-        subobject_initialisers: &'a [SubobjectInitialiser<'a, Expression>],
+        subobject_initialisers: &'a [SubobjectInitialiser<'a>],
         #[expect(
             unused,
             reason = "TODO: error messages that need this are not implemented"
         )]
         close_brace: Token<'a>,
     },
-    Expression(Expression),
+    Expression(TypedExpression<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct SubobjectInitialiser<'a, Expression> {
+pub(crate) struct SubobjectInitialiser<'a> {
     pub(crate) subobject: Subobject<'a>,
-    pub(crate) initialiser: Expression,
+    pub(crate) initialiser: TypedExpression<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1046,7 +1046,7 @@ fn typeck_function_definition<'a>(
 
 fn typeck_initialiser_list<'a>(
     sess: &'a Session<'a>,
-    subobject_initialisers: &mut Vec<SubobjectInitialiser<'a, TypedExpression<'a>>>,
+    subobject_initialisers: &mut Vec<SubobjectInitialiser<'a>>,
     subobjects: &mut Subobjects<'a>,
     initialiser_list: &[scope::DesignatedInitialiser<'a, scope::Expression<'a>>],
 ) {
