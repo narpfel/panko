@@ -189,14 +189,17 @@ pub enum Slot<'a> {
     Static(&'a str),
     Automatic(u64),
     Void,
+    StaticWithOffset { name: &'a str, offset: u64 },
 }
 
 impl<'a> Slot<'a> {
     pub fn offset(&self, offset: u64) -> Slot<'a> {
         match self {
-            Slot::Static(_) => todo!(),
+            Slot::Static(name) => Self::StaticWithOffset { name, offset },
             Slot::Automatic(slot) => Self::Automatic(slot + offset),
             Slot::Void => unreachable!("`void` slots have no subobjects"),
+            Slot::StaticWithOffset { name, offset: self_offset } =>
+                Self::StaticWithOffset { name, offset: self_offset + offset },
         }
     }
 }

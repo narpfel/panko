@@ -177,6 +177,13 @@ impl<'a> SubobjectAtReference<'a> {
     }
 }
 
+enum StaticInitialiser<'a> {
+    Braced {
+        subobject_initialisers: Vec<SubobjectInitialiser<'a, &'a Expression<'a>>>,
+    },
+    Expression(&'a Expression<'a>),
+}
+
 #[derive(Debug, Default)]
 struct Codegen<'a> {
     tentative_definitions: IndexMap<&'a str, Type<'a>>,
@@ -358,7 +365,7 @@ impl<'a> Codegen<'a> {
         &mut self,
         name: &str,
         ty: Type,
-        initialiser: Option<Initialiser<'_, &Expression>>,
+        initialiser: Option<StaticInitialiser<'_>>,
     ) {
         let size = match ty {
             // TODO: assert that this only happens in tentative definitions
@@ -375,7 +382,7 @@ impl<'a> Codegen<'a> {
         self.directive("align", &[&ty.align()]);
         self.label(name);
         match initialiser {
-            Some(Initialiser::Expression(initialiser)) => match initialiser {
+            Some(StaticInitialiser::Expression(initialiser)) => match initialiser {
                 Expression::Error(_) => todo!("ICE?"),
                 Expression::Name(_) => todo!(),
                 Expression::Integer(value) =>
@@ -401,10 +408,23 @@ impl<'a> Codegen<'a> {
                 Expression::Logical { .. } => todo!(),
                 Expression::Conditional { .. } => todo!(),
             },
-            Some(Initialiser::Braced { subobject_initialisers }) => {
-                self.zero(size);
-                for _initialiser in subobject_initialisers {
-                    todo!()
+            Some(StaticInitialiser::Braced { subobject_initialisers }) => {
+                if subobject_initialisers.is_empty() {
+                    self.zero(size);
+                }
+                else {
+                    // TODO: this can be made a lot more efficient for sparse initialisers
+                    let mut bytes = vec![0; usize::try_from(size).unwrap()];
+                    for SubobjectInitialiser { subobject, initialiser } in subobject_initialisers {
+                        let subobject_size = usize::try_from(subobject.ty().ty.size()).unwrap();
+                        match initialiser {
+                            Expression::Integer(value) => bytes
+                                [usize::try_from(subobject.offset()).unwrap()..][..subobject_size]
+                                .copy_from_slice(&value.to_le_bytes()[..subobject_size]),
+                            _ => todo!(),
+                        }
+                    }
+                    self.constant(&bytes);
                 }
             }
             None => self.zero(size),
@@ -447,11 +467,18 @@ impl<'a> Codegen<'a> {
                 let initialiser = try {
                     match decl.initialiser.as_ref()? {
                         Initialiser::Braced { subobject_initialisers } =>
-                            match subobject_initialisers {
-                                [] => Initialiser::Braced { subobject_initialisers: &[] },
-                                _ => todo!(),
+                            StaticInitialiser::Braced {
+                                subobject_initialisers: subobject_initialisers
+                                    .iter()
+                                    .map(|SubobjectInitialiser { subobject, initialiser }| {
+                                        SubobjectInitialiser {
+                                            subobject: *subobject,
+                                            initialiser: &initialiser.expr,
+                                        }
+                                    })
+                                    .collect(),
                             },
-                        Initialiser::Expression(expr) => Initialiser::Expression(&expr.expr),
+                        Initialiser::Expression(expr) => StaticInitialiser::Expression(&expr.expr),
                     }
                 };
                 self.object_definition(name, ty, initialiser)
@@ -740,6 +767,7 @@ impl<'a> Codegen<'a> {
                                 offset: Offset::Immediate(offset),
                             },
                             Slot::Void => unreachable!(),
+                            Slot::StaticWithOffset { name: _, offset: _ } => todo!(),
                         };
                         self.emit_args("lea", &[&Rax, memory_operand]);
                     }

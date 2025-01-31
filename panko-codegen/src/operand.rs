@@ -204,6 +204,7 @@ fn slot_as_operand<'a>(
             )
         }
         Slot::Void => unreachable!(),
+        Slot::StaticWithOffset { name: _, offset: _ } => todo!(),
     };
     Operand {
         kind: OperandKind::Pointer {

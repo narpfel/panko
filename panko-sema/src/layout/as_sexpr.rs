@@ -180,6 +180,9 @@ impl AsSExpr for Slot<'_> {
             Slot::Static(name) => SExpr::new("static").inline_string(name.to_string()),
             Slot::Automatic(offset) => SExpr::string(format!("@{offset}")),
             Self::Void => SExpr::string("@void"),
+            Self::StaticWithOffset { name, offset } => SExpr::new("static")
+                .inline_string(name.to_string())
+                .inline_string(format!("+{offset}")),
         }
     }
 }
