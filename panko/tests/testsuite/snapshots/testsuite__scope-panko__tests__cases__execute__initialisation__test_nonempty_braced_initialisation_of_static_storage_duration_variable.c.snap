@@ -18,40 +18,47 @@ exit_code: 0
          27
          5
          2147483647))
+   (definition value~2 `int`
+      (braced
+         123))
    (function-definition
-      main~2 `fn(∅: int, ∅: ptr<ptr<char>>) -> int`
+      main~3 `fn(∅: int, ∅: ptr<ptr<char>>) -> int`
       (params
-         main.unnamed_parameter.0~3 `int`
-         main.unnamed_parameter.1~4 `ptr<ptr<char>>`)
+         main.unnamed_parameter.0~4 `int`
+         main.unnamed_parameter.1~5 `ptr<ptr<char>>`)
       (compound-statement
-         (definition s~5 `array<char; 100>`
+         (definition s~6 `array<char; 100>`
             (braced
                37
                100
                10))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (name s~5 `array<char; 100>`)
+               (name s~6 `array<char; 100>`)
                (subscript (name xs~1 `array<int; 100>`) 0)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (name s~5 `array<char; 100>`)
+               (name s~6 `array<char; 100>`)
                (subscript (name xs~1 `array<int; 100>`) 1)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (name s~5 `array<char; 100>`)
+               (name s~6 `array<char; 100>`)
                (subscript (name xs~1 `array<int; 100>`) 2)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (name s~5 `array<char; 100>`)
+               (name s~6 `array<char; 100>`)
                (subscript (name xs~1 `array<int; 100>`) 3)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (name s~5 `array<char; 100>`)
+               (name s~6 `array<char; 100>`)
                (subscript (name xs~1 `array<int; 100>`) 4)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (name s~5 `array<char; 100>`)
-               (subscript (name xs~1 `array<int; 100>`) 99))))))
+               (name s~6 `array<char; 100>`)
+               (subscript (name xs~1 `array<int; 100>`) 99)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name s~6 `array<char; 100>`)
+               (name value~2 `int`))))))
 
 ----- stderr -----

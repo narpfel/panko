@@ -2,6 +2,8 @@ int printf(char const*, ...);
 
 int xs[100] = {42, 27, 5, 2147483647};
 
+int value = {123};
+
 int main(int, char**) {
     char s[100] = {37, 100, 10};
     // [[print: 42]]
@@ -16,4 +18,6 @@ int main(int, char**) {
     printf(s, xs[4]);
     // [[print: 0]]
     printf(s, xs[99]);
+    // [[print: 123]]
+    printf(s, value);
 }
