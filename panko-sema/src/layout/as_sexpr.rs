@@ -61,10 +61,7 @@ impl AsSExpr for Declaration<'_> {
     }
 }
 
-impl<Expression> AsSExpr for Initialiser<'_, Expression>
-where
-    Expression: AsSExpr,
-{
+impl AsSExpr for Initialiser<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Self::Braced { subobject_initialisers } =>

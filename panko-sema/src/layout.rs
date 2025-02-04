@@ -38,15 +38,15 @@ pub enum ExternalDeclaration<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct Declaration<'a> {
     pub reference: Reference<'a>,
-    pub initialiser: Option<Initialiser<'a, LayoutedExpression<'a>>>,
+    pub initialiser: Option<Initialiser<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum Initialiser<'a, Expression> {
+pub enum Initialiser<'a> {
     Braced {
-        subobject_initialisers: &'a [SubobjectInitialiser<'a, Expression>],
+        subobject_initialisers: &'a [SubobjectInitialiser<'a, LayoutedExpression<'a>>],
     },
-    Expression(Expression),
+    Expression(LayoutedExpression<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
