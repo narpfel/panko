@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/initialisation/test_empty_braced_initialisation_of_static_variable.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (definition x~0 `int` (braced ∅))
+   (definition xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>` (braced ∅))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (return (bit-or (bit-or (bit-or (bit-or (x~0 `int`) (deref (ptr-add (noop-type-conversion (addressof (deref (ptr-add (noop-type-conversion (addressof (xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>`) `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`) `ptr<array<int; (constexpr 2)>>`) (sign-extend (0 `int`) `unsigned long`) `ptr<array<int; (constexpr 2)>>`) `array<int; (constexpr 2)>`) `ptr<array<int; (constexpr 2)>>`) `ptr<int>`) (sign-extend (0 `int`) `unsigned long`) `ptr<int>`) `int`) `int`) (deref (ptr-add (noop-type-conversion (addressof (deref (ptr-add (noop-type-conversion (addressof (xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>`) `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`) `ptr<array<int; (constexpr 2)>>`) (sign-extend (0 `int`) `unsigned long`) `ptr<array<int; (constexpr 2)>>`) `array<int; (constexpr 2)>`) `ptr<array<int; (constexpr 2)>>`) `ptr<int>`) (sign-extend (1 `int`) `unsigned long`) `ptr<int>`) `int`) `int`) (deref (ptr-add (noop-type-conversion (addressof (deref (ptr-add (noop-type-conversion (addressof (xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>`) `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`) `ptr<array<int; (constexpr 2)>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<array<int; (constexpr 2)>>`) `array<int; (constexpr 2)>`) `ptr<array<int; (constexpr 2)>>`) `ptr<int>`) (sign-extend (0 `int`) `unsigned long`) `ptr<int>`) `int`) `int`) (deref (ptr-add (noop-type-conversion (addressof (deref (ptr-add (noop-type-conversion (addressof (xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>`) `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`) `ptr<array<int; (constexpr 2)>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<array<int; (constexpr 2)>>`) `array<int; (constexpr 2)>`) `ptr<array<int; (constexpr 2)>>`) `ptr<int>`) (sign-extend (1 `int`) `unsigned long`) `ptr<int>`) `int`) `int`)))))
+
+----- stderr -----
