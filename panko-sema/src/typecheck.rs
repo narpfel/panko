@@ -427,7 +427,7 @@ impl<Expression> Hash for ArrayLength<Expression> {
     }
 }
 
-type Type<'a> = ty::Type<'a, !, ArrayLength<&'a TypedExpression<'a>>>;
+pub(crate) type Type<'a> = ty::Type<'a, !, ArrayLength<&'a TypedExpression<'a>>>;
 pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, !, ArrayLength<&'a TypedExpression<'a>>>;
 
 #[derive(Debug, Clone, Copy)]
@@ -1061,7 +1061,7 @@ fn typeck_initialiser_list<'a>(
                     close_brace: _,
                 } => {
                     // TODO: this does not work:
-                    //     int xs[2] = {{1}, 2};
+                    //     int xs[2][2] = {{{1}, 2}, {3, 4}};
                     // TODO: nested braced initialisers in array initialisers initialise *an array
                     // element* (with excess initialisers), not the array itself:
                     //     int xs[2] = {{{1, 2}}};
@@ -1078,15 +1078,17 @@ fn typeck_initialiser_list<'a>(
                     );
                     subobjects.leave_subobject();
                 }
-                scope::Initialiser::Expression(initialiser) =>
+                scope::Initialiser::Expression(initialiser) => {
+                    let subobject = subobjects.next_scalar().unwrap();
                     subobject_initialisers.push(SubobjectInitialiser {
-                        subobject: subobjects.next_scalar().unwrap(),
+                        subobject,
                         initialiser: convert_as_if_by_assignment(
                             sess,
-                            subobjects.current().unwrap().ty,
+                            subobject.ty,
                             typeck_expression(sess, initialiser, Context::Default),
                         ),
-                    }),
+                    })
+                }
             },
         }
     }

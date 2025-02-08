@@ -2,9 +2,6 @@ use std::borrow::Cow;
 use std::fmt;
 use std::hash::Hash;
 use std::hash::Hasher;
-use std::iter::empty;
-use std::iter::once;
-use std::iter::repeat_n;
 
 use bumpalo::Bump;
 use itertools::Itertools as _;
@@ -362,22 +359,6 @@ where
             ty,
             loc: *loc,
         })
-    }
-
-    fn direct_subobjects(&self) -> Box<dyn Iterator<Item = &Self> + '_> {
-        match self.ty {
-            Type::Array(ArrayType { ty, length }) => match length {
-                ArrayLength::Constant(length) =>
-                    Box::new(repeat_n(ty, usize::try_from(length).unwrap())),
-                ArrayLength::Variable(_) => todo!(),
-                // TODO: this should infinitely yield `ty`
-                ArrayLength::Unknown => Box::new(empty()),
-            },
-            ty => {
-                assert!(ty.is_scalar());
-                Box::new(once(self))
-            }
-        }
     }
 }
 

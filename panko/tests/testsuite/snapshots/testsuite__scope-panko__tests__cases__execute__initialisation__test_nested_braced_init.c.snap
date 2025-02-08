@@ -90,6 +90,19 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 1)
-               (subscript (subscript (name ys~7 `array<array<int; 2>; 2>`) 1) 1))))))
+               (subscript (subscript (name ys~7 `array<array<int; 2>; 2>`) 1) 1)))
+         (definition zs~8 `array<int; 2>`
+            (braced
+               (braced
+                  1)
+               2))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (name zs~8 `array<int; 2>`) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (name zs~8 `array<int; 2>`) 1))))))
 
 ----- stderr -----

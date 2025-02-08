@@ -1,8 +1,10 @@
-use std::collections::VecDeque;
 use std::mem;
 
-use crate::ty::Type;
+use crate::ty::ArrayType;
+use crate::typecheck::ArrayLength;
 use crate::typecheck::QualifiedType;
+use crate::typecheck::Type;
+use crate::typecheck::TypedExpression;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Subobject<'a> {
@@ -11,61 +13,119 @@ pub(crate) struct Subobject<'a> {
 }
 
 #[derive(Debug, Clone)]
+enum SubobjectIterator<'a> {
+    Scalar {
+        ty: Type<'a>,
+        is_exhausted: bool,
+    },
+    Array {
+        ty: ArrayType<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
+        index: u64,
+    },
+}
+
+impl<'a> SubobjectIterator<'a> {
+    fn next(&mut self) -> Option<Subobject<'a>> {
+        let result = self.current();
+        match self {
+            Self::Scalar { ty: _, is_exhausted } => {
+                *is_exhausted = true;
+            }
+            Self::Array { ty: _, index } => {
+                *index += 1;
+            }
+        }
+        result
+    }
+
+    fn current(&self) -> Option<Subobject<'a>> {
+        if self.is_empty() {
+            None
+        }
+        else {
+            match self {
+                // TODO: is it correct to return the unqualified type here or should the qualifiers
+                // be retained?
+                Self::Scalar { ty, is_exhausted: _ } =>
+                    Some(Subobject { ty: ty.unqualified(), offset: 0 }),
+                Self::Array { ty, index } => Some(Subobject {
+                    ty: ty.ty.ty.unqualified(),
+                    offset: index.checked_mul(ty.ty.ty.size()).unwrap(),
+                }),
+            }
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        match self {
+            Self::Scalar { ty: _, is_exhausted } => *is_exhausted,
+            Self::Array { ty, index } => match ty.length {
+                ArrayLength::Constant(len) => *index >= len,
+                ArrayLength::Variable(_) =>
+                    todo!("VLAs cannot be initialised by braced initialisation"),
+                ArrayLength::Unknown => false,
+            },
+        }
+    }
+
+    fn size(&self) -> u64 {
+        match self {
+            Self::Array { ty, index: _ } => Type::Array(*ty).size(),
+            Self::Scalar { ty, is_exhausted: _ } => ty.size(),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub(crate) struct Subobjects<'a> {
-    stack: Vec<VecDeque<Subobject<'a>>>,
-    queue: VecDeque<Subobject<'a>>,
-    current: Option<Subobject<'a>>,
+    stack: Vec<SubobjectIterator<'a>>,
+    current: SubobjectIterator<'a>,
+    offset: u64,
 }
 
 impl<'a> Subobjects<'a> {
     pub(crate) fn new(ty: QualifiedType<'a>) -> Self {
-        let subobject = Subobject { ty, offset: 0 };
+        let subobject_iterator = match ty.ty {
+            Type::Array(ty) => SubobjectIterator::Array { ty, index: 0 },
+            ty if ty.is_scalar() => SubobjectIterator::Scalar { ty, is_exhausted: false },
+            _ => unreachable!(),
+        };
         Self {
-            stack: vec![[subobject].into_iter().collect()],
-            current: Some(subobject),
-            queue: VecDeque::new(),
+            stack: vec![],
+            current: subobject_iterator,
+            offset: 0,
         }
     }
 
     pub(crate) fn next_scalar(&mut self) -> Option<Subobject<'a>> {
-        self.current = None;
         loop {
-            if self.queue.is_empty()
-                && let Some(queue) = self.stack.pop()
-            {
-                self.queue = queue;
+            while self.current.is_empty() && !self.stack.is_empty() {
+                self.leave_subobject();
             }
 
-            let subobject = self.queue.pop_front()?;
+            let subobject = self.current.next()?;
             match subobject.ty.ty {
-                ty @ Type::Array(_) => {
-                    self.stack.push(mem::take(&mut self.queue));
-                    self.queue.extend(ty.unqualified().direct_subobjects().scan(
-                        subobject.offset,
-                        |offset, &ty| {
-                            let subobject = Some(Subobject { ty, offset: *offset });
-                            *offset += ty.ty.size();
-                            subobject
-                        },
-                    ));
+                Type::Array(ty) => {
+                    self.stack
+                        .push(mem::replace(&mut self.current, SubobjectIterator::Array {
+                            ty,
+                            index: 0,
+                        }));
                 }
-                ty => {
-                    assert!(ty.is_scalar());
-                    self.current = Some(subobject);
-                    return self.current;
-                }
+                _ =>
+                    return Some(Subobject {
+                        offset: subobject.offset + self.offset,
+                        ..subobject
+                    }),
             }
         }
     }
 
     pub(crate) fn leave_subobject(&mut self) {
-        if let Some(queue) = self.stack.pop() {
-            self.queue = queue;
+        if let Some(iterator) = self.stack.pop() {
+            self.offset += self.current.size();
+            self.current = iterator;
         }
-    }
-
-    pub(crate) fn current(&self) -> Option<Subobject<'a>> {
-        self.current
     }
 }
 

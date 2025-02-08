@@ -37,4 +37,11 @@ int main(int, char** argv) {
     printf(argv[1], ys[1][0]);
     // [[print: 4]]
     printf(argv[1], ys[1][1]);
+
+    // braced initialiser with braces around scalar
+    int zs[2] = {{1}, 2};
+    // [[print: 1]]
+    printf(argv[1], zs[0]);
+    // [[print: 2]]
+    printf(argv[1], zs[1]);
 }
