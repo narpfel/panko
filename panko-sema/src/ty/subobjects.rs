@@ -130,6 +130,9 @@ impl<'a> Subobjects<'a> {
                 },
                 _ => unreachable!(),
             },
+            // TODO: this is incorrect:
+            //     int x = {1, {}};
+            // this should error, not silently ignore the excess initialiser (even if it is empty)
             None => SubobjectIterator::Empty,
         };
         self.stack.push(mem::replace(&mut self.current, iterator));
