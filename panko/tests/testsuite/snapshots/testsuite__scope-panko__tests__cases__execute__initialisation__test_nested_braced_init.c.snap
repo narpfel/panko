@@ -103,6 +103,56 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 1)
-               (subscript (name zs~8 `array<int; 2>`) 1))))))
+               (subscript (name zs~8 `array<int; 2>`) 1)))
+         (definition as~9 `array<array<int; 2>; 2>`
+            (braced
+               (braced
+                  (braced
+                     1)
+                  2)
+               (braced
+                  3
+                  4)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name as~9 `array<array<int; 2>; 2>`) 0) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name as~9 `array<array<int; 2>; 2>`) 0) 1)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name as~9 `array<array<int; 2>; 2>`) 1) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name as~9 `array<array<int; 2>; 2>`) 1) 1)))
+         (definition bs~10 `array<array<int; 2>; 2>`
+            (braced
+               (braced
+                  1
+                  (braced
+                     3))
+               (braced
+                  4
+                  5)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name bs~10 `array<array<int; 2>; 2>`) 0) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name bs~10 `array<array<int; 2>; 2>`) 0) 1)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name bs~10 `array<array<int; 2>; 2>`) 1) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name bs~10 `array<array<int; 2>; 2>`) 1) 1))))))
 
 ----- stderr -----

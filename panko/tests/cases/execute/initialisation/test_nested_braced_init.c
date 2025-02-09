@@ -44,4 +44,24 @@ int main(int, char** argv) {
     printf(argv[1], zs[0]);
     // [[print: 2]]
     printf(argv[1], zs[1]);
+
+    int as[2][2] = {{{1}, 2}, {3, 4}};
+    // [[print: 1]]
+    printf(argv[1], as[0][0]);
+    // [[print: 2]]
+    printf(argv[1], as[0][1]);
+    // [[print: 3]]
+    printf(argv[1], as[1][0]);
+    // [[print: 4]]
+    printf(argv[1], as[1][1]);
+
+    int bs[2][2] = {{1, {3}}, {4, 5}};
+    // [[print: 1]]
+    printf(argv[1], bs[0][0]);
+    // [[print: 3]]
+    printf(argv[1], bs[0][1]);
+    // [[print: 4]]
+    printf(argv[1], bs[1][0]);
+    // [[print: 5]]
+    printf(argv[1], bs[1][1]);
 }

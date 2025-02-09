@@ -1060,8 +1060,6 @@ fn typeck_initialiser_list<'a>(
                     initialiser_list,
                     close_brace: _,
                 } => {
-                    // TODO: this does not work:
-                    //     int xs[2][2] = {{{1}, 2}, {3, 4}};
                     // TODO: nested braced initialisers in array initialisers initialise *an array
                     // element* (with excess initialisers), not the array itself:
                     //     int xs[2] = {{{1, 2}}};
@@ -1070,6 +1068,7 @@ fn typeck_initialiser_list<'a>(
                     //     // [[print: 0]]
                     //     printf("%s\n", xs[1]);
                     // Also, this is required to emit a diagnostic.
+                    subobjects.enter_subobject();
                     typeck_initialiser_list(
                         sess,
                         subobject_initialisers,
