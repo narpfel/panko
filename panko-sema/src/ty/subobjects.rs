@@ -24,7 +24,6 @@ enum SubobjectIterator<'a> {
         index: u64,
         offset: u64,
     },
-    Empty,
 }
 
 impl<'a> SubobjectIterator<'a> {
@@ -37,7 +36,6 @@ impl<'a> SubobjectIterator<'a> {
             Self::Array { ty: _, index, offset: _ } => {
                 *index += 1;
             }
-            Self::Empty => (),
         }
         result
     }
@@ -58,7 +56,6 @@ impl<'a> SubobjectIterator<'a> {
                         .checked_add(index.checked_mul(ty.ty.ty.size()).unwrap())
                         .unwrap(),
                 }),
-                Self::Empty => None,
             }
         }
     }
@@ -72,7 +69,6 @@ impl<'a> SubobjectIterator<'a> {
                     todo!("VLAs cannot be initialised by braced initialisation"),
                 ArrayLength::Unknown => false,
             },
-            Self::Empty => true,
         }
     }
 }
@@ -130,10 +126,9 @@ impl<'a> Subobjects<'a> {
                 },
                 _ => unreachable!(),
             },
-            // TODO: this is incorrect:
+            // Example for this case:
             //     int x = {1, {}};
-            // this should error, not silently ignore the excess initialiser (even if it is empty)
-            None => SubobjectIterator::Empty,
+            None => todo!("error: excess initialiser"),
         };
         self.stack.push(mem::replace(&mut self.current, iterator));
     }
