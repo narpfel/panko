@@ -108,7 +108,7 @@ impl<'a> Subobjects<'a> {
     pub(crate) fn next_scalar(&mut self) -> Option<Subobject<'a>> {
         loop {
             while self.current.is_empty() && !self.stack.is_empty() {
-                let left = self.leave_subobject(AllowExplicit::No);
+                let left = self.try_leave_subobject(AllowExplicit::No);
                 if !left {
                     break;
                 }
@@ -151,7 +151,8 @@ impl<'a> Subobjects<'a> {
             .push((mem::replace(&mut self.current, iterator), Explicit::Yes));
     }
 
-    pub(crate) fn leave_subobject(&mut self, allow_explicit: AllowExplicit) -> bool {
+    #[must_use]
+    pub(crate) fn try_leave_subobject(&mut self, allow_explicit: AllowExplicit) -> bool {
         if let Some((iterator, _)) = self.stack.pop_if(|(_, explicit)| {
             matches!(allow_explicit, AllowExplicit::Yes) || matches!(explicit, Explicit::No)
         }) {
@@ -244,11 +245,11 @@ mod tests {
 
         let mut subobjects = Subobjects::new(ty);
         assert_eq!(subobjects.next_scalar().unwrap().offset, 0);
-        subobjects.leave_subobject(AllowExplicit::No);
+        assert!(subobjects.try_leave_subobject(AllowExplicit::No));
         let size = size_t.ty.size();
         assert_eq!(subobjects.next_scalar().unwrap().offset, size * 4);
         assert_eq!(subobjects.next_scalar().unwrap().offset, size * 4 + size);
-        subobjects.leave_subobject(AllowExplicit::No);
+        assert!(subobjects.try_leave_subobject(AllowExplicit::No));
         assert_eq!(subobjects.next_scalar().unwrap().offset, size * 8);
     }
 }

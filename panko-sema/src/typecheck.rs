@@ -1077,7 +1077,7 @@ fn typeck_initialiser_list<'a>(
                         subobjects,
                         initialiser_list,
                     );
-                    let left = subobjects.leave_subobject(AllowExplicit::Yes);
+                    let left = subobjects.try_leave_subobject(AllowExplicit::Yes);
                     assert!(left);
                 }
                 scope::Initialiser::Expression(initialiser) => {
