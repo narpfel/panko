@@ -43,6 +43,7 @@ use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
+use crate::ty::subobjects::AllowExplicit;
 use crate::ty::subobjects::Subobject;
 use crate::ty::subobjects::Subobjects;
 
@@ -1060,7 +1061,8 @@ fn typeck_initialiser_list<'a>(
                     initialiser_list,
                     close_brace: _,
                 } => {
-                    // TODO: nested braced initialisers in array initialisers initialise *an array
+                    // TODO: add a test for this case:
+                    // nested braced initialisers in array initialisers initialise *an array
                     // element* (with excess initialisers), not the array itself:
                     //     int xs[2] = {{{1, 2}}};
                     //     // [[print: 1]]
@@ -1075,7 +1077,8 @@ fn typeck_initialiser_list<'a>(
                         subobjects,
                         initialiser_list,
                     );
-                    subobjects.leave_subobject();
+                    let left = subobjects.leave_subobject(AllowExplicit::Yes);
+                    assert!(left);
                 }
                 scope::Initialiser::Expression(initialiser) => {
                     let subobject = subobjects.next_scalar().unwrap();

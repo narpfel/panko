@@ -1,4 +1,5 @@
 #![feature(cmp_minmax)]
+#![feature(vec_pop_if)]
 #![feature(let_chains)]
 #![feature(impl_trait_in_fn_trait_return)]
 #![feature(never_type)]

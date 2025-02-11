@@ -73,9 +73,21 @@ impl<'a> SubobjectIterator<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+enum Explicit {
+    No,
+    Yes,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum AllowExplicit {
+    No,
+    Yes,
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct Subobjects<'a> {
-    stack: Vec<SubobjectIterator<'a>>,
+    stack: Vec<(SubobjectIterator<'a>, Explicit)>,
     current: SubobjectIterator<'a>,
 }
 
@@ -96,18 +108,23 @@ impl<'a> Subobjects<'a> {
     pub(crate) fn next_scalar(&mut self) -> Option<Subobject<'a>> {
         loop {
             while self.current.is_empty() && !self.stack.is_empty() {
-                self.leave_subobject();
+                let left = self.leave_subobject(AllowExplicit::No);
+                if !left {
+                    break;
+                }
             }
 
             let subobject = self.current.next()?;
             match subobject.ty.ty {
                 Type::Array(ty) => {
-                    self.stack
-                        .push(mem::replace(&mut self.current, SubobjectIterator::Array {
+                    self.stack.push((
+                        mem::replace(&mut self.current, SubobjectIterator::Array {
                             ty,
                             index: 0,
                             offset: subobject.offset,
-                        }));
+                        }),
+                        Explicit::No,
+                    ));
                 }
                 _ => return Some(subobject),
             }
@@ -130,12 +147,19 @@ impl<'a> Subobjects<'a> {
             //     int x = {1, {}};
             None => todo!("error: excess initialiser"),
         };
-        self.stack.push(mem::replace(&mut self.current, iterator));
+        self.stack
+            .push((mem::replace(&mut self.current, iterator), Explicit::Yes));
     }
 
-    pub(crate) fn leave_subobject(&mut self) {
-        if let Some(iterator) = self.stack.pop() {
+    pub(crate) fn leave_subobject(&mut self, allow_explicit: AllowExplicit) -> bool {
+        if let Some((iterator, _)) = self.stack.pop_if(|(_, explicit)| {
+            matches!(allow_explicit, AllowExplicit::Yes) || matches!(explicit, Explicit::No)
+        }) {
             self.current = iterator;
+            true
+        }
+        else {
+            false
         }
     }
 }
@@ -220,11 +244,11 @@ mod tests {
 
         let mut subobjects = Subobjects::new(ty);
         assert_eq!(subobjects.next_scalar().unwrap().offset, 0);
-        subobjects.leave_subobject();
+        subobjects.leave_subobject(AllowExplicit::No);
         let size = size_t.ty.size();
         assert_eq!(subobjects.next_scalar().unwrap().offset, size * 4);
         assert_eq!(subobjects.next_scalar().unwrap().offset, size * 4 + size);
-        subobjects.leave_subobject();
+        subobjects.leave_subobject(AllowExplicit::No);
         assert_eq!(subobjects.next_scalar().unwrap().offset, size * 8);
     }
 }
