@@ -106,6 +106,8 @@ impl<'a> Session<'a> {
         T: Report + 'a,
         Expr: ErrorExpr<'a>,
     {
+        // TODO: make it possible to panic on any (or a specific) error, similar to
+        // `-Z treat-err-as-bug` in rustc
         let diagnostic = self.alloc(diagnostic);
         self.diagnostics.borrow_mut().push(diagnostic);
         Expr::from_error(diagnostic)
