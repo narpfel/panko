@@ -376,6 +376,12 @@ enum Diagnostic<'a> {
         actual: usize,
         is_varargs: bool,
     },
+
+    #[error("empty arrays are not allowed")]
+    #[diagnostics(
+        at(colour = Red, label = "this array is declared as empty"),
+    )]
+    EmptyArray { at: Reference<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1142,14 +1148,15 @@ fn typeck_declaration<'a>(
             } = reference.ty
                 && let Some(Initialiser::Braced { subobject_initialisers, .. }) = initialiser
             {
-                let max_offset = subobject_initialisers
+                let length = subobject_initialisers
                     .iter()
                     .map(|initialiser| initialiser.subobject.offset)
                     .max()
-                    .unwrap_or(0);
-                let element_size = element_ty.ty.size();
-                assert!(max_offset.is_multiple_of(element_size));
-                let length = (max_offset / element_size).checked_add(1).unwrap();
+                    .map_or(0, |max_offset| {
+                        let element_size = element_ty.ty.size();
+                        assert!(max_offset.is_multiple_of(element_size));
+                        (max_offset / element_size).checked_add(1).unwrap()
+                    });
                 Reference {
                     ty: QualifiedType {
                         ty: Type::Array(ArrayType {
@@ -1170,6 +1177,12 @@ fn typeck_declaration<'a>(
         else {
             reference
         };
+
+    if let Type::Array(ArrayType { ty: _, length: ArrayLength::Constant(0) }) = reference.ty.ty {
+        // TODO: use this error
+        sess.emit(Diagnostic::EmptyArray { at: reference })
+    }
+
     Declaration { reference, initialiser }
 }
 
