@@ -1102,9 +1102,6 @@ fn typeck_declaration<'a>(
 ) -> Declaration<'a> {
     let scope::Declaration { reference, initialiser } = *declaration;
     let reference = typeck_reference(sess, reference);
-    if matches!(reference.kind, RefKind::Definition) && !reference.ty.ty.is_complete() {
-        sess.emit(Diagnostic::VariableWithIncompleteType { at: reference })
-    }
     let initialiser = try {
         match initialiser? {
             scope::Initialiser::Braced {
@@ -1133,6 +1130,46 @@ fn typeck_declaration<'a>(
                 )),
         }
     };
+    let reference =
+        if matches!(reference.kind, RefKind::Definition) && !reference.ty.ty.is_complete() {
+            if let ty @ QualifiedType {
+                ty:
+                    Type::Array(ArrayType {
+                        ty: element_ty,
+                        length: ArrayLength::Unknown,
+                    }),
+                ..
+            } = reference.ty
+                && let Some(Initialiser::Braced { subobject_initialisers, .. }) = initialiser
+            {
+                let max_offset = subobject_initialisers
+                    .iter()
+                    .map(|initialiser| initialiser.subobject.offset)
+                    .max()
+                    .unwrap_or(0);
+                let element_size = element_ty.ty.size();
+                assert!(max_offset.is_multiple_of(element_size));
+                let length = (max_offset / element_size).checked_add(1).unwrap();
+                Reference {
+                    ty: QualifiedType {
+                        ty: Type::Array(ArrayType {
+                            ty: element_ty,
+                            length: ArrayLength::Constant(length),
+                        }),
+                        ..ty
+                    },
+                    ..reference
+                }
+            }
+            else {
+                // TODO: use this error
+                let () = sess.emit(Diagnostic::VariableWithIncompleteType { at: reference });
+                reference
+            }
+        }
+        else {
+            reference
+        };
     Declaration { reference, initialiser }
 }
 
