@@ -1118,6 +1118,7 @@ fn typeck_initialiser_list<'a>(
                 scope::Initialiser::Expression(initialiser) => match subobjects.next_scalar() {
                     Ok(subobject) => subobject_initialisers.push(SubobjectInitialiser {
                         subobject,
+                        // TODO: this skips typechecking the initialiser in the `Err` case
                         initialiser: convert_as_if_by_assignment(
                             sess,
                             subobject.ty,
