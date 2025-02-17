@@ -13,7 +13,7 @@ pub(crate) struct Subobject<'a> {
 }
 
 #[derive(Debug, Clone)]
-enum SubobjectIterator<'a> {
+pub(crate) enum SubobjectIterator<'a> {
     Scalar {
         ty: Type<'a>,
         is_exhausted: bool,
@@ -40,7 +40,7 @@ impl<'a> SubobjectIterator<'a> {
         result
     }
 
-    fn current(&self) -> Option<Subobject<'a>> {
+    pub(crate) fn current(&self) -> Option<Subobject<'a>> {
         if self.is_empty() {
             None
         }
@@ -69,6 +69,13 @@ impl<'a> SubobjectIterator<'a> {
                     todo!("VLAs cannot be initialised by braced initialisation"),
                 ArrayLength::Unknown => false,
             },
+        }
+    }
+
+    pub(crate) fn kind(&self) -> &'static str {
+        match self {
+            Self::Scalar { .. } => "scalar",
+            Self::Array { .. } => "array",
         }
     }
 }
@@ -105,7 +112,7 @@ impl<'a> Subobjects<'a> {
         }
     }
 
-    pub(crate) fn next_scalar(&mut self) -> Option<Subobject<'a>> {
+    pub(crate) fn next_scalar(&mut self) -> Result<Subobject<'a>, SubobjectIterator<'a>> {
         loop {
             while self.current.is_empty() && !self.stack.is_empty() {
                 let left = self.try_leave_subobject(AllowExplicit::No);
@@ -114,7 +121,7 @@ impl<'a> Subobjects<'a> {
                 }
             }
 
-            let subobject = self.current.next()?;
+            let subobject = self.current.next().ok_or_else(|| self.current.clone())?;
             match subobject.ty.ty {
                 Type::Array(ty) => {
                     self.stack.push((
@@ -126,7 +133,7 @@ impl<'a> Subobjects<'a> {
                         Explicit::No,
                     ));
                 }
-                _ => return Some(subobject),
+                _ => return Ok(subobject),
             }
         }
     }
@@ -181,7 +188,7 @@ mod tests {
         let ty = Type::size_t().unqualified();
 
         let mut subobjects = Subobjects::new(ty);
-        let subobject_offsets = from_fn(|| subobjects.next_scalar())
+        let subobject_offsets = from_fn(|| subobjects.next_scalar().ok())
             .map(|subobject| subobject.offset)
             .collect_vec();
         assert_eq!(subobject_offsets, vec![0]);
@@ -197,7 +204,7 @@ mod tests {
         .unqualified();
 
         let mut subobjects = Subobjects::new(ty);
-        let subobject_offsets = from_fn(|| subobjects.next_scalar())
+        let subobject_offsets = from_fn(|| subobjects.next_scalar().ok())
             .map(|subobject| subobject.offset)
             .collect_vec();
         assert_eq!(subobject_offsets, vec![0, 8, 16]);
@@ -218,7 +225,7 @@ mod tests {
         .unqualified();
 
         let mut subobjects = Subobjects::new(ty);
-        let subobject_offsets = from_fn(|| subobjects.next_scalar())
+        let subobject_offsets = from_fn(|| subobjects.next_scalar().ok())
             .map(|subobject| subobject.offset)
             .collect_vec();
         assert_eq!(
