@@ -1119,6 +1119,9 @@ fn typeck_initialiser_list<'a>(
                     Ok(subobject) => subobject_initialisers.push(SubobjectInitialiser {
                         subobject,
                         // TODO: this skips typechecking the initialiser in the `Err` case
+                        // example:
+                        //     int x = {1, (void)42};
+                        // this should emit an excess initialiser error *and* a type error
                         initialiser: convert_as_if_by_assignment(
                             sess,
                             subobject.ty,
