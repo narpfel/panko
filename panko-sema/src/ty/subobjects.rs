@@ -138,7 +138,7 @@ impl<'a> Subobjects<'a> {
         }
     }
 
-    pub(crate) fn enter_subobject(&mut self) {
+    pub(crate) fn enter_subobject(&mut self) -> Result<(), SubobjectIterator<'a>> {
         let iterator = match self.current.next() {
             Some(subobject) => match subobject.ty.ty {
                 Type::Array(ty) =>
@@ -152,10 +152,11 @@ impl<'a> Subobjects<'a> {
             },
             // Example for this case:
             //     int x = {1, {}};
-            None => todo!("error: excess initialiser"),
+            None => Err(self.current.clone())?,
         };
         self.stack
             .push((mem::replace(&mut self.current, iterator), Explicit::Yes));
+        Ok(())
     }
 
     #[must_use]

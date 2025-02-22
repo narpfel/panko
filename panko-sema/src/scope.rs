@@ -287,6 +287,19 @@ pub(crate) enum GenericAssociation<'a> {
     },
 }
 
+impl<'a> Initialiser<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
+        match self {
+            Self::Braced {
+                open_brace,
+                initialiser_list: _,
+                close_brace,
+            } => open_brace.loc().until(close_brace.loc()),
+            Self::Expression(expression) => expression.loc(),
+        }
+    }
+}
+
 impl<'a> FunctionDefinition<'a> {
     pub(crate) fn return_ty(&self) -> &'a QualifiedType<'a> {
         match self.reference.ty.ty {

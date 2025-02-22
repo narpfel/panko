@@ -409,6 +409,32 @@ enum Diagnostic<'a> {
         reference: Reference<'a>,
         iterator: SubobjectIterator<'a>,
     },
+
+    #[error("excess element in {kind} initialiser")]
+    #[with(
+        name = reference.name.fg(Blue),
+        ty = reference.ty.fg(Blue),
+        kind = iterator.kind(),
+        help = match iterator {
+            SubobjectIterator::Scalar { .. } => format!("`{name}`’s type `{ty}` is scalar"),
+            SubobjectIterator::Array { ty, index, offset: _ } => {
+                let ty = ty.fg(Blue);
+                // trying to get the non-existing element increments the index, so we undo this
+                // here
+                let index = index.checked_sub(1).unwrap().fg(Red);
+                format!("trying to initialise element at index {index} for `{ty}`")
+            }
+        },
+    )]
+    #[diagnostics(
+        reference(colour = Blue, label = "while initialising this variable"),
+        at(colour = Red, label = "{help}"),
+    )]
+    ExcessInitialiserBraced {
+        at: scope::Initialiser<'a>,
+        reference: Reference<'a>,
+        iterator: SubobjectIterator<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1085,6 +1111,7 @@ fn typeck_initialiser_list<'a>(
     subobject_initialisers: &mut Vec<SubobjectInitialiser<'a>>,
     subobjects: &mut Subobjects<'a>,
     initialiser_list: &[DesignatedInitialiser<'a>],
+    emit_nested_excess_initialiser_errors: bool,
 ) {
     for DesignatedInitialiser { designation, initialiser } in initialiser_list {
         match designation {
@@ -1104,16 +1131,30 @@ fn typeck_initialiser_list<'a>(
                     //     // [[print: 0]]
                     //     printf("%s\n", xs[1]);
                     // Also, this is required to emit a diagnostic.
-                    subobjects.enter_subobject();
+                    let should_leave = match subobjects.enter_subobject() {
+                        Ok(()) => true,
+                        Err(iterator) => {
+                            // TODO: use this error
+                            let () = sess.emit(Diagnostic::ExcessInitialiserBraced {
+                                at: **initialiser,
+                                reference: *reference,
+                                iterator,
+                            });
+                            false
+                        }
+                    };
                     typeck_initialiser_list(
                         sess,
                         reference,
                         subobject_initialisers,
                         subobjects,
                         initialiser_list,
+                        should_leave,
                     );
-                    let left = subobjects.try_leave_subobject(AllowExplicit::Yes);
-                    assert!(left);
+                    if should_leave {
+                        let left = subobjects.try_leave_subobject(AllowExplicit::Yes);
+                        assert!(left);
+                    }
                 }
                 scope::Initialiser::Expression(initialiser) => match subobjects.next_scalar() {
                     Ok(subobject) => subobject_initialisers.push(SubobjectInitialiser {
@@ -1128,12 +1169,16 @@ fn typeck_initialiser_list<'a>(
                             typeck_expression(sess, initialiser, Context::Default),
                         ),
                     }),
-                    // TODO: use this error (implement `ErrorExpr` for `SubobjectInitialiser`)
-                    Err(iterator) => sess.emit(Diagnostic::ExcessInitialiserInArray {
-                        at: *initialiser,
-                        reference: *reference,
-                        iterator,
-                    }),
+                    Err(iterator) =>
+                        if emit_nested_excess_initialiser_errors {
+                            // TODO: use this error (implement `ErrorExpr` for
+                            // `SubobjectInitialiser`)
+                            sess.emit(Diagnostic::ExcessInitialiserInArray {
+                                at: *initialiser,
+                                reference: *reference,
+                                iterator,
+                            })
+                        },
                 },
             },
         }
@@ -1160,6 +1205,7 @@ fn typeck_declaration<'a>(
                     subobject_initialisers,
                     &mut Subobjects::new(reference.ty),
                     initialiser_list,
+                    true,
                 );
                 Initialiser::Braced {
                     open_brace,
