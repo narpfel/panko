@@ -404,33 +404,7 @@ enum Diagnostic<'a> {
         reference(colour = Blue, label = "while initialising this variable"),
         at(colour = Red, label = "{help}"),
     )]
-    ExcessInitialiserInArray {
-        at: scope::Expression<'a>,
-        reference: Reference<'a>,
-        iterator: SubobjectIterator<'a>,
-    },
-
-    #[error("excess element in {kind} initialiser")]
-    #[with(
-        name = reference.name.fg(Blue),
-        ty = reference.ty.fg(Blue),
-        kind = iterator.kind(),
-        help = match iterator {
-            SubobjectIterator::Scalar { .. } => format!("`{name}`’s type `{ty}` is scalar"),
-            SubobjectIterator::Array { ty, index, offset: _ } => {
-                let ty = ty.fg(Blue);
-                // trying to get the non-existing element increments the index, so we undo this
-                // here
-                let index = index.checked_sub(1).unwrap().fg(Red);
-                format!("trying to initialise element at index {index} for `{ty}`")
-            }
-        },
-    )]
-    #[diagnostics(
-        reference(colour = Blue, label = "while initialising this variable"),
-        at(colour = Red, label = "{help}"),
-    )]
-    ExcessInitialiserBraced {
+    ExcessInitialiser {
         at: scope::Initialiser<'a>,
         reference: Reference<'a>,
         iterator: SubobjectIterator<'a>,
@@ -1135,7 +1109,7 @@ fn typeck_initialiser_list<'a>(
                         Ok(()) => true,
                         Err(iterator) => {
                             // TODO: use this error
-                            let () = sess.emit(Diagnostic::ExcessInitialiserBraced {
+                            let () = sess.emit(Diagnostic::ExcessInitialiser {
                                 at: **initialiser,
                                 reference: *reference,
                                 iterator,
@@ -1156,7 +1130,7 @@ fn typeck_initialiser_list<'a>(
                         assert!(left);
                     }
                 }
-                scope::Initialiser::Expression(initialiser) => match subobjects.next_scalar() {
+                scope::Initialiser::Expression(expr) => match subobjects.next_scalar() {
                     Ok(subobject) => subobject_initialisers.push(SubobjectInitialiser {
                         subobject,
                         // TODO: this skips typechecking the initialiser in the `Err` case
@@ -1166,15 +1140,15 @@ fn typeck_initialiser_list<'a>(
                         initialiser: convert_as_if_by_assignment(
                             sess,
                             subobject.ty,
-                            typeck_expression(sess, initialiser, Context::Default),
+                            typeck_expression(sess, expr, Context::Default),
                         ),
                     }),
                     Err(iterator) =>
                         if emit_nested_excess_initialiser_errors {
                             // TODO: use this error (implement `ErrorExpr` for
                             // `SubobjectInitialiser`)
-                            sess.emit(Diagnostic::ExcessInitialiserInArray {
-                                at: *initialiser,
+                            sess.emit(Diagnostic::ExcessInitialiser {
+                                at: **initialiser,
                                 reference: *reference,
                                 iterator,
                             })
