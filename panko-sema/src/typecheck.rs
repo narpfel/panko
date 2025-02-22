@@ -484,17 +484,7 @@ pub(crate) struct Declaration<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Initialiser<'a> {
     Braced {
-        #[expect(
-            unused,
-            reason = "TODO: error messages that need this are not implemented"
-        )]
-        open_brace: Token<'a>,
         subobject_initialisers: &'a [SubobjectInitialiser<'a>],
-        #[expect(
-            unused,
-            reason = "TODO: error messages that need this are not implemented"
-        )]
-        close_brace: Token<'a>,
     },
     Expression(TypedExpression<'a>),
 }
@@ -1168,9 +1158,9 @@ fn typeck_declaration<'a>(
     let initialiser = try {
         match initialiser? {
             scope::Initialiser::Braced {
-                open_brace,
+                open_brace: _,
                 initialiser_list,
-                close_brace,
+                close_brace: _,
             } => {
                 let subobject_initialisers = &mut Vec::new();
                 typeck_initialiser_list(
@@ -1182,9 +1172,7 @@ fn typeck_declaration<'a>(
                     true,
                 );
                 Initialiser::Braced {
-                    open_brace,
                     subobject_initialisers: sess.alloc_slice_copy(subobject_initialisers),
-                    close_brace,
                 }
             }
             scope::Initialiser::Expression(initialiser) =>

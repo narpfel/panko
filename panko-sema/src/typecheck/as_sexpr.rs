@@ -79,11 +79,8 @@ impl AsSExpr for Declaration<'_> {
 impl AsSExpr for Initialiser<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            Self::Braced {
-                open_brace: _,
-                subobject_initialisers,
-                close_brace: _,
-            } => SExpr::new("braced").lines_explicit_empty(*subobject_initialisers),
+            Self::Braced { subobject_initialisers } =>
+                SExpr::new("braced").lines_explicit_empty(*subobject_initialisers),
             Self::Expression(expr) => expr.as_sexpr(),
         }
     }

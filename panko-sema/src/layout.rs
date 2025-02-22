@@ -320,11 +320,7 @@ fn layout_declaration<'a>(
     let slot = reference.slot();
     let initialiser = stack.with_block(|stack| try {
         match initialiser? {
-            typecheck::Initialiser::Braced {
-                open_brace: _,
-                subobject_initialisers,
-                close_brace: _,
-            } => {
+            typecheck::Initialiser::Braced { subobject_initialisers } => {
                 let subobject_initialisers = bump.alloc_slice_fill_iter(
                     subobject_initialisers.iter().map(|subobject_initialiser| {
                         let typecheck::SubobjectInitialiser {
