@@ -34,7 +34,7 @@ impl<'a> SubobjectIterator<'a> {
                 *is_exhausted = true;
             }
             Self::Array { ty: _, index, offset: _ } => {
-                *index += 1;
+                *index = index.checked_add(1).unwrap();
             }
         }
         result
