@@ -139,24 +139,27 @@ impl<'a> Subobjects<'a> {
     }
 
     pub(crate) fn enter_subobject(&mut self) -> Result<(), SubobjectIterator<'a>> {
-        let iterator = match self.current.next() {
-            Some(subobject) => match subobject.ty.ty {
-                Type::Array(ty) =>
-                    SubobjectIterator::Array { ty, index: 0, offset: subobject.offset },
-                ty if ty.is_scalar() => SubobjectIterator::Scalar {
-                    ty,
-                    is_exhausted: false,
-                    offset: subobject.offset,
-                },
-                _ => unreachable!(),
-            },
+        let (iterator, result) = match self.current.next() {
+            Some(subobject) => {
+                let iterator = match subobject.ty.ty {
+                    Type::Array(ty) =>
+                        SubobjectIterator::Array { ty, index: 0, offset: subobject.offset },
+                    ty if ty.is_scalar() => SubobjectIterator::Scalar {
+                        ty,
+                        is_exhausted: false,
+                        offset: subobject.offset,
+                    },
+                    _ => unreachable!(),
+                };
+                (iterator, Ok(()))
+            }
             // Example for this case:
             //     int x = {1, {}};
-            None => Err(self.current.clone())?,
+            None => (self.current.clone(), Err(self.current.clone())),
         };
         self.stack
             .push((mem::replace(&mut self.current, iterator), Explicit::Yes));
-        Ok(())
+        result
     }
 
     #[must_use]

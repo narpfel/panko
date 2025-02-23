@@ -1095,7 +1095,7 @@ fn typeck_initialiser_list<'a>(
                     //     // [[print: 0]]
                     //     printf("%s\n", xs[1]);
                     // Also, this is required to emit a diagnostic.
-                    let should_leave = match subobjects.enter_subobject() {
+                    let emit_nested_errors = match subobjects.enter_subobject() {
                         Ok(()) => true,
                         Err(iterator) => {
                             // TODO: use this error
@@ -1113,12 +1113,10 @@ fn typeck_initialiser_list<'a>(
                         subobject_initialisers,
                         subobjects,
                         initialiser_list,
-                        should_leave,
+                        emit_nested_errors,
                     );
-                    if should_leave {
-                        let left = subobjects.try_leave_subobject(AllowExplicit::Yes);
-                        assert!(left);
-                    }
+                    let left = subobjects.try_leave_subobject(AllowExplicit::Yes);
+                    assert!(left);
                 }
                 scope::Initialiser::Expression(expr) => match subobjects.next_scalar() {
                     Ok(subobject) => subobject_initialisers.push(SubobjectInitialiser {

@@ -37,7 +37,7 @@ Error: excess element in array initialiser
    │
  4 │     int xs[2] = {1, 2, {3}, {4}};
    │         ─┬                  ─┬─  
-   │          │                   ╰─── trying to initialise element at index 4 for `array<int; (constexpr 2)>`
+   │          │                   ╰─── trying to initialise element at index 3 for `array<int; (constexpr 2)>`
    │          │                       
    │          ╰─────────────────────── while initialising this variable
 ───╯
@@ -77,7 +77,7 @@ Error: excess element in array initialiser
    │
  7 │     int qs[2] = {1, 2, {3, 4}, 5};
    │         ─┬                     ┬  
-   │          │                     ╰── trying to initialise element at index 5 for `array<int; (constexpr 2)>`
+   │          │                     ╰── trying to initialise element at index 3 for `array<int; (constexpr 2)>`
    │          │                        
    │          ╰──────────────────────── while initialising this variable
 ───╯
@@ -97,7 +97,7 @@ Error: excess element in array initialiser
    │
  8 │     int ws[3][2] = {{1, 2, {3, 6}, 70, 80}, {4, 5}, 6, 7, 8, 9};
    │         ─┬                         ─┬  
-   │          │                          ╰── trying to initialise element at index 5 for `array<int; (constexpr 2)>`
+   │          │                          ╰── trying to initialise element at index 3 for `array<int; (constexpr 2)>`
    │          │                             
    │          ╰───────────────────────────── while initialising this variable
 ───╯
@@ -107,7 +107,7 @@ Error: excess element in array initialiser
    │
  8 │     int ws[3][2] = {{1, 2, {3, 6}, 70, 80}, {4, 5}, 6, 7, 8, 9};
    │         ─┬                             ─┬  
-   │          │                              ╰── trying to initialise element at index 6 for `array<int; (constexpr 2)>`
+   │          │                              ╰── trying to initialise element at index 4 for `array<int; (constexpr 2)>`
    │          │                                 
    │          ╰───────────────────────────────── while initialising this variable
 ───╯
