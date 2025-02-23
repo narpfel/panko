@@ -71,6 +71,21 @@ exit_code: 0
                6
                7
                8
-               9)))))
+               9))
+         (definition excess_empty_braces_in_scalar~7 `int`
+            (braced
+               42
+               (braced ∅)))
+         (definition excess_empty_braces_in_array~8 `array<int; 2>`
+            (braced
+               1
+               2
+               (braced ∅)))
+         (definition excess_empty_braces_in_array_2~9 `array<int; 2>`
+            (braced
+               1
+               2
+               (braced ∅)
+               4)))))
 
 ----- stderr -----

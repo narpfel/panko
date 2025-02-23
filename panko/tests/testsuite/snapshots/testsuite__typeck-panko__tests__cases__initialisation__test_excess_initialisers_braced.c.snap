@@ -131,3 +131,43 @@ Error: excess element in array initialiser
    │          │                                                      
    │          ╰────────────────────────────────────────────────────── while initialising this variable
 ───╯
+
+Error: excess element in scalar initialiser
+    ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:10:46]
+    │
+ 10 │     int excess_empty_braces_in_scalar = {42, {}};
+    │         ──────────────┬──────────────        ─┬  
+    │                       │                       ╰── `excess_empty_braces_in_scalar`’s type `int` is scalar
+    │                       │                          
+    │                       ╰────────────────────────── while initialising this variable
+────╯
+
+Error: excess element in array initialiser
+    ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:11:50]
+    │
+ 11 │     int excess_empty_braces_in_array[2] = {1, 2, {}};
+    │         ──────────────┬─────────────             ─┬  
+    │                       │                           ╰── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+    │                       │                              
+    │                       ╰────────────────────────────── while initialising this variable
+────╯
+
+Error: excess element in array initialiser
+    ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:12:52]
+    │
+ 12 │     int excess_empty_braces_in_array_2[2] = {1, 2, {}, 4};
+    │         ───────────────┬──────────────             ─┬  
+    │                        │                            ╰── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+    │                        │                               
+    │                        ╰─────────────────────────────── while initialising this variable
+────╯
+
+Error: excess element in array initialiser
+    ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:12:56]
+    │
+ 12 │     int excess_empty_braces_in_array_2[2] = {1, 2, {}, 4};
+    │         ───────────────┬──────────────                 ┬  
+    │                        │                               ╰── trying to initialise element at index 3 for `array<int; (constexpr 2)>`
+    │                        │                                  
+    │                        ╰────────────────────────────────── while initialising this variable
+────╯
