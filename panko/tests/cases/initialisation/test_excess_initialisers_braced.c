@@ -10,4 +10,6 @@ int main() {
     int excess_empty_braces_in_scalar = {42, {}};
     int excess_empty_braces_in_array[2] = {1, 2, {}};
     int excess_empty_braces_in_array_2[2] = {1, 2, {}, 4};
+
+    int nested_braces_dont_emit_nested_errors = {1, {2, {3}}};
 }

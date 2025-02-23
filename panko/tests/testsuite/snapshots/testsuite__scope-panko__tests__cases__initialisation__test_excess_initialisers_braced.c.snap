@@ -86,6 +86,13 @@ exit_code: 0
                1
                2
                (braced ∅)
-               4)))))
+               4))
+         (definition nested_braces_dont_emit_nested_errors~10 `int`
+            (braced
+               1
+               (braced
+                  2
+                  (braced
+                     3)))))))
 
 ----- stderr -----

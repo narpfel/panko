@@ -1098,12 +1098,14 @@ fn typeck_initialiser_list<'a>(
                     let emit_nested_errors = match subobjects.enter_subobject() {
                         Ok(()) => true,
                         Err(iterator) => {
-                            // TODO: use this error
-                            let () = sess.emit(Diagnostic::ExcessInitialiser {
-                                at: **initialiser,
-                                reference: *reference,
-                                iterator,
-                            });
+                            if emit_nested_excess_initialiser_errors {
+                                // TODO: use this error
+                                sess.emit(Diagnostic::ExcessInitialiser {
+                                    at: **initialiser,
+                                    reference: *reference,
+                                    iterator,
+                                })
+                            }
                             false
                         }
                     };

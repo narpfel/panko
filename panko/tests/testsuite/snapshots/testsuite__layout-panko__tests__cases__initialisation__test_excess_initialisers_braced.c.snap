@@ -171,3 +171,13 @@ Error: excess element in array initialiser
     │                        │                                  
     │                        ╰────────────────────────────────── while initialising this variable
 ────╯
+
+Error: excess element in scalar initialiser
+    ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:14:53]
+    │
+ 14 │     int nested_braces_dont_emit_nested_errors = {1, {2, {3}}};
+    │         ──────────────────┬──────────────────       ────┬───  
+    │                           │                             ╰───── `nested_braces_dont_emit_nested_errors`’s type `int` is scalar
+    │                           │                                   
+    │                           ╰─────────────────────────────────── while initialising this variable
+────╯
