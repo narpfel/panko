@@ -112,6 +112,14 @@ impl<'a> Subobjects<'a> {
         }
     }
 
+    pub(crate) fn goto_index(&mut self, target_index: u64) -> Result<(), SubobjectIterator<'a>> {
+        match &mut self.current {
+            SubobjectIterator::Scalar { .. } => todo!(),
+            SubobjectIterator::Array { ty: _, index, offset: _ } => *index = target_index,
+        }
+        Ok(())
+    }
+
     pub(crate) fn next_scalar(&mut self) -> Result<Subobject<'a>, SubobjectIterator<'a>> {
         loop {
             while self.current.is_empty() && !self.stack.is_empty() {

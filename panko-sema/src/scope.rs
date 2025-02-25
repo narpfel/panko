@@ -94,7 +94,7 @@ pub(crate) struct DesignatedInitialiser<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct Designation<'a>(&'a [Designator<'a>]);
+pub(crate) struct Designation<'a>(pub(crate) &'a [Designator<'a>]);
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Designator<'a> {

@@ -33,6 +33,8 @@ use variant_types::IntoVariant as _;
 
 use crate::scope;
 use crate::scope::DesignatedInitialiser;
+use crate::scope::Designation;
+use crate::scope::Designator;
 use crate::scope::GenericAssociation;
 use crate::scope::Id;
 use crate::scope::IncrementFixity;
@@ -1079,71 +1081,82 @@ fn typeck_initialiser_list<'a>(
 ) {
     for DesignatedInitialiser { designation, initialiser } in initialiser_list {
         match designation {
+            Some(Designation(
+                [Designator::Bracketed { open_bracket: _, index, close_bracket: _ }],
+            )) => {
+                let index = typeck_expression(sess, index, Context::Default);
+                // TODO: constexpr evaluate
+                let index = match index.expr {
+                    Expression::Integer { value, token: _ } => value,
+                    _ => todo!(),
+                };
+                subobjects.goto_index(index).unwrap_or_else(|_| todo!());
+            }
             Some(_) => todo!(),
-            None => match initialiser {
-                scope::Initialiser::Braced {
-                    open_brace: _,
-                    initialiser_list,
-                    close_brace: _,
-                } => {
-                    // TODO: add a test for this case:
-                    // nested braced initialisers in array initialisers initialise *an array
-                    // element* (with excess initialisers), not the array itself:
-                    //     int xs[2] = {{{1, 2}}};
-                    //     // [[print: 1]]
-                    //     printf("%s\n", xs[0]);
-                    //     // [[print: 0]]
-                    //     printf("%s\n", xs[1]);
-                    // Also, this is required to emit a diagnostic.
-                    let emit_nested_errors = match subobjects.enter_subobject() {
-                        Ok(()) => true,
-                        Err(iterator) => {
-                            if emit_nested_excess_initialiser_errors {
-                                // TODO: use this error
-                                sess.emit(Diagnostic::ExcessInitialiser {
-                                    at: **initialiser,
-                                    reference: *reference,
-                                    iterator,
-                                })
-                            }
-                            false
-                        }
-                    };
-                    typeck_initialiser_list(
-                        sess,
-                        reference,
-                        subobject_initialisers,
-                        subobjects,
-                        initialiser_list,
-                        emit_nested_errors,
-                    );
-                    let left = subobjects.try_leave_subobject(AllowExplicit::Yes);
-                    assert!(left);
-                }
-                scope::Initialiser::Expression(expr) => match subobjects.next_scalar() {
-                    Ok(subobject) => subobject_initialisers.push(SubobjectInitialiser {
-                        subobject,
-                        // TODO: this skips typechecking the initialiser in the `Err` case
-                        // example:
-                        //     int x = {1, (void)42};
-                        // this should emit an excess initialiser error *and* a type error
-                        initialiser: convert_as_if_by_assignment(
-                            sess,
-                            subobject.ty,
-                            typeck_expression(sess, expr, Context::Default),
-                        ),
-                    }),
-                    Err(iterator) =>
+            None => (),
+        }
+        match initialiser {
+            scope::Initialiser::Braced {
+                open_brace: _,
+                initialiser_list,
+                close_brace: _,
+            } => {
+                // TODO: add a test for this case:
+                // nested braced initialisers in array initialisers initialise *an array
+                // element* (with excess initialisers), not the array itself:
+                //     int xs[2] = {{{1, 2}}};
+                //     // [[print: 1]]
+                //     printf("%s\n", xs[0]);
+                //     // [[print: 0]]
+                //     printf("%s\n", xs[1]);
+                // Also, this is required to emit a diagnostic.
+                let emit_nested_errors = match subobjects.enter_subobject() {
+                    Ok(()) => true,
+                    Err(iterator) => {
                         if emit_nested_excess_initialiser_errors {
-                            // TODO: use this error (implement `ErrorExpr` for
-                            // `SubobjectInitialiser`)
+                            // TODO: use this error
                             sess.emit(Diagnostic::ExcessInitialiser {
                                 at: **initialiser,
                                 reference: *reference,
                                 iterator,
                             })
-                        },
-                },
+                        }
+                        false
+                    }
+                };
+                typeck_initialiser_list(
+                    sess,
+                    reference,
+                    subobject_initialisers,
+                    subobjects,
+                    initialiser_list,
+                    emit_nested_errors,
+                );
+                let left = subobjects.try_leave_subobject(AllowExplicit::Yes);
+                assert!(left);
+            }
+            scope::Initialiser::Expression(expr) => match subobjects.next_scalar() {
+                Ok(subobject) => subobject_initialisers.push(SubobjectInitialiser {
+                    subobject,
+                    // TODO: this skips typechecking the initialiser in the `Err` case
+                    // example:
+                    //     int x = {1, (void)42};
+                    // this should emit an excess initialiser error *and* a type error
+                    initialiser: convert_as_if_by_assignment(
+                        sess,
+                        subobject.ty,
+                        typeck_expression(sess, expr, Context::Default),
+                    ),
+                }),
+                Err(iterator) =>
+                    if emit_nested_excess_initialiser_errors {
+                        // TODO: use this error (implement `ErrorExpr` for `SubobjectInitialiser`)
+                        sess.emit(Diagnostic::ExcessInitialiser {
+                            at: **initialiser,
+                            reference: *reference,
+                            iterator,
+                        })
+                    },
             },
         }
     }
