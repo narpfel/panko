@@ -329,6 +329,7 @@ fn layout_declaration<'a>(
                         } = *subobject_initialiser;
                         SubobjectInitialiser {
                             subobject: Subobject { ty: layout_ty(stack, bump, ty), offset },
+                            // TODO: this misses a block somewhere (initialisers don’t reuse slots)
                             initialiser: layout_expression_in_slot(
                                 stack,
                                 bump,
