@@ -10,8 +10,7 @@ int f(int x) {
 
 int main(int, char** argv) {
     int xs[] = {
-        // TODO: this should not be executed, so it should not print `1`
-        // [[print: 1]]
+        // this is not executed, so it does not print `1`
         [0] = f(1),
         // [[print: 2]]
         [42] = f(2),

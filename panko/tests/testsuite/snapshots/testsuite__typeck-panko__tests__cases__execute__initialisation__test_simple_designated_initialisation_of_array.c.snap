@@ -37,10 +37,6 @@ exit_code: 0
       (compound-statement
          (definition xs~7 `array<int; (constexpr 43)>`
             (braced
-               (subobject +0
-                  (call (addressof (f~1 `fn(x: int) -> int`) `ptr<fn(x: int) -> int>`)
-                     (1 `int`)
-                     `int`))
                (subobject +168
                   (call (addressof (f~1 `fn(x: int) -> int`) `ptr<fn(x: int) -> int>`)
                      (2 `int`)

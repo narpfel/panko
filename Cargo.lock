@@ -761,6 +761,7 @@ version = "0.1.0"
 dependencies = [
  "ariadne",
  "bumpalo",
+ "indexmap",
  "itertools 0.14.0",
  "panko-lex",
  "panko-parser",

@@ -8,6 +8,7 @@ use ariadne::Color::Green;
 use ariadne::Color::Magenta;
 use ariadne::Color::Red;
 use ariadne::Fmt as _;
+use indexmap::IndexMap;
 use itertools::EitherOrBoth;
 use itertools::Itertools as _;
 use panko_lex::Integer;
@@ -1074,7 +1075,7 @@ fn typeck_function_definition<'a>(
 fn typeck_initialiser_list<'a>(
     sess: &'a Session<'a>,
     reference: &Reference<'a>,
-    subobject_initialisers: &mut Vec<SubobjectInitialiser<'a>>,
+    subobject_initialisers: &mut IndexMap<u64, SubobjectInitialiser<'a>>,
     subobjects: &mut Subobjects<'a>,
     initialiser_list: &[DesignatedInitialiser<'a>],
     emit_nested_excess_initialiser_errors: bool,
@@ -1136,18 +1137,25 @@ fn typeck_initialiser_list<'a>(
                 assert!(left);
             }
             scope::Initialiser::Expression(expr) => match subobjects.next_scalar() {
-                Ok(subobject) => subobject_initialisers.push(SubobjectInitialiser {
-                    subobject,
-                    // TODO: this skips typechecking the initialiser in the `Err` case
-                    // example:
-                    //     int x = {1, (void)42};
-                    // this should emit an excess initialiser error *and* a type error
-                    initialiser: convert_as_if_by_assignment(
-                        sess,
-                        subobject.ty,
-                        typeck_expression(sess, expr, Context::Default),
-                    ),
-                }),
+                Ok(subobject) => {
+                    // TODO: this is inefficient when there are duplicate initialisers
+                    subobject_initialisers.insert_before(
+                        subobject_initialisers.len(),
+                        subobject.offset,
+                        SubobjectInitialiser {
+                            subobject,
+                            // TODO: this skips typechecking the initialiser in the `Err` case
+                            // example:
+                            //     int x = {1, (void)42};
+                            // this should emit an excess initialiser error *and* a type error
+                            initialiser: convert_as_if_by_assignment(
+                                sess,
+                                subobject.ty,
+                                typeck_expression(sess, expr, Context::Default),
+                            ),
+                        },
+                    );
+                }
                 Err(iterator) =>
                     if emit_nested_excess_initialiser_errors {
                         // TODO: use this error (implement `ErrorExpr` for `SubobjectInitialiser`)
@@ -1175,7 +1183,7 @@ fn typeck_declaration<'a>(
                 initialiser_list,
                 close_brace: _,
             } => {
-                let subobject_initialisers = &mut Vec::new();
+                let subobject_initialisers = &mut IndexMap::new();
                 typeck_initialiser_list(
                     sess,
                     &reference,
@@ -1185,7 +1193,8 @@ fn typeck_declaration<'a>(
                     true,
                 );
                 Initialiser::Braced {
-                    subobject_initialisers: sess.alloc_slice_copy(subobject_initialisers),
+                    subobject_initialisers: sess
+                        .alloc_slice_fill_iter(subobject_initialisers.values().copied()),
                 }
             }
             scope::Initialiser::Expression(initialiser) =>
