@@ -111,6 +111,7 @@ extern {
         "++" => Token { kind: panko_lex::TokenKind::PlusPlus, .. },
         "--" => Token { kind: panko_lex::TokenKind::MinusMinus, ..},
 
+        "." => Token { kind: panko_lex::TokenKind::Dot, .. },
         "..." => Token { kind: panko_lex::TokenKind::Ellipsis, .. },
 
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
@@ -266,8 +267,22 @@ FunctionAbstractDeclarator: ast::FunctionDeclarator<'a> = {
 
 Initialiser: ast::Initialiser<'a> = {
     // TODO: incomplete: `braced-initializer` can be nonempty
-    <open_brace:"{"> <close_brace:"}"> => ast::Initialiser::Braced { <> },
+    <open_brace:"{"> <initialiser_list:CommaSepWithTrailingComma<DesignatedInitialiser>>
+        <close_brace:"}"> => ast::Initialiser::Braced { <> },
     AssignmentExpression => ast::Initialiser::Expression(<>),
+}
+
+DesignatedInitialiser: ast::DesignatedInitialiser<'a> = {
+    <designation:(<Designation> "=")?> <initialiser:Bump<Initialiser>> => ast::DesignatedInitialiser { <> },
+}
+
+Designation: ast::Designation<'a> = {
+    Some<Designator> => ast::Designation(<>),
+}
+
+Designator: ast::Designator<'a> = {
+    <open_bracket:"["> <index:Expression> <close_bracket:"]"> => ast::Designator::Bracketed { <> },
+    <dot:"."> <ident:Identifier> => ast::Designator::Identifier { <> },
 }
 
 AttributeSpecifierSequence: () = {}
@@ -607,6 +622,11 @@ Many<T>: &'a [T] = {
 CommaSep<T>: &'a [T] = {
     () => &[],
     NonEmptyCommaSep<T>,
+}
+
+CommaSepWithTrailingComma<T>: &'a [T] = {
+    () => &[],
+    <NonEmptyCommaSep<T>> ","?,
 }
 
 #[inline]

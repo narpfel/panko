@@ -10,6 +10,7 @@ use crate::LabelId;
 use crate::MAX_ADDRESS_OFFSET;
 use crate::Register;
 use crate::StaticId;
+use crate::SubobjectAtReference;
 use crate::TypedRegister;
 
 #[derive(Debug, Clone, Copy)]
@@ -203,6 +204,7 @@ fn slot_as_operand<'a>(
             )
         }
         Slot::Void => unreachable!(),
+        Slot::StaticWithOffset { name: _, offset: _ } => todo!(),
     };
     Operand {
         kind: OperandKind::Pointer {
@@ -248,6 +250,17 @@ impl AsOperand for ByValue<&Reference<'_>> {
             self.0.ty.ty,
             argument_area_size.unwrap(),
             true,
+        )
+    }
+}
+
+impl AsOperand for SubobjectAtReference<'_> {
+    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
+        slot_as_operand(
+            self.slot(),
+            self.subobject.ty().ty,
+            argument_area_size.unwrap(),
+            false,
         )
     }
 }

@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/initialisation/test_braced_initialisation_of_array_with_unknown_length_uses_array_in_initialiser.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid application of `sizeof` to incomplete type `array<int; ∅>`
+   ╭─[panko/tests/cases/initialisation/test_braced_initialisation_of_array_with_unknown_length_uses_array_in_initialiser.c:2:20]
+   │
+ 2 │     int error[] = {sizeof error, _Lengthof error};
+   │                    ──────┬─────  
+   │                          │       
+   │                          ╰─────── in this expression
+───╯
+
+Error: `_Lengthof` can only be applied to arrays of known length, but the operand has type `array<int; ∅>`
+   ╭─[panko/tests/cases/initialisation/test_braced_initialisation_of_array_with_unknown_length_uses_array_in_initialiser.c:2:44]
+   │
+ 2 │     int error[] = {sizeof error, _Lengthof error};
+   │                                  ───────── ──┬──  
+   │                                              ╰──── the type of this is `array<int; ∅>`, which has unknown length
+───╯

@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_with_missing_inialiser.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      (params
+         main.unnamed_parameter.0~2 `int`
+         argv~3 `ptr<ptr<char>>`)
+      (compound-statement
+         (definition xs~4 `array<array<int; 2>; 2>`
+            (braced
+               (braced
+                  1)
+               (braced
+                  3
+                  4)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name xs~4 `array<array<int; 2>; 2>`) 0) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name xs~4 `array<array<int; 2>; 2>`) 0) 1)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name xs~4 `array<array<int; 2>; 2>`) 1) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 1)
+               (subscript (subscript (name xs~4 `array<array<int; 2>; 2>`) 1) 1))))))
+
+----- stderr -----
