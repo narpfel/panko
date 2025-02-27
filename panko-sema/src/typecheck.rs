@@ -1082,18 +1082,36 @@ fn typeck_initialiser_list<'a>(
 ) {
     for DesignatedInitialiser { designation, initialiser } in initialiser_list {
         match designation {
-            Some(Designation(
-                [Designator::Bracketed { open_bracket: _, index, close_bracket: _ }],
-            )) => {
-                let index = typeck_expression(sess, index, Context::Default);
-                // TODO: constexpr evaluate
-                let index = match index.expr {
-                    Expression::Integer { value, token: _ } => value,
-                    _ => todo!(),
-                };
-                subobjects.goto_index(index).unwrap_or_else(|_| todo!());
+            Some(Designation([])) => unreachable!(),
+            Some(Designation([designator, rest @ ..])) => {
+                fn apply_designator<'a>(
+                    sess: &'a Session<'a>,
+                    subobjects: &mut Subobjects<'a>,
+                    designator: &Designator<'a>,
+                ) {
+                    match designator {
+                        Designator::Bracketed { open_bracket: _, index, close_bracket: _ } => {
+                            let index = typeck_expression(sess, index, Context::Default);
+                            // TODO: constexpr evaluate
+                            let index = match index.expr {
+                                Expression::Integer { value, token: _ } => value,
+                                _ => todo!(),
+                            };
+                            subobjects.goto_index(index).unwrap_or_else(|_| todo!());
+                        }
+                        Designator::Identifier { .. } => todo!(),
+                    }
+                }
+
+                while subobjects.try_leave_subobject(AllowExplicit::No) {}
+                apply_designator(sess, subobjects, designator);
+                for designator in rest {
+                    subobjects
+                        .enter_subobject_implicit()
+                        .unwrap_or_else(|_| todo!());
+                    apply_designator(sess, subobjects, designator);
+                }
             }
-            Some(_) => todo!(),
             None => (),
         }
         match initialiser {

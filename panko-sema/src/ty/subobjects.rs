@@ -146,7 +146,10 @@ impl<'a> Subobjects<'a> {
         }
     }
 
-    pub(crate) fn enter_subobject(&mut self) -> Result<(), SubobjectIterator<'a>> {
+    fn enter_subobject_impl(
+        &mut self,
+        explicitness: Explicit,
+    ) -> Result<(), SubobjectIterator<'a>> {
         let (iterator, result) = match self.current.next() {
             Some(subobject) => {
                 let iterator = match subobject.ty.ty {
@@ -166,8 +169,16 @@ impl<'a> Subobjects<'a> {
             None => (self.current.clone(), Err(self.current.clone())),
         };
         self.stack
-            .push((mem::replace(&mut self.current, iterator), Explicit::Yes));
+            .push((mem::replace(&mut self.current, iterator), explicitness));
         result
+    }
+
+    pub(crate) fn enter_subobject_implicit(&mut self) -> Result<(), SubobjectIterator<'a>> {
+        self.enter_subobject_impl(Explicit::No)
+    }
+
+    pub(crate) fn enter_subobject(&mut self) -> Result<(), SubobjectIterator<'a>> {
+        self.enter_subobject_impl(Explicit::Yes)
     }
 
     #[must_use]
