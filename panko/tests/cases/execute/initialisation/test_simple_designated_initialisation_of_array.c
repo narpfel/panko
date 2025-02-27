@@ -9,18 +9,23 @@ int f(int x) {
 }
 
 int main(int, char** argv) {
+    // [0]
+    // [[print: 42]]
+    // [27]
+    // [[print: 3]]
+    // [28]
+    // [[print: 4]]
+    // [29]
+    // [[print: 5]]
+    // [42]
+    // [[print: 2]]
     int xs[] = {
         // this is not executed, so it does not print `1`
         [0] = f(1),
-        // [[print: 2]]
         [42] = f(2),
-        // [[print: 3]]
         [27] = f(3),
-        // [[print: 4]]
         f(4),
-        // [[print: 5]]
         f(5),
-        // [[print: 42]]
         [0] = f(42),
     };
 

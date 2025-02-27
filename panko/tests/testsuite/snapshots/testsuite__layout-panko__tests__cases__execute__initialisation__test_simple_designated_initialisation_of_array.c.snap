@@ -36,9 +36,9 @@ exit_code: 0
       (compound-statement
          (definition (xs~7 `array<int; (constexpr 43)>` @16)
             (braced
-               (subobject +168
-                  (call `int` @184 (addressof `ptr<fn(x: int) -> int>` @192 (f~1 `fn(x: int) -> int` (static f)))
-                     (2 `int` @200)))
+               (subobject +0
+                  (call `int` @16 (addressof `ptr<fn(x: int) -> int>` @192 (f~1 `fn(x: int) -> int` (static f)))
+                     (42 `int` @200)))
                (subobject +108
                   (call `int` @124 (addressof `ptr<fn(x: int) -> int>` @208 (f~1 `fn(x: int) -> int` (static f)))
                      (3 `int` @216)))
@@ -48,9 +48,9 @@ exit_code: 0
                (subobject +116
                   (call `int` @132 (addressof `ptr<fn(x: int) -> int>` @240 (f~1 `fn(x: int) -> int` (static f)))
                      (5 `int` @248)))
-               (subobject +0
-                  (call `int` @16 (addressof `ptr<fn(x: int) -> int>` @256 (f~1 `fn(x: int) -> int` (static f)))
-                     (42 `int` @264)))))
+               (subobject +168
+                  (call `int` @184 (addressof `ptr<fn(x: int) -> int>` @256 (f~1 `fn(x: int) -> int` (static f)))
+                     (2 `int` @264)))))
          (definition (s~8 `ptr<char const>` @192)
             (noop-type-conversion `ptr<char const>` @192
                (deref `ptr<char>` @192
