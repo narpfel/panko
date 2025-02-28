@@ -99,16 +99,8 @@ pub(crate) struct Designation<'a>(pub(crate) &'a [Designator<'a>]);
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Designator<'a> {
     Bracketed {
-        #[expect(
-            unused,
-            reason = "TODO: source locations for `Designator`s are not implemented"
-        )]
         open_bracket: Token<'a>,
         index: Expression<'a>,
-        #[expect(
-            unused,
-            reason = "TODO: source locations for `Designator`s are not implemented"
-        )]
         close_bracket: Token<'a>,
     },
     #[expect(unused, reason = "TODO: `struct`s are not implemented")]
@@ -296,6 +288,16 @@ impl<'a> Initialiser<'a> {
                 close_brace,
             } => open_brace.loc().until(close_brace.loc()),
             Self::Expression(expression) => expression.loc(),
+        }
+    }
+}
+
+impl<'a> Designator<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
+        match self {
+            Self::Bracketed { open_bracket, index: _, close_bracket } =>
+                open_bracket.loc().until(close_bracket.loc()),
+            Self::Identifier { dot, ident } => dot.loc().until(ident.loc()),
         }
     }
 }

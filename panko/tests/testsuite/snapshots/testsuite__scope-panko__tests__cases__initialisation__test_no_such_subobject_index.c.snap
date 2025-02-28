@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/initialisation/test_no_such_subobject_index.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition x~1 `int`
+            (braced
+               (designation ((index 0)) 42)))
+         (definition xs~2 `array<int; 2>`
+            (braced
+               (designation ((index 0) (index 0)) 42)))
+         (definition xss~3 `array<array<int; 2>; 2>`
+            (braced
+               (designation ((index 0) (index 0) (index 0)) 42))))))
+
+----- stderr -----

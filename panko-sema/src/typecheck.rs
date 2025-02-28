@@ -412,6 +412,23 @@ enum Diagnostic<'a> {
         reference: Reference<'a>,
         iterator: SubobjectIterator<'a>,
     },
+
+    #[error("no such subobject while initialising object of type `{ty}`")]
+    #[diagnostics(
+        reference(colour = Blue, label = "while initialising this variable"),
+        at(colour = Red, label = "no such subobject"),
+    )]
+    #[with(
+        ty = match iterator {
+            SubobjectIterator::Scalar { ty, .. } => ty,
+            SubobjectIterator::Array { .. } => unreachable!(),
+        }.fg(Blue),
+    )]
+    NoSuchSubobject {
+        at: Designator<'a>,
+        reference: Reference<'a>,
+        iterator: SubobjectIterator<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1086,6 +1103,7 @@ fn typeck_initialiser_list<'a>(
             Some(Designation([designator, rest @ ..])) => {
                 fn apply_designator<'a>(
                     sess: &'a Session<'a>,
+                    reference: &Reference<'a>,
                     subobjects: &mut Subobjects<'a>,
                     designator: &Designator<'a>,
                 ) {
@@ -1097,19 +1115,26 @@ fn typeck_initialiser_list<'a>(
                                 Expression::Integer { value, token: _ } => value,
                                 _ => todo!(),
                             };
-                            subobjects.goto_index(index).unwrap_or_else(|_| todo!());
+                            match subobjects.goto_index(index) {
+                                Ok(()) => (),
+                                Err(iterator) => sess.emit(Diagnostic::NoSuchSubobject {
+                                    at: *designator,
+                                    reference: *reference,
+                                    iterator,
+                                }),
+                            }
                         }
                         Designator::Identifier { .. } => todo!(),
                     }
                 }
 
                 while subobjects.try_leave_subobject(AllowExplicit::No) {}
-                apply_designator(sess, subobjects, designator);
+                apply_designator(sess, reference, subobjects, designator);
                 for designator in rest {
                     subobjects
                         .enter_subobject_implicit()
                         .unwrap_or_else(|_| todo!());
-                    apply_designator(sess, subobjects, designator);
+                    apply_designator(sess, reference, subobjects, designator);
                 }
             }
             None => (),

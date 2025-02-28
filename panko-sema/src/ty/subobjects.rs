@@ -114,10 +114,12 @@ impl<'a> Subobjects<'a> {
 
     pub(crate) fn goto_index(&mut self, target_index: u64) -> Result<(), SubobjectIterator<'a>> {
         match &mut self.current {
-            SubobjectIterator::Scalar { .. } => todo!(),
-            SubobjectIterator::Array { ty: _, index, offset: _ } => *index = target_index,
+            SubobjectIterator::Scalar { .. } => Err(self.current.clone()),
+            SubobjectIterator::Array { ty: _, index, offset: _ } => {
+                *index = target_index;
+                Ok(())
+            }
         }
-        Ok(())
     }
 
     pub(crate) fn next_scalar(&mut self) -> Result<Subobject<'a>, SubobjectIterator<'a>> {
