@@ -1,0 +1,46 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/initialisation/test_no_such_subobject_index.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: no such subobject while initialising object of type `int`
+   ╭─[panko/tests/cases/initialisation/test_no_such_subobject_index.c:3:9]
+   │
+ 2 │     int x = {
+   │         ┬  
+   │         ╰── while initialising this variable
+ 3 │         [0] = 42,
+   │         ─┬─  
+   │          ╰─── no such subobject
+───╯
+
+Error: no such subobject while initialising object of type `int`
+   ╭─[panko/tests/cases/initialisation/test_no_such_subobject_index.c:7:12]
+   │
+ 6 │     int xs[2] = {
+   │         ─┬  
+   │          ╰── while initialising this variable
+ 7 │         [0][0] = 42,
+   │            ─┬─  
+   │             ╰─── no such subobject
+───╯
+
+Error: no such subobject while initialising object of type `int`
+    ╭─[panko/tests/cases/initialisation/test_no_such_subobject_index.c:11:15]
+    │
+ 10 │     int xss[2][2] = {
+    │         ─┬─  
+    │          ╰─── while initialising this variable
+ 11 │         [0][0][0] = 42,
+    │               ─┬─  
+    │                ╰─── no such subobject
+────╯

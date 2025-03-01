@@ -427,9 +427,32 @@ struct InitDeclarator<'a> {
 pub enum Initialiser<'a> {
     Braced {
         open_brace: Token<'a>,
+        initialiser_list: &'a [DesignatedInitialiser<'a>],
         close_brace: Token<'a>,
     },
     Expression(Expression<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DesignatedInitialiser<'a> {
+    pub designation: Option<Designation<'a>>,
+    pub initialiser: &'a Initialiser<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Designation<'a>(pub &'a [Designator<'a>]);
+
+#[derive(Debug, Clone, Copy)]
+pub enum Designator<'a> {
+    Bracketed {
+        open_bracket: Token<'a>,
+        index: Expression<'a>,
+        close_bracket: Token<'a>,
+    },
+    Identifier {
+        dot: Token<'a>,
+        ident: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]

@@ -1,0 +1,183 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/initialisation/test_excess_initialisers_braced.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: excess element in scalar initialiser
+   ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:2:17]
+   │
+ 2 │     int x = {1, {2, 3}};
+   │         ┬       ───┬──  
+   │         │          ╰──── `x`’s type `int` is scalar
+   │         │               
+   │         ╰─────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:4:24]
+   │
+ 4 │     int xs[2] = {1, 2, {3}, {4}};
+   │         ─┬             ─┬─  
+   │          │              ╰─── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+   │          │                  
+   │          ╰────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:4:29]
+   │
+ 4 │     int xs[2] = {1, 2, {3}, {4}};
+   │         ─┬                  ─┬─  
+   │          │                   ╰─── trying to initialise element at index 3 for `array<int; (constexpr 2)>`
+   │          │                       
+   │          ╰─────────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:5:33]
+   │
+ 5 │     int ys[2][2] = {1, 2, 3, 4, {5}};
+   │         ─┬                      ─┬─  
+   │          │                       ╰─── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+   │          │                           
+   │          ╰─────────────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:6:28]
+   │
+ 6 │     int zs[3][2] = {{1, 2, {3, 6}}, {4, 5}};
+   │         ─┬                 ───┬──  
+   │          │                    ╰──── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+   │          │                         
+   │          ╰───────────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:7:24]
+   │
+ 7 │     int qs[2] = {1, 2, {3, 4}, 5};
+   │         ─┬             ───┬──  
+   │          │                ╰──── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+   │          │                     
+   │          ╰───────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:7:32]
+   │
+ 7 │     int qs[2] = {1, 2, {3, 4}, 5};
+   │         ─┬                     ┬  
+   │          │                     ╰── trying to initialise element at index 3 for `array<int; (constexpr 2)>`
+   │          │                        
+   │          ╰──────────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:8:28]
+   │
+ 8 │     int ws[3][2] = {{1, 2, {3, 6}, 70, 80}, {4, 5}, 6, 7, 8, 9};
+   │         ─┬                 ───┬──  
+   │          │                    ╰──── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+   │          │                         
+   │          ╰───────────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:8:36]
+   │
+ 8 │     int ws[3][2] = {{1, 2, {3, 6}, 70, 80}, {4, 5}, 6, 7, 8, 9};
+   │         ─┬                         ─┬  
+   │          │                          ╰── trying to initialise element at index 3 for `array<int; (constexpr 2)>`
+   │          │                             
+   │          ╰───────────────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:8:40]
+   │
+ 8 │     int ws[3][2] = {{1, 2, {3, 6}, 70, 80}, {4, 5}, 6, 7, 8, 9};
+   │         ─┬                             ─┬  
+   │          │                              ╰── trying to initialise element at index 4 for `array<int; (constexpr 2)>`
+   │          │                                 
+   │          ╰───────────────────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:8:59]
+   │
+ 8 │     int ws[3][2] = {{1, 2, {3, 6}, 70, 80}, {4, 5}, 6, 7, 8, 9};
+   │         ─┬                                                ┬  
+   │          │                                                ╰── trying to initialise element at index 3 for `array<array<int; (constexpr 2)>; (constexpr 3)>`
+   │          │                                                   
+   │          ╰─────────────────────────────────────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:8:62]
+   │
+ 8 │     int ws[3][2] = {{1, 2, {3, 6}, 70, 80}, {4, 5}, 6, 7, 8, 9};
+   │         ─┬                                                   ┬  
+   │          │                                                   ╰── trying to initialise element at index 4 for `array<array<int; (constexpr 2)>; (constexpr 3)>`
+   │          │                                                      
+   │          ╰────────────────────────────────────────────────────── while initialising this variable
+───╯
+
+Error: excess element in scalar initialiser
+    ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:10:46]
+    │
+ 10 │     int excess_empty_braces_in_scalar = {42, {}};
+    │         ──────────────┬──────────────        ─┬  
+    │                       │                       ╰── `excess_empty_braces_in_scalar`’s type `int` is scalar
+    │                       │                          
+    │                       ╰────────────────────────── while initialising this variable
+────╯
+
+Error: excess element in array initialiser
+    ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:11:50]
+    │
+ 11 │     int excess_empty_braces_in_array[2] = {1, 2, {}};
+    │         ──────────────┬─────────────             ─┬  
+    │                       │                           ╰── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+    │                       │                              
+    │                       ╰────────────────────────────── while initialising this variable
+────╯
+
+Error: excess element in array initialiser
+    ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:12:52]
+    │
+ 12 │     int excess_empty_braces_in_array_2[2] = {1, 2, {}, 4};
+    │         ───────────────┬──────────────             ─┬  
+    │                        │                            ╰── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+    │                        │                               
+    │                        ╰─────────────────────────────── while initialising this variable
+────╯
+
+Error: excess element in array initialiser
+    ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:12:56]
+    │
+ 12 │     int excess_empty_braces_in_array_2[2] = {1, 2, {}, 4};
+    │         ───────────────┬──────────────                 ┬  
+    │                        │                               ╰── trying to initialise element at index 3 for `array<int; (constexpr 2)>`
+    │                        │                                  
+    │                        ╰────────────────────────────────── while initialising this variable
+────╯
+
+Error: excess element in scalar initialiser
+    ╭─[panko/tests/cases/initialisation/test_excess_initialisers_braced.c:14:53]
+    │
+ 14 │     int nested_braces_dont_emit_nested_errors = {1, {2, {3}}};
+    │         ──────────────────┬──────────────────       ────┬───  
+    │                           │                             ╰───── `nested_braces_dont_emit_nested_errors`’s type `int` is scalar
+    │                           │                                   
+    │                           ╰─────────────────────────────────── while initialising this variable
+────╯

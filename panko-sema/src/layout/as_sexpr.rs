@@ -9,11 +9,13 @@ use super::Declaration;
 use super::Expression;
 use super::ExternalDeclaration;
 use super::FunctionDefinition;
+use super::Initialiser;
 use super::LayoutedExpression;
 use super::ParamRefs;
 use super::Reference;
 use super::Slot;
 use super::Statement;
+use super::SubobjectInitialiser;
 use super::TranslationUnit;
 
 impl AsSExpr for TranslationUnit<'_> {
@@ -55,6 +57,27 @@ impl AsSExpr for Declaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new(self.reference.kind.str())
             .inherit(&self.reference)
+            .inherit(&self.initialiser)
+    }
+}
+
+impl AsSExpr for Initialiser<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Braced { subobject_initialisers } =>
+                SExpr::new("braced").lines_explicit_empty(*subobject_initialisers),
+            Self::Expression(expr) => expr.as_sexpr(),
+        }
+    }
+}
+
+impl<Expression> AsSExpr for SubobjectInitialiser<'_, Expression>
+where
+    Expression: AsSExpr,
+{
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("subobject")
+            .inline_string(format!("+{}", self.subobject.offset))
             .inherit(&self.initialiser)
     }
 }
@@ -154,6 +177,9 @@ impl AsSExpr for Slot<'_> {
             Slot::Static(name) => SExpr::new("static").inline_string(name.to_string()),
             Slot::Automatic(offset) => SExpr::string(format!("@{offset}")),
             Self::Void => SExpr::string("@void"),
+            Self::StaticWithOffset { name, offset } => SExpr::new("static")
+                .inline_string(name.to_string())
+                .inline_string(format!("+{offset}")),
         }
     }
 }
