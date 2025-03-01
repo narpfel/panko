@@ -189,6 +189,8 @@ pub enum Slot<'a> {
     Static(&'a str),
     Automatic(u64),
     Void,
+    // TODO: this is unused everywhere except in static initialisers, where it is ignored.
+    // It should be removed when static initialisers are properly constexpr evaluated.
     StaticWithOffset { name: &'a str, offset: u64 },
 }
 
