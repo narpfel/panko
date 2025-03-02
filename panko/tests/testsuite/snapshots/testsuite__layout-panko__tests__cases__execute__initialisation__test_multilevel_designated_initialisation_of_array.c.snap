@@ -20,9 +20,9 @@ exit_code: 0
          (definition (s~3 `array<char; (constexpr 4)>` @4)
             (braced
                (subobject +0 (truncate `char` @4 (37 `int` @8)))
-               (subobject +1 (truncate `char` @5 (100 `int` @12)))
-               (subobject +2 (truncate `char` @6 (10 `int` @16)))
-               (subobject +3 (truncate `char` @7 (0 `int` @20)))))
+               (subobject +1 (truncate `char` @5 (100 `int` @8)))
+               (subobject +2 (truncate `char` @6 (10 `int` @8)))
+               (subobject +3 (truncate `char` @7 (0 `int` @8)))))
          (expression
             (call `int` @8 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; ∅>>` @24 (s~3 `array<char; ∅>` @4))))
@@ -40,14 +40,14 @@ exit_code: 0
                   (call `int` @16 (addressof `ptr<fn(x: int) -> int>` @32 (f~1 `fn(x: int) -> int` (static f)))
                      (1 `int` @40)))
                (subobject +4
-                  (call `int` @20 (addressof `ptr<fn(x: int) -> int>` @48 (f~1 `fn(x: int) -> int` (static f)))
-                     (2 `int` @56)))
+                  (call `int` @20 (addressof `ptr<fn(x: int) -> int>` @32 (f~1 `fn(x: int) -> int` (static f)))
+                     (2 `int` @40)))
                (subobject +8
-                  (call `int` @24 (addressof `ptr<fn(x: int) -> int>` @64 (f~1 `fn(x: int) -> int` (static f)))
-                     (3 `int` @72)))
+                  (call `int` @24 (addressof `ptr<fn(x: int) -> int>` @32 (f~1 `fn(x: int) -> int` (static f)))
+                     (3 `int` @40)))
                (subobject +12
-                  (call `int` @28 (addressof `ptr<fn(x: int) -> int>` @80 (f~1 `fn(x: int) -> int` (static f)))
-                     (4 `int` @88)))))
+                  (call `int` @28 (addressof `ptr<fn(x: int) -> int>` @32 (f~1 `fn(x: int) -> int` (static f)))
+                     (4 `int` @40)))))
          (expression
             (call `int` @32 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @48

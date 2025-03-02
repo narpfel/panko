@@ -30,8 +30,8 @@ exit_code: 0
          (definition (s~6 `array<char; (constexpr 100)>` @16)
             (braced
                (subobject +0 (truncate `char` @16 (37 `int` @116)))
-               (subobject +1 (truncate `char` @17 (100 `int` @120)))
-               (subobject +2 (truncate `char` @18 (10 `int` @124)))))
+               (subobject +1 (truncate `char` @17 (100 `int` @116)))
+               (subobject +2 (truncate `char` @18 (10 `int` @116)))))
          (expression
             (call `int` @116 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @120 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @128 (noop-type-conversion `ptr<char>` @128 (addressof `ptr<array<char; (constexpr 100)>>` @128 (s~6 `array<char; (constexpr 100)>` @16))))

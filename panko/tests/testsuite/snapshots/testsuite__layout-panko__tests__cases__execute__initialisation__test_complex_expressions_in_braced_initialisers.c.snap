@@ -98,9 +98,9 @@ exit_code: 0
                      (two~10 `int` @36)))
                (subobject +8
                   (subtract `int` @48
-                     (call `int` @48 (addressof `ptr<fn(n: int) -> int>` @64 (fib~1 `fn(n: int) -> int` (static fib)))
-                        (add `int` @72
-                           (add `int` @72
+                     (call `int` @48 (addressof `ptr<fn(n: int) -> int>` @56 (fib~1 `fn(n: int) -> int` (static fib)))
+                        (add `int` @64
+                           (add `int` @64
                               (two~10 `int` @36)
                               (two~10 `int` @36))
                            (two~10 `int` @36)))

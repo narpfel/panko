@@ -20,9 +20,9 @@ exit_code: 0
          (definition (s~3 `array<char const; (constexpr 4)>` @4)
             (braced
                (subobject +0 (truncate `char` @4 (37 `int` @8)))
-               (subobject +1 (truncate `char` @5 (100 `int` @12)))
-               (subobject +2 (truncate `char` @6 (10 `int` @16)))
-               (subobject +3 (truncate `char` @7 (0 `int` @20)))))
+               (subobject +1 (truncate `char` @5 (100 `int` @8)))
+               (subobject +2 (truncate `char` @6 (10 `int` @8)))
+               (subobject +3 (truncate `char` @7 (0 `int` @8)))))
          (expression
             (call `int` @8 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @24 (addressof `ptr<array<char const; ∅>>` @24 (s~3 `array<char const; ∅>` @4)))
@@ -40,17 +40,17 @@ exit_code: 0
                   (call `int` @16 (addressof `ptr<fn(x: int) -> int>` @192 (f~1 `fn(x: int) -> int` (static f)))
                      (42 `int` @200)))
                (subobject +108
-                  (call `int` @124 (addressof `ptr<fn(x: int) -> int>` @208 (f~1 `fn(x: int) -> int` (static f)))
-                     (3 `int` @216)))
+                  (call `int` @124 (addressof `ptr<fn(x: int) -> int>` @192 (f~1 `fn(x: int) -> int` (static f)))
+                     (3 `int` @200)))
                (subobject +112
-                  (call `int` @128 (addressof `ptr<fn(x: int) -> int>` @224 (f~1 `fn(x: int) -> int` (static f)))
-                     (4 `int` @232)))
+                  (call `int` @128 (addressof `ptr<fn(x: int) -> int>` @192 (f~1 `fn(x: int) -> int` (static f)))
+                     (4 `int` @200)))
                (subobject +116
-                  (call `int` @132 (addressof `ptr<fn(x: int) -> int>` @240 (f~1 `fn(x: int) -> int` (static f)))
-                     (5 `int` @248)))
+                  (call `int` @132 (addressof `ptr<fn(x: int) -> int>` @192 (f~1 `fn(x: int) -> int` (static f)))
+                     (5 `int` @200)))
                (subobject +168
-                  (call `int` @184 (addressof `ptr<fn(x: int) -> int>` @256 (f~1 `fn(x: int) -> int` (static f)))
-                     (2 `int` @264)))))
+                  (call `int` @184 (addressof `ptr<fn(x: int) -> int>` @192 (f~1 `fn(x: int) -> int` (static f)))
+                     (2 `int` @200)))))
          (definition (s~8 `ptr<char const>` @192)
             (noop-type-conversion `ptr<char const>` @192
                (deref `ptr<char>` @192
