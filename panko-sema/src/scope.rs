@@ -755,7 +755,8 @@ fn resolve_initialiser<'a>(
                                 index: resolve_expr(scopes, index),
                                 close_bracket: *close_bracket,
                             },
-                        cst::Designator::Identifier { .. } => todo!(),
+                        cst::Designator::Identifier { .. } =>
+                            todo!("structs are not implemented yet"),
                     }
                 })),
         )
