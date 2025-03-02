@@ -17,6 +17,8 @@ use panko_parser::sexpr_builder::SExpr;
 
 use crate::typecheck::ArrayLength;
 
+pub(crate) mod subobjects;
+
 #[derive(Debug, Clone, Copy)]
 pub struct ParameterDeclaration<'a, TypeofExpr, LengthExpr> {
     pub loc: Loc<'a>,

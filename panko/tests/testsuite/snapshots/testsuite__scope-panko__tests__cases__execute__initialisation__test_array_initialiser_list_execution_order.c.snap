@@ -1,0 +1,92 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/test_array_initialiser_list_execution_order.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      f~1 `fn(x: int) -> int`
+      (params
+         x~2 `int`)
+      (compound-statement
+         (definition s~3 `array<char; ∅>`
+            (braced
+               37
+               100
+               10
+               0))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name s~3 `array<char; ∅>`)
+               (name x~2 `int`)))
+         (return (name x~2 `int`))))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (definition s~5 `array<char; ∅>`
+            (braced
+               37
+               100
+               10
+               0))
+         (definition xs~6 `array<array<int; 2>; 2>`
+            (braced
+               (designation ((index 1))
+                  (braced
+                     (call (name f~1 `fn(x: int) -> int`)
+                        1)
+                     (designation ((index 1))
+                        (call (name f~1 `fn(x: int) -> int`)
+                           2))
+                     (designation ((index 0))
+                        (call (name f~1 `fn(x: int) -> int`)
+                           3))))
+               (designation ((index 0) (index 0))
+                  (call (name f~1 `fn(x: int) -> int`)
+                     4))
+               (call (name f~1 `fn(x: int) -> int`)
+                  5)
+               (call (name f~1 `fn(x: int) -> int`)
+                  6)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name s~5 `array<char; ∅>`)
+               (subscript (subscript (name xs~6 `array<array<int; 2>; 2>`) 0) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name s~5 `array<char; ∅>`)
+               (subscript (subscript (name xs~6 `array<array<int; 2>; 2>`) 0) 1)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name s~5 `array<char; ∅>`)
+               (subscript (subscript (name xs~6 `array<array<int; 2>; 2>`) 1) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name s~5 `array<char; ∅>`)
+               (subscript (subscript (name xs~6 `array<array<int; 2>; 2>`) 1) 1)))
+         (definition ys~7 `array<int; 2>`
+            (braced
+               (designation ((index 1))
+                  (call (name f~1 `fn(x: int) -> int`)
+                     10))
+               (designation ((index 0))
+                  (call (name f~1 `fn(x: int) -> int`)
+                     20))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name s~5 `array<char; ∅>`)
+               (subscript (name ys~7 `array<int; 2>`) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name s~5 `array<char; ∅>`)
+               (subscript (name ys~7 `array<int; 2>`) 1))))))
+
+----- stderr -----

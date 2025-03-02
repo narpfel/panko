@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/test_empty_braced_initialisation_of_static_variable.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (definition x~0 `int` (braced ∅))
+   (definition xs~1 `array<array<int; 2>; 2>` (braced ∅))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (return (bit-or (bit-or (bit-or (bit-or (name x~0 `int`) (subscript (subscript (name xs~1 `array<array<int; 2>; 2>`) 0) 0)) (subscript (subscript (name xs~1 `array<array<int; 2>; 2>`) 0) 1)) (subscript (subscript (name xs~1 `array<array<int; 2>; 2>`) 1) 0)) (subscript (subscript (name xs~1 `array<array<int; 2>; 2>`) 1) 1))))))
+
+----- stderr -----

@@ -8,7 +8,6 @@ use panko_report::Report;
 
 use crate::layout::stack::Stack;
 use crate::scope::Id;
-use crate::scope::Initialiser;
 use crate::scope::RefKind;
 use crate::ty;
 use crate::ty::ArrayType;
@@ -39,7 +38,37 @@ pub enum ExternalDeclaration<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct Declaration<'a> {
     pub reference: Reference<'a>,
-    pub initialiser: Option<Initialiser<'a, LayoutedExpression<'a>>>,
+    pub initialiser: Option<Initialiser<'a>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Initialiser<'a> {
+    Braced {
+        subobject_initialisers: &'a [SubobjectInitialiser<'a, LayoutedExpression<'a>>],
+    },
+    Expression(LayoutedExpression<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct SubobjectInitialiser<'a, Expression> {
+    pub subobject: Subobject<'a>,
+    pub initialiser: Expression,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Subobject<'a> {
+    pub(crate) ty: QualifiedType<'a>,
+    pub(crate) offset: u64,
+}
+
+impl<'a> Subobject<'a> {
+    pub fn ty(&self) -> &QualifiedType<'a> {
+        &self.ty
+    }
+
+    pub fn offset(&self) -> u64 {
+        self.offset
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -160,6 +189,21 @@ pub enum Slot<'a> {
     Static(&'a str),
     Automatic(u64),
     Void,
+    // TODO: this is unused everywhere except in static initialisers, where it is ignored.
+    // It should be removed when static initialisers are properly constexpr evaluated.
+    StaticWithOffset { name: &'a str, offset: u64 },
+}
+
+impl<'a> Slot<'a> {
+    pub fn offset(&self, offset: u64) -> Slot<'a> {
+        match self {
+            Slot::Static(name) => Self::StaticWithOffset { name, offset },
+            Slot::Automatic(slot) => Self::Automatic(slot + offset),
+            Slot::Void => unreachable!("`void` slots have no subobjects"),
+            Slot::StaticWithOffset { name, offset: self_offset } =>
+                Self::StaticWithOffset { name, offset: self_offset + offset },
+        }
+    }
 }
 
 impl<'a> FunctionDefinition<'a> {
@@ -275,11 +319,32 @@ fn layout_declaration<'a>(
 ) -> Declaration<'a> {
     let typecheck::Declaration { reference, initialiser } = *decl;
     let reference = stack.add(bump, reference);
+    let slot = reference.slot();
     let initialiser = stack.with_block(|stack| try {
         match initialiser? {
-            Initialiser::Braced { open_brace, close_brace } =>
-                Initialiser::Braced { open_brace, close_brace },
-            Initialiser::Expression(initialiser) => Initialiser::Expression(
+            typecheck::Initialiser::Braced { subobject_initialisers } => {
+                let subobject_initialisers = bump.alloc_slice_fill_iter(
+                    subobject_initialisers.iter().map(|subobject_initialiser| {
+                        let typecheck::SubobjectInitialiser {
+                            subobject: ty::subobjects::Subobject { ty, offset },
+                            initialiser,
+                        } = *subobject_initialiser;
+                        SubobjectInitialiser {
+                            subobject: Subobject { ty: layout_ty(stack, bump, ty), offset },
+                            initialiser: stack.with_block(|stack| {
+                                layout_expression_in_slot(
+                                    stack,
+                                    bump,
+                                    &initialiser,
+                                    Some(slot.offset(offset)),
+                                )
+                            }),
+                        }
+                    }),
+                );
+                Initialiser::Braced { subobject_initialisers }
+            }
+            typecheck::Initialiser::Expression(initialiser) => Initialiser::Expression(
                 layout_expression_in_slot(stack, bump, &initialiser, Some(reference.slot)),
             ),
         }
