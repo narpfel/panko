@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 ariadne = { workspace = true }
 bumpalo = { workspace = true }
+indexmap = { workspace = true }
 itertools = { workspace = true }
 panko-lex = { path = "../panko-lex" }
 panko-parser = { path = "../panko-parser" }

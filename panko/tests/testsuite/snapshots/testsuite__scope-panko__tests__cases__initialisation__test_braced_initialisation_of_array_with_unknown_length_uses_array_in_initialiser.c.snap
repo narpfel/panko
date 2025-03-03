@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/initialisation/test_braced_initialisation_of_array_with_unknown_length_uses_array_in_initialiser.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition error~1 `array<int; ∅>`
+            (braced
+               (sizeof (name error~1 `array<int; ∅>`))
+               (lengthof (name error~1 `array<int; ∅>`)))))))
+
+----- stderr -----

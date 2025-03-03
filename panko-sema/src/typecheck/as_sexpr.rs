@@ -11,9 +11,11 @@ use super::Declaration;
 use super::Expression;
 use super::ExternalDeclaration;
 use super::FunctionDefinition;
+use super::Initialiser;
 use super::ParamRefs;
 use super::Reference;
 use super::Statement;
+use super::SubobjectInitialiser;
 use super::TranslationUnit;
 use super::TypedExpression;
 
@@ -70,6 +72,24 @@ impl AsSExpr for Declaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new(self.reference.kind().str())
             .inherit(&self.reference)
+            .inherit(&self.initialiser)
+    }
+}
+
+impl AsSExpr for Initialiser<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Braced { subobject_initialisers } =>
+                SExpr::new("braced").lines_explicit_empty(*subobject_initialisers),
+            Self::Expression(expr) => expr.as_sexpr(),
+        }
+    }
+}
+
+impl AsSExpr for SubobjectInitialiser<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("subobject")
+            .inline_string(format!("+{}", self.subobject.offset))
             .inherit(&self.initialiser)
     }
 }

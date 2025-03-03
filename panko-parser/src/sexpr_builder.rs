@@ -59,6 +59,19 @@ impl<'a> SExpr<'a> {
         self
     }
 
+    pub fn lines_explicit_empty<T, IntoIter>(mut self, params: IntoIter) -> Self
+    where
+        IntoIter: IntoIterator<Item = &'a T>,
+        IntoIter::IntoIter: ExactSizeIterator,
+        T: AsSExpr + 'a,
+    {
+        let params = params.into_iter();
+        if params.len() == 0 {
+            self.params.push(Param::Inherit(&()));
+        }
+        self.lines(params)
+    }
+
     pub fn inherit(mut self, param: &'a dyn AsSExpr) -> Self {
         self.params.push(Param::Inherit(param));
         self

@@ -15,6 +15,7 @@ use panko_report::Report;
 use crate as cst;
 use crate::ArrayDeclarator;
 use crate::BlockItem;
+pub use crate::DesignatedInitialiser;
 use crate::DirectDeclarator;
 use crate::FunctionDeclarator;
 use crate::InitDeclarator;
@@ -105,6 +106,8 @@ impl<'a> Session<'a> {
         T: Report + 'a,
         Expr: ErrorExpr<'a>,
     {
+        // TODO: make it possible to panic on any (or a specific) error, similar to
+        // `-Z treat-err-as-bug` in rustc
         let diagnostic = self.alloc(diagnostic);
         self.diagnostics.borrow_mut().push(diagnostic);
         Expr::from_error(diagnostic)

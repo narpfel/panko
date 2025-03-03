@@ -1,0 +1,74 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/initialisation/test_excess_initialisers.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (definition static_int~0 `int`
+      (braced
+         1
+         2))
+   (definition static_array~1 `array<int; 2>`
+      (braced
+         1
+         2
+         3))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (definition x~3 `int`
+            (braced
+               1
+               2))
+         (definition xs~4 `array<int; 2>`
+            (braced
+               1
+               2
+               3
+               4))
+         (definition ys~5 `array<array<int; 2>; 2>`
+            (braced
+               1
+               2
+               3
+               4
+               5))
+         (definition zs~6 `array<array<int; 2>; 3>`
+            (braced
+               (braced
+                  1
+                  2
+                  3)
+               (braced
+                  4
+                  5)))
+         (definition scalar_in_array_initialiser~7 `array<int; 2>`
+            (braced
+               1
+               (braced
+                  2
+                  3)))
+         (definition nested_braces_in_first_initialiser~8 `array<int; 2>`
+            (braced
+               (braced
+                  (braced
+                     1
+                     2))))
+         (definition multiline~9 `array<array<int; 2>; 3>`
+            (braced
+               (braced
+                  1
+                  2
+                  3)
+               (braced
+                  4
+                  5))))))
+
+----- stderr -----

@@ -8,6 +8,7 @@ use ariadne::Color::Green;
 use ariadne::Color::Magenta;
 use ariadne::Color::Red;
 use ariadne::Fmt as _;
+use indexmap::IndexMap;
 use itertools::EitherOrBoth;
 use itertools::Itertools as _;
 use panko_lex::Integer;
@@ -32,10 +33,12 @@ use panko_report::Report;
 use variant_types::IntoVariant as _;
 
 use crate::scope;
+use crate::scope::DesignatedInitialiser;
+use crate::scope::Designation;
+use crate::scope::Designator;
 use crate::scope::GenericAssociation;
 use crate::scope::Id;
 use crate::scope::IncrementFixity;
-use crate::scope::Initialiser;
 use crate::scope::IsParameter;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
@@ -43,6 +46,10 @@ use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
+use crate::ty::subobjects::AllowExplicit;
+use crate::ty::subobjects::Subobject;
+use crate::ty::subobjects::SubobjectIterator;
+use crate::ty::subobjects::Subobjects;
 
 mod as_sexpr;
 #[cfg(test)]
@@ -373,6 +380,55 @@ enum Diagnostic<'a> {
         actual: usize,
         is_varargs: bool,
     },
+
+    #[error("empty arrays are not allowed")]
+    #[diagnostics(
+        at(colour = Red, label = "this array is declared as empty"),
+    )]
+    EmptyArray { at: Reference<'a> },
+
+    #[error("excess element in {kind} initialiser")]
+    #[with(
+        name = reference.name.fg(Blue),
+        ty = reference.ty.fg(Blue),
+        kind = iterator.kind(),
+        help = match iterator {
+            SubobjectIterator::Scalar { .. } => format!("`{name}`’s type `{ty}` is scalar"),
+            SubobjectIterator::Array { ty, index, offset: _ } => {
+                let ty = ty.fg(Blue);
+                // trying to get the non-existing element increments the index, so we undo this
+                // here
+                let index = index.checked_sub(1).unwrap().fg(Red);
+                format!("trying to initialise element at index {index} for `{ty}`")
+            }
+        },
+    )]
+    #[diagnostics(
+        reference(colour = Blue, label = "while initialising this variable"),
+        at(colour = Red, label = "{help}"),
+    )]
+    ExcessInitialiser {
+        at: scope::Initialiser<'a>,
+        reference: Reference<'a>,
+        iterator: SubobjectIterator<'a>,
+    },
+
+    #[error("no such subobject while initialising object of type `{ty}`")]
+    #[diagnostics(
+        reference(colour = Blue, label = "while initialising this variable"),
+        at(colour = Red, label = "no such subobject"),
+    )]
+    #[with(
+        ty = match iterator {
+            SubobjectIterator::Scalar { ty, .. } => ty,
+            SubobjectIterator::Array { .. } => unreachable!(),
+        }.fg(Blue),
+    )]
+    NoSuchSubobject {
+        at: Designator<'a>,
+        reference: Reference<'a>,
+        iterator: SubobjectIterator<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -425,28 +481,42 @@ impl<Expression> Hash for ArrayLength<Expression> {
     }
 }
 
-type Type<'a> = ty::Type<'a, !, ArrayLength<&'a TypedExpression<'a>>>;
+pub(crate) type Type<'a> = ty::Type<'a, !, ArrayLength<&'a TypedExpression<'a>>>;
 pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, !, ArrayLength<&'a TypedExpression<'a>>>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
-    pub decls: &'a [ExternalDeclaration<'a>],
+    pub(crate) decls: &'a [ExternalDeclaration<'a>],
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum ExternalDeclaration<'a> {
+pub(crate) enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Declaration<'a> {
-    pub reference: Reference<'a>,
-    pub initialiser: Option<Initialiser<'a, TypedExpression<'a>>>,
+pub(crate) struct Declaration<'a> {
+    pub(crate) reference: Reference<'a>,
+    pub(crate) initialiser: Option<Initialiser<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct FunctionDefinition<'a> {
+pub(crate) enum Initialiser<'a> {
+    Braced {
+        subobject_initialisers: &'a [SubobjectInitialiser<'a>],
+    },
+    Expression(TypedExpression<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct SubobjectInitialiser<'a> {
+    pub(crate) subobject: Subobject<'a>,
+    pub(crate) initialiser: TypedExpression<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct FunctionDefinition<'a> {
     pub(crate) reference: Reference<'a>,
     pub(crate) params: ParamRefs<'a>,
     pub(crate) storage_class: Option<cst::StorageClassSpecifier<'a>>,
@@ -460,10 +530,10 @@ pub struct FunctionDefinition<'a> {
 pub(crate) struct ParamRefs<'a>(pub(crate) &'a [Reference<'a>]);
 
 #[derive(Debug, Clone, Copy)]
-pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
+pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 
 #[derive(Debug, Clone, Copy)]
-pub enum Statement<'a> {
+pub(crate) enum Statement<'a> {
     Declaration(Declaration<'a>),
     Expression(Option<TypedExpression<'a>>),
     Compound(CompoundStatement<'a>),
@@ -471,13 +541,13 @@ pub enum Statement<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct TypedExpression<'a> {
+pub(crate) struct TypedExpression<'a> {
     pub(crate) ty: QualifiedType<'a>,
-    pub expr: Expression<'a>,
+    pub(crate) expr: Expression<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum Expression<'a> {
+pub(crate) enum Expression<'a> {
     Error(&'a dyn Report),
     Name(Reference<'a>),
     Integer {
@@ -599,7 +669,7 @@ pub enum Expression<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Reference<'a> {
+pub(crate) struct Reference<'a> {
     // TODO: The location of `name` points to where this name was declared. This is unused for now,
     // but should be used in error messages to print e. g. “note: [...] was declared here:”.
     pub(crate) name: &'a str,
@@ -616,7 +686,7 @@ impl<'a> Reference<'a> {
         self.name
     }
 
-    pub fn unique_name(&self) -> String {
+    pub(crate) fn unique_name(&self) -> String {
         format!("{}~{}", self.name, self.id.0)
     }
 
@@ -624,7 +694,7 @@ impl<'a> Reference<'a> {
         clippy::misnamed_getters,
         reason = "`loc` should actually return the `usage_location` and not the `loc` where this reference was declared"
     )]
-    pub fn loc(&self) -> Loc<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
         self.usage_location
     }
 
@@ -632,7 +702,7 @@ impl<'a> Reference<'a> {
         self.name
     }
 
-    pub fn kind(&self) -> RefKind {
+    pub(crate) fn kind(&self) -> RefKind {
         self.kind
     }
 
@@ -1019,20 +1089,145 @@ fn typeck_function_definition<'a>(
     }
 }
 
+fn typeck_initialiser_list<'a>(
+    sess: &'a Session<'a>,
+    reference: &Reference<'a>,
+    subobject_initialisers: &mut IndexMap<u64, SubobjectInitialiser<'a>>,
+    subobjects: &mut Subobjects<'a>,
+    initialiser_list: &[DesignatedInitialiser<'a>],
+    emit_nested_excess_initialiser_errors: bool,
+) {
+    for DesignatedInitialiser { designation, initialiser } in initialiser_list {
+        match designation {
+            Some(Designation([])) => unreachable!(),
+            Some(Designation([designator, rest @ ..])) => {
+                fn apply_designator<'a>(
+                    sess: &'a Session<'a>,
+                    reference: &Reference<'a>,
+                    subobjects: &mut Subobjects<'a>,
+                    designator: &Designator<'a>,
+                ) {
+                    match designator {
+                        Designator::Bracketed { open_bracket: _, index, close_bracket: _ } => {
+                            let index = typeck_expression(sess, index, Context::Default);
+                            // TODO: constexpr evaluate
+                            let index = match index.expr {
+                                Expression::Integer { value, token: _ } => value,
+                                _ => todo!(),
+                            };
+                            match subobjects.goto_index(index) {
+                                Ok(()) => (),
+                                Err(iterator) => sess.emit(Diagnostic::NoSuchSubobject {
+                                    at: *designator,
+                                    reference: *reference,
+                                    iterator,
+                                }),
+                            }
+                        }
+                        Designator::Identifier { .. } => todo!(),
+                    }
+                }
+
+                while subobjects.try_leave_subobject(AllowExplicit::No) {}
+                apply_designator(sess, reference, subobjects, designator);
+                for designator in rest {
+                    subobjects.enter_subobject_implicit().unwrap_or_else(|_| {
+                        unreachable!("only reachable for nested braced initialisation")
+                    });
+                    apply_designator(sess, reference, subobjects, designator);
+                }
+            }
+            None => (),
+        }
+        match initialiser {
+            scope::Initialiser::Braced {
+                open_brace: _,
+                initialiser_list,
+                close_brace: _,
+            } => {
+                let emit_nested_errors = match subobjects.enter_subobject() {
+                    Ok(()) => true,
+                    Err(iterator) => {
+                        if emit_nested_excess_initialiser_errors {
+                            // TODO: use this error
+                            sess.emit(Diagnostic::ExcessInitialiser {
+                                at: **initialiser,
+                                reference: *reference,
+                                iterator,
+                            })
+                        }
+                        false
+                    }
+                };
+                typeck_initialiser_list(
+                    sess,
+                    reference,
+                    subobject_initialisers,
+                    subobjects,
+                    initialiser_list,
+                    emit_nested_errors,
+                );
+                let left = subobjects.try_leave_subobject(AllowExplicit::Yes);
+                assert!(left);
+            }
+            scope::Initialiser::Expression(expr) => match subobjects.next_scalar() {
+                Ok(subobject) => {
+                    subobject_initialisers.insert(subobject.offset, SubobjectInitialiser {
+                        subobject,
+                        // TODO: this skips typechecking the initialiser in the `Err` case
+                        // example:
+                        //     int x = {1, (void)42};
+                        // this should emit an excess initialiser error *and* a type error
+                        initialiser: convert_as_if_by_assignment(
+                            sess,
+                            subobject.ty,
+                            typeck_expression(sess, expr, Context::Default),
+                        ),
+                    });
+                }
+                Err(iterator) =>
+                    if emit_nested_excess_initialiser_errors {
+                        // TODO: use this error (implement `ErrorExpr` for `SubobjectInitialiser`)
+                        sess.emit(Diagnostic::ExcessInitialiser {
+                            at: **initialiser,
+                            reference: *reference,
+                            iterator,
+                        })
+                    },
+            },
+        }
+    }
+}
+
 fn typeck_declaration<'a>(
     sess: &'a Session<'a>,
     declaration: &scope::Declaration<'a>,
 ) -> Declaration<'a> {
     let scope::Declaration { reference, initialiser } = *declaration;
     let reference = typeck_reference(sess, reference);
-    if matches!(reference.kind, RefKind::Definition) && !reference.ty.ty.is_complete() {
-        sess.emit(Diagnostic::VariableWithIncompleteType { at: reference })
-    }
     let initialiser = try {
         match initialiser? {
-            Initialiser::Braced { open_brace, close_brace } =>
-                Initialiser::Braced { open_brace, close_brace },
-            Initialiser::Expression(initialiser) =>
+            scope::Initialiser::Braced {
+                open_brace: _,
+                initialiser_list,
+                close_brace: _,
+            } => {
+                let subobject_initialisers = &mut IndexMap::new();
+                typeck_initialiser_list(
+                    sess,
+                    &reference,
+                    subobject_initialisers,
+                    &mut Subobjects::new(reference.ty),
+                    initialiser_list,
+                    true,
+                );
+                subobject_initialisers.sort_unstable_keys();
+                Initialiser::Braced {
+                    subobject_initialisers: sess
+                        .alloc_slice_fill_iter(subobject_initialisers.values().copied()),
+                }
+            }
+            scope::Initialiser::Expression(initialiser) =>
                 Initialiser::Expression(convert_as_if_by_assignment(
                     sess,
                     reference.ty,
@@ -1040,6 +1235,53 @@ fn typeck_declaration<'a>(
                 )),
         }
     };
+    let reference =
+        if matches!(reference.kind, RefKind::Definition) && !reference.ty.ty.is_complete() {
+            if let ty @ QualifiedType {
+                ty:
+                    Type::Array(ArrayType {
+                        ty: element_ty,
+                        length: ArrayLength::Unknown,
+                    }),
+                ..
+            } = reference.ty
+                && let Some(Initialiser::Braced { subobject_initialisers, .. }) = initialiser
+            {
+                let length = subobject_initialisers
+                    .iter()
+                    .map(|initialiser| initialiser.subobject.offset)
+                    .max()
+                    .map_or(0, |max_offset| {
+                        let element_size = element_ty.ty.size();
+                        assert!(max_offset.is_multiple_of(element_size));
+                        (max_offset / element_size).checked_add(1).unwrap()
+                    });
+                Reference {
+                    ty: QualifiedType {
+                        ty: Type::Array(ArrayType {
+                            ty: element_ty,
+                            length: ArrayLength::Constant(length),
+                        }),
+                        ..ty
+                    },
+                    ..reference
+                }
+            }
+            else {
+                // TODO: use this error
+                let () = sess.emit(Diagnostic::VariableWithIncompleteType { at: reference });
+                reference
+            }
+        }
+        else {
+            reference
+        };
+
+    if let Type::Array(ArrayType { ty: _, length: ArrayLength::Constant(0) }) = reference.ty.ty {
+        // TODO: use this error
+        sess.emit(Diagnostic::EmptyArray { at: reference })
+    }
+
     Declaration { reference, initialiser }
 }
 

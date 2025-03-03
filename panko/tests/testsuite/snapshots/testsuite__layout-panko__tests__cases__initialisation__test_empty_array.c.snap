@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/initialisation/test_empty_array.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: empty arrays are not allowed
+   ╭─[panko/tests/cases/initialisation/test_empty_array.c:2:9]
+   │
+ 2 │     int empty_1[0];
+   │         ───┬───  
+   │            ╰───── this array is declared as empty
+───╯
+
+Error: empty arrays are not allowed
+   ╭─[panko/tests/cases/initialisation/test_empty_array.c:3:9]
+   │
+ 3 │     int empty_2[0] = {};
+   │         ───┬───  
+   │            ╰───── this array is declared as empty
+───╯
+
+Error: empty arrays are not allowed
+   ╭─[panko/tests/cases/initialisation/test_empty_array.c:4:9]
+   │
+ 4 │     int empty_3[] = {};
+   │         ───┬───  
+   │            ╰───── this array is declared as empty
+───╯

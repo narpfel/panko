@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/initialisation/test_empty_array.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition empty_1~1 `array<int; 0>` ∅)
+         (definition empty_2~2 `array<int; 0>` (braced ∅))
+         (definition empty_3~3 `array<int; ∅>` (braced ∅)))))
+
+----- stderr -----
