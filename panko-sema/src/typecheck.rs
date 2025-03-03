@@ -1131,9 +1131,9 @@ fn typeck_initialiser_list<'a>(
                 while subobjects.try_leave_subobject(AllowExplicit::No) {}
                 apply_designator(sess, reference, subobjects, designator);
                 for designator in rest {
-                    subobjects
-                        .enter_subobject_implicit()
-                        .unwrap_or_else(|_| todo!());
+                    subobjects.enter_subobject_implicit().unwrap_or_else(|_| {
+                        unreachable!("only reachable for nested braced initialisation")
+                    });
                     apply_designator(sess, reference, subobjects, designator);
                 }
             }
