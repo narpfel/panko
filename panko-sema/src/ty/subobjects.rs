@@ -104,6 +104,9 @@ impl<'a> Subobjects<'a> {
             Type::Array(ty) => SubobjectIterator::Array { ty, index: 0, offset: 0 },
             ty if ty.is_scalar() =>
                 SubobjectIterator::Scalar { ty, is_exhausted: false, offset: 0 },
+            // TODO: this is reachable for e. g. a braced initialisation of a variable of type
+            // `void`:
+            //     void v = {1, 2, 3};
             _ => unreachable!(),
         };
         Self {
