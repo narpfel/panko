@@ -92,13 +92,23 @@ Error: excess element in scalar initialiser
     │                      ╰────────────────────────────── while initialising this variable
 ────╯
 
-Error: excess element in array initialiser
-    ╭─[panko/tests/cases/initialisation/test_excess_initialisers.c:14:16]
+Error: excess element in scalar initialiser
+    ╭─[panko/tests/cases/initialisation/test_excess_initialisers.c:12:55]
     │
- 13 │     int multiline[3][2] = {
+ 12 │     int nested_braces_in_first_initialiser[2] = {{{1, 2}}};
+    │         ─────────────────┬────────────────            ┬  
+    │                          │                            ╰── `nested_braces_in_first_initialiser`’s type `array<int; (constexpr 2)>` is scalar
+    │                          │                               
+    │                          ╰─────────────────────────────── while initialising this variable
+────╯
+
+Error: excess element in array initialiser
+    ╭─[panko/tests/cases/initialisation/test_excess_initialisers.c:15:16]
+    │
+ 14 │     int multiline[3][2] = {
     │         ────┬────  
     │             ╰────── while initialising this variable
- 14 │         {1, 2, 3},
+ 15 │         {1, 2, 3},
     │                ┬  
     │                ╰── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
 ────╯

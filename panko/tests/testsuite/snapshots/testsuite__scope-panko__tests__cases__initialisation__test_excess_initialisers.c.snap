@@ -55,7 +55,13 @@ exit_code: 0
                (braced
                   2
                   3)))
-         (definition multiline~8 `array<array<int; 2>; 3>`
+         (definition nested_braces_in_first_initialiser~8 `array<int; 2>`
+            (braced
+               (braced
+                  (braced
+                     1
+                     2))))
+         (definition multiline~9 `array<array<int; 2>; 3>`
             (braced
                (braced
                   1

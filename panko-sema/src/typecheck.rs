@@ -1145,15 +1145,6 @@ fn typeck_initialiser_list<'a>(
                 initialiser_list,
                 close_brace: _,
             } => {
-                // TODO: add a test for this case:
-                // nested braced initialisers in array initialisers initialise *an array
-                // element* (with excess initialisers), not the array itself:
-                //     int xs[2] = {{{1, 2}}};
-                //     // [[print: 1]]
-                //     printf("%s\n", xs[0]);
-                //     // [[print: 0]]
-                //     printf("%s\n", xs[1]);
-                // Also, this is required to emit a diagnostic.
                 let emit_nested_errors = match subobjects.enter_subobject() {
                     Ok(()) => true,
                     Err(iterator) => {
