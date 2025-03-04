@@ -3,6 +3,9 @@ name = "panko-report"
 version = "0.1.0"
 edition = "2024"
 
+[lints]
+workspace = true
+
 [dependencies]
 panko-derive-report = { path = "../panko-derive-report" }
 panko-lex = { path = "../panko-lex" }

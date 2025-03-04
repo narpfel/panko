@@ -12,6 +12,10 @@ members = [
     "panko-sema",
 ]
 
+[workspace.lints.clippy]
+# TODO: remove this and `expect` the warning for each enum separately
+large_enum_variant = "allow"
+
 [workspace.dependencies]
 bumpalo = "3.16.0"
 clap = { version = "4.5.26", features = ["derive"] }

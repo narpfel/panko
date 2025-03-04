@@ -693,15 +693,14 @@ fn resolve_function_definition<'a>(
                     },
                     |name| name.slice(),
                 );
-                let reference = scopes.add(
+                scopes.add(
                     name,
                     param.loc,
                     param.ty,
                     RefKind::Definition,
                     StorageDuration::Automatic,
                     IsParameter::Yes,
-                );
-                reference
+                )
             })
             .collect_vec(),
     );

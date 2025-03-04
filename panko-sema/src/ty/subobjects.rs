@@ -138,11 +138,10 @@ impl<'a> Subobjects<'a> {
             match subobject.ty.ty {
                 Type::Array(ty) => {
                     self.stack.push((
-                        mem::replace(&mut self.current, SubobjectIterator::Array {
-                            ty,
-                            index: 0,
-                            offset: subobject.offset,
-                        }),
+                        mem::replace(
+                            &mut self.current,
+                            SubobjectIterator::Array { ty, index: 0, offset: subobject.offset },
+                        ),
                         Explicit::No,
                     ));
                 }

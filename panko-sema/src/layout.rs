@@ -462,12 +462,10 @@ fn layout_expression_in_slot<'a>(
             let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, Some(slot)));
             let rhs = bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, rhs)));
             let (pointer, integral) = order.select(lhs, rhs);
-            (slot, Expression::PtrAdd {
-                pointer,
-                integral,
-                pointee_size,
-                order,
-            })
+            (
+                slot,
+                Expression::PtrAdd { pointer, integral, pointee_size, order },
+            )
         }
         typecheck::Expression::PtrSub { pointer, integral, pointee_size } => {
             let slot = make_slot();

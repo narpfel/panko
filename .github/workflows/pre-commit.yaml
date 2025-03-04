@@ -22,7 +22,7 @@ jobs:
       - name: Install Rust nightly toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2025-01-15
+          toolchain: nightly-2025-03-04
           # we have to install rustc-codegen-cranelift here even though it’s
           # unused, otherwise it would get installed via `rust-toolchain.toml`
           # when running `cargo fmt`, which conflicts with the rust-toolchain

@@ -1172,18 +1172,21 @@ fn typeck_initialiser_list<'a>(
             }
             scope::Initialiser::Expression(expr) => match subobjects.next_scalar() {
                 Ok(subobject) => {
-                    subobject_initialisers.insert(subobject.offset, SubobjectInitialiser {
-                        subobject,
-                        // TODO: this skips typechecking the initialiser in the `Err` case
-                        // example:
-                        //     int x = {1, (void)42};
-                        // this should emit an excess initialiser error *and* a type error
-                        initialiser: convert_as_if_by_assignment(
-                            sess,
-                            subobject.ty,
-                            typeck_expression(sess, expr, Context::Default),
-                        ),
-                    });
+                    subobject_initialisers.insert(
+                        subobject.offset,
+                        SubobjectInitialiser {
+                            subobject,
+                            // TODO: this skips typechecking the initialiser in the `Err` case
+                            // example:
+                            //     int x = {1, (void)42};
+                            // this should emit an excess initialiser error *and* a type error
+                            initialiser: convert_as_if_by_assignment(
+                                sess,
+                                subobject.ty,
+                                typeck_expression(sess, expr, Context::Default),
+                            ),
+                        },
+                    );
                 }
                 Err(iterator) =>
                     if emit_nested_excess_initialiser_errors {

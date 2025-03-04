@@ -1,6 +1,5 @@
 #![feature(impl_trait_in_assoc_type)]
 #![feature(try_blocks)]
-#![feature(unsigned_is_multiple_of)]
 
 use std::borrow::Cow;
 use std::fmt;
@@ -712,11 +711,17 @@ impl<'a> Codegen<'a> {
                 match pointee_size {
                     size @ (1 | 2 | 4 | 8) => {
                         self.emit_args("mov", &[&R10, integral]);
-                        self.emit_args("lea", &[&Rax.typed(pointer), &Memory {
-                            pointer: Rax,
-                            index: Some(Index { register: R10, size }),
-                            offset: Offset::Immediate(0),
-                        }]);
+                        self.emit_args(
+                            "lea",
+                            &[
+                                &Rax.typed(pointer),
+                                &Memory {
+                                    pointer: Rax,
+                                    index: Some(Index { register: R10, size }),
+                                    offset: Offset::Immediate(0),
+                                },
+                            ],
+                        );
                     }
                     size => self.emit_pointer_offset("add", size, integral),
                 }
