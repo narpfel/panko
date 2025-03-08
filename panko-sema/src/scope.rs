@@ -74,7 +74,7 @@ pub(crate) enum ExternalDeclaration<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Declaration<'a> {
     pub(crate) reference: Reference<'a>,
-    pub(crate) initialiser: Option<Initialiser<'a>>,
+    pub(crate) initialiser: Option<&'a Initialiser<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -242,6 +242,7 @@ pub struct Reference<'a> {
     pub(crate) storage_duration: StorageDuration,
     pub(crate) previous_definition: Option<&'a Self>,
     pub(crate) is_parameter: IsParameter,
+    pub(crate) initialiser: Option<&'a Initialiser<'a>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -500,6 +501,7 @@ impl<'a> Scopes<'a> {
             storage_duration,
             previous_definition: None,
             is_parameter,
+            initialiser: None,
         };
         match self.lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
@@ -547,6 +549,7 @@ impl<'a> Scopes<'a> {
             storage_duration: StorageDuration::Automatic,
             previous_definition: None,
             is_parameter: IsParameter::No,
+            initialiser: None,
         }
     }
 
@@ -579,6 +582,17 @@ impl<'a> Scopes<'a> {
 
     fn is_in_global_scope(&self) -> bool {
         self.scopes.len() == 1
+    }
+
+    fn add_initialiser(
+        &mut self,
+        reference: &Reference<'a>,
+        initialiser: Option<&'a Initialiser<'a>>,
+    ) {
+        match self.lookup_innermost(reference.name) {
+            Entry::Occupied(mut entry) => entry.get_mut().initialiser = initialiser,
+            Entry::Vacant(_) => unreachable!(),
+        }
     }
 }
 
@@ -810,34 +824,41 @@ fn resolve_declaration<'a>(
         Type::Function(_) => StorageDuration::Static,
         _ => storage_duration,
     };
+
+    let reference = scopes.add(
+        name.slice(),
+        name.loc(),
+        ty,
+        kind,
+        storage_duration,
+        IsParameter::No,
+    );
+    // TODO: move resolving the initialiser into `Scopes::add` so that the `add_initialiser` call
+    // cannot be forgotten
+    let initialiser = try {
+        let initialiser = match initialiser.as_ref()? {
+            ast::Initialiser::Braced {
+                open_brace,
+                initialiser_list,
+                close_brace,
+            } => Initialiser::Braced {
+                open_brace: *open_brace,
+                initialiser_list: scopes.sess.alloc_slice_fill_iter(
+                    initialiser_list
+                        .iter()
+                        .map(|initialiser| resolve_initialiser(scopes, initialiser)),
+                ),
+                close_brace: *close_brace,
+            },
+            ast::Initialiser::Expression(initialiser) =>
+                Initialiser::Expression(resolve_expr(scopes, initialiser)),
+        };
+        scopes.sess.alloc(initialiser)
+    };
+    scopes.add_initialiser(&reference, initialiser);
     Declaration {
-        reference: scopes.add(
-            name.slice(),
-            name.loc(),
-            ty,
-            kind,
-            storage_duration,
-            IsParameter::No,
-        ),
-        initialiser: try {
-            match initialiser.as_ref()? {
-                ast::Initialiser::Braced {
-                    open_brace,
-                    initialiser_list,
-                    close_brace,
-                } => Initialiser::Braced {
-                    open_brace: *open_brace,
-                    initialiser_list: scopes.sess.alloc_slice_fill_iter(
-                        initialiser_list
-                            .iter()
-                            .map(|initialiser| resolve_initialiser(scopes, initialiser)),
-                    ),
-                    close_brace: *close_brace,
-                },
-                ast::Initialiser::Expression(initialiser) =>
-                    Initialiser::Expression(resolve_expr(scopes, initialiser)),
-            }
-        },
+        reference: Reference { initialiser, ..reference },
+        initialiser,
     }
 }
 

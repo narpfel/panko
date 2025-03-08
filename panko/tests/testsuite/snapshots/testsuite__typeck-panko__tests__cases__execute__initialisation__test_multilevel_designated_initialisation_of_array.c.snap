@@ -25,7 +25,7 @@ exit_code: 0
                (subobject +3 (truncate (0 `int`) `char`))))
          (expression
             (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (noop-type-conversion (addressof (s~3 `array<char; ∅>`) `ptr<array<char; ∅>>`) `ptr<char>`) `ptr<char const>`)
+               (noop-type-conversion (noop-type-conversion (addressof (s~3 `array<char; (constexpr 4)>`) `ptr<array<char; (constexpr 4)>>`) `ptr<char>`) `ptr<char const>`)
                (x~2 `int`)
                `int`))
          (return (x~2 `int`))))

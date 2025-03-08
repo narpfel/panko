@@ -34,6 +34,14 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 1)
-               (subscript (name xs~4 `array<int; ∅>`) 2))))))
+               (subscript (name xs~4 `array<int; ∅>`) 2)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 2)
+               (sizeof (name xs~4 `array<int; ∅>`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~3 `ptr<ptr<char>>`) 2)
+               (lengthof (name xs~4 `array<int; ∅>`)))))))
 
 ----- stderr -----

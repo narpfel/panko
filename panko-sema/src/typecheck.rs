@@ -509,6 +509,25 @@ pub(crate) enum Initialiser<'a> {
     Expression(TypedExpression<'a>),
 }
 
+impl Initialiser<'_> {
+    fn array_length(&self, element_ty: &Type) -> Option<u64> {
+        match self {
+            Self::Braced { subobject_initialisers } => Some(
+                subobject_initialisers
+                    .iter()
+                    .map(|initialiser| initialiser.subobject.offset)
+                    .max()
+                    .map_or(0, |max_offset| {
+                        let element_size = element_ty.size();
+                        assert!(max_offset.is_multiple_of(element_size));
+                        (max_offset / element_size).checked_add(1).unwrap()
+                    }),
+            ),
+            Self::Expression(_) => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct SubobjectInitialiser<'a> {
     pub(crate) subobject: Subobject<'a>,
@@ -859,10 +878,11 @@ impl fmt::Display for ConversionKind {
     }
 }
 
-fn typeck_ty<'a>(
+fn typeck_ty_with_initialiser<'a>(
     sess: &'a Session<'a>,
     ty: scope::QualifiedType<'a>,
     is_parameter: IsParameter,
+    reference: Option<&scope::Reference<'a>>,
 ) -> QualifiedType<'a> {
     let scope::QualifiedType { is_const, is_volatile, ty, loc } = ty;
     let ty = match ty {
@@ -891,6 +911,18 @@ fn typeck_ty<'a>(
                     .unwrap_or_else(|_| todo!("variable length array"))
                 })
                 .unwrap_or(ArrayLength::Unknown);
+            let length = if let Some(reference) = reference
+                && let Some(initialiser) = reference.initialiser
+                && let ArrayLength::Unknown = length
+                && let reference = typeck_reference(sess, *reference, NeedsInitialiser::No)
+                && let initialiser = typeck_initialiser(sess, initialiser, &reference)
+                && let Initialiser::Braced { subobject_initialisers: _ } = initialiser
+            {
+                ArrayLength::Constant(initialiser.array_length(&ty.ty).unwrap())
+            }
+            else {
+                length
+            };
             match is_parameter {
                 IsParameter::Yes => {
                     // TODO: use qualifiers specified in the array declarator
@@ -947,7 +979,24 @@ fn typeck_ty<'a>(
     QualifiedType { is_const, is_volatile, ty, loc }
 }
 
-fn typeck_reference<'a>(sess: &'a Session<'a>, reference: scope::Reference<'a>) -> Reference<'a> {
+fn typeck_ty<'a>(
+    sess: &'a Session<'a>,
+    ty: scope::QualifiedType<'a>,
+    is_parameter: IsParameter,
+) -> QualifiedType<'a> {
+    typeck_ty_with_initialiser(sess, ty, is_parameter, None)
+}
+
+enum NeedsInitialiser {
+    No,
+    Yes,
+}
+
+fn typeck_reference<'a>(
+    sess: &'a Session<'a>,
+    reference: scope::Reference<'a>,
+    needs_initialiser: NeedsInitialiser,
+) -> Reference<'a> {
     let scope::Reference {
         name,
         loc,
@@ -958,11 +1007,19 @@ fn typeck_reference<'a>(sess: &'a Session<'a>, reference: scope::Reference<'a>) 
         storage_duration,
         previous_definition,
         is_parameter,
+        initialiser: _,
     } = reference;
     let reference = Reference {
         name,
         loc,
-        ty: typeck_ty(sess, ty, is_parameter),
+        // TODO: this should be replaced by a more ECS-ish approach to avoid re-typechecking the
+        // initialiser for every usage of references to arrays with unknown length.
+        ty: typeck_ty_with_initialiser(
+            sess,
+            ty,
+            is_parameter,
+            matches!(needs_initialiser, NeedsInitialiser::Yes).then_some(&reference),
+        ),
         id,
         usage_location,
         kind,
@@ -972,7 +1029,8 @@ fn typeck_reference<'a>(sess: &'a Session<'a>, reference: scope::Reference<'a>) 
         Some(previous_definition) => {
             // TODO: this is quadratic in the number of previous decls for this name
             // TODO: this will also emit quadratically many error messages
-            let previous_definition = typeck_reference(sess, *previous_definition);
+            let previous_definition =
+                typeck_reference(sess, *previous_definition, needs_initialiser);
             reference
                 .ty
                 .composite_ty(sess.bump(), &previous_definition.ty)
@@ -1075,11 +1133,16 @@ fn typeck_function_definition<'a>(
     } = *definition;
 
     let params = ParamRefs(
-        sess.alloc_slice_fill_iter(params.0.iter().map(|&param| typeck_reference(sess, param))),
+        sess.alloc_slice_fill_iter(
+            params
+                .0
+                .iter()
+                .map(|&param| typeck_reference(sess, param, NeedsInitialiser::No)),
+        ),
     );
 
     FunctionDefinition {
-        reference: typeck_reference(sess, reference),
+        reference: typeck_reference(sess, reference, NeedsInitialiser::No),
         params,
         storage_class,
         inline,
@@ -1202,42 +1265,48 @@ fn typeck_initialiser_list<'a>(
     }
 }
 
+fn typeck_initialiser<'a>(
+    sess: &'a Session<'a>,
+    initialiser: &scope::Initialiser<'a>,
+    reference: &Reference<'a>,
+) -> Initialiser<'a> {
+    match initialiser {
+        scope::Initialiser::Braced {
+            open_brace: _,
+            initialiser_list,
+            close_brace: _,
+        } => {
+            let subobject_initialisers = &mut IndexMap::new();
+            typeck_initialiser_list(
+                sess,
+                reference,
+                subobject_initialisers,
+                &mut Subobjects::new(reference.ty),
+                initialiser_list,
+                true,
+            );
+            subobject_initialisers.sort_unstable_keys();
+            Initialiser::Braced {
+                subobject_initialisers: sess
+                    .alloc_slice_fill_iter(subobject_initialisers.values().copied()),
+            }
+        }
+        scope::Initialiser::Expression(initialiser) =>
+            Initialiser::Expression(convert_as_if_by_assignment(
+                sess,
+                reference.ty,
+                typeck_expression(sess, initialiser, Context::Default),
+            )),
+    }
+}
+
 fn typeck_declaration<'a>(
     sess: &'a Session<'a>,
     declaration: &scope::Declaration<'a>,
 ) -> Declaration<'a> {
     let scope::Declaration { reference, initialiser } = *declaration;
-    let reference = typeck_reference(sess, reference);
-    let initialiser = try {
-        match initialiser? {
-            scope::Initialiser::Braced {
-                open_brace: _,
-                initialiser_list,
-                close_brace: _,
-            } => {
-                let subobject_initialisers = &mut IndexMap::new();
-                typeck_initialiser_list(
-                    sess,
-                    &reference,
-                    subobject_initialisers,
-                    &mut Subobjects::new(reference.ty),
-                    initialiser_list,
-                    true,
-                );
-                subobject_initialisers.sort_unstable_keys();
-                Initialiser::Braced {
-                    subobject_initialisers: sess
-                        .alloc_slice_fill_iter(subobject_initialisers.values().copied()),
-                }
-            }
-            scope::Initialiser::Expression(initialiser) =>
-                Initialiser::Expression(convert_as_if_by_assignment(
-                    sess,
-                    reference.ty,
-                    typeck_expression(sess, &initialiser, Context::Default),
-                )),
-        }
-    };
+    let reference = typeck_reference(sess, reference, NeedsInitialiser::Yes);
+    let initialiser = try { typeck_initialiser(sess, initialiser?, &reference) };
     let reference =
         if matches!(reference.kind, RefKind::Definition) && !reference.ty.ty.is_complete() {
             if let ty @ QualifiedType {
@@ -1248,22 +1317,16 @@ fn typeck_declaration<'a>(
                     }),
                 ..
             } = reference.ty
-                && let Some(Initialiser::Braced { subobject_initialisers, .. }) = initialiser
+                && let Some(initialiser @ Initialiser::Braced { subobject_initialisers: _ }) =
+                    initialiser
             {
-                let length = subobject_initialisers
-                    .iter()
-                    .map(|initialiser| initialiser.subobject.offset)
-                    .max()
-                    .map_or(0, |max_offset| {
-                        let element_size = element_ty.ty.size();
-                        assert!(max_offset.is_multiple_of(element_size));
-                        (max_offset / element_size).checked_add(1).unwrap()
-                    });
                 Reference {
                     ty: QualifiedType {
                         ty: Type::Array(ArrayType {
                             ty: element_ty,
-                            length: ArrayLength::Constant(length),
+                            length: ArrayLength::Constant(
+                                initialiser.array_length(&element_ty.ty).unwrap(),
+                            ),
                         }),
                         ..ty
                     },
@@ -1797,7 +1860,7 @@ fn typeck_expression<'a>(
     let expr = match expr {
         scope::Expression::Error(error) => TypedExpression::from_error(*error),
         scope::Expression::Name(reference) => {
-            let reference = typeck_reference(sess, *reference);
+            let reference = typeck_reference(sess, *reference, NeedsInitialiser::Yes);
             TypedExpression {
                 ty: reference.ty,
                 expr: Expression::Name(reference),
@@ -1870,7 +1933,7 @@ fn typeck_expression<'a>(
                 // TODO: this will fail for bitfields
                 expr: Expression::Addressof { ampersand: op.token, operand: target },
             });
-            let target_temporary = typeck_reference(sess, *target_temporary);
+            let target_temporary = typeck_reference(sess, *target_temporary, NeedsInitialiser::No);
             let target_addr = sess.alloc(TypedExpression {
                 ty: target.ty,
                 expr: Expression::Name(Reference { ty: target.ty, ..target_temporary }),
