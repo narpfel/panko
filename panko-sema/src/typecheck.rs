@@ -429,6 +429,10 @@ enum Diagnostic<'a> {
         reference: Reference<'a>,
         iterator: SubobjectIterator<'a>,
     },
+
+    #[error("empty character constant")]
+    #[diagnostics(at(colour = Red, label = "this character constant is empty"))]
+    EmptyCharConstant { at: Token<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1844,10 +1848,10 @@ fn desugar_postfix_increment<'a>(
     }
 }
 
-fn parse_char_literal(char: &Token) -> u64 {
+fn parse_char_literal(char: &Token) -> Option<u64> {
     let content = &char.slice()[1..char.slice().len() - 1];
     let value = match content.chars().next() {
-        None => unreachable!(),
+        None => return None,
         Some('\\') => match content.chars().nth(1) {
             None => unreachable!(),
             Some('\'') => '\'',
@@ -1865,7 +1869,7 @@ fn parse_char_literal(char: &Token) -> u64 {
         },
         Some(c) => c,
     };
-    u64::from(value)
+    Some(u64::from(value))
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1932,9 +1936,9 @@ fn typeck_expression<'a>(
         }
         scope::Expression::CharConstant(char) => TypedExpression {
             ty: Type::int().unqualified(),
-            expr: Expression::Integer {
-                value: parse_char_literal(char),
-                token: *char,
+            expr: match parse_char_literal(char) {
+                Some(value) => Expression::Integer { value, token: *char },
+                None => sess.emit(Diagnostic::EmptyCharConstant { at: *char }),
             },
         },
         scope::Expression::Parenthesised { open_paren, expr, close_paren } => {

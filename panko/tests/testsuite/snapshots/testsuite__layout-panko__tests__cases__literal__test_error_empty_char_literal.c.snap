@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/literal/test_error_empty_char_literal.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: empty character constant
+   ╭─[panko/tests/cases/literal/test_error_empty_char_literal.c:2:5]
+   │
+ 2 │     '';
+   │     ─┬  
+   │      ╰── this character constant is empty
+───╯
