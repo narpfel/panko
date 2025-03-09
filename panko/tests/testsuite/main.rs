@@ -156,9 +156,10 @@ fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
         "test program did not exit with expected return code {expected_return_code}",
     );
 
-    assert_eq!(
-        stdout, expected_output,
-        "output on stdout (left) did not match expected output (right)",
+    pretty_assertions::assert_eq!(
+        expected_output,
+        stdout,
+        "expected output (left) did not match output on stdout (right)",
     );
-    assert_eq!(stderr, "", "no output on stderr is expected");
+    assert_eq!("", stderr, "no output on stderr is expected");
 }

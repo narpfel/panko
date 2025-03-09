@@ -688,6 +688,7 @@ dependencies = [
  "panko-lex",
  "panko-parser",
  "panko-sema",
+ "pretty_assertions",
  "regex",
  "rstest",
  "tempfile",
