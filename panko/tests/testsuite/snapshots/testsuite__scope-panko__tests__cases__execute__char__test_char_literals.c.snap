@@ -1,0 +1,121 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/char/test_char_literals.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition as_integral_value~2 `array<char; ∅>`
+            (braced
+               '%'
+               'd'
+               '\n'
+               0))
+         (definition as_char~3 `array<char; ∅>`
+            (braced
+               '<'
+               '%'
+               'c'
+               '>'
+               '\n'
+               0))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               'e'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_char~3 `array<char; ∅>`)
+               'e'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '\''))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_char~3 `array<char; ∅>`)
+               '\''))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '\"'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_char~3 `array<char; ∅>`)
+               '\"'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '"'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_char~3 `array<char; ∅>`)
+               '"'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '\?'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_char~3 `array<char; ∅>`)
+               '\?'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '?'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_char~3 `array<char; ∅>`)
+               '?'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '\\'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_char~3 `array<char; ∅>`)
+               '\\'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '\a'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '\b'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '\f'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '\n'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_char~3 `array<char; ∅>`)
+               '\n'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '\r'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '\t'))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (name as_integral_value~2 `array<char; ∅>`)
+               '\v')))))
+
+----- stderr -----

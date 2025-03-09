@@ -116,6 +116,7 @@ extern {
 
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
         Integer => Token { kind: panko_lex::TokenKind::Integer(_), .. },
+        CharConstant => Token { kind: panko_lex::TokenKind::CharConstant, .. },
     }
 }
 
@@ -402,6 +403,7 @@ ExpressionStatement: ast::ExpressionStatement<'a> = {
 PrimaryExpression: ast::Expression<'a> = {
     Identifier => ast::Expression::Name(<>),
     Integer => ast::Expression::Integer(<>),
+    CharConstant => ast::Expression::CharConstant(<>),
     <open_paren:"("> <expr:Bump<Expression>> <close_paren:")"> => ast::Expression::Parenthesised { <> },
     <generic:"_Generic"> "("
         <selector:Bump<AssignmentExpression>> ","

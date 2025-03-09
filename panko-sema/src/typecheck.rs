@@ -1844,6 +1844,30 @@ fn desugar_postfix_increment<'a>(
     }
 }
 
+fn parse_char_literal(char: &Token) -> u64 {
+    let content = &char.slice()[1..char.slice().len() - 1];
+    let value = match content.chars().next() {
+        None => unreachable!(),
+        Some('\\') => match content.chars().nth(1) {
+            None => unreachable!(),
+            Some('\'') => '\'',
+            Some('"') => '"',
+            Some('?') => '?',
+            Some('\\') => '\\',
+            Some('a') => '\x07',
+            Some('b') => '\x08',
+            Some('f') => '\x0c',
+            Some('n') => '\n',
+            Some('r') => '\r',
+            Some('t') => '\t',
+            Some('v') => '\x0b',
+            Some(_) => unreachable!(),
+        },
+        Some(c) => c,
+    };
+    u64::from(value)
+}
+
 #[derive(Debug, Clone, Copy)]
 enum Context {
     Default,
@@ -1906,6 +1930,13 @@ fn typeck_expression<'a>(
                 },
             }
         }
+        scope::Expression::CharConstant(char) => TypedExpression {
+            ty: Type::int().unqualified(),
+            expr: Expression::Integer {
+                value: parse_char_literal(char),
+                token: *char,
+            },
+        },
         scope::Expression::Parenthesised { open_paren, expr, close_paren } => {
             let expr = sess.alloc(typeck_expression(sess, expr, context));
             TypedExpression {

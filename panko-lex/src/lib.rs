@@ -346,6 +346,9 @@ pub enum TokenKind {
     #[regex("0('?[0-7])*", |lexer| lex_integer(lexer, 8))]
     Integer(Integer),
 
+    #[regex(r#"'([^'\\\n]|\\['"?\\abfnrtv])*'"#)]
+    CharConstant,
+
     #[token("alignas")]
     #[token("_Alignas")]
     Alignas,
