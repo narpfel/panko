@@ -436,7 +436,7 @@ impl<'a> Codegen<'a> {
         self.directive("globl", &[&name]);
         self.directive("data", &[]);
         self.directive("type", &[&name, &"@object"]);
-        self.directive("size", &[&name, &value.len()]);
+        self.directive("size", &[&name, &(value.len() + 1)]);
         self.directive("align", &[&1]);
         self.label(&name);
         self.code.push_str(".asciz \"");
