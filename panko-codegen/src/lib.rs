@@ -431,6 +431,9 @@ impl<'a> Codegen<'a> {
     }
 
     fn string_literal_definition(&mut self, id: StaticId, value: &str) {
+        // `.asciz` adds a null terminator, so we can optionally remove one here
+        let value = value.strip_suffix('\0').unwrap_or(value);
+
         self.block(2);
         let name = format!(".L.{id}");
         self.directive("globl", &[&name]);
