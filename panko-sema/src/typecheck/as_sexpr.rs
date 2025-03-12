@@ -123,6 +123,8 @@ impl AsSExpr for Expression<'_> {
             Expression::Error(_error) => SExpr::new("error"),
             Expression::Name(reference) => SExpr::string(reference.unique_name()),
             Expression::Integer { value: _, token } => SExpr::string(token.slice()),
+            Expression::String(string) =>
+                SExpr::new("string").inline_string(format!("{:?}", string.value())),
             Expression::NoopTypeConversion(expr) =>
                 SExpr::new("noop-type-conversion").inherit(expr),
             Expression::Truncate(truncate) => SExpr::new("truncate").inherit(truncate),

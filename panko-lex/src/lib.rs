@@ -315,7 +315,7 @@ pub enum TokenKind {
 
     #[regex(r"[\p{XID_start}_]\p{XID_continue}*")]
     Identifier,
-    #[regex(r#""[^"]*""#)]
+    #[regex(r#""([^"\\\n]|\\['"?\\abfnrtv])*""#)]
     String,
 
     #[regex("[1-9]('?[0-9])*", |lexer| lex_integer(lexer, 10))]

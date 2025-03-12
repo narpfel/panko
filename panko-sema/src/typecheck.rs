@@ -570,6 +570,26 @@ pub(crate) struct TypedExpression<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) struct StringLiteral<'a> {
+    value: &'a str,
+    loc: Loc<'a>,
+}
+
+impl<'a> StringLiteral<'a> {
+    pub(crate) fn value(&self) -> &'a str {
+        self.value
+    }
+
+    fn len(&self) -> u64 {
+        u64::try_from(self.value.len()).unwrap()
+    }
+
+    fn loc(&self) -> Loc<'a> {
+        self.loc
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum Expression<'a> {
     Error(&'a dyn Report),
     Name(Reference<'a>),
@@ -577,6 +597,7 @@ pub(crate) enum Expression<'a> {
         value: u64,
         token: Token<'a>,
     },
+    String(StringLiteral<'a>),
     NoopTypeConversion(&'a TypedExpression<'a>),
     // TODO: `Truncate`, `SignExtend`, `ZeroExtend` and `VoidCast` lose location information when
     // representing an explicit cast. They should take an optional location (or better:
@@ -755,6 +776,7 @@ impl<'a> TypedExpression<'a> {
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.is_lvalue(),
             Expression::Deref { .. } => self.ty.ty.is_object() && !matches!(self.ty.ty, Type::Void),
             Expression::Integer { .. }
+            | Expression::String(_)
             | Expression::NoopTypeConversion(_)
             | Expression::Truncate(_)
             | Expression::SignExtend(_)
@@ -792,6 +814,7 @@ impl<'a> Expression<'a> {
             Expression::Error(error) => error.location(),
             Expression::Name(reference) => reference.loc(),
             Expression::Integer { value: _, token } => token.loc(),
+            Expression::String(string) => string.loc(),
             Expression::NoopTypeConversion(inner)
             | Expression::Truncate(inner)
             | Expression::SignExtend(inner)
@@ -1872,6 +1895,31 @@ fn parse_char_literal(char: &Token) -> Option<u64> {
     Some(u64::from(value))
 }
 
+fn parse_string_literal<'a>(sess: &'a Session<'a>, tokens: &[Token<'a>]) -> StringLiteral<'a> {
+    gen fn parse_escape_sequences(s: &str) -> char {
+        for c in s.chars() {
+            match c {
+                '\\' => todo!("parse escape sequence"),
+                c => yield c,
+            }
+        }
+    }
+
+    let value: String = tokens
+        .iter()
+        .flat_map(|token| parse_escape_sequences(&token.slice()[1..token.slice().len() - 1]))
+        .chain(std::iter::once('\0'))
+        .collect();
+    StringLiteral {
+        value: sess.alloc_str(&value),
+        loc: tokens
+            .first()
+            .unwrap()
+            .loc()
+            .until(tokens.last().unwrap().loc()),
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 enum Context {
     Default,
@@ -1941,6 +1989,17 @@ fn typeck_expression<'a>(
                 None => sess.emit(Diagnostic::EmptyCharConstant { at: *char }),
             },
         },
+        scope::Expression::String(tokens) => {
+            let string = parse_string_literal(sess, tokens);
+            TypedExpression {
+                ty: Type::Array(ArrayType {
+                    ty: sess.alloc(Type::char().unqualified()),
+                    length: ArrayLength::Constant(string.len()),
+                })
+                .unqualified(),
+                expr: Expression::String(string),
+            }
+        }
         scope::Expression::Parenthesised { open_paren, expr, close_paren } => {
             let expr = sess.alloc(typeck_expression(sess, expr, context));
             TypedExpression {

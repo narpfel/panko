@@ -113,6 +113,7 @@ pub enum Expression<'a> {
     Error(&'a dyn Report),
     Name(Reference<'a>),
     Integer(u64),
+    String(&'a str),
     NoopTypeConversion(&'a LayoutedExpression<'a>),
     Truncate(&'a LayoutedExpression<'a>),
     SignExtend(&'a LayoutedExpression<'a>),
@@ -413,6 +414,10 @@ fn layout_expression_in_slot<'a>(
         }
         typecheck::Expression::Integer { value, token: _ } =>
             (make_slot(), Expression::Integer(value)),
+        typecheck::Expression::String(string) => (
+            stack.temporary(Type::Void),
+            Expression::String(string.value()),
+        ),
         typecheck::Expression::NoopTypeConversion(expr) => {
             let expr = layout_expression_in_slot(stack, bump, expr, target_slot);
             (expr.slot, Expression::NoopTypeConversion(bump.alloc(expr)))

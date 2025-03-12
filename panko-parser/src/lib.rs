@@ -547,6 +547,7 @@ pub enum Expression<'a> {
     Name(Token<'a>),
     Integer(Token<'a>),
     CharConstant(Token<'a>),
+    String(&'a [Token<'a>]),
     Parenthesised {
         open_paren: Token<'a>,
         expr: &'a Expression<'a>,

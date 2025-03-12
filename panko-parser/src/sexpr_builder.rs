@@ -82,7 +82,7 @@ impl<'a> SExpr<'a> {
         self
     }
 
-    pub(crate) fn inherit_many<T>(mut self, params: impl IntoIterator<Item = &'a T>) -> Self
+    pub fn inherit_many<T>(mut self, params: impl IntoIterator<Item = &'a T>) -> Self
     where
         T: AsSExpr + 'a,
     {

@@ -387,6 +387,9 @@ impl<'a> Codegen<'a> {
                 Expression::Name(_) => todo!(),
                 Expression::Integer(value) =>
                     self.constant(&value.to_le_bytes()[..usize::try_from(size).unwrap()]),
+                Expression::String(_string) => unreachable!(
+                    "either contained in a `noop-type-conversion` or in an initialiser",
+                ),
                 Expression::NoopTypeConversion(_) => todo!(),
                 Expression::Truncate(_) => todo!(),
                 Expression::SignExtend(_) => todo!(),
@@ -567,6 +570,9 @@ impl<'a> Codegen<'a> {
                 self.emit_args("movabs", &[&Rax, &value]);
                 self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
+            Expression::String(_string) => unreachable!(
+                "strings are either used as array initialisers or as operands to addressof operators, but never separately",
+            ),
             Expression::NoopTypeConversion(inner) => {
                 assert_eq!(expr.ty.ty.size(), inner.ty.ty.size());
                 assert_eq!(expr.slot, inner.slot);
@@ -783,6 +789,10 @@ impl<'a> Codegen<'a> {
                     Expression::Deref(operand) => {
                         self.expr(operand);
                         self.emit_args("mov", &[&Rax.typed(operand), operand]);
+                    }
+                    Expression::String(string) => {
+                        let id = self.string(Cow::Borrowed(string));
+                        self.emit_args("lea", &[&Rax, &id]);
                     }
                     _ => unreachable!(),
                 }

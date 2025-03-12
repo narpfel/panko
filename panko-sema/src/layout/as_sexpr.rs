@@ -122,6 +122,7 @@ impl AsSExpr for Expression<'_> {
             )),
             Expression::Name(reference) => SExpr::string(reference.unique_name()),
             Expression::Integer(int) => SExpr::string(int.to_string()),
+            Expression::String(string) => SExpr::new("string").inline_string(format!("{string:?}")),
             Expression::NoopTypeConversion(expr) =>
                 SExpr::new("noop-type-conversion").inherit(expr),
             Expression::Truncate(from) => SExpr::new("truncate").inherit(from),

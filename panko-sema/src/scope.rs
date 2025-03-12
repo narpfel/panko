@@ -148,6 +148,7 @@ pub(crate) enum Expression<'a> {
         token: Token<'a>,
     },
     CharConstant(Token<'a>),
+    String(&'a [Token<'a>]),
     Parenthesised {
         open_paren: Token<'a>,
         expr: &'a Expression<'a>,
@@ -347,6 +348,11 @@ impl<'a> Expression<'a> {
             Expression::Name(name) => name.loc(),
             Expression::Integer { value: _, token } => token.loc(),
             Expression::CharConstant(char) => char.loc(),
+            Expression::String(tokens) => tokens
+                .first()
+                .unwrap()
+                .loc()
+                .until(tokens.last().unwrap().loc()),
             Expression::Parenthesised { open_paren, expr: _, close_paren } =>
                 open_paren.loc().until(close_paren.loc()),
             Expression::Assign { target, value } => target.loc().until(value.loc()),
@@ -907,6 +913,7 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::Integer(token) =>
             Expression::Integer { value: token.slice(), token: *token },
         ast::Expression::CharConstant(char) => Expression::CharConstant(*char),
+        ast::Expression::String(tokens) => Expression::String(tokens),
         ast::Expression::Parenthesised { open_paren, expr, close_paren } =>
             Expression::Parenthesised {
                 open_paren: *open_paren,

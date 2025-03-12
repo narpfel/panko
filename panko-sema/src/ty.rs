@@ -131,6 +131,13 @@ pub enum Type<'a, TypeofExpr, LengthExpr> {
 }
 
 impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
+    pub(crate) const fn char() -> Self {
+        Self::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Signed,
+            kind: IntegralKind::PlainChar,
+        }))
+    }
+
     pub const fn uchar() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Unsigned,
