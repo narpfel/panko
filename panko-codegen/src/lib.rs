@@ -189,6 +189,7 @@ struct Codegen<'a> {
     defined: IndexSet<&'a str>,
     current_function: Option<&'a FunctionDefinition<'a>>,
     code: String,
+    // TODO: could use an `IndexSet` here to deduplicate
     strings: Vec<(StaticId, Cow<'a, str>)>,
     next_label_id: u64,
     debug: bool,
