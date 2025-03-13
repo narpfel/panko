@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/string/test_string_literal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (expression (string "ignored string"))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "some string" " " "concatenated")))
+         (definition char_star~2 `ptr<char>` (string "char star"))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (name char_star~2 `ptr<char>`)))
+         (definition char_const_star~3 `ptr<char const>` (string "char const star"))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (name char_const_star~3 `ptr<char const>`)))
+         (return (lengthof (string "string"))))))
+
+----- stderr -----
