@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
 use std::num::IntErrorKind;
+use std::str::Chars;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Green;
@@ -1871,43 +1872,41 @@ fn desugar_postfix_increment<'a>(
     }
 }
 
+gen fn parse_escape_sequences(mut chars: Chars<'_>) -> char {
+    while let Some(c) = chars.next() {
+        match c {
+            '\\' =>
+                yield match chars.next() {
+                    None => unreachable!(),
+                    Some('\'') => '\'',
+                    Some('"') => '"',
+                    Some('?') => '?',
+                    Some('\\') => '\\',
+                    Some('a') => '\x07',
+                    Some('b') => '\x08',
+                    Some('f') => '\x0c',
+                    Some('n') => '\n',
+                    Some('r') => '\r',
+                    Some('t') => '\t',
+                    Some('v') => '\x0b',
+                    Some(_) => todo!("error: invalid escape sequence"),
+                },
+            c => yield c,
+        }
+    }
+}
+
 fn parse_char_literal(char: &Token) -> Option<u64> {
-    let content = &char.slice()[1..char.slice().len() - 1];
-    let value = match content.chars().next() {
-        None => return None,
-        Some('\\') => match content.chars().nth(1) {
-            None => unreachable!(),
-            Some('\'') => '\'',
-            Some('"') => '"',
-            Some('?') => '?',
-            Some('\\') => '\\',
-            Some('a') => '\x07',
-            Some('b') => '\x08',
-            Some('f') => '\x0c',
-            Some('n') => '\n',
-            Some('r') => '\r',
-            Some('t') => '\t',
-            Some('v') => '\x0b',
-            Some(_) => unreachable!(),
-        },
-        Some(c) => c,
-    };
-    Some(u64::from(value))
+    Some(u64::from(
+        // TODO: handle multichar character constants
+        parse_escape_sequences(char.slice()[1..char.slice().len() - 1].chars()).next()?,
+    ))
 }
 
 fn parse_string_literal<'a>(sess: &'a Session<'a>, tokens: &[Token<'a>]) -> StringLiteral<'a> {
-    gen fn parse_escape_sequences(s: &str) -> char {
-        for c in s.chars() {
-            match c {
-                '\\' => todo!("parse escape sequence"),
-                c => yield c,
-            }
-        }
-    }
-
     let value: String = tokens
         .iter()
-        .flat_map(|token| parse_escape_sequences(&token.slice()[1..token.slice().len() - 1]))
+        .flat_map(|token| parse_escape_sequences(token.slice()[1..token.slice().len() - 1].chars()))
         .chain(std::iter::once('\0'))
         .collect();
     StringLiteral {
