@@ -1873,6 +1873,10 @@ fn desugar_postfix_increment<'a>(
 }
 
 gen fn parse_escape_sequences(mut chars: Chars<'_>) -> char {
+    let char_from_codepoint = |codepoint| {
+        char::from_u32(codepoint).unwrap_or_else(|| todo!("error: invalid escape sequence"))
+    };
+
     while let Some(c) = chars.next() {
         match c {
             '\\' =>
@@ -1889,6 +1893,41 @@ gen fn parse_escape_sequences(mut chars: Chars<'_>) -> char {
                     Some('r') => '\r',
                     Some('t') => '\t',
                     Some('v') => '\x0b',
+                    Some(oct_digit @ '0'..='7') => {
+                        let value = oct_digit.to_digit(8).unwrap();
+                        match chars.next() {
+                            None => char_from_codepoint(value),
+                            Some(oct_digit @ '0'..='7') => {
+                                let value = value * 8 + oct_digit.to_digit(8).unwrap();
+                                match chars.next() {
+                                    None => char_from_codepoint(value),
+                                    Some(oct_digit @ '0'..='7') => {
+                                        let value = value * 8 + oct_digit.to_digit(8).unwrap();
+                                        char_from_codepoint(value)
+                                    }
+                                    Some(c) => {
+                                        yield char_from_codepoint(value);
+                                        c
+                                    }
+                                }
+                            }
+                            Some(c) => {
+                                yield char_from_codepoint(value);
+                                c
+                            }
+                        }
+                    }
+                    Some('x') => {
+                        let s = chars.as_str();
+                        let split_point =
+                            s.find(|c: char| !c.is_ascii_hexdigit()).unwrap_or(s.len());
+                        let (digits, rest) = s.split_at(split_point);
+                        chars = rest.chars();
+                        match u32::from_str_radix(digits, 16) {
+                            Ok(codepoint) => char_from_codepoint(codepoint),
+                            Err(_) => unreachable!(),
+                        }
+                    }
                     Some(_) => todo!("error: invalid escape sequence"),
                 },
             c => yield c,

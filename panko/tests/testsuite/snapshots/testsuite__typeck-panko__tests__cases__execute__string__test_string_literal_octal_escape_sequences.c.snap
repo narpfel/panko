@@ -1,0 +1,47 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/string/test_string_literal_octal_escape_sequences.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration strcmp~1 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (noop-type-conversion (noop-type-conversion (addressof (string "%s\n\0" `array<char; (constexpr 4)>`) `ptr<array<char; (constexpr 4)>>`) `ptr<char>`) `ptr<char const>`)
+               (noop-type-conversion (addressof (string "<9\0" `array<char; (constexpr 3)>`) `ptr<array<char; (constexpr 3)>>`) `ptr<char>`)
+               `int`))
+         (expression
+            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (noop-type-conversion (noop-type-conversion (addressof (string "%s\n\0" `array<char; (constexpr 4)>`) `ptr<array<char; (constexpr 4)>>`) `ptr<char>`) `ptr<char const>`)
+               (noop-type-conversion (addressof (string "abcSghi\0" `array<char; (constexpr 8)>`) `ptr<array<char; (constexpr 8)>>`) `ptr<char>`)
+               `int`))
+         (expression
+            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (noop-type-conversion (noop-type-conversion (addressof (string "%d\n\0" `array<char; (constexpr 4)>`) `ptr<array<char; (constexpr 4)>>`) `ptr<char>`) `ptr<char const>`)
+               (call (addressof (strcmp~1 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int`) `ptr<fn(∅: ptr<char const>, ∅: ptr<char const>) -> int>`)
+                  (noop-type-conversion (noop-type-conversion (addressof (string "\n\0" `array<char; (constexpr 2)>`) `ptr<array<char; (constexpr 2)>>`) `ptr<char>`) `ptr<char const>`)
+                  (noop-type-conversion (noop-type-conversion (addressof (string "\n\0" `array<char; (constexpr 2)>`) `ptr<array<char; (constexpr 2)>>`) `ptr<char>`) `ptr<char const>`)
+                  `int`)
+               `int`))
+         (expression
+            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (noop-type-conversion (noop-type-conversion (addressof (string "%d\n\0" `array<char; (constexpr 4)>`) `ptr<array<char; (constexpr 4)>>`) `ptr<char>`) `ptr<char const>`)
+               (call (addressof (strcmp~1 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int`) `ptr<fn(∅: ptr<char const>, ∅: ptr<char const>) -> int>`)
+                  (noop-type-conversion (noop-type-conversion (addressof (string "q\nq\0" `array<char; (constexpr 4)>`) `ptr<array<char; (constexpr 4)>>`) `ptr<char>`) `ptr<char const>`)
+                  (noop-type-conversion (noop-type-conversion (addressof (string "q\nq\0" `array<char; (constexpr 4)>`) `ptr<array<char; (constexpr 4)>>`) `ptr<char>`) `ptr<char const>`)
+                  `int`)
+               `int`))
+         (return (truncate (lengthof 2 (string "\n\0" `array<char; (constexpr 2)>`) `unsigned long`) `int`)))))
+
+----- stderr -----

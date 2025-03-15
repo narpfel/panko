@@ -315,7 +315,7 @@ pub enum TokenKind {
 
     #[regex(r"[\p{XID_start}_]\p{XID_continue}*")]
     Identifier,
-    #[regex(r#""([^"\\\n]|\\['"?\\abfnrtv])*""#)]
+    #[regex(r#""([^"\\\n]|\\(['"?\\abfnrtv]|[0-7]{1,3}|x[0-9a-fA-F]+))*""#)]
     String,
 
     #[regex("[1-9]('?[0-9])*", |lexer| lex_integer(lexer, 10))]
@@ -346,7 +346,7 @@ pub enum TokenKind {
     #[regex("0('?[0-7])*", |lexer| lex_integer(lexer, 8))]
     Integer(Integer),
 
-    #[regex(r#"'([^'\\\n]|\\['"?\\abfnrtv])*'"#)]
+    #[regex(r#"'([^'\\\n]|\\(['"?\\abfnrtv]|[0-7]{1,3}|x[0-9a-fA-F]+))*'"#)]
     CharConstant,
 
     #[token("alignas")]
