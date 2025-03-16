@@ -1,0 +1,60 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/subscript/test_subscript_multidimensional_array.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (definition (xss~2 `array<array<int; (constexpr 30)>; (constexpr 20)>` @0) (braced ∅))
+         (expression
+            (assign `int` @2400
+               (deref `int` @2400
+                  (ptr-add `ptr<int>` @2408
+                     (noop-type-conversion `ptr<int>` @2408
+                        (addressof `ptr<array<int; (constexpr 30)>>` @2408
+                           (deref `array<int; (constexpr 30)>` @2408
+                              (ptr-add `ptr<array<int; (constexpr 30)>>` @2416
+                                 (noop-type-conversion `ptr<array<int; (constexpr 30)>>` @2416 (addressof `ptr<array<array<int; (constexpr 30)>; (constexpr 20)>>` @2416 (xss~2 `array<array<int; (constexpr 30)>; (constexpr 20)>` @0)))
+                                 (sign-extend `unsigned long` @2424 (2 `int` @2432))))))
+                     (sign-extend `unsigned long` @2424 (3 `int` @2432))))
+               (42 `int` @2424)))
+         (expression
+            (call `int` @2400 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @2408 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @2416 (noop-type-conversion `ptr<char>` @2416 (addressof `ptr<array<char; (constexpr 4)>>` @2416 (string `array<char; (constexpr 4)>` @void "%d\n\0"))))
+               (deref `int` @2424
+                  (ptr-add `ptr<int>` @2432
+                     (noop-type-conversion `ptr<int>` @2432
+                        (addressof `ptr<array<int; (constexpr 30)>>` @2432
+                           (deref `array<int; (constexpr 30)>` @2432
+                              (ptr-add `ptr<array<int; (constexpr 30)>>` @2440
+                                 (noop-type-conversion `ptr<array<int; (constexpr 30)>>` @2440 (addressof `ptr<array<array<int; (constexpr 30)>; (constexpr 20)>>` @2440 (xss~2 `array<array<int; (constexpr 30)>; (constexpr 20)>` @0)))
+                                 (sign-extend `unsigned long` @2448 (2 `int` @2456))))))
+                     (sign-extend `unsigned long` @2448 (3 `int` @2456))))))
+         (expression
+            (call `int` @2400 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @2408 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @2416 (noop-type-conversion `ptr<char>` @2416 (addressof `ptr<array<char; (constexpr 5)>>` @2416 (string `array<char; (constexpr 5)>` @void "%zu\n\0"))))
+               (2400 `unsigned long` @2424)))
+         (expression
+            (call `int` @2400 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @2408 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @2416 (noop-type-conversion `ptr<char>` @2416 (addressof `ptr<array<char; (constexpr 5)>>` @2416 (string `array<char; (constexpr 5)>` @void "%zu\n\0"))))
+               (120 `unsigned long` @2424)))
+         (expression
+            (call `int` @2400 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @2408 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @2416 (noop-type-conversion `ptr<char>` @2416 (addressof `ptr<array<char; (constexpr 5)>>` @2416 (string `array<char; (constexpr 5)>` @void "%zu\n\0"))))
+               (20 `unsigned long` @2424)))
+         (expression
+            (call `int` @2400 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @2408 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @2416 (noop-type-conversion `ptr<char>` @2416 (addressof `ptr<array<char; (constexpr 5)>>` @2416 (string `array<char; (constexpr 5)>` @void "%zu\n\0"))))
+               (30 `unsigned long` @2424))))))
+
+----- stderr -----

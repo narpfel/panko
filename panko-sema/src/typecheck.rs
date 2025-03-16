@@ -2399,7 +2399,7 @@ fn typeck_expression<'a>(
                     rhs,
                 }),
             },
-            Context::Default,
+            context,
         ),
         scope::Expression::Generic {
             generic,
