@@ -64,13 +64,15 @@ type Diagnostics<'a> = RefCell<Vec<&'a dyn Report>>;
 pub struct Session<'a> {
     pub(crate) bump: &'a Bump,
     diagnostics: Diagnostics<'a>,
+    treat_error_as_bug: bool,
 }
 
 impl<'a> Session<'a> {
-    pub fn new(bump: &'a Bump) -> Self {
+    pub fn new(bump: &'a Bump, treat_error_as_bug: bool) -> Self {
         Self {
             bump,
             diagnostics: Diagnostics::default(),
+            treat_error_as_bug,
         }
     }
 
@@ -101,13 +103,16 @@ impl<'a> Session<'a> {
         self.bump.alloc_str(s)
     }
 
+    #[track_caller]
     pub fn emit<T, Expr>(&self, diagnostic: T) -> Expr
     where
         T: Report + 'a,
         Expr: ErrorExpr<'a>,
     {
-        // TODO: make it possible to panic on any (or a specific) error, similar to
-        // `-Z treat-err-as-bug` in rustc
+        if self.treat_error_as_bug {
+            diagnostic.print();
+            panic!("error treated as bug");
+        }
         let diagnostic = self.alloc(diagnostic);
         self.diagnostics.borrow_mut().push(diagnostic);
         Expr::from_error(diagnostic)

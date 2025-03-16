@@ -35,6 +35,9 @@ struct Args {
     /// emit debug info
     #[arg(short('g'), long)]
     debug: bool,
+    /// panic whenever a diagnostic is emitted
+    #[arg(long)]
+    treat_error_as_bug: bool,
 }
 
 fn main() -> Result<()> {
@@ -48,7 +51,7 @@ fn main() -> Result<()> {
         &std::fs::read_to_string(&args.filename)
             .with_context(|| format!("could not open source file `{}`", args.filename.display()))?,
     );
-    let session = &panko_parser::ast::Session::new(bump);
+    let session = &panko_parser::ast::Session::new(bump, args.treat_error_as_bug);
     let translation_unit = match panko_parser::parse(session, tokens) {
         Ok(translation_unit) => translation_unit,
         Err(err) => {
