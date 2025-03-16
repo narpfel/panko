@@ -12,5 +12,10 @@ int main() {
     printf("%d\12", strcmp("\12", "\n"));
     // [[print: 0]]
     printf("%d\12", strcmp("q\12q", "q\nq"));
+
+    // check that concatenated strings don’t merge escape sequences
+    char const* s = "\1" "1";
+    // [[print: 11]]
+    printf("%d%s\n", s[0], &s[1]);
     return _Lengthof "\12";
 }
