@@ -776,8 +776,8 @@ impl<'a> TypedExpression<'a> {
                 reference.ty.ty.is_object() && !matches!(reference.ty.ty, Type::Void),
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.is_lvalue(),
             Expression::Deref { .. } => self.ty.ty.is_object() && !matches!(self.ty.ty, Type::Void),
+            Expression::String(_) => true,
             Expression::Integer { .. }
-            | Expression::String(_)
             | Expression::NoopTypeConversion(_)
             | Expression::Truncate(_)
             | Expression::SignExtend(_)
