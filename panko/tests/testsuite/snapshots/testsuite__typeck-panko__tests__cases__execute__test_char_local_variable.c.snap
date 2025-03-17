@@ -14,10 +14,10 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `char` (truncate (1 `int`) `char`))
-         (definition b~2 `char` (truncate (27 `int`) `char`))
-         (definition c~3 `char` (truncate (3 `int`) `char`))
-         (definition d~4 `char` (truncate (4 `int`) `char`))
-         (return (sign-extend (b~2 `char`) `int`)))))
+         (definition a~1 `char` (truncate `char` (1 `int`)))
+         (definition b~2 `char` (truncate `char` (27 `int`)))
+         (definition c~3 `char` (truncate `char` (3 `int`)))
+         (definition d~4 `char` (truncate `char` (4 `int`)))
+         (return (sign-extend `int` (b~2 `char`))))))
 
 ----- stderr -----

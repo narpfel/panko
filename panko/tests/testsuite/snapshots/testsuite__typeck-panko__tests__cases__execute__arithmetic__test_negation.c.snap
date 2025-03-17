@@ -19,30 +19,24 @@ exit_code: 0
          argv~3 `ptr<ptr<char>>`)
       (compound-statement
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (negate (42 `int`) `int`)
-               `int`))
-         (definition l~4 `long` (sign-extend (27 `int`) `long`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (negate `int` (42 `int`))))
+         (definition l~4 `long` (sign-extend `long` (27 `int`)))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (2 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (negate (l~4 `long`) `long`)
-               `int`))
-         (definition s~5 `unsigned short` (truncate (5 `int`) `unsigned short`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (2 `int`)))))
+               (negate `long` (l~4 `long`))))
+         (definition s~5 `unsigned short` (truncate `unsigned short` (5 `int`)))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (negate (zero-extend (s~5 `unsigned short`) `int`) `int`)
-               `int`)))))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (negate `int` (zero-extend `int` (s~5 `unsigned short`))))))))
 
 ----- stderr -----

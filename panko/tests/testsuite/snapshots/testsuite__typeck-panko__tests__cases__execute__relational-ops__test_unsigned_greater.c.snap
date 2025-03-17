@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `unsigned int` (noop-type-conversion (42 `int`) `unsigned int`))
-         (definition b~2 `unsigned int` (noop-type-conversion (27 `int`) `unsigned int`))
-         (return (add (greater-equal (a~1 `unsigned int`) (b~2 `unsigned int`) `int` `int`) (greater-equal (a~1 `unsigned int`) (a~1 `unsigned int`) `int` `int`) `int`)))))
+         (definition a~1 `unsigned int` (noop-type-conversion `unsigned int` (42 `int`)))
+         (definition b~2 `unsigned int` (noop-type-conversion `unsigned int` (27 `int`)))
+         (return (add `int` (greater-equal `int` `int` (a~1 `unsigned int`) (b~2 `unsigned int`)) (greater-equal `int` `int` (a~1 `unsigned int`) (a~1 `unsigned int`)))))))
 
 ----- stderr -----

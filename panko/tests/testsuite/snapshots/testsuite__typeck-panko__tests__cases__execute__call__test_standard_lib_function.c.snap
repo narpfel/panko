@@ -16,14 +16,11 @@ exit_code: 0
       (compound-statement
          (declaration isalnum~1 `fn(∅: int) -> int` ∅)
          (return
-            (not-equal
-               (call
-                  (addressof
-                     (isalnum~1 `fn(∅: int) -> int`)
-                     `ptr<fn(∅: int) -> int>`)
-                  (100 `int`)
-                  `int`)
-               (0 `int`)
-               `int`)))))
+            (not-equal `int`
+               (call `int`
+                  (addressof `ptr<fn(∅: int) -> int>`
+                     (isalnum~1 `fn(∅: int) -> int`))
+                  (100 `int`))
+               (0 `int`))))))
 
 ----- stderr -----

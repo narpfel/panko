@@ -14,9 +14,9 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `signed char` (truncate (90 `int`) `signed char`))
-         (definition b~2 `signed char` (truncate (110 `int`) `signed char`))
-         (definition result~3 `int` (add (sign-extend (a~1 `signed char`) `int`) (sign-extend (b~2 `signed char`) `int`) `int`))
+         (definition a~1 `signed char` (truncate `signed char` (90 `int`)))
+         (definition b~2 `signed char` (truncate `signed char` (110 `int`)))
+         (definition result~3 `int` (add `int` (sign-extend `int` (a~1 `signed char`)) (sign-extend `int` (b~2 `signed char`))))
          (return (result~3 `int`)))))
 
 ----- stderr -----

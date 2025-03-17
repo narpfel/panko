@@ -16,12 +16,10 @@ exit_code: 0
       main~1 `fn() -> int`
       (compound-statement
          (return
-            (call
-               (addressof
-                  (f~0 `fn(∅: int) -> int`)
-                  `ptr<fn(∅: int) -> int>`)
-               (42 `int`)
-               `int`))))
+            (call `int`
+               (addressof `ptr<fn(∅: int) -> int>`
+                  (f~0 `fn(∅: int) -> int`))
+               (42 `int`)))))
    (function-definition
       f~0 `fn(x: int) -> int`
       (params

@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition c~1 `char` (truncate (0 `int`) `char`))
+         (definition c~1 `char` (truncate `char` (0 `int`)))
          (return (42 `int`)))))
 
 ----- stderr -----

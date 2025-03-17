@@ -16,8 +16,8 @@ exit_code: 0
       (compound-statement
          (definition i1~1 `int` (42 `int`))
          (definition i2~2 `int` (27 `int`))
-         (definition p1~3 `long` (sign-extend (5 `int`) `long`))
-         (definition p2~4 `long` (sign-extend (6 `int`) `long`))
-         (return (add (add (add (not-equal (p1~3 `long`) (sign-extend (i1~1 `int`) `long`) `int` `int`) (not-equal (p2~4 `long`) (sign-extend (i2~2 `int`) `long`) `int` `int`) `int`) (equal (add (p1~3 `long`) (sign-extend (1 `int`) `long`) `long`) (p2~4 `long`) `int` `int`) `int`) (equal (subtract (p2~4 `long`) (sign-extend (1 `int`) `long`) `long`) (p1~3 `long`) `int` `int`) `int`)))))
+         (definition p1~3 `long` (sign-extend `long` (5 `int`)))
+         (definition p2~4 `long` (sign-extend `long` (6 `int`)))
+         (return (add `int` (add `int` (add `int` (not-equal `int` `int` (p1~3 `long`) (sign-extend `long` (i1~1 `int`))) (not-equal `int` `int` (p2~4 `long`) (sign-extend `long` (i2~2 `int`)))) (equal `int` `int` (add `long` (p1~3 `long`) (sign-extend `long` (1 `int`))) (p2~4 `long`))) (equal `int` `int` (subtract `long` (p2~4 `long`) (sign-extend `long` (1 `int`))) (p1~3 `long`)))))))
 
 ----- stderr -----

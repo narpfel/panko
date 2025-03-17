@@ -49,7 +49,7 @@ exit_code: 0
    (function-definition
       g~10 `fn() -> char`
       (compound-statement
-         (definition c~11 `char` (truncate (0 `int`) `char`))
+         (definition c~11 `char` (truncate `char` (0 `int`)))
          (return (c~11 `char`))))
    (function-definition
       h~12 `fn() -> int`

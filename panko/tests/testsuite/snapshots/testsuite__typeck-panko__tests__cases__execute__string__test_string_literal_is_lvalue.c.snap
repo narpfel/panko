@@ -16,15 +16,11 @@ exit_code: 0
       main~1 `fn() -> int`
       (compound-statement
          (expression
-            (call
-               (addressof
-                  (puts~0 `fn(∅: ptr<char const>) -> int`)
-                  `ptr<fn(∅: ptr<char const>) -> int>`)
-               (noop-type-conversion
-                  (addressof
-                     (string "hello\0" `array<char; (constexpr 6)>`)
-                     `ptr<array<char; (constexpr 6)>>`)
-                  `ptr<char const>`)
-               `int`)))))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>`
+                  (puts~0 `fn(∅: ptr<char const>) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (addressof `ptr<array<char; (constexpr 6)>>`
+                     (string `array<char; (constexpr 6)>` "hello\0"))))))))
 
 ----- stderr -----

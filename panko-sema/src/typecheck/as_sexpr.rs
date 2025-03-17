@@ -113,7 +113,7 @@ impl AsSExpr for Statement<'_> {
 
 impl AsSExpr for TypedExpression<'_> {
     fn as_sexpr(&self) -> SExpr {
-        self.expr.as_sexpr().inherit(&self.ty)
+        self.expr.as_sexpr().inherit_front(&self.ty)
     }
 }
 

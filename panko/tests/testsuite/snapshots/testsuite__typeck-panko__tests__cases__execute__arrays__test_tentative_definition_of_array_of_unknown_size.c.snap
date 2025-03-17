@@ -16,29 +16,20 @@ exit_code: 0
       main~1 `fn() -> int`
       (compound-statement
          (expression
-            (assign
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (xs~0 `array<int; ∅>`)
-                           `ptr<array<int; ∅>>`)
-                        `ptr<int>`)
-                     (sign-extend (0 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               (42 `int`)
-               `int`))
+            (assign `int`
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; ∅>>`
+                           (xs~0 `array<int; ∅>`)))
+                     (sign-extend `unsigned long` (0 `int`))))
+               (42 `int`)))
          (return
-            (deref
-               (ptr-add
-                  (noop-type-conversion
-                     (addressof
-                        (xs~0 `array<int; ∅>`)
-                        `ptr<array<int; ∅>>`)
-                     `ptr<int>`)
-                  (sign-extend (0 `int`) `unsigned long`)
-                  `ptr<int>`)
-               `int`)))))
+            (deref `int`
+               (ptr-add `ptr<int>`
+                  (noop-type-conversion `ptr<int>`
+                     (addressof `ptr<array<int; ∅>>`
+                        (xs~0 `array<int; ∅>`)))
+                  (sign-extend `unsigned long` (0 `int`))))))))
 
 ----- stderr -----

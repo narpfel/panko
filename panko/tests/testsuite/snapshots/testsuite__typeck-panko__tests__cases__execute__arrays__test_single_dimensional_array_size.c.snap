@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/arrays/test_single_dimensional_array_size.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -16,6 +15,6 @@ exit_code: 0
       main~0 `fn() -> int`
       (compound-statement
          (definition xs~1 `array<int; (constexpr 5)>` ∅)
-         (return (truncate (sizeof 20 (xs~1 `array<int; (constexpr 5)>`) `unsigned long`) `int`)))))
+         (return (truncate `int` (sizeof `unsigned long` 20 (xs~1 `array<int; (constexpr 5)>`)))))))
 
 ----- stderr -----

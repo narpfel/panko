@@ -22,12 +22,10 @@ exit_code: 0
       (compound-statement
          (definition x~3 `int` (42 `int`))
          (definition y~4 `int`
-            (call
-               (addressof
-                  (f~0 `fn(x: int) -> int`)
-                  `ptr<fn(x: int) -> int>`)
-               (x~3 `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(x: int) -> int>`
+                  (f~0 `fn(x: int) -> int`))
+               (x~3 `int`)))
          (return (y~4 `int`)))))
 
 ----- stderr -----

@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/arithmetic/test_arithmetic_between_const_and_nonconst.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -17,6 +16,6 @@ exit_code: 0
       (compound-statement
          (definition x~1 `int const` (42 `int`))
          (definition y~2 `int` (27 `int`))
-         (return (add (x~1 `int const`) (y~2 `int`) `int`)))))
+         (return (add `int` (x~1 `int const`) (y~2 `int`))))))
 
 ----- stderr -----

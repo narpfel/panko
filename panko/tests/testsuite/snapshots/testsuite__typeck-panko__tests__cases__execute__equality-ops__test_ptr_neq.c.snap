@@ -17,13 +17,10 @@ exit_code: 0
          (definition x~1 `int` ∅)
          (definition y~2 `int` ∅)
          (return
-            (ptr-not-equal
-               (addressof
-                  (x~1 `int`)
-                  `ptr<int>`)
-               (addressof
-                  (y~2 `int`)
-                  `ptr<int>`)
-               `int`)))))
+            (ptr-not-equal `int`
+               (addressof `ptr<int>`
+                  (x~1 `int`))
+               (addressof `ptr<int>`
+                  (y~2 `int`)))))))
 
 ----- stderr -----

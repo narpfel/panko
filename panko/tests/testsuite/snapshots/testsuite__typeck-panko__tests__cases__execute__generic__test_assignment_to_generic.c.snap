@@ -15,7 +15,7 @@ exit_code: 0
       main~0 `fn() -> int`
       (compound-statement
          (definition value~1 `int` (27 `int`))
-         (expression (assign (value~1 `int`) (42 `int`) `int`))
+         (expression (assign `int` (value~1 `int`) (42 `int`)))
          (return (value~1 `int`)))))
 
 ----- stderr -----

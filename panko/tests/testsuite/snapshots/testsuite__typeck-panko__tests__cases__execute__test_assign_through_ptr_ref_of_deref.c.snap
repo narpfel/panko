@@ -16,18 +16,14 @@ exit_code: 0
       (compound-statement
          (definition x~1 `int` (42 `int`))
          (definition p~2 `ptr<int>`
-            (addressof
-               (x~1 `int`)
-               `ptr<int>`))
+            (addressof `ptr<int>`
+               (x~1 `int`)))
          (expression
-            (assign
-               (deref
-                  (addressof
-                     (deref (p~2 `ptr<int>`) `int`)
-                     `ptr<int>`)
-                  `int`)
-               (27 `int`)
-               `int`))
+            (assign `int`
+               (deref `int`
+                  (addressof `ptr<int>`
+                     (deref `int` (p~2 `ptr<int>`))))
+               (27 `int`)))
          (return (x~1 `int`)))))
 
 ----- stderr -----

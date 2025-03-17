@@ -18,42 +18,31 @@ exit_code: 0
          p~2 `ptr<int>`)
       (compound-statement
          (expression
-            (call
-               (addressof
-                  (putchar~0 `fn(∅: int) -> int`)
-                  `ptr<fn(∅: int) -> int>`)
-               (65 `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: int) -> int>`
+                  (putchar~0 `fn(∅: int) -> int`))
+               (65 `int`)))
          (expression
-            (call
-               (addressof
-                  (putchar~0 `fn(∅: int) -> int`)
-                  `ptr<fn(∅: int) -> int>`)
-               (10 `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: int) -> int>`
+                  (putchar~0 `fn(∅: int) -> int`))
+               (10 `int`)))
          (return (p~2 `ptr<int>`))))
    (function-definition
       main~3 `fn() -> int`
       (compound-statement
          (definition x~4 `int` (42 `int`))
          (expression
-            (combine
-               (assign (unnamed-temporary~5 `ptr<int>`)
-                  (addressof
-                     (deref
-                        (call
-                           (addressof
-                              (f~1 `fn(p: ptr<int>) -> ptr<int>`)
-                              `ptr<fn(p: ptr<int>) -> ptr<int>>`)
-                           (addressof
-                              (x~4 `int`)
-                              `ptr<int>`)
-                           `ptr<int>`)
-                        `int`)
-                     `ptr<int>`)
-                  `ptr<int>`)
-               (assign (deref (unnamed-temporary~5 `ptr<int>`) `int`) (truncate (add (sign-extend (deref (unnamed-temporary~5 `ptr<int>`) `int`) `long`) (27l `long`) `long`) `int`) `int`)
-               `int`))
+            (combine `int`
+               (assign `ptr<int>` (unnamed-temporary~5 `ptr<int>`)
+                  (addressof `ptr<int>`
+                     (deref `int`
+                        (call `ptr<int>`
+                           (addressof `ptr<fn(p: ptr<int>) -> ptr<int>>`
+                              (f~1 `fn(p: ptr<int>) -> ptr<int>`))
+                           (addressof `ptr<int>`
+                              (x~4 `int`))))))
+               (assign `int` (deref `int` (unnamed-temporary~5 `ptr<int>`)) (truncate `int` (add `long` (sign-extend `long` (deref `int` (unnamed-temporary~5 `ptr<int>`))) (27l `long`))))))
          (return (x~4 `int`)))))
 
 ----- stderr -----

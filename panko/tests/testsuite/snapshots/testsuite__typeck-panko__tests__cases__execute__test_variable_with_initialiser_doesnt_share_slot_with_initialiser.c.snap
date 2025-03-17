@@ -16,7 +16,7 @@ exit_code: 0
       (compound-statement
          (definition a~1 `int` (42 `int`))
          (definition b~2 `int` (a~1 `int`))
-         (expression (assign (b~2 `int`) (27 `int`) `int`))
+         (expression (assign `int` (b~2 `int`) (27 `int`)))
          (return (a~1 `int`)))))
 
 ----- stderr -----

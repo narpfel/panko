@@ -16,34 +16,24 @@ exit_code: 0
       (params
          x~1 `int`)
       (compound-statement
-         (return (add (x~1 `int`) (2 `int`) `int`))))
+         (return (add `int` (x~1 `int`) (2 `int`)))))
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
          (definition x~3 `int` (40 `int`))
          (definition p~4 `ptr<fn(∅: int) -> int>`
-            (addressof
-               (f~0 `fn(x: int) -> int`)
-               `ptr<fn(x: int) -> int>`))
+            (addressof `ptr<fn(x: int) -> int>`
+               (f~0 `fn(x: int) -> int`)))
          (return
-            (call
-               (addressof
-                  (deref
-                     (addressof
-                        (deref
-                           (addressof
-                              (deref
-                                 (addressof
-                                    (deref (p~4 `ptr<fn(∅: int) -> int>`) `fn(∅: int) -> int`)
-                                    `ptr<fn(∅: int) -> int>`)
-                                 `fn(∅: int) -> int`)
-                              `ptr<fn(∅: int) -> int>`)
-                           `fn(∅: int) -> int`)
-                        `ptr<fn(∅: int) -> int>`)
-                     `fn(∅: int) -> int`)
-                  `ptr<fn(∅: int) -> int>`
-                  `ptr<fn(∅: int) -> int>`)
-               (x~3 `int`)
-               `int`)))))
+            (call `int`
+               (addressof `ptr<fn(∅: int) -> int>` `ptr<fn(∅: int) -> int>`
+                  (deref `fn(∅: int) -> int`
+                     (addressof `ptr<fn(∅: int) -> int>`
+                        (deref `fn(∅: int) -> int`
+                           (addressof `ptr<fn(∅: int) -> int>`
+                              (deref `fn(∅: int) -> int`
+                                 (addressof `ptr<fn(∅: int) -> int>`
+                                    (deref `fn(∅: int) -> int` (p~4 `ptr<fn(∅: int) -> int>`)))))))))
+               (x~3 `int`))))))
 
 ----- stderr -----

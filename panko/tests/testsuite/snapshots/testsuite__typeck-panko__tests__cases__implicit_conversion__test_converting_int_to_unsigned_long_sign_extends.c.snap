@@ -15,6 +15,6 @@ exit_code: 0
       main~0 `fn() -> int`
       (compound-statement
          (definition a~1 `int` (42 `int`))
-         (definition b~2 `unsigned long` (sign-extend (a~1 `int`) `unsigned long`)))))
+         (definition b~2 `unsigned long` (sign-extend `unsigned long` (a~1 `int`))))))
 
 ----- stderr -----

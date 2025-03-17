@@ -18,10 +18,8 @@ exit_code: 0
       main~1 `fn() -> int`
       (compound-statement
          (expression
-            (call
-               (addressof
-                  (f~0 `fn() -> void`)
-                  `ptr<fn() -> void>`)
-               `void`)))))
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (f~0 `fn() -> void`)))))))
 
 ----- stderr -----

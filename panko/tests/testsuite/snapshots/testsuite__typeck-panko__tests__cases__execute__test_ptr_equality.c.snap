@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/test_ptr_equality.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -16,9 +15,9 @@ exit_code: 0
       main~0 `fn() -> int`
       (compound-statement
          (definition p1~1 `ptr<long>` ∅)
-         (definition b~2 `unsigned long long` (sign-extend (42 `int`) `unsigned long long`))
-         (definition p2~3 `ptr<long>` (ptr-add (noop-type-conversion (b~2 `unsigned long long`) `unsigned long`) (p1~1 `ptr<long>`) `ptr<long>`))
-         (definition p3~4 `ptr<long>` (ptr-sub (p2~3 `ptr<long>`) (noop-type-conversion (b~2 `unsigned long long`) `unsigned long`) `ptr<long>`))
-         (return (ptr-equal (p3~4 `ptr<long>`) (p1~1 `ptr<long>`) `int`)))))
+         (definition b~2 `unsigned long long` (sign-extend `unsigned long long` (42 `int`)))
+         (definition p2~3 `ptr<long>` (ptr-add `ptr<long>` (noop-type-conversion `unsigned long` (b~2 `unsigned long long`)) (p1~1 `ptr<long>`)))
+         (definition p3~4 `ptr<long>` (ptr-sub `ptr<long>` (p2~3 `ptr<long>`) (noop-type-conversion `unsigned long` (b~2 `unsigned long long`))))
+         (return (ptr-equal `int` (p3~4 `ptr<long>`) (p1~1 `ptr<long>`))))))
 
 ----- stderr -----

@@ -16,47 +16,30 @@ exit_code: 0
       (compound-statement
          (definition xs~1 `array<array<int; (constexpr 123)>; (constexpr 123)>` ∅)
          (expression
-            (assign
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (xs~1 `array<array<int; (constexpr 123)>; (constexpr 123)>`)
-                                       `ptr<array<array<int; (constexpr 123)>; (constexpr 123)>>`)
-                                    `ptr<array<int; (constexpr 123)>>`)
-                                 (sign-extend (122 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 123)>>`)
-                              `array<int; (constexpr 123)>`)
-                           `ptr<array<int; (constexpr 123)>>`)
-                        `ptr<int>`)
-                     (sign-extend (122 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               (42 `int`)
-               `int`))
+            (assign `int`
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 123)>>`
+                           (deref `array<int; (constexpr 123)>`
+                              (ptr-add `ptr<array<int; (constexpr 123)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 123)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 123)>; (constexpr 123)>>`
+                                       (xs~1 `array<array<int; (constexpr 123)>; (constexpr 123)>`)))
+                                 (sign-extend `unsigned long` (122 `int`))))))
+                     (sign-extend `unsigned long` (122 `int`))))
+               (42 `int`)))
          (return
-            (deref
-               (ptr-add
-                  (noop-type-conversion
-                     (addressof
-                        (deref
-                           (ptr-add
-                              (noop-type-conversion
-                                 (addressof
-                                    (xs~1 `array<array<int; (constexpr 123)>; (constexpr 123)>`)
-                                    `ptr<array<array<int; (constexpr 123)>; (constexpr 123)>>`)
-                                 `ptr<array<int; (constexpr 123)>>`)
-                              (sign-extend (122 `int`) `unsigned long`)
-                              `ptr<array<int; (constexpr 123)>>`)
-                           `array<int; (constexpr 123)>`)
-                        `ptr<array<int; (constexpr 123)>>`)
-                     `ptr<int>`)
-                  (sign-extend (122 `int`) `unsigned long`)
-                  `ptr<int>`)
-               `int`)))))
+            (deref `int`
+               (ptr-add `ptr<int>`
+                  (noop-type-conversion `ptr<int>`
+                     (addressof `ptr<array<int; (constexpr 123)>>`
+                        (deref `array<int; (constexpr 123)>`
+                           (ptr-add `ptr<array<int; (constexpr 123)>>`
+                              (noop-type-conversion `ptr<array<int; (constexpr 123)>>`
+                                 (addressof `ptr<array<array<int; (constexpr 123)>; (constexpr 123)>>`
+                                    (xs~1 `array<array<int; (constexpr 123)>; (constexpr 123)>`)))
+                              (sign-extend `unsigned long` (122 `int`))))))
+                  (sign-extend `unsigned long` (122 `int`))))))))
 
 ----- stderr -----

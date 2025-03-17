@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition c~1 `char` (truncate (128 `int`) `char`))
-         (definition x~2 `unsigned int` (noop-type-conversion (200 `int`) `unsigned int`))
-         (return (add (less (sign-extend (c~1 `char`) `int`) (0 `int`) `int` `int`) (greater (sign-extend (c~1 `char`) `unsigned int`) (x~2 `unsigned int`) `int` `int`) `int`)))))
+         (definition c~1 `char` (truncate `char` (128 `int`)))
+         (definition x~2 `unsigned int` (noop-type-conversion `unsigned int` (200 `int`)))
+         (return (add `int` (less `int` `int` (sign-extend `int` (c~1 `char`)) (0 `int`)) (greater `int` `int` (sign-extend `unsigned int` (c~1 `char`)) (x~2 `unsigned int`)))))))
 
 ----- stderr -----

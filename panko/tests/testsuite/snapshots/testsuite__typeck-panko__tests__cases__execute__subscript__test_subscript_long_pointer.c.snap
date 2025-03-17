@@ -16,17 +16,14 @@ exit_code: 0
       main~1 `fn() -> int`
       (compound-statement
          (definition p~2 `ptr<long>`
-            (noop-type-conversion
-               (call
-                  (addressof
-                     (calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`)
-                     `ptr<fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>>`)
-                  (sign-extend (2 `int`) `unsigned long`)
-                  (sizeof 8 `long` `unsigned long`)
-                  `ptr<void>`)
-               `ptr<long>`))
-         (expression (assign (deref (ptr-add (p~2 `ptr<long>`) (sign-extend (0 `int`) `unsigned long`) `ptr<long>`) `long`) (sign-extend (42 `int`) `long`) `long`))
-         (expression (assign (deref (ptr-add (p~2 `ptr<long>`) (sign-extend (1 `int`) `unsigned long`) `ptr<long>`) `long`) (sign-extend (27 `int`) `long`) `long`))
-         (return (truncate (add (deref (ptr-add (p~2 `ptr<long>`) (sign-extend (0 `int`) `unsigned long`) `ptr<long>`) `long`) (deref (ptr-add (sign-extend (1 `int`) `unsigned long`) (p~2 `ptr<long>`) `ptr<long>`) `long`) `long`) `int`)))))
+            (noop-type-conversion `ptr<long>`
+               (call `ptr<void>`
+                  (addressof `ptr<fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>>`
+                     (calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`))
+                  (sign-extend `unsigned long` (2 `int`))
+                  (sizeof `unsigned long` 8 `long`))))
+         (expression (assign `long` (deref `long` (ptr-add `ptr<long>` (p~2 `ptr<long>`) (sign-extend `unsigned long` (0 `int`)))) (sign-extend `long` (42 `int`))))
+         (expression (assign `long` (deref `long` (ptr-add `ptr<long>` (p~2 `ptr<long>`) (sign-extend `unsigned long` (1 `int`)))) (sign-extend `long` (27 `int`))))
+         (return (truncate `int` (add `long` (deref `long` (ptr-add `ptr<long>` (p~2 `ptr<long>`) (sign-extend `unsigned long` (0 `int`)))) (deref `long` (ptr-add `ptr<long>` (sign-extend `unsigned long` (1 `int`)) (p~2 `ptr<long>`)))))))))
 
 ----- stderr -----

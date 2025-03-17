@@ -14,15 +14,13 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `char` (truncate (42 `int`) `char`))
+         (definition x~1 `char` (truncate `char` (42 `int`)))
          (definition p~2 `ptr<char>`
-            (addressof
-               (x~1 `char`)
-               `ptr<char>`))
+            (addressof `ptr<char>`
+               (x~1 `char`)))
          (definition pp~3 `ptr<ptr<char>>`
-            (addressof
-               (p~2 `ptr<char>`)
-               `ptr<ptr<char>>`))
-         (return (sign-extend (deref (deref (pp~3 `ptr<ptr<char>>`) `ptr<char>`) `char`) `int`)))))
+            (addressof `ptr<ptr<char>>`
+               (p~2 `ptr<char>`)))
+         (return (sign-extend `int` (deref `char` (deref `ptr<char>` (pp~3 `ptr<ptr<char>>`))))))))
 
 ----- stderr -----

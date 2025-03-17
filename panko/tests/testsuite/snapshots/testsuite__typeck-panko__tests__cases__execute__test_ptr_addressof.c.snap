@@ -17,33 +17,22 @@ exit_code: 0
          (definition i1~1 `int` (42 `int`))
          (definition i2~2 `int` (27 `int`))
          (definition p1~3 `ptr<int>`
-            (addressof
-               (i1~1 `int`)
-               `ptr<int>`))
+            (addressof `ptr<int>`
+               (i1~1 `int`)))
          (definition p2~4 `ptr<int>`
-            (addressof
-               (i2~2 `int`)
-               `ptr<int>`))
+            (addressof `ptr<int>`
+               (i2~2 `int`)))
          (return
-            (add
-               (add
-                  (add
-                     (ptr-equal (p1~3 `ptr<int>`)
-                        (addressof
-                           (i1~1 `int`)
-                           `ptr<int>`)
-                        `int`
-                        `int`)
-                     (ptr-equal (p2~4 `ptr<int>`)
-                        (addressof
-                           (i2~2 `int`)
-                           `ptr<int>`)
-                        `int`
-                        `int`)
-                     `int`)
-                  (ptr-equal (ptr-add (p1~3 `ptr<int>`) (sign-extend (1 `int`) `unsigned long`) `ptr<int>`) (p2~4 `ptr<int>`) `int` `int`)
-                  `int`)
-               (ptr-equal (ptr-sub (p2~4 `ptr<int>`) (sign-extend (1 `int`) `unsigned long`) `ptr<int>`) (p1~3 `ptr<int>`) `int` `int`)
-               `int`)))))
+            (add `int`
+               (add `int`
+                  (add `int`
+                     (ptr-equal `int` `int` (p1~3 `ptr<int>`)
+                        (addressof `ptr<int>`
+                           (i1~1 `int`)))
+                     (ptr-equal `int` `int` (p2~4 `ptr<int>`)
+                        (addressof `ptr<int>`
+                           (i2~2 `int`))))
+                  (ptr-equal `int` `int` (ptr-add `ptr<int>` (p1~3 `ptr<int>`) (sign-extend `unsigned long` (1 `int`))) (p2~4 `ptr<int>`)))
+               (ptr-equal `int` `int` (ptr-sub `ptr<int>` (p2~4 `ptr<int>`) (sign-extend `unsigned long` (1 `int`))) (p1~3 `ptr<int>`)))))))
 
 ----- stderr -----

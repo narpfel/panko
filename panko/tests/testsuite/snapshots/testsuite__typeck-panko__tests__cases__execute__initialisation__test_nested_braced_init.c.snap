@@ -22,116 +22,82 @@ exit_code: 0
             (braced
                (subobject +0 (3 `int`))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (x~4 `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (x~4 `int`)))
          (definition y~5 `long`
             (braced
-               (subobject +0 (sign-extend (negate (42 `int`) `int`) `long`))))
+               (subobject +0 (sign-extend `long` (negate `int` (42 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (2 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (y~5 `long`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (2 `int`)))))
+               (y~5 `long`)))
          (definition xs~6 `array<int; (constexpr 5)>`
             (braced
-               (subobject +0 (negate (1 `int`) `int`))
-               (subobject +4 (add (negate (5 `int`) `int`) (negate (2 `int`) `int`) `int`))
+               (subobject +0 (negate `int` (1 `int`)))
+               (subobject +4 (add `int` (negate `int` (5 `int`)) (negate `int` (2 `int`))))
                (subobject +8 (3 `int`))
                (subobject +12 (4 `int`))
                (subobject +16 (5 `int`))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (xs~6 `array<int; (constexpr 5)>`)
-                           `ptr<array<int; (constexpr 5)>>`)
-                        `ptr<int>`)
-                     (sign-extend (0 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 5)>>`
+                           (xs~6 `array<int; (constexpr 5)>`)))
+                     (sign-extend `unsigned long` (0 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (xs~6 `array<int; (constexpr 5)>`)
-                           `ptr<array<int; (constexpr 5)>>`)
-                        `ptr<int>`)
-                     (sign-extend (1 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 5)>>`
+                           (xs~6 `array<int; (constexpr 5)>`)))
+                     (sign-extend `unsigned long` (1 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (xs~6 `array<int; (constexpr 5)>`)
-                           `ptr<array<int; (constexpr 5)>>`)
-                        `ptr<int>`)
-                     (sign-extend (2 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 5)>>`
+                           (xs~6 `array<int; (constexpr 5)>`)))
+                     (sign-extend `unsigned long` (2 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (xs~6 `array<int; (constexpr 5)>`)
-                           `ptr<array<int; (constexpr 5)>>`)
-                        `ptr<int>`)
-                     (sign-extend (3 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 5)>>`
+                           (xs~6 `array<int; (constexpr 5)>`)))
+                     (sign-extend `unsigned long` (3 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (xs~6 `array<int; (constexpr 5)>`)
-                           `ptr<array<int; (constexpr 5)>>`)
-                        `ptr<int>`)
-                     (sign-extend (4 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 5)>>`
+                           (xs~6 `array<int; (constexpr 5)>`)))
+                     (sign-extend `unsigned long` (4 `int`))))))
          (definition ys~7 `array<array<int; (constexpr 2)>; (constexpr 2)>`
             (braced
                (subobject +0 (1 `int`))
@@ -139,147 +105,95 @@ exit_code: 0
                (subobject +8 (3 `int`))
                (subobject +12 (4 `int`))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (ys~7 `array<array<int; (constexpr 2)>; (constexpr 2)>`)
-                                       `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`)
-                                    `ptr<array<int; (constexpr 2)>>`)
-                                 (sign-extend (0 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 2)>>`)
-                              `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (0 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (deref `array<int; (constexpr 2)>`
+                              (ptr-add `ptr<array<int; (constexpr 2)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`
+                                       (ys~7 `array<array<int; (constexpr 2)>; (constexpr 2)>`)))
+                                 (sign-extend `unsigned long` (0 `int`))))))
+                     (sign-extend `unsigned long` (0 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (ys~7 `array<array<int; (constexpr 2)>; (constexpr 2)>`)
-                                       `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`)
-                                    `ptr<array<int; (constexpr 2)>>`)
-                                 (sign-extend (0 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 2)>>`)
-                              `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (1 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (deref `array<int; (constexpr 2)>`
+                              (ptr-add `ptr<array<int; (constexpr 2)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`
+                                       (ys~7 `array<array<int; (constexpr 2)>; (constexpr 2)>`)))
+                                 (sign-extend `unsigned long` (0 `int`))))))
+                     (sign-extend `unsigned long` (1 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (ys~7 `array<array<int; (constexpr 2)>; (constexpr 2)>`)
-                                       `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`)
-                                    `ptr<array<int; (constexpr 2)>>`)
-                                 (sign-extend (1 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 2)>>`)
-                              `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (0 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (deref `array<int; (constexpr 2)>`
+                              (ptr-add `ptr<array<int; (constexpr 2)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`
+                                       (ys~7 `array<array<int; (constexpr 2)>; (constexpr 2)>`)))
+                                 (sign-extend `unsigned long` (1 `int`))))))
+                     (sign-extend `unsigned long` (0 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (ys~7 `array<array<int; (constexpr 2)>; (constexpr 2)>`)
-                                       `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`)
-                                    `ptr<array<int; (constexpr 2)>>`)
-                                 (sign-extend (1 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 2)>>`)
-                              `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (1 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (deref `array<int; (constexpr 2)>`
+                              (ptr-add `ptr<array<int; (constexpr 2)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`
+                                       (ys~7 `array<array<int; (constexpr 2)>; (constexpr 2)>`)))
+                                 (sign-extend `unsigned long` (1 `int`))))))
+                     (sign-extend `unsigned long` (1 `int`))))))
          (definition zs~8 `array<int; (constexpr 2)>`
             (braced
                (subobject +0 (1 `int`))
                (subobject +4 (2 `int`))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (zs~8 `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (0 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (zs~8 `array<int; (constexpr 2)>`)))
+                     (sign-extend `unsigned long` (0 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (zs~8 `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (1 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (zs~8 `array<int; (constexpr 2)>`)))
+                     (sign-extend `unsigned long` (1 `int`))))))
          (definition as~9 `array<array<int; (constexpr 2)>; (constexpr 2)>`
             (braced
                (subobject +0 (1 `int`))
@@ -287,109 +201,69 @@ exit_code: 0
                (subobject +8 (3 `int`))
                (subobject +12 (4 `int`))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (as~9 `array<array<int; (constexpr 2)>; (constexpr 2)>`)
-                                       `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`)
-                                    `ptr<array<int; (constexpr 2)>>`)
-                                 (sign-extend (0 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 2)>>`)
-                              `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (0 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (deref `array<int; (constexpr 2)>`
+                              (ptr-add `ptr<array<int; (constexpr 2)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`
+                                       (as~9 `array<array<int; (constexpr 2)>; (constexpr 2)>`)))
+                                 (sign-extend `unsigned long` (0 `int`))))))
+                     (sign-extend `unsigned long` (0 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (as~9 `array<array<int; (constexpr 2)>; (constexpr 2)>`)
-                                       `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`)
-                                    `ptr<array<int; (constexpr 2)>>`)
-                                 (sign-extend (0 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 2)>>`)
-                              `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (1 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (deref `array<int; (constexpr 2)>`
+                              (ptr-add `ptr<array<int; (constexpr 2)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`
+                                       (as~9 `array<array<int; (constexpr 2)>; (constexpr 2)>`)))
+                                 (sign-extend `unsigned long` (0 `int`))))))
+                     (sign-extend `unsigned long` (1 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (as~9 `array<array<int; (constexpr 2)>; (constexpr 2)>`)
-                                       `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`)
-                                    `ptr<array<int; (constexpr 2)>>`)
-                                 (sign-extend (1 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 2)>>`)
-                              `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (0 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (deref `array<int; (constexpr 2)>`
+                              (ptr-add `ptr<array<int; (constexpr 2)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`
+                                       (as~9 `array<array<int; (constexpr 2)>; (constexpr 2)>`)))
+                                 (sign-extend `unsigned long` (1 `int`))))))
+                     (sign-extend `unsigned long` (0 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (as~9 `array<array<int; (constexpr 2)>; (constexpr 2)>`)
-                                       `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`)
-                                    `ptr<array<int; (constexpr 2)>>`)
-                                 (sign-extend (1 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 2)>>`)
-                              `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (1 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (deref `array<int; (constexpr 2)>`
+                              (ptr-add `ptr<array<int; (constexpr 2)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`
+                                       (as~9 `array<array<int; (constexpr 2)>; (constexpr 2)>`)))
+                                 (sign-extend `unsigned long` (1 `int`))))))
+                     (sign-extend `unsigned long` (1 `int`))))))
          (definition bs~10 `array<array<int; (constexpr 2)>; (constexpr 2)>`
             (braced
                (subobject +0 (1 `int`))
@@ -397,108 +271,68 @@ exit_code: 0
                (subobject +8 (4 `int`))
                (subobject +12 (5 `int`))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (bs~10 `array<array<int; (constexpr 2)>; (constexpr 2)>`)
-                                       `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`)
-                                    `ptr<array<int; (constexpr 2)>>`)
-                                 (sign-extend (0 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 2)>>`)
-                              `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (0 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (deref `array<int; (constexpr 2)>`
+                              (ptr-add `ptr<array<int; (constexpr 2)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`
+                                       (bs~10 `array<array<int; (constexpr 2)>; (constexpr 2)>`)))
+                                 (sign-extend `unsigned long` (0 `int`))))))
+                     (sign-extend `unsigned long` (0 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (bs~10 `array<array<int; (constexpr 2)>; (constexpr 2)>`)
-                                       `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`)
-                                    `ptr<array<int; (constexpr 2)>>`)
-                                 (sign-extend (0 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 2)>>`)
-                              `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (1 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (deref `array<int; (constexpr 2)>`
+                              (ptr-add `ptr<array<int; (constexpr 2)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`
+                                       (bs~10 `array<array<int; (constexpr 2)>; (constexpr 2)>`)))
+                                 (sign-extend `unsigned long` (0 `int`))))))
+                     (sign-extend `unsigned long` (1 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (bs~10 `array<array<int; (constexpr 2)>; (constexpr 2)>`)
-                                       `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`)
-                                    `ptr<array<int; (constexpr 2)>>`)
-                                 (sign-extend (1 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 2)>>`)
-                              `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (0 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (deref `array<int; (constexpr 2)>`
+                              (ptr-add `ptr<array<int; (constexpr 2)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`
+                                       (bs~10 `array<array<int; (constexpr 2)>; (constexpr 2)>`)))
+                                 (sign-extend `unsigned long` (1 `int`))))))
+                     (sign-extend `unsigned long` (0 `int`))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (deref
-                  (ptr-add
-                     (noop-type-conversion
-                        (addressof
-                           (deref
-                              (ptr-add
-                                 (noop-type-conversion
-                                    (addressof
-                                       (bs~10 `array<array<int; (constexpr 2)>; (constexpr 2)>`)
-                                       `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`)
-                                    `ptr<array<int; (constexpr 2)>>`)
-                                 (sign-extend (1 `int`) `unsigned long`)
-                                 `ptr<array<int; (constexpr 2)>>`)
-                              `array<int; (constexpr 2)>`)
-                           `ptr<array<int; (constexpr 2)>>`)
-                        `ptr<int>`)
-                     (sign-extend (1 `int`) `unsigned long`)
-                     `ptr<int>`)
-                  `int`)
-               `int`)))))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; (constexpr 2)>>`
+                           (deref `array<int; (constexpr 2)>`
+                              (ptr-add `ptr<array<int; (constexpr 2)>>`
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>`
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>`
+                                       (bs~10 `array<array<int; (constexpr 2)>; (constexpr 2)>`)))
+                                 (sign-extend `unsigned long` (1 `int`))))))
+                     (sign-extend `unsigned long` (1 `int`)))))))))
 
 ----- stderr -----

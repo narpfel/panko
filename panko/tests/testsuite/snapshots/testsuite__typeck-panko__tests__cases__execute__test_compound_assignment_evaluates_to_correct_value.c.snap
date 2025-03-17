@@ -16,13 +16,10 @@ exit_code: 0
       (compound-statement
          (definition x~1 `int` (42 `int`))
          (return
-            (combine
-               (assign (unnamed-temporary~2 `ptr<int>`)
-                  (addressof
-                     (x~1 `int`)
-                     `ptr<int>`)
-                  `ptr<int>`)
-               (assign (deref (unnamed-temporary~2 `ptr<int>`) `int`) (truncate (add (sign-extend (deref (unnamed-temporary~2 `ptr<int>`) `int`) `long`) (27l `long`) `long`) `int`) `int`)
-               `int`)))))
+            (combine `int`
+               (assign `ptr<int>` (unnamed-temporary~2 `ptr<int>`)
+                  (addressof `ptr<int>`
+                     (x~1 `int`)))
+               (assign `int` (deref `int` (unnamed-temporary~2 `ptr<int>`)) (truncate `int` (add `long` (sign-extend `long` (deref `int` (unnamed-temporary~2 `ptr<int>`))) (27l `long`)))))))))
 
 ----- stderr -----

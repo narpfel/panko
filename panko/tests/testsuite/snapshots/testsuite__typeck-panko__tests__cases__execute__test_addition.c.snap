@@ -14,6 +14,6 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (return (add (add (add (1 `int`) (1 `int`) `int`) (1 `int`) `int`) (2 `int`) `int`)))))
+         (return (add `int` (add `int` (add `int` (1 `int`) (1 `int`)) (1 `int`)) (2 `int`))))))
 
 ----- stderr -----

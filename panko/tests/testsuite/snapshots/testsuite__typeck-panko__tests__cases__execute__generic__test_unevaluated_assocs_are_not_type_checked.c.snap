@@ -16,9 +16,8 @@ exit_code: 0
       (compound-statement
          (definition a~1 `int` (42 `int`))
          (definition p~2 `ptr<int>`
-            (addressof
-               (a~1 `int`)
-               `ptr<int>`))
+            (addressof `ptr<int>`
+               (a~1 `int`)))
          (return (42 `int`)))))
 
 ----- stderr -----

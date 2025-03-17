@@ -17,130 +17,81 @@ exit_code: 0
       main~2 `fn() -> int`
       (compound-statement
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion
-                  (noop-type-conversion
-                     (addressof
-                        (string "%s\n\0" `array<char; (constexpr 4)>`)
-                        `ptr<array<char; (constexpr 4)>>`)
-                     `ptr<char>`)
-                  `ptr<char const>`)
-               (noop-type-conversion
-                  (addressof
-                     (string "<9\0" `array<char; (constexpr 3)>`)
-                     `ptr<array<char; (constexpr 3)>>`)
-                  `ptr<char>`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; (constexpr 4)>>`
+                        (string `array<char; (constexpr 4)>` "%s\n\0"))))
+               (noop-type-conversion `ptr<char>`
+                  (addressof `ptr<array<char; (constexpr 3)>>`
+                     (string `array<char; (constexpr 3)>` "<9\0")))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion
-                  (noop-type-conversion
-                     (addressof
-                        (string "%s\n\0" `array<char; (constexpr 4)>`)
-                        `ptr<array<char; (constexpr 4)>>`)
-                     `ptr<char>`)
-                  `ptr<char const>`)
-               (noop-type-conversion
-                  (addressof
-                     (string "abcSghi\0" `array<char; (constexpr 8)>`)
-                     `ptr<array<char; (constexpr 8)>>`)
-                  `ptr<char>`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; (constexpr 4)>>`
+                        (string `array<char; (constexpr 4)>` "%s\n\0"))))
+               (noop-type-conversion `ptr<char>`
+                  (addressof `ptr<array<char; (constexpr 8)>>`
+                     (string `array<char; (constexpr 8)>` "abcSghi\0")))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion
-                  (noop-type-conversion
-                     (addressof
-                        (string "%d\n\0" `array<char; (constexpr 4)>`)
-                        `ptr<array<char; (constexpr 4)>>`)
-                     `ptr<char>`)
-                  `ptr<char const>`)
-               (call
-                  (addressof
-                     (strcmp~1 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int`)
-                     `ptr<fn(∅: ptr<char const>, ∅: ptr<char const>) -> int>`)
-                  (noop-type-conversion
-                     (noop-type-conversion
-                        (addressof
-                           (string "\n\0" `array<char; (constexpr 2)>`)
-                           `ptr<array<char; (constexpr 2)>>`)
-                        `ptr<char>`)
-                     `ptr<char const>`)
-                  (noop-type-conversion
-                     (noop-type-conversion
-                        (addressof
-                           (string "\n\0" `array<char; (constexpr 2)>`)
-                           `ptr<array<char; (constexpr 2)>>`)
-                        `ptr<char>`)
-                     `ptr<char const>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; (constexpr 4)>>`
+                        (string `array<char; (constexpr 4)>` "%d\n\0"))))
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ∅: ptr<char const>) -> int>`
+                     (strcmp~1 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; (constexpr 2)>>`
+                           (string `array<char; (constexpr 2)>` "\n\0"))))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; (constexpr 2)>>`
+                           (string `array<char; (constexpr 2)>` "\n\0")))))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion
-                  (noop-type-conversion
-                     (addressof
-                        (string "%d\n\0" `array<char; (constexpr 4)>`)
-                        `ptr<array<char; (constexpr 4)>>`)
-                     `ptr<char>`)
-                  `ptr<char const>`)
-               (call
-                  (addressof
-                     (strcmp~1 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int`)
-                     `ptr<fn(∅: ptr<char const>, ∅: ptr<char const>) -> int>`)
-                  (noop-type-conversion
-                     (noop-type-conversion
-                        (addressof
-                           (string "q\nq\0" `array<char; (constexpr 4)>`)
-                           `ptr<array<char; (constexpr 4)>>`)
-                        `ptr<char>`)
-                     `ptr<char const>`)
-                  (noop-type-conversion
-                     (noop-type-conversion
-                        (addressof
-                           (string "q\nq\0" `array<char; (constexpr 4)>`)
-                           `ptr<array<char; (constexpr 4)>>`)
-                        `ptr<char>`)
-                     `ptr<char const>`)
-                  `int`)
-               `int`))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; (constexpr 4)>>`
+                        (string `array<char; (constexpr 4)>` "%d\n\0"))))
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ∅: ptr<char const>) -> int>`
+                     (strcmp~1 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; (constexpr 4)>>`
+                           (string `array<char; (constexpr 4)>` "q\nq\0"))))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; (constexpr 4)>>`
+                           (string `array<char; (constexpr 4)>` "q\nq\0")))))))
          (definition s~3 `ptr<char const>`
-            (noop-type-conversion
-               (noop-type-conversion
-                  (addressof
-                     (string "\u{1}1\0" `array<char; (constexpr 3)>`)
-                     `ptr<array<char; (constexpr 3)>>`)
-                  `ptr<char>`)
-               `ptr<char const>`))
+            (noop-type-conversion `ptr<char const>`
+               (noop-type-conversion `ptr<char>`
+                  (addressof `ptr<array<char; (constexpr 3)>>`
+                     (string `array<char; (constexpr 3)>` "\u{1}1\0")))))
          (expression
-            (call
-               (addressof
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion
-                  (noop-type-conversion
-                     (addressof
-                        (string "%d%s\n\0" `array<char; (constexpr 6)>`)
-                        `ptr<array<char; (constexpr 6)>>`)
-                     `ptr<char>`)
-                  `ptr<char const>`)
-               (sign-extend (deref (ptr-add (s~3 `ptr<char const>`) (sign-extend (0 `int`) `unsigned long`) `ptr<char const>`) `char const`) `int`)
-               (addressof
-                  (deref (ptr-add (s~3 `ptr<char const>`) (sign-extend (1 `int`) `unsigned long`) `ptr<char const>`) `char const`)
-                  `ptr<char const>`)
-               `int`))
-         (return (truncate (lengthof 2 (string "\n\0" `array<char; (constexpr 2)>`) `unsigned long`) `int`)))))
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; (constexpr 6)>>`
+                        (string `array<char; (constexpr 6)>` "%d%s\n\0"))))
+               (sign-extend `int` (deref `char const` (ptr-add `ptr<char const>` (s~3 `ptr<char const>`) (sign-extend `unsigned long` (0 `int`)))))
+               (addressof `ptr<char const>`
+                  (deref `char const` (ptr-add `ptr<char const>` (s~3 `ptr<char const>`) (sign-extend `unsigned long` (1 `int`)))))))
+         (return (truncate `int` (lengthof `unsigned long` 2 (string `array<char; (constexpr 2)>` "\n\0")))))))
 
 ----- stderr -----
