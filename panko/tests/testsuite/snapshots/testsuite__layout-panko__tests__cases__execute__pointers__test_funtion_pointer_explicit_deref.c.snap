@@ -24,9 +24,19 @@ exit_code: 0
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (definition (x~3 `int` @0) (40 `int` @0))
-         (definition (p~4 `ptr<fn(∅: int) -> int>` @8) (addressof `ptr<fn(x: int) -> int>` @8 (f~0 `fn(x: int) -> int` (static f))))
+         (definition (p~4 `ptr<fn(∅: int) -> int>` @8)
+            (addressof `ptr<fn(x: int) -> int>` @8
+               (f~0 `fn(x: int) -> int` (static f))))
          (return
-            (call `int` @16 (addressof `ptr<fn(∅: int) -> int>` @24 (deref `fn(∅: int) -> int` @24 (addressof `ptr<fn(∅: int) -> int>` @32 (deref `fn(∅: int) -> int` @32 (addressof `ptr<fn(∅: int) -> int>` @40 (deref `fn(∅: int) -> int` @40 (addressof `ptr<fn(∅: int) -> int>` @48 (deref `fn(∅: int) -> int` @48 (p~4 `ptr<fn(∅: int) -> int>` @8)))))))))
+            (call `int` @16
+               (addressof `ptr<fn(∅: int) -> int>` @24
+                  (deref `fn(∅: int) -> int` @24
+                     (addressof `ptr<fn(∅: int) -> int>` @32
+                        (deref `fn(∅: int) -> int` @32
+                           (addressof `ptr<fn(∅: int) -> int>` @40
+                              (deref `fn(∅: int) -> int` @40
+                                 (addressof `ptr<fn(∅: int) -> int>` @48
+                                    (deref `fn(∅: int) -> int` @48 (p~4 `ptr<fn(∅: int) -> int>` @8)))))))))
                (x~3 `int` @0))))))
 
 ----- stderr -----

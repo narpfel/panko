@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/arithmetic/test_alignof.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -20,52 +19,82 @@ exit_code: 0
          argv~3 `ptr<ptr<char>>`)
       (compound-statement
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (alignof 1 `char` `unsigned long`)
                `int`))
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (alignof 1 `char const` `unsigned long`)
                `int`))
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (alignof 8 `ptr<char const>` `unsigned long`)
                `int`))
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (alignof 8 `ptr<char>` `unsigned long`)
                `int`))
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (alignof 8 `ptr<fn(∅: int, ∅: int) -> void>` `unsigned long`)
                `int`))
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (alignof 2 `unsigned short` `unsigned long`)
                `int`))
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (alignof 4 `int` `unsigned long`)
                `int`))
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (alignof 8 `long` `unsigned long`)
                `int`))
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (alignof 8 `long long` `unsigned long`)
                `int`))
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (alignof 8 `ptr<void>` `unsigned long`)
                `int`)))))

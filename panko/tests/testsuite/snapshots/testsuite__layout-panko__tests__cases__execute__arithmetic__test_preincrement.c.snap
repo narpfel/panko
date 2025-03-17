@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/arithmetic/test_preincrement.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -20,10 +19,14 @@ exit_code: 0
          (p~3 `ptr<int>` @0))
       (compound-statement
          (expression
-            (call `int` @8 (addressof `ptr<fn(∅: int) -> int>` @16 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @8
+               (addressof `ptr<fn(∅: int) -> int>` @16
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (65 `int` @24)))
          (expression
-            (call `int` @8 (addressof `ptr<fn(∅: int) -> int>` @16 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @8
+               (addressof `ptr<fn(∅: int) -> int>` @16
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (10 `int` @24)))
          (return (p~3 `ptr<int>` @0))))
    (function-definition
@@ -34,7 +37,9 @@ exit_code: 0
       (compound-statement
          (definition (x~7 `int` @16) (42 `int` @16))
          (expression
-            (call `int` @20 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @20
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -43,14 +48,17 @@ exit_code: 0
                (combine `int` @48
                   (assign `ptr<int>` @56
                      (unnamed-temporary~8 `ptr<int>` @56)
-                     (addressof `ptr<int>` @56 (x~7 `int` @16)))
+                     (addressof `ptr<int>` @56
+                        (x~7 `int` @16)))
                   (assign `int` @48
                      (deref `int` @48 (unnamed-temporary~8 `ptr<int>` @56))
                      (add `int` @64
                         (deref `int` @64 (unnamed-temporary~8 `ptr<int>` @56))
                         (1 `int` @72))))))
          (expression
-            (call `int` @20 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @20
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -58,7 +66,9 @@ exit_code: 0
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (x~7 `int` @16)))
          (expression
-            (call `int` @20 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @20
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -69,8 +79,11 @@ exit_code: 0
                      (unnamed-temporary~9 `ptr<int>` @56)
                      (addressof `ptr<int>` @56
                         (deref `int` @56
-                           (call `ptr<int>` @72 (addressof `ptr<fn(p: ptr<int>) -> ptr<int>>` @80 (f~2 `fn(p: ptr<int>) -> ptr<int>` (static f)))
-                              (addressof `ptr<int>` @88 (x~7 `int` @16))))))
+                           (call `ptr<int>` @72
+                              (addressof `ptr<fn(p: ptr<int>) -> ptr<int>>` @80
+                                 (f~2 `fn(p: ptr<int>) -> ptr<int>` (static f)))
+                              (addressof `ptr<int>` @88
+                                 (x~7 `int` @16))))))
                   (assign `int` @48
                      (deref `int` @48 (unnamed-temporary~9 `ptr<int>` @56))
                      (add `int` @64

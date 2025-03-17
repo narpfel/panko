@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/subscript/test_subscript_argv.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -20,7 +19,9 @@ exit_code: 0
          (argv~3 `ptr<ptr<char>>` @8))
       (compound-statement
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -35,7 +36,9 @@ exit_code: 0
                               (sign-extend `unsigned long` @72 (1 `int` @80))))
                         (sign-extend `unsigned long` @72 (0 `int` @80)))))))
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -50,7 +53,9 @@ exit_code: 0
                               (sign-extend `unsigned long` @72 (1 `int` @80))))
                         (sign-extend `unsigned long` @72 (1 `int` @80)))))))
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -65,7 +70,9 @@ exit_code: 0
                               (sign-extend `unsigned long` @72 (1 `int` @80))))
                         (sign-extend `unsigned long` @72 (2 `int` @80)))))))
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -90,7 +97,9 @@ exit_code: 0
                      (sign-extend `unsigned long` @40 (1 `int` @48))))
                (truncate `char` @40 (115 `int` @48))))
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40

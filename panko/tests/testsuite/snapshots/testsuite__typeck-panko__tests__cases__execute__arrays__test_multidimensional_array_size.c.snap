@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/arrays/test_multidimensional_array_size.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -20,7 +19,10 @@ exit_code: 0
          argv~3 `ptr<ptr<char>>`)
       (compound-statement
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (sizeof 400000 `array<array<int; (constexpr 500)>; (constexpr 200)>` `unsigned long`)
                `int`))

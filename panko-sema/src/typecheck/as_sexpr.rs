@@ -152,7 +152,7 @@ impl AsSExpr for Expression<'_> {
             Expression::PtrCmp { lhs, kind, rhs } =>
                 SExpr::new(kind.str()).inherit(lhs).inherit(rhs),
             Expression::Addressof { ampersand: _, operand } =>
-                SExpr::new("addressof").inherit(operand),
+                SExpr::new("addressof").lines([operand]),
             Expression::Deref { star: _, operand } => SExpr::new("deref").inherit(operand),
             Expression::Call {
                 callee,

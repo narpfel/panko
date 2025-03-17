@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/conditional/test_conditional_only_evaluates_taken_branch.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -22,11 +21,17 @@ exit_code: 0
          (expression
             (conditional
                (0 `int`)
-               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (call
+                  (addressof
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                     `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (1 `int`)
                   `int`)
-               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (call
+                  (addressof
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                     `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (2 `int`)
                   `int`)
@@ -34,11 +39,17 @@ exit_code: 0
          (expression
             (conditional
                (42 `int`)
-               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (call
+                  (addressof
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                     `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (3 `int`)
                   `int`)
-               (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (call
+                  (addressof
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                     `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                   (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                   (4 `int`)
                   `int`)

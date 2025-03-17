@@ -16,9 +16,16 @@ exit_code: 0
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (expression
-            (call `int` @0 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @16 (noop-type-conversion `ptr<char>` @16 (addressof `ptr<array<char; (constexpr 4)>>` @16 (string `array<char; (constexpr 4)>` @void "%s\n\0"))))
-               (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 12)>>` @24 (string `array<char; (constexpr 12)>` @void "abc?\"'\\'def\0")))))
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; (constexpr 4)>>` @16
+                        (string `array<char; (constexpr 4)>` @void "%s\n\0"))))
+               (noop-type-conversion `ptr<char>` @24
+                  (addressof `ptr<array<char; (constexpr 12)>>` @24
+                     (string `array<char; (constexpr 12)>` @void "abc?\"'\\'def\0")))))
          (return (truncate `int` @0 (2 `unsigned long` @8))))))
 
 ----- stderr -----

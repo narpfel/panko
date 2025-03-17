@@ -16,40 +16,64 @@ exit_code: 0
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (expression
-            (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int) -> int>` @8
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (104 `int` @16)))
          (expression
-            (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int) -> int>` @8
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (101 `int` @16)))
          (expression
-            (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int) -> int>` @8
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (108 `int` @16)))
          (expression
-            (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int) -> int>` @8
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (108 `int` @16)))
          (expression
-            (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int) -> int>` @8
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (111 `int` @16)))
          (expression
-            (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int) -> int>` @8
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (32 `int` @16)))
          (expression
-            (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int) -> int>` @8
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (119 `int` @16)))
          (expression
-            (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int) -> int>` @8
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (111 `int` @16)))
          (expression
-            (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int) -> int>` @8
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (114 `int` @16)))
          (expression
-            (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int) -> int>` @8
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (108 `int` @16)))
          (expression
-            (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int) -> int>` @8
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (100 `int` @16)))
          (return
-            (call `int` @0 (addressof `ptr<fn(∅: int) -> int>` @8 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int) -> int>` @8
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (10 `int` @16))))))
 
 ----- stderr -----

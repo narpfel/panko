@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/arithmetic/test_unary_plus.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -22,14 +21,20 @@ exit_code: 0
          (definition c~4 `unsigned char` (truncate (42 `int`) `unsigned char`))
          (definition i~5 `int` (zero-extend (c~4 `unsigned char`) `int`))
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (i~5 `int`)
                `int`))
          (definition l~6 `unsigned long` (sign-extend (42 `int`) `unsigned long`))
          (definition l2~7 `unsigned long` (l~6 `unsigned long`))
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (2 `int`) `unsigned long`) `ptr<ptr<char>>` `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (l2~7 `unsigned long`)
                `int`)))))

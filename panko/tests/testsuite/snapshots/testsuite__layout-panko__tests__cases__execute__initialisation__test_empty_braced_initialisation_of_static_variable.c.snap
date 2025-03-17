@@ -28,7 +28,9 @@ exit_code: 0
                                  (addressof `ptr<array<int; (constexpr 2)>>` @8
                                     (deref `array<int; (constexpr 2)>` @8
                                        (ptr-add `ptr<array<int; (constexpr 2)>>` @16
-                                          (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @16 (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @16 (xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>` (static xs))))
+                                          (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @16
+                                             (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @16
+                                                (xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>` (static xs))))
                                           (sign-extend `unsigned long` @24 (0 `int` @32))))))
                               (sign-extend `unsigned long` @24 (0 `int` @32)))))
                      (deref `int` @4
@@ -37,7 +39,9 @@ exit_code: 0
                               (addressof `ptr<array<int; (constexpr 2)>>` @8
                                  (deref `array<int; (constexpr 2)>` @8
                                     (ptr-add `ptr<array<int; (constexpr 2)>>` @16
-                                       (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @16 (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @16 (xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>` (static xs))))
+                                       (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @16
+                                          (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @16
+                                             (xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>` (static xs))))
                                        (sign-extend `unsigned long` @24 (0 `int` @32))))))
                            (sign-extend `unsigned long` @24 (1 `int` @32)))))
                   (deref `int` @4
@@ -46,7 +50,9 @@ exit_code: 0
                            (addressof `ptr<array<int; (constexpr 2)>>` @8
                               (deref `array<int; (constexpr 2)>` @8
                                  (ptr-add `ptr<array<int; (constexpr 2)>>` @16
-                                    (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @16 (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @16 (xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>` (static xs))))
+                                    (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @16
+                                       (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @16
+                                          (xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>` (static xs))))
                                     (sign-extend `unsigned long` @24 (1 `int` @32))))))
                         (sign-extend `unsigned long` @24 (0 `int` @32)))))
                (deref `int` @4
@@ -55,7 +61,9 @@ exit_code: 0
                         (addressof `ptr<array<int; (constexpr 2)>>` @8
                            (deref `array<int; (constexpr 2)>` @8
                               (ptr-add `ptr<array<int; (constexpr 2)>>` @16
-                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @16 (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @16 (xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>` (static xs))))
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @16
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @16
+                                       (xs~1 `array<array<int; (constexpr 2)>; (constexpr 2)>` (static xs))))
                                  (sign-extend `unsigned long` @24 (1 `int` @32))))))
                      (sign-extend `unsigned long` @24 (1 `int` @32)))))))))
 

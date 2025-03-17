@@ -21,7 +21,10 @@ exit_code: 0
       main~2 `fn() -> int`
       (compound-statement
          (definition x~3 `int` (40 `int`))
-         (definition p~4 `ptr<fn(∅: int) -> int>` (addressof (f~0 `fn(x: int) -> int`) `ptr<fn(x: int) -> int>`))
+         (definition p~4 `ptr<fn(∅: int) -> int>`
+            (addressof
+               (f~0 `fn(x: int) -> int`)
+               `ptr<fn(x: int) -> int>`))
          (return
             (call (p~4 `ptr<fn(∅: int) -> int>`)
                (x~3 `int`)

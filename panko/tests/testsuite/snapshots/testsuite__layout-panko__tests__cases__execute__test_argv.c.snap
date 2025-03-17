@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/test_argv.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -21,7 +20,9 @@ exit_code: 0
       (compound-statement
          (return
             (truncate `int` @16
-               (call `unsigned long` @24 (addressof `ptr<fn(∅: ptr<char const>) -> unsigned long>` @32 (strlen~0 `fn(∅: ptr<char const>) -> unsigned long` (static strlen)))
+               (call `unsigned long` @24
+                  (addressof `ptr<fn(∅: ptr<char const>) -> unsigned long>` @32
+                     (strlen~0 `fn(∅: ptr<char const>) -> unsigned long` (static strlen)))
                   (noop-type-conversion `ptr<char const>` @40
                      (deref `ptr<char>` @40
                         (ptr-add `ptr<ptr<char>>` @48

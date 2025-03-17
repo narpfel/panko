@@ -30,92 +30,202 @@ exit_code: 0
                (subobject +4 (truncate `char` @8 (10 `int` @12)))
                (subobject +5 (truncate `char` @9 (0 `int` @12)))))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (101 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 6)>>` @24 (as_char~3 `array<char; (constexpr 6)>` @4))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 6)>>` @24
+                        (as_char~3 `array<char; (constexpr 6)>` @4))))
                (101 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (39 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 6)>>` @24 (as_char~3 `array<char; (constexpr 6)>` @4))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 6)>>` @24
+                        (as_char~3 `array<char; (constexpr 6)>` @4))))
                (39 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (34 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 6)>>` @24 (as_char~3 `array<char; (constexpr 6)>` @4))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 6)>>` @24
+                        (as_char~3 `array<char; (constexpr 6)>` @4))))
                (34 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (34 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 6)>>` @24 (as_char~3 `array<char; (constexpr 6)>` @4))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 6)>>` @24
+                        (as_char~3 `array<char; (constexpr 6)>` @4))))
                (34 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (63 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 6)>>` @24 (as_char~3 `array<char; (constexpr 6)>` @4))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 6)>>` @24
+                        (as_char~3 `array<char; (constexpr 6)>` @4))))
                (63 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (63 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 6)>>` @24 (as_char~3 `array<char; (constexpr 6)>` @4))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 6)>>` @24
+                        (as_char~3 `array<char; (constexpr 6)>` @4))))
                (63 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (92 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 6)>>` @24 (as_char~3 `array<char; (constexpr 6)>` @4))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 6)>>` @24
+                        (as_char~3 `array<char; (constexpr 6)>` @4))))
                (92 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (7 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (8 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (12 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (10 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 6)>>` @24 (as_char~3 `array<char; (constexpr 6)>` @4))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 6)>>` @24
+                        (as_char~3 `array<char; (constexpr 6)>` @4))))
                (10 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (13 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (9 `int` @32)))
          (expression
-            (call `int` @12 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @24 (noop-type-conversion `ptr<char>` @24 (addressof `ptr<array<char; (constexpr 4)>>` @24 (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; (constexpr 4)>>` @24
+                        (as_integral_value~2 `array<char; (constexpr 4)>` @0))))
                (11 `int` @32))))))
 
 ----- stderr -----

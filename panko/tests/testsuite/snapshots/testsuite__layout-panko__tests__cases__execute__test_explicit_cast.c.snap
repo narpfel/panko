@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/test_explicit_cast.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -19,7 +18,9 @@ exit_code: 0
          (fmt~2 `ptr<char const>` @0))
       (compound-statement
          (expression
-            (call `int` @8 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @8
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (fmt~2 `ptr<char const>` @0)
                (123 `int` @24)))))
    (function-definition
@@ -33,18 +34,26 @@ exit_code: 0
          (argv~6 `ptr<ptr<char>>` @8))
       (compound-statement
          (expression
-            (call `void` @void (addressof `ptr<fn(fmt: ptr<char const>) -> void>` @16 (f~1 `fn(fmt: ptr<char const>) -> void` (static f)))
+            (call `void` @void
+               (addressof `ptr<fn(fmt: ptr<char const>) -> void>` @16
+                  (f~1 `fn(fmt: ptr<char const>) -> void` (static f)))
                (noop-type-conversion `ptr<char const>` @24
                   (deref `ptr<char>` @24
                      (ptr-add `ptr<ptr<char>>` @32
                         (argv~6 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @40 (2 `int` @48)))))))
          (expression (void-cast `void` @void (42 `int` @16)))
-         (expression (void-cast `void` @void (call `int` @16 (addressof `ptr<fn() -> int>` @24 (g~3 `fn() -> int` (static g))))))
+         (expression
+            (void-cast `void` @void
+               (call `int` @16
+                  (addressof `ptr<fn() -> int>` @24
+                     (g~3 `fn() -> int` (static g))))))
          (expression (void-cast `void` @void (argc~5 `int` @0)))
          (expression (void-cast `void` @void (argv~6 `ptr<ptr<char>>` @8)))
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -52,7 +61,9 @@ exit_code: 0
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (sign-extend `ptr<void>` @48 (0 `int` @56))))
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -60,7 +71,9 @@ exit_code: 0
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (noop-type-conversion `ptr<void>` @48 (sign-extend `ptr<int const>` @48 (0 `int` @56)))))
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -68,7 +81,9 @@ exit_code: 0
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (sign-extend `ptr<void>` @48 (42 `int` @56))))
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -76,7 +91,9 @@ exit_code: 0
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (sign-extend `ptr<void>` @48 (negate `int` @56 (1 `int` @56)))))
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -84,7 +101,9 @@ exit_code: 0
                         (sign-extend `unsigned long` @48 (2 `int` @56)))))
                (sign-extend `int` @48 (truncate `char` @52 (128 `int` @56)))))
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -92,7 +111,9 @@ exit_code: 0
                         (sign-extend `unsigned long` @48 (2 `int` @56)))))
                (zero-extend `int` @48 (truncate `unsigned char` @52 (128 `int` @56)))))
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
@@ -100,7 +121,9 @@ exit_code: 0
                         (sign-extend `unsigned long` @48 (2 `int` @56)))))
                (noop-type-conversion `int` @48 (42 `int` @48))))
          (expression
-            (call `int` @16 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40

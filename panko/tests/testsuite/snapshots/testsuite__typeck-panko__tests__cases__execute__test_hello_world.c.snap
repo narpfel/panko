@@ -16,51 +16,87 @@ exit_code: 0
       main~1 `fn() -> int`
       (compound-statement
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (104 `int`)
                `int`))
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (101 `int`)
                `int`))
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (108 `int`)
                `int`))
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (108 `int`)
                `int`))
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (111 `int`)
                `int`))
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (32 `int`)
                `int`))
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (119 `int`)
                `int`))
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (111 `int`)
                `int`))
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (114 `int`)
                `int`))
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (108 `int`)
                `int`))
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (100 `int`)
                `int`))
          (return
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (10 `int`)
                `int`)))))
 

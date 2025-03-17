@@ -16,6 +16,14 @@ exit_code: 0
       (compound-statement
          (definition x~1 `int` ∅)
          (definition y~2 `int` ∅)
-         (return (ptr-not-equal (addressof (x~1 `int`) `ptr<int>`) (addressof (y~2 `int`) `ptr<int>`) `int`)))))
+         (return
+            (ptr-not-equal
+               (addressof
+                  (x~1 `int`)
+                  `ptr<int>`)
+               (addressof
+                  (y~2 `int`)
+                  `ptr<int>`)
+               `int`)))))
 
 ----- stderr -----

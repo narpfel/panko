@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/test_compound_assignment_only_evaluates_lhs_once.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -19,11 +18,17 @@ exit_code: 0
          p~2 `ptr<int>`)
       (compound-statement
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (65 `int`)
                `int`))
          (expression
-            (call (addressof (putchar~0 `fn(∅: int) -> int`) `ptr<fn(∅: int) -> int>`)
+            (call
+               (addressof
+                  (putchar~0 `fn(∅: int) -> int`)
+                  `ptr<fn(∅: int) -> int>`)
                (10 `int`)
                `int`))
          (return (p~2 `ptr<int>`))))
@@ -36,8 +41,13 @@ exit_code: 0
                (assign (unnamed-temporary~5 `ptr<int>`)
                   (addressof
                      (deref
-                        (call (addressof (f~1 `fn(p: ptr<int>) -> ptr<int>`) `ptr<fn(p: ptr<int>) -> ptr<int>>`)
-                           (addressof (x~4 `int`) `ptr<int>`)
+                        (call
+                           (addressof
+                              (f~1 `fn(p: ptr<int>) -> ptr<int>`)
+                              `ptr<fn(p: ptr<int>) -> ptr<int>>`)
+                           (addressof
+                              (x~4 `int`)
+                              `ptr<int>`)
                            `ptr<int>`)
                         `int`)
                      `ptr<int>`)

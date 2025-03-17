@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/arrays/test_multidimensional_array_as_parameter.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -49,7 +48,9 @@ exit_code: 0
                         (addressof `ptr<array<int; (constexpr 2)>>` @24
                            (deref `array<int; (constexpr 2)>` @24
                               (ptr-add `ptr<array<int; (constexpr 2)>>` @32
-                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @32 (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @32 (xs~3 `array<array<int; (constexpr 2)>; (constexpr 2)>` @0)))
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @32
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @32
+                                       (xs~3 `array<array<int; (constexpr 2)>; (constexpr 2)>` @0)))
                                  (sign-extend `unsigned long` @40 (0 `int` @48))))))
                      (sign-extend `unsigned long` @40 (0 `int` @48))))
                (4 `int` @40)))
@@ -61,12 +62,18 @@ exit_code: 0
                         (addressof `ptr<array<int; (constexpr 2)>>` @24
                            (deref `array<int; (constexpr 2)>` @24
                               (ptr-add `ptr<array<int; (constexpr 2)>>` @32
-                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @32 (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @32 (xs~3 `array<array<int; (constexpr 2)>; (constexpr 2)>` @0)))
+                                 (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @32
+                                    (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @32
+                                       (xs~3 `array<array<int; (constexpr 2)>; (constexpr 2)>` @0)))
                                  (sign-extend `unsigned long` @40 (1 `int` @48))))))
                      (sign-extend `unsigned long` @40 (1 `int` @48))))
                (6 `int` @40)))
          (return
-            (call `int` @16 (addressof `ptr<fn(xs: ptr<array<int; (constexpr 2)>>) -> int>` @24 (f~0 `fn(xs: ptr<array<int; (constexpr 2)>>) -> int` (static f)))
-               (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @32 (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @32 (xs~3 `array<array<int; (constexpr 2)>; (constexpr 2)>` @0))))))))
+            (call `int` @16
+               (addressof `ptr<fn(xs: ptr<array<int; (constexpr 2)>>) -> int>` @24
+                  (f~0 `fn(xs: ptr<array<int; (constexpr 2)>>) -> int` (static f)))
+               (noop-type-conversion `ptr<array<int; (constexpr 2)>>` @32
+                  (addressof `ptr<array<array<int; (constexpr 2)>; (constexpr 2)>>` @32
+                     (xs~3 `array<array<int; (constexpr 2)>; (constexpr 2)>` @0))))))))
 
 ----- stderr -----

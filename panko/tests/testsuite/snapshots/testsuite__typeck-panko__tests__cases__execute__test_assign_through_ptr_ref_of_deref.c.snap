@@ -15,8 +15,19 @@ exit_code: 0
       main~0 `fn() -> int`
       (compound-statement
          (definition x~1 `int` (42 `int`))
-         (definition p~2 `ptr<int>` (addressof (x~1 `int`) `ptr<int>`))
-         (expression (assign (deref (addressof (deref (p~2 `ptr<int>`) `int`) `ptr<int>`) `int`) (27 `int`) `int`))
+         (definition p~2 `ptr<int>`
+            (addressof
+               (x~1 `int`)
+               `ptr<int>`))
+         (expression
+            (assign
+               (deref
+                  (addressof
+                     (deref (p~2 `ptr<int>`) `int`)
+                     `ptr<int>`)
+                  `int`)
+               (27 `int`)
+               `int`))
          (return (x~1 `int`)))))
 
 ----- stderr -----

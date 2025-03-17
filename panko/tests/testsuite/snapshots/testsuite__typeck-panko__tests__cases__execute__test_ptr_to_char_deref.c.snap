@@ -15,8 +15,14 @@ exit_code: 0
       main~0 `fn() -> int`
       (compound-statement
          (definition x~1 `char` (truncate (42 `int`) `char`))
-         (definition p~2 `ptr<char>` (addressof (x~1 `char`) `ptr<char>`))
-         (definition pp~3 `ptr<ptr<char>>` (addressof (p~2 `ptr<char>`) `ptr<ptr<char>>`))
+         (definition p~2 `ptr<char>`
+            (addressof
+               (x~1 `char`)
+               `ptr<char>`))
+         (definition pp~3 `ptr<ptr<char>>`
+            (addressof
+               (p~2 `ptr<char>`)
+               `ptr<ptr<char>>`))
          (return (sign-extend (deref (deref (pp~3 `ptr<ptr<char>>`) `ptr<char>`) `char`) `int`)))))
 
 ----- stderr -----

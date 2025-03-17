@@ -22,7 +22,9 @@ exit_code: 0
       (main~3 `fn() -> int` (static main))
       (compound-statement
          (return
-            (call `int` @0 (addressof `ptr<fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int>` @8 (f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int` (static f)))
+            (call `int` @0
+               (addressof `ptr<fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int>` @8
+                  (f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int` (static f)))
                (1 `int` @16)
                (2 `int` @20)
                (3 `int` @24)
@@ -32,7 +34,9 @@ exit_code: 0
                (7 `int` @40)
                (8 `int` @44)
                (9 `int` @48)
-               (call `int` @52 (addressof `ptr<fn(n: int) -> int>` @56 (id~1 `fn(n: int) -> int` (static id)))
+               (call `int` @52
+                  (addressof `ptr<fn(n: int) -> int>` @56
+                     (id~1 `fn(n: int) -> int` (static id)))
                   (10 `int` @64))
                (11 `int` @68)))))
    (function-definition

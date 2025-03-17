@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/test_compound_assignment_evaluates_to_correct_value.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -18,7 +17,11 @@ exit_code: 0
          (definition x~1 `int` (42 `int`))
          (return
             (combine
-               (assign (unnamed-temporary~2 `ptr<int>`) (addressof (x~1 `int`) `ptr<int>`) `ptr<int>`)
+               (assign (unnamed-temporary~2 `ptr<int>`)
+                  (addressof
+                     (x~1 `int`)
+                     `ptr<int>`)
+                  `ptr<int>`)
                (assign (deref (unnamed-temporary~2 `ptr<int>`) `int`) (truncate (add (sign-extend (deref (unnamed-temporary~2 `ptr<int>`) `int`) `long`) (27l `long`) `long`) `int`) `int`)
                `int`)))))
 

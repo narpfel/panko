@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/arrays/test_tentative_definition_of_array_of_unknown_size.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -16,7 +15,30 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (expression (assign (deref (ptr-add (noop-type-conversion (addressof (xs~0 `array<int; ∅>`) `ptr<array<int; ∅>>`) `ptr<int>`) (sign-extend (0 `int`) `unsigned long`) `ptr<int>`) `int`) (42 `int`) `int`))
-         (return (deref (ptr-add (noop-type-conversion (addressof (xs~0 `array<int; ∅>`) `ptr<array<int; ∅>>`) `ptr<int>`) (sign-extend (0 `int`) `unsigned long`) `ptr<int>`) `int`)))))
+         (expression
+            (assign
+               (deref
+                  (ptr-add
+                     (noop-type-conversion
+                        (addressof
+                           (xs~0 `array<int; ∅>`)
+                           `ptr<array<int; ∅>>`)
+                        `ptr<int>`)
+                     (sign-extend (0 `int`) `unsigned long`)
+                     `ptr<int>`)
+                  `int`)
+               (42 `int`)
+               `int`))
+         (return
+            (deref
+               (ptr-add
+                  (noop-type-conversion
+                     (addressof
+                        (xs~0 `array<int; ∅>`)
+                        `ptr<array<int; ∅>>`)
+                     `ptr<int>`)
+                  (sign-extend (0 `int`) `unsigned long`)
+                  `ptr<int>`)
+               `int`)))))
 
 ----- stderr -----

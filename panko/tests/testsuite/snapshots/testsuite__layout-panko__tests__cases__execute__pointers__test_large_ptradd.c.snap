@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/pointers/test_large_ptradd.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -24,7 +23,9 @@ exit_code: 0
                         (addressof `ptr<array<int; (constexpr 123)>>` @60520
                            (deref `array<int; (constexpr 123)>` @60520
                               (ptr-add `ptr<array<int; (constexpr 123)>>` @60528
-                                 (noop-type-conversion `ptr<array<int; (constexpr 123)>>` @60528 (addressof `ptr<array<array<int; (constexpr 123)>; (constexpr 123)>>` @60528 (xs~1 `array<array<int; (constexpr 123)>; (constexpr 123)>` @0)))
+                                 (noop-type-conversion `ptr<array<int; (constexpr 123)>>` @60528
+                                    (addressof `ptr<array<array<int; (constexpr 123)>; (constexpr 123)>>` @60528
+                                       (xs~1 `array<array<int; (constexpr 123)>; (constexpr 123)>` @0)))
                                  (sign-extend `unsigned long` @60536 (122 `int` @60544))))))
                      (sign-extend `unsigned long` @60536 (122 `int` @60544))))
                (42 `int` @60536)))
@@ -35,7 +36,9 @@ exit_code: 0
                      (addressof `ptr<array<int; (constexpr 123)>>` @60520
                         (deref `array<int; (constexpr 123)>` @60520
                            (ptr-add `ptr<array<int; (constexpr 123)>>` @60528
-                              (noop-type-conversion `ptr<array<int; (constexpr 123)>>` @60528 (addressof `ptr<array<array<int; (constexpr 123)>; (constexpr 123)>>` @60528 (xs~1 `array<array<int; (constexpr 123)>; (constexpr 123)>` @0)))
+                              (noop-type-conversion `ptr<array<int; (constexpr 123)>>` @60528
+                                 (addressof `ptr<array<array<int; (constexpr 123)>; (constexpr 123)>>` @60528
+                                    (xs~1 `array<array<int; (constexpr 123)>; (constexpr 123)>` @0)))
                               (sign-extend `unsigned long` @60536 (122 `int` @60544))))))
                   (sign-extend `unsigned long` @60536 (122 `int` @60544))))))))
 

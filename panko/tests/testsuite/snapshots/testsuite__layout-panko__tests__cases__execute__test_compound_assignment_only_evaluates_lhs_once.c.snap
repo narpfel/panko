@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/test_compound_assignment_only_evaluates_lhs_once.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -19,10 +18,14 @@ exit_code: 0
          (p~2 `ptr<int>` @0))
       (compound-statement
          (expression
-            (call `int` @8 (addressof `ptr<fn(∅: int) -> int>` @16 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @8
+               (addressof `ptr<fn(∅: int) -> int>` @16
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (65 `int` @24)))
          (expression
-            (call `int` @8 (addressof `ptr<fn(∅: int) -> int>` @16 (putchar~0 `fn(∅: int) -> int` (static putchar)))
+            (call `int` @8
+               (addressof `ptr<fn(∅: int) -> int>` @16
+                  (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (10 `int` @24)))
          (return (p~2 `ptr<int>` @0))))
    (function-definition
@@ -35,8 +38,11 @@ exit_code: 0
                   (unnamed-temporary~5 `ptr<int>` @8)
                   (addressof `ptr<int>` @8
                      (deref `int` @8
-                        (call `ptr<int>` @40 (addressof `ptr<fn(p: ptr<int>) -> ptr<int>>` @48 (f~1 `fn(p: ptr<int>) -> ptr<int>` (static f)))
-                           (addressof `ptr<int>` @56 (x~4 `int` @0))))))
+                        (call `ptr<int>` @40
+                           (addressof `ptr<fn(p: ptr<int>) -> ptr<int>>` @48
+                              (f~1 `fn(p: ptr<int>) -> ptr<int>` (static f)))
+                           (addressof `ptr<int>` @56
+                              (x~4 `int` @0))))))
                (assign `int` @4
                   (deref `int` @4 (unnamed-temporary~5 `ptr<int>` @8))
                   (truncate `int` @16

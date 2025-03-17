@@ -17,6 +17,9 @@ exit_code: 0
    (function-definition
       (main~1 `fn() -> int` (static main))
       (compound-statement
-         (expression (call `void` @void (addressof `ptr<fn() -> void>` @0 (f~0 `fn() -> void` (static f))))))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (f~0 `fn() -> void` (static f))))))))
 
 ----- stderr -----

@@ -17,10 +17,20 @@ exit_code: 0
    (function-definition
       g~1 `fn() -> void`
       (compound-statement
-         (return (call (addressof (f~0 `fn() -> void`) `ptr<fn() -> void>`) `void`))))
+         (return
+            (call
+               (addressof
+                  (f~0 `fn() -> void`)
+                  `ptr<fn() -> void>`)
+               `void`))))
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (expression (call (addressof (g~1 `fn() -> void`) `ptr<fn() -> void>`) `void`)))))
+         (expression
+            (call
+               (addressof
+                  (g~1 `fn() -> void`)
+                  `ptr<fn() -> void>`)
+               `void`)))))
 
 ----- stderr -----

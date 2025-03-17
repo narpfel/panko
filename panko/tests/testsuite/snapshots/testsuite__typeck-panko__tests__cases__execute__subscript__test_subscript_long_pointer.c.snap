@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/subscript/test_subscript_long_pointer.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -18,7 +17,10 @@ exit_code: 0
       (compound-statement
          (definition p~2 `ptr<long>`
             (noop-type-conversion
-               (call (addressof (calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`) `ptr<fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>>`)
+               (call
+                  (addressof
+                     (calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`)
+                     `ptr<fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>>`)
                   (sign-extend (2 `int`) `unsigned long`)
                   (sizeof 8 `long` `unsigned long`)
                   `ptr<void>`)

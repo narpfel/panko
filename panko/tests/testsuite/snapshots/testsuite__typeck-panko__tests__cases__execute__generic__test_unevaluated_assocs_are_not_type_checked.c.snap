@@ -15,7 +15,10 @@ exit_code: 0
       main~0 `fn() -> int`
       (compound-statement
          (definition a~1 `int` (42 `int`))
-         (definition p~2 `ptr<int>` (addressof (a~1 `int`) `ptr<int>`))
+         (definition p~2 `ptr<int>`
+            (addressof
+               (a~1 `int`)
+               `ptr<int>`))
          (return (42 `int`)))))
 
 ----- stderr -----

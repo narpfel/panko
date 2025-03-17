@@ -16,9 +16,22 @@ exit_code: 0
       main~1 `fn() -> int`
       (compound-statement
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
-               (noop-type-conversion (noop-type-conversion (addressof (string "%s\n\0" `array<char; (constexpr 4)>`) `ptr<array<char; (constexpr 4)>>`) `ptr<char>`) `ptr<char const>`)
-               (noop-type-conversion (addressof (string "abc?\"'\\'def\0" `array<char; (constexpr 12)>`) `ptr<array<char; (constexpr 12)>>`) `ptr<char>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+               (noop-type-conversion
+                  (noop-type-conversion
+                     (addressof
+                        (string "%s\n\0" `array<char; (constexpr 4)>`)
+                        `ptr<array<char; (constexpr 4)>>`)
+                     `ptr<char>`)
+                  `ptr<char const>`)
+               (noop-type-conversion
+                  (addressof
+                     (string "abc?\"'\\'def\0" `array<char; (constexpr 12)>`)
+                     `ptr<array<char; (constexpr 12)>>`)
+                  `ptr<char>`)
                `int`))
          (return (truncate (lengthof 2 (string "\n\0" `array<char; (constexpr 2)>`) `unsigned long`) `int`)))))
 

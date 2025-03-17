@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/arithmetic/test_unary_plus.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -22,7 +21,9 @@ exit_code: 0
          (definition (c~4 `unsigned char` @16) (truncate `unsigned char` @16 (42 `int` @20)))
          (definition (i~5 `int` @20) (zero-extend `int` @20 (c~4 `unsigned char` @16)))
          (expression
-            (call `int` @24 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @40
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
@@ -32,7 +33,9 @@ exit_code: 0
          (definition (l~6 `unsigned long` @24) (sign-extend `unsigned long` @24 (42 `int` @32)))
          (definition (l2~7 `unsigned long` @32) (l~6 `unsigned long` @24))
          (expression
-            (call `int` @40 (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @48 (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+            (call `int` @40
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @48
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @56
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64

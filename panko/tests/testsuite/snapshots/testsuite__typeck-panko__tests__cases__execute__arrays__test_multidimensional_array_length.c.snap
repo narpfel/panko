@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/arrays/test_multidimensional_array_length.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -20,22 +19,52 @@ exit_code: 0
          argv~3 `ptr<ptr<char>>`)
       (compound-statement
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (lengthof 100 `array<array<ptr<long>; (constexpr 400)>; (constexpr 100)>` `unsigned long`)
                `int`))
          (definition xs~4 `array<array<int; (constexpr 27)>; (constexpr 42)>` ∅)
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
                (lengthof 42 (xs~4 `array<array<int; (constexpr 27)>; (constexpr 42)>`) `unsigned long`)
                `int`))
          (expression
-            (call (addressof (printf~0 `fn(∅: ptr<char const>, ...) -> int`) `ptr<fn(∅: ptr<char const>, ...) -> int>`)
+            (call
+               (addressof
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  `ptr<fn(∅: ptr<char const>, ...) -> int>`)
                (noop-type-conversion (deref (ptr-add (argv~3 `ptr<ptr<char>>`) (sign-extend (1 `int`) `unsigned long`) `ptr<ptr<char>>`) `ptr<char>`) `ptr<char const>`)
-               (lengthof 27 (deref (noop-type-conversion (addressof (xs~4 `array<array<int; (constexpr 27)>; (constexpr 42)>`) `ptr<array<array<int; (constexpr 27)>; (constexpr 42)>>`) `ptr<array<int; (constexpr 27)>>`) `array<int; (constexpr 27)>`) `unsigned long`)
+               (lengthof 27
+                  (deref
+                     (noop-type-conversion
+                        (addressof
+                           (xs~4 `array<array<int; (constexpr 27)>; (constexpr 42)>`)
+                           `ptr<array<array<int; (constexpr 27)>; (constexpr 42)>>`)
+                        `ptr<array<int; (constexpr 27)>>`)
+                     `array<int; (constexpr 27)>`)
+                  `unsigned long`)
                `int`))
          (definition ys~5 `ptr<array<array<int; (constexpr 27)>; (constexpr 42)>>` ∅)
-         (return (truncate (add (lengthof 42 (deref (ys~5 `ptr<array<array<int; (constexpr 27)>; (constexpr 42)>>`) `array<array<int; (constexpr 27)>; (constexpr 42)>`) `unsigned long`) (lengthof 27 (deref (noop-type-conversion (addressof (deref (ys~5 `ptr<array<array<int; (constexpr 27)>; (constexpr 42)>>`) `array<array<int; (constexpr 27)>; (constexpr 42)>`) `ptr<array<array<int; (constexpr 27)>; (constexpr 42)>>`) `ptr<array<int; (constexpr 27)>>`) `array<int; (constexpr 27)>`) `unsigned long`) `unsigned long`) `int`)))))
+         (return
+            (truncate
+               (add (lengthof 42 (deref (ys~5 `ptr<array<array<int; (constexpr 27)>; (constexpr 42)>>`) `array<array<int; (constexpr 27)>; (constexpr 42)>`) `unsigned long`)
+                  (lengthof 27
+                     (deref
+                        (noop-type-conversion
+                           (addressof
+                              (deref (ys~5 `ptr<array<array<int; (constexpr 27)>; (constexpr 42)>>`) `array<array<int; (constexpr 27)>; (constexpr 42)>`)
+                              `ptr<array<array<int; (constexpr 27)>; (constexpr 42)>>`)
+                           `ptr<array<int; (constexpr 27)>>`)
+                        `array<int; (constexpr 27)>`)
+                     `unsigned long`)
+                  `unsigned long`)
+               `int`)))))
 
 ----- stderr -----

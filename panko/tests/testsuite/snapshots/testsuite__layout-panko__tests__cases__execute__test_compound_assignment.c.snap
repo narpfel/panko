@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/test_compound_assignment.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -20,7 +19,8 @@ exit_code: 0
             (combine `int` @4
                (assign `ptr<int>` @8
                   (unnamed-temporary~2 `ptr<int>` @8)
-                  (addressof `ptr<int>` @8 (x~1 `int` @0)))
+                  (addressof `ptr<int>` @8
+                     (x~1 `int` @0)))
                (assign `int` @4
                   (deref `int` @4 (unnamed-temporary~2 `ptr<int>` @8))
                   (truncate `int` @16
