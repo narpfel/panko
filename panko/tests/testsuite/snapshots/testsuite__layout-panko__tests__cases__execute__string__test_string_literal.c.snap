@@ -17,20 +17,20 @@ exit_code: 0
       (compound-statement
          (expression
             (noop-type-conversion `ptr<char>` @0
-               (addressof `ptr<array<char; (constexpr 15)>>` @0
-                  (string `array<char; (constexpr 15)>` @void "ignored string\0"))))
+               (addressof `ptr<array<char; 15>>` @0
+                  (string `array<char; 15>` @void "ignored string\0"))))
          (expression
             (call `int` @0
                (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
                   (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
                (noop-type-conversion `ptr<char const>` @16
                   (noop-type-conversion `ptr<char>` @16
-                     (addressof `ptr<array<char; (constexpr 25)>>` @16
-                        (string `array<char; (constexpr 25)>` @void "some string concatenated\0"))))))
+                     (addressof `ptr<array<char; 25>>` @16
+                        (string `array<char; 25>` @void "some string concatenated\0"))))))
          (definition (char_star~2 `ptr<char>` @0)
             (noop-type-conversion `ptr<char>` @0
-               (addressof `ptr<array<char; (constexpr 10)>>` @0
-                  (string `array<char; (constexpr 10)>` @void "char star\0"))))
+               (addressof `ptr<array<char; 10>>` @0
+                  (string `array<char; 10>` @void "char star\0"))))
          (expression
             (call `int` @8
                (addressof `ptr<fn(∅: ptr<char const>) -> int>` @16
@@ -39,8 +39,8 @@ exit_code: 0
          (definition (char_const_star~3 `ptr<char const>` @8)
             (noop-type-conversion `ptr<char const>` @8
                (noop-type-conversion `ptr<char>` @8
-                  (addressof `ptr<array<char; (constexpr 16)>>` @8
-                     (string `array<char; (constexpr 16)>` @void "char const star\0")))))
+                  (addressof `ptr<array<char; 16>>` @8
+                     (string `array<char; 16>` @void "char const star\0")))))
          (expression
             (call `int` @16
                (addressof `ptr<fn(∅: ptr<char const>) -> int>` @24

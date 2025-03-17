@@ -25,8 +25,7 @@ where
 {
     fn as_sexpr(&self) -> panko_parser::sexpr_builder::SExpr {
         match self {
-            ArrayLength::Constant(length) =>
-                SExpr::new("constexpr").inline_string(length.to_string()),
+            ArrayLength::Constant(length) => SExpr::string(length.to_string()),
             ArrayLength::Variable(length) => SExpr::new("variable").inherit(length),
             ArrayLength::Unknown => SExpr::string(NO_VALUE),
         }

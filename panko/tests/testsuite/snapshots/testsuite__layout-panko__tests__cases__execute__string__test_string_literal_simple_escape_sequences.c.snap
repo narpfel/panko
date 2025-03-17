@@ -21,11 +21,11 @@ exit_code: 0
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @16
                   (noop-type-conversion `ptr<char>` @16
-                     (addressof `ptr<array<char; (constexpr 4)>>` @16
-                        (string `array<char; (constexpr 4)>` @void "%s\n\0"))))
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%s\n\0"))))
                (noop-type-conversion `ptr<char>` @24
-                  (addressof `ptr<array<char; (constexpr 12)>>` @24
-                     (string `array<char; (constexpr 12)>` @void "abc?\"'\\'def\0")))))
+                  (addressof `ptr<array<char; 12>>` @24
+                     (string `array<char; 12>` @void "abc?\"'\\'def\0")))))
          (return (truncate `int` @0 (2 `unsigned long` @8))))))
 
 ----- stderr -----

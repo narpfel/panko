@@ -28,7 +28,7 @@ exit_code: 0
                         (argv~3 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (400000 `unsigned long` @48)))
-         (definition (xs~4 `array<array<int; (constexpr 3)>; (constexpr 5)>` @16) ∅)
+         (definition (xs~4 `array<array<int; 3>; 5>` @16) ∅)
          (return (truncate `int` @76 (60 `unsigned long` @80))))))
 
 ----- stderr -----

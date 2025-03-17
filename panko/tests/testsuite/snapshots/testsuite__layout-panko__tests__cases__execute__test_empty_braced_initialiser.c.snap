@@ -29,7 +29,7 @@ exit_code: 0
                         (argv~3 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (zero~4 `int` @16)))
-         (definition (zeros~5 `array<int; (constexpr 3)>` @20) (braced ∅))
+         (definition (zeros~5 `array<int; 3>` @20) (braced ∅))
          (expression
             (call `int` @32
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
@@ -42,8 +42,8 @@ exit_code: 0
                (deref `int` @64
                   (ptr-add `ptr<int>` @72
                      (noop-type-conversion `ptr<int>` @72
-                        (addressof `ptr<array<int; (constexpr 3)>>` @72
-                           (zeros~5 `array<int; (constexpr 3)>` @20)))
+                        (addressof `ptr<array<int; 3>>` @72
+                           (zeros~5 `array<int; 3>` @20)))
                      (sign-extend `unsigned long` @80 (0 `int` @88))))))
          (expression
             (call `int` @32
@@ -57,8 +57,8 @@ exit_code: 0
                (deref `int` @64
                   (ptr-add `ptr<int>` @72
                      (noop-type-conversion `ptr<int>` @72
-                        (addressof `ptr<array<int; (constexpr 3)>>` @72
-                           (zeros~5 `array<int; (constexpr 3)>` @20)))
+                        (addressof `ptr<array<int; 3>>` @72
+                           (zeros~5 `array<int; 3>` @20)))
                      (sign-extend `unsigned long` @80 (1 `int` @88))))))
          (expression
             (call `int` @32
@@ -72,8 +72,8 @@ exit_code: 0
                (deref `int` @64
                   (ptr-add `ptr<int>` @72
                      (noop-type-conversion `ptr<int>` @72
-                        (addressof `ptr<array<int; (constexpr 3)>>` @72
-                           (zeros~5 `array<int; (constexpr 3)>` @20)))
+                        (addressof `ptr<array<int; 3>>` @72
+                           (zeros~5 `array<int; 3>` @20)))
                      (sign-extend `unsigned long` @80 (2 `int` @88))))))
          (definition (long_zero~6 `int` @32) (braced ∅))
          (expression

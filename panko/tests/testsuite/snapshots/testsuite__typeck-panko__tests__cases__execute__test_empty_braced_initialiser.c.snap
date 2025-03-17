@@ -25,7 +25,7 @@ exit_code: 0
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
                (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
                (zero~4 `int`)))
-         (definition zeros~5 `array<int; (constexpr 3)>` (braced ∅))
+         (definition zeros~5 `array<int; 3>` (braced ∅))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -34,8 +34,8 @@ exit_code: 0
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
-                        (addressof `ptr<array<int; (constexpr 3)>>`
-                           (zeros~5 `array<int; (constexpr 3)>`)))
+                        (addressof `ptr<array<int; 3>>`
+                           (zeros~5 `array<int; 3>`)))
                      (sign-extend `unsigned long` (0 `int`))))))
          (expression
             (call `int`
@@ -45,8 +45,8 @@ exit_code: 0
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
-                        (addressof `ptr<array<int; (constexpr 3)>>`
-                           (zeros~5 `array<int; (constexpr 3)>`)))
+                        (addressof `ptr<array<int; 3>>`
+                           (zeros~5 `array<int; 3>`)))
                      (sign-extend `unsigned long` (1 `int`))))))
          (expression
             (call `int`
@@ -56,8 +56,8 @@ exit_code: 0
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
-                        (addressof `ptr<array<int; (constexpr 3)>>`
-                           (zeros~5 `array<int; (constexpr 3)>`)))
+                        (addressof `ptr<array<int; 3>>`
+                           (zeros~5 `array<int; 3>`)))
                      (sign-extend `unsigned long` (2 `int`))))))
          (definition long_zero~6 `int` (braced ∅))
          (expression

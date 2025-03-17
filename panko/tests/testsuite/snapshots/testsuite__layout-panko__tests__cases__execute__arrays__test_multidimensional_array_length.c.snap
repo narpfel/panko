@@ -28,7 +28,7 @@ exit_code: 0
                         (argv~3 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (100 `unsigned long` @48)))
-         (definition (xs~4 `array<array<int; (constexpr 27)>; (constexpr 42)>` @16) ∅)
+         (definition (xs~4 `array<array<int; 27>; 42>` @16) ∅)
          (expression
             (call `int` @4552
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @4560
@@ -49,7 +49,7 @@ exit_code: 0
                         (argv~3 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @4584 (1 `int` @4592)))))
                (27 `unsigned long` @4584)))
-         (definition (ys~5 `ptr<array<array<int; (constexpr 27)>; (constexpr 42)>>` @4552) ∅)
+         (definition (ys~5 `ptr<array<array<int; 27>; 42>>` @4552) ∅)
          (return
             (truncate `int` @4560
                (add `unsigned long` @4568

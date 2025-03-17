@@ -20,7 +20,7 @@ exit_code: 0
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`
                   (puts~0 `fn(∅: ptr<char const>) -> int`))
                (noop-type-conversion `ptr<char const>`
-                  (addressof `ptr<array<char; (constexpr 6)>>`
-                     (string `array<char; (constexpr 6)>` "hello\0"))))))))
+                  (addressof `ptr<array<char; 6>>`
+                     (string `array<char; 6>` "hello\0"))))))))
 
 ----- stderr -----

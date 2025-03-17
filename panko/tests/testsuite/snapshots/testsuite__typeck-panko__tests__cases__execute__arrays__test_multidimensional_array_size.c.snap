@@ -23,8 +23,8 @@ exit_code: 0
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
                (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
-               (sizeof `unsigned long` 400000 `array<array<int; (constexpr 500)>; (constexpr 200)>`)))
-         (definition xs~4 `array<array<int; (constexpr 3)>; (constexpr 5)>` ∅)
-         (return (truncate `int` (sizeof `unsigned long` 60 (xs~4 `array<array<int; (constexpr 3)>; (constexpr 5)>`)))))))
+               (sizeof `unsigned long` 400000 `array<array<int; 500>; 200>`)))
+         (definition xs~4 `array<array<int; 3>; 5>` ∅)
+         (return (truncate `int` (sizeof `unsigned long` 60 (xs~4 `array<array<int; 3>; 5>`)))))))
 
 ----- stderr -----

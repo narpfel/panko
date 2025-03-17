@@ -27,7 +27,7 @@ Error: excess element in array initialiser
    │
  2 │ int static_array[2] = {1, 2, 3};
    │     ──────┬─────             ┬  
-   │           │                  ╰── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+   │           │                  ╰── trying to initialise element at index 2 for `array<int; 2>`
    │           │                     
    │           ╰───────────────────── while initialising this variable
 ───╯
@@ -47,7 +47,7 @@ Error: excess element in array initialiser
    │
  6 │     int xs[2] = {1, 2, 3, 4};
    │         ─┬             ┬  
-   │          │             ╰── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+   │          │             ╰── trying to initialise element at index 2 for `array<int; 2>`
    │          │                
    │          ╰──────────────── while initialising this variable
 ───╯
@@ -57,7 +57,7 @@ Error: excess element in array initialiser
    │
  6 │     int xs[2] = {1, 2, 3, 4};
    │         ─┬                ┬  
-   │          │                ╰── trying to initialise element at index 3 for `array<int; (constexpr 2)>`
+   │          │                ╰── trying to initialise element at index 3 for `array<int; 2>`
    │          │                   
    │          ╰─────────────────── while initialising this variable
 ───╯
@@ -67,7 +67,7 @@ Error: excess element in array initialiser
    │
  7 │     int ys[2][2] = {1, 2, 3, 4, 5};
    │         ─┬                      ┬  
-   │          │                      ╰── trying to initialise element at index 2 for `array<array<int; (constexpr 2)>; (constexpr 2)>`
+   │          │                      ╰── trying to initialise element at index 2 for `array<array<int; 2>; 2>`
    │          │                         
    │          ╰───────────────────────── while initialising this variable
 ───╯
@@ -77,7 +77,7 @@ Error: excess element in array initialiser
    │
  8 │     int zs[3][2] = {{1, 2, 3}, {4, 5}};
    │         ─┬                 ┬  
-   │          │                 ╰── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+   │          │                 ╰── trying to initialise element at index 2 for `array<int; 2>`
    │          │                    
    │          ╰──────────────────── while initialising this variable
 ───╯
@@ -87,7 +87,7 @@ Error: excess element in scalar initialiser
     │
  11 │     int scalar_in_array_initialiser[2] = {1, {2, 3}};
     │         ─────────────┬─────────────              ┬  
-    │                      │                           ╰── `scalar_in_array_initialiser`’s type `array<int; (constexpr 2)>` is scalar
+    │                      │                           ╰── `scalar_in_array_initialiser`’s type `array<int; 2>` is scalar
     │                      │                              
     │                      ╰────────────────────────────── while initialising this variable
 ────╯
@@ -97,7 +97,7 @@ Error: excess element in scalar initialiser
     │
  12 │     int nested_braces_in_first_initialiser[2] = {{{1, 2}}};
     │         ─────────────────┬────────────────            ┬  
-    │                          │                            ╰── `nested_braces_in_first_initialiser`’s type `array<int; (constexpr 2)>` is scalar
+    │                          │                            ╰── `nested_braces_in_first_initialiser`’s type `array<int; 2>` is scalar
     │                          │                               
     │                          ╰─────────────────────────────── while initialising this variable
 ────╯
@@ -110,5 +110,5 @@ Error: excess element in array initialiser
     │             ╰────── while initialising this variable
  15 │         {1, 2, 3},
     │                ┬  
-    │                ╰── trying to initialise element at index 2 for `array<int; (constexpr 2)>`
+    │                ╰── trying to initialise element at index 2 for `array<int; 2>`
 ────╯

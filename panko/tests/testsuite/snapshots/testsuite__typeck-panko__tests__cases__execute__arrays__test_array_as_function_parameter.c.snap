@@ -20,14 +20,14 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (definition xs~3 `array<int; (constexpr 2)>` ∅)
+         (definition xs~3 `array<int; 2>` ∅)
          (expression
             (assign `int`
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
-                        (addressof `ptr<array<int; (constexpr 2)>>`
-                           (xs~3 `array<int; (constexpr 2)>`)))
+                        (addressof `ptr<array<int; 2>>`
+                           (xs~3 `array<int; 2>`)))
                      (sign-extend `unsigned long` (0 `int`))))
                (4 `int`)))
          (expression
@@ -35,8 +35,8 @@ exit_code: 0
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
-                        (addressof `ptr<array<int; (constexpr 2)>>`
-                           (xs~3 `array<int; (constexpr 2)>`)))
+                        (addressof `ptr<array<int; 2>>`
+                           (xs~3 `array<int; 2>`)))
                      (sign-extend `unsigned long` (1 `int`))))
                (6 `int`)))
          (return
@@ -44,7 +44,7 @@ exit_code: 0
                (addressof `ptr<fn(xs: ptr<int>) -> int>`
                   (f~0 `fn(xs: ptr<int>) -> int`))
                (noop-type-conversion `ptr<int>`
-                  (addressof `ptr<array<int; (constexpr 2)>>`
-                     (xs~3 `array<int; (constexpr 2)>`))))))))
+                  (addressof `ptr<array<int; 2>>`
+                     (xs~3 `array<int; 2>`))))))))
 
 ----- stderr -----

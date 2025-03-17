@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition xs~1 `array<long; (constexpr 42)>` ∅)
-         (return (truncate `int` (lengthof `unsigned long` 42 (xs~1 `array<long; (constexpr 42)>`)))))))
+         (definition xs~1 `array<long; 42>` ∅)
+         (return (truncate `int` (lengthof `unsigned long` 42 (xs~1 `array<long; 42>`)))))))
 
 ----- stderr -----

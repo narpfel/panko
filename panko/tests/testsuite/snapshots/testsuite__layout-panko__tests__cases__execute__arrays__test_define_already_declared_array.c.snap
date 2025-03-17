@@ -47,6 +47,6 @@ exit_code: 0
                         (addressof `ptr<array<int; ∅>>` @24
                            (xs~0 `array<int; ∅>` (static xs))))
                      (sign-extend `unsigned long` @32 (12345 `int` @40))))))))
-   (tentative-definition (xs~0 `array<int; (constexpr 12346)>` (static xs)) ∅))
+   (tentative-definition (xs~0 `array<int; 12346>` (static xs)) ∅))
 
 ----- stderr -----

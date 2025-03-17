@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/execute/arrays/test_empty_initialisation_of_array_that_fits_in_register.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -15,20 +14,20 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition a1~1 `array<char; (constexpr 1)>` (braced ∅))
-         (definition a2~2 `array<char; (constexpr 2)>` (braced ∅))
-         (definition a3~3 `array<char; (constexpr 3)>` (braced ∅))
-         (definition a4~4 `array<char; (constexpr 4)>` (braced ∅))
-         (definition a5~5 `array<char; (constexpr 5)>` (braced ∅))
-         (definition a6~6 `array<char; (constexpr 6)>` (braced ∅))
-         (definition a7~7 `array<char; (constexpr 7)>` (braced ∅))
-         (definition a8~8 `array<char; (constexpr 8)>` (braced ∅))
-         (definition b1~9 `array<short; (constexpr 1)>` (braced ∅))
-         (definition b2~10 `array<short; (constexpr 2)>` (braced ∅))
-         (definition b3~11 `array<short; (constexpr 3)>` (braced ∅))
-         (definition b4~12 `array<short; (constexpr 4)>` (braced ∅))
-         (definition c1~13 `array<int; (constexpr 1)>` (braced ∅))
-         (definition c2~14 `array<int; (constexpr 2)>` (braced ∅))
-         (definition d1~15 `array<long; (constexpr 1)>` (braced ∅)))))
+         (definition a1~1 `array<char; 1>` (braced ∅))
+         (definition a2~2 `array<char; 2>` (braced ∅))
+         (definition a3~3 `array<char; 3>` (braced ∅))
+         (definition a4~4 `array<char; 4>` (braced ∅))
+         (definition a5~5 `array<char; 5>` (braced ∅))
+         (definition a6~6 `array<char; 6>` (braced ∅))
+         (definition a7~7 `array<char; 7>` (braced ∅))
+         (definition a8~8 `array<char; 8>` (braced ∅))
+         (definition b1~9 `array<short; 1>` (braced ∅))
+         (definition b2~10 `array<short; 2>` (braced ∅))
+         (definition b3~11 `array<short; 3>` (braced ∅))
+         (definition b4~12 `array<short; 4>` (braced ∅))
+         (definition c1~13 `array<int; 1>` (braced ∅))
+         (definition c2~14 `array<int; 2>` (braced ∅))
+         (definition d1~15 `array<long; 1>` (braced ∅)))))
 
 ----- stderr -----
