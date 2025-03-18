@@ -40,6 +40,16 @@ impl<'a> SubobjectIterator<'a> {
         result
     }
 
+    fn parent(&self) -> Option<Subobject<'a>> {
+        match self {
+            Self::Scalar { .. } => None,
+            Self::Array { ty, index: _, offset } => Some(Subobject {
+                ty: Type::Array(*ty).unqualified(),
+                offset: *offset,
+            }),
+        }
+    }
+
     pub(crate) fn current(&self) -> Option<Subobject<'a>> {
         if self.is_empty() {
             None
@@ -113,6 +123,14 @@ impl<'a> Subobjects<'a> {
             stack: vec![],
             current: subobject_iterator,
         }
+    }
+
+    pub(crate) fn parent(&self) -> Result<Subobject<'a>, SubobjectIterator<'a>> {
+        self.current.parent().ok_or_else(|| self.current.clone())
+    }
+
+    pub(crate) fn current(&self) -> Result<Subobject<'a>, SubobjectIterator<'a>> {
+        self.current.current().ok_or_else(|| self.current.clone())
     }
 
     pub(crate) fn goto_index(&mut self, target_index: u64) -> Result<(), SubobjectIterator<'a>> {

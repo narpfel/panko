@@ -227,6 +227,10 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
             Type::Arithmetic(_) | Type::Pointer(_), // TODO: | Type::Nullptr
         )
     }
+
+    pub fn is_array(&self) -> bool {
+        matches!(self, Type::Array(_))
+    }
 }
 
 impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {

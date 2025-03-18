@@ -217,6 +217,10 @@ fn slot_as_operand<'a>(
 
 pub(super) trait AsOperand {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand;
+
+    fn size(&self) -> u64 {
+        self.as_operand(None).ty.size()
+    }
 }
 
 impl AsOperand for Operand<'_> {
@@ -235,11 +239,19 @@ impl AsOperand for LayoutedExpression<'_> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
         slot_as_operand(self.slot, self.ty.ty, argument_area_size.unwrap(), false)
     }
+
+    fn size(&self) -> u64 {
+        self.ty.ty.size()
+    }
 }
 
 impl AsOperand for Reference<'_> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
         slot_as_operand(self.slot(), self.ty.ty, argument_area_size.unwrap(), false)
+    }
+
+    fn size(&self) -> u64 {
+        self.ty.ty.size()
     }
 }
 
@@ -252,6 +264,10 @@ impl AsOperand for ByValue<&Reference<'_>> {
             true,
         )
     }
+
+    fn size(&self) -> u64 {
+        self.0.ty.ty.size()
+    }
 }
 
 impl AsOperand for SubobjectAtReference<'_> {
@@ -262,6 +278,10 @@ impl AsOperand for SubobjectAtReference<'_> {
             argument_area_size.unwrap(),
             false,
         )
+    }
+
+    fn size(&self) -> u64 {
+        self.subobject.ty().ty.size()
     }
 }
 

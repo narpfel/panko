@@ -502,6 +502,12 @@ impl<'a> Codegen<'a> {
         match stmt {
             Statement::Declaration(Declaration { reference, initialiser }) =>
                 match initialiser.as_ref() {
+                    Some(Initialiser::Expression(LayoutedExpression {
+                        expr: Expression::String(string),
+                        ..
+                    })) if reference.ty.ty.is_array() => {
+                        self.initialise_with_string(reference, string);
+                    }
                     Some(Initialiser::Expression(initialiser)) => {
                         self.expr(initialiser);
                         if reference.slot() != initialiser.slot {
@@ -522,14 +528,20 @@ impl<'a> Codegen<'a> {
                         }
                         subobject_initialisers.iter().for_each(
                             |SubobjectInitialiser { subobject, initialiser }| {
-                                self.expr(initialiser);
-
-                                let tgt = SubobjectAtReference {
+                                let target = SubobjectAtReference {
                                     reference: *reference,
                                     subobject: *subobject,
                                 };
-                                if tgt.slot() != initialiser.slot {
-                                    self.copy(&tgt, initialiser);
+
+                                if let Expression::String(string) = initialiser.expr {
+                                    self.initialise_with_string(&target, string);
+                                }
+                                else {
+                                    self.expr(initialiser);
+
+                                    if target.slot() != initialiser.slot {
+                                        self.copy(&target, initialiser);
+                                    }
                                 }
                             },
                         );
@@ -552,6 +564,22 @@ impl<'a> Codegen<'a> {
                 self.emit("ret");
             }
         }
+    }
+
+    fn initialise_with_string(&mut self, target: &dyn AsOperand, string: &'a str) {
+        let target_size = target.size();
+        let string_len = u64::try_from(string.len()).unwrap();
+        let id = self.string(Cow::Borrowed(string));
+        if string_len < target_size {
+            self.emit("xor eax, eax");
+            self.emit_args("lea", &[&Rdi, target]);
+            self.emit_args("movabs", &[&Rcx, &target_size]);
+            self.emit("rep stosb");
+        }
+        self.emit_args("lea", &[&Rsi, &id]);
+        self.emit_args("lea", &[&Rdi, target]);
+        self.emit_args("movabs", &[&Rcx, &target_size.min(string_len)]);
+        self.emit("rep movsb");
     }
 
     fn expr(&mut self, expr: &LayoutedExpression<'a>) {

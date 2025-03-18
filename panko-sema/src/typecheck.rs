@@ -517,6 +517,15 @@ pub(crate) enum Initialiser<'a> {
 impl Initialiser<'_> {
     fn array_length(&self, element_ty: &Type) -> Option<u64> {
         match self {
+            Self::Braced {
+                subobject_initialisers:
+                    [
+                        SubobjectInitialiser {
+                            subobject: _,
+                            initialiser: TypedExpression { ty: _, expr: Expression::String(value) },
+                        },
+                    ],
+            } => Some(value.len()),
             Self::Braced { subobject_initialisers } => Some(
                 subobject_initialisers
                     .iter()
@@ -528,6 +537,8 @@ impl Initialiser<'_> {
                         (max_offset / element_size).checked_add(1).unwrap()
                     }),
             ),
+            Self::Expression(TypedExpression { ty: _, expr: Expression::String(value) }) =>
+                Some(value.len()),
             Self::Expression(_) => None,
         }
     }
@@ -944,7 +955,11 @@ fn typeck_ty_with_initialiser<'a>(
                 && let ArrayLength::Unknown = length
                 && let reference = typeck_reference(sess, *reference, NeedsInitialiser::No)
                 && let initialiser = typeck_initialiser(sess, initialiser, &reference)
-                && let Initialiser::Braced { subobject_initialisers: _ } = initialiser
+                && let Initialiser::Braced { subobject_initialisers: _ }
+                | Initialiser::Expression(TypedExpression {
+                    ty: _,
+                    expr: Expression::String(_),
+                }) = initialiser
             {
                 ArrayLength::Constant(initialiser.array_length(&ty.ty).unwrap())
             }
@@ -1188,6 +1203,28 @@ fn typeck_initialiser_list<'a>(
     initialiser_list: &[DesignatedInitialiser<'a>],
     emit_nested_excess_initialiser_errors: bool,
 ) {
+    if let [
+        DesignatedInitialiser {
+            designation: None,
+            initialiser: scope::Initialiser::Expression(initialiser @ scope::Expression::String(_)),
+        },
+    ] = initialiser_list
+        && let Ok(subobject) = subobjects.parent()
+    {
+        subobject_initialisers.insert(
+            subobject.offset,
+            SubobjectInitialiser {
+                subobject,
+                initialiser: typeck_expression(
+                    sess,
+                    initialiser,
+                    Context::ArrayInitialisationByString,
+                ),
+            },
+        );
+        return;
+    }
+
     for DesignatedInitialiser { designation, initialiser } in initialiser_list {
         match designation {
             Some(Designation([])) => unreachable!(),
@@ -1261,6 +1298,25 @@ fn typeck_initialiser_list<'a>(
                 let left = subobjects.try_leave_subobject(AllowExplicit::Yes);
                 assert!(left);
             }
+            scope::Initialiser::Expression(expr @ scope::Expression::String(_))
+                if let Ok(subobject) = subobjects.current()
+                    && subobject.ty.ty.is_array() =>
+            {
+                let _ = subobjects.next_scalar();
+                let left = subobjects.try_leave_subobject(AllowExplicit::No);
+                assert!(left);
+                subobject_initialisers.insert(
+                    subobject.offset,
+                    SubobjectInitialiser {
+                        subobject,
+                        initialiser: typeck_expression(
+                            sess,
+                            expr,
+                            Context::ArrayInitialisationByString,
+                        ),
+                    },
+                );
+            }
             scope::Initialiser::Expression(expr) => match subobjects.next_scalar() {
                 Ok(subobject) => {
                     subobject_initialisers.insert(
@@ -1319,12 +1375,18 @@ fn typeck_initialiser<'a>(
                     .alloc_slice_fill_iter(subobject_initialisers.values().copied()),
             }
         }
-        scope::Initialiser::Expression(initialiser) =>
-            Initialiser::Expression(convert_as_if_by_assignment(
-                sess,
-                reference.ty,
-                typeck_expression(sess, initialiser, Context::Default),
-            )),
+        scope::Initialiser::Expression(initialiser) => {
+            let initialiser = match initialiser {
+                scope::Expression::String(_) if reference.ty.ty.is_array() =>
+                    typeck_expression(sess, initialiser, Context::ArrayInitialisationByString),
+                _ => convert_as_if_by_assignment(
+                    sess,
+                    reference.ty,
+                    typeck_expression(sess, initialiser, Context::Default),
+                ),
+            };
+            Initialiser::Expression(initialiser)
+        }
     }
 }
 
@@ -1345,8 +1407,13 @@ fn typeck_declaration<'a>(
                     }),
                 ..
             } = reference.ty
-                && let Some(initialiser @ Initialiser::Braced { subobject_initialisers: _ }) =
-                    initialiser
+                && let Some(
+                    initialiser @ (Initialiser::Braced { subobject_initialisers: _ }
+                    | Initialiser::Expression(TypedExpression {
+                        ty: _,
+                        expr: Expression::String(_),
+                    })),
+                ) = initialiser
             {
                 Reference {
                     ty: QualifiedType {
@@ -1964,6 +2031,7 @@ enum Context {
     Addressof,
     Sizeof,
     Typeof,
+    ArrayInitialisationByString,
 }
 
 fn typeck_expression<'a>(
@@ -2593,7 +2661,8 @@ fn typeck_expression<'a>(
     };
 
     match context {
-        Context::Default => match expr.ty.ty {
+        Context::ArrayInitialisationByString if let Expression::String(_) = expr.expr => expr,
+        Context::Default | Context::ArrayInitialisationByString => match expr.ty.ty {
             ty @ Type::Function(_) => TypedExpression {
                 ty: Type::Pointer(sess.alloc(ty.unqualified())).unqualified(),
                 expr: Expression::Addressof {
