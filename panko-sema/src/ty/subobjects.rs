@@ -125,12 +125,12 @@ impl<'a> Subobjects<'a> {
         }
     }
 
-    pub(crate) fn parent(&self) -> Result<Subobject<'a>, SubobjectIterator<'a>> {
-        self.current.parent().ok_or_else(|| self.current.clone())
+    pub(crate) fn parent(&self) -> Option<Subobject<'a>> {
+        self.current.parent()
     }
 
-    pub(crate) fn current(&self) -> Result<Subobject<'a>, SubobjectIterator<'a>> {
-        self.current.current().ok_or_else(|| self.current.clone())
+    pub(crate) fn current(&self) -> Option<Subobject<'a>> {
+        self.current.current()
     }
 
     pub(crate) fn goto_index(&mut self, target_index: u64) -> Result<(), SubobjectIterator<'a>> {

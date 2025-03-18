@@ -1209,7 +1209,7 @@ fn typeck_initialiser_list<'a>(
             initialiser: scope::Initialiser::Expression(initialiser @ scope::Expression::String(_)),
         },
     ] = initialiser_list
-        && let Ok(subobject) = subobjects.parent()
+        && let Some(subobject) = subobjects.parent()
     {
         subobject_initialisers.insert(
             subobject.offset,
@@ -1299,7 +1299,7 @@ fn typeck_initialiser_list<'a>(
                 assert!(left);
             }
             scope::Initialiser::Expression(expr @ scope::Expression::String(_))
-                if let Ok(subobject) = subobjects.current()
+                if let Some(subobject) = subobjects.current()
                     && subobject.ty.ty.is_array() =>
             {
                 let _ = subobjects.next_scalar();
