@@ -1,4 +1,5 @@
 #![feature(impl_trait_in_assoc_type)]
+#![feature(let_chains)]
 #![feature(try_blocks)]
 
 use std::borrow::Cow;
@@ -181,6 +182,12 @@ enum StaticInitialiser<'a> {
         subobject_initialisers: Vec<SubobjectInitialiser<'a, &'a Expression<'a>>>,
     },
     Expression(&'a Expression<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+enum ShouldZero {
+    No,
+    Yes,
 }
 
 #[derive(Debug, Default)]
@@ -506,7 +513,7 @@ impl<'a> Codegen<'a> {
                         expr: Expression::String(string),
                         ..
                     })) if reference.ty.ty.is_array() => {
-                        self.initialise_with_string(reference, string);
+                        self.initialise_with_string(reference, ShouldZero::Yes, string);
                     }
                     Some(Initialiser::Expression(initialiser)) => {
                         self.expr(initialiser);
@@ -534,7 +541,7 @@ impl<'a> Codegen<'a> {
                                 };
 
                                 if let Expression::String(string) = initialiser.expr {
-                                    self.initialise_with_string(&target, string);
+                                    self.initialise_with_string(&target, ShouldZero::No, string);
                                 }
                                 else {
                                     self.expr(initialiser);
@@ -566,11 +573,18 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    fn initialise_with_string(&mut self, target: &dyn AsOperand, string: &'a str) {
+    fn initialise_with_string(
+        &mut self,
+        target: &dyn AsOperand,
+        should_zero: ShouldZero,
+        string: &'a str,
+    ) {
         let target_size = target.size();
         let string_len = u64::try_from(string.len()).unwrap();
         let id = self.string(Cow::Borrowed(string));
-        if string_len < target_size {
+        if let ShouldZero::Yes = should_zero
+            && string_len < target_size
+        {
             self.emit("xor eax, eax");
             self.emit_args("lea", &[&Rdi, target]);
             self.emit_args("movabs", &[&Rcx, &target_size]);
