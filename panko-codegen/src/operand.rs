@@ -71,6 +71,8 @@ enum OperandKind<'a> {
     Register(Register),
     Pointer {
         address: Memory<'a>,
+        // TODO: this feels weird, find a better representation. Implementing `AsOperand` for
+        // `ByValue<&dyn AsOperand>` makes it even more iffy.
         is_dereferenced: bool,
     },
     Immediate(u64),
@@ -267,6 +269,24 @@ impl AsOperand for ByValue<&Reference<'_>> {
 
     fn size(&self) -> u64 {
         self.0.ty.ty.size()
+    }
+}
+
+impl AsOperand for ByValue<&dyn AsOperand> {
+    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
+        let Operand { kind, ty } = self.0.as_operand(argument_area_size);
+
+        let kind = match kind {
+            OperandKind::Pointer { address, is_dereferenced: _ } =>
+                OperandKind::Pointer { address, is_dereferenced: true },
+            kind => kind,
+        };
+
+        Operand { kind, ty }
+    }
+
+    fn size(&self) -> u64 {
+        self.0.size()
     }
 }
 

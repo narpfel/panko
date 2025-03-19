@@ -522,17 +522,8 @@ impl<'a> Codegen<'a> {
                         }
                     }
                     Some(Initialiser::Braced { subobject_initialisers }) => {
-                        self.emit("xor eax, eax");
-                        match reference.ty.ty.size() {
-                            size @ (1 | 2 | 4 | 8) => {
-                                self.emit_args("mov", &[&ByValue(reference), &Rax.with_size(size)]);
-                            }
-                            size => {
-                                self.emit_args("lea", &[&Rdi, reference]);
-                                self.emit_args("movabs", &[&Rcx, &size]);
-                                self.emit("rep stosb");
-                            }
-                        }
+                        self.memset_zero(reference);
+
                         subobject_initialisers.iter().for_each(
                             |SubobjectInitialiser { subobject, initialiser }| {
                                 let target = SubobjectAtReference {
@@ -573,6 +564,20 @@ impl<'a> Codegen<'a> {
         }
     }
 
+    fn memset_zero(&mut self, target: &dyn AsOperand) {
+        self.emit("xor eax, eax");
+        match target.size() {
+            size @ (1 | 2 | 4 | 8) => {
+                self.emit_args("mov", &[&ByValue(target), &Rax.with_size(size)]);
+            }
+            size => {
+                self.emit_args("lea", &[&Rdi, target]);
+                self.emit_args("movabs", &[&Rcx, &size]);
+                self.emit("rep stosb");
+            }
+        }
+    }
+
     fn initialise_with_string(
         &mut self,
         target: &dyn AsOperand,
@@ -585,10 +590,7 @@ impl<'a> Codegen<'a> {
         if let ShouldZero::Yes = should_zero
             && string_len < target_size
         {
-            self.emit("xor eax, eax");
-            self.emit_args("lea", &[&Rdi, target]);
-            self.emit_args("movabs", &[&Rcx, &target_size]);
-            self.emit("rep stosb");
+            self.memset_zero(target);
         }
         self.emit_args("lea", &[&Rsi, &id]);
         self.emit_args("lea", &[&Rdi, target]);
