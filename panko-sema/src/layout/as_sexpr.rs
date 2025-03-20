@@ -168,7 +168,9 @@ impl AsSExpr for Expression<'_> {
 
 impl AsSExpr for Reference<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::new(format!("{} `{}`", self.unique_name(), self.ty)).inherit(&self.slot)
+        SExpr::new(self.unique_name())
+            .inherit(&self.ty)
+            .inherit(&self.slot)
     }
 }
 
