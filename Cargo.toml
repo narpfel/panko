@@ -30,6 +30,7 @@ quote = "1.0.39"
 regex = "1.11.1"
 syn = { version = "2.0.99", features = ["fold", "visit"] }
 variant-types = { git = "https://github.com/narpfel/crabbing-interpreters" }
+yansi = { version = "1.0.1", features = ["detect-tty"] }
 
 insta-cmd = "0.6.0"
 pretty_assertions = { version = "1.4.1", features = ["unstable"] }

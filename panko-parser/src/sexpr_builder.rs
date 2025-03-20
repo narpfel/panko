@@ -5,6 +5,7 @@ use std::iter::repeat;
 
 use itertools::Either;
 use panko_lex::Token;
+use yansi::Paint as _;
 
 use crate::NO_VALUE;
 use crate::SEXPR_INDENT;
@@ -132,14 +133,21 @@ impl<'a> SExpr<'a> {
     }
 
     fn fmt(&self, f: &mut fmt::Formatter, indent: usize) -> fmt::Result {
-        let (open_paren, close_paren) = if self.params.is_empty() && !self.parenthesise_if_empty {
+        let should_parenthesise = self.params.is_empty() && !self.parenthesise_if_empty;
+        let (open_paren, close_paren) = if should_parenthesise {
             ("", "")
         }
         else {
             ("(", ")")
         };
 
-        write!(f, "{EMPTY:indent$}{open_paren}{}", self.name)?;
+        write!(
+            f,
+            "{EMPTY:indent$}{open_paren}{}",
+            self.name
+                .bold()
+                .whenever(yansi::Condition::cached(!should_parenthesise)),
+        )?;
         let mut has_line_break = false;
         let first_was_preceded = !self.name.is_empty();
         for (param, was_preceded) in self

@@ -1,5 +1,6 @@
 #![feature(exit_status_error)]
 
+use std::env;
 use std::fs::File;
 use std::io::Write as _;
 use std::path::PathBuf;
@@ -11,6 +12,7 @@ use clap::ValueEnum;
 use color_eyre::Result;
 use color_eyre::eyre::Context;
 use panko_parser::sexpr_builder::AsSExpr as _;
+use yansi::Condition;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 enum Step {
@@ -42,6 +44,17 @@ struct Args {
 
 fn main() -> Result<()> {
     color_eyre::install()?;
+
+    let enable_colours = if env::var_os("NO_COLOR").is_some() {
+        false
+    }
+    else if env::var_os("CLICOLOR_FORCE").is_some() {
+        true
+    }
+    else {
+        Condition::stdouterr_are_tty()
+    };
+    yansi::whenever(Condition::cached(enable_colours));
 
     let args = Args::parse();
     let bump = &Bump::new();

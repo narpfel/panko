@@ -13,6 +13,7 @@ itertools = { workspace = true }
 lalrpop-util = { workspace = true }
 panko-lex = { path = "../panko-lex" }
 panko-report = { path = "../panko-report" }
+yansi = { workspace = true }
 
 [build-dependencies]
 lalrpop = { workspace = true }

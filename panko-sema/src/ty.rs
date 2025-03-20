@@ -14,6 +14,7 @@ use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Signedness;
 use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
+use yansi::Paint as _;
 
 use crate::typecheck::ArrayLength;
 
@@ -431,6 +432,6 @@ where
     LengthExpr: AsSExpr,
 {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::display(self)
+        SExpr::display(&self.italic())
     }
 }
