@@ -17,6 +17,9 @@ exit_code: 0
       (compound-statement
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (addressof (string "hello")))))))
+               (addressof (string "hello"))))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (addressof (deref (string "world"))))))))
 
 ----- stderr -----

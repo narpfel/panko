@@ -21,6 +21,16 @@ exit_code: 0
                   (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
                (noop-type-conversion `ptr<char const>` @16
                   (addressof `ptr<array<char; 6>>` @16
-                     (string `array<char; 6>` @void "hello\0"))))))))
+                     (string `array<char; 6>` @void "hello\0")))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (addressof `ptr<char>` @16
+                     (deref `char` @16
+                        (noop-type-conversion `ptr<char>` @24
+                           (addressof `ptr<array<char; 6>>` @24
+                              (string `array<char; 6>` @void "world\0")))))))))))
 
 ----- stderr -----
