@@ -955,13 +955,9 @@ fn typeck_ty_with_initialiser<'a>(
                 && let ArrayLength::Unknown = length
                 && let reference = typeck_reference(sess, *reference, NeedsInitialiser::No)
                 && let initialiser = typeck_initialiser(sess, initialiser, &reference)
-                && let Initialiser::Braced { subobject_initialisers: _ }
-                | Initialiser::Expression(TypedExpression {
-                    ty: _,
-                    expr: Expression::String(_),
-                }) = initialiser
+                && let Some(length) = initialiser.array_length(&ty.ty)
             {
-                ArrayLength::Constant(initialiser.array_length(&ty.ty).unwrap())
+                ArrayLength::Constant(length)
             }
             else {
                 length
@@ -1407,21 +1403,14 @@ fn typeck_declaration<'a>(
                     }),
                 ..
             } = reference.ty
-                && let Some(
-                    initialiser @ (Initialiser::Braced { subobject_initialisers: _ }
-                    | Initialiser::Expression(TypedExpression {
-                        ty: _,
-                        expr: Expression::String(_),
-                    })),
-                ) = initialiser
+                && let Some(initialiser) = initialiser
+                && let Some(length) = initialiser.array_length(&element_ty.ty)
             {
                 Reference {
                     ty: QualifiedType {
                         ty: Type::Array(ArrayType {
                             ty: element_ty,
-                            length: ArrayLength::Constant(
-                                initialiser.array_length(&element_ty.ty).unwrap(),
-                            ),
+                            length: ArrayLength::Constant(length),
                         }),
                         ..ty
                     },
