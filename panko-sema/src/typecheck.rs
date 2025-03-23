@@ -533,7 +533,6 @@ impl Initialiser<'_> {
                     .max()
                     .map_or(0, |max_offset| {
                         let element_size = element_ty.size();
-                        assert!(max_offset.is_multiple_of(element_size));
                         (max_offset / element_size).checked_add(1).unwrap()
                     }),
             ),
