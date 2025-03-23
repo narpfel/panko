@@ -1395,33 +1395,9 @@ fn typeck_declaration<'a>(
     let initialiser = try { typeck_initialiser(sess, initialiser?, &reference) };
     let reference =
         if matches!(reference.kind, RefKind::Definition) && !reference.ty.ty.is_complete() {
-            if let ty @ QualifiedType {
-                ty:
-                    Type::Array(ArrayType {
-                        ty: element_ty,
-                        length: ArrayLength::Unknown,
-                    }),
-                ..
-            } = reference.ty
-                && let Some(initialiser) = initialiser
-                && let Some(length) = initialiser.array_length(&element_ty.ty)
-            {
-                Reference {
-                    ty: QualifiedType {
-                        ty: Type::Array(ArrayType {
-                            ty: element_ty,
-                            length: ArrayLength::Constant(length),
-                        }),
-                        ..ty
-                    },
-                    ..reference
-                }
-            }
-            else {
-                // TODO: use this error
-                let () = sess.emit(Diagnostic::VariableWithIncompleteType { at: reference });
-                reference
-            }
+            // TODO: use this error
+            let () = sess.emit(Diagnostic::VariableWithIncompleteType { at: reference });
+            reference
         }
         else {
             reference
