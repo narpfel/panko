@@ -129,10 +129,6 @@ impl<'a> Subobjects<'a> {
         self.current.parent()
     }
 
-    pub(crate) fn current(&self) -> Option<Subobject<'a>> {
-        self.current.current()
-    }
-
     pub(crate) fn goto_index(&mut self, target_index: u64) -> Result<(), SubobjectIterator<'a>> {
         match &mut self.current {
             SubobjectIterator::Scalar { .. } => Err(self.current.clone()),

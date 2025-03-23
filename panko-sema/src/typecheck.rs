@@ -1191,6 +1191,22 @@ fn typeck_function_definition<'a>(
     }
 }
 
+fn typeck_array_initialisation_with_string<'a>(
+    sess: &'a Session<'a>,
+    element_ty: &Type<'a>,
+    initialiser: &scope::Expression<'a>,
+) -> TypedExpression<'a> {
+    // TODO: adjust this check for prefixed string literals
+    if let Type::Arithmetic(Arithmetic::Integral(integral)) = element_ty
+        && let IntegralKind::Char | IntegralKind::PlainChar = integral.kind
+    {
+        typeck_expression(sess, initialiser, Context::ArrayInitialisationByString)
+    }
+    else {
+        todo!("type error: string literals can only initialise arrays of character type")
+    }
+}
+
 fn typeck_initialiser_list<'a>(
     sess: &'a Session<'a>,
     reference: &Reference<'a>,
@@ -1205,16 +1221,18 @@ fn typeck_initialiser_list<'a>(
             initialiser: scope::Initialiser::Expression(initialiser @ scope::Expression::String(_)),
         },
     ] = initialiser_list
+        && let Ok(_) = subobjects.next_scalar()
         && let Some(subobject) = subobjects.parent()
+        && let Type::Array(array_ty) = subobject.ty.ty
     {
         subobject_initialisers.insert(
             subobject.offset,
             SubobjectInitialiser {
                 subobject,
-                initialiser: typeck_expression(
+                initialiser: typeck_array_initialisation_with_string(
                     sess,
+                    &array_ty.ty.ty,
                     initialiser,
-                    Context::ArrayInitialisationByString,
                 ),
             },
         );
@@ -1295,20 +1313,20 @@ fn typeck_initialiser_list<'a>(
                 assert!(left);
             }
             scope::Initialiser::Expression(expr @ scope::Expression::String(_))
-                if let Some(subobject) = subobjects.current()
-                    && subobject.ty.ty.is_array() =>
+                if let Ok(_) = subobjects.next_scalar()
+                    && let Some(subobject) = subobjects.parent()
+                    && let Type::Array(array_ty) = subobject.ty.ty =>
             {
-                let _ = subobjects.next_scalar();
                 let left = subobjects.try_leave_subobject(AllowExplicit::No);
                 assert!(left);
                 subobject_initialisers.insert(
                     subobject.offset,
                     SubobjectInitialiser {
                         subobject,
-                        initialiser: typeck_expression(
+                        initialiser: typeck_array_initialisation_with_string(
                             sess,
+                            &array_ty.ty.ty,
                             expr,
-                            Context::ArrayInitialisationByString,
                         ),
                     },
                 );
@@ -1373,8 +1391,8 @@ fn typeck_initialiser<'a>(
         }
         scope::Initialiser::Expression(initialiser) => {
             let initialiser = match initialiser {
-                scope::Expression::String(_) if reference.ty.ty.is_array() =>
-                    typeck_expression(sess, initialiser, Context::ArrayInitialisationByString),
+                scope::Expression::String(_) if let Type::Array(array_ty) = reference.ty.ty =>
+                    typeck_array_initialisation_with_string(sess, &array_ty.ty.ty, initialiser),
                 _ => convert_as_if_by_assignment(
                     sess,
                     reference.ty,
