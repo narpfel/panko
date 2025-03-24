@@ -528,29 +528,23 @@ impl<'a> Error<'a> {
     }
 }
 
-mod wrap_defining_use_for_token_iter {
-    use super::*;
+pub type TokenIter<'a> = impl Iterator<Item = Result<Token<'a>, Error<'a>>>;
 
-    pub type TokenIter<'a> = impl Iterator<Item = Result<Token<'a>, Error<'a>>>;
-
-    pub fn lex<'a>(bump: &'a Bump, filename: &'a Path, src: &str) -> TokenIter<'a> {
-        let src = bump.alloc_str(src);
-        let source_file = &*bump.alloc(SourceFile { file: filename, src });
-        TokenKind::lexer(src).spanned().map(|(kind, span)| {
-            let loc = Loc {
-                span: Span { start: span.start, end: span.end },
-                source_file,
-            };
-            Ok(Token {
-                kind: kind.map_err(|()| Error { at: loc })?,
-                loc,
-            })
+#[define_opaque(TokenIter)]
+pub fn lex<'a>(bump: &'a Bump, filename: &'a Path, src: &str) -> TokenIter<'a> {
+    let src = bump.alloc_str(src);
+    let source_file = &*bump.alloc(SourceFile { file: filename, src });
+    TokenKind::lexer(src).spanned().map(|(kind, span)| {
+        let loc = Loc {
+            span: Span { start: span.start, end: span.end },
+            source_file,
+        };
+        Ok(Token {
+            kind: kind.map_err(|()| Error { at: loc })?,
+            loc,
         })
-    }
+    })
 }
-
-pub use wrap_defining_use_for_token_iter::TokenIter;
-pub use wrap_defining_use_for_token_iter::lex;
 
 #[cfg(test)]
 mod test {

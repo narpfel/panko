@@ -1478,8 +1478,9 @@ fn typeck_statement<'a>(
     }
 }
 
-type Comparator = impl Fn(&Arithmetic) -> (impl Ord + use<>);
-const SIZE_WITH_UNSIGNED_AS_TIE_BREAKER: Comparator = |ty| (ty.conversion_rank(), ty.signedness());
+fn compare_by_size_with_unsigned_as_tie_breaker(ty: &Arithmetic) -> impl Ord + use<> {
+    (ty.conversion_rank(), ty.signedness())
+}
 
 fn integral_promote(ty: Arithmetic) -> Arithmetic {
     match ty {
@@ -1509,7 +1510,7 @@ fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) 
     }
     else {
         let [smaller_ty, larger_ty] =
-            std::cmp::minmax_by_key(lhs_ty, rhs_ty, SIZE_WITH_UNSIGNED_AS_TIE_BREAKER);
+            std::cmp::minmax_by_key(lhs_ty, rhs_ty, compare_by_size_with_unsigned_as_tie_breaker);
 
         if matches!(larger_ty.signedness(), Signedness::Unsigned) {
             larger_ty

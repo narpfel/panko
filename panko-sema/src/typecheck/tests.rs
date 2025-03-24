@@ -13,11 +13,11 @@ fn test_conversion_rank_comparison() {
     });
     assert_eq!(
         [lhs_ty, rhs_ty],
-        std::cmp::minmax_by_key(lhs_ty, rhs_ty, SIZE_WITH_UNSIGNED_AS_TIE_BREAKER),
+        std::cmp::minmax_by_key(lhs_ty, rhs_ty, compare_by_size_with_unsigned_as_tie_breaker),
     );
     assert_eq!(
         [lhs_ty, rhs_ty],
-        std::cmp::minmax_by_key(rhs_ty, lhs_ty, SIZE_WITH_UNSIGNED_AS_TIE_BREAKER),
+        std::cmp::minmax_by_key(rhs_ty, lhs_ty, compare_by_size_with_unsigned_as_tie_breaker),
     );
 }
 
