@@ -12,6 +12,9 @@ members = [
     "panko-sema",
 ]
 
+[workspace.lints.rust]
+unqualified_local_imports = "warn"
+
 [workspace.lints.clippy]
 # TODO: remove this and `expect` the warning for each enum separately
 large_enum_variant = "allow"

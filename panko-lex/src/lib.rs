@@ -1,5 +1,6 @@
 #![feature(closure_lifetime_binder)]
 #![feature(type_alias_impl_trait)]
+#![feature(unqualified_local_imports)]
 
 use std::ops::Range;
 use std::path::Path;

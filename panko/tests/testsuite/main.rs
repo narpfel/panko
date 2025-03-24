@@ -1,4 +1,5 @@
 #![feature(exit_status_error)]
+#![feature(unqualified_local_imports)]
 
 use std::borrow::Borrow;
 use std::io;

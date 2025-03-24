@@ -1,13 +1,9 @@
 #![feature(coverage_attribute)]
 #![feature(never_type)]
 #![feature(try_blocks)]
+#![feature(unqualified_local_imports)]
 
 use ariadne::Color::Red;
-use ast::Arithmetic;
-use ast::Integral;
-use ast::IntegralKind;
-use ast::Signedness;
-use ast::Type;
 use itertools::Itertools as _;
 use lalrpop_util::ParseError;
 use lalrpop_util::lalrpop_mod;
@@ -17,7 +13,12 @@ use panko_lex::TokenIter;
 use panko_lex::TokenKind;
 use panko_report::Report;
 
+use crate::ast::Arithmetic;
+use crate::ast::Integral;
+use crate::ast::IntegralKind;
 use crate::ast::QualifiedType;
+use crate::ast::Signedness;
+use crate::ast::Type;
 
 mod as_sexpr;
 pub mod ast;

@@ -1,4 +1,5 @@
 #![feature(iterator_try_collect)]
+#![feature(unqualified_local_imports)]
 
 use std::borrow::Cow;
 use std::collections::HashSet;

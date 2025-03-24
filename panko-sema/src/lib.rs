@@ -5,6 +5,7 @@
 #![feature(impl_trait_in_fn_trait_return)]
 #![feature(never_type)]
 #![feature(try_blocks)]
+#![feature(unqualified_local_imports)]
 
 pub use crate::layout::layout;
 pub use crate::scope::resolve_names;

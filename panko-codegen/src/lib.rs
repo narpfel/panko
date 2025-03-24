@@ -1,6 +1,7 @@
 #![feature(impl_trait_in_assoc_type)]
 #![feature(let_chains)]
 #![feature(try_blocks)]
+#![feature(unqualified_local_imports)]
 
 use std::borrow::Cow;
 use std::fmt;
