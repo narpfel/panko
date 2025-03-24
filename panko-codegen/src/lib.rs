@@ -152,7 +152,7 @@ impl Display for TypedRegister<'_> {
 #[derive(Debug, Clone, Copy)]
 struct StaticId(u64);
 
-impl fmt::Display for StaticId {
+impl Display for StaticId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "static.{}", self.0)
     }
@@ -161,7 +161,7 @@ impl fmt::Display for StaticId {
 #[derive(Debug, Clone, Copy)]
 struct LabelId(u64);
 
-impl fmt::Display for LabelId {
+impl Display for LabelId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, ".L.{}", self.0)
     }

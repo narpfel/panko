@@ -24,7 +24,10 @@ mod as_sexpr;
 pub mod ast;
 pub mod sexpr_builder;
 
-lalrpop_mod!(grammar);
+lalrpop_mod!(
+    #[allow(unused_qualifications)]
+    grammar
+);
 
 const SEXPR_INDENT: usize = 3;
 pub const NO_VALUE: &str = "∅";

@@ -8,7 +8,7 @@ pub use panko_lex::Loc;
 
 pub trait Report: fmt::Debug {
     fn print(&self);
-    fn write(&self, writer: &mut dyn std::io::Write);
+    fn write(&self, writer: &mut dyn io::Write);
     fn exit_code(&self) -> u8;
     fn location(&self) -> Loc;
 }

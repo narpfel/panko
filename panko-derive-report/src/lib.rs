@@ -42,7 +42,7 @@ struct Assign(Vec<Attribute>, Pat, Expr);
 struct Diagnostics(IndexMap<Ident, IndexMap<String, Expr>>);
 
 impl Parse for Args {
-    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+    fn parse(input: syn::parse::ParseStream) -> Result<Self> {
         Ok(Self(Punctuated::parse_terminated(input)?))
     }
 }
@@ -293,7 +293,7 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
 fn find_lifetimes(field_types: &[Type]) -> impl Iterator<Item = Lifetime> {
     struct CollectLifetimes(HashSet<Lifetime>);
     impl Visit<'_> for CollectLifetimes {
-        fn visit_lifetime(&mut self, lifetime: &syn::Lifetime) {
+        fn visit_lifetime(&mut self, lifetime: &Lifetime) {
             self.0.insert(lifetime.clone());
         }
     }

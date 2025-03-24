@@ -421,7 +421,7 @@ impl<'a> CompoundStatement<'a> {
 impl<'a> Statement<'a> {
     fn from_parse_tree(
         sess: &'a Session<'a>,
-        item: &'a cst::BlockItem<'a>,
+        item: &'a BlockItem<'a>,
     ) -> impl Iterator<Item = Self> + 'a {
         match item {
             BlockItem::Declaration(decl) =>
@@ -431,7 +431,7 @@ impl<'a> Statement<'a> {
         }
     }
 
-    fn from_unlabeled_statement(sess: &'a Session<'a>, stmt: &cst::UnlabeledStatement<'a>) -> Self {
+    fn from_unlabeled_statement(sess: &'a Session<'a>, stmt: &UnlabeledStatement<'a>) -> Self {
         match stmt {
             UnlabeledStatement::ExpressionStatement(expr) => Self::Expression(expr.0),
             UnlabeledStatement::PrimaryBlock(PrimaryBlock::CompoundStatement(block)) =>

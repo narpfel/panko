@@ -7,10 +7,7 @@ use super::*;
 #[test]
 fn test_conversion_rank_comparison() {
     let lhs_ty = Arithmetic::Integral(Integral { signedness: Signed, kind: Int });
-    let rhs_ty = Arithmetic::Integral(Integral {
-        signedness: Signedness::Unsigned,
-        kind: Int,
-    });
+    let rhs_ty = Arithmetic::Integral(Integral { signedness: Unsigned, kind: Int });
     assert_eq!(
         [lhs_ty, rhs_ty],
         std::cmp::minmax_by_key(lhs_ty, rhs_ty, compare_by_size_with_unsigned_as_tie_breaker),

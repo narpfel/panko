@@ -23,7 +23,7 @@ impl<Expression> AsSExpr for ArrayLength<Expression>
 where
     Expression: AsSExpr,
 {
-    fn as_sexpr(&self) -> panko_parser::sexpr_builder::SExpr {
+    fn as_sexpr(&self) -> SExpr {
         match self {
             ArrayLength::Constant(length) => SExpr::string(length.to_string()),
             ArrayLength::Variable(length) => SExpr::new("variable").inherit(length),

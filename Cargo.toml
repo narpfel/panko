@@ -14,6 +14,7 @@ members = [
 
 [workspace.lints.rust]
 unqualified_local_imports = "warn"
+unused_qualifications = "warn"
 
 [workspace.lints.clippy]
 # TODO: remove this and `expect` the warning for each enum separately

@@ -1907,7 +1907,7 @@ fn desugar_postfix_increment<'a>(
                 value: sess.alloc(scope::Expression::Integer {
                     value: "1",
                     token: Token::synthesised(
-                        TokenKind::Integer(panko_lex::Integer {
+                        TokenKind::Integer(Integer {
                             suffix: IntegerSuffix::None,
                             suffix_len: 0,
                             base: 10,
@@ -2626,7 +2626,7 @@ fn typeck_expression<'a>(
                     value: sess.alloc(scope::Expression::Integer {
                         value: "1",
                         token: Token::synthesised(
-                            TokenKind::Integer(panko_lex::Integer {
+                            TokenKind::Integer(Integer {
                                 suffix: IntegerSuffix::None,
                                 suffix_len: 0,
                                 base: 10,
@@ -2649,7 +2649,7 @@ fn typeck_expression<'a>(
             ty @ Type::Function(_) => TypedExpression {
                 ty: Type::Pointer(sess.alloc(ty.unqualified())).unqualified(),
                 expr: Expression::Addressof {
-                    ampersand: Token::synthesised(panko_lex::TokenKind::And, expr.loc()),
+                    ampersand: Token::synthesised(TokenKind::And, expr.loc()),
                     operand: sess.alloc(expr),
                 },
             },
