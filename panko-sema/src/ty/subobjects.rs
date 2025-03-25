@@ -139,14 +139,18 @@ impl<'a> Subobjects<'a> {
         }
     }
 
+    fn leave_empty_subobjects(&mut self) {
+        while self.current.is_empty() && !self.stack.is_empty() {
+            let left = self.try_leave_subobject(AllowExplicit::No);
+            if !left {
+                break;
+            }
+        }
+    }
+
     pub(crate) fn next_scalar(&mut self) -> Result<Subobject<'a>, SubobjectIterator<'a>> {
         loop {
-            while self.current.is_empty() && !self.stack.is_empty() {
-                let left = self.try_leave_subobject(AllowExplicit::No);
-                if !left {
-                    break;
-                }
-            }
+            self.leave_empty_subobjects();
 
             let subobject = self.current.next().ok_or_else(|| self.current.clone())?;
             match subobject.ty.ty {
@@ -168,12 +172,7 @@ impl<'a> Subobjects<'a> {
         &mut self,
         explicitness: Explicit,
     ) -> Result<(), SubobjectIterator<'a>> {
-        while self.current.is_empty() && !self.stack.is_empty() {
-            let left = self.try_leave_subobject(AllowExplicit::No);
-            if !left {
-                break;
-            }
-        }
+        self.leave_empty_subobjects();
 
         let (iterator, result) = match self.current.next() {
             Some(subobject) => {
