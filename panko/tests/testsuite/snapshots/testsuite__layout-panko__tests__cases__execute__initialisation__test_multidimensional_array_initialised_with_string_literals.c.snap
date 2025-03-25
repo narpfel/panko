@@ -1,0 +1,187 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/initialisation/test_multidimensional_array_initialised_with_string_literals.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (compound-statement
+            (definition (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)
+               (braced
+                  (subobject +0 (string `array<char; 6>` @void "first\0"))
+                  (subobject +100 (string `array<char; 11>` @void "also first\0"))
+                  (subobject +200 (string `array<char; 7>` @void "second\0"))
+                  (subobject +400 (string `array<char; 6>` @void "third\0"))
+                  (subobject +500 (string `array<char; 11>` @void "also third\0"))))
+            (expression
+               (call `int` @600
+                  (addressof `ptr<fn(∅: ptr<char const>) -> int>` @608
+                     (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)))
+                  (noop-type-conversion `ptr<char const>` @616
+                     (noop-type-conversion `ptr<char>` @616
+                        (addressof `ptr<array<char; 100>>` @616
+                           (deref `array<char; 100>` @616
+                              (ptr-add `ptr<array<char; 100>>` @624
+                                 (noop-type-conversion `ptr<array<char; 100>>` @624
+                                    (addressof `ptr<array<array<char; 100>; 2>>` @624
+                                       (deref `array<array<char; 100>; 2>` @624
+                                          (ptr-add `ptr<array<array<char; 100>; 2>>` @632
+                                             (noop-type-conversion `ptr<array<array<char; 100>; 2>>` @632
+                                                (addressof `ptr<array<array<array<char; 100>; 2>; 3>>` @632
+                                                   (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)))
+                                             (sign-extend `unsigned long` @640 (0 `int` @648))))))
+                                 (sign-extend `unsigned long` @640 (0 `int` @648)))))))))
+            (expression
+               (call `int` @600
+                  (addressof `ptr<fn(∅: ptr<char const>) -> int>` @608
+                     (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)))
+                  (noop-type-conversion `ptr<char const>` @616
+                     (noop-type-conversion `ptr<char>` @616
+                        (addressof `ptr<array<char; 100>>` @616
+                           (deref `array<char; 100>` @616
+                              (ptr-add `ptr<array<char; 100>>` @624
+                                 (noop-type-conversion `ptr<array<char; 100>>` @624
+                                    (addressof `ptr<array<array<char; 100>; 2>>` @624
+                                       (deref `array<array<char; 100>; 2>` @624
+                                          (ptr-add `ptr<array<array<char; 100>; 2>>` @632
+                                             (noop-type-conversion `ptr<array<array<char; 100>; 2>>` @632
+                                                (addressof `ptr<array<array<array<char; 100>; 2>; 3>>` @632
+                                                   (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)))
+                                             (sign-extend `unsigned long` @640 (0 `int` @648))))))
+                                 (sign-extend `unsigned long` @640 (1 `int` @648)))))))))
+            (expression
+               (call `int` @600
+                  (addressof `ptr<fn(∅: ptr<char const>) -> int>` @608
+                     (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)))
+                  (noop-type-conversion `ptr<char const>` @616
+                     (noop-type-conversion `ptr<char>` @616
+                        (addressof `ptr<array<char; 100>>` @616
+                           (deref `array<char; 100>` @616
+                              (ptr-add `ptr<array<char; 100>>` @624
+                                 (noop-type-conversion `ptr<array<char; 100>>` @624
+                                    (addressof `ptr<array<array<char; 100>; 2>>` @624
+                                       (deref `array<array<char; 100>; 2>` @624
+                                          (ptr-add `ptr<array<array<char; 100>; 2>>` @632
+                                             (noop-type-conversion `ptr<array<array<char; 100>; 2>>` @632
+                                                (addressof `ptr<array<array<array<char; 100>; 2>; 3>>` @632
+                                                   (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)))
+                                             (sign-extend `unsigned long` @640 (1 `int` @648))))))
+                                 (sign-extend `unsigned long` @640 (0 `int` @648)))))))))
+            (expression
+               (call `int` @600
+                  (addressof `ptr<fn(∅: ptr<char const>) -> int>` @608
+                     (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)))
+                  (noop-type-conversion `ptr<char const>` @616
+                     (noop-type-conversion `ptr<char>` @616
+                        (addressof `ptr<array<char; 100>>` @616
+                           (deref `array<char; 100>` @616
+                              (ptr-add `ptr<array<char; 100>>` @624
+                                 (noop-type-conversion `ptr<array<char; 100>>` @624
+                                    (addressof `ptr<array<array<char; 100>; 2>>` @624
+                                       (deref `array<array<char; 100>; 2>` @624
+                                          (ptr-add `ptr<array<array<char; 100>; 2>>` @632
+                                             (noop-type-conversion `ptr<array<array<char; 100>; 2>>` @632
+                                                (addressof `ptr<array<array<array<char; 100>; 2>; 3>>` @632
+                                                   (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)))
+                                             (sign-extend `unsigned long` @640 (1 `int` @648))))))
+                                 (sign-extend `unsigned long` @640 (1 `int` @648)))))))))
+            (expression
+               (call `int` @600
+                  (addressof `ptr<fn(∅: ptr<char const>) -> int>` @608
+                     (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)))
+                  (noop-type-conversion `ptr<char const>` @616
+                     (noop-type-conversion `ptr<char>` @616
+                        (addressof `ptr<array<char; 100>>` @616
+                           (deref `array<char; 100>` @616
+                              (ptr-add `ptr<array<char; 100>>` @624
+                                 (noop-type-conversion `ptr<array<char; 100>>` @624
+                                    (addressof `ptr<array<array<char; 100>; 2>>` @624
+                                       (deref `array<array<char; 100>; 2>` @624
+                                          (ptr-add `ptr<array<array<char; 100>; 2>>` @632
+                                             (noop-type-conversion `ptr<array<array<char; 100>; 2>>` @632
+                                                (addressof `ptr<array<array<array<char; 100>; 2>; 3>>` @632
+                                                   (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)))
+                                             (sign-extend `unsigned long` @640 (2 `int` @648))))))
+                                 (sign-extend `unsigned long` @640 (0 `int` @648)))))))))
+            (expression
+               (call `int` @600
+                  (addressof `ptr<fn(∅: ptr<char const>) -> int>` @608
+                     (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)))
+                  (noop-type-conversion `ptr<char const>` @616
+                     (noop-type-conversion `ptr<char>` @616
+                        (addressof `ptr<array<char; 100>>` @616
+                           (deref `array<char; 100>` @616
+                              (ptr-add `ptr<array<char; 100>>` @624
+                                 (noop-type-conversion `ptr<array<char; 100>>` @624
+                                    (addressof `ptr<array<array<char; 100>; 2>>` @624
+                                       (deref `array<array<char; 100>; 2>` @624
+                                          (ptr-add `ptr<array<array<char; 100>; 2>>` @632
+                                             (noop-type-conversion `ptr<array<array<char; 100>; 2>>` @632
+                                                (addressof `ptr<array<array<array<char; 100>; 2>; 3>>` @632
+                                                   (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)))
+                                             (sign-extend `unsigned long` @640 (2 `int` @648))))))
+                                 (sign-extend `unsigned long` @640 (1 `int` @648)))))))))
+            (expression
+               (call `int` @600
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @608
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @616
+                     (noop-type-conversion `ptr<char>` @616
+                        (addressof `ptr<array<char; 13>>` @616
+                           (string `array<char; 13>` @void "%zu %zu %zu\n\0"))))
+                  (3 `unsigned long` @624)
+                  (2 `unsigned long` @632)
+                  (100 `unsigned long` @640))))
+         (compound-statement
+            (definition (strings~4 `array<array<char; 100>; 2>` @0)
+               (braced
+                  (subobject +0 (string `array<char; 7>` @void "string\0"))
+                  (subobject +100 (string `array<char; 15>` @void "another string\0"))))
+            (expression
+               (call `int` @200
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @208
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @216
+                     (noop-type-conversion `ptr<char>` @216
+                        (addressof `ptr<array<char; 5>>` @216
+                           (string `array<char; 5>` @void "%zu\n\0"))))
+                  (2 `unsigned long` @224)))
+            (expression
+               (call `int` @200
+                  (addressof `ptr<fn(∅: ptr<char const>) -> int>` @208
+                     (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)))
+                  (noop-type-conversion `ptr<char const>` @216
+                     (noop-type-conversion `ptr<char>` @216
+                        (addressof `ptr<array<char; 100>>` @216
+                           (deref `array<char; 100>` @216
+                              (ptr-add `ptr<array<char; 100>>` @224
+                                 (noop-type-conversion `ptr<array<char; 100>>` @224
+                                    (addressof `ptr<array<array<char; 100>; 2>>` @224
+                                       (strings~4 `array<array<char; 100>; 2>` @0)))
+                                 (sign-extend `unsigned long` @232 (0 `int` @240)))))))))
+            (expression
+               (call `int` @200
+                  (addressof `ptr<fn(∅: ptr<char const>) -> int>` @208
+                     (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)))
+                  (noop-type-conversion `ptr<char const>` @216
+                     (noop-type-conversion `ptr<char>` @216
+                        (addressof `ptr<array<char; 100>>` @216
+                           (deref `array<char; 100>` @216
+                              (ptr-add `ptr<array<char; 100>>` @224
+                                 (noop-type-conversion `ptr<array<char; 100>>` @224
+                                    (addressof `ptr<array<array<char; 100>; 2>>` @224
+                                       (strings~4 `array<array<char; 100>; 2>` @0)))
+                                 (sign-extend `unsigned long` @232 (1 `int` @240)))))))))))))
+
+----- stderr -----

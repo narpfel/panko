@@ -1,0 +1,69 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/test_multidimensional_array_initialised_with_string_literals.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration puts~1 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (compound-statement
+            (definition strings~3 `array<array<array<char; 100>; 2>; ∅>`
+               (braced
+                  (designation ((index 0)) (string "first"))
+                  (string "also first")
+                  (braced
+                     (string "second"))
+                  (string "third")
+                  (string "also third")))
+            (expression
+               (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+                  (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 0) 0)))
+            (expression
+               (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+                  (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 0) 1)))
+            (expression
+               (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+                  (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 1) 0)))
+            (expression
+               (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+                  (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 1) 1)))
+            (expression
+               (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+                  (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 2) 0)))
+            (expression
+               (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+                  (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 2) 1)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%zu %zu %zu\n")
+                  (lengthof (name strings~3 `array<array<array<char; 100>; 2>; ∅>`))
+                  (lengthof (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 0))
+                  (lengthof (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 0) 0)))))
+         (compound-statement
+            (definition strings~4 `array<array<char; 100>; ∅>`
+               (braced
+                  (string "string")
+                  (braced
+                     (string "another string"))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%zu\n")
+                  (lengthof (name strings~4 `array<array<char; 100>; ∅>`))))
+            (expression
+               (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+                  (subscript (name strings~4 `array<array<char; 100>; ∅>`) 0)))
+            (expression
+               (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+                  (subscript (name strings~4 `array<array<char; 100>; ∅>`) 1)))))))
+
+----- stderr -----

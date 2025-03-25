@@ -1235,6 +1235,7 @@ fn typeck_initialiser_list<'a>(
                 ),
             },
         );
+        let _ = subobjects.try_leave_subobject(AllowExplicit::No);
         return;
     }
 
