@@ -168,6 +168,13 @@ impl<'a> Subobjects<'a> {
         &mut self,
         explicitness: Explicit,
     ) -> Result<(), SubobjectIterator<'a>> {
+        while self.current.is_empty() && !self.stack.is_empty() {
+            let left = self.try_leave_subobject(AllowExplicit::No);
+            if !left {
+                break;
+            }
+        }
+
         let (iterator, result) = match self.current.next() {
             Some(subobject) => {
                 let iterator = match subobject.ty.ty {

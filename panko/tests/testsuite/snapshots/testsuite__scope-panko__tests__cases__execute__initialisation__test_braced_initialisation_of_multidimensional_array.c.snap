@@ -1,0 +1,47 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition xs~2 `array<array<int; 2>; ∅>`
+            (braced
+               1
+               2
+               (braced
+                  3)
+               5
+               6))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu %zu\n")
+               (lengthof (name xs~2 `array<array<int; 2>; ∅>`))
+               (lengthof (subscript (name xs~2 `array<array<int; 2>; ∅>`) 0))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (subscript (subscript (name xs~2 `array<array<int; 2>; ∅>`) 0) 0)
+               (subscript (subscript (name xs~2 `array<array<int; 2>; ∅>`) 0) 1)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (subscript (subscript (name xs~2 `array<array<int; 2>; ∅>`) 1) 0)
+               (subscript (subscript (name xs~2 `array<array<int; 2>; ∅>`) 1) 1)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (subscript (subscript (name xs~2 `array<array<int; 2>; ∅>`) 2) 0)
+               (subscript (subscript (name xs~2 `array<array<int; 2>; ∅>`) 2) 1))))))
+
+----- stderr -----

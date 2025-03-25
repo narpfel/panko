@@ -47,7 +47,7 @@ Error: excess element in array initialiser
    │
  5 │     int ys[2][2] = {1, 2, 3, 4, {5}};
    │         ─┬                      ─┬─  
-   │          │                       ╰─── trying to initialise element at index 2 for `array<int; 2>`
+   │          │                       ╰─── trying to initialise element at index 2 for `array<array<int; 2>; 2>`
    │          │                           
    │          ╰─────────────────────────── while initialising this variable
 ───╯
