@@ -378,7 +378,7 @@ impl<'a> Codegen<'a> {
         let size = match ty {
             // TODO: assert that this only happens in tentative definitions
             // TODO: gcc and clang warn in this case
-            Type::Array(ArrayType { ty, length: ArrayLength::Unknown }) => ty.ty.size(),
+            Type::Array(ArrayType { ty, length: ArrayLength::Unknown, loc: _ }) => ty.ty.size(),
             _ => ty.size(),
         };
 

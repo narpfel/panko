@@ -257,9 +257,10 @@ fn layout_ty<'a>(
     let ty = match ty {
         ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ty::Type::Pointer(pointee) => Type::Pointer(bump.alloc(layout_ty(stack, bump, *pointee))),
-        ty::Type::Array(ArrayType { ty, length }) => Type::Array(ArrayType {
+        ty::Type::Array(ArrayType { ty, length, loc }) => Type::Array(ArrayType {
             ty: bump.alloc(layout_ty(stack, bump, *ty)),
             length: layout_array_length(stack, bump, length),
+            loc,
         }),
         ty::Type::Function(FunctionType { params, return_type, is_varargs }) =>
             Type::Function(FunctionType {

@@ -70,10 +70,51 @@ where
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy)]
 pub struct ArrayType<'a, TypeofExpr, LengthExpr> {
     pub ty: &'a QualifiedType<'a, TypeofExpr, LengthExpr>,
     pub length: LengthExpr,
+    pub loc: Loc<'a>,
+}
+
+impl<'a, TypeofExpr, LengthExpr> ArrayType<'a, TypeofExpr, LengthExpr> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
+        self.loc
+    }
+}
+
+impl<'a, TypeofExpr, LengthExpr> PartialEq for ArrayType<'a, TypeofExpr, LengthExpr>
+where
+    TypeofExpr: PartialEq,
+    LengthExpr: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        let Self { ty, length, loc: _ } = self;
+        let Self {
+            ty: other_ty,
+            length: other_length,
+            loc: _,
+        } = other;
+        (ty, length) == (other_ty, other_length)
+    }
+}
+
+impl<'a, TypeofExpr, LengthExpr> Eq for ArrayType<'a, TypeofExpr, LengthExpr>
+where
+    TypeofExpr: Eq,
+    LengthExpr: Eq,
+{
+}
+
+impl<'a, TypeofExpr, LengthExpr> Hash for ArrayType<'a, TypeofExpr, LengthExpr>
+where
+    TypeofExpr: Hash,
+    LengthExpr: Hash,
+{
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Self { ty, length, loc: _ } = self;
+        (ty, length).hash(state)
+    }
 }
 
 impl<TypeofExpr, LengthExpr> fmt::Display for ArrayType<'_, TypeofExpr, LengthExpr>
@@ -82,7 +123,7 @@ where
     LengthExpr: AsSExpr,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let Self { ty, length } = self;
+        let Self { ty, length, loc: _ } = self;
         write!(f, "array<{ty}; {length}>", length = length.as_sexpr())
     }
 }
@@ -142,6 +183,13 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
     pub const fn uchar() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Unsigned,
+            kind: IntegralKind::Char,
+        }))
+    }
+
+    pub const fn schar() -> Self {
+        Self::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Signed,
             kind: IntegralKind::Char,
         }))
     }
@@ -239,7 +287,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
         match self {
             Type::Arithmetic(arithmetic) => arithmetic.size(),
             Type::Pointer(_) => 8,
-            Type::Array(ArrayType { ty, length }) => {
+            Type::Array(ArrayType { ty, length, loc: _ }) => {
                 let elem_size = ty.ty.size();
                 let length = match length {
                     ArrayLength::Constant(length) => *length,
@@ -278,7 +326,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
     pub(crate) fn is_complete(&self) -> bool {
         match self {
             Type::Arithmetic(_) | Type::Pointer(_) | Type::Function(_) => true,
-            Type::Array(ArrayType { ty: _, length }) => length.is_known(),
+            Type::Array(ArrayType { ty: _, length, loc: _ }) => length.is_known(),
             Type::Void => false,
             Type::Typeof { expr, unqual: _ } => match *expr {},
         }
@@ -345,8 +393,12 @@ where
 
         let ty = match (ty, other_ty) {
             (
-                Type::Array(ArrayType { ty, length }),
-                Type::Array(ArrayType { ty: other_ty, length: other_length }),
+                Type::Array(ArrayType { ty, length, loc }),
+                Type::Array(ArrayType {
+                    ty: other_ty,
+                    length: other_length,
+                    loc: _,
+                }),
             ) => {
                 let ty = bump.alloc(ty.composite_ty(bump, *other_ty)?);
                 let length = match (length, other_length) {
@@ -359,7 +411,7 @@ where
                         ArrayLength::Variable(*length),
                     (ArrayLength::Unknown, ArrayLength::Unknown) => ArrayLength::Unknown,
                 };
-                Type::Array(ArrayType { ty, length })
+                Type::Array(ArrayType { ty, length, loc: *loc })
             }
             _ if ty == other_ty => *ty,
             _ => return None,

@@ -224,6 +224,7 @@ mod tests {
     use std::iter::from_fn;
 
     use itertools::Itertools as _;
+    use panko_lex::Loc;
 
     use super::*;
     use crate::ty::ArrayType;
@@ -247,6 +248,7 @@ mod tests {
         let ty = Type::Array(ArrayType {
             ty: &size_t,
             length: ArrayLength::Constant(3),
+            loc: Loc::synthesised(),
         })
         .unqualified();
 
@@ -263,11 +265,13 @@ mod tests {
         let array_ty = Type::Array(ArrayType {
             ty: &size_t,
             length: ArrayLength::Constant(4),
+            loc: Loc::synthesised(),
         })
         .unqualified();
         let ty = Type::Array(ArrayType {
             ty: &array_ty,
             length: ArrayLength::Constant(3),
+            loc: Loc::synthesised(),
         })
         .unqualified();
 
@@ -289,11 +293,13 @@ mod tests {
         let array_ty = Type::Array(ArrayType {
             ty: &size_t,
             length: ArrayLength::Constant(4),
+            loc: Loc::synthesised(),
         })
         .unqualified();
         let ty = Type::Array(ArrayType {
             ty: &array_ty,
             length: ArrayLength::Constant(3),
+            loc: Loc::synthesised(),
         })
         .unqualified();
 

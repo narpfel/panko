@@ -33,6 +33,7 @@ use panko_parser::ast::Signedness;
 use panko_report::Report;
 use variant_types::IntoVariant as _;
 
+use crate::ItertoolsExt as _;
 use crate::scope;
 use crate::scope::DesignatedInitialiser;
 use crate::scope::Designation;
@@ -434,6 +435,25 @@ enum Diagnostic<'a> {
     #[error("empty character constant")]
     #[diagnostics(at(colour = Red, label = "this character constant is empty"))]
     EmptyCharConstant { at: Token<'a> },
+
+    #[error("array of inappropriate type `{actual_ty}` initialised by string literal")]
+    #[diagnostics(
+        actual_ty(colour = Red, label = "this is an array of `{element_ty}`"),
+        at(
+            colour = Red,
+            label = "this is a {kind} string literal, which can only initialise arrays of {expected_tys}",
+        ),
+    )]
+    #[with(
+        expected_tys = expected_tys.iter().map(|ty| format!("`{}`", ty.fg(Blue))).join_end(", ", " or "),
+        element_ty = actual_ty.ty.ty,
+    )]
+    ArrayInitialisationByStringLiteralTypeMismatch {
+        at: scope::Expression<'a>,
+        kind: &'a str,
+        expected_tys: &'a [Type<'a>],
+        actual_ty: ArrayType<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -927,7 +947,7 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ty::Type::Pointer(pointee) =>
             Type::Pointer(sess.alloc(typeck_ty(sess, *pointee, IsParameter::No))),
-        ty::Type::Array(ArrayType { ty, length }) => {
+        ty::Type::Array(ArrayType { ty, length, loc }) => {
             let ty = sess.alloc(typeck_ty(sess, *ty, IsParameter::No));
             if !ty.ty.is_complete() {
                 // TODO: this should be `Type::Error`
@@ -969,7 +989,7 @@ fn typeck_ty_with_initialiser<'a>(
                     }
                     Type::Pointer(ty)
                 }
-                IsParameter::No => Type::Array(ArrayType { ty, length }),
+                IsParameter::No => Type::Array(ArrayType { ty, length, loc }),
             }
         }
         ty::Type::Function(FunctionType { params, return_type, is_varargs }) => {
@@ -1192,17 +1212,22 @@ fn typeck_function_definition<'a>(
 
 fn typeck_array_initialisation_with_string<'a>(
     sess: &'a Session<'a>,
-    element_ty: &Type<'a>,
+    array_ty: &ArrayType<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
     initialiser: &scope::Expression<'a>,
 ) -> TypedExpression<'a> {
     // TODO: adjust this check for prefixed string literals
-    if let Type::Arithmetic(Arithmetic::Integral(integral)) = element_ty
+    if let Type::Arithmetic(Arithmetic::Integral(integral)) = array_ty.ty.ty
         && let IntegralKind::Char | IntegralKind::PlainChar = integral.kind
     {
         typeck_expression(sess, initialiser, Context::ArrayInitialisationByString)
     }
     else {
-        todo!("type error: string literals can only initialise arrays of character type")
+        sess.emit(Diagnostic::ArrayInitialisationByStringLiteralTypeMismatch {
+            at: *initialiser,
+            expected_tys: const { &[Type::char(), Type::uchar(), Type::schar()] },
+            actual_ty: *array_ty,
+            kind: "character",
+        })
     }
 }
 
@@ -1228,11 +1253,7 @@ fn typeck_initialiser_list<'a>(
             subobject.offset,
             SubobjectInitialiser {
                 subobject,
-                initialiser: typeck_array_initialisation_with_string(
-                    sess,
-                    &array_ty.ty.ty,
-                    initialiser,
-                ),
+                initialiser: typeck_array_initialisation_with_string(sess, &array_ty, initialiser),
             },
         );
         let _ = subobjects.try_leave_subobject(AllowExplicit::No);
@@ -1315,19 +1336,14 @@ fn typeck_initialiser_list<'a>(
             scope::Initialiser::Expression(expr @ scope::Expression::String(_))
                 if let Ok(_) = subobjects.next_scalar()
                     && let Some(subobject) = subobjects.parent()
-                    && let Type::Array(array_ty) = subobject.ty.ty =>
+                    && let Type::Array(array_ty) = subobject.ty.ty
+                    && subobjects.try_leave_subobject(AllowExplicit::No) =>
             {
-                let left = subobjects.try_leave_subobject(AllowExplicit::No);
-                assert!(left);
                 subobject_initialisers.insert(
                     subobject.offset,
                     SubobjectInitialiser {
                         subobject,
-                        initialiser: typeck_array_initialisation_with_string(
-                            sess,
-                            &array_ty.ty.ty,
-                            expr,
-                        ),
+                        initialiser: typeck_array_initialisation_with_string(sess, &array_ty, expr),
                     },
                 );
             }
@@ -1392,7 +1408,7 @@ fn typeck_initialiser<'a>(
         scope::Initialiser::Expression(initialiser) => {
             let initialiser = match initialiser {
                 scope::Expression::String(_) if let Type::Array(array_ty) = reference.ty.ty =>
-                    typeck_array_initialisation_with_string(sess, &array_ty.ty.ty, initialiser),
+                    typeck_array_initialisation_with_string(sess, &array_ty, initialiser),
                 _ => convert_as_if_by_assignment(
                     sess,
                     reference.ty,
@@ -1421,7 +1437,12 @@ fn typeck_declaration<'a>(
             reference
         };
 
-    if let Type::Array(ArrayType { ty: _, length: ArrayLength::Constant(0) }) = reference.ty.ty {
+    if let Type::Array(ArrayType {
+        ty: _,
+        length: ArrayLength::Constant(0),
+        loc: _,
+    }) = reference.ty.ty
+    {
         // TODO: use this error
         sess.emit(Diagnostic::EmptyArray { at: reference })
     }
@@ -2085,6 +2106,7 @@ fn typeck_expression<'a>(
                 ty: Type::Array(ArrayType {
                     ty: sess.alloc(Type::char().unqualified()),
                     length: ArrayLength::Constant(string.len()),
+                    loc: string.loc,
                 })
                 .unqualified(),
                 expr: Expression::String(string),
@@ -2300,7 +2322,7 @@ fn typeck_expression<'a>(
                 }
                 UnaryOpKind::Lengthof => {
                     let expr = match operand.ty.ty {
-                        Type::Array(ArrayType { ty: _, length }) => match length {
+                        Type::Array(ArrayType { ty: _, length, loc: _ }) => match length {
                             ArrayLength::Constant(length) => Expression::Lengthof {
                                 lengthof: operator.token,
                                 operand: sess.alloc(operand),
@@ -2397,7 +2419,7 @@ fn typeck_expression<'a>(
         scope::Expression::Lengthof { lengthof, ty, close_paren } => {
             let ty = typeck_ty(sess, *ty, IsParameter::No);
             let expr = match ty.ty {
-                Type::Array(ArrayType { ty: _, length }) => match length {
+                Type::Array(ArrayType { ty: _, length, loc: _ }) => match length {
                     ArrayLength::Constant(length) => Expression::LengthofTy {
                         lengthof: *lengthof,
                         ty,
