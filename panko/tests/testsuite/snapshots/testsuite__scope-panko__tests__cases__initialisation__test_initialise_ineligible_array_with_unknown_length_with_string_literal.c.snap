@@ -1,0 +1,38 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition abc~1 `array<short; ∅>` (string "abc"))
+         (definition xs~2 `array<int; ∅>` (string "abc"))
+         (definition ys~3 `array<int; ∅>`
+            (braced
+               (string "abc")))
+         (definition zs~4 `array<array<int; 100>; ∅>`
+            (braced
+               (string "abc")
+               (braced
+                  (string "d"))))
+         (definition ws~5 `array<array<int; 100>; ∅>`
+            (braced
+               (braced
+                  (string "abc"))
+               (braced
+                  (string "d"))))
+         (definition multidimensional~6 `array<array<int; 4>; ∅>` (string "abc"))
+         (definition another_multidimensional~7 `array<array<int; 5>; ∅>`
+            (braced
+               (string "def"))))))
+
+----- stderr -----

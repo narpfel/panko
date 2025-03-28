@@ -1,0 +1,106 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/initialisation/test_initialise_ineligible_array_with_string_literal.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: array of inappropriate type `array<short; 27>` initialised by string literal
+   ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_string_literal.c:2:21]
+   │
+ 2 │     short abc[27] = "abc";
+   │     ──────┬──────   ──┬──  
+   │           │           ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+   │           │                
+   │           ╰──────────────── this is an array of `short`
+───╯
+
+Error: array of inappropriate type `array<int; 42>` initialised by string literal
+   ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_string_literal.c:3:18]
+   │
+ 3 │     int xs[42] = "abc";
+   │     ─────┬────   ──┬──  
+   │          │         ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+   │          │              
+   │          ╰────────────── this is an array of `int`
+───╯
+
+Error: array of inappropriate type `array<int; 123>` initialised by string literal
+   ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_string_literal.c:4:20]
+   │
+ 4 │     int ys[123] = {"abc"};
+   │     ─────┬─────    ──┬──  
+   │          │           ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+   │          │                
+   │          ╰──────────────── this is an array of `int`
+───╯
+
+Error: array of inappropriate type `array<int; 100>` initialised by string literal
+   ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_string_literal.c:5:23]
+   │
+ 5 │     int zs[7][100] = {"abc", {"d"}};
+   │     ───────┬──────    ──┬──  
+   │            │            ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+   │            │                 
+   │            ╰───────────────── this is an array of `int`
+───╯
+
+Error: array of inappropriate type `array<int; 100>` initialised by string literal
+   ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_string_literal.c:5:31]
+   │
+ 5 │     int zs[7][100] = {"abc", {"d"}};
+   │     ───────┬──────            ─┬─  
+   │            │                   ╰─── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+   │            │                       
+   │            ╰─────────────────────── this is an array of `int`
+───╯
+
+Error: array of inappropriate type `array<int; 100>` initialised by string literal
+   ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_string_literal.c:7:10]
+   │
+ 6 │     int ws[5][100] = {
+   │     ───────┬──────  
+   │            ╰──────── this is an array of `int`
+ 7 │         {"abc"},
+   │          ──┬──  
+   │            ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+───╯
+
+Error: array of inappropriate type `array<int; 100>` initialised by string literal
+   ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_string_literal.c:8:10]
+   │
+ 6 │     int ws[5][100] = {
+   │     ───────┬──────  
+   │            ╰──────── this is an array of `int`
+   │ 
+ 8 │         {"d"},
+   │          ─┬─  
+   │           ╰─── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+───╯
+
+Error: array of inappropriate type `array<array<int; 4>; 9>` initialised by string literal
+    ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_string_literal.c:10:34]
+    │
+ 10 │     int multidimensional[9][4] = "abc";
+    │     ─────────────┬────────────   ──┬──  
+    │                  │                 ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+    │                  │                      
+    │                  ╰────────────────────── this is an array of `array<int; 4>`
+────╯
+
+Error: array of inappropriate type `array<int; 5>` initialised by string literal
+    ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_string_literal.c:11:44]
+    │
+ 11 │     int another_multidimensional[10][5] = {"def"};
+    │     ─────────────────┬─────────────────    ──┬──  
+    │                      │                       ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+    │                      │                            
+    │                      ╰──────────────────────────── this is an array of `int`
+────╯
