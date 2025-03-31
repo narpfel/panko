@@ -216,6 +216,7 @@ pub(crate) enum Expression<'a> {
     },
     Conditional {
         condition: &'a Expression<'a>,
+        question_mark: Token<'a>,
         then: &'a Expression<'a>,
         or_else: &'a Expression<'a>,
     },
@@ -382,8 +383,12 @@ impl<'a> Expression<'a> {
                 close_paren,
             } => generic.loc().until(close_paren.loc()),
             Expression::Logical { lhs, op: _, rhs } => lhs.loc().until(rhs.loc()),
-            Expression::Conditional { condition, then: _, or_else } =>
-                condition.loc().until(or_else.loc()),
+            Expression::Conditional {
+                condition,
+                question_mark: _,
+                then: _,
+                or_else,
+            } => condition.loc().until(or_else.loc()),
             Expression::Comma { lhs, rhs } => lhs.loc().until(rhs.loc()),
             Expression::Increment {
                 operator,
@@ -998,11 +1003,13 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             op: *op,
             rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),
         },
-        ast::Expression::Conditional { condition, then, or_else } => Expression::Conditional {
-            condition: scopes.sess.alloc(resolve_expr(scopes, condition)),
-            then: scopes.sess.alloc(resolve_expr(scopes, then)),
-            or_else: scopes.sess.alloc(resolve_expr(scopes, or_else)),
-        },
+        ast::Expression::Conditional { condition, question_mark, then, or_else } =>
+            Expression::Conditional {
+                condition: scopes.sess.alloc(resolve_expr(scopes, condition)),
+                question_mark: *question_mark,
+                then: scopes.sess.alloc(resolve_expr(scopes, then)),
+                or_else: scopes.sess.alloc(resolve_expr(scopes, or_else)),
+            },
         ast::Expression::Comma { lhs, rhs } => Expression::Comma {
             lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
             rhs: scopes.sess.alloc(resolve_expr(scopes, rhs)),

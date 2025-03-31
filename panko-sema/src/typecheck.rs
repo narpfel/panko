@@ -454,6 +454,22 @@ enum Diagnostic<'a> {
         expected_tys: &'a [Type<'a>],
         actual_ty: ArrayType<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
     },
+
+    #[error("incompatible operand types in conditional expression")]
+    #[diagnostics(
+        at(colour = Blue),
+        then(colour = Red, label = "this is of type `{then_ty}`"),
+        or_else(colour = Magenta, label = "this is of type `{or_else_ty}`"),
+    )]
+    #[with(
+        then_ty = then.ty.ty,
+        or_else_ty = or_else.ty.ty,
+    )]
+    ConditionalExprOperandTypesIncompatible {
+        at: Token<'a>,
+        then: TypedExpression<'a>,
+        or_else: TypedExpression<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -2565,7 +2581,7 @@ fn typeck_expression<'a>(
                 },
             }
         }
-        scope::Expression::Conditional { condition, then, or_else } => {
+        scope::Expression::Conditional { condition, question_mark, then, or_else } => {
             let condition = typeck_expression(sess, condition, Context::Default);
             let condition = if condition.ty.ty.is_scalar() {
                 condition
@@ -2608,11 +2624,15 @@ fn typeck_expression<'a>(
                 (Type::Function(_), _) | (_, Type::Function(_)) => unreachable!(),
                 (Type::Arithmetic(_), Type::Pointer(_) | Type::Void)
                 | (Type::Pointer(_), Type::Arithmetic(_) | Type::Void)
-                | (Type::Void, _) => todo!(
-                    "type error: incompatible operand types for conditional expression: `{}` != `{}`",
-                    then.ty.ty,
-                    or_else.ty.ty,
-                ),
+                | (Type::Void, _) => {
+                    // TODO: use this error
+                    let () = sess.emit(Diagnostic::ConditionalExprOperandTypesIncompatible {
+                        at: *question_mark,
+                        then,
+                        or_else,
+                    });
+                    then.ty.ty
+                }
             };
             let result_ty = result_ty.unqualified();
             TypedExpression {

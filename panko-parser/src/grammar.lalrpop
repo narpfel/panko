@@ -582,8 +582,9 @@ LogicalOrExpression: ast::Expression<'a> = {
 
 ConditionalExpression: ast::Expression<'a> = {
     LogicalOrExpression,
-    <condition:Bump<LogicalOrExpression>> "?" <then:Bump<Expression>> ":" <or_else:Bump<ConditionalExpression>> =>
-        ast::Expression::Conditional { <> },
+    <condition:Bump<LogicalOrExpression>>
+        <question_mark:"?"> <then:Bump<Expression>>
+        ":" <or_else:Bump<ConditionalExpression>> => ast::Expression::Conditional { <> },
 }
 
 CompoudAssignmentOperator: ast::BinOp<'a> = {

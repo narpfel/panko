@@ -618,6 +618,7 @@ pub enum Expression<'a> {
     },
     Conditional {
         condition: &'a Expression<'a>,
+        question_mark: Token<'a>,
         then: &'a Expression<'a>,
         or_else: &'a Expression<'a>,
     },

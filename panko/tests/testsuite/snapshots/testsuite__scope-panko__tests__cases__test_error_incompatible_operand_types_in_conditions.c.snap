@@ -1,0 +1,44 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/test_error_incompatible_operand_types_in_conditions.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      void_function~0 `fn() -> void`
+      (compound-statement))
+   (function-definition
+      ptr_function~1 `fn() -> ptr<int>`
+      (compound-statement))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (expression
+            (conditional
+               1
+               (call (name void_function~0 `fn() -> void`))
+               42))
+         (expression
+            (conditional
+               2
+               (call (name ptr_function~1 `fn() -> ptr<int>`))
+               42))
+         (expression
+            (conditional
+               3
+               27
+               (call (name void_function~0 `fn() -> void`))))
+         (expression
+            (conditional
+               4
+               27
+               (call (name ptr_function~1 `fn() -> ptr<int>`)))))))
+
+----- stderr -----
