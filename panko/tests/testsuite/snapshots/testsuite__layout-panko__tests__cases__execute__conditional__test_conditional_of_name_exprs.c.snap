@@ -1,0 +1,100 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/conditional/test_conditional_of_name_exprs.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (compound-statement
+            (definition (x~2 `int` @0) (42 `int` @0))
+            (definition (y~3 `int` @4) (27 `int` @4))
+            (expression
+               (call `int` @8
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @24
+                     (noop-type-conversion `ptr<char>` @24
+                        (addressof `ptr<array<char; 4>>` @24
+                           (string `array<char; 4>` @void "%d\n\0"))))
+                  (conditional `int` @32
+                     (0 `int` @36)
+                     (x~2 `int` @0)
+                     (y~3 `int` @4))))
+            (expression
+               (call `int` @8
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @24
+                     (noop-type-conversion `ptr<char>` @24
+                        (addressof `ptr<array<char; 4>>` @24
+                           (string `array<char; 4>` @void "%d\n\0"))))
+                  (conditional `int` @32
+                     (1 `int` @36)
+                     (x~2 `int` @0)
+                     (y~3 `int` @4)))))
+         (compound-statement
+            (definition (x~4 `short` @0) (truncate `short` @0 (42 `int` @4)))
+            (definition (y~5 `short` @2) (truncate `short` @2 (27 `int` @4)))
+            (expression
+               (call `int` @4
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 4>>` @16
+                           (string `array<char; 4>` @void "%d\n\0"))))
+                  (conditional `int` @24
+                     (0 `int` @28)
+                     (sign-extend `int` @24 (x~4 `short` @0))
+                     (sign-extend `int` @24 (y~5 `short` @2)))))
+            (expression
+               (call `int` @4
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 4>>` @16
+                           (string `array<char; 4>` @void "%d\n\0"))))
+                  (conditional `int` @24
+                     (1 `int` @28)
+                     (sign-extend `int` @24 (x~4 `short` @0))
+                     (sign-extend `int` @24 (y~5 `short` @2))))))
+         (compound-statement
+            (definition (x~6 `long` @0) (sign-extend `long` @0 (42 `int` @8)))
+            (definition (y~7 `long` @8) (sign-extend `long` @8 (27 `int` @16)))
+            (expression
+               (call `int` @16
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @32
+                     (noop-type-conversion `ptr<char>` @32
+                        (addressof `ptr<array<char; 5>>` @32
+                           (string `array<char; 5>` @void "%ld\n\0"))))
+                  (conditional `long` @40
+                     (0 `int` @48)
+                     (x~6 `long` @0)
+                     (y~7 `long` @8))))
+            (expression
+               (call `int` @16
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @32
+                     (noop-type-conversion `ptr<char>` @32
+                        (addressof `ptr<array<char; 5>>` @32
+                           (string `array<char; 5>` @void "%ld\n\0"))))
+                  (conditional `long` @40
+                     (1 `int` @48)
+                     (x~6 `long` @0)
+                     (y~7 `long` @8))))))))
+
+----- stderr -----

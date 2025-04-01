@@ -927,13 +927,17 @@ impl<'a> Codegen<'a> {
                 let condition_false = self.new_label();
                 self.emit_args("je", &[&condition_false]);
                 self.expr(then);
+                if then.slot != expr.slot {
+                    self.copy(expr, then);
+                }
                 let merge = self.new_label();
                 self.emit_args("jmp", &[&merge]);
                 self.label(condition_false);
                 self.expr(or_else);
+                if or_else.slot != expr.slot {
+                    self.copy(expr, or_else);
+                }
                 self.label(merge);
-                assert_eq!(expr.slot, then.slot);
-                assert_eq!(expr.slot, or_else.slot);
             }
         }
     }

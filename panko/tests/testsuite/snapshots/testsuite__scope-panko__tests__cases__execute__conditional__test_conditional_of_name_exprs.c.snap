@@ -1,0 +1,70 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/conditional/test_conditional_of_name_exprs.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (compound-statement
+            (definition x~2 `int` 42)
+            (definition y~3 `int` 27)
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (conditional
+                     0
+                     (name x~2 `int`)
+                     (name y~3 `int`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (conditional
+                     1
+                     (name x~2 `int`)
+                     (name y~3 `int`)))))
+         (compound-statement
+            (definition x~4 `short` 42)
+            (definition y~5 `short` 27)
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (conditional
+                     0
+                     (name x~4 `short`)
+                     (name y~5 `short`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (conditional
+                     1
+                     (name x~4 `short`)
+                     (name y~5 `short`)))))
+         (compound-statement
+            (definition x~6 `long` 42)
+            (definition y~7 `long` 27)
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%ld\n")
+                  (conditional
+                     0
+                     (name x~6 `long`)
+                     (name y~7 `long`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%ld\n")
+                  (conditional
+                     1
+                     (name x~6 `long`)
+                     (name y~7 `long`))))))))
+
+----- stderr -----
