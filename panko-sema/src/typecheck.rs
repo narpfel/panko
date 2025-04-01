@@ -2208,6 +2208,7 @@ fn typeck_expression<'a>(
                         /* && !operand.is_bitfield() && !operand.has_register_storage_class() */;
                     if !(is_function_designator || is_lvalue) {
                         // TODO: update error message for bitfields and `register` storage class
+                        // TODO: this should be the correct type, not `Type::Error` or `void`
                         sess.emit(Diagnostic::CannotTakeAddress {
                             at: operand,
                             reason: "not an lvalue",
