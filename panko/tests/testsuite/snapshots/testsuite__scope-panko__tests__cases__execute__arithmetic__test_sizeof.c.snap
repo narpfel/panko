@@ -75,6 +75,14 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~4 `ptr<ptr<char>>`) 1))
                (sizeof (sizeof 42))))
+         (expression
+            (generic
+               (sizeof `int`)
+               (assoc `unsigned long` 0)))
+         (expression
+            (generic
+               (sizeof 42)
+               (assoc `unsigned long` 0)))
          (definition p~5 `ptr<int>`
             (call (name calloc~1 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`)
                1

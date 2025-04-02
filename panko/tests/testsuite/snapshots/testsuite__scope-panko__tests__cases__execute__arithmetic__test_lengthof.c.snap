@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arithmetic/test_lengthof.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (expression
+            (generic
+               (lengthof `array<int; 42>`)
+               (assoc `unsigned long` 0)))
+         (definition xs~1 `array<int; ∅>`
+            (braced
+               1
+               2))
+         (expression
+            (generic
+               (lengthof (name xs~1 `array<int; ∅>`))
+               (assoc `unsigned long` 0)))
+         (return (lengthof (name xs~1 `array<int; ∅>`))))))
+
+----- stderr -----

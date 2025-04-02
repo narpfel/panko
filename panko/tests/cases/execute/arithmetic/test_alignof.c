@@ -23,4 +23,7 @@ int main(int, char** argv) {
     printf(*(argv + 1), alignof(long long));
     // [[print: 8]]
     printf(*(argv + 1), alignof(void*));
+
+    // TODO: this should be `size_t`
+    _Generic(alignof(int), unsigned long: 0);
 }

@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/arithmetic/test_lengthof.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (expression (0 `int` @0))
+         (definition (xs~1 `array<int; 2>` @0)
+            (braced
+               (subobject +0 (1 `int` @0))
+               (subobject +4 (2 `int` @4))))
+         (expression (0 `int` @8))
+         (return (truncate `int` @8 (2 `unsigned long` @16))))))
+
+----- stderr -----

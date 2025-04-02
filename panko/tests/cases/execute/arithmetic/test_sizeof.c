@@ -35,6 +35,10 @@ int main(int, char** argv) {
     // [[print: 8]]
     printf(*(argv + 1), sizeof sizeof 42);
 
+    // TODO: this should be `size_t`
+    _Generic(sizeof(int), unsigned long: 0);
+    _Generic(sizeof 42, unsigned long: 0);
+
     int* p = calloc(1, sizeof *p);
     return *p + sizeof &calloc;
 }

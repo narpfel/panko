@@ -103,6 +103,8 @@ exit_code: 0
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
                (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` `ptr<ptr<char>>` (argv~4 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
                (sizeof `unsigned long` 8 (sizeof `unsigned long` 4 (42 `int`)))))
+         (expression (0 `int`))
+         (expression (0 `int`))
          (definition p~5 `ptr<int>`
             (noop-type-conversion `ptr<int>`
                (call `ptr<void>`

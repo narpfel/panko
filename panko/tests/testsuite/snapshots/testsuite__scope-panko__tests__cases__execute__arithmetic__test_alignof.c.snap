@@ -57,6 +57,10 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
-               (alignof `ptr<void>`))))))
+               (alignof `ptr<void>`)))
+         (expression
+            (generic
+               (alignof `int`)
+               (assoc `unsigned long` 0))))))
 
 ----- stderr -----

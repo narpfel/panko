@@ -159,6 +159,8 @@ exit_code: 0
                         (argv~4 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (8 `unsigned long` @48)))
+         (expression (0 `int` @16))
+         (expression (0 `int` @16))
          (definition (p~5 `ptr<int>` @16)
             (noop-type-conversion `ptr<int>` @16
                (call `ptr<void>` @16

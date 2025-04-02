@@ -117,6 +117,7 @@ exit_code: 0
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~3 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
-               (8 `unsigned long` @48))))))
+               (8 `unsigned long` @48)))
+         (expression (0 `int` @16)))))
 
 ----- stderr -----
