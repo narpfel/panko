@@ -455,7 +455,7 @@ enum Diagnostic<'a> {
         actual_ty: ArrayType<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
     },
 
-    #[error("incompatible operand types in conditional expression")]
+    #[error("incompatible operand types in conditional expression{note}")]
     #[diagnostics(
         at(colour = Blue),
         then(colour = Red, label = "this is of type `{then_ty}`"),
@@ -464,9 +464,14 @@ enum Diagnostic<'a> {
     #[with(
         then_ty = then.ty.ty,
         or_else_ty = or_else.ty.ty,
+        note = match note {
+            Some(note) => format!(" {note}"),
+            None => String::from(""),
+        },
     )]
     ConditionalExprOperandTypesIncompatible {
         at: Token<'a>,
+        note: Option<&'a str>,
         then: TypedExpression<'a>,
         or_else: TypedExpression<'a>,
     },
@@ -2616,11 +2621,16 @@ fn typeck_expression<'a>(
                         },
                         loc: Loc::synthesised(),
                     })),
-                (Type::Pointer(_), Type::Pointer(_)) => todo!(
-                    "type error: pointer type mismatch: `{}` != `{}`",
-                    then.ty.ty,
-                    or_else.ty.ty,
-                ),
+                (Type::Pointer(_), Type::Pointer(_)) => {
+                    // TODO: use this error
+                    let () = sess.emit(Diagnostic::ConditionalExprOperandTypesIncompatible {
+                        at: *question_mark,
+                        note: Some("(pointers are compatible if they point to compatible types)"),
+                        then,
+                        or_else,
+                    });
+                    then.ty.ty
+                }
                 (Type::Array(_), _) | (_, Type::Array(_)) => unreachable!(),
                 (Type::Function(_), _) | (_, Type::Function(_)) => unreachable!(),
                 (Type::Arithmetic(_), Type::Pointer(_) | Type::Void)
@@ -2629,6 +2639,7 @@ fn typeck_expression<'a>(
                     // TODO: use this error
                     let () = sess.emit(Diagnostic::ConditionalExprOperandTypesIncompatible {
                         at: *question_mark,
+                        note: None,
                         then,
                         or_else,
                     });

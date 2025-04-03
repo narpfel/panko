@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_incompatible_pointer_types_in_conditional.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: incompatible operand types in conditional expression (pointers are compatible if they point to compatible types)
+   ╭─[panko/tests/cases/test_error_incompatible_pointer_types_in_conditional.c:4:7]
+   │
+ 4 │     1 ? p : c;
+   │       ─ ┬   ┬  
+   │         │   ╰── this is of type `ptr<char const>`
+   │         │      
+   │         ╰────── this is of type `ptr<int const>`
+───╯

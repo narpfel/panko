@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/test_error_incompatible_pointer_types_in_conditional.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition p~1 `ptr<int const>` ∅)
+         (definition c~2 `ptr<char const>` ∅)
+         (expression
+            (conditional
+               1
+               (name p~1 `ptr<int const>`)
+               (name c~2 `ptr<char const>`))))))
+
+----- stderr -----
