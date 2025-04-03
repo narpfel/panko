@@ -3,9 +3,9 @@ source: panko/tests/testsuite/main.rs
 info:
   program: panko
   args:
-    - "--print=typeck"
-    - "--stop-after=typeck"
-    - panko/tests/cases/test_error_incompatible_operand_types_in_conditions.c
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/test_error_incompatible_operand_types_in_conditional.c
 ---
 success: false
 exit_code: 1
@@ -13,7 +13,7 @@ exit_code: 1
 
 ----- stderr -----
 Error: incompatible operand types in conditional expression
-   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditions.c:6:7]
+   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditional.c:6:7]
    │
  6 │     1 ? void_function() : 42;
    │       ─ ───────┬───────   ─┬  
@@ -23,7 +23,7 @@ Error: incompatible operand types in conditional expression
 ───╯
 
 Error: invalid implicit conversion from `int` to `void`
-   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditions.c:6:27]
+   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditional.c:6:27]
    │
  6 │     1 ? void_function() : 42;
    │                           ─┬  
@@ -31,7 +31,7 @@ Error: invalid implicit conversion from `int` to `void`
 ───╯
 
 Error: incompatible operand types in conditional expression
-   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditions.c:7:7]
+   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditional.c:7:7]
    │
  7 │     2 ? ptr_function() : 42;
    │       ─ ───────┬──────   ─┬  
@@ -41,7 +41,7 @@ Error: incompatible operand types in conditional expression
 ───╯
 
 Error: invalid implicit conversion from `int` to `ptr<int>`
-   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditions.c:7:26]
+   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditional.c:7:26]
    │
  7 │     2 ? ptr_function() : 42;
    │                          ─┬  
@@ -49,7 +49,7 @@ Error: invalid implicit conversion from `int` to `ptr<int>`
 ───╯
 
 Error: incompatible operand types in conditional expression
-   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditions.c:8:7]
+   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditional.c:8:7]
    │
  8 │     3 ? 27 : void_function();
    │       ─ ─┬   ───────┬───────  
@@ -59,7 +59,7 @@ Error: incompatible operand types in conditional expression
 ───╯
 
 Error: invalid implicit conversion from `void` to `int`
-   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditions.c:8:14]
+   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditional.c:8:14]
    │
  8 │     3 ? 27 : void_function();
    │              ───────┬───────  
@@ -67,7 +67,7 @@ Error: invalid implicit conversion from `void` to `int`
 ───╯
 
 Error: incompatible operand types in conditional expression
-   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditions.c:9:7]
+   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditional.c:9:7]
    │
  9 │     4 ? 27 : ptr_function();
    │       ─ ─┬   ───────┬──────  
@@ -77,7 +77,7 @@ Error: incompatible operand types in conditional expression
 ───╯
 
 Error: invalid implicit conversion from `ptr<int>` to `int`
-   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditions.c:9:14]
+   ╭─[panko/tests/cases/test_error_incompatible_operand_types_in_conditional.c:9:14]
    │
  9 │     4 ? 27 : ptr_function();
    │              ───────┬──────  
