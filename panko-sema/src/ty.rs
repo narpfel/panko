@@ -5,6 +5,7 @@ use std::hash::Hasher;
 
 use bumpalo::Bump;
 use itertools::Itertools as _;
+use panko_lex::EncodingPrefix;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser::NO_VALUE;
@@ -208,7 +209,7 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
         }))
     }
 
-    pub fn int() -> Self {
+    pub const fn int() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Signed,
             kind: IntegralKind::Int,
@@ -237,6 +238,32 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
             signedness: Signedness::Unsigned,
             kind: IntegralKind::Long,
         }))
+    }
+
+    pub(crate) const fn char_constant_ty(encoding_prefix: EncodingPrefix) -> Self {
+        match encoding_prefix {
+            EncodingPrefix::None => Self::int(),
+            EncodingPrefix::Utf8 => Self::char8_t(),
+            EncodingPrefix::Utf16 => Self::char16_t(),
+            EncodingPrefix::Utf32 => Self::char32_t(),
+            EncodingPrefix::Wchar => Self::wchar_t(),
+        }
+    }
+
+    const fn char8_t() -> Self {
+        Self::uchar()
+    }
+
+    const fn char16_t() -> Self {
+        Self::ushort()
+    }
+
+    const fn char32_t() -> Self {
+        Self::uint()
+    }
+
+    const fn wchar_t() -> Self {
+        Self::int()
     }
 
     pub fn unqualified(&self) -> QualifiedType<'a, TypeofExpr, LengthExpr>

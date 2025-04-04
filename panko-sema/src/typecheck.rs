@@ -12,6 +12,7 @@ use ariadne::Fmt as _;
 use indexmap::IndexMap;
 use itertools::EitherOrBoth;
 use itertools::Itertools as _;
+use panko_lex::EncodingPrefix;
 use panko_lex::Integer;
 use panko_lex::IntegerSuffix;
 use panko_lex::Loc;
@@ -2028,11 +2029,33 @@ gen fn parse_escape_sequences(mut chars: Chars<'_>) -> char {
     }
 }
 
-fn parse_char_literal(char: &Token) -> Option<u64> {
-    Some(u64::from(
+fn parse_char_literal<'a>(sess: &'a Session<'a>, char: &Token<'a>) -> TypedExpression<'a> {
+    let TokenKind::CharConstant(encoding_prefix) = char.kind
+    else {
+        unreachable!()
+    };
+    let ty = Type::char_constant_ty(encoding_prefix);
+    // TODO: check that escape sequence values are in range
+    let values = parse_escape_sequences(
+        char.slice()[encoding_prefix.len() + 1..char.slice().len() - 1].chars(),
+    )
+    .collect_vec();
+
+    let expr = if let EncodingPrefix::Utf8 | EncodingPrefix::Utf16 | EncodingPrefix::Utf32 =
+        encoding_prefix
+        && values.len() > 1
+    {
+        todo!("error: shall not contain more than one character")
+    }
+    else {
         // TODO: handle multichar character constants
-        parse_escape_sequences(char.slice()[1..char.slice().len() - 1].chars()).next()?,
-    ))
+        match values.first() {
+            Some(value) => Expression::Integer { value: u64::from(*value), token: *char },
+            None => sess.emit(Diagnostic::EmptyCharConstant { at: *char }),
+        }
+    };
+
+    TypedExpression { ty: ty.unqualified(), expr }
 }
 
 fn parse_string_literal<'a>(sess: &'a Session<'a>, tokens: &[Token<'a>]) -> StringLiteral<'a> {
@@ -2114,13 +2137,7 @@ fn typeck_expression<'a>(
                 },
             }
         }
-        scope::Expression::CharConstant(char) => TypedExpression {
-            ty: Type::int().unqualified(),
-            expr: match parse_char_literal(char) {
-                Some(value) => Expression::Integer { value, token: *char },
-                None => sess.emit(Diagnostic::EmptyCharConstant { at: *char }),
-            },
-        },
+        scope::Expression::CharConstant(char) => parse_char_literal(sess, char),
         scope::Expression::String(tokens) => {
             let string = parse_string_literal(sess, tokens);
             TypedExpression {

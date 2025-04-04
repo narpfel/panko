@@ -206,6 +206,41 @@ pub struct Integer {
     pub prefix_len: usize,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum EncodingPrefix {
+    None,
+    Utf8,
+    Utf16,
+    Utf32,
+    Wchar,
+}
+
+impl EncodingPrefix {
+    #[expect(clippy::len_without_is_empty, reason = "`Self` is not a container`")]
+    pub fn len(self) -> usize {
+        match self {
+            Self::None => 0,
+            Self::Utf8 => 2,
+            Self::Utf16 => 1,
+            Self::Utf32 => 1,
+            Self::Wchar => 1,
+        }
+    }
+}
+
+fn lex_encoding_prefix(lexer: &mut Lexer<TokenKind>) -> EncodingPrefix {
+    // the slice it at least two bytes long due to opening and closing quotes
+    let bytes = lexer.slice().as_bytes();
+    let maybe_prefix = (bytes[0], bytes[1]);
+    match maybe_prefix {
+        (b'u', b'8') => EncodingPrefix::Utf8,
+        (b'u', _) => EncodingPrefix::Utf16,
+        (b'U', _) => EncodingPrefix::Utf32,
+        (b'L', _) => EncodingPrefix::Wchar,
+        _ => EncodingPrefix::None,
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Logos)]
 #[logos(skip r"[ \n\r\t\f]+")]
 #[logos(skip r"//[^\n]*\n?")]
@@ -347,8 +382,11 @@ pub enum TokenKind {
     #[regex("0('?[0-7])*", |lexer| lex_integer(lexer, 8))]
     Integer(Integer),
 
-    #[regex(r#"'([^'\\\n]|\\(['"?\\abfnrtv]|[0-7]{1,3}|x[0-9a-fA-F]+))*'"#)]
-    CharConstant,
+    #[regex(
+        r#"(u8|u|U|L)?'([^'\\\n]|\\(['"?\\abfnrtv]|[0-7]{1,3}|x[0-9a-fA-F]+))*'"#,
+        lex_encoding_prefix
+    )]
+    CharConstant(EncodingPrefix),
 
     #[token("alignas")]
     #[token("_Alignas")]

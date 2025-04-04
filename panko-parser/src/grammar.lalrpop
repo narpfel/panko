@@ -116,7 +116,7 @@ extern {
 
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
         Integer => Token { kind: panko_lex::TokenKind::Integer(_), .. },
-        CharConstant => Token { kind: panko_lex::TokenKind::CharConstant, .. },
+        CharConstant => Token { kind: panko_lex::TokenKind::CharConstant(_), .. },
         String => Token { kind: panko_lex::TokenKind::String, .. },
     }
 }
