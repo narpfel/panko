@@ -437,6 +437,18 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "this character constant is empty"))]
     EmptyCharConstant { at: Token<'a> },
 
+    #[error("{kind} character constant may not contain multiple characters")]
+    #[diagnostics(at(colour = Red, label = "this character constant contains {len} characters"))]
+    #[with(
+        kind = prefix.encoding(),
+        len = len.fg(Red),
+    )]
+    UnicodeCharConstantWithMoreThanOneCharacter {
+        at: Token<'a>,
+        prefix: EncodingPrefix,
+        len: usize,
+    },
+
     #[error("array of inappropriate type `{actual_ty}` initialised by string literal")]
     #[diagnostics(
         actual_ty(colour = Red, label = "this is an array of `{element_ty}`"),
@@ -2045,7 +2057,11 @@ fn parse_char_literal<'a>(sess: &'a Session<'a>, char: &Token<'a>) -> TypedExpre
         encoding_prefix
         && values.len() > 1
     {
-        todo!("error: shall not contain more than one character")
+        sess.emit(Diagnostic::UnicodeCharConstantWithMoreThanOneCharacter {
+            at: *char,
+            prefix: encoding_prefix,
+            len: values.len(),
+        })
     }
     else {
         // TODO: handle multichar character constants

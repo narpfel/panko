@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/literal/test_error_prefixed_char_constant_with_multiple_characters.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: UTF-8 character constant may not contain multiple characters
+   ╭─[panko/tests/cases/literal/test_error_prefixed_char_constant_with_multiple_characters.c:2:5]
+   │
+ 2 │     u8'ab\1234';
+   │     ─────┬─────  
+   │          ╰─────── this character constant contains 4 characters
+───╯
+
+Error: UTF-16 character constant may not contain multiple characters
+   ╭─[panko/tests/cases/literal/test_error_prefixed_char_constant_with_multiple_characters.c:3:5]
+   │
+ 3 │     u'ab';
+   │     ──┬──  
+   │       ╰──── this character constant contains 2 characters
+───╯
+
+Error: UTF-32 character constant may not contain multiple characters
+   ╭─[panko/tests/cases/literal/test_error_prefixed_char_constant_with_multiple_characters.c:4:5]
+   │
+ 4 │     U'ab';
+   │     ──┬──  
+   │       ╰──── this character constant contains 2 characters
+───╯

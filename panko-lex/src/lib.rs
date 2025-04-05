@@ -226,6 +226,15 @@ impl EncodingPrefix {
             Self::Wchar => 1,
         }
     }
+
+    pub fn encoding(self) -> &'static str {
+        match self {
+            EncodingPrefix::Utf8 => "UTF-8",
+            EncodingPrefix::Utf16 => "UTF-16",
+            EncodingPrefix::Utf32 => "UTF-32",
+            EncodingPrefix::None | EncodingPrefix::Wchar => unreachable!(),
+        }
+    }
 }
 
 fn lex_encoding_prefix(lexer: &mut Lexer<TokenKind>) -> EncodingPrefix {
