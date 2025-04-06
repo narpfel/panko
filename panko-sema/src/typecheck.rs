@@ -449,6 +449,28 @@ enum Diagnostic<'a> {
         len: usize,
     },
 
+    #[error(
+        "{kind} character constant contains character that is not encodable in a single {kind} code unit"
+    )]
+    #[diagnostics(
+        at(
+            colour = Red,
+            label = "`{char}` (U+{codepoint:X}) is encoded as {len} code units in {kind}",
+        ),
+    )]
+    #[with(
+        kind = prefix.encoding(),
+        codepoint = u32::from(*char),
+        char = char.fg(Red),
+        len = len.fg(Red),
+    )]
+    UnicodeCharLiteralNotEncodableInSingleCodeUnit {
+        at: Token<'a>,
+        char: char,
+        len: usize,
+        prefix: EncodingPrefix,
+    },
+
     #[error("array of inappropriate type `{actual_ty}` initialised by string literal")]
     #[diagnostics(
         actual_ty(colour = Red, label = "this is an array of `{element_ty}`"),
@@ -2064,9 +2086,25 @@ fn parse_char_literal<'a>(sess: &'a Session<'a>, char: &Token<'a>) -> TypedExpre
         })
     }
     else {
-        // TODO: handle multichar character constants
         match values.first() {
-            Some(value) => Expression::Integer { value: u64::from(*value), token: *char },
+            Some(value) => match encoding_prefix {
+                EncodingPrefix::Utf8 if value.len_utf8() > 1 =>
+                    sess.emit(Diagnostic::UnicodeCharLiteralNotEncodableInSingleCodeUnit {
+                        at: *char,
+                        char: *value,
+                        len: value.len_utf8(),
+                        prefix: encoding_prefix,
+                    }),
+                EncodingPrefix::Utf16 if value.len_utf16() > 1 =>
+                    sess.emit(Diagnostic::UnicodeCharLiteralNotEncodableInSingleCodeUnit {
+                        at: *char,
+                        char: *value,
+                        len: value.len_utf16(),
+                        prefix: encoding_prefix,
+                    }),
+                // TODO: handle multichar character constants
+                _ => Expression::Integer { value: u64::from(*value), token: *char },
+            },
             None => sess.emit(Diagnostic::EmptyCharConstant { at: *char }),
         }
     };
