@@ -2000,9 +2000,87 @@ fn desugar_postfix_increment<'a>(
     }
 }
 
-gen fn parse_escape_sequences(mut chars: Chars<'_>) -> char {
-    let char_from_codepoint = |codepoint| {
-        char::from_u32(codepoint).unwrap_or_else(|| todo!("error: invalid escape sequence"))
+#[derive(Debug, Clone, Copy)]
+enum Char {
+    Codepoint(char),
+    // TODO: this hardcodes the assumption that `wchar_t` will be at most 32 bit long
+    EscapeSequence(u32),
+}
+
+impl Char {
+    fn unwrap_codepoint(self) -> char {
+        match self {
+            Char::Codepoint(c) => c,
+            Char::EscapeSequence(_) => panic!(),
+        }
+    }
+
+    fn len_utf8(self) -> usize {
+        match self {
+            Char::Codepoint(c) => c.len_utf8(),
+            Char::EscapeSequence(_) => 1,
+        }
+    }
+
+    fn len_utf16(self) -> usize {
+        match self {
+            Char::Codepoint(c) => c.len_utf16(),
+            Char::EscapeSequence(_) => 1,
+        }
+    }
+
+    gen fn encode_utf8(self) -> u8 {
+        match self {
+            Char::Codepoint(c) => {
+                let mut storage = [0; char::MAX_LEN_UTF8];
+                let encoded = c.encode_utf8(&mut storage);
+                #[expect(
+                    clippy::needless_range_loop,
+                    reason = "cannot hold references over `yield` points"
+                )]
+                for i in 0..encoded.len() {
+                    yield storage[i];
+                }
+            }
+            Char::EscapeSequence(value) => {
+                yield value as u8;
+            }
+        };
+    }
+}
+
+impl From<Char> for u64 {
+    fn from(value: Char) -> Self {
+        match value {
+            Char::Codepoint(c) => Self::from(c),
+            Char::EscapeSequence(value) => Self::from(value),
+        }
+    }
+}
+
+gen fn parse_escape_sequences(mut chars: Chars<'_>, encoding_prefix: EncodingPrefix) -> Char {
+    let char_from_escape_sequence = move |value| {
+        let escape_sequence_ty = Type::escape_sequence_ty(encoding_prefix);
+        let codepoint = if escape_sequence_ty.can_represent(value) {
+            match encoding_prefix {
+                EncodingPrefix::None => i32::from(
+                    u8::try_from(value)
+                        .unwrap_or_else(|_| unreachable!())
+                        .cast_signed(),
+                )
+                .cast_unsigned(),
+                EncodingPrefix::Utf8
+                | EncodingPrefix::Utf16
+                | EncodingPrefix::Utf32
+                | EncodingPrefix::Wchar => value,
+            }
+        }
+        else {
+            todo!(
+                "error message: escape sequence value {value} out of range for type `{escape_sequence_ty}` of {encoding_prefix:?}-prefixed literal",
+            );
+        };
+        Char::EscapeSequence(codepoint)
     };
 
     while let Some(c) = chars.next() {
@@ -2010,38 +2088,38 @@ gen fn parse_escape_sequences(mut chars: Chars<'_>) -> char {
             '\\' =>
                 yield match chars.next() {
                     None => unreachable!(),
-                    Some('\'') => '\'',
-                    Some('"') => '"',
-                    Some('?') => '?',
-                    Some('\\') => '\\',
-                    Some('a') => '\x07',
-                    Some('b') => '\x08',
-                    Some('f') => '\x0c',
-                    Some('n') => '\n',
-                    Some('r') => '\r',
-                    Some('t') => '\t',
-                    Some('v') => '\x0b',
+                    Some('\'') => Char::Codepoint('\''),
+                    Some('"') => Char::Codepoint('"'),
+                    Some('?') => Char::Codepoint('?'),
+                    Some('\\') => Char::Codepoint('\\'),
+                    Some('a') => Char::Codepoint('\x07'),
+                    Some('b') => Char::Codepoint('\x08'),
+                    Some('f') => Char::Codepoint('\x0c'),
+                    Some('n') => Char::Codepoint('\n'),
+                    Some('r') => Char::Codepoint('\r'),
+                    Some('t') => Char::Codepoint('\t'),
+                    Some('v') => Char::Codepoint('\x0b'),
                     Some(oct_digit @ '0'..='7') => {
                         let value = oct_digit.to_digit(8).unwrap();
                         match chars.next() {
-                            None => char_from_codepoint(value),
+                            None => char_from_escape_sequence(value),
                             Some(oct_digit @ '0'..='7') => {
                                 let value = value * 8 + oct_digit.to_digit(8).unwrap();
                                 match chars.next() {
-                                    None => char_from_codepoint(value),
+                                    None => char_from_escape_sequence(value),
                                     Some(oct_digit @ '0'..='7') => {
                                         let value = value * 8 + oct_digit.to_digit(8).unwrap();
-                                        char_from_codepoint(value)
+                                        char_from_escape_sequence(value)
                                     }
                                     Some(c) => {
-                                        yield char_from_codepoint(value);
-                                        c
+                                        yield char_from_escape_sequence(value);
+                                        Char::Codepoint(c)
                                     }
                                 }
                             }
                             Some(c) => {
-                                yield char_from_codepoint(value);
-                                c
+                                yield char_from_escape_sequence(value);
+                                Char::Codepoint(c)
                             }
                         }
                     }
@@ -2052,13 +2130,13 @@ gen fn parse_escape_sequences(mut chars: Chars<'_>) -> char {
                         let (digits, rest) = s.split_at(split_point);
                         chars = rest.chars();
                         match u32::from_str_radix(digits, 16) {
-                            Ok(codepoint) => char_from_codepoint(codepoint),
+                            Ok(codepoint) => char_from_escape_sequence(codepoint),
                             Err(_) => unreachable!(),
                         }
                     }
                     Some(_) => todo!("error: invalid escape sequence"),
                 },
-            c => yield c,
+            c => yield Char::Codepoint(c),
         }
     }
 }
@@ -2072,6 +2150,7 @@ fn parse_char_literal<'a>(sess: &'a Session<'a>, char: &Token<'a>) -> TypedExpre
     // TODO: check that escape sequence values are in range
     let values = parse_escape_sequences(
         char.slice()[encoding_prefix.len() + 1..char.slice().len() - 1].chars(),
+        encoding_prefix,
     )
     .collect_vec();
 
@@ -2091,14 +2170,14 @@ fn parse_char_literal<'a>(sess: &'a Session<'a>, char: &Token<'a>) -> TypedExpre
                 EncodingPrefix::Utf8 if value.len_utf8() > 1 =>
                     sess.emit(Diagnostic::UnicodeCharLiteralNotEncodableInSingleCodeUnit {
                         at: *char,
-                        char: *value,
+                        char: value.unwrap_codepoint(),
                         len: value.len_utf8(),
                         prefix: encoding_prefix,
                     }),
                 EncodingPrefix::Utf16 if value.len_utf16() > 1 =>
                     sess.emit(Diagnostic::UnicodeCharLiteralNotEncodableInSingleCodeUnit {
                         at: *char,
-                        char: *value,
+                        char: value.unwrap_codepoint(),
                         len: value.len_utf16(),
                         prefix: encoding_prefix,
                     }),
@@ -2113,11 +2192,19 @@ fn parse_char_literal<'a>(sess: &'a Session<'a>, char: &Token<'a>) -> TypedExpre
 }
 
 fn parse_string_literal<'a>(sess: &'a Session<'a>, tokens: &[Token<'a>]) -> StringLiteral<'a> {
-    let value: String = tokens
+    let value: Vec<u8> = tokens
         .iter()
-        .flat_map(|token| parse_escape_sequences(token.slice()[1..token.slice().len() - 1].chars()))
-        .chain(std::iter::once('\0'))
+        .flat_map(|token| {
+            parse_escape_sequences(
+                token.slice()[1..token.slice().len() - 1].chars(),
+                EncodingPrefix::None,
+            )
+        })
+        .chain(std::iter::once(Char::Codepoint('\0')))
+        .flat_map(|c| c.encode_utf8())
         .collect();
+    // TODO: pass through invalid UTF-8
+    let value = String::from_utf8_lossy(&value);
     StringLiteral {
         value: sess.alloc_str(&value),
         loc: tokens

@@ -250,20 +250,41 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
         }
     }
 
-    const fn char8_t() -> Self {
+    pub(crate) fn escape_sequence_ty(encoding_prefix: EncodingPrefix) -> Self {
+        match encoding_prefix {
+            EncodingPrefix::None => Type::uchar(),
+            EncodingPrefix::Utf8 => Type::char8_t(),
+            EncodingPrefix::Utf16 => Type::char16_t(),
+            EncodingPrefix::Utf32 => Type::char32_t(),
+            EncodingPrefix::Wchar => Type::wchar_t().make_unsigned(),
+        }
+    }
+
+    pub(crate) const fn char8_t() -> Self {
         Self::uchar()
     }
 
-    const fn char16_t() -> Self {
+    pub(crate) const fn char16_t() -> Self {
         Self::ushort()
     }
 
-    const fn char32_t() -> Self {
+    pub(crate) const fn char32_t() -> Self {
         Self::uint()
     }
 
-    const fn wchar_t() -> Self {
+    pub(crate) const fn wchar_t() -> Self {
         Self::int()
+    }
+
+    pub(crate) const fn make_unsigned(&self) -> Self {
+        match self {
+            Self::Arithmetic(Arithmetic::Integral(Integral { signedness: _, kind })) =>
+                Self::Arithmetic(Arithmetic::Integral(Integral {
+                    signedness: Signedness::Unsigned,
+                    kind: *kind,
+                })),
+            _ => panic!("cannot make self unsigned (not an integral type)"),
+        }
     }
 
     pub fn unqualified(&self) -> QualifiedType<'a, TypeofExpr, LengthExpr>
@@ -356,6 +377,23 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Array(ArrayType { ty: _, length, loc: _ }) => length.is_known(),
             Type::Void => false,
             Type::Typeof { expr, unqual: _ } => match *expr {},
+        }
+    }
+
+    pub(crate) fn can_represent<T>(&self, value: T) -> bool
+    where
+        i8: TryFrom<T>,
+        i16: TryFrom<T>,
+        i32: TryFrom<T>,
+        i64: TryFrom<T>,
+        u8: TryFrom<T>,
+        u16: TryFrom<T>,
+        u32: TryFrom<T>,
+        u64: TryFrom<T>,
+    {
+        match self {
+            Self::Arithmetic(Arithmetic::Integral(integral)) => integral.can_represent(value),
+            _ => false,
         }
     }
 }
