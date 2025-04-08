@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/literal/test_error_prefixed_char_constant_with_multiple_code_units.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (expression u8'ä')
+         (expression u'ä')
+         (expression U'ä')
+         (expression u8'ゆ')
+         (expression u'ゆ')
+         (expression U'ゆ')
+         (expression u8'🐌')
+         (expression u'🐌')
+         (expression U'🐌'))))
+
+----- stderr -----

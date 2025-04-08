@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/literal/test_error_prefixed_char_constant_with_multiple_code_units.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: UTF-8 character constant contains character that is not encodable in a single UTF-8 code unit
+   ╭─[panko/tests/cases/literal/test_error_prefixed_char_constant_with_multiple_code_units.c:2:5]
+   │
+ 2 │     u8'ä';
+   │     ──┬──  
+   │       ╰──── `ä` (U+E4) is encoded as 2 code units in UTF-8
+───╯
+
+Error: UTF-8 character constant contains character that is not encodable in a single UTF-8 code unit
+   ╭─[panko/tests/cases/literal/test_error_prefixed_char_constant_with_multiple_code_units.c:7:5]
+   │
+ 7 │     u8'ゆ';
+   │     ──┬───  
+   │       ╰───── `ゆ` (U+3086) is encoded as 3 code units in UTF-8
+───╯
+
+Error: UTF-8 character constant contains character that is not encodable in a single UTF-8 code unit
+    ╭─[panko/tests/cases/literal/test_error_prefixed_char_constant_with_multiple_code_units.c:12:5]
+    │
+ 12 │     u8'🐌';
+    │     ──┬───  
+    │       ╰───── `🐌` (U+1F40C) is encoded as 4 code units in UTF-8
+────╯
+
+Error: UTF-16 character constant contains character that is not encodable in a single UTF-16 code unit
+    ╭─[panko/tests/cases/literal/test_error_prefixed_char_constant_with_multiple_code_units.c:13:5]
+    │
+ 13 │     u'🐌';
+    │     ──┬──  
+    │       ╰──── `🐌` (U+1F40C) is encoded as 2 code units in UTF-16
+────╯
