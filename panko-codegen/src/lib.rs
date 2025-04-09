@@ -1,9 +1,12 @@
+#![feature(bstr)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(let_chains)]
 #![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
 
 use std::borrow::Cow;
+use std::bstr::ByteStr;
+use std::bstr::ByteString;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Write as _;
@@ -198,7 +201,7 @@ struct Codegen<'a> {
     current_function: Option<&'a FunctionDefinition<'a>>,
     code: String,
     // TODO: could use an `IndexSet` here to deduplicate
-    strings: Vec<(StaticId, Cow<'a, str>)>,
+    strings: Vec<(StaticId, Cow<'a, ByteStr>)>,
     next_label_id: u64,
     debug: bool,
     linenos: Linenos<'a>,
@@ -244,7 +247,7 @@ impl<'a> Codegen<'a> {
         writeln!(self.code, "    .byte {}", constant.iter().format(", ")).unwrap();
     }
 
-    fn string(&mut self, s: Cow<'a, str>) -> StaticId {
+    fn string(&mut self, s: Cow<'a, ByteStr>) -> StaticId {
         let id = StaticId(self.strings.len().try_into().unwrap());
         self.strings.push((id, s));
         id
@@ -442,9 +445,9 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    fn string_literal_definition(&mut self, id: StaticId, value: &str) {
+    fn string_literal_definition(&mut self, id: StaticId, value: &ByteStr) {
         // `.asciz` adds a null terminator, so we can optionally remove one here
-        let value = value.strip_suffix('\0').unwrap_or(value);
+        let value = value.strip_suffix(b"\0").unwrap_or(value);
 
         self.block(2);
         let name = format!(".L.{id}");
@@ -455,7 +458,7 @@ impl<'a> Codegen<'a> {
         self.directive("align", &[&1]);
         self.label(&name);
         self.code.push_str(".asciz \"");
-        for byte in value.bytes() {
+        for &byte in value {
             if byte.is_ascii_graphic() || byte == b' ' {
                 write!(&mut self.code, "{}", char::from(byte).escape_default()).unwrap();
             }
@@ -583,7 +586,7 @@ impl<'a> Codegen<'a> {
         &mut self,
         target: &dyn AsOperand,
         should_zero: ShouldZero,
-        string: &'a str,
+        string: &'a ByteStr,
     ) {
         let target_size = target.size();
         let string_len = u64::try_from(string.len()).unwrap();
@@ -603,7 +606,7 @@ impl<'a> Codegen<'a> {
         self.at(expr.loc);
         match expr.expr {
             Expression::Error(error) => {
-                let id = self.string(error.to_string().into());
+                let id = self.string(ByteString(error.to_string().into_bytes()).into());
                 self.emit_args("lea", &[&Rdi, &id]);
                 self.emit("mov rsi, qword ptr [rip + stderr@gotpcrel]");
                 self.emit("mov rsi, [rsi]");

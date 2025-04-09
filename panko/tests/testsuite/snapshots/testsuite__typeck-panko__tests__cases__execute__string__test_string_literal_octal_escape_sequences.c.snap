@@ -80,7 +80,7 @@ exit_code: 0
             (noop-type-conversion `ptr<char const>`
                (noop-type-conversion `ptr<char>`
                   (addressof `ptr<array<char; 3>>`
-                     (string `array<char; 3>` "\u{1}1\0")))))
+                     (string `array<char; 3>` "\x011\0")))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

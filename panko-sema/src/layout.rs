@@ -1,3 +1,5 @@
+use std::bstr::ByteStr;
+
 use bumpalo::Bump;
 use panko_lex::Loc;
 use panko_parser as cst;
@@ -113,7 +115,7 @@ pub enum Expression<'a> {
     Error(&'a dyn Report),
     Name(Reference<'a>),
     Integer(u64),
-    String(&'a str),
+    String(&'a ByteStr),
     NoopTypeConversion(&'a LayoutedExpression<'a>),
     Truncate(&'a LayoutedExpression<'a>),
     SignExtend(&'a LayoutedExpression<'a>),

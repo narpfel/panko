@@ -25,7 +25,7 @@ exit_code: 0
                         (string `array<char; 4>` @void "%s\n\0"))))
                (noop-type-conversion `ptr<char>` @24
                   (addressof `ptr<array<char; 12>>` @24
-                     (string `array<char; 12>` @void "abc?\"'\\'def\0")))))
+                     (string `array<char; 12>` @void "abc?\"\'\\\'def\0")))))
          (return (truncate `int` @0 (2 `unsigned long` @8))))))
 
 ----- stderr -----

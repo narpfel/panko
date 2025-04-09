@@ -1,3 +1,4 @@
+#![feature(bstr)]
 #![feature(char_max_len)]
 #![feature(cmp_minmax)]
 #![feature(gen_blocks)]

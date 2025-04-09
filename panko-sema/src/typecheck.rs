@@ -1,3 +1,4 @@
+use std::bstr::ByteStr;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
@@ -658,12 +659,12 @@ pub(crate) struct TypedExpression<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct StringLiteral<'a> {
-    value: &'a str,
+    value: &'a ByteStr,
     loc: Loc<'a>,
 }
 
 impl<'a> StringLiteral<'a> {
-    pub(crate) fn value(&self) -> &'a str {
+    pub(crate) fn value(&self) -> &'a ByteStr {
         self.value
     }
 
@@ -2203,10 +2204,8 @@ fn parse_string_literal<'a>(sess: &'a Session<'a>, tokens: &[Token<'a>]) -> Stri
         .chain(std::iter::once(Char::Codepoint('\0')))
         .flat_map(|c| c.encode_utf8())
         .collect();
-    // TODO: pass through invalid UTF-8
-    let value = String::from_utf8_lossy(&value);
     StringLiteral {
-        value: sess.alloc_str(&value),
+        value: ByteStr::new(sess.alloc_slice_copy(&value)),
         loc: tokens
             .first()
             .unwrap()
