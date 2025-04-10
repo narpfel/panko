@@ -1,3 +1,4 @@
+#![feature(assert_matches)]
 #![feature(bstr)]
 #![feature(char_max_len)]
 #![feature(cmp_minmax)]

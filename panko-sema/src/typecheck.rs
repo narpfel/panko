@@ -1,3 +1,4 @@
+use std::assert_matches::assert_matches;
 use std::bstr::ByteStr;
 use std::cmp::Ordering;
 use std::fmt;
@@ -1595,11 +1596,11 @@ fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) 
             larger_ty
         }
         else if larger_ty.size() > smaller_ty.size() {
-            assert!(matches!(larger_ty.signedness(), Signedness::Signed));
+            assert_matches!(larger_ty.signedness(), Signedness::Signed);
             larger_ty
         }
         else {
-            assert!(matches!(larger_ty.signedness(), Signedness::Signed));
+            assert_matches!(larger_ty.signedness(), Signedness::Signed);
             #[expect(irrefutable_let_patterns)]
             let Arithmetic::Integral(Integral { signedness: _, kind }) = larger_ty
             else {
@@ -1739,10 +1740,7 @@ fn typeck_integral_shift<'a>(
     lhs_ty: Arithmetic,
     rhs_ty: Arithmetic,
 ) -> TypedExpression<'a> {
-    assert!(matches!(
-        op.kind,
-        BinOpKind::LeftShift | BinOpKind::RightShift,
-    ));
+    assert_matches!(op.kind, BinOpKind::LeftShift | BinOpKind::RightShift);
     let lhs_ty @ Arithmetic::Integral(lhs_integral) = integral_promote(lhs_ty);
     let lhs_ty = Type::Arithmetic(lhs_ty).unqualified();
     let rhs_ty = Type::Arithmetic(integral_promote(rhs_ty)).unqualified();
@@ -1781,11 +1779,8 @@ fn typeck_ptradd<'a>(
     integral: TypedExpression<'a>,
     order: PtrAddOrder,
 ) -> TypedExpression<'a> {
-    assert!(matches!(pointer.ty.ty, Type::Pointer(_)));
-    assert!(matches!(
-        integral.ty.ty,
-        Type::Arithmetic(Arithmetic::Integral(_)),
-    ));
+    assert_matches!(pointer.ty.ty, Type::Pointer(_));
+    assert_matches!(integral.ty.ty, Type::Arithmetic(Arithmetic::Integral(_)));
     let integral = convert_as_if_by_assignment(sess, Type::size_t().unqualified(), integral);
     TypedExpression {
         ty: pointer.ty.ty.unqualified(),
@@ -1804,11 +1799,8 @@ fn typeck_ptrsub<'a>(
     pointee_ty: &QualifiedType<'a>,
     integral: TypedExpression<'a>,
 ) -> TypedExpression<'a> {
-    assert!(matches!(pointer.ty.ty, Type::Pointer(_)));
-    assert!(matches!(
-        integral.ty.ty,
-        Type::Arithmetic(Arithmetic::Integral(_)),
-    ));
+    assert_matches!(pointer.ty.ty, Type::Pointer(_));
+    assert_matches!(integral.ty.ty, Type::Arithmetic(Arithmetic::Integral(_)));
     let integral = convert_as_if_by_assignment(sess, Type::size_t().unqualified(), integral);
     TypedExpression {
         ty: pointer.ty.ty.unqualified(),

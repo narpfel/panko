@@ -1,3 +1,4 @@
+use std::assert_matches::assert_matches;
 use std::fmt;
 
 use panko_sema::layout::LayoutedExpression;
@@ -46,14 +47,14 @@ pub(super) struct Memory<'a> {
 impl fmt::Display for Memory<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { pointer, index, offset } = self;
-        assert!(matches!(
+        assert_matches!(
             index,
             None | Some(Index { register: _, size: 1 | 2 | 4 | 8 }),
-        ));
-        assert!(matches!(
+        );
+        assert_matches!(
             offset,
             Offset::Immediate(0..=MAX_ADDRESS_OFFSET) | Offset::Plt(_) | Offset::Static(_),
-        ));
+        );
         write!(f, "[{pointer}")?;
         if let Some(Index { register: reg, size }) = index {
             write!(f, " + {size} * {reg}")?;
