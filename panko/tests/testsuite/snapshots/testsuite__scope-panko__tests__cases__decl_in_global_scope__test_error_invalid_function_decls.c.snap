@@ -6,7 +6,6 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -16,6 +15,7 @@ exit_code: 0
    (tentative-definition b~1 `ptr<fn() -> int>` ∅)
    (declaration c~2 `fn() -> ptr<fn() -> fn() -> int>` ∅)
    (declaration d~3 `fn(param: void) -> int` ∅)
-   (declaration e~4 `fn() -> int` ∅))
+   (declaration e~4 `fn() -> int` ∅)
+   (declaration f~5 `fn() -> array<int; 42>` ∅))
 
 ----- stderr -----

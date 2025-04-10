@@ -12,3 +12,6 @@ int d(void param);
 
 // okay
 int e(void);
+
+// can’t return array
+int f()[42];

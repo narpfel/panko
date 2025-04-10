@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c
-snapshot_kind: text
 ---
 success: false
 exit_code: 1
@@ -35,4 +34,12 @@ Error: cannot declare function parameter `param` with incomplete type `void`
  11 │ int d(void param);
     │            ──┬──  
     │              ╰──── parameter declared here
+────╯
+
+Error: invalid function return type `array<int; 42>`
+    ╭─[panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c:17:1]
+    │
+ 17 │ int f()[42];
+    │ ─────┬─────  
+    │      ╰─────── declaration here
 ────╯
