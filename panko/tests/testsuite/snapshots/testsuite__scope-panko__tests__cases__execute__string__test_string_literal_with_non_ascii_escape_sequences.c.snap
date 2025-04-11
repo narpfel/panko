@@ -1,0 +1,61 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/string/test_string_literal_with_non_ascii_escape_sequences.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration strcmp~0 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int` ∅)
+   (declaration printf~1 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration puts~2 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof (string "\xe4"))))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (subscript (string "\xe4") 0)))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (subscript (string "\xe4") 1)))
+         (expression
+            (call (name puts~2 `fn(∅: ptr<char const>) -> int`)
+               (string "ä")))
+         (expression
+            (call (name puts~2 `fn(∅: ptr<char const>) -> int`)
+               (string "\xc3\xa4")))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof (string "ä"))))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (subscript (string "ä") 0)))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (subscript (string "ä") 1)))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (subscript (string "ä") 2)))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (call (name strcmp~0 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int`)
+                  (string "ä")
+                  (string "\xc3\xa4")))))))
+
+----- stderr -----
