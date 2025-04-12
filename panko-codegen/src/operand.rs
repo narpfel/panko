@@ -336,6 +336,10 @@ impl AsOperand for u64 {
 
 impl AsOperand for Memory<'_> {
     fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
+        assert!(
+            !matches!(self.pointer, Register::Rsp),
+            "this would need an offset adjustment of `argument_area_size`",
+        );
         Operand {
             kind: OperandKind::Pointer { address: *self, is_dereferenced: false },
             ty: Type::size_t(),

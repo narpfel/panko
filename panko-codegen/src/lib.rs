@@ -823,18 +823,9 @@ impl<'a> Codegen<'a> {
             }
             Expression::Addressof(operand) => {
                 match operand.expr {
-                    Expression::Name(_) => {
-                        let memory_operand: &dyn AsOperand = match operand.slot {
-                            Slot::Static(_) => operand,
-                            Slot::Automatic(offset) => &Memory {
-                                pointer: Rsp,
-                                index: None,
-                                offset: Offset::Immediate(offset),
-                            },
-                            Slot::Void => unreachable!(),
-                            Slot::StaticWithOffset { name: _, offset: _ } => todo!(),
-                        };
-                        self.emit_args("lea", &[&Rax, memory_operand]);
+                    Expression::Name(_reference) => {
+                        // `_reference` is already in memory, just load the address
+                        self.emit_args("lea", &[&Rax, operand]);
                     }
                     Expression::Deref(operand) => {
                         self.expr(operand);

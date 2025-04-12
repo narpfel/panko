@@ -1,0 +1,48 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/call/test_params_on_stack_with_addressof_operator.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (seven_params~0 `fn(x1: int, x2: int, x3: int, x4: int, x5: int, x6: int, x7: int) -> void` (static seven_params))
+      (params
+         (x1~1 `int` @0)
+         (x2~2 `int` @4)
+         (x3~3 `int` @8)
+         (x4~4 `int` @12)
+         (x5~5 `int` @16)
+         (x6~6 `int` @20)
+         (x7~7 `int` @24))
+      (compound-statement))
+   (function-definition
+      (main~8 `fn(argc: int, ∅: ptr<ptr<char>>) -> int` (static main))
+      (params
+         (argc~9 `int` @0)
+         (main.unnamed_parameter.1~10 `ptr<ptr<char>>` @8))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn(x1: int, x2: int, x3: int, x4: int, x5: int, x6: int, x7: int) -> void>` @16
+                  (seven_params~0 `fn(x1: int, x2: int, x3: int, x4: int, x5: int, x6: int, x7: int) -> void` (static seven_params)))
+               (1 `int` @24)
+               (2 `int` @28)
+               (3 `int` @32)
+               (4 `int` @36)
+               (5 `int` @40)
+               (6 `int` @44)
+               (7 `int` @48)))
+         (definition (value~11 `int` @16) (27 `int` @16))
+         (definition (p~12 `ptr<int>` @24)
+            (addressof `ptr<int>` @24
+               (value~11 `int` @16)))
+         (return (deref `int` @32 (p~12 `ptr<int>` @24))))))
+
+----- stderr -----
