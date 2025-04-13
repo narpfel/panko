@@ -1,0 +1,56 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arithmetic/test_postdecrement.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration putchar~0 `fn(∅: int) -> int` ∅)
+   (declaration printf~1 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      f~2 `fn(p: ptr<int>) -> ptr<int>`
+      (params
+         p~3 `ptr<int>`)
+      (compound-statement
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               65))
+         (expression
+            (call (name putchar~0 `fn(∅: int) -> int`)
+               10))
+         (return (name p~3 `ptr<int>`))))
+   (function-definition
+      main~4 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      (params
+         main.unnamed_parameter.0~5 `int`
+         argv~6 `ptr<ptr<char>>`)
+      (compound-statement
+         (definition x~7 `int` 42)
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~6 `ptr<ptr<char>>`) 1)
+               (post-decrement (name x~7 `int`))))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~6 `ptr<ptr<char>>`) 1)
+               (name x~7 `int`)))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~6 `ptr<ptr<char>>`) 1)
+               (post-decrement
+                  (deref
+                     (call (name f~2 `fn(p: ptr<int>) -> ptr<int>`)
+                        (addressof (name x~7 `int`)))))))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (subscript (name argv~6 `ptr<ptr<char>>`) 1)
+               (name x~7 `int`)))
+         (return (name x~7 `int`)))))
+
+----- stderr -----
