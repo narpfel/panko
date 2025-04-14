@@ -1601,12 +1601,7 @@ fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) 
         }
         else {
             assert_matches!(larger_ty.signedness(), Signedness::Signed);
-            #[expect(irrefutable_let_patterns)]
-            let Arithmetic::Integral(Integral { signedness: _, kind }) = larger_ty
-            else {
-                unreachable!()
-            };
-
+            let Arithmetic::Integral(Integral { signedness: _, kind }) = larger_ty;
             Arithmetic::Integral(Integral { signedness: Signedness::Unsigned, kind })
         }
     }
