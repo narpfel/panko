@@ -10,6 +10,7 @@ use panko_parser as cst;
 use panko_parser::BinOp;
 use panko_parser::IncrementOp;
 use panko_parser::LogicalOp;
+use panko_parser::StorageClassSpecifierKind;
 use panko_parser::UnaryOp;
 use panko_parser::ast;
 use panko_parser::ast::ErrorExpr;
@@ -69,12 +70,25 @@ pub struct TranslationUnit<'a> {
 pub(crate) enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
+    Typedef(Typedef<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum DeclarationOrTypedef<'a> {
+    Declaration(Declaration<'a>),
+    Typedef(Typedef<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Declaration<'a> {
     pub(crate) reference: Reference<'a>,
     pub(crate) initialiser: Option<&'a Initialiser<'a>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Typedef<'a> {
+    ty: QualifiedType<'a>,
+    name: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -131,6 +145,7 @@ type MaybeExpr<'a> = Option<Expression<'a>>;
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
     Declaration(Declaration<'a>),
+    Typedef(Typedef<'a>),
     Expression(MaybeExpr<'a>),
     Compound(CompoundStatement<'a>),
     Return {
@@ -283,6 +298,13 @@ pub(crate) enum GenericAssociation<'a> {
     },
 }
 
+impl<'a> Typedef<'a> {
+    fn loc(&self) -> Loc<'a> {
+        // TODO: should this be the whole declaration?
+        self.name.loc()
+    }
+}
+
 impl<'a> Initialiser<'a> {
     pub(crate) fn loc(&self) -> Loc<'a> {
         match self {
@@ -323,6 +345,7 @@ impl<'a> Statement<'a> {
     pub(crate) fn loc(&self) -> Loc<'a> {
         match self {
             Statement::Declaration(decl) => decl.reference.loc(),
+            Statement::Typedef(typedef) => typedef.loc(),
             Statement::Expression(expr) => expr.as_ref().unwrap().loc(),
             Statement::Compound(_) => todo!(),
             Statement::Return { return_, expr } => {
@@ -460,6 +483,7 @@ impl IncrementFixity<'_> {
 #[derive(Debug, Default)]
 struct Scope<'a> {
     names: nonempty::Vec<HashMap<&'a str, Reference<'a>>>,
+    type_names: nonempty::Vec<HashMap<&'a str, QualifiedType<'a>>>,
 }
 
 impl<'a> Scope<'a> {
@@ -475,12 +499,26 @@ impl<'a> Scope<'a> {
         self.names.last_mut().entry(name)
     }
 
+    fn lookup_ty(&self, name: &'a str) -> Option<QualifiedType<'a>> {
+        self.type_names
+            .iter()
+            .rev()
+            .find_map(|names| names.get(name))
+            .copied()
+    }
+
+    fn lookup_ty_innermost(&mut self, name: &'a str) -> Entry<&'a str, QualifiedType<'a>> {
+        self.type_names.last_mut().entry(name)
+    }
+
     fn push(&mut self) {
         self.names.push(HashMap::default());
+        self.type_names.push(HashMap::default());
     }
 
     fn pop(&mut self) {
         self.names.pop();
+        self.type_names.pop();
     }
 }
 
@@ -550,6 +588,14 @@ impl<'a> Scopes<'a> {
         }
     }
 
+    fn add_ty(&mut self, name: &'a str, ty: QualifiedType<'a>) {
+        match self.lookup_ty_innermost(name) {
+            Entry::Occupied(_) =>
+                todo!("error message: typedef already defined (or is this allowed?"),
+            Entry::Vacant(entry) => entry.insert(ty),
+        };
+    }
+
     fn temporary(&mut self, loc: Loc<'a>, ty: QualifiedType<'a>) -> Reference<'a> {
         let id = self.id();
         Reference {
@@ -576,6 +622,17 @@ impl<'a> Scopes<'a> {
 
     fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Reference<'a>> {
         self.scopes.last_mut().lookup_innermost(name)
+    }
+
+    fn lookup_ty(&self, name: &'a str) -> Option<QualifiedType<'a>> {
+        self.scopes
+            .iter()
+            .rev()
+            .find_map(|scope| scope.lookup_ty(name))
+    }
+
+    fn lookup_ty_innermost(&mut self, name: &'a str) -> Entry<&'a str, QualifiedType<'a>> {
+        self.scopes.last_mut().lookup_ty_innermost(name)
     }
 
     fn push(&mut self) {
@@ -623,6 +680,24 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
         ast::Type::Function(function_type) =>
             Type::Function(resolve_function_ty(scopes, &function_type)),
         ast::Type::Void => Type::Void,
+        ast::Type::Typedef(name) => {
+            let QualifiedType {
+                is_const: typedef_is_const,
+                is_volatile: typedef_is_volatile,
+                ty,
+                loc,
+            } = scopes.lookup_ty(name.slice()).unwrap_or_else(|| {
+                unreachable!(
+                    "the lexer hack makes sure that only typedef’d names will be a `typedef`’s name",
+                )
+            });
+            return QualifiedType {
+                is_const: is_const | typedef_is_const,
+                is_volatile: is_volatile | typedef_is_volatile,
+                ty,
+                loc,
+            };
+        }
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -815,9 +890,21 @@ fn resolve_declaration<'a>(
     scopes: &mut Scopes<'a>,
     decl: &ast::Declaration<'a>,
     storage_duration: StorageDuration,
-) -> Declaration<'a> {
-    let ast::Declaration { ty, name, initialiser } = decl;
+) -> DeclarationOrTypedef<'a> {
+    let ast::Declaration { ty, name, initialiser, storage_class } = decl;
     let ty = resolve_ty(scopes, ty);
+
+    match storage_class {
+        Some(cst::StorageClassSpecifier {
+            token: _,
+            kind: StorageClassSpecifierKind::Typedef,
+        }) => {
+            scopes.add_ty(name.slice(), ty);
+            return DeclarationOrTypedef::Typedef(Typedef { ty, name: *name });
+        }
+        Some(storage_class) => todo!("not implemented: storage class {:?}", storage_class.kind),
+        None => (),
+    }
 
     let kind = if initialiser.is_some() {
         RefKind::Definition
@@ -870,19 +957,20 @@ fn resolve_declaration<'a>(
         scopes.sess.alloc(initialiser)
     };
     scopes.add_initialiser(&reference, initialiser);
-    Declaration {
+    DeclarationOrTypedef::Declaration(Declaration {
         reference: Reference { initialiser, ..reference },
         initialiser,
-    }
+    })
 }
 
 fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Statement<'a> {
     match stmt {
-        ast::Statement::Declaration(decl) => Statement::Declaration(resolve_declaration(
-            scopes,
-            decl,
-            StorageDuration::Automatic,
-        )),
+        ast::Statement::Declaration(decl) =>
+            match resolve_declaration(scopes, decl, StorageDuration::Automatic) {
+                DeclarationOrTypedef::Declaration(declaration) =>
+                    Statement::Declaration(declaration),
+                DeclarationOrTypedef::Typedef(typedef) => Statement::Typedef(typedef),
+            },
         ast::Statement::Expression(expr) =>
             Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
         ast::Statement::Compound(stmts) =>
@@ -1052,9 +1140,12 @@ pub fn resolve_names<'a>(
         decls: sess.alloc_slice_fill_iter(translation_unit.decls.iter().map(|decl| match decl {
             ast::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(resolve_function_definition(scopes, def)),
-            ast::ExternalDeclaration::Declaration(decl) => ExternalDeclaration::Declaration(
-                resolve_declaration(scopes, decl, StorageDuration::Static),
-            ),
+            ast::ExternalDeclaration::Declaration(decl) =>
+                match resolve_declaration(scopes, decl, StorageDuration::Static) {
+                    DeclarationOrTypedef::Declaration(declaration) =>
+                        ExternalDeclaration::Declaration(declaration),
+                    DeclarationOrTypedef::Typedef(typedef) => ExternalDeclaration::Typedef(typedef),
+                },
         })),
     }
 }

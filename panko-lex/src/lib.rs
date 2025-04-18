@@ -2,6 +2,8 @@
 #![feature(type_alias_impl_trait)]
 #![feature(unqualified_local_imports)]
 
+use std::cell::RefCell;
+use std::collections::HashSet;
 use std::ops::Range;
 use std::path::Path;
 use std::path::PathBuf;
@@ -360,6 +362,10 @@ pub enum TokenKind {
 
     #[regex(r"[\p{XID_start}_]\p{XID_continue}*")]
     Identifier,
+
+    // only generated via the lexer hack
+    TypeIdentifier,
+
     #[regex(r#""([^"\\\n]|\\(['"?\\abfnrtv]|[0-7]{1,3}|x[0-9a-fA-F]+))*""#)]
     String,
 
@@ -579,7 +585,12 @@ impl<'a> Error<'a> {
 pub type TokenIter<'a> = impl Iterator<Item = Result<Token<'a>, Error<'a>>>;
 
 #[define_opaque(TokenIter)]
-pub fn lex<'a>(bump: &'a Bump, filename: &'a Path, src: &str) -> TokenIter<'a> {
+pub fn lex<'a>(
+    bump: &'a Bump,
+    filename: &'a Path,
+    src: &str,
+    typedef_names: &'a RefCell<HashSet<&'a str>>,
+) -> TokenIter<'a> {
     let src = bump.alloc_str(src);
     let source_file = &*bump.alloc(SourceFile { file: filename, src });
     TokenKind::lexer(src).spanned().map(|(kind, span)| {
@@ -587,10 +598,15 @@ pub fn lex<'a>(bump: &'a Bump, filename: &'a Path, src: &str) -> TokenIter<'a> {
             span: Span { start: span.start, end: span.end },
             source_file,
         };
-        Ok(Token {
-            kind: kind.map_err(|()| Error { at: loc })?,
-            loc,
-        })
+
+        let kind = kind.map_err(|()| Error { at: loc })?;
+        let kind = match kind {
+            TokenKind::Identifier
+                if typedef_names.borrow().contains(&src[span.start..span.end]) =>
+                TokenKind::TypeIdentifier,
+            kind => kind,
+        };
+        Ok(Token { kind, loc })
     })
 }
 
@@ -673,7 +689,7 @@ mod test {
         })
     ])]
     fn test_lexer(bump: Bump, #[case] src: &str, #[case] expected: &[TokenKind]) {
-        let tokens = lex(&bump, Path::new("<src>"), src)
+        let tokens = lex(&bump, Path::new("<src>"), src, &RefCell::default())
             .map(|token| Ok(token?.kind))
             .collect::<Result<Vec<_>, Error>>()
             .unwrap();
@@ -690,7 +706,7 @@ mod test {
         #[case] src: &str,
         #[case] expected: impl for<'a> FnOnce(TokenIter<'a>),
     ) {
-        expected(lex(&bump, Path::new("<src>"), src))
+        expected(lex(&bump, Path::new("<src>"), src, &RefCell::default()))
     }
 
     #[rstest]

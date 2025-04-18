@@ -11,6 +11,7 @@ use panko_report::Report;
 use crate::layout::stack::Stack;
 use crate::scope::Id;
 use crate::scope::RefKind;
+use crate::scope::Typedef;
 use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::FunctionType;
@@ -35,6 +36,7 @@ pub struct TranslationUnit<'a> {
 pub enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
+    Typedef(Typedef<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -97,6 +99,7 @@ pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
 #[derive(Debug, Clone, Copy)]
 pub enum Statement<'a> {
     Declaration(Declaration<'a>),
+    Typedef(Typedef<'a>),
     Expression(Option<LayoutedExpression<'a>>),
     Compound(CompoundStatement<'a>),
     Return(Option<LayoutedExpression<'a>>),
@@ -380,6 +383,7 @@ fn layout_statement<'a>(
     match stmt {
         typecheck::Statement::Declaration(decl) =>
             Statement::Declaration(layout_declaration(stack, bump, decl)),
+        typecheck::Statement::Typedef(typedef) => Statement::Typedef(*typedef),
         typecheck::Statement::Expression(expr) => stack.with_block(|stack| {
             Statement::Expression(try { layout_expression(stack, bump, expr.as_ref()?) })
         }),
@@ -596,6 +600,8 @@ pub fn layout<'a>(
                     bump,
                     decl,
                 )),
+            typecheck::ExternalDeclaration::Typedef(typedef) =>
+                ExternalDeclaration::Typedef(*typedef),
         })),
     }
 }

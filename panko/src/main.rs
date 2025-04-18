@@ -1,6 +1,7 @@
 #![feature(exit_status_error)]
 #![feature(unqualified_local_imports)]
 
+use std::cell::RefCell;
 use std::env;
 use std::fs::File;
 use std::io::Write as _;
@@ -59,14 +60,16 @@ fn main() -> Result<()> {
 
     let args = Args::parse();
     let bump = &Bump::new();
+    let typedef_names = RefCell::default();
     let tokens = panko_lex::lex(
         bump,
         &args.filename,
         &std::fs::read_to_string(&args.filename)
             .with_context(|| format!("could not open source file `{}`", args.filename.display()))?,
+        &typedef_names,
     );
     let session = &panko_parser::ast::Session::new(bump, args.treat_error_as_bug);
-    let translation_unit = match panko_parser::parse(session, tokens) {
+    let translation_unit = match panko_parser::parse(session, &typedef_names, tokens) {
         Ok(translation_unit) => translation_unit,
         Err(err) => {
             err.print();

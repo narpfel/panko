@@ -1,9 +1,12 @@
+use std::cell::RefCell;
+use std::collections::HashSet;
+
 use panko_lex::Token;
 
 use crate as ast;
 use crate::ast::Session;
 
-grammar<'a>(sess: &'a Session<'a>);
+grammar<'a>(sess: &'a Session<'a>, typedef_names: &'a RefCell<HashSet<&'a str>>);
 
 extern {
     type Error = ast::Error<'a>;
@@ -115,6 +118,7 @@ extern {
         "..." => Token { kind: panko_lex::TokenKind::Ellipsis, .. },
 
         Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
+        TypedefName => Token { kind: panko_lex::TokenKind::TypeIdentifier, .. },
         Integer => Token { kind: panko_lex::TokenKind::Integer(_), .. },
         CharConstant => Token { kind: panko_lex::TokenKind::CharConstant(_), .. },
         String => Token { kind: panko_lex::TokenKind::String, .. },
@@ -140,8 +144,15 @@ FunctionDefinition: ast::FunctionDefinition<'a> = {
 FunctionBody = { CompoundStatement }
 
 Declaration: ast::Declaration<'a> = {
-    <specifiers:DeclarationSpecifiers> <init_declarator_list:InitDeclaratorList> ";" =>
-        ast::Declaration { <> },
+    <specifiers:DeclarationSpecifiers> <init_declarator_list:InitDeclaratorList> ";" => {
+        if specifiers.is_typedef() {
+            let mut typedef_names = typedef_names.borrow_mut();
+            for init_declarator in init_declarator_list {
+                typedef_names.insert(init_declarator.declarator.direct_declarator.name());
+            }
+        }
+        ast::Declaration { <> }
+    },
     // attribute-specifier-sequence declaration-specifiers init_declarator_list ";"
     // static_assert-declaration
     // attribute-declaration
@@ -222,7 +233,8 @@ SpecifierQualifierList: ast::DeclarationSpecifiers<'a> = {
 
 TypeName: crate::ast::QualifiedType<'a> = {
     <specifier_qualifier_list:SpecifierQualifierList> <abstract_declarator:AbstractDeclarator?> => {
-        let ty = crate::ast::parse_type_specifiers(sess, specifier_qualifier_list);
+        let crate::ast::DeclarationSpecifiers { storage_class: _, ty }
+            = crate::ast::parse_declaration_specifiers(sess, specifier_qualifier_list);
         match abstract_declarator {
             None => ty,
             Some(abstract_declarator) => {
@@ -314,7 +326,7 @@ TypeSpecifier: ast::TypeSpecifier<'a> = {
     AtomicTypeSpecifier => todo!(),
     StructOrUnionSpecifier => todo!(),
     EnumSpecifier => todo!(),
-    TypedefName => todo!(),
+    TypedefName => ast::TypeSpecifier::new(<>),
     TypeofSpecifier => todo!(),
 }
 
@@ -339,7 +351,6 @@ BitIntTypeSpecifier: () = {}
 AtomicTypeSpecifier: () = {}
 StructOrUnionSpecifier: () = {}
 EnumSpecifier: () = {}
-TypedefName: () = {}
 TypeofSpecifier: () = {}
 
 TypeQualifier: ast::TypeQualifier<'a> = {

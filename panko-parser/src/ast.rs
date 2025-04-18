@@ -1,3 +1,4 @@
+use std::assert_matches::assert_matches;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::fmt;
@@ -23,6 +24,7 @@ pub use crate::Initialiser;
 use crate::JumpStatement;
 use crate::NO_VALUE;
 use crate::PrimaryBlock;
+use crate::StorageClassSpecifierKind;
 use crate::TypeQualifier;
 use crate::TypeQualifierKind;
 use crate::TypeSpecifierQualifier::Qualifier;
@@ -165,6 +167,7 @@ pub struct Declaration<'a> {
     pub ty: QualifiedType<'a>,
     pub name: Token<'a>,
     pub initialiser: Option<Initialiser<'a>>,
+    pub storage_class: Option<cst::StorageClassSpecifier<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -192,6 +195,7 @@ pub enum Type<'a> {
     Array(ArrayType<'a>),
     Function(FunctionType<'a>),
     Void,
+    Typedef(Token<'a>),
     // TODO
 }
 
@@ -278,7 +282,9 @@ impl<'a> ExternalDeclaration<'a> {
 impl<'a> FunctionDefinition<'a> {
     fn from_parse_tree(sess: &'a Session<'a>, def: &cst::FunctionDefinition<'a>) -> Self {
         let cst::FunctionDefinition { declaration_specifiers, declarator, body } = *def;
-        let ty = parse_type_specifiers(sess, declaration_specifiers);
+        let DeclarationSpecifiers { storage_class, ty } =
+            parse_declaration_specifiers(sess, declaration_specifiers);
+        assert_matches!(storage_class, None, "TODO: handle `storage_class`");
         let (ty, name) = parse_declarator(sess, ty, declarator);
         let name =
             name.unwrap_or_else(|| unreachable!("[parser] syntax error: declaration without name"));
@@ -314,6 +320,7 @@ impl fmt::Display for Type<'_> {
             Type::Array(array) => write!(f, "{array}"),
             Type::Function(function) => write!(f, "{function}"),
             Type::Void => write!(f, "void"),
+            Type::Typedef(name) => write!(f, "typedef<{}>", name.slice()),
         }
     }
 }
@@ -364,7 +371,8 @@ impl<'a> Declaration<'a> {
         sess: &'a Session<'a>,
         decl: &'a cst::Declaration<'a>,
     ) -> impl Iterator<Item = Self> + 'a {
-        let ty = parse_type_specifiers(sess, decl.specifiers);
+        let DeclarationSpecifiers { storage_class, ty } =
+            parse_declaration_specifiers(sess, decl.specifiers);
         decl.init_declarator_list
             .iter()
             .map(move |&InitDeclarator { declarator, initialiser }| {
@@ -372,7 +380,7 @@ impl<'a> Declaration<'a> {
                 let name = name.unwrap_or_else(|| {
                     unreachable!("[parser] syntax error: declaration without name")
                 });
-                Self { ty, name, initialiser }
+                Self { ty, name, initialiser, storage_class }
             })
     }
 }
@@ -540,15 +548,24 @@ impl fmt::Display for Signedness {
     }
 }
 
-pub(crate) fn parse_type_specifiers<'a>(
+pub(crate) struct DeclarationSpecifiers<'a> {
+    pub(crate) storage_class: Option<cst::StorageClassSpecifier<'a>>,
+    pub(crate) ty: QualifiedType<'a>,
+}
+
+pub(crate) fn parse_declaration_specifiers<'a>(
     sess: &'a Session<'a>,
     specifiers: cst::DeclarationSpecifiers<'a>,
-) -> QualifiedType<'a> {
+) -> DeclarationSpecifiers<'a> {
     let mut const_qualifier = None;
     let mut volatile_qualifier = None;
     let mut ty = None;
+    let mut storage_class = None;
     for specifier in specifiers.0 {
         match specifier {
+            cst::DeclarationSpecifier::StorageClass(class)
+                if let StorageClassSpecifierKind::Typedef = class.kind =>
+                storage_class = Some(*class),
             cst::DeclarationSpecifier::StorageClass(storage_class) => todo!("{storage_class:#?}"),
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Specifier(specifier)) =>
                 specifier.parse(sess, &mut ty),
@@ -568,11 +585,14 @@ pub(crate) fn parse_type_specifiers<'a>(
             kind: IntegralKind::Int,
         }))
     });
-    QualifiedType {
-        is_const: const_qualifier.is_some(),
-        is_volatile: volatile_qualifier.is_some(),
-        ty,
-        loc: specifiers.loc(),
+    DeclarationSpecifiers {
+        storage_class,
+        ty: QualifiedType {
+            is_const: const_qualifier.is_some(),
+            is_volatile: volatile_qualifier.is_some(),
+            ty,
+            loc: specifiers.loc(),
+        },
     }
 }
 
@@ -637,7 +657,10 @@ pub(crate) fn parse_declarator<'a>(
                     ty: Type::Function(FunctionType {
                         params: sess.alloc_slice_fill_iter(
                             parameter_type_list.parameter_list.iter().map(|param| {
-                                let ty = parse_type_specifiers(sess, param.declaration_specifiers);
+                                let DeclarationSpecifiers { storage_class, ty } = parse_declaration_specifiers(sess, param.declaration_specifiers);
+                                        if let Some(storage_class) = storage_class {
+                                            todo!("error: parameter declared with storage class {storage_class:?}");
+                                        }
                                 let (ty, name) =
                                     param.declarator.map_or((ty, None), |declarator| {
                                         parse_declarator(sess, ty, declarator)

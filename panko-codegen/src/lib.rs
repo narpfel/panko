@@ -552,6 +552,7 @@ impl<'a> Codegen<'a> {
                     }
                     None => (),
                 },
+            Statement::Typedef(_) => (),
             Statement::Expression(expr) =>
                 if let Some(expr) = expr.as_ref() {
                     self.expr(expr);
@@ -949,6 +950,7 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
         match decl {
             ExternalDeclaration::FunctionDefinition(def) => cg.function_definition(def),
             ExternalDeclaration::Declaration(decl) => cg.external_declaration(decl),
+            ExternalDeclaration::Typedef(_) => (),
         }
     }
 

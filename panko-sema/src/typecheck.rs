@@ -47,6 +47,7 @@ use crate::scope::IncrementFixity;
 use crate::scope::IsParameter;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
+use crate::scope::Typedef;
 use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::FunctionType;
@@ -576,6 +577,7 @@ pub struct TranslationUnit<'a> {
 pub(crate) enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
+    Typedef(Typedef<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -647,6 +649,7 @@ pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
     Declaration(Declaration<'a>),
+    Typedef(Typedef<'a>),
     Expression(Option<TypedExpression<'a>>),
     Compound(CompoundStatement<'a>),
     Return(Option<TypedExpression<'a>>),
@@ -1530,6 +1533,7 @@ fn typeck_statement<'a>(
     match stmt {
         scope::Statement::Declaration(decl) =>
             Statement::Declaration(typeck_declaration(sess, decl)),
+        scope::Statement::Typedef(typedef) => Statement::Typedef(*typedef),
         scope::Statement::Expression(expr) =>
             Statement::Expression(try { typeck_expression(sess, expr.as_ref()?, Context::Default) }),
         scope::Statement::Compound(stmt) =>
@@ -2911,6 +2915,7 @@ pub fn resolve_types<'a>(
         decls: sess.alloc_slice_fill_iter(translation_unit.decls.iter().map(|decl| match decl {
             scope::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(typeck_function_definition(sess, def)),
+            scope::ExternalDeclaration::Typedef(typedef) => ExternalDeclaration::Typedef(*typedef),
             scope::ExternalDeclaration::Declaration(decl) =>
                 ExternalDeclaration::Declaration(typeck_declaration(sess, decl)),
         })),

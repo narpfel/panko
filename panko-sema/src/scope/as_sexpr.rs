@@ -19,6 +19,7 @@ use super::ParamRefs;
 use super::Reference;
 use super::Statement;
 use super::TranslationUnit;
+use super::Typedef;
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {
@@ -31,6 +32,7 @@ impl AsSExpr for ExternalDeclaration<'_> {
         match self {
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
+            ExternalDeclaration::Typedef(typedef) => typedef.as_sexpr(),
         }
     }
 }
@@ -60,6 +62,15 @@ impl AsSExpr for Declaration<'_> {
         SExpr::new(self.reference.kind.str())
             .inherit(&self.reference)
             .inherit(&self.initialiser)
+    }
+}
+
+impl AsSExpr for Typedef<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { ty, name } = self;
+        SExpr::new("typedef")
+            .inline_string(name.slice().to_owned())
+            .inherit(ty)
     }
 }
 
@@ -113,6 +124,7 @@ impl AsSExpr for Statement<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Statement::Declaration(decl) => decl.as_sexpr(),
+            Statement::Typedef(typedef) => typedef.as_sexpr(),
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),
             Statement::Return { return_: _, expr } => SExpr::new("return").inherit(expr),

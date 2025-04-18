@@ -1,7 +1,12 @@
+#![feature(assert_matches)]
 #![feature(coverage_attribute)]
+#![feature(if_let_guard)]
 #![feature(never_type)]
 #![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
+
+use std::cell::RefCell;
+use std::collections::HashSet;
 
 use ariadne::Color::Red;
 use itertools::Itertools as _;
@@ -78,6 +83,19 @@ pub struct Declaration<'a> {
 struct DeclarationSpecifiers<'a>(&'a [DeclarationSpecifier<'a>]);
 
 impl<'a> DeclarationSpecifiers<'a> {
+    fn is_typedef(self) -> bool {
+        for specifier in self.0 {
+            if let DeclarationSpecifier::StorageClass(StorageClassSpecifier {
+                token: _,
+                kind: StorageClassSpecifierKind::Typedef,
+            }) = specifier
+            {
+                return true;
+            }
+        }
+        false
+    }
+
     fn loc(&self) -> Loc<'a> {
         match self.0 {
             [] => unreachable!(),
@@ -107,9 +125,8 @@ impl<'a> DeclarationSpecifier<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct StorageClassSpecifier<'a> {
-    token: Token<'a>,
-    #[expect(unused)]
-    kind: StorageClassSpecifierKind,
+    pub token: Token<'a>,
+    pub kind: StorageClassSpecifierKind,
 }
 
 impl<'a> StorageClassSpecifier<'a> {
@@ -126,7 +143,7 @@ impl<'a> StorageClassSpecifier<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum StorageClassSpecifierKind {
+pub enum StorageClassSpecifierKind {
     Auto,
     Constexpr,
     Extern,
@@ -223,7 +240,7 @@ impl<'a> TypeSpecifier<'a> {
         self.token.loc()
     }
 
-    fn parse(&self, _sess: &ast::Session<'a>, ty: &mut Option<Type<'_>>) {
+    fn parse(&self, _sess: &ast::Session<'a>, ty: &mut Option<Type<'a>>) {
         match self.kind {
             TypeSpecifierKind::Short => match ty {
                 None =>
@@ -333,6 +350,10 @@ impl<'a> TypeSpecifier<'a> {
                 _ => todo!(),
             },
             TypeSpecifierKind::Bool => todo!(),
+            TypeSpecifierKind::TypedefName => match ty {
+                Some(ty) => todo!("{ty}"),
+                None => *ty = Some(Type::Typedef(self.token)),
+            },
             _ => todo!("{self:#?}"),
         }
     }
@@ -363,7 +384,7 @@ enum TypeSpecifierKind<'a> {
     // atomic-type-specifier
     // struct-or-union-specifier
     // enum-specifier
-    // typedef-name
+    TypedefName,
     // typeof-specifier
 }
 
@@ -383,6 +404,7 @@ fn type_specifier_kind(token_kind: TokenKind) -> TypeSpecifierKind<'static> {
         TokenKind::Decimal32 => TypeSpecifierKind::Decimal32,
         TokenKind::Decimal64 => TypeSpecifierKind::Decimal64,
         TokenKind::Decimal128 => TypeSpecifierKind::Decimal128,
+        TokenKind::TypeIdentifier => TypeSpecifierKind::TypedefName,
         _ => unreachable!(),
     }
 }
@@ -478,6 +500,20 @@ enum DirectDeclarator<'a> {
     Parenthesised(&'a Declarator<'a>),
     ArrayDeclarator(ArrayDeclarator<'a>),
     FunctionDeclarator(FunctionDeclarator<'a>),
+}
+
+impl<'a> DirectDeclarator<'a> {
+    fn name(&self) -> &'a str {
+        match self {
+            DirectDeclarator::Abstract => unreachable!(),
+            DirectDeclarator::Identifier(token) => token.slice(),
+            DirectDeclarator::Parenthesised(declarator) => declarator.direct_declarator.name(),
+            DirectDeclarator::ArrayDeclarator(array_declarator) =>
+                array_declarator.direct_declarator.name(),
+            DirectDeclarator::FunctionDeclarator(function_declarator) =>
+                function_declarator.direct_declarator.name(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -823,16 +859,16 @@ impl IncrementFixity {
 
 pub fn parse<'a>(
     sess: &'a ast::Session<'a>,
+    typedef_names: &'a RefCell<HashSet<&'a str>>,
     tokens: TokenIter<'a>,
 ) -> Result<ast::TranslationUnit<'a>, Box<dyn Report + 'a>> {
     let parser = grammar::TranslationUnitParser::new();
-    let parse_tree =
-        parser
-            .parse(sess, tokens.map(|token| Ok(token?)))
-            .map_err(|err| match err {
-                ParseError::UnrecognizedToken { token, expected } =>
-                    Error::UnrecognisedToken { at: token.1, expected: Strings(expected) },
-                err => todo!("{err:#?}"),
-            })?;
+    let parse_tree = parser
+        .parse(sess, typedef_names, tokens.map(|token| Ok(token?)))
+        .map_err(|err| match err {
+            ParseError::UnrecognizedToken { token, expected } =>
+                Error::UnrecognisedToken { at: token.1, expected: Strings(expected) },
+            err => todo!("{err:#?}"),
+        })?;
     Ok(ast::from_parse_tree(sess, parse_tree))
 }
