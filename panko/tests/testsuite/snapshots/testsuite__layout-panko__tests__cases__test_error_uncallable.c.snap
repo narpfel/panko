@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/test_error_uncallable.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: value of type `int` is not callable because it is not a function or function pointer
+   ╭─[panko/tests/cases/test_error_uncallable.c:4:5]
+   │
+ 4 │     42();
+   │     ─┬  
+   │      ╰── this is not callable because it is of type `int`
+───╯
+
+Error: value of type `void` is not callable because it is not a function or function pointer
+   ╭─[panko/tests/cases/test_error_uncallable.c:5:5]
+   │
+ 5 │     f()();
+   │     ─┬─  
+   │      ╰─── this is not callable because it is of type `void`
+───╯

@@ -387,6 +387,13 @@ enum Diagnostic<'a> {
         is_varargs: bool,
     },
 
+    #[error(
+        "value of type `{ty}` is not callable because it is not a function or function pointer"
+    )]
+    #[diagnostics(at(colour = Red, label = "this is not callable because it is of type `{ty}`"))]
+    #[with(ty = at.ty)]
+    Uncallable { at: TypedExpression<'a> },
+
     #[error("empty arrays are not allowed")]
     #[diagnostics(
         at(colour = Red, label = "this array is declared as empty"),
@@ -2523,7 +2530,7 @@ fn typeck_expression<'a>(
                 loc: _,
             }) = callee.ty.ty
             else {
-                todo!("type error: uncallable");
+                return sess.emit(Diagnostic::Uncallable { at: callee });
             };
 
             let has_arity_mismatch = if is_varargs {
