@@ -1,6 +1,7 @@
 #![feature(exit_status_error)]
 #![feature(unqualified_local_imports)]
 
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::env;
 use std::fs::File;
@@ -61,6 +62,7 @@ fn main() -> Result<()> {
     let args = Args::parse();
     let bump = &Bump::new();
     let typedef_names = RefCell::default();
+    let is_in_typedef = Cell::new(false);
     let tokens = panko_lex::lex(
         bump,
         &args.filename,
@@ -69,13 +71,14 @@ fn main() -> Result<()> {
         &typedef_names,
     );
     let session = &panko_parser::ast::Session::new(bump, args.treat_error_as_bug);
-    let translation_unit = match panko_parser::parse(session, &typedef_names, tokens) {
-        Ok(translation_unit) => translation_unit,
-        Err(err) => {
-            err.print();
-            std::process::exit(err.exit_code().into());
-        }
-    };
+    let translation_unit =
+        match panko_parser::parse(session, &typedef_names, &is_in_typedef, tokens) {
+            Ok(translation_unit) => translation_unit,
+            Err(err) => {
+                err.print();
+                std::process::exit(err.exit_code().into());
+            }
+        };
 
     if args.print.contains(&Step::Ast) {
         println!("{}", translation_unit.as_sexpr());

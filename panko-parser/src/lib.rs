@@ -5,6 +5,7 @@
 #![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
 
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashSet;
 
@@ -83,19 +84,6 @@ pub struct Declaration<'a> {
 struct DeclarationSpecifiers<'a>(&'a [DeclarationSpecifier<'a>]);
 
 impl<'a> DeclarationSpecifiers<'a> {
-    fn is_typedef(self) -> bool {
-        for specifier in self.0 {
-            if let DeclarationSpecifier::StorageClass(StorageClassSpecifier {
-                token: _,
-                kind: StorageClassSpecifierKind::Typedef,
-            }) = specifier
-            {
-                return true;
-            }
-        }
-        false
-    }
-
     fn loc(&self) -> Loc<'a> {
         match self.0 {
             [] => unreachable!(),
@@ -860,11 +848,17 @@ impl IncrementFixity {
 pub fn parse<'a>(
     sess: &'a ast::Session<'a>,
     typedef_names: &'a RefCell<HashSet<&'a str>>,
+    is_in_typedef: &'a Cell<bool>,
     tokens: TokenIter<'a>,
 ) -> Result<ast::TranslationUnit<'a>, Box<dyn Report + 'a>> {
     let parser = grammar::TranslationUnitParser::new();
     let parse_tree = parser
-        .parse(sess, typedef_names, tokens.map(|token| Ok(token?)))
+        .parse(
+            sess,
+            typedef_names,
+            is_in_typedef,
+            tokens.map(|token| Ok(token?)),
+        )
         .map_err(|err| match err {
             ParseError::UnrecognizedToken { token, expected } =>
                 Error::UnrecognisedToken { at: token.1, expected: Strings(expected) },

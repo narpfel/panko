@@ -1,3 +1,4 @@
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashSet;
 
@@ -6,7 +7,11 @@ use panko_lex::Token;
 use crate as ast;
 use crate::ast::Session;
 
-grammar<'a>(sess: &'a Session<'a>, typedef_names: &'a RefCell<HashSet<&'a str>>);
+grammar<'a>(
+    sess: &'a Session<'a>,
+    typedef_names: &'a RefCell<HashSet<&'a str>>,
+    is_in_typedef: &'a Cell<bool>,
+);
 
 extern {
     type Error = ast::Error<'a>;
@@ -145,12 +150,7 @@ FunctionBody = { CompoundStatement }
 
 Declaration: ast::Declaration<'a> = {
     <specifiers:DeclarationSpecifiers> <init_declarator_list:InitDeclaratorList> ";" => {
-        if specifiers.is_typedef() {
-            let mut typedef_names = typedef_names.borrow_mut();
-            for init_declarator in init_declarator_list {
-                typedef_names.insert(init_declarator.declarator.direct_declarator.name());
-            }
-        }
+        is_in_typedef.set(false);
         ast::Declaration { <> }
     },
     // attribute-specifier-sequence declaration-specifiers init_declarator_list ";"
@@ -173,7 +173,13 @@ InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
 }
 
 InitDeclarator: ast::InitDeclarator<'a> = {
-    <declarator:Declarator> <initialiser:("=" <Initialiser>)?> => ast::InitDeclarator { <> },
+    <declarator:Declarator> <initialiser:("=" <Initialiser>)?> => {
+        if is_in_typedef.get() {
+            let mut typedef_names = typedef_names.borrow_mut();
+            typedef_names.insert(declarator.direct_declarator.name());
+        }
+        ast::InitDeclarator { <> }
+    },
 }
 
 Declarator: ast::Declarator<'a> = {
@@ -312,7 +318,10 @@ StorageClassSpecifierToken = {
     "register",
     "static",
     "thread_local",
-    "typedef",
+    "typedef" => {
+        is_in_typedef.set(true);
+        <>
+    },
 }
 
 TypeSpecifierQualifier: ast::TypeSpecifierQualifier<'a> = {

@@ -1,0 +1,17 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/typedef/test_use_typedef_name_in_same_decl.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (typedef i32 `int`)
+   (typedef array `array<int; (sizeof `int`)>`))
+
+----- stderr -----
