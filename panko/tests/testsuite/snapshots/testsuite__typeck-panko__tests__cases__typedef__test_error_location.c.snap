@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/typedef/test_error_location.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `_Lengthof` can only be applied to arrays of known length
+   ╭─[panko/tests/cases/typedef/test_error_location.c:1:1]
+   │
+ 1 │ typedef int array[];
+   │ ─────────┬─────────  
+   │          ╰─────────── `array<int; ∅>` has unknown length
+   │ 
+ 9 │     _Lengthof(array);
+   │     ─────────  
+───╯
+
+Error: `_Lengthof` can only be applied to arrays of known length
+   ╭─[panko/tests/cases/typedef/test_error_location.c:4:15]
+   │
+ 4 │     _Lengthof(int[]);
+   │     ───────── ──┬──  
+   │                 ╰──── `array<int; ∅>` has unknown length
+───╯

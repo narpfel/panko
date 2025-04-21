@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/typedef/test_error_location.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (typedef array `array<int; ∅>`)
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (expression (lengthof `array<int; ∅>`))
+         (expression (lengthof `array<int; ∅>`)))))
+
+----- stderr -----
