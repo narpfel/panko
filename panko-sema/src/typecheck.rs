@@ -2530,6 +2530,7 @@ fn typeck_expression<'a>(
                 loc: _,
             }) = callee.ty.ty
             else {
+                // TODO: this has the wrong location (the argument list is missing)
                 return sess.emit(Diagnostic::Uncallable { at: callee });
             };
 
@@ -2540,6 +2541,7 @@ fn typeck_expression<'a>(
                 params.len() != args.len()
             };
             if has_arity_mismatch {
+                // TODO: this has the wrong location (the argument list is missing)
                 return sess.emit(Diagnostic::ArityMismatch {
                     at: callee,
                     expected: params.len(),
