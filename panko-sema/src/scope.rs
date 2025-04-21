@@ -591,7 +591,7 @@ impl<'a> Scopes<'a> {
     fn add_ty(&mut self, name: &'a str, ty: QualifiedType<'a>) {
         match self.lookup_ty_innermost(name) {
             Entry::Occupied(_) =>
-                todo!("error message: typedef already defined (or is this allowed?"),
+                todo!("error message: typedef already defined (or is this allowed?)"),
             Entry::Vacant(entry) => entry.insert(ty),
         };
     }
