@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/typedef/test_typedef_of_function_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (typedef FunctionPtr `fn(∅: ptr<char const>) -> int`)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition ptr~2 `ptr<fn(∅: ptr<char const>) -> int>` (name puts~0 `fn(∅: ptr<char const>) -> int`))
+         (expression
+            (call (name ptr~2 `ptr<fn(∅: ptr<char const>) -> int>`)
+               (string "hello world"))))))
+
+----- stderr -----

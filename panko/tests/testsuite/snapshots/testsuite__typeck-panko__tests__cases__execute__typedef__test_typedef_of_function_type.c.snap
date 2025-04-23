@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/typedef/test_typedef_of_function_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (typedef FunctionPtr `fn(∅: ptr<char const>) -> int`)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition ptr~2 `ptr<fn(∅: ptr<char const>) -> int>`
+            (addressof `ptr<fn(∅: ptr<char const>) -> int>`
+               (puts~0 `fn(∅: ptr<char const>) -> int`)))
+         (expression
+            (call `int` (ptr~2 `ptr<fn(∅: ptr<char const>) -> int>`)
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 12>>`
+                        (string `array<char; 12>` "hello world\0")))))))))
+
+----- stderr -----
