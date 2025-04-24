@@ -31,6 +31,7 @@ pub mod ast;
 pub mod sexpr_builder;
 
 lalrpop_mod!(
+    #[allow(clippy::uninlined_format_args)]
     #[allow(unused_qualifications)]
     grammar
 );
