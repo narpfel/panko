@@ -333,7 +333,7 @@ impl fmt::Display for Integral {
         {
             write!(f, "{signedness} ")?;
         }
-        write!(f, "{}", kind)
+        write!(f, "{kind}")
     }
 }
 

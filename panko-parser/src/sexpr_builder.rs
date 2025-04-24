@@ -184,7 +184,7 @@ impl<'a> SExpr<'a> {
                 }
             }
         }
-        write!(f, "{}", close_paren)
+        write!(f, "{close_paren}")
     }
 }
 
