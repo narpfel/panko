@@ -1,0 +1,39 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/typedef/test_typedef_in_function_scope_does_not_leak.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition
+      (f~1 `fn() -> void` (static f))
+      (compound-statement
+         (typedef name `char const`)
+         (definition (x~2 `char const` @0) (truncate `char` @0 (97 `int` @4)))
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%c\n\0"))))
+               (sign-extend `int` @24 (x~2 `char const` @0))))))
+   (function-definition
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (f~1 `fn() -> void` (static f)))))
+         (definition (name~4 `int` @0) (42 `int` @0))
+         (return (name~4 `int` @0)))))
+
+----- stderr -----
