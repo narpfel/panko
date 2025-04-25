@@ -7,7 +7,6 @@
 
 use std::cell::Cell;
 use std::cell::RefCell;
-use std::collections::HashSet;
 
 use ariadne::Color::Red;
 use itertools::Itertools as _;
@@ -17,6 +16,7 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenIter;
 use panko_lex::TokenKind;
+use panko_lex::TypedefNames;
 use panko_report::Report;
 
 use crate::ast::Arithmetic;
@@ -848,7 +848,7 @@ impl IncrementFixity {
 
 pub fn parse<'a>(
     sess: &'a ast::Session<'a>,
-    typedef_names: &'a RefCell<HashSet<&'a str>>,
+    typedef_names: &'a RefCell<TypedefNames<'a>>,
     is_in_typedef: &'a Cell<bool>,
     tokens: TokenIter<'a>,
 ) -> Result<ast::TranslationUnit<'a>, Box<dyn Report + 'a>> {

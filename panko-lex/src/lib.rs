@@ -3,7 +3,6 @@
 #![feature(unqualified_local_imports)]
 
 use std::cell::RefCell;
-use std::collections::HashSet;
 use std::ops::Range;
 use std::path::Path;
 use std::path::PathBuf;
@@ -12,6 +11,10 @@ use std::sync::LazyLock;
 use bumpalo::Bump;
 use logos::Lexer;
 use logos::Logos;
+
+pub use crate::typedef_names::TypedefNames;
+
+pub mod typedef_names;
 
 #[derive(Clone, Copy)]
 pub struct Token<'a> {
@@ -589,7 +592,7 @@ pub fn lex<'a>(
     bump: &'a Bump,
     filename: &'a Path,
     src: &str,
-    typedef_names: &'a RefCell<HashSet<&'a str>>,
+    typedef_names: &'a RefCell<TypedefNames<'a>>,
 ) -> TokenIter<'a> {
     let src = bump.alloc_str(src);
     let source_file = &*bump.alloc(SourceFile { file: filename, src });

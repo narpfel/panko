@@ -1,15 +1,15 @@
 use std::cell::Cell;
 use std::cell::RefCell;
-use std::collections::HashSet;
 
 use panko_lex::Token;
+use panko_lex::TypedefNames;
 
 use crate as ast;
 use crate::ast::Session;
 
 grammar<'a>(
     sess: &'a Session<'a>,
-    typedef_names: &'a RefCell<HashSet<&'a str>>,
+    typedef_names: &'a RefCell<TypedefNames<'a>>,
     is_in_typedef: &'a Cell<bool>,
 );
 
@@ -383,7 +383,20 @@ FunctionSpecifierToken = {
 }
 
 CompoundStatement: ast::CompoundStatement<'a> = {
-    "{" <BlockItemList?> "}" => ast::CompoundStatement(<>.unwrap_or(&[])),
+    "{" PushTypedefScope <BlockItemList?> "}" PopTypedefScope =>
+        ast::CompoundStatement(<>.unwrap_or(&[])),
+}
+
+PushTypedefScope: () = {
+    () => {
+        typedef_names.borrow_mut().push_scope();
+    },
+}
+
+PopTypedefScope: () = {
+    () => {
+        typedef_names.borrow_mut().pop_scope();
+    },
 }
 
 BlockItemList: &'a [ast::BlockItem<'a>] = {

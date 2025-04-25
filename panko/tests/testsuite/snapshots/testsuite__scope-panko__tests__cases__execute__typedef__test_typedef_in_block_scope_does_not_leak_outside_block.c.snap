@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/typedef/test_typedef_in_block_scope_does_not_leak_outside_block.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (compound-statement
+            (typedef name `char const`)
+            (definition x~2 `char const` 'a')
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%c\n")
+                  (name x~2 `char const`))))
+         (definition name~3 `int` 42)
+         (return (name name~3 `int`)))))
+
+----- stderr -----
