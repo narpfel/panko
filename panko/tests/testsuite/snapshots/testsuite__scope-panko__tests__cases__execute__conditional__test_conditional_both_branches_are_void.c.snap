@@ -1,0 +1,36 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/conditional/test_conditional_both_branches_are_void.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      f~1 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "f")))))
+   (function-definition
+      g~2 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "g")))))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (expression
+            (conditional
+               1
+               (call (name f~1 `fn() -> void`))
+               (call (name g~2 `fn() -> void`)))))))
+
+----- stderr -----

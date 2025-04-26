@@ -1,0 +1,50 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/conditional/test_conditional_both_branches_are_void.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition
+      (f~1 `fn() -> void` (static f))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 2>>` @16
+                        (string `array<char; 2>` @void "f\0"))))))))
+   (function-definition
+      (g~2 `fn() -> void` (static g))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 2>>` @16
+                        (string `array<char; 2>` @void "g\0"))))))))
+   (function-definition
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (conditional `void` @void
+               (1 `int` @16)
+               (call `void` @void
+                  (addressof `ptr<fn() -> void>` @0
+                     (f~1 `fn() -> void` (static f))))
+               (call `void` @void
+                  (addressof `ptr<fn() -> void>` @8
+                     (g~2 `fn() -> void` (static g)))))))))
+
+----- stderr -----
