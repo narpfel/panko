@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+#[derive(Debug)]
 pub struct TypedefNames<'a> {
     // TODO: should be a `nonempty::Vec`
     scopes: Vec<HashSet<&'a str>>,
