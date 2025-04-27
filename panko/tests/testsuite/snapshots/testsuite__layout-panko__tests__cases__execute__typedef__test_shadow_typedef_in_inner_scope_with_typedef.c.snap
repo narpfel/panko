@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/typedef/test_shadow_typedef_in_inner_scope_with_typedef.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (compound-statement
+            (typedef name `int`)
+            (compound-statement
+               (typedef name `char const`)
+               (definition (x~2 `char const` @0) (truncate `char` @0 (97 `int` @4)))
+               (expression
+                  (call `int` @4
+                     (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                        (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                     (noop-type-conversion `ptr<char const>` @16
+                        (noop-type-conversion `ptr<char>` @16
+                           (addressof `ptr<array<char; 4>>` @16
+                              (string `array<char; 4>` @void "%c\n\0"))))
+                     (sign-extend `int` @24 (x~2 `char const` @0)))))
+            (definition (x~3 `int` @0) (123 `int` @0))
+            (expression
+               (call `int` @4
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 4>>` @16
+                           (string `array<char; 4>` @void "%d\n\0"))))
+                  (x~3 `int` @0))))
+         (definition (name~4 `int` @0) (42 `int` @0))
+         (return (name~4 `int` @0)))))
+
+----- stderr -----

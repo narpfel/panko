@@ -149,13 +149,66 @@ FunctionDefinition: ast::FunctionDefinition<'a> = {
 FunctionBody = { CompoundStatement }
 
 Declaration: ast::Declaration<'a> = {
-    <specifiers:DeclarationSpecifiers> <init_declarator_list:InitDeclaratorList> ";" => {
+    <head:DeclarationHead> <init_declarator_list:("," <InitDeclaratorList>)?> ";" => {
+        let (specifiers, declarator) = head;
+        let init_declarator_list = match init_declarator_list {
+            None => sess.alloc_slice_copy(declarator.as_slice()),
+            Some(list) => {
+                let mut init_declarator_list = vec![];
+                init_declarator_list.extend(declarator);
+                init_declarator_list.extend(list);
+                sess.alloc_slice_copy(&init_declarator_list)
+            }
+        };
         is_in_typedef.set(false);
-        ast::Declaration { <> }
+        ast::Declaration { specifiers, init_declarator_list }
     },
     // attribute-specifier-sequence declaration-specifiers init_declarator_list ";"
     // static_assert-declaration
     // attribute-declaration
+}
+
+DeclarationHead: (ast::DeclarationSpecifiers<'a>, Option<ast::InitDeclarator<'a>>) = {
+    <specifiers:DeclarationSpecifiers> <declarator:InitDeclarator<MaybeAbstractDeclarator>?> => {
+        if let ast::DeclarationSpecifiers([specifiers @ .., specifier]) = specifiers
+            && let ast::DeclarationSpecifier::TypeSpecifierQualifier(
+                ast::TypeSpecifierQualifier::Specifier(specifier),
+            ) = specifier
+        {
+            let name = specifier.token;
+            let add_typedef_name = || {
+                if is_in_typedef.get() {
+                    let mut typedef_names = typedef_names.borrow_mut();
+                    typedef_names.insert(name.slice());
+                }
+            };
+            if declarator.is_none() {
+                let declarator = ast::Declarator {
+                    pointers: None,
+                    direct_declarator: ast::DirectDeclarator::Identifier(name),
+                };
+                add_typedef_name();
+                return (
+                    ast::DeclarationSpecifiers(specifiers),
+                    Some(ast::InitDeclarator { declarator, initialiser: None }),
+                );
+            }
+            else if let Some(declarator) = declarator
+                && declarator.declarator.direct_declarator.is_abstract()
+            {
+                let ast::InitDeclarator { declarator, initialiser } = declarator;
+                let ast::Declarator { pointers, direct_declarator } = declarator;
+                let direct_declarator = direct_declarator.with_name(sess, name);
+                let declarator = ast::Declarator { pointers, direct_declarator };
+                add_typedef_name();
+                return (
+                    ast::DeclarationSpecifiers(specifiers),
+                    Some(ast::InitDeclarator { declarator, initialiser }),
+                );
+            }
+        }
+        (<>)
+    },
 }
 
 DeclarationSpecifiers: ast::DeclarationSpecifiers<'a> = {
@@ -169,12 +222,12 @@ DeclarationSpecifier: ast::DeclarationSpecifier<'a> = {
 }
 
 InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
-    CommaSep<InitDeclarator>,
+    CommaSep<InitDeclarator<Declarator>>,
 }
 
-InitDeclarator: ast::InitDeclarator<'a> = {
+InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
     <declarator:Declarator> <initialiser:("=" <Initialiser>)?> => {
-        if is_in_typedef.get() {
+        if is_in_typedef.get() && !declarator.direct_declarator.is_abstract() {
             let mut typedef_names = typedef_names.borrow_mut();
             typedef_names.insert(declarator.direct_declarator.name());
         }
@@ -184,6 +237,11 @@ InitDeclarator: ast::InitDeclarator<'a> = {
 
 Declarator: ast::Declarator<'a> = {
     <pointers:Some<Pointer>?> <direct_declarator:DirectDeclarator> => ast::Declarator { <> },
+}
+
+MaybeAbstractDeclarator: ast::Declarator<'a> = {
+    Declarator,
+    AbstractDeclarator,
 }
 
 Pointer: ast::Pointer<'a> = {

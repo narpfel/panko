@@ -492,6 +492,43 @@ enum DirectDeclarator<'a> {
 }
 
 impl<'a> DirectDeclarator<'a> {
+    fn is_abstract(&self) -> bool {
+        match self {
+            DirectDeclarator::Abstract => true,
+            DirectDeclarator::Identifier(_) => false,
+            DirectDeclarator::Parenthesised(declarator) =>
+                declarator.direct_declarator.is_abstract(),
+            DirectDeclarator::ArrayDeclarator(array_declarator) =>
+                array_declarator.direct_declarator.is_abstract(),
+            DirectDeclarator::FunctionDeclarator(function_declarator) =>
+                function_declarator.direct_declarator.is_abstract(),
+        }
+    }
+
+    fn with_name(&self, sess: &'a ast::Session<'a>, name: Token<'a>) -> Self {
+        match self {
+            DirectDeclarator::Abstract => Self::Identifier(name),
+            DirectDeclarator::Identifier(_) => unreachable!(),
+            DirectDeclarator::Parenthesised(declarator) =>
+                Self::Parenthesised(sess.alloc(Declarator {
+                    direct_declarator: declarator.direct_declarator.with_name(sess, name),
+                    ..**declarator
+                })),
+            DirectDeclarator::ArrayDeclarator(array_declarator) =>
+                Self::ArrayDeclarator(ArrayDeclarator {
+                    direct_declarator: sess
+                        .alloc(array_declarator.direct_declarator.with_name(sess, name)),
+                    ..*array_declarator
+                }),
+            DirectDeclarator::FunctionDeclarator(function_declarator) =>
+                Self::FunctionDeclarator(FunctionDeclarator {
+                    direct_declarator: sess
+                        .alloc(function_declarator.direct_declarator.with_name(sess, name)),
+                    ..*function_declarator
+                }),
+        }
+    }
+
     fn name(&self) -> &'a str {
         match self {
             DirectDeclarator::Abstract => unreachable!(),
