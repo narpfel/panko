@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/typedef/test_first_token_after_scope.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (compound-statement
+            (typedef puts `int`))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "hello"))))))
+
+----- stderr -----

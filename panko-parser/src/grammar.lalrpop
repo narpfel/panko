@@ -441,7 +441,7 @@ FunctionSpecifierToken = {
 }
 
 CompoundStatement: ast::CompoundStatement<'a> = {
-    "{" PushTypedefScope <BlockItemList?> "}" PopTypedefScope =>
+    "{" PushTypedefScope <BlockItemList?> PopTypedefScope "}" =>
         ast::CompoundStatement(<>.unwrap_or(&[])),
 }
 
