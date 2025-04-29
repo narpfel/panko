@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/typedef/test_shadow_typedef_in_inner_scope_with_value.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (compound-statement
+            (typedef name `int`)
+            (compound-statement
+               (definition name~2 `long` ∅)
+               (expression (assign `long` (name~2 `long`) (sign-extend `long` (negate `int` (42 `int`)))))
+               (expression
+                  (call `int`
+                     (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                        (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                     (noop-type-conversion `ptr<char const>`
+                        (noop-type-conversion `ptr<char>`
+                           (addressof `ptr<array<char; 5>>`
+                              (string `array<char; 5>` "%ld\n\0"))))
+                     (name~2 `long`))))
+            (definition x~3 `int` (123 `int`))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 4>>`
+                           (string `array<char; 4>` "%d\n\0"))))
+                  (x~3 `int`))))
+         (definition name~4 `int` (42 `int`))
+         (return (name~4 `int`)))))
+
+----- stderr -----

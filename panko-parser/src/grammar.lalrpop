@@ -177,10 +177,13 @@ DeclarationHead: (ast::DeclarationSpecifiers<'a>, Option<ast::InitDeclarator<'a>
         {
             let name = specifier.token;
             let add_typedef_name = || {
-                if is_in_typedef.get() {
-                    let mut typedef_names = typedef_names.borrow_mut();
-                    typedef_names.insert(name.slice());
+                let kind = if is_in_typedef.get() {
+                    panko_lex::TokenKind::TypeIdentifier
                 }
+                else {
+                    panko_lex::TokenKind::Identifier
+                };
+                typedef_names.borrow_mut().insert(name.slice(), kind);
             };
             if declarator.is_none() {
                 let declarator = ast::Declarator {
@@ -227,9 +230,14 @@ InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
 
 InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
     <declarator:Declarator> <initialiser:("=" <Initialiser>)?> => {
-        if is_in_typedef.get() && !declarator.direct_declarator.is_abstract() {
-            let mut typedef_names = typedef_names.borrow_mut();
-            typedef_names.insert(declarator.direct_declarator.name());
+        if !declarator.direct_declarator.is_abstract() {
+            let kind = if is_in_typedef.get() {
+                panko_lex::TokenKind::TypeIdentifier
+            }
+            else {
+                panko_lex::TokenKind::Identifier
+            };
+            typedef_names.borrow_mut().insert(declarator.direct_declarator.name(), kind);
         }
         ast::InitDeclarator { <> }
     },

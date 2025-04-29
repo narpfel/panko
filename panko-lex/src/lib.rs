@@ -604,8 +604,7 @@ pub fn lex<'a>(
 
         let kind = kind.map_err(|()| Error { at: loc })?;
         let kind = match kind {
-            TokenKind::Identifier
-                if typedef_names.borrow().contains(&src[span.start..span.end]) =>
+            TokenKind::Identifier if typedef_names.borrow().is_type_identifier(loc.slice()) =>
                 TokenKind::TypeIdentifier,
             kind => kind,
         };
