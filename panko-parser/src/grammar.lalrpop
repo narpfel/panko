@@ -241,6 +241,15 @@ InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
         }
         ast::InitDeclarator { <> }
     },
+    "=" <Initialiser> => {
+        ast::InitDeclarator {
+            declarator: ast::Declarator {
+                pointers: None,
+                direct_declarator: ast::DirectDeclarator::Abstract,
+            },
+            initialiser: Some(<>),
+        }
+    },
 }
 
 Declarator: ast::Declarator<'a> = {
