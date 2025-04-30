@@ -12,7 +12,7 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: cannot dereference this expression with type `int` (pointer or array type required)
+Error: cannot dereference this expression of type `int` (pointer or array type required)
    ╭─[panko/tests/cases/deref/test_deref_of_non_pointer.c:3:5]
    │
  3 │     *a = 2;
@@ -28,7 +28,7 @@ Error: cannot assign to this expression because it is not an lvalue
    │      ╰── this expression is not an lvalue
 ───╯
 
-Error: cannot dereference this expression with type `int` (pointer or array type required)
+Error: cannot dereference this expression of type `int` (pointer or array type required)
    ╭─[panko/tests/cases/deref/test_deref_of_non_pointer.c:4:5]
    │
  4 │     *42;
@@ -36,7 +36,7 @@ Error: cannot dereference this expression with type `int` (pointer or array type
    │      ╰─── in this expression
 ───╯
 
-Error: cannot dereference this expression with type `int` (pointer or array type required)
+Error: cannot dereference this expression of type `int` (pointer or array type required)
    ╭─[panko/tests/cases/deref/test_deref_of_non_pointer.c:5:5]
    │
  5 │     42[27];
@@ -44,7 +44,7 @@ Error: cannot dereference this expression with type `int` (pointer or array type
    │        ╰──── in this expression
 ───╯
 
-Error: cannot dereference this expression with type `int` (pointer or array type required)
+Error: cannot dereference this expression of type `int` (pointer or array type required)
    ╭─[panko/tests/cases/deref/test_deref_of_non_pointer.c:6:5]
    │
  6 │     42[a] = a;

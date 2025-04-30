@@ -189,7 +189,7 @@ enum Diagnostic<'a> {
         reason: &'a str,
     },
 
-    #[error("cannot dereference this expression with type `{ty}` (pointer or array type required)")]
+    #[error("cannot dereference this expression of type `{ty}` (pointer or array type required)")]
     #[diagnostics(at(colour = Red, label = "in this expression"))]
     #[with(ty = ty.fg(Red))]
     CannotDeref {
