@@ -56,7 +56,13 @@ pub struct Loc<'a> {
 
 impl std::fmt::Debug for Loc<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}:{:?}", self.file().display(), self.span())
+        let prefix = &self.source_file.src[..self.span().start];
+        let line = prefix.bytes().filter(|c| *c == b'\n').count() + 1;
+        let column = prefix
+            .rfind('\n')
+            .map(|i| prefix.len() - i)
+            .unwrap_or(prefix.len() + 1);
+        write!(f, "{}:{line}:{column}", self.file().display())
     }
 }
 
