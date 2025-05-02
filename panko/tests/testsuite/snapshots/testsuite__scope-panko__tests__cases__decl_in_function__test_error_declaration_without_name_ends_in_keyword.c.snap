@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/decl_in_function/test_error_declaration_without_name_ends_in_keyword.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/decl_in_function/test_error_declaration_without_name_ends_in_keyword.c:2:5]
+   │
+ 2 │     long int = 42;
+   │     ───────┬──────  
+   │            ╰──────── name missing
+───╯

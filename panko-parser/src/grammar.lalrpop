@@ -175,8 +175,12 @@ DeclarationHead: (ast::DeclarationSpecifiers<'a>, Option<ast::InitDeclarator<'a>
             && let ast::DeclarationSpecifier::TypeSpecifierQualifier(
                 ast::TypeSpecifierQualifier::Specifier(specifier),
             ) = specifier
+            && let name = specifier.token
+            && matches!(
+                name.kind,
+                panko_lex::TokenKind::Identifier | panko_lex::TokenKind::TypeIdentifier,
+            )
         {
-            let name = specifier.token;
             let add_typedef_name = || {
                 let kind = if is_in_typedef.get() {
                     panko_lex::TokenKind::TypeIdentifier
