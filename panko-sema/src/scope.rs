@@ -1000,6 +1000,7 @@ fn resolve_assoc<'a>(
 
 fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expression<'a> {
     match expr {
+        ast::Expression::Error(error) => Expression::Error(*error),
         ast::Expression::Name(name) => scopes
             .lookup(name.slice(), name.loc())
             .map(Expression::Name)

@@ -271,6 +271,7 @@ impl AsSExpr for JumpStatement<'_> {
 impl AsSExpr for Expression<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
+            Expression::Error(_error) => SExpr::new("error"),
             Expression::Name(name) => SExpr::new("name").inline_string(name.slice().to_owned()),
             Expression::Integer(int) => SExpr::string(int.slice()),
             Expression::CharConstant(char) => SExpr::string(char.slice()),

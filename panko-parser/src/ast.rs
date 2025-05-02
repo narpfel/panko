@@ -50,6 +50,10 @@ enum Diagnostic<'a> {
     #[error("declaration does not specify a type")]
     #[diagnostics(at(colour = Red, label = "type missing"))]
     DeclarationWithoutType { at: cst::DeclarationSpecifiers<'a> },
+
+    #[error("declaration does not specify a name")]
+    #[diagnostics(at(colour = Red, label = "name missing"))]
+    DeclarationWithoutName { at: cst::Declaration<'a> },
 }
 
 pub trait ErrorExpr<'a> {
@@ -262,6 +266,12 @@ pub enum Statement<'a> {
     },
 }
 
+impl<'a> ErrorExpr<'a> for Statement<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Expression(Some(Expression::from_error(error)))
+    }
+}
+
 impl<'a> ExternalDeclaration<'a> {
     fn from_parse_tree(
         sess: &'a Session<'a>,
@@ -273,7 +283,10 @@ impl<'a> ExternalDeclaration<'a> {
                     FunctionDefinition::from_parse_tree(sess, def),
                 ))),
             cst::ExternalDeclaration::Declaration(decl) => Either::Right(
-                Declaration::from_parse_tree(sess, decl).map(ExternalDeclaration::Declaration),
+                Declaration::from_parse_tree(sess, decl).map(|decl| match decl {
+                    Some(decl) => ExternalDeclaration::Declaration(decl),
+                    None => todo!(),
+                }),
             ),
         }
     }
@@ -370,17 +383,19 @@ impl<'a> Declaration<'a> {
     fn from_parse_tree(
         sess: &'a Session<'a>,
         decl: &'a cst::Declaration<'a>,
-    ) -> impl Iterator<Item = Self> + 'a {
+    ) -> impl Iterator<Item = Option<Self>> + 'a {
         let DeclarationSpecifiers { storage_class, ty } =
             parse_declaration_specifiers(sess, decl.specifiers);
         decl.init_declarator_list
             .iter()
             .map(move |&InitDeclarator { declarator, initialiser }| {
                 let (ty, name) = parse_declarator(sess, ty, declarator);
-                let name = name.unwrap_or_else(|| {
-                    unreachable!("[parser] syntax error: declaration without name")
-                });
-                Self { ty, name, initialiser, storage_class }
+                Some(Self {
+                    ty,
+                    name: name?,
+                    initialiser,
+                    storage_class,
+                })
             })
     }
 }
@@ -433,7 +448,12 @@ impl<'a> Statement<'a> {
     ) -> impl Iterator<Item = Self> + 'a {
         match item {
             BlockItem::Declaration(decl) =>
-                Either::Left(Declaration::from_parse_tree(sess, decl).map(Self::Declaration)),
+                Either::Left(Declaration::from_parse_tree(sess, decl).map(|maybe_decl| {
+                    match maybe_decl {
+                        Some(decl) => Self::Declaration(decl),
+                        None => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl }),
+                    }
+                })),
             BlockItem::UnlabeledStatement(stmt) =>
                 Either::Right(once(Self::from_unlabeled_statement(sess, stmt))),
         }

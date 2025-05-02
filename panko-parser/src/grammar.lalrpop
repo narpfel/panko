@@ -149,7 +149,7 @@ FunctionDefinition: ast::FunctionDefinition<'a> = {
 FunctionBody = { CompoundStatement }
 
 Declaration: ast::Declaration<'a> = {
-    <head:DeclarationHead> <init_declarator_list:("," <InitDeclaratorList>)?> ";" => {
+    <head:DeclarationHead> <init_declarator_list:("," <InitDeclaratorList>)?> <semi:";"> => {
         let (specifiers, declarator) = head;
         let init_declarator_list = match init_declarator_list {
             None => sess.alloc_slice_copy(declarator.as_slice()),
@@ -161,7 +161,7 @@ Declaration: ast::Declaration<'a> = {
             }
         };
         is_in_typedef.set(false);
-        ast::Declaration { specifiers, init_declarator_list }
+        ast::Declaration { specifiers, init_declarator_list, semi }
     },
     // attribute-specifier-sequence declaration-specifiers init_declarator_list ";"
     // static_assert-declaration
@@ -171,6 +171,7 @@ Declaration: ast::Declaration<'a> = {
 DeclarationHead: (ast::DeclarationSpecifiers<'a>, Option<ast::InitDeclarator<'a>>) = {
     <specifiers:DeclarationSpecifiers> <declarator:InitDeclarator<MaybeAbstractDeclarator>?> => {
         if let ast::DeclarationSpecifiers([specifiers @ .., specifier]) = specifiers
+            && !specifiers.is_empty()
             && let ast::DeclarationSpecifier::TypeSpecifierQualifier(
                 ast::TypeSpecifierQualifier::Specifier(specifier),
             ) = specifier

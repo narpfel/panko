@@ -20,6 +20,7 @@ use panko_lex::TypedefNames;
 use panko_report::Report;
 
 use crate::ast::Arithmetic;
+use crate::ast::ErrorExpr;
 use crate::ast::Integral;
 use crate::ast::IntegralKind;
 use crate::ast::QualifiedType;
@@ -79,6 +80,18 @@ pub enum ExternalDeclaration<'a> {
 pub struct Declaration<'a> {
     specifiers: DeclarationSpecifiers<'a>,
     init_declarator_list: &'a [InitDeclarator<'a>],
+    semi: Token<'a>,
+}
+
+impl<'a> Declaration<'a> {
+    fn loc(&self) -> Loc<'a> {
+        let Self {
+            specifiers,
+            init_declarator_list: _,
+            semi,
+        } = self;
+        specifiers.loc().until(semi.loc())
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -610,6 +623,7 @@ enum JumpStatement<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub enum Expression<'a> {
+    Error(&'a dyn Report),
     Name(Token<'a>),
     Integer(Token<'a>),
     CharConstant(Token<'a>),
@@ -693,6 +707,12 @@ pub enum Expression<'a> {
         operand: &'a Expression<'a>,
         fixity: IncrementFixity,
     },
+}
+
+impl<'a> ErrorExpr<'a> for Expression<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Error(error)
+    }
 }
 
 #[derive(Debug, Clone, Copy)]

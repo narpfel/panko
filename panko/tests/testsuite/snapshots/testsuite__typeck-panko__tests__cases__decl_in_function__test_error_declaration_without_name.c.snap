@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/decl_in_function/test_error_declaration_without_name.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/decl_in_function/test_error_declaration_without_name.c:2:5]
+   │
+ 2 │     int = 42;
+   │     ────┬────  
+   │         ╰────── name missing
+───╯
+
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/decl_in_function/test_error_declaration_without_name.c:5:9]
+   │
+ 5 │         name = 42;
+   │         ─────┬────  
+   │              ╰────── name missing
+───╯
