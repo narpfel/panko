@@ -13,8 +13,9 @@ exit_code: 0
 (translation-unit
    (typedef F `fn() -> int`)
    (declaration f~0 `fn() -> int const` ∅)
+   (declaration g~1 `fn() -> int const` ∅)
    (function-definition
-      f~0 `fn() -> int const`
+      g~1 `fn() -> int const`
       (compound-statement)))
 
 ----- stderr -----
