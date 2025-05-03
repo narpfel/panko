@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_global_scope/test_error_function_type_is_qualified.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: redeclaration of `f` with different type: `fn() -> int const` vs. `fn() -> int const`
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_function_type_is_qualified.c:9:11]
+   │
+ 7 │ F const f;
+   │         ┬  
+   │         ╰── previously declared here with type `fn() -> int const`
+   │ 
+ 9 │ int const f() {}
+   │           ┬  
+   │           ╰── new declaration with different type `fn() -> int const`
+───╯

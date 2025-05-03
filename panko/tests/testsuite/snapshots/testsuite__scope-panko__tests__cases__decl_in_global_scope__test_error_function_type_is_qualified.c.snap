@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/decl_in_global_scope/test_error_function_type_is_qualified.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (typedef F `fn() -> int`)
+   (declaration f~0 `fn() -> int const` ∅)
+   (function-definition
+      f~0 `fn() -> int const`
+      (compound-statement)))
+
+----- stderr -----
