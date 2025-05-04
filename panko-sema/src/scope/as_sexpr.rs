@@ -67,7 +67,7 @@ impl AsSExpr for Declaration<'_> {
 
 impl AsSExpr for Typedef<'_> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { ty, name } = self;
+        let Self { ty, name, previously_declared_as: _ } = self;
         SExpr::new("typedef")
             .inline_string(name.slice().to_owned())
             .inherit(ty)

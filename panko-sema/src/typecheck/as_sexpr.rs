@@ -18,6 +18,7 @@ use super::Statement;
 use super::SubobjectInitialiser;
 use super::TranslationUnit;
 use super::TypedExpression;
+use super::Typedef;
 
 impl<Expression> AsSExpr for ArrayLength<Expression>
 where
@@ -45,6 +46,15 @@ impl AsSExpr for ExternalDeclaration<'_> {
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
             ExternalDeclaration::Typedef(typedef) => typedef.as_sexpr(),
         }
+    }
+}
+
+impl AsSExpr for Typedef<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { ty, name } = self;
+        SExpr::new("typedef")
+            .inline_string(name.slice().to_owned())
+            .inherit(ty)
     }
 }
 

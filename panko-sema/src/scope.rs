@@ -86,9 +86,10 @@ pub(crate) struct Declaration<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Typedef<'a> {
-    ty: QualifiedType<'a>,
-    name: Token<'a>,
+pub(crate) struct Typedef<'a> {
+    pub(crate) ty: QualifiedType<'a>,
+    pub(crate) name: Token<'a>,
+    pub(crate) previously_declared_as: Option<QualifiedType<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -299,7 +300,7 @@ pub(crate) enum GenericAssociation<'a> {
 }
 
 impl<'a> Typedef<'a> {
-    fn loc(&self) -> Loc<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
         // TODO: should this be the whole declaration?
         self.name.loc()
     }
@@ -588,12 +589,15 @@ impl<'a> Scopes<'a> {
         }
     }
 
-    fn add_ty(&mut self, name: &'a str, ty: QualifiedType<'a>) {
+    #[must_use]
+    fn add_ty(&mut self, name: &'a str, ty: QualifiedType<'a>) -> Option<QualifiedType<'a>> {
         match self.lookup_ty_innermost(name) {
-            Entry::Occupied(_) =>
-                todo!("error message: typedef already defined (or is this allowed?)"),
-            Entry::Vacant(entry) => entry.insert(ty),
-        };
+            Entry::Occupied(entry) => Some(*entry.get()),
+            Entry::Vacant(entry) => {
+                entry.insert(ty);
+                None
+            }
+        }
     }
 
     fn temporary(&mut self, loc: Loc<'a>, ty: QualifiedType<'a>) -> Reference<'a> {
@@ -899,8 +903,12 @@ fn resolve_declaration<'a>(
             token: _,
             kind: StorageClassSpecifierKind::Typedef,
         }) => {
-            scopes.add_ty(name.slice(), ty);
-            return DeclarationOrTypedef::Typedef(Typedef { ty, name: *name });
+            let previously_declared_as = scopes.add_ty(name.slice(), ty);
+            return DeclarationOrTypedef::Typedef(Typedef {
+                ty,
+                name: *name,
+                previously_declared_as,
+            });
         }
         Some(storage_class) => todo!("not implemented: storage class {:?}", storage_class.kind),
         None => (),

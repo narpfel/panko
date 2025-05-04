@@ -47,7 +47,6 @@ use crate::scope::IncrementFixity;
 use crate::scope::IsParameter;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
-use crate::scope::Typedef;
 use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::FunctionType;
@@ -520,6 +519,23 @@ enum Diagnostic<'a> {
         then: TypedExpression<'a>,
         or_else: TypedExpression<'a>,
     },
+
+    #[error("redeclaration of type alias `{name}` with different type")]
+    #[with(
+        ty = at.ty,
+        name = at.name,
+    )]
+    #[diagnostics(
+        previously_declared_as(
+            colour = Blue,
+            label = "previously declared as `{previously_declared_as}` here",
+        ),
+        at(colour = Red, label = "redeclarared as different type `{ty}` here"),
+    )]
+    TypedefRedeclared {
+        at: scope::Typedef<'a>,
+        previously_declared_as: scope::QualifiedType<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -585,6 +601,12 @@ pub(crate) enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Typedef<'a> {
+    ty: QualifiedType<'a>,
+    name: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1540,7 +1562,7 @@ fn typeck_statement<'a>(
     match stmt {
         scope::Statement::Declaration(decl) =>
             Statement::Declaration(typeck_declaration(sess, decl)),
-        scope::Statement::Typedef(typedef) => Statement::Typedef(*typedef),
+        scope::Statement::Typedef(typedef) => Statement::Typedef(typeck_typedef(sess, typedef)),
         scope::Statement::Expression(expr) =>
             Statement::Expression(try { typeck_expression(sess, expr.as_ref()?, Context::Default) }),
         scope::Statement::Compound(stmt) =>
@@ -2916,6 +2938,21 @@ fn grow_to_fit(signedness: Signedness, kind: IntegralKind, base: u32, value: u64
         .unwrap_or_else(|| todo!("emit error: integer constant cannot be represented"))
 }
 
+fn typeck_typedef<'a>(sess: &'a Session<'a>, typedef: &scope::Typedef<'a>) -> Typedef<'a> {
+    let scope::Typedef { ty, name, previously_declared_as } = *typedef;
+    let ty = typeck_ty(sess, ty, IsParameter::No);
+    if let Some(previously_declared_as) = previously_declared_as {
+        let previous_ty = typeck_ty(sess, previously_declared_as, IsParameter::No);
+        if ty != previous_ty {
+            // this error is not fatal
+            let () =
+                sess.emit(Diagnostic::TypedefRedeclared { at: *typedef, previously_declared_as });
+        }
+        // TODO: when continuing after this error, `previous_ty` should be returned
+    }
+    Typedef { ty, name }
+}
+
 pub fn resolve_types<'a>(
     sess: &'a Session<'a>,
     translation_unit: scope::TranslationUnit<'a>,
@@ -2924,7 +2961,8 @@ pub fn resolve_types<'a>(
         decls: sess.alloc_slice_fill_iter(translation_unit.decls.iter().map(|decl| match decl {
             scope::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(typeck_function_definition(sess, def)),
-            scope::ExternalDeclaration::Typedef(typedef) => ExternalDeclaration::Typedef(*typedef),
+            scope::ExternalDeclaration::Typedef(typedef) =>
+                ExternalDeclaration::Typedef(typeck_typedef(sess, typedef)),
             scope::ExternalDeclaration::Declaration(decl) =>
                 ExternalDeclaration::Declaration(typeck_declaration(sess, decl)),
         })),

@@ -11,7 +11,6 @@ use panko_report::Report;
 use crate::layout::stack::Stack;
 use crate::scope::Id;
 use crate::scope::RefKind;
-use crate::scope::Typedef;
 use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::FunctionType;
@@ -19,6 +18,7 @@ use crate::ty::ParameterDeclaration;
 use crate::typecheck;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::PtrCmpKind;
+use crate::typecheck::Typedef;
 
 mod as_sexpr;
 mod stack;

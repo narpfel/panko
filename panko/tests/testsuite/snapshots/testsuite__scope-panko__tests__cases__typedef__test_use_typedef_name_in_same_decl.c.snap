@@ -12,6 +12,6 @@ exit_code: 0
 ----- stdout -----
 (translation-unit
    (typedef i32 `int`)
-   (typedef array `array<int; (sizeof `int`)>`))
+   (typedef function `fn(∅: int) -> int`))
 
 ----- stderr -----

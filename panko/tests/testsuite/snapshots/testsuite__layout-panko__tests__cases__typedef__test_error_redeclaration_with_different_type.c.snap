@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/typedef/test_error_redeclaration_with_different_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: redeclaration of type alias `in_global_scope` with different type
+   ╭─[panko/tests/cases/typedef/test_error_redeclaration_with_different_type.c:2:20]
+   │
+ 1 │ typedef long in_global_scope;
+   │ ──────┬─────  
+   │       ╰─────── previously declared as `long` here
+ 2 │ typedef long const in_global_scope;
+   │                    ───────┬───────  
+   │                           ╰───────── redeclarared as different type `long const` here
+───╯
+
+Error: redeclaration of type alias `in_local_scope` with different type
+   ╭─[panko/tests/cases/typedef/test_error_redeclaration_with_different_type.c:6:23]
+   │
+ 5 │     typedef int in_local_scope;
+   │     ─────┬─────  
+   │          ╰─────── previously declared as `int` here
+ 6 │     typedef int const in_local_scope;
+   │                       ───────┬──────  
+   │                              ╰──────── redeclarared as different type `int const` here
+───╯
