@@ -1,0 +1,41 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arithmetic/test_strcpy_with_deref_postincrement_idiom.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration puts~1 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (definition str~3 `array<char; ∅>` (string "hello"))
+         (definition copy~4 `array<char; 6>` ∅)
+         (definition src~5 `ptr<char>` (name str~3 `array<char; ∅>`))
+         (definition tgt~6 `ptr<char>` (name copy~4 `array<char; 6>`))
+         (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
+         (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
+         (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
+         (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
+         (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
+         (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu %zu\n")
+               (subtract (name src~5 `ptr<char>`) (name str~3 `array<char; ∅>`))
+               (subtract (name tgt~6 `ptr<char>`) (name copy~4 `array<char; 6>`))))
+         (expression
+            (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+               (name str~3 `array<char; ∅>`)))
+         (expression
+            (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+               (name copy~4 `array<char; 6>`))))))
+
+----- stderr -----
