@@ -18,10 +18,10 @@ exit_code: 0
    (declaration e~4 `fn() -> ptr<int>` ∅)
    (tentative-definition f~5 `ptr<fn(∅: int) -> int>` ∅)
    (tentative-definition g~6 `ptr<fn(∅: ptr<int>) -> int>` ∅)
-   (tentative-definition h~7 `ptr<fn(∅: fn() -> int) -> int>` ∅)
-   (declaration i~8 `fn(a: fn() -> int) -> int` ∅)
-   (declaration j~9 `fn(a: fn(∅: int) -> int) -> int` ∅)
-   (declaration k~10 `fn(a: fn(a: int) -> int) -> int` ∅)
+   (tentative-definition h~7 `ptr<fn(∅: ptr<fn() -> int>) -> int>` ∅)
+   (declaration i~8 `fn(a: ptr<fn() -> int>) -> int` ∅)
+   (declaration j~9 `fn(a: ptr<fn(∅: int) -> int>) -> int` ∅)
+   (declaration k~10 `fn(a: ptr<fn(a: int) -> int>) -> int` ∅)
    (declaration l~11 `fn(∅: int, ∅: ptr<fn() -> int>) -> int` ∅))
 
 ----- stderr -----

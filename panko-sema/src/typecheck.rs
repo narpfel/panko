@@ -1093,7 +1093,7 @@ fn typeck_ty_with_initialiser<'a>(
                     }),
                 Type::Typeof { expr, unqual: _ } => match expr {},
             }
-            Type::Function(FunctionType {
+            let function_ty = Type::Function(FunctionType {
                 params: sess.alloc_slice_fill_iter(params.iter().map(
                     |&ParameterDeclaration { loc, ty, name }| {
                         let ty = typeck_ty(sess, ty, IsParameter::Yes);
@@ -1106,7 +1106,11 @@ fn typeck_ty_with_initialiser<'a>(
                 )),
                 return_type,
                 is_varargs,
-            })
+            });
+            match is_parameter {
+                IsParameter::Yes => Type::Pointer(sess.alloc(function_ty.unqualified())),
+                IsParameter::No => function_ty,
+            }
         }
         ty::Type::Void => Type::Void,
         ty::Type::Typeof { expr, unqual } => {

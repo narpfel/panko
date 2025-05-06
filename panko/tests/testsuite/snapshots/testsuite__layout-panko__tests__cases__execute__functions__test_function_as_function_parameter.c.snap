@@ -1,0 +1,43 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/functions/test_function_as_function_parameter.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (plus_1~0 `fn(x: int) -> int` (static plus_1))
+      (params
+         (x~1 `int` @0))
+      (compound-statement
+         (return
+            (add `int` @4
+               (x~1 `int` @0)
+               (1 `int` @8)))))
+   (declaration (f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int` (static f)) ∅)
+   (function-definition
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (return
+            (call `int` @0
+               (addressof `ptr<fn(callback: ptr<fn(∅: int) -> int>) -> int>` @8
+                  (f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int` (static f)))
+               (addressof `ptr<fn(x: int) -> int>` @16
+                  (plus_1~0 `fn(x: int) -> int` (static plus_1)))))))
+   (function-definition
+      (f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int` (static f))
+      (params
+         (callback~5 `ptr<fn(∅: int) -> int>` @0))
+      (compound-statement
+         (return
+            (call `int` @8 (callback~5 `ptr<fn(∅: int) -> int>` @0)
+               (call `int` @12 (callback~5 `ptr<fn(∅: int) -> int>` @0)
+                  (42 `int` @16)))))))
+
+----- stderr -----

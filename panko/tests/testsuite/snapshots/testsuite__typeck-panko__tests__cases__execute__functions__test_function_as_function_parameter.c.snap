@@ -1,0 +1,40 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/functions/test_function_as_function_parameter.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      plus_1~0 `fn(x: int) -> int`
+      (params
+         x~1 `int`)
+      (compound-statement
+         (return (add `int` (x~1 `int`) (1 `int`)))))
+   (declaration f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int` ∅)
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (return
+            (call `int`
+               (addressof `ptr<fn(callback: ptr<fn(∅: int) -> int>) -> int>`
+                  (f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int`))
+               (addressof `ptr<fn(x: int) -> int>`
+                  (plus_1~0 `fn(x: int) -> int`))))))
+   (function-definition
+      f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int`
+      (params
+         callback~5 `ptr<fn(∅: int) -> int>`)
+      (compound-statement
+         (return
+            (call `int` (callback~5 `ptr<fn(∅: int) -> int>`)
+               (call `int` (callback~5 `ptr<fn(∅: int) -> int>`)
+                  (42 `int`)))))))
+
+----- stderr -----
