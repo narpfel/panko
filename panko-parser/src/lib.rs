@@ -506,16 +506,7 @@ enum DirectDeclarator<'a> {
 
 impl<'a> DirectDeclarator<'a> {
     fn is_abstract(&self) -> bool {
-        match self {
-            DirectDeclarator::Abstract => true,
-            DirectDeclarator::Identifier(_) => false,
-            DirectDeclarator::Parenthesised(declarator) =>
-                declarator.direct_declarator.is_abstract(),
-            DirectDeclarator::ArrayDeclarator(array_declarator) =>
-                array_declarator.direct_declarator.is_abstract(),
-            DirectDeclarator::FunctionDeclarator(function_declarator) =>
-                function_declarator.direct_declarator.is_abstract(),
-        }
+        self.name().is_none()
     }
 
     fn with_name(&self, sess: &'a ast::Session<'a>, name: Token<'a>) -> Self {
@@ -542,10 +533,10 @@ impl<'a> DirectDeclarator<'a> {
         }
     }
 
-    fn name(&self) -> &'a str {
+    fn name(&self) -> Option<&'a str> {
         match self {
-            DirectDeclarator::Abstract => unreachable!(),
-            DirectDeclarator::Identifier(token) => token.slice(),
+            DirectDeclarator::Abstract => None,
+            DirectDeclarator::Identifier(token) => Some(token.slice()),
             DirectDeclarator::Parenthesised(declarator) => declarator.direct_declarator.name(),
             DirectDeclarator::ArrayDeclarator(array_declarator) =>
                 array_declarator.direct_declarator.name(),

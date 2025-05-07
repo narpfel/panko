@@ -235,14 +235,14 @@ InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
 
 InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
     <declarator:Declarator> <initialiser:("=" <Initialiser>)?> => {
-        if !declarator.direct_declarator.is_abstract() {
+        if let Some(name) = declarator.direct_declarator.name() {
             let kind = if is_in_typedef.get() {
                 panko_lex::TokenKind::TypeIdentifier
             }
             else {
                 panko_lex::TokenKind::Identifier
             };
-            typedef_names.borrow_mut().insert(declarator.direct_declarator.name(), kind);
+            typedef_names.borrow_mut().insert(name, kind);
         }
         ast::InitDeclarator { <> }
     },
