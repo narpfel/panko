@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/typedef/test_use_typedefd_name_as_parameter_name.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (typedef a `int`)
+         (declaration (f~1 `fn(a: int) -> int` (static f)) ∅)
+         (return
+            (call `int` @0
+               (addressof `ptr<fn(a: int) -> int>` @8
+                  (f~1 `fn(a: int) -> int` (static f)))
+               (42 `int` @16)))))
+   (function-definition
+      (f~2 `fn(a: int) -> int` (static f))
+      (params
+         (a~3 `int` @0))
+      (compound-statement
+         (return (a~3 `int` @0)))))
+
+----- stderr -----

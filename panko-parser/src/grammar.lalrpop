@@ -299,8 +299,15 @@ ParameterTypeList: ast::ParameterTypeList<'a> = {
 }
 
 ParameterDeclaration: ast::ParameterDeclaration<'a> = {
-    AttributeSpecifierSequence? <declaration_specifiers:DeclarationSpecifiers>
-        <declarator:ParameterDeclarator> => ast::ParameterDeclaration { <> },
+    AttributeSpecifierSequence? <declarator:DeclarationHead> => {
+        let (declaration_specifiers, declarator) = declarator;
+        let declarator = try {
+            let declarator = declarator?;
+            assert!(declarator.initialiser.is_none(), "TODO: generate a good error message");
+            declarator.declarator
+        };
+        ast::ParameterDeclaration { declaration_specifiers, declarator }
+    },
 }
 
 ParameterDeclarator: Option<ast::Declarator<'a>> = {
