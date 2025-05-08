@@ -7,8 +7,10 @@
 
 use std::cell::Cell;
 use std::cell::RefCell;
+use std::iter::empty;
 
 use ariadne::Color::Red;
+use itertools::Either;
 use itertools::Itertools as _;
 use lalrpop_util::ParseError;
 use lalrpop_util::lalrpop_mod;
@@ -104,6 +106,18 @@ impl<'a> DeclarationSpecifiers<'a> {
             [specifier] => specifier.loc(),
             [first, .., last] => first.loc().until(last.loc()),
         }
+    }
+
+    fn is_typedef(&self) -> bool {
+        self.0.iter().any(|specifier| {
+            matches!(
+                specifier,
+                DeclarationSpecifier::StorageClass(StorageClassSpecifier {
+                    token: _,
+                    kind: StorageClassSpecifierKind::Typedef
+                })
+            )
+        })
     }
 }
 
@@ -542,6 +556,31 @@ impl<'a> DirectDeclarator<'a> {
                 array_declarator.direct_declarator.name(),
             DirectDeclarator::FunctionDeclarator(function_declarator) =>
                 function_declarator.direct_declarator.name(),
+        }
+    }
+
+    fn parameter_names(&self) -> impl Iterator<Item = (&'a str, TokenKind)> {
+        match self {
+            DirectDeclarator::Abstract => Either::Left(empty()),
+            DirectDeclarator::Identifier(_token) => Either::Left(empty()),
+            DirectDeclarator::Parenthesised(declarator) =>
+                declarator.direct_declarator.parameter_names(),
+            DirectDeclarator::ArrayDeclarator(_array_declarator) => Either::Left(empty()),
+            DirectDeclarator::FunctionDeclarator(function_declarator) => Either::Right(
+                function_declarator
+                    .parameter_type_list
+                    .parameter_list
+                    .iter()
+                    .filter_map(|param| {
+                        let kind = if param.declaration_specifiers.is_typedef() {
+                            TokenKind::TypeIdentifier
+                        }
+                        else {
+                            TokenKind::Identifier
+                        };
+                        Some((param.declarator?.direct_declarator.name()?, kind))
+                    }),
+            ),
         }
     }
 }

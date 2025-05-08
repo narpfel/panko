@@ -140,13 +140,27 @@ ExternalDeclaration: ast::ExternalDeclaration<'a> = {
 }
 
 FunctionDefinition: ast::FunctionDefinition<'a> = {
-    AttributeSpecifierSequence?
-        <declaration_specifiers:DeclarationSpecifiers>
-        <declarator:Declarator>
-        <body:FunctionBody> => ast::FunctionDefinition { <> },
+    <head:FunctionDefinitionHead> <body:FunctionBody> => {
+        let (declaration_specifiers, declarator) = head;
+        ast::FunctionDefinition { declaration_specifiers, declarator, body }
+    }
 }
 
-FunctionBody = { CompoundStatement }
+FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = {
+    AttributeSpecifierSequence? <declaration_specifiers:DeclarationSpecifiers> <declarator:Declarator> => {
+        let mut typedef_names = typedef_names.borrow_mut();
+        typedef_names.push_scope();
+        // while parameters cannot be declared with a storage class (i. e. as a
+        // `typedef` declaration), it’s important for error recovery that we
+        // can parse this case
+        for (name, kind) in declarator.direct_declarator.parameter_names() {
+            typedef_names.insert(name, kind);
+        }
+        (<>)
+    },
+}
+
+FunctionBody = { CompoundStatement<DontPushTypedefScope> }
 
 Declaration: ast::Declaration<'a> = {
     <head:DeclarationHead> <init_declarator_list:("," <InitDeclaratorList>)?> <semi:";"> => {
@@ -285,7 +299,11 @@ ArrayDeclarator: ast::ArrayDeclarator<'a> = {
 }
 
 FunctionDeclarator: ast::FunctionDeclarator<'a> = {
-    <direct_declarator:Bump<DirectDeclarator>> "(" <parameter_type_list:ParameterTypeList> <close_paren:")"> =>
+    <direct_declarator:Bump<DirectDeclarator>> "("
+        PushTypedefScope
+        <parameter_type_list:ParameterTypeList>
+        PopTypedefScope
+    <close_paren:")"> =>
         ast::FunctionDeclarator { <> },
 }
 
@@ -469,7 +487,7 @@ FunctionSpecifierToken = {
     "_Noreturn",
 }
 
-CompoundStatement: ast::CompoundStatement<'a> = {
+CompoundStatement<PushTypedefScope>: ast::CompoundStatement<'a> = {
     "{" PushTypedefScope <BlockItemList?> PopTypedefScope "}" =>
         ast::CompoundStatement(<>.unwrap_or(&[])),
 }
@@ -479,6 +497,8 @@ PushTypedefScope: () = {
         typedef_names.borrow_mut().push_scope();
     },
 }
+
+DontPushTypedefScope: () = { () => () }
 
 PopTypedefScope: () = {
     () => {
@@ -503,7 +523,7 @@ UnlabeledStatement: ast::UnlabeledStatement<'a> = {
 }
 
 PrimaryBlock: ast::PrimaryBlock<'a> = {
-    CompoundStatement => ast::PrimaryBlock::CompoundStatement(<>),
+    CompoundStatement<PushTypedefScope> => ast::PrimaryBlock::CompoundStatement(<>),
     // selection-statement
     // iteration-statement
 }
