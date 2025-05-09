@@ -2,6 +2,7 @@ use std::cell::Cell;
 use std::cell::RefCell;
 
 use panko_lex::Token;
+use panko_lex::TokenKind;
 use panko_lex::TypedefNames;
 
 use crate as ast;
@@ -17,116 +18,116 @@ extern {
     type Error = ast::Error<'a>;
 
     enum Token<'a> {
-        ";" => Token { kind: panko_lex::TokenKind::Semicolon, .. },
-        "," => Token { kind: panko_lex::TokenKind::Comma, .. },
-        "=" => Token { kind: panko_lex::TokenKind::Equal, .. },
+        ";" => Token { kind: TokenKind::Semicolon, .. },
+        "," => Token { kind: TokenKind::Comma, .. },
+        "=" => Token { kind: TokenKind::Equal, .. },
 
-        "*" => Token { kind: panko_lex::TokenKind::Star, .. },
+        "*" => Token { kind: TokenKind::Star, .. },
 
         // parentheses
-        "(" => Token { kind: panko_lex::TokenKind::LParen, .. },
-        ")" => Token { kind: panko_lex::TokenKind::RParen, .. },
-        "{" => Token { kind: panko_lex::TokenKind::LBrace, .. },
-        "}" => Token { kind: panko_lex::TokenKind::RBrace, .. },
-        "[" => Token { kind: panko_lex::TokenKind::LBracket, .. },
-        "]" => Token { kind: panko_lex::TokenKind::RBracket, .. },
+        "(" => Token { kind: TokenKind::LParen, .. },
+        ")" => Token { kind: TokenKind::RParen, .. },
+        "{" => Token { kind: TokenKind::LBrace, .. },
+        "}" => Token { kind: TokenKind::RBrace, .. },
+        "[" => Token { kind: TokenKind::LBracket, .. },
+        "]" => Token { kind: TokenKind::RBracket, .. },
 
-        "_Generic" => Token { kind: panko_lex::TokenKind::Generic, .. },
-        "default" => Token { kind: panko_lex::TokenKind::Default, .. },
-        ":" => Token { kind: panko_lex::TokenKind::Colon, .. },
+        "_Generic" => Token { kind: TokenKind::Generic, .. },
+        "default" => Token { kind: TokenKind::Default, .. },
+        ":" => Token { kind: TokenKind::Colon, .. },
 
         // StorageClassSpecifierToken
-        "auto" => Token { kind: panko_lex::TokenKind::Auto, .. },
-        "constexpr" => Token { kind: panko_lex::TokenKind::Constexpr, .. },
-        "extern" => Token { kind: panko_lex::TokenKind::Extern, .. },
-        "register" => Token { kind: panko_lex::TokenKind::Register, .. },
-        "static" => Token { kind: panko_lex::TokenKind::Static, .. },
-        "thread_local" => Token { kind: panko_lex::TokenKind::ThreadLocal, .. },
-        "typedef" => Token { kind: panko_lex::TokenKind::Typedef, .. },
+        "auto" => Token { kind: TokenKind::Auto, .. },
+        "constexpr" => Token { kind: TokenKind::Constexpr, .. },
+        "extern" => Token { kind: TokenKind::Extern, .. },
+        "register" => Token { kind: TokenKind::Register, .. },
+        "static" => Token { kind: TokenKind::Static, .. },
+        "thread_local" => Token { kind: TokenKind::ThreadLocal, .. },
+        "typedef" => Token { kind: TokenKind::Typedef, .. },
 
         // TypeSpecifierToken
-        "void" => Token { kind: panko_lex::TokenKind::Void, .. },
-        "char" => Token { kind: panko_lex::TokenKind::Char, .. },
-        "short" => Token { kind: panko_lex::TokenKind::Short, .. },
-        "int" => Token { kind: panko_lex::TokenKind::Int, .. },
-        "long" => Token { kind: panko_lex::TokenKind::Long, .. },
-        "float" => Token { kind: panko_lex::TokenKind::Float, .. },
-        "double" => Token { kind: panko_lex::TokenKind::Double, .. },
-        "signed" => Token { kind: panko_lex::TokenKind::Signed, .. },
-        "unsigned" => Token { kind: panko_lex::TokenKind::Unsigned, .. },
-        "bool" => Token { kind: panko_lex::TokenKind::Bool, .. },
-        "_Complex" => Token { kind: panko_lex::TokenKind::Complex, .. },
-        "_Decimal32" => Token { kind: panko_lex::TokenKind::Decimal32, .. },
-        "_Decimal64" => Token { kind: panko_lex::TokenKind::Decimal64, .. },
-        "_Decimal128" => Token { kind: panko_lex::TokenKind::Decimal128, .. },
+        "void" => Token { kind: TokenKind::Void, .. },
+        "char" => Token { kind: TokenKind::Char, .. },
+        "short" => Token { kind: TokenKind::Short, .. },
+        "int" => Token { kind: TokenKind::Int, .. },
+        "long" => Token { kind: TokenKind::Long, .. },
+        "float" => Token { kind: TokenKind::Float, .. },
+        "double" => Token { kind: TokenKind::Double, .. },
+        "signed" => Token { kind: TokenKind::Signed, .. },
+        "unsigned" => Token { kind: TokenKind::Unsigned, .. },
+        "bool" => Token { kind: TokenKind::Bool, .. },
+        "_Complex" => Token { kind: TokenKind::Complex, .. },
+        "_Decimal32" => Token { kind: TokenKind::Decimal32, .. },
+        "_Decimal64" => Token { kind: TokenKind::Decimal64, .. },
+        "_Decimal128" => Token { kind: TokenKind::Decimal128, .. },
 
         // TypeQualifierToken
-        "const" => Token { kind: panko_lex::TokenKind::Const, .. },
-        "restrict" => Token { kind: panko_lex::TokenKind::Restrict, .. },
-        "volatile" => Token { kind: panko_lex::TokenKind::Volatile, .. },
-        "_Atomic" => Token { kind: panko_lex::TokenKind::Atomic, .. },
+        "const" => Token { kind: TokenKind::Const, .. },
+        "restrict" => Token { kind: TokenKind::Restrict, .. },
+        "volatile" => Token { kind: TokenKind::Volatile, .. },
+        "_Atomic" => Token { kind: TokenKind::Atomic, .. },
 
         // FunctionSpecifierToken
-        "inline" => Token { kind: panko_lex::TokenKind::Inline, .. },
-        "_Noreturn" => Token { kind: panko_lex::TokenKind::Noreturn, .. },
+        "inline" => Token { kind: TokenKind::Inline, .. },
+        "_Noreturn" => Token { kind: TokenKind::Noreturn, .. },
 
-        "return" => Token { kind: panko_lex::TokenKind::Return, .. },
+        "return" => Token { kind: TokenKind::Return, .. },
 
-        "sizeof" => Token { kind: panko_lex::TokenKind::Sizeof, .. },
-        "_Lengthof" => Token { kind: panko_lex::TokenKind::Lengthof, ..},
-        "alignof" => Token { kind: panko_lex::TokenKind::Alignof, .. },
+        "sizeof" => Token { kind: TokenKind::Sizeof, .. },
+        "_Lengthof" => Token { kind: TokenKind::Lengthof, ..},
+        "alignof" => Token { kind: TokenKind::Alignof, .. },
 
-        "+" => Token { kind: panko_lex::TokenKind::Plus, .. },
-        "-" => Token { kind: panko_lex::TokenKind::Minus, .. },
-        "~" => Token { kind: panko_lex::TokenKind::Tilde, .. },
-        "!" => Token { kind: panko_lex::TokenKind::Bang, .. },
+        "+" => Token { kind: TokenKind::Plus, .. },
+        "-" => Token { kind: TokenKind::Minus, .. },
+        "~" => Token { kind: TokenKind::Tilde, .. },
+        "!" => Token { kind: TokenKind::Bang, .. },
 
-        "/" => Token { kind: panko_lex::TokenKind::Slash, .. },
-        "%" => Token { kind: panko_lex::TokenKind::Percent, .. },
+        "/" => Token { kind: TokenKind::Slash, .. },
+        "%" => Token { kind: TokenKind::Percent, .. },
 
-        "==" => Token { kind: panko_lex::TokenKind::EqualEqual, .. },
-        "!=" => Token { kind: panko_lex::TokenKind::BangEqual, .. },
+        "==" => Token { kind: TokenKind::EqualEqual, .. },
+        "!=" => Token { kind: TokenKind::BangEqual, .. },
 
-        "<" => Token { kind: panko_lex::TokenKind::Less, .. },
-        "<=" => Token { kind: panko_lex::TokenKind::LessEqual, .. },
-        ">" => Token { kind: panko_lex::TokenKind::Greater, .. },
-        ">=" => Token { kind: panko_lex::TokenKind::GreaterEqual, .. },
+        "<" => Token { kind: TokenKind::Less, .. },
+        "<=" => Token { kind: TokenKind::LessEqual, .. },
+        ">" => Token { kind: TokenKind::Greater, .. },
+        ">=" => Token { kind: TokenKind::GreaterEqual, .. },
 
-        "&" => Token { kind: panko_lex::TokenKind::And, .. },
-        "^" => Token { kind: panko_lex::TokenKind::Hat, .. },
-        "|" => Token { kind: panko_lex::TokenKind::Pipe, .. },
+        "&" => Token { kind: TokenKind::And, .. },
+        "^" => Token { kind: TokenKind::Hat, .. },
+        "|" => Token { kind: TokenKind::Pipe, .. },
 
-        "<<" => Token { kind: panko_lex::TokenKind::LessLess, .. },
-        ">>" => Token { kind: panko_lex::TokenKind::GreaterGreater, .. },
+        "<<" => Token { kind: TokenKind::LessLess, .. },
+        ">>" => Token { kind: TokenKind::GreaterGreater, .. },
 
-        "*=" => Token { kind: panko_lex::TokenKind::StarEqual, ..},
-        "/=" => Token { kind: panko_lex::TokenKind::SlashEqual, ..},
-        "%=" => Token { kind: panko_lex::TokenKind::PercentEqual, ..},
-        "+=" => Token { kind: panko_lex::TokenKind::PlusEqual, ..},
-        "-=" => Token { kind: panko_lex::TokenKind::MinusEqual, ..},
-        "<<=" => Token { kind: panko_lex::TokenKind::LessLessEqual, ..},
-        ">>=" => Token { kind: panko_lex::TokenKind::GreaterGreaterEqual, ..},
-        "&=" => Token { kind: panko_lex::TokenKind::AndEqual, ..},
-        "^=" => Token { kind: panko_lex::TokenKind::HatEqual, ..},
-        "|=" => Token { kind: panko_lex::TokenKind::PipeEqual, ..},
+        "*=" => Token { kind: TokenKind::StarEqual, ..},
+        "/=" => Token { kind: TokenKind::SlashEqual, ..},
+        "%=" => Token { kind: TokenKind::PercentEqual, ..},
+        "+=" => Token { kind: TokenKind::PlusEqual, ..},
+        "-=" => Token { kind: TokenKind::MinusEqual, ..},
+        "<<=" => Token { kind: TokenKind::LessLessEqual, ..},
+        ">>=" => Token { kind: TokenKind::GreaterGreaterEqual, ..},
+        "&=" => Token { kind: TokenKind::AndEqual, ..},
+        "^=" => Token { kind: TokenKind::HatEqual, ..},
+        "|=" => Token { kind: TokenKind::PipeEqual, ..},
 
-        "&&" => Token { kind: panko_lex::TokenKind::AndAnd, .. },
-        "||" => Token { kind: panko_lex::TokenKind::PipePipe, .. },
+        "&&" => Token { kind: TokenKind::AndAnd, .. },
+        "||" => Token { kind: TokenKind::PipePipe, .. },
 
-        "?" => Token { kind: panko_lex::TokenKind::QuestionMark, .. },
-        ":" => Token { kind: panko_lex::TokenKind::Colon, .. },
+        "?" => Token { kind: TokenKind::QuestionMark, .. },
+        ":" => Token { kind: TokenKind::Colon, .. },
 
-        "++" => Token { kind: panko_lex::TokenKind::PlusPlus, .. },
-        "--" => Token { kind: panko_lex::TokenKind::MinusMinus, ..},
+        "++" => Token { kind: TokenKind::PlusPlus, .. },
+        "--" => Token { kind: TokenKind::MinusMinus, ..},
 
-        "." => Token { kind: panko_lex::TokenKind::Dot, .. },
-        "..." => Token { kind: panko_lex::TokenKind::Ellipsis, .. },
+        "." => Token { kind: TokenKind::Dot, .. },
+        "..." => Token { kind: TokenKind::Ellipsis, .. },
 
-        Identifier => Token { kind: panko_lex::TokenKind::Identifier, .. },
-        TypedefName => Token { kind: panko_lex::TokenKind::TypeIdentifier, .. },
-        Integer => Token { kind: panko_lex::TokenKind::Integer(_), .. },
-        CharConstant => Token { kind: panko_lex::TokenKind::CharConstant(_), .. },
-        String => Token { kind: panko_lex::TokenKind::String, .. },
+        Identifier => Token { kind: TokenKind::Identifier, .. },
+        TypedefName => Token { kind: TokenKind::TypeIdentifier, .. },
+        Integer => Token { kind: TokenKind::Integer(_), .. },
+        CharConstant => Token { kind: TokenKind::CharConstant(_), .. },
+        String => Token { kind: TokenKind::String, .. },
     }
 }
 
@@ -190,17 +191,14 @@ DeclarationHead: (ast::DeclarationSpecifiers<'a>, Option<ast::InitDeclarator<'a>
                 ast::TypeSpecifierQualifier::Specifier(specifier),
             ) = specifier
             && let name = specifier.token
-            && matches!(
-                name.kind,
-                panko_lex::TokenKind::Identifier | panko_lex::TokenKind::TypeIdentifier,
-            )
+            && matches!(name.kind, TokenKind::Identifier | TokenKind::TypeIdentifier)
         {
             let add_typedef_name = || {
                 let kind = if is_in_typedef.get() {
-                    panko_lex::TokenKind::TypeIdentifier
+                    TokenKind::TypeIdentifier
                 }
                 else {
-                    panko_lex::TokenKind::Identifier
+                    TokenKind::Identifier
                 };
                 typedef_names.borrow_mut().insert(name.slice(), kind);
             };
@@ -251,10 +249,10 @@ InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
     <declarator:Declarator> <initialiser:("=" <Initialiser>)?> => {
         if let Some(name) = declarator.direct_declarator.name() {
             let kind = if is_in_typedef.get() {
-                panko_lex::TokenKind::TypeIdentifier
+                TokenKind::TypeIdentifier
             }
             else {
-                panko_lex::TokenKind::Identifier
+                TokenKind::Identifier
             };
             typedef_names.borrow_mut().insert(name, kind);
         }
