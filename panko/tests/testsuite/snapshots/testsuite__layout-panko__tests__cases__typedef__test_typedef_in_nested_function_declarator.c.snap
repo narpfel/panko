@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/typedef/test_typedef_in_nested_function_declarator.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (typedef a `int`)
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (declaration (a~1 `fn(a: ptr<fn(a: ptr<fn(a: int) -> int>) -> int>) -> int` (static a)) ∅))))
+
+----- stderr -----
