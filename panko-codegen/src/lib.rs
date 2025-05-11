@@ -22,6 +22,7 @@ use panko_parser::BinOpKind;
 use panko_parser::LogicalOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Signedness;
+use panko_report::Report;
 use panko_sema::layout::CompoundStatement;
 use panko_sema::layout::Declaration;
 use panko_sema::layout::Expression;
@@ -206,6 +207,7 @@ struct Codegen<'a> {
     next_label_id: u64,
     debug: bool,
     linenos: Linenos<'a>,
+    global_errors: Vec<&'a dyn Report>,
 }
 
 impl<'a> Codegen<'a> {
@@ -307,6 +309,14 @@ impl<'a> Codegen<'a> {
             self.emit_args("imul", &[&R10, integral]);
         }
         self.emit_args(operation, &[&Rax, &R10]);
+    }
+
+    fn emit_error_output(&mut self, error: &dyn Report) {
+        let id = self.string(ByteString(error.to_string().into_bytes()).into());
+        self.emit_args("lea", &[&Rdi, &id]);
+        self.emit("mov rsi, qword ptr [rip + stderr@gotpcrel]");
+        self.emit("mov rsi, [rsi]");
+        self.emit("call fputs@plt");
     }
 
     fn function_definition(&mut self, def: &'a FunctionDefinition<'a>) {
@@ -610,11 +620,7 @@ impl<'a> Codegen<'a> {
         self.at(expr.loc);
         match expr.expr {
             Expression::Error(error) => {
-                let id = self.string(ByteString(error.to_string().into_bytes()).into());
-                self.emit_args("lea", &[&Rdi, &id]);
-                self.emit("mov rsi, qword ptr [rip + stderr@gotpcrel]");
-                self.emit("mov rsi, [rsi]");
-                self.emit("call fputs@plt");
+                self.emit_error_output(error);
                 self.emit("ud2");
             }
             Expression::Name(_reference) => (), // already in memory
@@ -954,9 +960,27 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
             ExternalDeclaration::Typedef(_) => {
                 // TODO: check that the type is not a VMT
             }
-            ExternalDeclaration::Error(_error) =>
-                todo!("static deferred errors not implemented yet"),
+            ExternalDeclaration::Error(error) => cg.global_errors.push(*error),
         }
+    }
+
+    if !cg.global_errors.is_empty() {
+        let name = "__panko_emit_global_errors";
+
+        cg.block(2);
+        cg.directive("globl", &[&name]);
+        cg.directive("text", &[]);
+        cg.directive("type", &[&name, &"@function"]);
+        cg.label(name);
+        for error in mem::take(&mut cg.global_errors) {
+            cg.emit_error_output(error);
+        }
+        cg.emit("int3");
+
+        cg.block(2);
+        cg.directive("section", &[&".init_array", &r#""aw""#]);
+        cg.directive("align", &[&8]);
+        cg.directive("quad", &[&name]);
     }
 
     for (name, ty) in mem::take(&mut cg.tentative_definitions) {

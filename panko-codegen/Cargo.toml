@@ -11,4 +11,5 @@ indexmap = { workspace = true }
 itertools = { workspace = true }
 panko-lex = { path = "../panko-lex" }
 panko-parser = { path = "../panko-parser" }
+panko-report = { path = "../panko-report" }
 panko-sema = { path = "../panko-sema" }

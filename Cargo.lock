@@ -703,6 +703,7 @@ dependencies = [
  "itertools",
  "panko-lex",
  "panko-parser",
+ "panko-report",
  "panko-sema",
 ]
 
