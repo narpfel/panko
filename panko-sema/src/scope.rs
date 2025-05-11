@@ -45,7 +45,7 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "this name has not been declared"))]
     UndeclaredName { at: Token<'a> },
 
-    #[error("`{typedef}` name redeclared as value name")]
+    #[error("`{typedef}` name `{at}` redeclared as value name")]
     #[diagnostics(
         at(colour = Red, label = "redeclared here as a value name"),
         ty(colour = Blue, label = "originally declared here as a `{typedef}` name"),
@@ -56,12 +56,15 @@ enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
     },
 
-    #[error("value name redeclared as `{typedef}` name")]
+    #[error("value name `{name}` redeclared as `{typedef}` name")]
     #[diagnostics(
         at(colour = Red, label = "redeclared here as a `{typedef}` name"),
         reference(colour = Blue, label = "originally declared here as a value name"),
     )]
-    #[with(typedef = "typedef".fg(Red))]
+    #[with(
+        typedef = "typedef".fg(Red),
+        name = reference.name,
+    )]
     ValueRedeclaredAsTypedef {
         at: QualifiedType<'a>,
         reference: Reference<'a>,
