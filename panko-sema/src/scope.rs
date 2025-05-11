@@ -3,6 +3,7 @@ use std::collections::hash_map::Entry;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
+use ariadne::Fmt as _;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
@@ -17,6 +18,7 @@ use panko_parser::ast::ErrorExpr;
 use panko_parser::ast::Session;
 use panko_report::Report;
 
+use crate::Sliced as _;
 use crate::nonempty;
 use crate::ty;
 
@@ -42,6 +44,28 @@ enum Diagnostic<'a> {
     #[error("use of undeclared identifier `{at}`")]
     #[diagnostics(at(colour = Red, label = "this name has not been declared"))]
     UndeclaredName { at: Token<'a> },
+
+    #[error("`{typedef}` name redeclared as value name")]
+    #[diagnostics(
+        at(colour = Red, label = "redeclared here as a value name"),
+        ty(colour = Blue, label = "originally declared here as a `{typedef}` name"),
+    )]
+    #[with(typedef = "typedef".fg(Blue))]
+    TypedefRedeclaredAsValue {
+        at: Token<'a>,
+        ty: QualifiedType<'a>,
+    },
+
+    #[error("value name redeclared as `{typedef}` name")]
+    #[diagnostics(
+        at(colour = Red, label = "redeclared here as a `{typedef}` name"),
+        reference(colour = Blue, label = "originally declared here as a value name"),
+    )]
+    #[with(typedef = "typedef".fg(Red))]
+    ValueRedeclaredAsTypedef {
+        at: QualifiedType<'a>,
+        reference: Reference<'a>,
+    },
 }
 
 type TypeofExpr<'a> = &'a Expression<'a>;
@@ -71,12 +95,26 @@ pub(crate) enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
+    Error(&'a dyn Report),
+}
+
+impl<'a> ErrorExpr<'a> for ExternalDeclaration<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Error(error)
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum DeclarationOrTypedef<'a> {
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
+    Error(&'a dyn Report),
+}
+
+impl<'a> ErrorExpr<'a> for DeclarationOrTypedef<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Error(error)
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -153,6 +191,12 @@ pub(crate) enum Statement<'a> {
         return_: Token<'a>,
         expr: MaybeExpr<'a>,
     },
+}
+
+impl<'a> ErrorExpr<'a> for Statement<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Expression(Some(Expression::from_error(error)))
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -540,7 +584,11 @@ impl<'a> Scopes<'a> {
         kind: RefKind,
         storage_duration: StorageDuration,
         is_parameter: IsParameter,
-    ) -> Reference<'a> {
+    ) -> Result<Reference<'a>, QualifiedType<'a>> {
+        if let Entry::Occupied(entry) = self.lookup_ty_innermost(name) {
+            return Err(*entry.get());
+        }
+
         let sess = self.sess;
         let id = self.id();
         let reference = Reference {
@@ -580,22 +628,30 @@ impl<'a> Scopes<'a> {
                     *previous_definition = reference;
                 }
 
-                reference
+                Ok(reference)
             }
             Entry::Vacant(entry) => {
                 entry.insert(reference);
-                reference
+                Ok(reference)
             }
         }
     }
 
-    #[must_use]
-    fn add_ty(&mut self, name: &'a str, ty: QualifiedType<'a>) -> Option<QualifiedType<'a>> {
+    #[expect(clippy::result_large_err)]
+    fn add_ty(
+        &mut self,
+        name: &'a str,
+        ty: QualifiedType<'a>,
+    ) -> Result<Option<QualifiedType<'a>>, Reference<'a>> {
+        if let Entry::Occupied(entry) = self.lookup_innermost(name) {
+            return Err(*entry.get());
+        }
+
         match self.lookup_ty_innermost(name) {
-            Entry::Occupied(entry) => Some(*entry.get()),
+            Entry::Occupied(entry) => Ok(Some(*entry.get())),
             Entry::Vacant(entry) => {
                 entry.insert(ty);
-                None
+                Ok(None)
             }
         }
     }
@@ -744,7 +800,7 @@ fn resolve_function_ty<'a>(
 fn resolve_function_definition<'a>(
     scopes: &mut Scopes<'a>,
     def: &'a ast::FunctionDefinition<'a>,
-) -> FunctionDefinition<'a> {
+) -> ExternalDeclaration<'a> {
     let ast::FunctionDefinition {
         name,
         storage_class,
@@ -754,7 +810,7 @@ fn resolve_function_definition<'a>(
         body,
     } = def;
     let ty = resolve_ty(scopes, ty);
-    let reference = scopes.add(
+    let maybe_reference = scopes.add(
         name.slice(),
         name.loc(),
         ty,
@@ -762,6 +818,13 @@ fn resolve_function_definition<'a>(
         StorageDuration::Static,
         IsParameter::No,
     );
+    let reference = match maybe_reference {
+        Ok(reference) => reference,
+        Err(ty) =>
+            return scopes
+                .sess
+                .emit(Diagnostic::TypedefRedeclaredAsValue { at: *name, ty }),
+    };
     scopes.push();
 
     let FunctionType { params, return_type: _, is_varargs } = match ty {
@@ -800,21 +863,25 @@ fn resolve_function_definition<'a>(
                     },
                     |name| name.slice(),
                 );
-                scopes.add(
+                let maybe_reference = scopes.add(
                     name,
                     param.loc,
                     param.ty,
                     RefKind::Definition,
                     StorageDuration::Automatic,
                     IsParameter::Yes,
-                )
+                );
+                match maybe_reference {
+                    Ok(reference) => reference,
+                    Err(_ty) => todo!("emit error"),
+                }
             })
             .collect_vec(),
     );
 
     let body = resolve_compound_statement(scopes, body, OpenNewScope::No);
     scopes.pop();
-    FunctionDefinition {
+    ExternalDeclaration::FunctionDefinition(FunctionDefinition {
         reference,
         params: ParamRefs(params),
         storage_class: *storage_class,
@@ -822,7 +889,7 @@ fn resolve_function_definition<'a>(
         noreturn: *noreturn,
         is_varargs,
         body,
-    }
+    })
 }
 
 fn resolve_compound_statement<'a>(
@@ -904,11 +971,18 @@ fn resolve_declaration<'a>(
             kind: StorageClassSpecifierKind::Typedef,
         }) => {
             let previously_declared_as = scopes.add_ty(name.slice(), ty);
-            return DeclarationOrTypedef::Typedef(Typedef {
-                ty,
-                name: *name,
-                previously_declared_as,
-            });
+            match previously_declared_as {
+                Ok(previously_declared_as) =>
+                    return DeclarationOrTypedef::Typedef(Typedef {
+                        ty,
+                        name: *name,
+                        previously_declared_as,
+                    }),
+                Err(reference) =>
+                    return scopes
+                        .sess
+                        .emit(Diagnostic::ValueRedeclaredAsTypedef { at: ty, reference }),
+            }
         }
         Some(storage_class) => todo!("not implemented: storage class {:?}", storage_class.kind),
         None => (),
@@ -934,7 +1008,7 @@ fn resolve_declaration<'a>(
         _ => storage_duration,
     };
 
-    let reference = scopes.add(
+    let maybe_reference = scopes.add(
         name.slice(),
         name.loc(),
         ty,
@@ -942,6 +1016,13 @@ fn resolve_declaration<'a>(
         storage_duration,
         IsParameter::No,
     );
+    let reference = match maybe_reference {
+        Ok(reference) => reference,
+        Err(ty) =>
+            return scopes
+                .sess
+                .emit(Diagnostic::TypedefRedeclaredAsValue { at: *name, ty }),
+    };
     // TODO: move resolving the initialiser into `Scopes::add` so that the `add_initialiser` call
     // cannot be forgotten
     let initialiser = try {
@@ -978,6 +1059,7 @@ fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> State
                 DeclarationOrTypedef::Declaration(declaration) =>
                     Statement::Declaration(declaration),
                 DeclarationOrTypedef::Typedef(typedef) => Statement::Typedef(typedef),
+                DeclarationOrTypedef::Error(error) => Statement::from_error(error),
             },
         ast::Statement::Expression(expr) =>
             Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
@@ -1148,12 +1230,13 @@ pub fn resolve_names<'a>(
     TranslationUnit {
         decls: sess.alloc_slice_fill_iter(translation_unit.decls.iter().map(|decl| match decl {
             ast::ExternalDeclaration::FunctionDefinition(def) =>
-                ExternalDeclaration::FunctionDefinition(resolve_function_definition(scopes, def)),
+                resolve_function_definition(scopes, def),
             ast::ExternalDeclaration::Declaration(decl) =>
                 match resolve_declaration(scopes, decl, StorageDuration::Static) {
                     DeclarationOrTypedef::Declaration(declaration) =>
                         ExternalDeclaration::Declaration(declaration),
                     DeclarationOrTypedef::Typedef(typedef) => ExternalDeclaration::Typedef(typedef),
+                    DeclarationOrTypedef::Error(error) => ExternalDeclaration::Error(error),
                 },
         })),
     }

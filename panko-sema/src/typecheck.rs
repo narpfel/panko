@@ -37,6 +37,7 @@ use panko_report::Report;
 use variant_types::IntoVariant as _;
 
 use crate::ItertoolsExt as _;
+use crate::Sliced as _;
 use crate::scope;
 use crate::scope::DesignatedInitialiser;
 use crate::scope::Designation;
@@ -59,20 +60,6 @@ use crate::ty::subobjects::Subobjects;
 mod as_sexpr;
 #[cfg(test)]
 mod tests;
-
-// TODO: this should be in `panko_report`
-trait Sliced {
-    fn slice(&self) -> String;
-}
-
-impl<T> Sliced for T
-where
-    T: ToString,
-{
-    fn slice(&self) -> String {
-        self.to_string()
-    }
-}
 
 #[derive(Debug, Report)]
 #[exit_code(1)]
@@ -601,6 +588,7 @@ pub(crate) enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
+    Error(&'a dyn Report),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -2969,6 +2957,7 @@ pub fn resolve_types<'a>(
                 ExternalDeclaration::Typedef(typeck_typedef(sess, typedef)),
             scope::ExternalDeclaration::Declaration(decl) =>
                 ExternalDeclaration::Declaration(typeck_declaration(sess, decl)),
+            scope::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
         })),
     }
 }

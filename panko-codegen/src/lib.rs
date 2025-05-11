@@ -954,6 +954,8 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
             ExternalDeclaration::Typedef(_) => {
                 // TODO: check that the type is not a VMT
             }
+            ExternalDeclaration::Error(_error) =>
+                todo!("static deferred errors not implemented yet"),
         }
     }
 

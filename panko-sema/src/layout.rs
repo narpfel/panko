@@ -37,6 +37,7 @@ pub enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
+    Error(&'a dyn Report),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -602,6 +603,7 @@ pub fn layout<'a>(
                 )),
             typecheck::ExternalDeclaration::Typedef(typedef) =>
                 ExternalDeclaration::Typedef(*typedef),
+            typecheck::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
         })),
     }
 }
