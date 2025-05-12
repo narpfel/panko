@@ -12,7 +12,7 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: `typedef` name `a` redeclared as value name
+Error: `typedef` name `a` redeclared as function name
    ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_definition_in_same_scope.c:3:5]
    │
  1 │ typedef int a;
@@ -21,5 +21,5 @@ Error: `typedef` name `a` redeclared as value name
    │ 
  3 │ int a() {}
    │     ┬  
-   │     ╰── redeclared here as a value name
+   │     ╰── redeclared here as a function name
 ───╯

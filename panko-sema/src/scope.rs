@@ -45,21 +45,22 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "this name has not been declared"))]
     UndeclaredName { at: Token<'a> },
 
-    #[error("`{typedef}` name `{at}` redeclared as value name")]
+    #[error("`{typedef}` name `{at}` redeclared as {kind} name")]
     #[diagnostics(
-        at(colour = Red, label = "redeclared here as a value name"),
+        at(colour = Red, label = "redeclared here as a {kind} name"),
         ty(colour = Blue, label = "originally declared here as a `{typedef}` name"),
     )]
     #[with(typedef = "typedef".fg(Blue))]
     TypedefRedeclaredAsValue {
         at: Token<'a>,
         ty: QualifiedType<'a>,
+        kind: &'a str,
     },
 
-    #[error("value name `{name}` redeclared as `{typedef}` name")]
+    #[error("{kind} name `{name}` redeclared as `{typedef}` name")]
     #[diagnostics(
         at(colour = Red, label = "redeclared here as a `{typedef}` name"),
-        reference(colour = Blue, label = "originally declared here as a value name"),
+        reference(colour = Blue, label = "originally declared here as a {kind} name"),
     )]
     #[with(
         typedef = "typedef".fg(Red),
@@ -68,6 +69,7 @@ enum Diagnostic<'a> {
     ValueRedeclaredAsTypedef {
         at: QualifiedType<'a>,
         reference: Reference<'a>,
+        kind: &'a str,
     },
 }
 
@@ -824,9 +826,11 @@ fn resolve_function_definition<'a>(
     let reference = match maybe_reference {
         Ok(reference) => reference,
         Err(ty) =>
-            return scopes
-                .sess
-                .emit(Diagnostic::TypedefRedeclaredAsValue { at: *name, ty }),
+            return scopes.sess.emit(Diagnostic::TypedefRedeclaredAsValue {
+                at: *name,
+                ty,
+                kind: "function",
+            }),
     };
     scopes.push();
 
@@ -968,6 +972,15 @@ fn resolve_declaration<'a>(
     let ast::Declaration { ty, name, initialiser, storage_class } = decl;
     let ty = resolve_ty(scopes, ty);
 
+    let ty_kind = |ty: QualifiedType| {
+        if ty.ty.is_function() {
+            "function"
+        }
+        else {
+            "value"
+        }
+    };
+
     match storage_class {
         Some(cst::StorageClassSpecifier {
             token: _,
@@ -982,9 +995,11 @@ fn resolve_declaration<'a>(
                         previously_declared_as,
                     }),
                 Err(reference) =>
-                    return scopes
-                        .sess
-                        .emit(Diagnostic::ValueRedeclaredAsTypedef { at: ty, reference }),
+                    return scopes.sess.emit(Diagnostic::ValueRedeclaredAsTypedef {
+                        at: ty,
+                        reference,
+                        kind: ty_kind(reference.ty),
+                    }),
             }
         }
         Some(storage_class) => todo!("not implemented: storage class {:?}", storage_class.kind),
@@ -1021,10 +1036,12 @@ fn resolve_declaration<'a>(
     );
     let reference = match maybe_reference {
         Ok(reference) => reference,
-        Err(ty) =>
-            return scopes
-                .sess
-                .emit(Diagnostic::TypedefRedeclaredAsValue { at: *name, ty }),
+        Err(typedef_ty) =>
+            return scopes.sess.emit(Diagnostic::TypedefRedeclaredAsValue {
+                at: *name,
+                ty: typedef_ty,
+                kind: ty_kind(ty),
+            }),
     };
     // TODO: move resolving the initialiser into `Scopes::add` so that the `add_initialiser` call
     // cannot be forgotten
