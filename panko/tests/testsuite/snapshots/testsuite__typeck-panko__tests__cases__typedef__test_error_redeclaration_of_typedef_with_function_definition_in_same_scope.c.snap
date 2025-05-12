@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_definition_in_same_scope.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unrecognised token
+   ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_definition_in_same_scope.c:3:9]
+   │
+ 3 │ int a() {}
+   │         ┬  
+   │         ╰── expected one of the following token kinds: [";", ",", "=", "(", "["]
+───╯
