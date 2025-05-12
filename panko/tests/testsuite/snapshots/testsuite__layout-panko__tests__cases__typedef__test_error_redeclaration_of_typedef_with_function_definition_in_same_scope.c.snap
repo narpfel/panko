@@ -12,10 +12,14 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: unrecognised token
-   ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_definition_in_same_scope.c:3:9]
+Error: `typedef` name `a` redeclared as value name
+   ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_definition_in_same_scope.c:3:5]
    │
+ 1 │ typedef int a;
+   │ ─────┬─────  
+   │      ╰─────── originally declared here as a `typedef` name
+   │ 
  3 │ int a() {}
-   │         ┬  
-   │         ╰── expected one of the following token kinds: [";", ",", "=", "(", "["]
+   │     ┬  
+   │     ╰── redeclared here as a value name
 ───╯

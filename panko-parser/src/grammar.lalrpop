@@ -148,7 +148,14 @@ FunctionDefinition: ast::FunctionDefinition<'a> = {
 }
 
 FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = {
-    AttributeSpecifierSequence? <declaration_specifiers:DeclarationSpecifiers> <declarator:Declarator> => {
+    AttributeSpecifierSequence? <head:DeclarationHead> => {
+        let (declaration_specifiers, declarator) = head;
+        let ast::InitDeclarator { declarator, initialiser }
+            = declarator.unwrap_or_else(|| todo!("error message; e. g. `int {{}}`"));
+        assert!(
+            initialiser.is_none(),
+            "TODO: generate a good error message; e. g. `int a() = 42 {{}}`",
+        );
         let mut typedef_names = typedef_names.borrow_mut();
         typedef_names.push_scope();
         // while parameters cannot be declared with a storage class (i. e. as a
@@ -157,7 +164,7 @@ FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = 
         for (name, kind) in declarator.direct_declarator.parameter_names() {
             typedef_names.insert(name, kind);
         }
-        (<>)
+        (declaration_specifiers, declarator)
     },
 }
 
