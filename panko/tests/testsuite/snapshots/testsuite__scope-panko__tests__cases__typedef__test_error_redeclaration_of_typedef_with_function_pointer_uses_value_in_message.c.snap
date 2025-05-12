@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_pointer_uses_value_in_message.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: value name `a` redeclared as `typedef` name
+   ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_pointer_uses_value_in_message.c:5:1]
+   │
+ 4 │ int (*a)();
+   │       ┬  
+   │       ╰── originally declared here as a value name
+ 5 │ typedef int a;
+   │ ─────┬─────  
+   │      ╰─────── redeclared here as a `typedef` name
+───╯
+
+Error: value name `c` redeclared as `typedef` name
+    ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_pointer_uses_value_in_message.c:13:5]
+    │
+ 12 │     int (*c)();
+    │           ┬  
+    │           ╰── originally declared here as a value name
+ 13 │     typedef int c;
+    │     ─────┬─────  
+    │          ╰─────── redeclared here as a `typedef` name
+────╯
