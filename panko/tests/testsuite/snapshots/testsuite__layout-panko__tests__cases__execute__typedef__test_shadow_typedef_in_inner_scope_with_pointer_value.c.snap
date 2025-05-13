@@ -1,0 +1,51 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/typedef/test_shadow_typedef_in_inner_scope_with_pointer_value.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (compound-statement
+            (typedef name `int`)
+            (compound-statement
+               (definition (place~2 `long` @0) ∅)
+               (definition (name~3 `ptr<long>` @8)
+                  (addressof `ptr<long>` @8
+                     (place~2 `long` @0)))
+               (expression
+                  (assign `long` @16
+                     (deref `long` @16 (name~3 `ptr<long>` @8))
+                     (sign-extend `long` @24 (negate `int` @32 (42 `int` @32)))))
+               (expression
+                  (call `int` @16
+                     (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                        (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                     (noop-type-conversion `ptr<char const>` @32
+                        (noop-type-conversion `ptr<char>` @32
+                           (addressof `ptr<array<char; 5>>` @32
+                              (string `array<char; 5>` @void "%ld\n\0"))))
+                     (place~2 `long` @0))))
+            (definition (x~4 `int` @0) (123 `int` @0))
+            (expression
+               (call `int` @4
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 4>>` @16
+                           (string `array<char; 4>` @void "%d\n\0"))))
+                  (x~4 `int` @0))))
+         (definition (name~5 `int` @0) (42 `int` @0))
+         (return (name~5 `int` @0)))))
+
+----- stderr -----

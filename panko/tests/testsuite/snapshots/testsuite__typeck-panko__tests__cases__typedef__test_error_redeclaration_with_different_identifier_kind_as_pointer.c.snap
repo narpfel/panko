@@ -1,0 +1,57 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/typedef/test_error_redeclaration_with_different_identifier_kind_as_pointer.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `typedef` name `global` redeclared as value name
+   ╭─[panko/tests/cases/typedef/test_error_redeclaration_with_different_identifier_kind_as_pointer.c:2:6]
+   │
+ 1 │ typedef int global;
+   │ ─────┬─────  
+   │      ╰─────── originally declared here as a `typedef` name
+ 2 │ int* global;
+   │      ───┬──  
+   │         ╰──── redeclared here as a value name
+───╯
+
+Error: value name `another_global` redeclared as `typedef` name
+   ╭─[panko/tests/cases/typedef/test_error_redeclaration_with_different_identifier_kind_as_pointer.c:5:1]
+   │
+ 4 │ int* another_global;
+   │      ───────┬──────  
+   │             ╰──────── originally declared here as a value name
+ 5 │ typedef int another_global;
+   │ ─────┬─────  
+   │      ╰─────── redeclared here as a `typedef` name
+───╯
+
+Error: `typedef` name `local` redeclared as value name
+   ╭─[panko/tests/cases/typedef/test_error_redeclaration_with_different_identifier_kind_as_pointer.c:9:10]
+   │
+ 8 │     typedef int local;
+   │     ─────┬─────  
+   │          ╰─────── originally declared here as a `typedef` name
+ 9 │     int* local;
+   │          ──┬──  
+   │            ╰──── redeclared here as a value name
+───╯
+
+Error: value name `another_local` redeclared as `typedef` name
+    ╭─[panko/tests/cases/typedef/test_error_redeclaration_with_different_identifier_kind_as_pointer.c:12:5]
+    │
+ 11 │     int* another_local;
+    │          ──────┬──────  
+    │                ╰──────── originally declared here as a value name
+ 12 │     typedef int another_local;
+    │     ─────┬─────  
+    │          ╰─────── redeclared here as a `typedef` name
+────╯

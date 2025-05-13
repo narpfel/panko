@@ -249,7 +249,7 @@ DeclarationSpecifier: ast::DeclarationSpecifier<'a> = {
 }
 
 InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
-    CommaSep<InitDeclarator<Declarator>>,
+    CommaSep<InitDeclarator<Declarator<Identifier>>>,
 }
 
 InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
@@ -276,12 +276,21 @@ InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
     },
 }
 
-Declarator: ast::Declarator<'a> = {
-    <pointers:Some<Pointer>?> <direct_declarator:DirectDeclarator> => ast::Declarator { <> },
+Declarator<Identifier>: ast::Declarator<'a> = {
+    <pointers:Some<Pointer>> <direct_declarator:DirectDeclarator<AnyIdentifier>> => {
+        let pointers = Some(pointers);
+        ast::Declarator { <> }
+    },
+    <direct_declarator:DirectDeclarator<Identifier>> => ast::Declarator { pointers: None, <> },
+}
+
+AnyIdentifier = {
+    Identifier,
+    TypedefName,
 }
 
 MaybeAbstractDeclarator: ast::Declarator<'a> = {
-    Declarator,
+    Declarator<Identifier>,
     AbstractDeclarator,
 }
 
@@ -289,22 +298,22 @@ Pointer: ast::Pointer<'a> = {
     <star:"*"> AttributeSpecifierSequence? <qualifiers:Many<TypeQualifier>> => ast::Pointer { <> },
 }
 
-DirectDeclarator: ast::DirectDeclarator<'a> = {
-    <Identifier> AttributeSpecifierSequence? => ast::DirectDeclarator::Identifier(<>),
-    "(" <Bump<Declarator>> ")" => ast::DirectDeclarator::Parenthesised(<>),
-    <ArrayDeclarator> AttributeSpecifierSequence? => ast::DirectDeclarator::ArrayDeclarator(<>),
-    <FunctionDeclarator> AttributeSpecifierSequence? => ast::DirectDeclarator::FunctionDeclarator(<>),
+DirectDeclarator<NonambiguousIdent>: ast::DirectDeclarator<'a> = {
+    <NonambiguousIdent> AttributeSpecifierSequence? => ast::DirectDeclarator::Identifier(<>),
+    "(" <Bump<Declarator<Identifier>>> ")" => ast::DirectDeclarator::Parenthesised(<>),
+    <ArrayDeclarator<Identifier>> AttributeSpecifierSequence? => ast::DirectDeclarator::ArrayDeclarator(<>),
+    <FunctionDeclarator<Identifier>> AttributeSpecifierSequence? => ast::DirectDeclarator::FunctionDeclarator(<>),
 }
 
-ArrayDeclarator: ast::ArrayDeclarator<'a> = {
+ArrayDeclarator<Identifier>: ast::ArrayDeclarator<'a> = {
     // TODO: incomplete
-    <direct_declarator:Bump<DirectDeclarator>>
+    <direct_declarator:Bump<DirectDeclarator<Identifier>>>
         "[" <type_qualifiers:Many<TypeQualifier>> <length:AssignmentExpression?> <close_bracket:"]"> =>
             ast::ArrayDeclarator { <> },
 }
 
-FunctionDeclarator: ast::FunctionDeclarator<'a> = {
-    <direct_declarator:Bump<DirectDeclarator>> "("
+FunctionDeclarator<Identifier>: ast::FunctionDeclarator<'a> = {
+    <direct_declarator:Bump<DirectDeclarator<Identifier>>> "("
         PushTypedefScope
         <parameter_type_list:ParameterTypeList>
         PopTypedefScope
@@ -334,7 +343,7 @@ ParameterDeclaration: ast::ParameterDeclaration<'a> = {
 }
 
 ParameterDeclarator: Option<ast::Declarator<'a>> = {
-    Declarator => Some(<>),
+    Declarator<Identifier> => Some(<>),
     AbstractDeclarator?,
 }
 
