@@ -249,7 +249,7 @@ DeclarationSpecifier: ast::DeclarationSpecifier<'a> = {
 }
 
 InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
-    CommaSep<InitDeclarator<Declarator<Identifier>>>,
+    CommaSep<InitDeclarator<Declarator<AnyIdentifier>>>,
 }
 
 InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
@@ -301,8 +301,8 @@ Pointer: ast::Pointer<'a> = {
 DirectDeclarator<NonambiguousIdent>: ast::DirectDeclarator<'a> = {
     <NonambiguousIdent> AttributeSpecifierSequence? => ast::DirectDeclarator::Identifier(<>),
     "(" <Bump<Declarator<Identifier>>> ")" => ast::DirectDeclarator::Parenthesised(<>),
-    <ArrayDeclarator<Identifier>> AttributeSpecifierSequence? => ast::DirectDeclarator::ArrayDeclarator(<>),
-    <FunctionDeclarator<Identifier>> AttributeSpecifierSequence? => ast::DirectDeclarator::FunctionDeclarator(<>),
+    <ArrayDeclarator<NonambiguousIdent>> AttributeSpecifierSequence? => ast::DirectDeclarator::ArrayDeclarator(<>),
+    <FunctionDeclarator<NonambiguousIdent>> AttributeSpecifierSequence? => ast::DirectDeclarator::FunctionDeclarator(<>),
 }
 
 ArrayDeclarator<Identifier>: ast::ArrayDeclarator<'a> = {

@@ -1,0 +1,70 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/typedef/test_shadow_typedef_in_inner_scope_after_comma.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (typedef name `int`)
+   (typedef ptr `int`)
+   (typedef fptr `int`)
+   (typedef xs `int`)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (typedef function `int`)
+         (compound-statement
+            (definition a~2 `int` ∅)
+            (definition name~3 `int` 42)
+            (definition b~4 `int` ∅)
+            (definition ptr~5 `ptr<int>` (addressof (name name~3 `int`)))
+            (definition c~6 `int` ∅)
+            (declaration function~7 `fn(∅: int) -> int` ∅)
+            (definition d~8 `int` ∅)
+            (definition fptr~9 `ptr<fn(∅: int) -> int>` (name function~7 `fn(∅: int) -> int`))
+            (definition e~10 `int` ∅)
+            (definition xs~11 `array<int; 5>`
+               (braced
+                  123))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (name name~3 `int`)))
+            (expression (pre-increment (name name~3 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (deref (name ptr~5 `ptr<int>`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (call (name function~7 `fn(∅: int) -> int`)
+                     27)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (call (name fptr~9 `ptr<fn(∅: int) -> int>`)
+                     5)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (subscript (name xs~11 `array<int; 5>`) 0))))))
+   (function-definition
+      function~13 `fn(value: int) -> int`
+      (params
+         value~14 `int`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "function %d\n")
+               (name value~14 `int`)))
+         (return (add (name value~14 `int`) 1)))))
+
+----- stderr -----
