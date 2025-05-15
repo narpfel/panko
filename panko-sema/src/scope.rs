@@ -774,19 +774,15 @@ fn resolve_function_ty<'a>(
     let ast::FunctionType { params, return_type, is_varargs } = *function_ty;
 
     let params = match params {
-        [
-            ast::ParameterDeclaration {
-                loc: _,
-                ty:
-                    ast::QualifiedType {
-                        is_const: false,
-                        is_volatile: false,
-                        ty: ast::Type::Void,
-                        loc: _,
-                    },
-                name: None,
-            },
-        ] if !is_varargs => &[],
+        [ast::ParameterDeclaration { loc: _, ty, name: None }]
+            if !is_varargs
+                && let QualifiedType {
+                    is_const: false,
+                    is_volatile: false,
+                    ty: Type::Void,
+                    loc: _,
+                } = resolve_ty(scopes, ty) =>
+            &[],
         params => params,
     };
 

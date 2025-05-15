@@ -1,0 +1,44 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/typedef/test_void_type_alias_for_zero_parameter_function.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (typedef v `void`)
+   (declaration f~1 `fn() -> void` ∅)
+   (function-definition
+      f~1 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "f")))))
+   (declaration g~3 `fn(∅: fn() -> void) -> void` ∅)
+   (function-definition
+      g~3 `fn(v: fn() -> void) -> void`
+      (params
+         v~5 `fn() -> void`)
+      (compound-statement
+         (expression (call (name v~5 `fn() -> void`)))))
+   (function-definition
+      print_g~6 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "g")))))
+   (function-definition
+      main~7 `fn() -> int`
+      (compound-statement
+         (expression (call (name f~1 `fn() -> void`)))
+         (expression
+            (call (name g~3 `fn(v: fn() -> void) -> void`)
+               (name print_g~6 `fn() -> void`))))))
+
+----- stderr -----
