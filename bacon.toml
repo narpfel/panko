@@ -58,6 +58,7 @@ command = [
     "--profile=clif",
     "--color", "always",
     "--",
+    { if = "treat-error-as-bug", then = "--treat-error-as-bug" },
     "--print=layout",
     "--print=codegen",
     "-o/tmp/main.S",
@@ -77,3 +78,4 @@ on_success = "back"
 [keybindings]
 shift-t = "job:covtest"
 shift-r = "job:rebuild-tests"
+g = "toggle-option(treat-error-as-bug)"
