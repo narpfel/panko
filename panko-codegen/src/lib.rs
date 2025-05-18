@@ -54,6 +54,10 @@ mod lineno;
 mod operand;
 
 const MAX_IMUL_IMMEDIATE: u64 = 2_u64.pow(31);
+#[expect(
+    clippy::as_conversions,
+    reason = "conversion using `From` not allowed in `const`"
+)]
 const MAX_ADDRESS_OFFSET: u64 = u32::MAX as _;
 const ARGUMENT_REGISTERS: [Register; 6] = [Rdi, Rsi, Rdx, Rcx, R8, R9];
 

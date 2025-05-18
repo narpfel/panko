@@ -2056,7 +2056,10 @@ impl Char {
                 }
             }
             Char::EscapeSequence(value) => {
-                yield value as u8;
+                yield value.try_into().expect(
+                    "TODO: only unprefixed string literals are implemented; non-`u8` escape \
+                    sequences are only allowed for prefixed string literals",
+                );
             }
         };
     }

@@ -17,6 +17,7 @@ unqualified_local_imports = "warn"
 unused_qualifications = "warn"
 
 [workspace.lints.clippy]
+as_conversions = "warn"
 # TODO: remove this and `expect` the warning for each enum separately
 large_enum_variant = "allow"
 

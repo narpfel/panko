@@ -34,6 +34,7 @@ pub mod ast;
 pub mod sexpr_builder;
 
 lalrpop_mod!(
+    #[allow(clippy::as_conversions, reason = "lalrpop generates `as` conversions")]
     #[allow(clippy::uninlined_format_args)]
     #[allow(unused_qualifications)]
     grammar
