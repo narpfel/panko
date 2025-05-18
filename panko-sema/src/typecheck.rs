@@ -2056,10 +2056,14 @@ impl Char {
                 }
             }
             Char::EscapeSequence(value) => {
-                yield value.try_into().expect(
-                    "TODO: only unprefixed string literals are implemented; non-`u8` escape \
-                    sequences are only allowed for prefixed string literals",
-                );
+                #[expect(
+                    clippy::as_conversions,
+                    reason = "\
+                        this should truncate; the value is checked to be in range for \
+                        non-prefixed string literals in `parse_escape_sequences`\
+                    "
+                )]
+                yield value as u8;
             }
         };
     }
