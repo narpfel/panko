@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/typedef/test_shadow_typedef_in_inner_scope_parenthesised_in_parameter_list.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (typedef name `int`)
+         (compound-statement
+            (declaration (f~1 `fn(∅: ptr<fn() -> int>) -> int` (static f)) ∅)
+            (declaration (g~2 `fn(∅: ptr<fn(∅: int) -> int>) -> int` (static g)) ∅)
+            (declaration (h~3 `fn(∅: ptr<fn(∅: int) -> int>) -> int` (static h)) ∅)
+            (declaration (i~4 `fn(name: int) -> int` (static i)) ∅)))))
+
+----- stderr -----

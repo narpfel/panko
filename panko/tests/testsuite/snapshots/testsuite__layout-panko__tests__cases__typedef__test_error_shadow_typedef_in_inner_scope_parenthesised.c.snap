@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid function return type `fn() -> int`
+   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised.c:4:9]
+   │
+ 4 │         int ((name())());
+   │         ───────┬───────  
+   │                ╰───────── declaration here
+───╯
+
+Error: arrays of functions are not allowed
+   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised.c:7:9]
+   │
+ 7 │         int ((name[42])());
+   │         ────────┬────────  
+   │                 ╰────────── element type is `fn() -> int`
+───╯

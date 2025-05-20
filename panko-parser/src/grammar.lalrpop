@@ -148,7 +148,7 @@ FunctionDefinition: ast::FunctionDefinition<'a> = {
 }
 
 FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = {
-    AttributeSpecifierSequence? <head:DeclarationHead> => {
+    AttributeSpecifierSequence? <head:DeclarationHead<AbstractDeclaratorDisallowed>> => {
         let (declaration_specifiers, declarator) = head;
         let ast::InitDeclarator { declarator, initialiser }
             = declarator.unwrap_or_else(|| todo!("error message; e. g. `int {{}}`"));
@@ -171,7 +171,8 @@ FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = 
 FunctionBody = { CompoundStatement<DontPushTypedefScope> }
 
 Declaration: ast::Declaration<'a> = {
-    <head:DeclarationHead> <init_declarator_list:("," <InitDeclaratorList>)?> <semi:";"> => {
+    <head:DeclarationHead<AbstractDeclaratorDisallowed>>
+    <init_declarator_list:("," <InitDeclaratorList>)?> <semi:";"> => {
         let (specifiers, declarator) = head;
         let init_declarator_list = match init_declarator_list {
             None => sess.alloc_slice_copy(declarator.as_slice()),
@@ -190,8 +191,27 @@ Declaration: ast::Declaration<'a> = {
     // attribute-declaration
 }
 
-DeclarationHead: (ast::DeclarationSpecifiers<'a>, Option<ast::InitDeclarator<'a>>) = {
+AbstractDeclaratorAllowed: ast::AbstractDeclaratorAllowed = {
+    () => ast::AbstractDeclaratorAllowed::Yes,
+}
+
+AbstractDeclaratorDisallowed: ast::AbstractDeclaratorAllowed = {
+    () => ast::AbstractDeclaratorAllowed::No,
+}
+
+DeclarationHead<IsAbstractDeclaratorAllowed>: (ast::DeclarationSpecifiers<'a>, Option<ast::InitDeclarator<'a>>) = {
+    <is_abstract_declarator_allowed:IsAbstractDeclaratorAllowed>
     <specifiers:DeclarationSpecifiers> <declarator:InitDeclarator<MaybeAbstractDeclarator>?> => {
+        let add_typedef_name = |name: Token<'a>| {
+            let kind = if is_in_typedef.get() {
+                TokenKind::TypeIdentifier
+            }
+            else {
+                TokenKind::Identifier
+            };
+            typedef_names.borrow_mut().insert(name.slice(), kind);
+        };
+
         if let ast::DeclarationSpecifiers([specifiers @ .., specifier]) = specifiers
             && !specifiers.is_empty()
             && let ast::DeclarationSpecifier::TypeSpecifierQualifier(
@@ -200,21 +220,12 @@ DeclarationHead: (ast::DeclarationSpecifiers<'a>, Option<ast::InitDeclarator<'a>
             && let name = specifier.token
             && matches!(name.kind, TokenKind::Identifier | TokenKind::TypeIdentifier)
         {
-            let add_typedef_name = || {
-                let kind = if is_in_typedef.get() {
-                    TokenKind::TypeIdentifier
-                }
-                else {
-                    TokenKind::Identifier
-                };
-                typedef_names.borrow_mut().insert(name.slice(), kind);
-            };
             if declarator.is_none() {
                 let declarator = ast::Declarator {
                     pointers: None,
                     direct_declarator: ast::DirectDeclarator::Identifier(name),
                 };
-                add_typedef_name();
+                add_typedef_name(name);
                 return (
                     ast::DeclarationSpecifiers(specifiers),
                     Some(ast::InitDeclarator { declarator, initialiser: None }),
@@ -226,14 +237,21 @@ DeclarationHead: (ast::DeclarationSpecifiers<'a>, Option<ast::InitDeclarator<'a>
                 && let Some(direct_declarator) = direct_declarator.with_name(sess, name)
             {
                 let declarator = ast::Declarator { pointers, direct_declarator };
-                add_typedef_name();
+                add_typedef_name(name);
                 return (
                     ast::DeclarationSpecifiers(specifiers),
                     Some(ast::InitDeclarator { declarator, initialiser }),
                 );
             }
         }
-        (<>)
+        else if let ast::AbstractDeclaratorAllowed::No = is_abstract_declarator_allowed
+            && let Some(ast::InitDeclarator { declarator, initialiser }) = declarator
+            && let Some((name, declarator)) = declarator.reinterpret_as_concrete_declarator(sess)
+        {
+            add_typedef_name(name);
+            return (specifiers, Some(ast::InitDeclarator { declarator, initialiser }));
+        }
+        (specifiers, declarator)
     },
 }
 
@@ -248,7 +266,7 @@ DeclarationSpecifier: ast::DeclarationSpecifier<'a> = {
 }
 
 InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
-    CommaSep<InitDeclarator<Declarator<AnyIdentifier>>>,
+    CommaSep<InitDeclarator<Declarator<AnyIdentifier, AnyIdentifier>>>,
 }
 
 InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
@@ -275,12 +293,14 @@ InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
     },
 }
 
-Declarator<Identifier>: ast::Declarator<'a> = {
-    <pointers:Some<Pointer>> <direct_declarator:DirectDeclarator<AnyIdentifier>> => {
+Declarator<Identifier, ParenthesisedIdent>: ast::Declarator<'a> = {
+    <pointers:Some<Pointer>>
+    <direct_declarator:DirectDeclarator<AnyIdentifier, ParenthesisedIdent>> => {
         let pointers = Some(pointers);
         ast::Declarator { <> }
     },
-    <direct_declarator:DirectDeclarator<Identifier>> => ast::Declarator { pointers: None, <> },
+    <direct_declarator:DirectDeclarator<Identifier, ParenthesisedIdent>> =>
+        ast::Declarator { pointers: None, <> },
 }
 
 AnyIdentifier = {
@@ -289,7 +309,7 @@ AnyIdentifier = {
 }
 
 MaybeAbstractDeclarator: ast::Declarator<'a> = {
-    Declarator<Identifier>,
+    Declarator<Identifier, Identifier>,
     AbstractDeclarator,
 }
 
@@ -297,22 +317,25 @@ Pointer: ast::Pointer<'a> = {
     <star:"*"> AttributeSpecifierSequence? <qualifiers:Many<TypeQualifier>> => ast::Pointer { <> },
 }
 
-DirectDeclarator<NonambiguousIdent>: ast::DirectDeclarator<'a> = {
+DirectDeclarator<NonambiguousIdent, ParenthesisedIdent>: ast::DirectDeclarator<'a> = {
     <NonambiguousIdent> AttributeSpecifierSequence? => ast::DirectDeclarator::Identifier(<>),
-    "(" <Bump<Declarator<Identifier>>> ")" => ast::DirectDeclarator::Parenthesised(<>),
-    <ArrayDeclarator<NonambiguousIdent>> AttributeSpecifierSequence? => ast::DirectDeclarator::ArrayDeclarator(<>),
-    <FunctionDeclarator<NonambiguousIdent>> AttributeSpecifierSequence? => ast::DirectDeclarator::FunctionDeclarator(<>),
+    "(" <Bump<Declarator<ParenthesisedIdent, ParenthesisedIdent>>> ")" =>
+        ast::DirectDeclarator::Parenthesised(<>),
+    <ArrayDeclarator<NonambiguousIdent, ParenthesisedIdent>> AttributeSpecifierSequence? =>
+        ast::DirectDeclarator::ArrayDeclarator(<>),
+    <FunctionDeclarator<NonambiguousIdent, ParenthesisedIdent>> AttributeSpecifierSequence? =>
+        ast::DirectDeclarator::FunctionDeclarator(<>),
 }
 
-ArrayDeclarator<Identifier>: ast::ArrayDeclarator<'a> = {
+ArrayDeclarator<Identifier, ParenthesisedIdent>: ast::ArrayDeclarator<'a> = {
     // TODO: incomplete
-    <direct_declarator:Bump<DirectDeclarator<Identifier>>>
+    <direct_declarator:Bump<DirectDeclarator<Identifier, ParenthesisedIdent>>>
         "[" <type_qualifiers:Many<TypeQualifier>> <length:AssignmentExpression?> <close_bracket:"]"> =>
             ast::ArrayDeclarator { <> },
 }
 
-FunctionDeclarator<Identifier>: ast::FunctionDeclarator<'a> = {
-    <direct_declarator:Bump<DirectDeclarator<Identifier>>> "("
+FunctionDeclarator<Identifier, ParenthesisedIdent>: ast::FunctionDeclarator<'a> = {
+    <direct_declarator:Bump<DirectDeclarator<Identifier, ParenthesisedIdent>>> "("
         PushTypedefScope
         <parameter_type_list:ParameterTypeList>
         PopTypedefScope
@@ -330,7 +353,7 @@ ParameterTypeList: ast::ParameterTypeList<'a> = {
 }
 
 ParameterDeclaration: ast::ParameterDeclaration<'a> = {
-    AttributeSpecifierSequence? <declarator:DeclarationHead> => {
+    AttributeSpecifierSequence? <declarator:DeclarationHead<AbstractDeclaratorAllowed>> => {
         let (declaration_specifiers, declarator) = declarator;
         let declarator = try {
             let declarator = declarator?;
@@ -342,7 +365,7 @@ ParameterDeclaration: ast::ParameterDeclaration<'a> = {
 }
 
 ParameterDeclarator: Option<ast::Declarator<'a>> = {
-    Declarator<Identifier> => Some(<>),
+    Declarator<Identifier, Identifier> => Some(<>),
     AbstractDeclarator?,
 }
 

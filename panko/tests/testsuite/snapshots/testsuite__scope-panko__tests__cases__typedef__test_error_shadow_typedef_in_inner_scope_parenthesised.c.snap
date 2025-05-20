@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (typedef name `int`)
+         (compound-statement
+            (declaration name~1 `fn() -> fn() -> int` ∅))
+         (compound-statement
+            (definition name~2 `array<fn() -> int; 42>` ∅)))))
+
+----- stderr -----

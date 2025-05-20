@@ -504,6 +504,23 @@ struct Declarator<'a> {
     direct_declarator: DirectDeclarator<'a>,
 }
 
+impl<'a> Declarator<'a> {
+    fn reinterpret_as_concrete_declarator(
+        &self,
+        sess: &'a ast::Session<'a>,
+    ) -> Option<(Token<'a>, Self)> {
+        let Self { pointers, direct_declarator } = *self;
+        try {
+            let (name, declarator) = direct_declarator.reinterpret_as_concrete_declarator(sess)?;
+            let direct_declarator = match declarator.pointers {
+                Some(_) => DirectDeclarator::Parenthesised(sess.alloc(declarator)),
+                None => declarator.direct_declarator,
+            };
+            (name, Self { pointers, direct_declarator })
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 struct Pointer<'a> {
     star: Token<'a>,
@@ -581,6 +598,84 @@ impl<'a> DirectDeclarator<'a> {
                         Some((param.declarator?.direct_declarator.name()?, kind))
                     }),
             ),
+        }
+    }
+
+    fn reinterpret_as_concrete_declarator(
+        &self,
+        sess: &'a ast::Session<'a>,
+    ) -> Option<(Token<'a>, Declarator<'a>)> {
+        match *self {
+            DirectDeclarator::Abstract => None,
+            DirectDeclarator::Identifier(_) => None,
+            DirectDeclarator::Parenthesised(declarator) =>
+                declarator.reinterpret_as_concrete_declarator(sess),
+            DirectDeclarator::ArrayDeclarator(ArrayDeclarator {
+                direct_declarator,
+                type_qualifiers,
+                length,
+                close_bracket,
+            }) => {
+                let (name, declarator) =
+                    direct_declarator.reinterpret_as_concrete_declarator(sess)?;
+                let direct_declarator = match declarator.pointers {
+                    Some(_) => DirectDeclarator::Parenthesised(sess.alloc(declarator)),
+                    None => declarator.direct_declarator,
+                };
+                let direct_declarator = DirectDeclarator::ArrayDeclarator(ArrayDeclarator {
+                    direct_declarator: sess.alloc(direct_declarator),
+                    type_qualifiers,
+                    length,
+                    close_bracket,
+                });
+                Some((name, Declarator { pointers: None, direct_declarator }))
+            }
+            DirectDeclarator::FunctionDeclarator(FunctionDeclarator {
+                direct_declarator,
+                parameter_type_list,
+                close_paren: _,
+            }) if let DirectDeclarator::Abstract = direct_declarator
+                && let ParameterTypeList { parameter_list, is_varargs: false } =
+                    parameter_type_list
+                && let [param] = parameter_list
+                && let ParameterDeclaration { declaration_specifiers, declarator } = param
+                && let DeclarationSpecifiers([specifier]) = declaration_specifiers
+                && let DeclarationSpecifier::TypeSpecifierQualifier(
+                    TypeSpecifierQualifier::Specifier(specifier),
+                ) = specifier
+                && let name = specifier.token
+                && matches!(name.kind, TokenKind::TypeIdentifier) =>
+                match *declarator {
+                    Some(Declarator { pointers, direct_declarator }) => {
+                        let direct_declarator = direct_declarator.with_name(sess, name)?;
+                        Some((name, Declarator { pointers, direct_declarator }))
+                    }
+                    None => Some((
+                        name,
+                        Declarator {
+                            pointers: None,
+                            direct_declarator: DirectDeclarator::Identifier(name),
+                        },
+                    )),
+                },
+            DirectDeclarator::FunctionDeclarator(FunctionDeclarator {
+                direct_declarator,
+                parameter_type_list,
+                close_paren,
+            }) => {
+                let (name, declarator) =
+                    direct_declarator.reinterpret_as_concrete_declarator(sess)?;
+                let direct_declarator = match declarator.pointers {
+                    Some(_) => DirectDeclarator::Parenthesised(sess.alloc(declarator)),
+                    None => declarator.direct_declarator,
+                };
+                let direct_declarator = DirectDeclarator::FunctionDeclarator(FunctionDeclarator {
+                    direct_declarator: sess.alloc(direct_declarator),
+                    parameter_type_list,
+                    close_paren,
+                });
+                Some((name, Declarator { pointers: None, direct_declarator }))
+            }
         }
     }
 }
@@ -931,6 +1026,12 @@ impl IncrementFixity {
             IncrementFixity::Postfix => "post",
         }
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum AbstractDeclaratorAllowed {
+    Yes,
+    No,
 }
 
 pub fn parse<'a>(

@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/typedef/test_shadow_typedef_in_inner_scope_parenthesised.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (typedef name `int`)
+         (compound-statement
+            (declaration (name~1 `fn() -> int` (static name)) ∅)
+            (expression (0 `int` @0)))
+         (compound-statement
+            (declaration (name~2 `fn() -> int` (static name)) ∅)
+            (expression (0 `int` @0)))
+         (compound-statement
+            (definition (name~3 `array<int; 42>` @0) ∅)
+            (expression (42 `unsigned long` @168)))
+         (compound-statement
+            (definition (name~4 `array<int; 42>` @0) ∅)
+            (expression (42 `unsigned long` @168))))))
+
+----- stderr -----
