@@ -246,7 +246,7 @@ DeclarationHead<IsAbstractDeclaratorAllowed>: (ast::DeclarationSpecifiers<'a>, O
         }
         else if let ast::AbstractDeclaratorAllowed::No = is_abstract_declarator_allowed
             && let Some(ast::InitDeclarator { declarator, initialiser }) = declarator
-            && let Some((name, declarator)) = declarator.reinterpret_as_concrete_declarator(sess)
+            && let Some((name, declarator)) = declarator.reinterpret_as_concrete(sess)
         {
             add_typedef_name(name);
             return (specifiers, Some(ast::InitDeclarator { declarator, initialiser }));
