@@ -1,0 +1,61 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised_looks_like_function.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised_looks_like_function.c:6:9]
+   │
+ 6 │         int (name, ...);
+   │         ────────┬───────  
+   │                 ╰───────── name missing
+───╯
+
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised_looks_like_function.c:7:9]
+   │
+ 7 │         int (name, name);
+   │         ────────┬────────  
+   │                 ╰────────── name missing
+───╯
+
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised_looks_like_function.c:8:9]
+   │
+ 8 │         int (name const);
+   │         ────────┬────────  
+   │                 ╰────────── name missing
+───╯
+
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised_looks_like_function.c:9:9]
+   │
+ 9 │         int (const);
+   │         ──────┬─────  
+   │               ╰─────── name missing
+───╯
+
+Error: declaration does not specify a type
+   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised_looks_like_function.c:9:14]
+   │
+ 9 │         int (const);
+   │              ──┬──  
+   │                ╰──── type missing
+───╯
+
+Error: declaration does not specify a name
+    ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised_looks_like_function.c:10:9]
+    │
+ 10 │         int (int);
+    │         ─────┬────  
+    │              ╰────── name missing
+────╯
