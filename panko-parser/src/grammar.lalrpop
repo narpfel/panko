@@ -221,11 +221,10 @@ DeclarationHead: (ast::DeclarationSpecifiers<'a>, Option<ast::InitDeclarator<'a>
                 );
             }
             else if let Some(declarator) = declarator
-                && declarator.declarator.direct_declarator.is_abstract()
+                && let ast::InitDeclarator { declarator, initialiser } = declarator
+                && let ast::Declarator { pointers, direct_declarator } = declarator
+                && let Some(direct_declarator) = direct_declarator.with_name(sess, name)
             {
-                let ast::InitDeclarator { declarator, initialiser } = declarator;
-                let ast::Declarator { pointers, direct_declarator } = declarator;
-                let direct_declarator = direct_declarator.with_name(sess, name);
                 let declarator = ast::Declarator { pointers, direct_declarator };
                 add_typedef_name();
                 return (

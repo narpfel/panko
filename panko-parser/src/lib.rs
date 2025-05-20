@@ -520,31 +520,30 @@ enum DirectDeclarator<'a> {
 }
 
 impl<'a> DirectDeclarator<'a> {
-    fn is_abstract(&self) -> bool {
-        self.name().is_none()
-    }
-
-    fn with_name(&self, sess: &'a ast::Session<'a>, name: Token<'a>) -> Self {
+    fn with_name(&self, sess: &'a ast::Session<'a>, name: Token<'a>) -> Option<Self> {
         match self {
-            DirectDeclarator::Abstract => Self::Identifier(name),
-            DirectDeclarator::Identifier(_) => unreachable!(),
+            DirectDeclarator::Abstract => Some(Self::Identifier(name)),
+            DirectDeclarator::Identifier(_) => None,
             DirectDeclarator::Parenthesised(declarator) =>
-                Self::Parenthesised(sess.alloc(Declarator {
-                    direct_declarator: declarator.direct_declarator.with_name(sess, name),
+                Some(Self::Parenthesised(sess.alloc(Declarator {
+                    direct_declarator: declarator.direct_declarator.with_name(sess, name)?,
                     ..**declarator
-                })),
+                }))),
             DirectDeclarator::ArrayDeclarator(array_declarator) =>
-                Self::ArrayDeclarator(ArrayDeclarator {
+                Some(Self::ArrayDeclarator(ArrayDeclarator {
                     direct_declarator: sess
-                        .alloc(array_declarator.direct_declarator.with_name(sess, name)),
+                        .alloc(array_declarator.direct_declarator.with_name(sess, name)?),
                     ..*array_declarator
-                }),
+                })),
             DirectDeclarator::FunctionDeclarator(function_declarator) =>
-                Self::FunctionDeclarator(FunctionDeclarator {
-                    direct_declarator: sess
-                        .alloc(function_declarator.direct_declarator.with_name(sess, name)),
+                Some(Self::FunctionDeclarator(FunctionDeclarator {
+                    direct_declarator: sess.alloc(
+                        function_declarator
+                            .direct_declarator
+                            .with_name(sess, name)?,
+                    ),
                     ..*function_declarator
-                }),
+                })),
         }
     }
 
