@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised_looks_like_function_taking_pointer.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised_looks_like_function_taking_pointer.c:4:9]
+   │
+ 4 │         int (name*);
+   │         ──────┬─────  
+   │               ╰─────── name missing
+───╯

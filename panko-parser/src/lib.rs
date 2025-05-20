@@ -646,9 +646,10 @@ impl<'a> DirectDeclarator<'a> {
                 && let name = specifier.token
                 && matches!(name.kind, TokenKind::TypeIdentifier) =>
                 match *declarator {
-                    Some(Declarator { pointers, direct_declarator }) => {
+                    Some(Declarator { pointers: Some(_), direct_declarator: _ }) => None,
+                    Some(Declarator { pointers: None, direct_declarator }) => {
                         let direct_declarator = direct_declarator.with_name(sess, name)?;
-                        Some((name, Declarator { pointers, direct_declarator }))
+                        Some((name, Declarator { pointers: None, direct_declarator }))
                     }
                     None => Some((
                         name,
