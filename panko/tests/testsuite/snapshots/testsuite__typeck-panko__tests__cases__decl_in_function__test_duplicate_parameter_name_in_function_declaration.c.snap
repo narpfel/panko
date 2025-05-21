@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/decl_in_function/test_duplicate_parameter_name_in_function_declaration.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: duplicate definition for `x`
+   ╭─[panko/tests/cases/decl_in_function/test_duplicate_parameter_name_in_function_declaration.c:2:22]
+   │
+ 2 │     int f(int x, int x);
+   │               ┬      ┬  
+   │               │      ╰── duplicate definition
+   │               │         
+   │               ╰───────── previously defined here
+───╯

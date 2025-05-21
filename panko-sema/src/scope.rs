@@ -33,8 +33,8 @@ enum Diagnostic<'a> {
         at(colour = Red, label = "duplicate definition"),
     )]
     AlreadyDefined {
-        at: Reference<'a>,
-        previous_definition: Reference<'a>,
+        at: Loc<'a>,
+        previous_definition: Loc<'a>,
     },
 
     #[error("expected `;` after declaration (or did you mean to declare a function: `{at}()`?)")]
@@ -615,8 +615,8 @@ impl<'a> Scopes<'a> {
                     && matches!(previous_definition.kind, RefKind::Definition)
                 {
                     sess.emit(Diagnostic::AlreadyDefined {
-                        at: reference,
-                        previous_definition: previous_definition.at(previous_definition.loc),
+                        at: reference.loc(),
+                        previous_definition: previous_definition.loc,
                     })
                 }
 
@@ -794,6 +794,24 @@ fn resolve_function_ty<'a>(
         },
     ));
     let return_type = scopes.sess.alloc(resolve_ty(scopes, return_type));
+
+    // TODO: this makes a bunch of unnecessary allocations
+    let params_by_name = params
+        .iter()
+        .filter_map(|param| Some((param.name?.slice(), param)))
+        .into_group_map();
+    for params in params_by_name.values() {
+        let [param, duplicates @ ..] = &params[..]
+        else {
+            unreachable!()
+        };
+        for duplicate in duplicates {
+            scopes.sess.emit(Diagnostic::AlreadyDefined {
+                at: duplicate.loc(),
+                previous_definition: param.loc(),
+            })
+        }
+    }
 
     FunctionType { params, return_type, is_varargs }
 }
