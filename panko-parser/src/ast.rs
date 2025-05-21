@@ -671,27 +671,26 @@ pub(crate) fn parse_declarator<'a>(
                     pointers: None,
                     direct_declarator: *direct_declarator,
                 };
+
+                let params = parameter_type_list.parameter_list.iter().map(|param| {
+                    let DeclarationSpecifiers { storage_class, ty } =
+                        parse_declaration_specifiers(sess, param.declaration_specifiers);
+                    if let Some(storage_class) = storage_class {
+                        todo!("error: parameter declared with storage class {storage_class:?}");
+                    }
+                    let (ty, name) = param.declarator.map_or((ty, None), |declarator| {
+                        parse_declarator(sess, ty, declarator)
+                    });
+                    let loc =
+                        name.map_or_else(|| param.declaration_specifiers.loc(), |name| name.loc());
+                    ParameterDeclaration { loc, ty, name }
+                });
+
                 ty = QualifiedType {
                     is_const: false,
                     is_volatile: false,
                     ty: Type::Function(FunctionType {
-                        params: sess.alloc_slice_fill_iter(
-                            parameter_type_list.parameter_list.iter().map(|param| {
-                                let DeclarationSpecifiers { storage_class, ty } = parse_declaration_specifiers(sess, param.declaration_specifiers);
-                                        if let Some(storage_class) = storage_class {
-                                            todo!("error: parameter declared with storage class {storage_class:?}");
-                                        }
-                                let (ty, name) =
-                                    param.declarator.map_or((ty, None), |declarator| {
-                                        parse_declarator(sess, ty, declarator)
-                                    });
-                                let loc = name.map_or_else(
-                                    || param.declaration_specifiers.loc(),
-                                    |name| name.loc(),
-                                );
-                                ParameterDeclaration { loc, ty, name }
-                            }),
-                        ),
+                        params: sess.alloc_slice_fill_iter(params),
                         is_varargs: parameter_type_list.is_varargs,
                         return_type: sess.alloc(ty),
                     }),
