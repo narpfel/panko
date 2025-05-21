@@ -507,10 +507,8 @@ struct Declarator<'a> {
 impl<'a> Declarator<'a> {
     fn reinterpret_as_concrete(&self, sess: &'a ast::Session<'a>) -> Option<(Token<'a>, Self)> {
         let Self { pointers, direct_declarator } = *self;
-        try {
-            let (name, direct_declarator) = direct_declarator.reinterpret_as_concrete(sess)?;
-            (name, Self { pointers, direct_declarator })
-        }
+        let (name, direct_declarator) = direct_declarator.reinterpret_as_concrete(sess)?;
+        Some((name, Self { pointers, direct_declarator }))
     }
 }
 
