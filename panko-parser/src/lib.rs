@@ -594,20 +594,20 @@ impl<'a> DirectDeclarator<'a> {
 
     fn reinterpret_as_concrete(&self, sess: &'a ast::Session<'a>) -> Option<(Token<'a>, Self)> {
         match *self {
-            DirectDeclarator::Abstract => None,
-            DirectDeclarator::Identifier(_) => None,
-            DirectDeclarator::Parenthesised(declarator) => {
+            Self::Abstract => None,
+            Self::Identifier(_) => None,
+            Self::Parenthesised(declarator) => {
                 let (name, declarator) = declarator.reinterpret_as_concrete(sess)?;
                 Some((name, Self::Parenthesised(sess.alloc(declarator))))
             }
-            DirectDeclarator::ArrayDeclarator(ArrayDeclarator {
+            Self::ArrayDeclarator(ArrayDeclarator {
                 direct_declarator,
                 type_qualifiers,
                 length,
                 close_bracket,
             }) => {
                 let (name, direct_declarator) = direct_declarator.reinterpret_as_concrete(sess)?;
-                let direct_declarator = DirectDeclarator::ArrayDeclarator(ArrayDeclarator {
+                let direct_declarator = Self::ArrayDeclarator(ArrayDeclarator {
                     direct_declarator: sess.alloc(direct_declarator),
                     type_qualifiers,
                     length,
@@ -615,13 +615,12 @@ impl<'a> DirectDeclarator<'a> {
                 });
                 Some((name, direct_declarator))
             }
-            DirectDeclarator::FunctionDeclarator(FunctionDeclarator {
-                direct_declarator,
+            Self::FunctionDeclarator(FunctionDeclarator {
+                direct_declarator: Self::Abstract,
                 parameter_type_list,
                 close_paren: _,
-            }) if let DirectDeclarator::Abstract = direct_declarator
-                && let ParameterTypeList { parameter_list, is_varargs: false } =
-                    parameter_type_list
+            }) if let ParameterTypeList { parameter_list, is_varargs: false } =
+                parameter_type_list
                 && let [param] = parameter_list
                 && let ParameterDeclaration { declaration_specifiers, declarator } = param
                 && let DeclarationSpecifiers([specifier]) = declaration_specifiers
@@ -634,15 +633,15 @@ impl<'a> DirectDeclarator<'a> {
                     Some(Declarator { pointers: Some(_), direct_declarator: _ }) => None,
                     Some(Declarator { pointers: None, direct_declarator }) =>
                         Some((name, direct_declarator.with_name(sess, name)?)),
-                    None => Some((name, DirectDeclarator::Identifier(name))),
+                    None => Some((name, Self::Identifier(name))),
                 },
-            DirectDeclarator::FunctionDeclarator(FunctionDeclarator {
+            Self::FunctionDeclarator(FunctionDeclarator {
                 direct_declarator,
                 parameter_type_list,
                 close_paren,
             }) => {
                 let (name, direct_declarator) = direct_declarator.reinterpret_as_concrete(sess)?;
-                let direct_declarator = DirectDeclarator::FunctionDeclarator(FunctionDeclarator {
+                let direct_declarator = Self::FunctionDeclarator(FunctionDeclarator {
                     direct_declarator: sess.alloc(direct_declarator),
                     parameter_type_list,
                     close_paren,
