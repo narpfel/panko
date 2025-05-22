@@ -54,9 +54,7 @@ enum Diagnostic<'a> {
     DeclarationWithoutType { at: cst::DeclarationSpecifiers<'a> },
 
     #[error("declaration does not specify a name")]
-    #[diagnostics(
-        at(colour = Red, label = "this looks like a declaration with type `{ty}`"),
-    )]
+    #[diagnostics(at(colour = Red, label = "this looks like a declaration with type `{ty}`"))]
     #[with(ty = ty.fg(Red))]
     DeclarationWithoutName {
         at: cst::Declaration<'a>,
