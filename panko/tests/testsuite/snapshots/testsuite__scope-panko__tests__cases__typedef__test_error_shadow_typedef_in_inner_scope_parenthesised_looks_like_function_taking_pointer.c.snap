@@ -17,5 +17,5 @@ Error: declaration does not specify a name
    │
  4 │         int (name*);
    │         ──────┬─────  
-   │               ╰─────── name missing
+   │               ╰─────── this looks like a declaration with type `fn(∅: ptr<typedef<name>>) -> int`
 ───╯

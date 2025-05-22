@@ -17,7 +17,7 @@ Error: declaration does not specify a name
    │
  6 │         int (name, ...);
    │         ────────┬───────  
-   │                 ╰───────── name missing
+   │                 ╰───────── this looks like a declaration with type `fn(∅: typedef<name>, ...) -> int`
 ───╯
 
 Error: declaration does not specify a name
@@ -25,7 +25,7 @@ Error: declaration does not specify a name
    │
  7 │         int (name, name);
    │         ────────┬────────  
-   │                 ╰────────── name missing
+   │                 ╰────────── this looks like a declaration with type `fn(∅: typedef<name>, ∅: typedef<name>) -> int`
 ───╯
 
 Error: declaration does not specify a name
@@ -33,7 +33,7 @@ Error: declaration does not specify a name
    │
  8 │         int (name const);
    │         ────────┬────────  
-   │                 ╰────────── name missing
+   │                 ╰────────── this looks like a declaration with type `fn(∅: typedef<name> const) -> int`
 ───╯
 
 Error: declaration does not specify a name
@@ -41,7 +41,7 @@ Error: declaration does not specify a name
    │
  9 │         int (const);
    │         ──────┬─────  
-   │               ╰─────── name missing
+   │               ╰─────── this looks like a declaration with type `fn(∅: int const) -> int`
 ───╯
 
 Error: declaration does not specify a type
@@ -57,5 +57,5 @@ Error: declaration does not specify a name
     │
  10 │         int (int);
     │         ─────┬────  
-    │              ╰────── name missing
+    │              ╰────── this looks like a declaration with type `fn(∅: int) -> int`
 ────╯

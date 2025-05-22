@@ -6,12 +6,14 @@ use std::iter::once;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
+use ariadne::Fmt as _;
 use bumpalo::Bump;
 use itertools::Either;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_report::Report;
+use panko_report::Sliced as _;
 
 use crate as cst;
 use crate::ArrayDeclarator;
@@ -52,8 +54,14 @@ enum Diagnostic<'a> {
     DeclarationWithoutType { at: cst::DeclarationSpecifiers<'a> },
 
     #[error("declaration does not specify a name")]
-    #[diagnostics(at(colour = Red, label = "name missing"))]
-    DeclarationWithoutName { at: cst::Declaration<'a> },
+    #[diagnostics(
+        at(colour = Red, label = "this looks like a declaration with type `{ty}`"),
+    )]
+    #[with(ty = ty.fg(Red))]
+    DeclarationWithoutName {
+        at: cst::Declaration<'a>,
+        ty: QualifiedType<'a>,
+    },
 }
 
 pub trait ErrorExpr<'a> {
@@ -284,8 +292,8 @@ impl<'a> ExternalDeclaration<'a> {
                 ))),
             cst::ExternalDeclaration::Declaration(decl) => Either::Right(
                 Declaration::from_parse_tree(sess, decl).map(|decl| match decl {
-                    Some(decl) => ExternalDeclaration::Declaration(decl),
-                    None => todo!(),
+                    Ok(decl) => ExternalDeclaration::Declaration(decl),
+                    Err(ty) => todo!("declaration does not specify a name: `{ty}`"),
                 }),
             ),
         }
@@ -383,19 +391,17 @@ impl<'a> Declaration<'a> {
     fn from_parse_tree(
         sess: &'a Session<'a>,
         decl: &'a cst::Declaration<'a>,
-    ) -> impl Iterator<Item = Option<Self>> + 'a {
+    ) -> impl Iterator<Item = Result<Self, QualifiedType<'a>>> + 'a {
         let DeclarationSpecifiers { storage_class, ty } =
             parse_declaration_specifiers(sess, decl.specifiers);
         decl.init_declarator_list
             .iter()
             .map(move |&InitDeclarator { declarator, initialiser }| {
                 let (ty, name) = parse_declarator(sess, ty, declarator);
-                Some(Self {
-                    ty,
-                    name: name?,
-                    initialiser,
-                    storage_class,
-                })
+                match name {
+                    Some(name) => Ok(Self { ty, name, initialiser, storage_class }),
+                    None => Err(ty),
+                }
             })
     }
 }
@@ -450,8 +456,8 @@ impl<'a> Statement<'a> {
             BlockItem::Declaration(decl) =>
                 Either::Left(Declaration::from_parse_tree(sess, decl).map(|maybe_decl| {
                     match maybe_decl {
-                        Some(decl) => Self::Declaration(decl),
-                        None => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl }),
+                        Ok(decl) => Self::Declaration(decl),
+                        Err(ty) => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl, ty }),
                     }
                 })),
             BlockItem::UnlabeledStatement(stmt) =>

@@ -17,8 +17,8 @@ use panko_parser::ast;
 use panko_parser::ast::ErrorExpr;
 use panko_parser::ast::Session;
 use panko_report::Report;
+use panko_report::Sliced as _;
 
-use crate::Sliced as _;
 use crate::nonempty;
 use crate::ty;
 

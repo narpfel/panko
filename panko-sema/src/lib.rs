@@ -39,17 +39,3 @@ trait ItertoolsExt: Itertools {
 }
 
 impl<T> ItertoolsExt for T where T: Itertools {}
-
-// TODO: this should be in `panko_report`
-trait Sliced {
-    fn slice(&self) -> String;
-}
-
-impl<T> Sliced for T
-where
-    T: ToString,
-{
-    fn slice(&self) -> String {
-        self.to_string()
-    }
-}

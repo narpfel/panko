@@ -17,5 +17,5 @@ Error: declaration does not specify a name
    │
  2 │     long int = 42;
    │     ───────┬──────  
-   │            ╰──────── name missing
+   │            ╰──────── this looks like a declaration with type `long`
 ───╯

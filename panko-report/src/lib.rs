@@ -41,3 +41,16 @@ where
         Box::new(value)
     }
 }
+
+pub trait Sliced {
+    fn slice(&self) -> String;
+}
+
+impl<T> Sliced for T
+where
+    T: ToString,
+{
+    fn slice(&self) -> String {
+        self.to_string()
+    }
+}

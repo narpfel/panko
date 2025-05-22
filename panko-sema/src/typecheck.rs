@@ -34,10 +34,10 @@ use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_report::Report;
+use panko_report::Sliced as _;
 use variant_types::IntoVariant as _;
 
 use crate::ItertoolsExt as _;
-use crate::Sliced as _;
 use crate::scope;
 use crate::scope::DesignatedInitialiser;
 use crate::scope::Designation;
