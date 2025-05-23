@@ -62,11 +62,12 @@ enum Diagnostic<'a> {
     },
 }
 
-pub trait ErrorExpr<'a> {
+// TODO: could this be `From<&'a dyn Report>`?
+pub trait FromError<'a> {
     fn from_error(error: &'a dyn Report) -> Self;
 }
 
-impl ErrorExpr<'_> for () {
+impl FromError<'_> for () {
     fn from_error(_error: &dyn Report) -> Self {}
 }
 
@@ -119,7 +120,7 @@ impl<'a> Session<'a> {
     pub fn emit<T, Expr>(&self, diagnostic: T) -> Expr
     where
         T: Report + 'a,
-        Expr: ErrorExpr<'a>,
+        Expr: FromError<'a>,
     {
         if self.treat_error_as_bug {
             diagnostic.print();
@@ -272,7 +273,7 @@ pub enum Statement<'a> {
     },
 }
 
-impl<'a> ErrorExpr<'a> for Statement<'a> {
+impl<'a> FromError<'a> for Statement<'a> {
     fn from_error(error: &'a dyn Report) -> Self {
         Self::Expression(Some(Expression::from_error(error)))
     }

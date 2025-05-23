@@ -14,7 +14,7 @@ use panko_parser::LogicalOp;
 use panko_parser::StorageClassSpecifierKind;
 use panko_parser::UnaryOp;
 use panko_parser::ast;
-use panko_parser::ast::ErrorExpr;
+use panko_parser::ast::FromError;
 use panko_parser::ast::Session;
 use panko_report::Report;
 use panko_report::Sliced as _;
@@ -103,7 +103,7 @@ pub(crate) enum ExternalDeclaration<'a> {
     Error(&'a dyn Report),
 }
 
-impl<'a> ErrorExpr<'a> for ExternalDeclaration<'a> {
+impl<'a> FromError<'a> for ExternalDeclaration<'a> {
     fn from_error(error: &'a dyn Report) -> Self {
         Self::Error(error)
     }
@@ -116,7 +116,7 @@ pub(crate) enum DeclarationOrTypedef<'a> {
     Error(&'a dyn Report),
 }
 
-impl<'a> ErrorExpr<'a> for DeclarationOrTypedef<'a> {
+impl<'a> FromError<'a> for DeclarationOrTypedef<'a> {
     fn from_error(error: &'a dyn Report) -> Self {
         Self::Error(error)
     }
@@ -198,7 +198,7 @@ pub(crate) enum Statement<'a> {
     },
 }
 
-impl<'a> ErrorExpr<'a> for Statement<'a> {
+impl<'a> FromError<'a> for Statement<'a> {
     fn from_error(error: &'a dyn Report) -> Self {
         Self::Expression(Some(Expression::from_error(error)))
     }
@@ -473,7 +473,7 @@ impl<'a> Expression<'a> {
     }
 }
 
-impl<'a> ErrorExpr<'a> for Expression<'a> {
+impl<'a> FromError<'a> for Expression<'a> {
     fn from_error(error: &'a dyn Report) -> Self {
         Self::Error(error)
     }

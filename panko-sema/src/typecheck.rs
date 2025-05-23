@@ -28,7 +28,7 @@ use panko_parser::LogicalOp;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast::Arithmetic;
-use panko_parser::ast::ErrorExpr;
+use panko_parser::ast::FromError;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
@@ -982,7 +982,7 @@ impl<'a> Expression<'a> {
     }
 }
 
-impl<'a> ErrorExpr<'a> for TypedExpression<'a> {
+impl<'a> FromError<'a> for TypedExpression<'a> {
     fn from_error(error: &'a dyn Report) -> Self {
         Self {
             // TODO: this should by `Type::Error`
@@ -992,7 +992,7 @@ impl<'a> ErrorExpr<'a> for TypedExpression<'a> {
     }
 }
 
-impl<'a> ErrorExpr<'a> for Expression<'a> {
+impl<'a> FromError<'a> for Expression<'a> {
     fn from_error(error: &'a dyn Report) -> Self {
         Self::Error(error)
     }

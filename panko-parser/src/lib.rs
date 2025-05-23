@@ -22,7 +22,7 @@ use panko_lex::TypedefNames;
 use panko_report::Report;
 
 use crate::ast::Arithmetic;
-use crate::ast::ErrorExpr;
+use crate::ast::FromError;
 use crate::ast::Integral;
 use crate::ast::IntegralKind;
 use crate::ast::QualifiedType;
@@ -806,7 +806,7 @@ pub enum Expression<'a> {
     },
 }
 
-impl<'a> ErrorExpr<'a> for Expression<'a> {
+impl<'a> FromError<'a> for Expression<'a> {
     fn from_error(error: &'a dyn Report) -> Self {
         Self::Error(error)
     }
