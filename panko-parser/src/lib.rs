@@ -81,7 +81,7 @@ enum Diagnostic<'a> {
         token = at.token,
         ty = ty.into_type(|| unreachable!()).fg(Blue),
     )]
-    InvalidDeclarationSpecifierCombination {
+    InvalidTypeSpecifierCombination {
         message: &'a str,
         at: TypeSpecifier<'a>,
         specifiers: DeclarationSpecifiers<'a>,
@@ -294,7 +294,7 @@ impl<'a> TypeSpecifier<'a> {
         type Parsed<'a> = ParsedSpecifiers<'a>;
 
         let error_full = |message: &'a str| {
-            let () = sess.emit(Diagnostic::InvalidDeclarationSpecifierCombination {
+            let () = sess.emit(Diagnostic::InvalidTypeSpecifierCombination {
                 message,
                 at: *self,
                 specifiers: specifiers.until(position),
@@ -303,7 +303,7 @@ impl<'a> TypeSpecifier<'a> {
             ty
         };
 
-        let error = || error_full("invalid combination of declaration specifiers");
+        let error = || error_full("invalid combination of type specifiers");
 
         match self.kind {
             Kind::Void => match ty {
