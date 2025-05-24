@@ -1,0 +1,163 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid combination of declaration specifiers
+   ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:4:9]
+   │
+ 4 │     int void a;
+   │     ─┬─ ──┬─  
+   │      │    ╰─── cannot combine `void` with previous type `int`
+   │      │        
+   │      ╰──────── previous type
+───╯
+
+Error: invalid combination of declaration specifiers
+   ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:5:10]
+   │
+ 5 │     void int b;
+   │     ──┬─ ─┬─  
+   │       │   ╰─── cannot combine `int` with previous type `void`
+   │       │       
+   │       ╰─────── previous type
+───╯
+
+Error: invalid combination of declaration specifiers
+   ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:6:11]
+   │
+ 6 │     short void c;
+   │     ──┬── ──┬─  
+   │       │     ╰─── cannot combine `void` with previous type `short`
+   │       │         
+   │       ╰───────── previous type
+───╯
+
+Error: invalid combination of declaration specifiers
+   ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:7:11]
+   │
+ 7 │     short char d;
+   │     ──┬── ──┬─  
+   │       │     ╰─── cannot combine `char` with previous type `short`
+   │       │         
+   │       ╰───────── previous type
+───╯
+
+Error: invalid combination of declaration specifiers
+   ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:8:10]
+   │
+ 8 │     char long e;
+   │     ──┬─ ──┬─  
+   │       │    ╰─── cannot combine `long` with previous type `char`
+   │       │        
+   │       ╰──────── previous type
+───╯
+
+Error: invalid combination of declaration specifiers
+   ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:9:9]
+   │
+ 9 │     int char f;
+   │     ─┬─ ──┬─  
+   │      │    ╰─── cannot combine `char` with previous type `int`
+   │      │        
+   │      ╰──────── previous type
+───╯
+
+Error: invalid combination of declaration specifiers
+    ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:10:10]
+    │
+ 10 │     char int g;
+    │     ──┬─ ─┬─  
+    │       │   ╰─── cannot combine `int` with previous type `char`
+    │       │       
+    │       ╰─────── previous type
+────╯
+
+Error: invalid combination of declaration specifiers
+    ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:11:9]
+    │
+ 11 │     int int h;
+    │     ─┬─ ─┬─  
+    │      │   ╰─── cannot combine `int` with previous type `int`
+    │      │       
+    │      ╰─────── previous type
+────╯
+
+Error: invalid combination of declaration specifiers
+    ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:12:20]
+    │
+ 12 │     unsigned short long i;
+    │     ───────┬────── ──┬─  
+    │            │         ╰─── cannot combine `long` with previous type `unsigned short`
+    │            │             
+    │            ╰───────────── previous type
+────╯
+
+Error: invalid combination of declaration specifiers
+    ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:13:14]
+    │
+ 13 │     unsigned signed int j;
+    │     ────┬─── ───┬──  
+    │         │       ╰──── cannot combine `signed` with previous type `unsigned int`
+    │         │            
+    │         ╰──────────── previous type
+────╯
+
+Error: invalid combination of declaration specifiers
+    ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:14:10]
+    │
+ 14 │     char short k;
+    │     ──┬─ ──┬──  
+    │       │    ╰──── cannot combine `short` with previous type `char`
+    │       │         
+    │       ╰───────── previous type
+────╯
+
+Error: invalid combination of declaration specifiers
+    ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:16:12]
+    │
+ 16 │     signed unsigned l;
+    │     ───┬── ────┬───  
+    │        │       ╰───── cannot combine `unsigned` with previous type `int`
+    │        │             
+    │        ╰───────────── previous type
+────╯
+
+Error: invalid combination of declaration specifiers
+    ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:17:18]
+    │
+ 17 │     typedef_name int m;
+    │     ──────┬───── ─┬─  
+    │           │       ╰─── cannot combine `int` with previous type `typedef<typedef_name>`
+    │           │           
+    │           ╰─────────── previous type
+────╯
+
+Error: invalid combination of declaration specifiers
+    ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:18:11]
+    │
+ 18 │     short typedef_name n;
+    │     ──┬── ──────┬─────  
+    │       │         ╰─────── cannot combine `typedef_name` with previous type `short`
+    │       │                 
+    │       ╰───────────────── previous type
+────╯
+
+Error: `long long long` is too long for panko
+    ╭─[panko/tests/cases/decl_in_function/test_error_invalid_type_specifier_combination.c:19:28]
+    │
+ 19 │     unsigned long int long long x = 42;
+    │     ───────────┬────────── ──┬─  
+    │                │             ╰─── cannot combine `long` with previous type `unsigned long long`
+    │                │                 
+    │                ╰───────────────── previous type
+────╯

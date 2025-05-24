@@ -9,7 +9,9 @@ use std::cell::Cell;
 use std::cell::RefCell;
 use std::iter::empty;
 
+use ariadne::Color::Blue;
 use ariadne::Color::Red;
+use ariadne::Fmt as _;
 use itertools::Either;
 use itertools::Itertools as _;
 use lalrpop_util::ParseError;
@@ -20,6 +22,7 @@ use panko_lex::TokenIter;
 use panko_lex::TokenKind;
 use panko_lex::TypedefNames;
 use panko_report::Report;
+use panko_report::Sliced as _;
 
 use crate::ast::FromError;
 use crate::ast::IntegralKind;
@@ -64,6 +67,28 @@ impl Strings {
     fn slice(&self) -> String {
         format!("[{}]", self.0.iter().join(", "))
     }
+}
+
+#[derive(Debug, Report)]
+#[exit_code(1)]
+enum Diagnostic<'a> {
+    #[error("{message}")]
+    #[diagnostics(
+        specifiers(colour = Blue, label = "previous type"),
+        at(colour = Red, label = "cannot combine `{token}` with previous type `{ty}`"),
+    )]
+    #[with(
+        token = at.token,
+        specifiers = specifiers.until(*len),
+        ty = ty.into_type(|| unreachable!()).fg(Blue),
+    )]
+    InvalidDeclarationSpecifierCombination {
+        message: &'a str,
+        at: TypeSpecifier<'a>,
+        specifiers: DeclarationSpecifiers<'a>,
+        len: usize,
+        ty: ParsedSpecifiers<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -117,6 +142,11 @@ impl<'a> DeclarationSpecifiers<'a> {
                 })
             )
         })
+    }
+
+    fn until(self, end: usize) -> Self {
+        let Self(specifiers) = self;
+        Self(&specifiers[..end])
     }
 }
 
@@ -255,18 +285,38 @@ impl<'a> TypeSpecifier<'a> {
         self.token.loc()
     }
 
-    fn parse(&self, _sess: &ast::Session<'a>, ty: ParsedSpecifiers<'a>) -> ParsedSpecifiers<'a> {
+    fn parse(
+        &self,
+        sess: &ast::Session<'a>,
+        specifiers: DeclarationSpecifiers<'a>,
+        position: usize,
+        ty: ParsedSpecifiers<'a>,
+    ) -> ParsedSpecifiers<'a> {
         type Kind<'a> = TypeSpecifierKind<'a>;
         type Parsed<'a> = ParsedSpecifiers<'a>;
+
+        let error_full = |message: &'a str| {
+            let () = sess.emit(Diagnostic::InvalidDeclarationSpecifierCombination {
+                message,
+                at: *self,
+                specifiers,
+                len: position,
+                ty,
+            });
+            ty
+        };
+
+        let error = || error_full("invalid combination of declaration specifiers");
+
         match self.kind {
             Kind::Void => match ty {
                 Parsed::None => Parsed::Void,
-                _ => todo!("error"),
+                _ => error(),
             },
             Kind::Char => match ty {
                 Parsed::None => Parsed::Char(None),
                 Parsed::Int { kind: None, signedness } => Parsed::Char(signedness),
-                _ => todo!("error"),
+                _ => error(),
             },
             Kind::Short => match ty {
                 Parsed::None => Parsed::Int {
@@ -280,7 +330,7 @@ impl<'a> TypeSpecifier<'a> {
                     kind: Some(IntegralKind::Short),
                     signedness,
                 },
-                _ => todo!("error"),
+                _ => error(),
             },
             Kind::Int => match ty {
                 Parsed::None => Parsed::Int {
@@ -295,7 +345,7 @@ impl<'a> TypeSpecifier<'a> {
                     kind: Some(IntegralKind::Short | IntegralKind::Long | IntegralKind::LongLong),
                     signedness: _,
                 } => ty,
-                _ => todo!("error"),
+                _ => error(),
             },
             Kind::Long => match ty {
                 Parsed::None => Parsed::Int {
@@ -316,7 +366,15 @@ impl<'a> TypeSpecifier<'a> {
                     kind: Some(IntegralKind::LongLong),
                     signedness,
                 },
-                _ => todo!("error"),
+                Parsed::Int {
+                    kind: Some(IntegralKind::LongLong),
+                    signedness: _,
+                } => error_full(sess.alloc_str(&format!(
+                    "`{longlonglong}` is too long for {panko}",
+                    longlonglong = "long long long".fg(Red),
+                    panko = yansi::Paint::bold("panko").fg(ariadne::Color::Rgb(0xaa, 0x22, 0xff)),
+                ))),
+                _ => error(),
             },
             Kind::Signed => match ty {
                 Parsed::None => Parsed::Int {
@@ -328,7 +386,7 @@ impl<'a> TypeSpecifier<'a> {
                     kind,
                     signedness: Some(Signedness::Signed),
                 },
-                _ => todo!("error"),
+                _ => error(),
             },
             Kind::Unsigned => match ty {
                 Parsed::None => Parsed::Int {
@@ -340,11 +398,11 @@ impl<'a> TypeSpecifier<'a> {
                     kind,
                     signedness: Some(Signedness::Unsigned),
                 },
-                _ => todo!("error"),
+                _ => error(),
             },
             Kind::TypedefName => match ty {
                 Parsed::None => Parsed::Typedef(self.token),
-                _ => todo!("error"),
+                _ => error(),
             },
             _ => todo!("unimplemented type specifier: {self:#?}"),
         }

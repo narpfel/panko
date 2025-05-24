@@ -578,6 +578,7 @@ pub(crate) struct DeclarationSpecifiers<'a> {
     pub(crate) ty: QualifiedType<'a>,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum ParsedSpecifiers<'a> {
     None,
     Void,
@@ -590,17 +591,9 @@ pub(crate) enum ParsedSpecifiers<'a> {
 }
 
 impl<'a> ParsedSpecifiers<'a> {
-    fn into_type(self, sess: &Session<'a>, specifiers: cst::DeclarationSpecifiers<'a>) -> Type<'a> {
+    pub(crate) fn into_type(self, if_none: impl FnOnce() -> Type<'a>) -> Type<'a> {
         match self {
-            Self::None => {
-                // TODO: implement `FromError` for `Type`
-                let () = sess.emit(Diagnostic::DeclarationWithoutType { at: specifiers });
-                // FIXME: don’t use implicit int here, an explicit “type error” type will be better
-                Type::Arithmetic(Arithmetic::Integral(Integral {
-                    signedness: Signedness::Signed,
-                    kind: IntegralKind::Int,
-                }))
-            }
+            Self::None => if_none(),
             Self::Void => Type::Void,
             Self::Char(signedness) => {
                 let kind = match signedness {
@@ -629,14 +622,14 @@ pub(crate) fn parse_declaration_specifiers<'a>(
     let mut volatile_qualifier = None;
     let mut ty = ParsedSpecifiers::None;
     let mut storage_class = None;
-    for specifier in specifiers.0 {
+    for (i, specifier) in specifiers.0.iter().enumerate() {
         match specifier {
             cst::DeclarationSpecifier::StorageClass(class)
                 if let StorageClassSpecifierKind::Typedef = class.kind =>
                 storage_class = Some(*class),
             cst::DeclarationSpecifier::StorageClass(storage_class) => todo!("{storage_class:#?}"),
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Specifier(specifier)) =>
-                ty = specifier.parse(sess, ty),
+                ty = specifier.parse(sess, specifiers, i, ty),
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Qualifier(qualifier)) =>
                 qualifier.parse(sess, &mut const_qualifier, &mut volatile_qualifier),
             cst::DeclarationSpecifier::FunctionSpecifier(function_specifier) =>
@@ -644,12 +637,21 @@ pub(crate) fn parse_declaration_specifiers<'a>(
         }
     }
 
+    let ty = ty.into_type(|| {
+        // TODO: implement `FromError` for `Type`
+        let () = sess.emit(Diagnostic::DeclarationWithoutType { at: specifiers });
+        // FIXME: don’t use implicit int here, an explicit “type error” type will be better
+        Type::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Signed,
+            kind: IntegralKind::Int,
+        }))
+    });
     DeclarationSpecifiers {
         storage_class,
         ty: QualifiedType {
             is_const: const_qualifier.is_some(),
             is_volatile: volatile_qualifier.is_some(),
-            ty: ty.into_type(sess, specifiers),
+            ty,
             loc: specifiers.loc(),
         },
     }
