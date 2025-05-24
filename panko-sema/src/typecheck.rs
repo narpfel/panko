@@ -1449,7 +1449,7 @@ fn typeck_initialiser_list<'a>(
                 }
                 Err(iterator) =>
                     if emit_nested_excess_initialiser_errors {
-                        // TODO: use this error (implement `ErrorExpr` for `SubobjectInitialiser`)
+                        // TODO: use this error (implement `FromError` for `SubobjectInitialiser`)
                         sess.emit(Diagnostic::ExcessInitialiser {
                             at: **initialiser,
                             reference: *reference,
