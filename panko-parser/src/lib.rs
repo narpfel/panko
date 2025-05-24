@@ -21,13 +21,11 @@ use panko_lex::TokenKind;
 use panko_lex::TypedefNames;
 use panko_report::Report;
 
-use crate::ast::Arithmetic;
 use crate::ast::FromError;
-use crate::ast::Integral;
 use crate::ast::IntegralKind;
+use crate::ast::ParsedSpecifiers;
 use crate::ast::QualifiedType;
 use crate::ast::Signedness;
-use crate::ast::Type;
 
 mod as_sexpr;
 pub mod ast;
@@ -257,121 +255,98 @@ impl<'a> TypeSpecifier<'a> {
         self.token.loc()
     }
 
-    fn parse(&self, _sess: &ast::Session<'a>, ty: &mut Option<Type<'a>>) {
+    fn parse(&self, _sess: &ast::Session<'a>, ty: ParsedSpecifiers<'a>) -> ParsedSpecifiers<'a> {
+        type Kind<'a> = TypeSpecifierKind<'a>;
+        type Parsed<'a> = ParsedSpecifiers<'a>;
         match self.kind {
-            TypeSpecifierKind::Short => match ty {
-                None =>
-                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                        signedness: Signedness::Signed,
-                        kind: IntegralKind::Short,
-                    }))),
-                Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+            Kind::Void => match ty {
+                Parsed::None => Parsed::Void,
+                _ => todo!("error"),
+            },
+            Kind::Char => match ty {
+                Parsed::None => Parsed::Char(None),
+                Parsed::Int { kind: None, signedness } => Parsed::Char(signedness),
+                _ => todo!("error"),
+            },
+            Kind::Short => match ty {
+                Parsed::None => Parsed::Int {
+                    kind: Some(IntegralKind::Short),
+                    signedness: None,
+                },
+                Parsed::Int {
+                    kind: None | Some(IntegralKind::Int),
                     signedness,
-                    kind: IntegralKind::Int,
-                }))) =>
-                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                        signedness: *signedness,
-                        kind: IntegralKind::Short,
-                    }))),
-                _ => todo!(),
-            },
-            // TODO: only allow at most one `int` per type
-            TypeSpecifierKind::Int => match ty {
-                Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                    signedness: _,
-                    kind:
-                        IntegralKind::Short
-                        | IntegralKind::Int
-                        | IntegralKind::Long
-                        | IntegralKind::LongLong,
-                }))) => (),
-                Some(_) => todo!(),
-                None =>
-                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                        signedness: Signedness::Signed,
-                        kind: IntegralKind::Int,
-                    }))),
-            },
-            TypeSpecifierKind::Long => match ty {
-                None =>
-                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                        signedness: Signedness::Signed,
-                        kind: IntegralKind::Long,
-                    }))),
-                Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                } => Parsed::Int {
+                    kind: Some(IntegralKind::Short),
                     signedness,
-                    kind: IntegralKind::Int,
-                }))) =>
-                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                        signedness: *signedness,
-                        kind: IntegralKind::Long,
-                    }))),
-                Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                },
+                _ => todo!("error"),
+            },
+            Kind::Int => match ty {
+                Parsed::None => Parsed::Int {
+                    kind: Some(IntegralKind::Int),
+                    signedness: None,
+                },
+                Parsed::Int { kind: None, signedness } => Parsed::Int {
+                    kind: Some(IntegralKind::Int),
                     signedness,
-                    kind: IntegralKind::Long,
-                }))) =>
-                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                        signedness: *signedness,
-                        kind: IntegralKind::LongLong,
-                    }))),
-                _ => todo!(),
-            },
-            TypeSpecifierKind::Char => match ty {
-                Some(_) => todo!(),
-                None =>
-                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                        signedness: Signedness::Signed,
-                        kind: IntegralKind::PlainChar,
-                    }))),
-            },
-            TypeSpecifierKind::Void => match ty {
-                Some(_) => todo!(),
-                None => *ty = Some(Type::Void),
-            },
-            TypeSpecifierKind::Signed => match ty {
-                Some(Type::Arithmetic(Arithmetic::Integral(Integral {
+                },
+                ty @ Parsed::Int {
+                    kind: Some(IntegralKind::Short | IntegralKind::Long | IntegralKind::LongLong),
                     signedness: _,
-                    kind: IntegralKind::PlainChar,
-                }))) =>
-                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                        signedness: Signedness::Signed,
-                        kind: IntegralKind::Char,
-                    }))),
-                Some(Type::Arithmetic(Arithmetic::Integral(
-                    integral @ Integral { signedness: Signedness::Signed, kind: _ },
-                ))) => integral.signedness = Signedness::Signed,
-                None =>
-                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                        signedness: Signedness::Signed,
-                        kind: IntegralKind::Int,
-                    }))),
-                _ => todo!(),
+                } => ty,
+                _ => todo!("error"),
             },
-            TypeSpecifierKind::Unsigned => match ty {
-                Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                    signedness: _,
-                    kind: IntegralKind::PlainChar,
-                }))) =>
-                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                        signedness: Signedness::Unsigned,
-                        kind: IntegralKind::Char,
-                    }))),
-                Some(Type::Arithmetic(Arithmetic::Integral(
-                    integral @ Integral { signedness: Signedness::Signed, kind: _ },
-                ))) => integral.signedness = Signedness::Unsigned,
-                None =>
-                    *ty = Some(Type::Arithmetic(Arithmetic::Integral(Integral {
-                        signedness: Signedness::Unsigned,
-                        kind: IntegralKind::Int,
-                    }))),
-                _ => todo!(),
+            Kind::Long => match ty {
+                Parsed::None => Parsed::Int {
+                    kind: Some(IntegralKind::Long),
+                    signedness: None,
+                },
+                Parsed::Int {
+                    kind: None | Some(IntegralKind::Int),
+                    signedness,
+                } => Parsed::Int {
+                    kind: Some(IntegralKind::Long),
+                    signedness,
+                },
+                Parsed::Int {
+                    kind: Some(IntegralKind::Long),
+                    signedness,
+                } => Parsed::Int {
+                    kind: Some(IntegralKind::LongLong),
+                    signedness,
+                },
+                _ => todo!("error"),
             },
-            TypeSpecifierKind::Bool => todo!(),
-            TypeSpecifierKind::TypedefName => match ty {
-                Some(ty) => todo!("{ty}"),
-                None => *ty = Some(Type::Typedef(self.token)),
+            Kind::Signed => match ty {
+                Parsed::None => Parsed::Int {
+                    kind: None,
+                    signedness: Some(Signedness::Signed),
+                },
+                Parsed::Char(None) => Parsed::Char(Some(Signedness::Signed)),
+                Parsed::Int { kind, signedness: None } => Parsed::Int {
+                    kind,
+                    signedness: Some(Signedness::Signed),
+                },
+                _ => todo!("error"),
             },
-            _ => todo!("{self:#?}"),
+            Kind::Unsigned => match ty {
+                Parsed::None => Parsed::Int {
+                    kind: None,
+                    signedness: Some(Signedness::Unsigned),
+                },
+                Parsed::Char(None) => Parsed::Char(Some(Signedness::Unsigned)),
+                Parsed::Int { kind, signedness: None } => Parsed::Int {
+                    kind,
+                    signedness: Some(Signedness::Unsigned),
+                },
+                _ => todo!("error"),
+            },
+            Kind::TypedefName => match ty {
+                Parsed::None => Parsed::Typedef(self.token),
+                _ => todo!("error"),
+            },
+            _ => todo!("unimplemented type specifier: {self:#?}"),
         }
     }
 }
