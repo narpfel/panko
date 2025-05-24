@@ -79,14 +79,12 @@ enum Diagnostic<'a> {
     )]
     #[with(
         token = at.token,
-        specifiers = specifiers.until(*len),
         ty = ty.into_type(|| unreachable!()).fg(Blue),
     )]
     InvalidDeclarationSpecifierCombination {
         message: &'a str,
         at: TypeSpecifier<'a>,
         specifiers: DeclarationSpecifiers<'a>,
-        len: usize,
         ty: ParsedSpecifiers<'a>,
     },
 }
@@ -299,8 +297,7 @@ impl<'a> TypeSpecifier<'a> {
             let () = sess.emit(Diagnostic::InvalidDeclarationSpecifierCombination {
                 message,
                 at: *self,
-                specifiers,
-                len: position,
+                specifiers: specifiers.until(position),
                 ty,
             });
             ty
