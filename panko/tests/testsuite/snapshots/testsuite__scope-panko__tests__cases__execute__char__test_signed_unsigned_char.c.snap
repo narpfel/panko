@@ -1,0 +1,38 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/char/test_signed_unsigned_char.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition a~2 `char` 'a')
+         (definition b~3 `unsigned char` 'b')
+         (definition c~4 `signed char` 'c')
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%c%c%c\n")
+               (name a~2 `char`)
+               (name b~3 `unsigned char`)
+               (name c~4 `signed char`)))
+         (definition x~5 `unsigned char` 200)
+         (definition y~6 `signed char` (negate 5))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name x~5 `unsigned char`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name y~6 `signed char`))))))
+
+----- stderr -----

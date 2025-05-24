@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/char/test_signed_unsigned_char.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition a~2 `char` (truncate `char` ('a' `int`)))
+         (definition b~3 `unsigned char` (truncate `unsigned char` ('b' `int`)))
+         (definition c~4 `signed char` (truncate `signed char` ('c' `int`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 8>>`
+                        (string `array<char; 8>` "%c%c%c\n\0"))))
+               (sign-extend `int` (a~2 `char`))
+               (zero-extend `int` (b~3 `unsigned char`))
+               (sign-extend `int` (c~4 `signed char`))))
+         (definition x~5 `unsigned char` (truncate `unsigned char` (200 `int`)))
+         (definition y~6 `signed char` (truncate `signed char` (negate `int` (5 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (zero-extend `int` (x~5 `unsigned char`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (sign-extend `int` (y~6 `signed char`)))))))
+
+----- stderr -----
