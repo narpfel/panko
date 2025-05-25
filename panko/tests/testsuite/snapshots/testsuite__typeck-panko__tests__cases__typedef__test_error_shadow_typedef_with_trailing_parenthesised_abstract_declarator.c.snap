@@ -7,19 +7,61 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/typedef/test_error_shadow_typedef_with_trailing_parenthesised_abstract_declarator.c
 ---
-success: true
-exit_code: 0
+success: false
+exit_code: 1
 ----- stdout -----
-(translation-unit
-   (typedef typedef_name `unsigned int`)
-   (function-definition
-      main~0 `fn() -> int`
-      (compound-statement
-         (compound-statement
-            (declaration typedef_name~1 `fn() -> int` ∅))
-         (compound-statement
-            (definition typedef_name~2 `array<int; 42>` ∅))
-         (compound-statement
-            (declaration typedef_name~3 `fn(∅: int) -> int` ∅)))))
 
 ----- stderr -----
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_with_trailing_parenthesised_abstract_declarator.c:5:9]
+   │
+ 5 │         int typedef_name(());
+   │         ──────────┬──────────  
+   │                   ╰──────────── this looks like a declaration with type `fn() -> int`
+───╯
+
+Error: invalid combination of type specifiers
+   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_with_trailing_parenthesised_abstract_declarator.c:5:13]
+   │
+ 5 │         int typedef_name(());
+   │         ─┬─ ──────┬─────  
+   │          │        ╰─────── cannot combine `typedef_name` with previous type `int`
+   │          │                
+   │          ╰──────────────── previous type
+───╯
+
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_with_trailing_parenthesised_abstract_declarator.c:8:9]
+   │
+ 8 │         int typedef_name([42]);
+   │         ───────────┬───────────  
+   │                    ╰───────────── this looks like a declaration with type `array<int; 42>`
+───╯
+
+Error: invalid combination of type specifiers
+   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_with_trailing_parenthesised_abstract_declarator.c:8:13]
+   │
+ 8 │         int typedef_name([42]);
+   │         ─┬─ ──────┬─────  
+   │          │        ╰─────── cannot combine `typedef_name` with previous type `int`
+   │          │                
+   │          ╰──────────────── previous type
+───╯
+
+Error: declaration does not specify a name
+    ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_with_trailing_parenthesised_abstract_declarator.c:11:9]
+    │
+ 11 │         int typedef_name((int));
+    │         ────────────┬───────────  
+    │                     ╰───────────── this looks like a declaration with type `fn(∅: int) -> int`
+────╯
+
+Error: invalid combination of type specifiers
+    ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_with_trailing_parenthesised_abstract_declarator.c:11:13]
+    │
+ 11 │         int typedef_name((int));
+    │         ─┬─ ──────┬─────  
+    │          │        ╰─────── cannot combine `typedef_name` with previous type `int`
+    │          │                
+    │          ╰──────────────── previous type
+────╯

@@ -562,11 +562,7 @@ impl<'a> DirectDeclarator<'a> {
         match self {
             DirectDeclarator::Abstract => Some(Self::Identifier(name)),
             DirectDeclarator::Identifier(_) => None,
-            DirectDeclarator::Parenthesised(declarator) =>
-                Some(Self::Parenthesised(sess.alloc(Declarator {
-                    direct_declarator: declarator.direct_declarator.with_name(sess, name)?,
-                    ..**declarator
-                }))),
+            DirectDeclarator::Parenthesised(_) => None,
             DirectDeclarator::ArrayDeclarator(array_declarator) =>
                 Some(Self::ArrayDeclarator(ArrayDeclarator {
                     direct_declarator: sess
