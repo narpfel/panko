@@ -17,30 +17,21 @@ exit_code: 0
       (compound-statement
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (string "hello\
- world")))
+               (string "hello world")))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (string "hello\
-\
- world")))
+               (string "hello world")))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (string "\
-hello world")))
+               (string "hello world")))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (string "\
-\
-hello world")))
+               (string "hello world")))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (string "hello world\
-")))
+               (string "hello world")))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (string "hello world\
-\
-"))))))
+               (string "hello world"))))))
 
 ----- stderr -----

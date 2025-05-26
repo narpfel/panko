@@ -1,6 +1,4 @@
 #![feature(closure_lifetime_binder)]
-#![feature(gen_blocks)]
-#![feature(if_let_guard)]
 #![feature(type_alias_impl_trait)]
 #![feature(unqualified_local_imports)]
 
@@ -11,7 +9,6 @@ use std::path::PathBuf;
 use std::sync::LazyLock;
 
 use bumpalo::Bump;
-use itertools::Itertools as _;
 use logos::Lexer;
 use logos::Logos;
 
@@ -48,19 +45,20 @@ impl std::fmt::Debug for Token<'_> {
 #[derive(Clone, Copy)]
 struct SourceFile<'a> {
     file: &'a Path,
-    src: &'a str,
+    physical_src: &'a str,
+    logical_src: &'a str,
+    chunk_starts: &'a [usize],
 }
 
 #[derive(Clone, Copy)]
 pub struct Loc<'a> {
     span: Span,
     source_file: &'a SourceFile<'a>,
-    slice: Option<&'a str>,
 }
 
 impl std::fmt::Debug for Loc<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let prefix = &self.source_file.src[..self.span().start];
+        let prefix = &self.source_file.physical_src[..self.span().start];
         let line = prefix.bytes().filter(|c| *c == b'\n').count() + 1;
         let column = prefix
             .rfind('\n')
@@ -73,13 +71,16 @@ impl std::fmt::Debug for Loc<'_> {
 impl<'a> Loc<'a> {
     pub fn synthesised() -> Self {
         static PATH: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from("<synthesised>"));
-        static SOURCE_FILE: LazyLock<SourceFile> =
-            LazyLock::new(|| SourceFile { file: &PATH, src: "<synthesised>" });
+        static SOURCE_FILE: LazyLock<SourceFile> = LazyLock::new(|| SourceFile {
+            file: &PATH,
+            physical_src: "<synthesised>",
+            logical_src: "<synthesised>",
+            chunk_starts: &[0],
+        });
 
         Self {
             span: Span { start: 0, end: 0 },
             source_file: &SOURCE_FILE,
-            slice: None,
         }
     }
 
@@ -88,7 +89,7 @@ impl<'a> Loc<'a> {
     }
 
     pub fn src(&self) -> &'a str {
-        self.source_file.src
+        self.source_file.logical_src
     }
 
     pub fn start(&self) -> usize {
@@ -100,7 +101,7 @@ impl<'a> Loc<'a> {
     }
 
     pub fn slice(&self) -> &'a str {
-        self.slice.unwrap_or_else(|| &self.src()[self.span()])
+        &self.src()[self.span()]
     }
 
     pub fn until(self, other: Self) -> Self {
@@ -142,7 +143,10 @@ impl<'a> Loc<'a> {
             }
         }
 
-        Cache(self.file(), ariadne::Source::from(self.src()))
+        Cache(
+            self.file(),
+            ariadne::Source::from(self.source_file.physical_src),
+        )
     }
 
     pub fn loc(&self) -> Self {
@@ -158,11 +162,23 @@ impl ariadne::Span for Loc<'_> {
     }
 
     fn start(&self) -> usize {
-        self.span.start
+        let start = self.span.start;
+        let index = self
+            .source_file
+            .chunk_starts
+            .binary_search(&start)
+            .unwrap_or_else(|i| i - 1);
+        start + 2 * index
     }
 
     fn end(&self) -> usize {
-        self.span.end
+        let end = self.span.end;
+        let index = self
+            .source_file
+            .chunk_starts
+            .binary_search(&end)
+            .unwrap_or_else(|i| i - 1);
+        end + 2 * index
     }
 }
 
@@ -270,9 +286,6 @@ fn lex_encoding_prefix(lexer: &mut Lexer<TokenKind>) -> EncodingPrefix {
 #[logos(skip r"[ \n\r\t\f]+")]
 #[logos(skip r"//[^\n]*\n?")]
 pub enum TokenKind {
-    #[token("\\\n")]
-    JoinLines,
-
     #[token("(")]
     LParen,
     #[token(")")]
@@ -605,118 +618,34 @@ pub type TokenIter<'a> = impl Iterator<Item = Result<Token<'a>, Error<'a>>>;
 pub fn lex<'a>(
     bump: &'a Bump,
     filename: &'a Path,
-    src: &str,
+    physical_src: &str,
     typedef_names: &'a RefCell<TypedefNames<'a>>,
 ) -> TokenIter<'a> {
-    let src = bump.alloc_str(src);
-    let source_file = &*bump.alloc(SourceFile { file: filename, src });
-    let mut lexer = TokenKind::lexer(src)
-        .spanned()
-        .map(|(kind, span)| {
-            let loc = Loc {
-                span: Span { start: span.start, end: span.end },
-                source_file,
-                slice: None,
-            };
-
-            let kind = kind.map_err(|()| Error { at: loc })?;
-            Ok(Token { kind, loc })
-        })
-        .peekable();
-
-    let tokens = gen move {
-        let mut last = loop {
-            let Some(last) = lexer.next()
-            else {
-                return;
-            };
-            match last {
-                Ok(Token { kind: TokenKind::JoinLines, loc: _ }) => (),
-                _ => {
-                    yield last;
-                    break last;
-                }
-            }
+    let (logical_src, chunk_lengths): (String, Vec<_>) = physical_src
+        .split_inclusive("\\\n")
+        .map(|chunk| chunk.strip_suffix("\\\n").unwrap_or(chunk))
+        .map(|chunk| (chunk, chunk.len()))
+        .collect();
+    let logical_src = bump.alloc_str(&logical_src);
+    let chunk_starts = bump.alloc_slice_copy(
+        &chunk_lengths
+            .into_iter()
+            .scan(0, |state, len| Some(std::mem::replace(state, *state + len)))
+            .collect::<Vec<_>>(),
+    );
+    let source_file = &*bump.alloc(SourceFile {
+        file: filename,
+        physical_src: bump.alloc_str(physical_src),
+        logical_src,
+        chunk_starts,
+    });
+    TokenKind::lexer(logical_src).spanned().map(|(kind, span)| {
+        let loc = Loc {
+            span: Span { start: span.start, end: span.end },
+            source_file,
         };
 
-        while let Some(current) = lexer.next() {
-            match current {
-                // TODO: tokens should remember when they are line-joined so that the preprocessor
-                // knows to not stop after such a token
-                Ok(Token { kind: TokenKind::JoinLines, loc })
-                    if let Ok(last) = last
-                        && let Some(Ok(next)) = lexer.peek()
-                        && last.loc.span.end == loc.span.start
-                        && loc.span.end == next.loc.span.start =>
-                {
-                    let src = bump.alloc_str(&format!("{}{}", last.slice(), next.slice()));
-                    let Some(Ok(next)) = lexer.next()
-                    else {
-                        unreachable!()
-                    };
-
-                    let tokens = TokenKind::lexer(src).spanned().collect_vec();
-                    match tokens[..] {
-                        [(kind, ref span)] => {
-                            let loc = Loc {
-                                span: Span {
-                                    start: last.loc.span.start,
-                                    end: next.loc.span.end,
-                                },
-                                source_file,
-                                slice: Some(&src[span.clone()]),
-                            };
-
-                            match kind {
-                                Ok(kind) => yield Ok(Token { kind, loc }),
-                                Err(()) => yield Err(Error { at: loc }),
-                            }
-                        }
-                        [(kind_1, ref span_1), (kind_2, ref span_2)] => {
-                            let span_1 = span_1.clone();
-                            let span_2 = span_2.clone();
-
-                            let loc = Loc {
-                                span: Span {
-                                    start: last.loc.span.start,
-                                    end: last.loc.span.start + span_1.len(),
-                                },
-                                source_file,
-                                slice: None,
-                            };
-                            yield match kind_1 {
-                                Ok(kind) => Ok(Token { kind, loc }),
-                                Err(()) => Err(Error { at: loc }),
-                            };
-
-                            let loc = Loc {
-                                span: Span {
-                                    start: next.loc.span.end - span_2.len(),
-                                    end: next.loc.span.end,
-                                },
-                                source_file,
-                                slice: None,
-                            };
-                            yield match kind_2 {
-                                Ok(kind) => Ok(Token { kind, loc }),
-                                Err(()) => Err(Error { at: loc }),
-                            };
-                        }
-                        _ => unreachable!(),
-                    }
-                }
-                Ok(Token { kind: TokenKind::JoinLines, loc: _ }) => yield last,
-                _ => match lexer.peek() {
-                    Some(Ok(Token { kind: TokenKind::JoinLines, loc: _ })) => (),
-                    _ => yield current,
-                },
-            }
-            last = current;
-        }
-    };
-
-    tokens.map(|token| {
-        let Token { kind, loc } = token?;
+        let kind = kind.map_err(|()| Error { at: loc })?;
         let kind = match kind {
             TokenKind::Identifier if typedef_names.borrow().is_type_identifier(loc.slice()) =>
                 TokenKind::TypeIdentifier,

@@ -18,12 +18,10 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%c\n")
-               '\
-a'))
+               'a'))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%c\n")
-               'b\
-')))))
+               'b')))))
 
 ----- stderr -----

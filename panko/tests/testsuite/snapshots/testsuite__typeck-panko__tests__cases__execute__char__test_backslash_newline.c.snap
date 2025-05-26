@@ -23,8 +23,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%c\n\0"))))
-               ('\
-a' `int`)))
+               ('a' `int`)))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -33,7 +32,6 @@ a' `int`)))
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%c\n\0"))))
-               ('b\
-' `int`))))))
+               ('b' `int`))))))
 
 ----- stderr -----
