@@ -714,6 +714,7 @@ version = "0.1.0"
 dependencies = [
  "ariadne",
  "bumpalo",
+ "itertools",
  "logos",
  "pretty_assertions",
  "rstest",
