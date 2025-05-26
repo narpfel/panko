@@ -428,7 +428,7 @@ pub enum TokenKind {
     Integer(Integer),
 
     #[regex(
-        r#"(u8|u|U|L)?'([^'\\\n]|\\(['"?\\abfnrtv\n]|[0-7]{1,3}|x[0-9a-fA-F]+))*'"#,
+        r#"(u8|u|U|L)?'([^'\\\n]|\\(['"?\\abfnrtv]|[0-7]{1,3}|x[0-9a-fA-F]+))*'"#,
         lex_encoding_prefix
     )]
     CharConstant(EncodingPrefix),
