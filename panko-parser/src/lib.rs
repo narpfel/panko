@@ -48,8 +48,12 @@ pub const NO_VALUE: &str = "∅";
 enum Error<'a> {
     #[error("unterminated string literal")]
     UnterminatedStringLiteral { at: panko_lex::Error<'a> },
-    #[error("unrecognised token")]
+    #[error("unrecognised token `{slice}` of kind `{kind}`")]
     #[diagnostics(at(colour = Red, label = "expected one of the following token kinds: {expected}"))]
+    #[with(
+        slice = at.slice().escape_debug(),
+        kind = format!("{:?}", at.kind).fg(Red),
+    )]
     UnrecognisedToken { at: Token<'a>, expected: Strings },
 }
 

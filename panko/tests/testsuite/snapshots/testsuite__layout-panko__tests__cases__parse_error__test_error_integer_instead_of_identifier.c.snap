@@ -12,7 +12,7 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: unrecognised token
+Error: unrecognised token `42` of kind `Integer(Integer { suffix: None, suffix_len: 0, base: 10, prefix_len: 0 })`
    ╭─[panko/tests/cases/parse_error/test_error_integer_instead_of_identifier.c:1:5]
    │
  1 │ int 42;
