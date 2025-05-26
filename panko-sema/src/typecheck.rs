@@ -2105,56 +2105,57 @@ gen fn parse_escape_sequences(mut chars: Chars<'_>, encoding_prefix: EncodingPre
 
     while let Some(c) = chars.next() {
         match c {
-            '\\' => match chars.next() {
-                None => unreachable!(),
-                Some('\n') => (),
-                Some('\'') => yield Char::Codepoint('\''),
-                Some('"') => yield Char::Codepoint('"'),
-                Some('?') => yield Char::Codepoint('?'),
-                Some('\\') => yield Char::Codepoint('\\'),
-                Some('a') => yield Char::Codepoint('\x07'),
-                Some('b') => yield Char::Codepoint('\x08'),
-                Some('f') => yield Char::Codepoint('\x0c'),
-                Some('n') => yield Char::Codepoint('\n'),
-                Some('r') => yield Char::Codepoint('\r'),
-                Some('t') => yield Char::Codepoint('\t'),
-                Some('v') => yield Char::Codepoint('\x0b'),
-                Some(oct_digit @ '0'..='7') => {
-                    let value = oct_digit.to_digit(8).unwrap();
-                    yield match chars.next() {
-                        None => char_from_escape_sequence(value),
-                        Some(oct_digit @ '0'..='7') => {
-                            let value = value * 8 + oct_digit.to_digit(8).unwrap();
-                            match chars.next() {
-                                None => char_from_escape_sequence(value),
-                                Some(oct_digit @ '0'..='7') => {
-                                    let value = value * 8 + oct_digit.to_digit(8).unwrap();
-                                    char_from_escape_sequence(value)
-                                }
-                                Some(c) => {
-                                    yield char_from_escape_sequence(value);
-                                    Char::Codepoint(c)
+            '\\' =>
+                yield match chars.next() {
+                    None => unreachable!(),
+                    Some('\'') => Char::Codepoint('\''),
+                    Some('"') => Char::Codepoint('"'),
+                    Some('?') => Char::Codepoint('?'),
+                    Some('\\') => Char::Codepoint('\\'),
+                    Some('a') => Char::Codepoint('\x07'),
+                    Some('b') => Char::Codepoint('\x08'),
+                    Some('f') => Char::Codepoint('\x0c'),
+                    Some('n') => Char::Codepoint('\n'),
+                    Some('r') => Char::Codepoint('\r'),
+                    Some('t') => Char::Codepoint('\t'),
+                    Some('v') => Char::Codepoint('\x0b'),
+                    Some(oct_digit @ '0'..='7') => {
+                        let value = oct_digit.to_digit(8).unwrap();
+                        match chars.next() {
+                            None => char_from_escape_sequence(value),
+                            Some(oct_digit @ '0'..='7') => {
+                                let value = value * 8 + oct_digit.to_digit(8).unwrap();
+                                match chars.next() {
+                                    None => char_from_escape_sequence(value),
+                                    Some(oct_digit @ '0'..='7') => {
+                                        let value = value * 8 + oct_digit.to_digit(8).unwrap();
+                                        char_from_escape_sequence(value)
+                                    }
+                                    Some(c) => {
+                                        yield char_from_escape_sequence(value);
+                                        Char::Codepoint(c)
+                                    }
                                 }
                             }
-                        }
-                        Some(c) => {
-                            yield char_from_escape_sequence(value);
-                            Char::Codepoint(c)
+                            Some(c) => {
+                                yield char_from_escape_sequence(value);
+                                Char::Codepoint(c)
+                            }
                         }
                     }
-                }
-                Some('x') => {
-                    let s = chars.as_str();
-                    let split_point = s.find(|c: char| !c.is_ascii_hexdigit()).unwrap_or(s.len());
-                    let (digits, rest) = s.split_at(split_point);
-                    chars = rest.chars();
-                    match u32::from_str_radix(digits, 16) {
-                        Ok(codepoint) => yield char_from_escape_sequence(codepoint),
-                        Err(_) => unreachable!(),
+                    Some('x') => {
+                        let s = chars.as_str();
+                        let split_point =
+                            s.find(|c: char| !c.is_ascii_hexdigit()).unwrap_or(s.len());
+                        let (digits, rest) = s.split_at(split_point);
+                        chars = rest.chars();
+                        match u32::from_str_radix(digits, 16) {
+                            Ok(codepoint) => char_from_escape_sequence(codepoint),
+                            Err(_) => unreachable!(),
+                        }
                     }
-                }
-                Some(_) => todo!("error: invalid escape sequence"),
-            },
+                    Some(_) => todo!("error: invalid escape sequence"),
+                },
             c => yield Char::Codepoint(c),
         }
     }
