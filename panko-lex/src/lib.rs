@@ -285,6 +285,7 @@ fn lex_encoding_prefix(lexer: &mut Lexer<TokenKind>) -> EncodingPrefix {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Logos)]
 #[logos(skip r"[ \n\r\t\f]+")]
 #[logos(skip r"//[^\n]*\n?")]
+#[logos(skip r"/\*([^*]|\*[^/])*\*/")]
 pub enum TokenKind {
     #[token("(")]
     LParen,
