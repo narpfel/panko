@@ -53,6 +53,9 @@ debug = 2
 lto = true
 codegen-units = 1
 
+[profile.dev]
+debug = false
+
 [profile.clif]
 inherits = "dev"
 codegen-backend = "cranelift"
