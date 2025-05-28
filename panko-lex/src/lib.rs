@@ -58,7 +58,7 @@ pub struct Loc<'a> {
 
 impl std::fmt::Debug for Loc<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let prefix = &self.source_file.physical_src[..self.span().start];
+        let prefix = &self.source_file.physical_src[..<Self as ariadne::Span>::start(self)];
         let line = prefix.bytes().filter(|c| *c == b'\n').count() + 1;
         let column = prefix
             .rfind('\n')
@@ -114,7 +114,7 @@ impl<'a> Loc<'a> {
     }
 
     pub fn report(&self, kind: ariadne::ReportKind<'a>) -> ariadne::ReportBuilder<'a, Self> {
-        ariadne::Report::build(kind, self.file(), self.start())
+        ariadne::Report::build(kind, self.file(), <Self as ariadne::Span>::start(self))
     }
 
     pub fn cache(&self) -> impl ariadne::Cache<Path> + 'a {

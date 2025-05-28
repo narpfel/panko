@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/join-lines/test_error_location_after_escaped_newline.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: use of undeclared identifier `a`
+   ╭─[panko/tests/cases/join-lines/test_error_location_after_escaped_newline.c:5:5]
+   │
+ 5 │     a;
+   │     ┬  
+   │     ╰── this name has not been declared
+───╯
