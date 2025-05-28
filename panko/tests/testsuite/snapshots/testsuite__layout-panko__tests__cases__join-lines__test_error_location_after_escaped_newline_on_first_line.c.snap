@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/join-lines/test_error_location_after_escaped_newline_on_first_line.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: use of undeclared identifier `abcde`
+   ╭─[panko/tests/cases/join-lines/test_error_location_after_escaped_newline_on_first_line.c:4:5]
+   │
+ 4 │     abcde;
+   │     ──┬──  
+   │       ╰──── this name has not been declared
+───╯

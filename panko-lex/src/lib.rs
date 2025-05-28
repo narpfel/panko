@@ -1,8 +1,10 @@
 #![feature(closure_lifetime_binder)]
+#![feature(iter_map_windows)]
 #![feature(type_alias_impl_trait)]
 #![feature(unqualified_local_imports)]
 
 use std::cell::RefCell;
+use std::iter::once;
 use std::ops::Range;
 use std::path::Path;
 use std::path::PathBuf;
@@ -636,19 +638,17 @@ pub fn lex<'a>(
     physical_src: &str,
     typedef_names: &'a RefCell<TypedefNames<'a>>,
 ) -> TokenIter<'a> {
-    let (logical_src, chunk_lengths): (String, Vec<_>) = physical_src
-        .split_inclusive("\\\n")
-        .map(|chunk| chunk.strip_suffix("\\\n").unwrap_or(chunk))
-        .map(|chunk| (chunk, chunk.len()))
+    let (logical_src, chunk_starts): (String, Vec<_>) = once(0)
+        .chain(memchr::memmem::find_iter(physical_src.as_bytes(), b"\\\n"))
+        .chain(once(physical_src.len()))
+        .map_windows(|&[start, end]| {
+            let chunk = &physical_src[start..end];
+            (chunk.strip_prefix("\\\n").unwrap_or(chunk), start)
+        })
         .collect();
     let logical_src = bump.alloc_str(&logical_src);
-    let chunk_starts = bump.alloc_slice_copy(
-        &chunk_lengths
-            .into_iter()
-            .scan(0, |state, len| Some(std::mem::replace(state, *state + len)))
-            .collect::<Vec<_>>(),
-    );
-    let source_file = &*bump.alloc(SourceFile {
+    let chunk_starts = bump.alloc_slice_copy(&chunk_starts);
+    let source_file = bump.alloc(SourceFile {
         file: filename,
         physical_src: bump.alloc_str(physical_src),
         logical_src,
