@@ -48,13 +48,13 @@ pub const NO_VALUE: &str = "∅";
 enum Error<'a> {
     #[error("unterminated string literal")]
     UnterminatedStringLiteral { at: panko_lex::Error<'a> },
-    #[error("unrecognised token `{slice}` of kind `{kind}`")]
+    #[error("unexpected token `{slice}` of kind `{kind}`")]
     #[diagnostics(at(colour = Red, label = "expected one of the following token kinds: {expected}"))]
     #[with(
         slice = at.slice().escape_debug(),
         kind = format!("{:?}", at.kind).fg(Red),
     )]
-    UnrecognisedToken { at: Token<'a>, expected: Strings },
+    UnexpectedToken { at: Token<'a>, expected: Strings },
 }
 
 impl<'a> From<panko_lex::Error<'a>> for Error<'a> {
@@ -1051,7 +1051,7 @@ pub fn parse<'a>(
         )
         .map_err(|err| match err {
             ParseError::UnrecognizedToken { token, expected } =>
-                Error::UnrecognisedToken { at: token.1, expected: Strings(expected) },
+                Error::UnexpectedToken { at: token.1, expected: Strings(expected) },
             err => todo!("{err:#?}"),
         })?;
     Ok(ast::from_parse_tree(sess, parse_tree))
