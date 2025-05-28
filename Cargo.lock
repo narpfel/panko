@@ -715,6 +715,7 @@ dependencies = [
  "ariadne",
  "bumpalo",
  "logos",
+ "memchr",
  "pretty_assertions",
  "rstest",
 ]

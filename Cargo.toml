@@ -30,6 +30,7 @@ itertools = "0.14.0"
 lalrpop = "0.22.2"
 lalrpop-util = { version = "0.22.2", features = ["unicode"] }
 logos = { version = "0.15.0", features = ["forbid_unsafe"] }
+memchr = "2.7.4"
 proc-macro2 = "1.0.95"
 quote = "1.0.40"
 regex = "1.11.1"

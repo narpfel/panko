@@ -11,6 +11,7 @@ use std::sync::LazyLock;
 use bumpalo::Bump;
 use logos::Lexer;
 use logos::Logos;
+use logos::Skip;
 
 pub use crate::typedef_names::TypedefNames;
 
@@ -282,11 +283,24 @@ fn lex_encoding_prefix(lexer: &mut Lexer<TokenKind>) -> EncodingPrefix {
     }
 }
 
+fn skip_block_comment(lexer: &mut Lexer<TokenKind>) -> Result<Skip, ()> {
+    const END_COMMENT_MARKER: &[u8] = b"*/";
+    static FINDER: LazyLock<memchr::memmem::Finder> =
+        LazyLock::new(|| memchr::memmem::Finder::new(END_COMMENT_MARKER));
+
+    let bytes = lexer.remainder().as_bytes();
+    let end_comment_start = FINDER.find(bytes).ok_or(())?;
+    lexer.bump(end_comment_start + END_COMMENT_MARKER.len());
+    Ok(Skip)
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Logos)]
 #[logos(skip r"[ \n\r\t\f]+")]
 #[logos(skip r"//[^\n]*\n?")]
-#[logos(skip r"/\*([^*]|\*[^/])*\*/")]
 pub enum TokenKind {
+    #[token("/*", skip_block_comment)]
+    BlockComment,
+
     #[token("(")]
     LParen,
     #[token(")")]
