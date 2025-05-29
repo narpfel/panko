@@ -15,7 +15,7 @@ grammar<'a>(
 );
 
 extern {
-    type Error = ast::Error<'a>;
+    type Error = &'a ast::Error<'a>;
 
     enum Token<'a> {
         ";" => Token { kind: TokenKind::Semicolon, .. },
@@ -794,7 +794,7 @@ String: ast::Token<'a> = {
             Ok(token)
         }
         else {
-            Err(ast::Error::UnterminatedStringLiteral { at: token.loc() }.into())
+            Err(sess.alloc(ast::Error::UnterminatedStringLiteral { at: token.loc() }).into())
         }
     },
 }

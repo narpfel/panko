@@ -43,7 +43,7 @@ lalrpop_mod!(
 const SEXPR_INDENT: usize = 3;
 pub const NO_VALUE: &str = "∅";
 
-#[derive(Debug, Report)]
+#[derive(Debug, Clone, Copy, Report)]
 #[exit_code(1)]
 enum Error<'a> {
     #[error("lexer error")]
@@ -64,7 +64,10 @@ enum Error<'a> {
         slice = at.slice().escape_debug(),
         kind = format!("{:?}", at.kind).fg(Red),
     )]
-    UnexpectedToken { at: Token<'a>, expected: Strings },
+    UnexpectedToken {
+        at: Token<'a>,
+        expected: Strings<'a>,
+    },
 }
 
 impl<'a> From<panko_lex::Error<'a>> for Error<'a> {
@@ -77,10 +80,10 @@ impl<'a> From<panko_lex::Error<'a>> for Error<'a> {
     }
 }
 
-#[derive(Debug)]
-struct Strings(Vec<String>);
+#[derive(Debug, Clone, Copy)]
+struct Strings<'a>(&'a [&'a str]);
 
-impl Strings {
+impl Strings<'_> {
     fn slice(&self) -> String {
         format!("[{}]", self.0.iter().join(", "))
     }
@@ -1061,12 +1064,16 @@ pub fn parse<'a>(
             sess,
             typedef_names,
             is_in_typedef,
-            tokens.map(|token| Ok(token?)),
+            tokens.map(|token| token.map_err(|err| sess.alloc(Error::from(err)))),
         )
         .map_err(|err| match err {
-            ParseError::UnrecognizedToken { token, expected } =>
-                Error::UnexpectedToken { at: token.1, expected: Strings(expected) },
-            ParseError::User { error } => error,
+            ParseError::UnrecognizedToken { token, expected } => Error::UnexpectedToken {
+                at: token.1,
+                expected: Strings(
+                    sess.alloc_slice_fill_iter(expected.iter().map(|s| sess.alloc_str(s))),
+                ),
+            },
+            ParseError::User { error } => *error,
             err => todo!("{err:#?}"),
         })?;
     Ok(ast::from_parse_tree(sess, parse_tree))
