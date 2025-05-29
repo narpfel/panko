@@ -285,18 +285,21 @@ fn lex_encoding_prefix(lexer: &mut Lexer<TokenKind>) -> EncodingPrefix {
     }
 }
 
-fn skip_block_comment(lexer: &mut Lexer<TokenKind>) -> Result<Skip, ()> {
+fn skip_block_comment(lexer: &mut Lexer<TokenKind>) -> Result<Skip, ErrorKind> {
     const END_COMMENT_MARKER: &[u8] = b"*/";
     static FINDER: LazyLock<memchr::memmem::Finder> =
         LazyLock::new(|| memchr::memmem::Finder::new(END_COMMENT_MARKER));
 
     let bytes = lexer.remainder().as_bytes();
-    let end_comment_start = FINDER.find(bytes).ok_or(())?;
+    let end_comment_start = FINDER
+        .find(bytes)
+        .ok_or(ErrorKind::UnterminatedBlockComment)?;
     lexer.bump(end_comment_start + END_COMMENT_MARKER.len());
     Ok(Skip)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Logos)]
+#[logos(error = ErrorKind)]
 #[logos(skip r"[ \n\r\t\f]+")]
 #[logos(skip r"//[^\n]*\n?")]
 pub enum TokenKind {
@@ -621,12 +624,20 @@ pub enum TokenKind {
 #[derive(Debug, Clone, Copy)]
 pub struct Error<'a> {
     pub at: Loc<'a>,
+    pub kind: ErrorKind,
 }
 
 impl<'a> Error<'a> {
     pub fn loc(&self) -> Loc<'a> {
         self.at
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
+pub enum ErrorKind {
+    #[default]
+    Other,
+    UnterminatedBlockComment,
 }
 
 pub type TokenIter<'a> = impl Iterator<Item = Result<Token<'a>, Error<'a>>>;
@@ -660,7 +671,7 @@ pub fn lex<'a>(
             source_file,
         };
 
-        let kind = kind.map_err(|()| Error { at: loc })?;
+        let kind = kind.map_err(|kind| Error { at: loc, kind })?;
         let kind = match kind {
             TokenKind::Identifier if typedef_names.borrow().is_type_identifier(loc.slice()) =>
                 TokenKind::TypeIdentifier,
@@ -692,7 +703,7 @@ mod test {
     }
 
     macro_rules! check_err {
-        ($pattern:pat) => {
+        ($pattern:pat $(,)?) => {
             check!(|result| pretty_assertions::assert_matches!(result, Err($pattern)))
         };
     }
@@ -759,7 +770,15 @@ mod test {
     #[rstest]
     #[case::unicode_number(
         "４２",
-        check_err!(Error { at: Loc { span: Span { start: 0, end: FULLWIDTH_NUMBER_4_LEN }, .. } }),
+        check_err!(
+            Error {
+                at: Loc {
+                    span: Span { start: 0, end: FULLWIDTH_NUMBER_4_LEN },
+                    source_file: _,
+                },
+                kind: ErrorKind::Other,
+            },
+        ),
     )]
     fn test_lex_error(
         bump: Bump,

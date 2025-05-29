@@ -46,8 +46,14 @@ pub const NO_VALUE: &str = "∅";
 #[derive(Debug, Report)]
 #[exit_code(1)]
 enum Error<'a> {
-    #[error("unterminated string literal")]
-    UnterminatedStringLiteral { at: panko_lex::Error<'a> },
+    #[error("lexer error")]
+    #[diagnostics(at(colour = Red, label = "lexer failed here"))]
+    LexerFailed { at: Loc<'a> },
+
+    #[error("unterminated block comment")]
+    #[diagnostics(at(colour = Red, label = "comment opened here"))]
+    UnterminatedBlockComment { at: Loc<'a> },
+
     #[error("unexpected token `{slice}` of kind `{kind}`")]
     #[diagnostics(at(colour = Red, label = "expected one of the following token kinds: {expected}"))]
     #[with(
@@ -58,8 +64,12 @@ enum Error<'a> {
 }
 
 impl<'a> From<panko_lex::Error<'a>> for Error<'a> {
-    fn from(value: panko_lex::Error<'a>) -> Self {
-        Self::UnterminatedStringLiteral { at: value }
+    fn from(error: panko_lex::Error<'a>) -> Self {
+        let panko_lex::Error { at, kind } = error;
+        match kind {
+            panko_lex::ErrorKind::UnterminatedBlockComment => Self::UnterminatedBlockComment { at },
+            panko_lex::ErrorKind::Other => Self::LexerFailed { at },
+        }
     }
 }
 
@@ -1052,6 +1062,7 @@ pub fn parse<'a>(
         .map_err(|err| match err {
             ParseError::UnrecognizedToken { token, expected } =>
                 Error::UnexpectedToken { at: token.1, expected: Strings(expected) },
+            ParseError::User { error } => error,
             err => todo!("{err:#?}"),
         })?;
     Ok(ast::from_parse_tree(sess, parse_tree))

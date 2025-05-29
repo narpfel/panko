@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/lexer/test_error_unterminated_block_comment.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unterminated block comment
+   ╭─[panko/tests/cases/lexer/test_error_unterminated_block_comment.c:2:5]
+   │
+ 2 │     /*
+   │     ─┬  
+   │      ╰── comment opened here
+───╯
