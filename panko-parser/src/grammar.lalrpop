@@ -127,7 +127,7 @@ extern {
         TypedefName => Token { kind: TokenKind::TypeIdentifier, .. },
         Integer => Token { kind: TokenKind::Integer(_), .. },
         CharConstant => Token { kind: TokenKind::CharConstant(_), .. },
-        String => Token { kind: TokenKind::String, .. },
+        MaybeUnterminatedString => Token { kind: TokenKind::String, .. },
     }
 }
 
@@ -786,6 +786,17 @@ AssignmentExpression: ast::Expression<'a> = {
 Expression: ast::Expression<'a> = {
     AssignmentExpression,
     <lhs:Bump<Expression>> "," <rhs:Bump<AssignmentExpression>> => ast::Expression::Comma { <> },
+}
+
+String: ast::Token<'a> = {
+    <token:MaybeUnterminatedString> =>? {
+        if token.slice().as_bytes().last() == Some(&b'"') {
+            Ok(token)
+        }
+        else {
+            Err(ast::Error::UnterminatedStringLiteral { at: token.loc() }.into())
+        }
+    },
 }
 
 Bump<T>: &'a T = {

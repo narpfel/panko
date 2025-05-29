@@ -54,6 +54,10 @@ enum Error<'a> {
     #[diagnostics(at(colour = Red, label = "comment opened here"))]
     UnterminatedBlockComment { at: Loc<'a> },
 
+    #[error("unterminated string literal")]
+    #[diagnostics(at(colour = Red))]
+    UnterminatedStringLiteral { at: Loc<'a> },
+
     #[error("unexpected token `{slice}` of kind `{kind}`")]
     #[diagnostics(at(colour = Red, label = "expected one of the following token kinds: {expected}"))]
     #[with(

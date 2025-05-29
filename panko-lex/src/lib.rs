@@ -416,7 +416,7 @@ pub enum TokenKind {
     // only generated via the lexer hack
     TypeIdentifier,
 
-    #[regex(r#""([^"\\\n]|\\(['"?\\abfnrtv]|[0-7]{1,3}|x[0-9a-fA-F]+))*""#)]
+    #[regex(r#""([^"\\\n]|\\(['"?\\abfnrtv]|[0-7]{1,3}|x[0-9a-fA-F]+))*["\n]"#)]
     String,
 
     #[regex("[1-9]('?[0-9])*", |lexer| lex_integer(lexer, 10))]

@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/test_error_unterminated_string_literal.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unterminated string literal
+   ╭─[panko/tests/cases/test_error_unterminated_string_literal.c:4:10]
+   │
+ 4 │     puts("a);
+   │          ─────  
+───╯
