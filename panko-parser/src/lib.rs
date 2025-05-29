@@ -58,6 +58,10 @@ enum Error<'a> {
     #[diagnostics(at(colour = Red))]
     UnterminatedStringLiteral { at: Loc<'a> },
 
+    #[error("unterminated character constant")]
+    #[diagnostics(at(colour = Red))]
+    UnterminatedCharConstant { at: Loc<'a> },
+
     #[error("unexpected token `{slice}` of kind `{kind}`")]
     #[diagnostics(at(colour = Red, label = "expected one of the following token kinds: {expected}"))]
     #[with(

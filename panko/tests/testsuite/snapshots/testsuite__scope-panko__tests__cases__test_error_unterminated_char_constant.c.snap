@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/test_error_unterminated_char_constant.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unterminated character constant
+   ╭─[panko/tests/cases/test_error_unterminated_char_constant.c:4:13]
+   │
+ 4 │     putchar('a);
+   │             ─────  
+───╯

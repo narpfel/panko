@@ -126,7 +126,7 @@ extern {
         Identifier => Token { kind: TokenKind::Identifier, .. },
         TypedefName => Token { kind: TokenKind::TypeIdentifier, .. },
         Integer => Token { kind: TokenKind::Integer(_), .. },
-        CharConstant => Token { kind: TokenKind::CharConstant(_), .. },
+        MaybeUnterminatedCharConstant => Token { kind: TokenKind::CharConstant(_), .. },
         MaybeUnterminatedString => Token { kind: TokenKind::String, .. },
     }
 }
@@ -795,6 +795,17 @@ String: ast::Token<'a> = {
         }
         else {
             Err(sess.alloc(ast::Error::UnterminatedStringLiteral { at: token.loc() }).into())
+        }
+    },
+}
+
+CharConstant: ast::Token<'a> = {
+    <token:MaybeUnterminatedCharConstant> =>? {
+        if token.slice().as_bytes().last() == Some(&b'\'') {
+            Ok(token)
+        }
+        else {
+            Err(sess.alloc(ast::Error::UnterminatedCharConstant { at: token.loc() }).into())
         }
     },
 }
