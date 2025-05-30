@@ -6,10 +6,15 @@ edition = "2024"
 [lints]
 workspace = true
 
+[[test]]
+name = "compiletest"
+harness = false
+
 [dependencies]
 clap = { workspace = true }
 color-eyre = { workspace = true }
 panko-codegen = { path = "../panko-codegen" }
+panko-compiletest = { path = "../panko-compiletest" }
 panko-lex = { path = "../panko-lex" }
 panko-parser = { path = "../panko-parser" }
 panko-sema = { path = "../panko-sema" }
