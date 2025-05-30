@@ -63,4 +63,5 @@ fn test_usual_arithmetic_conversions(
         perform_usual_arithmetic_conversions(lhs_ty, rhs_ty),
         expected,
     );
+    panic!("let’s see what the default test harness produces...");
 }
