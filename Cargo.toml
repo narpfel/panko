@@ -5,6 +5,7 @@ resolver = "3"
 members = [
     "panko",
     "panko-codegen",
+    "panko-compiletest",
     "panko-derive-report",
     "panko-lex",
     "panko-parser",
@@ -40,6 +41,7 @@ syn = { version = "2.0.101", features = ["fold", "visit"] }
 variant-types = { git = "https://github.com/narpfel/crabbing-interpreters" }
 yansi = { version = "1.0.1", features = ["detect-tty"] }
 
+glob = "0.3.2"
 insta-cmd = "0.6.0"
 pretty_assertions = { version = "1.4.1", features = ["unstable"] }
 rstest = { version = "0.25.0", default-features = false }
@@ -66,4 +68,9 @@ debug = "line-tables-only"
 
 [profile.clif.package."*"]
 opt-level = 3
+codegen-backend = "llvm"
+
+# TODO: `panko-compiletest` requires unwinding support/`catch_unwind`, so we
+# can’t use the cranelift backend until unwinding support is done
+[profile.clif.package.panko-compiletest]
 codegen-backend = "llvm"

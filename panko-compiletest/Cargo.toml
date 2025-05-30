@@ -1,0 +1,12 @@
+[package]
+name = "panko-compiletest"
+version = "0.1.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+color-eyre = { workspace = true }
+glob = { workspace = true }
+itertools = { workspace = true }
