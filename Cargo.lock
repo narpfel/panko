@@ -674,6 +674,7 @@ dependencies = [
  "insta-cmd",
  "itertools",
  "panko-codegen",
+ "panko-compiletest",
  "panko-lex",
  "panko-parser",
  "panko-sema",
@@ -694,6 +695,15 @@ dependencies = [
  "panko-parser",
  "panko-report",
  "panko-sema",
+]
+
+[[package]]
+name = "panko-compiletest"
+version = "0.1.0"
+dependencies = [
+ "color-eyre",
+ "glob",
+ "itertools",
 ]
 
 [[package]]
