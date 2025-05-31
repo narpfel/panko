@@ -1,5 +1,7 @@
+use std::collections::HashMap;
 use std::iter::Peekable;
 
+use itertools::Itertools as _;
 use panko_lex::Error;
 use panko_lex::Token;
 use panko_lex::TokenKind;
@@ -10,11 +12,21 @@ pub type TokenIter<'a> = impl Iterator<Item = Result<Token<'a>, Error<'a>>>;
 
 type UnpreprocessedTokens<'a> = Peekable<panko_lex::TokenIter<'a>>;
 
+fn is_identifier(token: &Token) -> bool {
+    // TODO: it’s UB to `#define` a keyword, so we can just treat that as a compile time error
+    token.kind == TokenKind::Identifier
+}
+
+#[derive(Debug)]
+struct Macro<'a> {
+    replacement: &'a [Token<'a>],
+}
+
 struct Preprocessor<'a> {
-    #[expect(unused)]
     sess: &'a Session<'a>,
     tokens: UnpreprocessedTokens<'a>,
     previous_was_newline: bool,
+    macros: HashMap<&'a str, Macro<'a>>,
 }
 
 impl<'a> Preprocessor<'a> {
@@ -36,7 +48,21 @@ impl<'a> Preprocessor<'a> {
                         },
                     _ => {
                         self.previous_was_newline = false;
-                        yield token;
+                        if let Ok(token) = token
+                            && let Some(r#macro) = self.macros.get(token.slice())
+                        {
+                            let replacement = r#macro.replacement;
+                            #[expect(
+                                clippy::needless_range_loop,
+                                reason = "cannot hold reference over `yield` point"
+                            )]
+                            for i in 0..replacement.len() {
+                                yield Ok(replacement[i]);
+                            }
+                        }
+                        else {
+                            yield token;
+                        }
                     }
                 }
             }
@@ -53,7 +79,35 @@ impl<'a> Preprocessor<'a> {
                 // eat newline token => null directive
                 self.tokens.next();
             }
+            Some(Ok(token)) if token.slice() == "define" => {
+                self.parse_define();
+            }
             token => todo!("error: unimplemented preprocessor directive starting in {token:?}"),
+        }
+    }
+
+    fn parse_define(&mut self) {
+        // eat `define`
+        self.tokens.next();
+        match self.tokens.next() {
+            Some(Ok(name)) if is_identifier(&name) => {
+                let replacement = self
+                    .tokens
+                    .by_ref()
+                    .take_while(|token| {
+                        !matches!(token, Ok(Token { kind: TokenKind::Newline, .. }))
+                    })
+                    .map(|token| {
+                        token.unwrap_or_else(|err| {
+                            todo!("what happens when there is a lexer error here? {err:?}")
+                        })
+                    })
+                    .collect_vec();
+                let replacement = self.sess.alloc_slice_copy(&replacement);
+                self.macros.insert(name.slice(), Macro { replacement });
+            }
+            Some(Ok(name)) => todo!("error message: trying to `#define` non-identifier {name:?}"),
+            _ => todo!("error message"),
         }
     }
 }
@@ -63,6 +117,7 @@ pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -
         sess,
         tokens: tokens.peekable(),
         previous_was_newline: true,
+        macros: HashMap::default(),
     }
     .run()
 }
