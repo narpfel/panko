@@ -3,6 +3,7 @@
 #![feature(if_let_guard)]
 #![feature(never_type)]
 #![feature(try_blocks)]
+#![feature(type_alias_impl_trait)]
 #![feature(unqualified_local_imports)]
 
 use std::cell::Cell;
@@ -18,7 +19,6 @@ use lalrpop_util::ParseError;
 use lalrpop_util::lalrpop_mod;
 use panko_lex::Loc;
 use panko_lex::Token;
-use panko_lex::TokenIter;
 use panko_lex::TokenKind;
 use panko_lex::TypedefNames;
 use panko_report::Report;
@@ -29,9 +29,12 @@ use crate::ast::IntegralKind;
 use crate::ast::ParsedSpecifiers;
 use crate::ast::QualifiedType;
 use crate::ast::Signedness;
+use crate::preprocess::TokenIter;
+pub use crate::preprocess::preprocess;
 
 mod as_sexpr;
 pub mod ast;
+mod preprocess;
 pub mod sexpr_builder;
 
 lalrpop_mod!(

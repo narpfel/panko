@@ -71,6 +71,9 @@ fn main() -> Result<()> {
         &typedef_names,
     );
     let session = &panko_parser::ast::Session::new(bump, args.treat_error_as_bug);
+
+    let tokens = panko_parser::preprocess(session, tokens);
+
     let translation_unit =
         match panko_parser::parse(session, &typedef_names, &is_in_typedef, tokens) {
             Ok(translation_unit) => translation_unit,
