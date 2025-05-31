@@ -309,6 +309,9 @@ pub enum TokenKind {
     #[token("\n")]
     Newline,
 
+    #[token("#")]
+    Hash,
+
     #[token("(")]
     LParen,
     #[token(")")]

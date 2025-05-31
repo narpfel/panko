@@ -1,5 +1,6 @@
 #![feature(assert_matches)]
 #![feature(coverage_attribute)]
+#![feature(gen_blocks)]
 #![feature(if_let_guard)]
 #![feature(never_type)]
 #![feature(try_blocks)]
