@@ -36,6 +36,14 @@ struct Expander<'a> {
 }
 
 impl<'a> Expander<'a> {
+    fn is_empty(&self) -> bool {
+        self.todo.is_empty()
+    }
+
+    fn push(&mut self, tokens: &'a [Token<'a>]) {
+        self.todo.push(tokens);
+    }
+
     fn next(&mut self, macros: &HashMap<&'a str, Macro<'a>>) -> Option<Token<'a>> {
         loop {
             let tokens = loop {
@@ -85,8 +93,8 @@ impl<'a> Preprocessor<'a> {
                             },
                         Some(Ok(token)) if let Some(r#macro) = self.macros.get(token.slice()) => {
                             self.previous_was_newline = false;
-                            assert!(self.expander.todo.is_empty());
-                            self.expander.todo.push(r#macro.replacement);
+                            assert!(self.expander.is_empty());
+                            self.expander.push(r#macro.replacement);
                             break;
                         }
                         Some(token) => {
