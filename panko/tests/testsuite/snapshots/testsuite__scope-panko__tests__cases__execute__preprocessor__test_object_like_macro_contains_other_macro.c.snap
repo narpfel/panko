@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/preprocessor/test_object_like_macro_contains_other_macro.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition x~2 `int` 42)
+         (definition p~3 `ptr<int>` (addressof (name x~2 `int`)))
+         (definition y~4 `int` 27)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "*p: %d\n")
+               (deref (name p~3 `ptr<int>`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "x: %d\n")
+               (name y~4 `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "y: %d\n")
+               (name y~4 `int`)))
+         (return (name y~4 `int`)))))
+
+----- stderr -----

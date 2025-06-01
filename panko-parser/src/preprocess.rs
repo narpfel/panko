@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::iter;
 use std::iter::Peekable;
 
 use itertools::Itertools as _;
@@ -27,46 +28,74 @@ struct Preprocessor<'a> {
     tokens: UnpreprocessedTokens<'a>,
     previous_was_newline: bool,
     macros: HashMap<&'a str, Macro<'a>>,
+    expander: Expander<'a>,
+}
+
+#[derive(Debug, Default)]
+struct Expander<'a> {
+    todo: Vec<&'a [Token<'a>]>,
+}
+
+impl<'a> Expander<'a> {
+    fn next(&mut self, macros: &HashMap<&'a str, Macro<'a>>) -> Option<Token<'a>> {
+        loop {
+            let tokens = loop {
+                let tokens = self.todo.pop()?;
+                if !tokens.is_empty() {
+                    break tokens;
+                }
+            };
+
+            let (token, tokens) = tokens.split_first().unwrap_or_else(|| unreachable!());
+            self.todo.push(tokens);
+
+            if let Some(r#macro) = macros.get(token.slice()) {
+                self.todo.push(r#macro.replacement);
+            }
+            else {
+                return Some(*token);
+            }
+        }
+    }
 }
 
 impl<'a> Preprocessor<'a> {
     #[define_opaque(TokenIter)]
     fn run(mut self) -> TokenIter<'a> {
-        gen move {
-            while let Some(token) = self.tokens.next() {
-                match token {
-                    Ok(token) if token.kind == TokenKind::Newline =>
-                        self.previous_was_newline = true,
-                    Ok(token) if token.kind == TokenKind::Hash =>
-                        if self.previous_was_newline {
-                            self.parse_directive();
-                        }
-                        else {
-                            todo!(
-                                "error: preprocessor directive does not start at beginning of line",
-                            )
-                        },
-                    _ => {
-                        self.previous_was_newline = false;
-                        if let Ok(token) = token
-                            && let Some(r#macro) = self.macros.get(token.slice())
-                        {
-                            let replacement = r#macro.replacement;
-                            #[expect(
-                                clippy::needless_range_loop,
-                                reason = "cannot hold reference over `yield` point"
-                            )]
-                            for i in 0..replacement.len() {
-                                yield Ok(replacement[i]);
+        iter::from_fn(move || {
+            'iter: loop {
+                if let Some(token) = self.expander.next(&self.macros) {
+                    return Some(Ok(token));
+                }
+
+                while let Some(token) = self.tokens.next() {
+                    match token {
+                        Ok(token) if token.kind == TokenKind::Newline =>
+                            self.previous_was_newline = true,
+                        Ok(token) if token.kind == TokenKind::Hash =>
+                            if self.previous_was_newline {
+                                self.parse_directive();
                             }
+                            else {
+                                todo!(
+                                    "error: preprocessor directive does not start at beginning of line",
+                                )
+                            },
+                        Ok(token) if let Some(r#macro) = self.macros.get(token.slice()) => {
+                            self.previous_was_newline = false;
+                            assert!(self.expander.todo.is_empty());
+                            self.expander.todo.push(r#macro.replacement);
                         }
-                        else {
-                            yield token;
+                        token => {
+                            self.previous_was_newline = false;
+                            return Some(token);
                         }
                     }
+                    continue 'iter;
                 }
+                break 'iter None;
             }
-        }
+        })
     }
 
     fn peek(&mut self) -> Option<Result<&Token<'a>, &Error<'a>>> {
@@ -118,6 +147,7 @@ pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -
         tokens: tokens.peekable(),
         previous_was_newline: true,
         macros: HashMap::default(),
+        expander: Expander::default(),
     }
     .run()
 }
