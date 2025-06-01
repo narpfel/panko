@@ -45,7 +45,9 @@ impl<'a> Expander<'a> {
                 }
             };
 
-            let (token, tokens) = tokens.split_first().unwrap_or_else(|| unreachable!());
+            let (token, tokens) = tokens
+                .split_first()
+                .expect("the loop above only ends on nonempty slices");
             self.todo.push(tokens);
 
             if let Some(r#macro) = macros.get(token.slice()) {
