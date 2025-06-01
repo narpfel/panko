@@ -1,6 +1,6 @@
 use std::bstr::ByteStr;
 
-use bumpalo::Bump;
+use panko_lex::Bump;
 use panko_lex::Loc;
 use panko_parser as cst;
 use panko_parser::BinOp;

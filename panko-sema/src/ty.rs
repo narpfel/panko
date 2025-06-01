@@ -3,8 +3,8 @@ use std::fmt;
 use std::hash::Hash;
 use std::hash::Hasher;
 
-use bumpalo::Bump;
 use itertools::Itertools as _;
+use panko_lex::Bump;
 use panko_lex::EncodingPrefix;
 use panko_lex::Loc;
 use panko_lex::Token;

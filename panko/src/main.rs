@@ -9,11 +9,11 @@ use std::io::Write as _;
 use std::path::PathBuf;
 use std::process::Command;
 
-use bumpalo::Bump;
 use clap::Parser;
 use clap::ValueEnum;
 use color_eyre::Result;
 use color_eyre::eyre::Context;
+use panko_lex::Bump;
 use panko_parser::sexpr_builder::AsSExpr as _;
 use yansi::Condition;
 

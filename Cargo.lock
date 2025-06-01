@@ -668,7 +668,6 @@ checksum = "26995317201fa17f3656c36716aed4a7c81743a9634ac4c99c0eeda495db0cec"
 name = "panko"
 version = "0.1.0"
 dependencies = [
- "bumpalo",
  "clap",
  "color-eyre",
  "insta-cmd",
@@ -725,7 +724,6 @@ name = "panko-parser"
 version = "0.1.0"
 dependencies = [
  "ariadne",
- "bumpalo",
  "itertools",
  "lalrpop",
  "lalrpop-util",
@@ -747,7 +745,6 @@ name = "panko-sema"
 version = "0.1.0"
 dependencies = [
  "ariadne",
- "bumpalo",
  "indexmap",
  "itertools",
  "panko-lex",

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 
-use bumpalo::Bump;
+use panko_lex::Bump;
 
 use super::LayoutedExpression;
 use super::Reference;

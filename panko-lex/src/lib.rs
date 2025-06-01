@@ -10,13 +10,14 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::LazyLock;
 
-use bumpalo::Bump;
 use logos::Lexer;
 use logos::Logos;
 use logos::Skip;
 
+pub use crate::bump::Bump;
 pub use crate::typedef_names::TypedefNames;
 
+mod bump;
 pub mod typedef_names;
 
 #[derive(Clone, Copy)]
