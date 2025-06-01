@@ -72,35 +72,30 @@ impl<'a> Preprocessor<'a> {
     #[define_opaque(TokenIter)]
     fn run(mut self) -> TokenIter<'a> {
         gen move {
-            loop {
-                while let Some(token) = self.expander.next(&self.macros) {
-                    yield Ok(token);
-                }
-
-                loop {
-                    match self.tokens.next() {
-                        None => return,
-                        Some(Ok(token)) if token.kind == TokenKind::Newline =>
-                            self.previous_was_newline = true,
-                        Some(Ok(token)) if token.kind == TokenKind::Hash =>
-                            if self.previous_was_newline {
-                                self.parse_directive();
-                            }
-                            else {
-                                todo!(
-                                    "error: preprocessor directive does not start at beginning of line",
-                                )
-                            },
-                        Some(Ok(token)) if let Some(r#macro) = self.macros.get(token.slice()) => {
-                            self.previous_was_newline = false;
-                            assert!(self.expander.is_empty());
-                            self.expander.push(r#macro.replacement);
-                            break;
+            while let Some(token) = self.tokens.next() {
+                match token {
+                    Ok(token) if token.kind == TokenKind::Newline =>
+                        self.previous_was_newline = true,
+                    Ok(token) if token.kind == TokenKind::Hash =>
+                        if self.previous_was_newline {
+                            self.parse_directive();
                         }
-                        Some(token) => {
-                            self.previous_was_newline = false;
-                            yield token;
+                        else {
+                            todo!(
+                                "error: preprocessor directive does not start at beginning of line",
+                            )
+                        },
+                    Ok(token) if let Some(r#macro) = self.macros.get(token.slice()) => {
+                        self.previous_was_newline = false;
+                        assert!(self.expander.is_empty());
+                        self.expander.push(r#macro.replacement);
+                        while let Some(token) = self.expander.next(&self.macros) {
+                            yield Ok(token);
                         }
+                    }
+                    token => {
+                        self.previous_was_newline = false;
+                        yield token;
                     }
                 }
             }
