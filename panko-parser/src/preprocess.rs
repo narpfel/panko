@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::iter;
 use std::iter::Peekable;
 
 use itertools::Itertools as _;
@@ -62,17 +61,18 @@ impl<'a> Expander<'a> {
 impl<'a> Preprocessor<'a> {
     #[define_opaque(TokenIter)]
     fn run(mut self) -> TokenIter<'a> {
-        iter::from_fn(move || {
-            'iter: loop {
-                if let Some(token) = self.expander.next(&self.macros) {
-                    return Some(Ok(token));
+        gen move {
+            loop {
+                while let Some(token) = self.expander.next(&self.macros) {
+                    yield Ok(token);
                 }
 
-                while let Some(token) = self.tokens.next() {
-                    match token {
-                        Ok(token) if token.kind == TokenKind::Newline =>
+                loop {
+                    match self.tokens.next() {
+                        None => return,
+                        Some(Ok(token)) if token.kind == TokenKind::Newline =>
                             self.previous_was_newline = true,
-                        Ok(token) if token.kind == TokenKind::Hash =>
+                        Some(Ok(token)) if token.kind == TokenKind::Hash =>
                             if self.previous_was_newline {
                                 self.parse_directive();
                             }
@@ -81,21 +81,20 @@ impl<'a> Preprocessor<'a> {
                                     "error: preprocessor directive does not start at beginning of line",
                                 )
                             },
-                        Ok(token) if let Some(r#macro) = self.macros.get(token.slice()) => {
+                        Some(Ok(token)) if let Some(r#macro) = self.macros.get(token.slice()) => {
                             self.previous_was_newline = false;
                             assert!(self.expander.todo.is_empty());
                             self.expander.todo.push(r#macro.replacement);
+                            break;
                         }
-                        token => {
+                        Some(token) => {
                             self.previous_was_newline = false;
-                            return Some(token);
+                            yield token;
                         }
                     }
-                    continue 'iter;
                 }
-                break 'iter None;
             }
-        })
+        }
     }
 
     fn peek(&mut self) -> Option<Result<&Token<'a>, &Error<'a>>> {
