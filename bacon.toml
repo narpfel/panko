@@ -62,7 +62,7 @@ command = [
     "--print=layout",
     "--print=codegen",
     "-o/tmp/main.S",
-    "c/main.c",
+    { if = "second-input-file", then = "c/test.c", else = "c/main.c"},
 ]
 need_stdout = true
 allow_warnings = true
@@ -79,3 +79,4 @@ on_success = "back"
 shift-t = "job:covtest"
 shift-r = "job:rebuild-tests"
 g = "toggle-option(treat-error-as-bug)"
+2 = "toggle-option(second-input-file)"
