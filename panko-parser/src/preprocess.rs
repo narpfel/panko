@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::iter::Peekable;
 
 use panko_lex::Error;
@@ -16,8 +17,9 @@ fn is_identifier(token: &Token) -> bool {
     token.kind == TokenKind::Identifier
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 struct Macro<'a> {
+    name: &'a str,
     replacement: &'a [Token<'a>],
 }
 
@@ -31,7 +33,8 @@ struct Preprocessor<'a> {
 
 #[derive(Debug, Default)]
 struct Expander<'a> {
-    todo: Vec<&'a [Token<'a>]>,
+    hidden: HashSet<&'a str>,
+    todo: Vec<(&'a str, &'a [Token<'a>])>,
 }
 
 impl<'a> Expander<'a> {
@@ -39,26 +42,32 @@ impl<'a> Expander<'a> {
         self.todo.is_empty()
     }
 
-    fn push(&mut self, tokens: &'a [Token<'a>]) {
-        self.todo.push(tokens);
+    fn push(&mut self, Macro { name, replacement }: Macro<'a>) {
+        self.todo.push((name, replacement));
+        self.hidden.insert(name);
     }
 
     fn next(&mut self, macros: &HashMap<&'a str, Macro<'a>>) -> Option<Token<'a>> {
         loop {
-            let tokens = loop {
-                let tokens = self.todo.pop()?;
+            let (name, tokens) = loop {
+                let (name, tokens) = self.todo.pop()?;
                 if !tokens.is_empty() {
-                    break tokens;
+                    break (name, tokens);
+                }
+                else {
+                    self.hidden.remove(name);
                 }
             };
 
             let (token, tokens) = tokens
                 .split_first()
                 .expect("the loop above only ends on nonempty slices");
-            self.todo.push(tokens);
+            self.todo.push((name, tokens));
 
-            if let Some(r#macro) = macros.get(token.slice()) {
-                self.todo.push(r#macro.replacement);
+            if let Some(&r#macro) = macros.get(token.slice())
+                && !self.hidden.contains(r#macro.name)
+            {
+                self.push(r#macro);
             }
             else {
                 return Some(*token);
@@ -84,10 +93,10 @@ impl<'a> Preprocessor<'a> {
                                 "error: preprocessor directive does not start at beginning of line",
                             )
                         },
-                    Ok(token) if let Some(r#macro) = self.macros.get(token.slice()) => {
+                    Ok(token) if let Some(&r#macro) = self.macros.get(token.slice()) => {
                         self.previous_was_newline = false;
                         assert!(self.expander.is_empty());
-                        self.expander.push(r#macro.replacement);
+                        self.expander.push(r#macro);
                         while let Some(token) = self.expander.next(&self.macros) {
                             yield Ok(token);
                         }
@@ -129,7 +138,8 @@ impl<'a> Preprocessor<'a> {
             [] => todo!("error: empty `#define` directive"),
             [name, replacement @ ..] if is_identifier(name) => {
                 let replacement = self.sess.alloc_slice_copy(replacement);
-                self.macros.insert(name.slice(), Macro { replacement });
+                self.macros
+                    .insert(name.slice(), Macro { name: name.slice(), replacement });
             }
             [name, rest @ ..] =>
                 todo!("error message: trying to `#define` non-identifier {name:?} with {rest:#?}"),

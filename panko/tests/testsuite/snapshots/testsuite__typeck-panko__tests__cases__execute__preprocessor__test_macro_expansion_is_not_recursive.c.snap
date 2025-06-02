@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition a~2 `int` (10 `int`))
+         (definition b~3 `int` (20 `int`))
+         (definition c~4 `int` (30 `int`))
+         (return (add `int` (add `int` (add `int` (a~2 `int`) (5 `int`)) (3 `int`)) (1 `int`))))))
+
+----- stderr -----
