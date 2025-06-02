@@ -124,13 +124,15 @@ impl<'a> Preprocessor<'a> {
     fn parse_define(&mut self) {
         // eat `define`
         self.tokens.next();
-        match self.tokens.next() {
-            Some(Ok(name)) if is_identifier(&name) => {
-                let replacement = self.sess.alloc_slice_copy(&self.eat_until_newline());
+        let line = self.eat_until_newline();
+        match &line[..] {
+            [] => todo!("error: empty `#define` directive"),
+            [name, replacement @ ..] if is_identifier(name) => {
+                let replacement = self.sess.alloc_slice_copy(replacement);
                 self.macros.insert(name.slice(), Macro { replacement });
             }
-            Some(Ok(name)) => todo!("error message: trying to `#define` non-identifier {name:?}"),
-            _ => todo!("error message"),
+            [name, rest @ ..] =>
+                todo!("error message: trying to `#define` non-identifier {name:?} with {rest:#?}"),
         }
     }
 
