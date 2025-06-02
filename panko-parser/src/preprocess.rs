@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::iter::Peekable;
 
-use itertools::Itertools as _;
 use panko_lex::Error;
 use panko_lex::Token;
 use panko_lex::TokenKind;
@@ -115,6 +114,9 @@ impl<'a> Preprocessor<'a> {
             Some(Ok(token)) if token.slice() == "define" => {
                 self.parse_define();
             }
+            Some(Ok(token)) if token.slice() == "undef" => {
+                self.parse_undef();
+            }
             token => todo!("error: unimplemented preprocessor directive starting in {token:?}"),
         }
     }
@@ -124,24 +126,39 @@ impl<'a> Preprocessor<'a> {
         self.tokens.next();
         match self.tokens.next() {
             Some(Ok(name)) if is_identifier(&name) => {
-                let replacement = self
-                    .tokens
-                    .by_ref()
-                    .take_while(|token| {
-                        !matches!(token, Ok(Token { kind: TokenKind::Newline, .. }))
-                    })
-                    .map(|token| {
-                        token.unwrap_or_else(|err| {
-                            todo!("what happens when there is a lexer error here? {err:?}")
-                        })
-                    })
-                    .collect_vec();
-                let replacement = self.sess.alloc_slice_copy(&replacement);
+                let replacement = self.sess.alloc_slice_copy(&self.eat_until_newline());
                 self.macros.insert(name.slice(), Macro { replacement });
             }
             Some(Ok(name)) => todo!("error message: trying to `#define` non-identifier {name:?}"),
             _ => todo!("error message"),
         }
+    }
+
+    fn parse_undef(&mut self) {
+        // eat `undef`
+        self.tokens.next();
+        let line = self.eat_until_newline();
+        match &line[..] {
+            [] => todo!("error message: empty `#undef` directive"),
+            [name] if is_identifier(name) => {
+                self.macros.remove(name.slice());
+            }
+            [name] => todo!("error message: trying to `#undef` non-identifier {name:?}"),
+            [name, rest @ ..] =>
+                todo!("error message: extraneous tokens in `#undef` of {name:?}: {rest:#?}"),
+        }
+    }
+
+    fn eat_until_newline(&mut self) -> Vec<Token<'a>> {
+        self.tokens
+            .by_ref()
+            .take_while(|token| !matches!(token, Ok(Token { kind: TokenKind::Newline, .. })))
+            .map(|token| {
+                token.unwrap_or_else(|err| {
+                    todo!("what happens when there is a lexer error here? {err:?}")
+                })
+            })
+            .collect()
     }
 }
 

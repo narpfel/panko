@@ -1,0 +1,41 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/preprocessor/test_undef_object_like_macro.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition x~2 `int` (42 `int`))
+         (definition y~3 `int` (27 `int`))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 8>>`
+                        (string `array<char; 8>` "%d, %d\n\0"))))
+               (y~3 `int`)
+               (y~3 `int`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 8>>`
+                        (string `array<char; 8>` "%d, %d\n\0"))))
+               (x~2 `int`)
+               (y~3 `int`))))))
+
+----- stderr -----
