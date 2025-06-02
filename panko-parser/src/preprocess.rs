@@ -44,7 +44,7 @@ impl<'a> Expander<'a> {
 
     fn push(&mut self, Macro { name, replacement }: Macro<'a>) {
         self.todo.push((name, replacement));
-        self.hidden.insert(name);
+        assert!(self.hidden.insert(name));
     }
 
     fn next(&mut self, macros: &HashMap<&'a str, Macro<'a>>) -> Option<Token<'a>> {
