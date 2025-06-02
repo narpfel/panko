@@ -49,20 +49,16 @@ impl<'a> Expander<'a> {
 
     fn next(&mut self, macros: &HashMap<&'a str, Macro<'a>>) -> Option<Token<'a>> {
         loop {
-            let (name, tokens) = loop {
-                let (name, tokens) = self.todo.pop()?;
-                if !tokens.is_empty() {
-                    break (name, tokens);
-                }
-                else {
-                    self.hidden.remove(name);
+            let token = loop {
+                let (name, tokens) = self.todo.last_mut()?;
+                match tokens.split_off_first() {
+                    Some(token) => break token,
+                    None => {
+                        self.hidden.remove(name);
+                        self.todo.pop();
+                    }
                 }
             };
-
-            let (token, tokens) = tokens
-                .split_first()
-                .expect("the loop above only ends on nonempty slices");
-            self.todo.push((name, tokens));
 
             if let Some(&r#macro) = macros.get(token.slice())
                 && !self.hidden.contains(r#macro.name)
