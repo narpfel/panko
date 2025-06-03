@@ -1,0 +1,34 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: preprocessor directive `#define` does not start at beginning of line
+   ╭─[panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line.c:2:18]
+   │
+ 2 │     int a = 10;  #define a b
+   │                  ─────── ───  
+───╯
+
+Error: `#` outside of preprocessing directive
+   ╭─[panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line.c:3:18]
+   │
+ 3 │     int b = 20;  #
+   │                  ─  
+───╯
+
+Error: preprocessor directive does not start at beginning of line
+   ╭─[panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line.c:4:18]
+   │
+ 4 │     int c = 30;  # +
+   │                  ─ ─  
+───╯

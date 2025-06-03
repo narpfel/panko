@@ -3,10 +3,14 @@ use std::collections::HashSet;
 use std::iter::Peekable;
 
 use panko_lex::Error;
+use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
 
 use crate::ast::Session;
+use crate::preprocess::diagnostics::Diagnostic;
+
+mod diagnostics;
 
 pub type TokenIter<'a> = impl Iterator<Item = Result<Token<'a>, Error<'a>>>;
 
@@ -14,6 +18,14 @@ type UnpreprocessedTokens<'a> = Peekable<panko_lex::TokenIter<'a>>;
 
 fn is_identifier(token: &Token) -> bool {
     token.is_identifier() || token.is_keyword()
+}
+
+fn tokens_loc<'a>(tokens: &[Token<'a>]) -> Loc<'a> {
+    match tokens {
+        [] => unreachable!(),
+        [token] => token.loc(),
+        [first, .., last] => first.loc().until(last.loc()),
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -84,9 +96,26 @@ impl<'a> Preprocessor<'a> {
                             self.parse_directive();
                         }
                         else {
-                            todo!(
-                                "error: preprocessor directive does not start at beginning of line",
-                            )
+                            let line = self.eat_until_newline();
+                            match &line[..] {
+                                [] => self
+                                    .sess
+                                    .emit(Diagnostic::HashOutsideDirective { at: token }),
+                                [directive, line @ ..] if is_identifier(directive) =>
+                                    self.sess.emit(
+                                        Diagnostic::NamedDirectiveDoesNotStartAtBeginningOfLine {
+                                            at: token,
+                                            directive: *directive,
+                                            line: tokens_loc(line),
+                                        },
+                                    ),
+                                line => self.sess.emit(
+                                    Diagnostic::DirectiveDoesNotStartAtBeginningOfLine {
+                                        at: token,
+                                        line: tokens_loc(line),
+                                    },
+                                ),
+                            }
                         },
                     Ok(token) if let Some(&r#macro) = self.macros.get(token.slice()) => {
                         self.previous_was_newline = false;
