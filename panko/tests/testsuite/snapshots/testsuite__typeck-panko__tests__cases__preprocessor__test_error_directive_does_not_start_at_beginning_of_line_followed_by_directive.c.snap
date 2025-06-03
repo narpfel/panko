@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line_followed_by_directive.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: preprocessor directive `#very` does not start at beginning of line
+   ╭─[panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line_followed_by_directive.c:4:5]
+   │
+ 4 │ int #very broken
+   │     ───── ──────  
+───╯

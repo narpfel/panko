@@ -186,6 +186,7 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn eat_until_newline(&mut self) -> Vec<Token<'a>> {
+        self.previous_was_newline = true;
         self.tokens
             .by_ref()
             .take_while(|token| !matches!(token, Ok(Token { kind: TokenKind::Newline, .. })))
