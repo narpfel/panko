@@ -38,6 +38,126 @@ impl<'a> Token<'a> {
     pub fn slice(&self) -> &'a str {
         self.loc.slice()
     }
+
+    pub fn is_identifier(&self) -> bool {
+        matches!(self.kind, TokenKind::Identifier | TokenKind::TypeIdentifier)
+    }
+
+    pub fn is_keyword(&self) -> bool {
+        match self.kind {
+            TokenKind::BlockComment
+            | TokenKind::Newline
+            | TokenKind::Hash
+            | TokenKind::LParen
+            | TokenKind::RParen
+            | TokenKind::LBrace
+            | TokenKind::RBrace
+            | TokenKind::LBracket
+            | TokenKind::RBracket
+            | TokenKind::Dot
+            | TokenKind::Arrow
+            | TokenKind::PlusPlus
+            | TokenKind::MinusMinus
+            | TokenKind::And
+            | TokenKind::Star
+            | TokenKind::Plus
+            | TokenKind::Minus
+            | TokenKind::Tilde
+            | TokenKind::Bang
+            | TokenKind::Slash
+            | TokenKind::Percent
+            | TokenKind::LessLess
+            | TokenKind::GreaterGreater
+            | TokenKind::Less
+            | TokenKind::Greater
+            | TokenKind::LessEqual
+            | TokenKind::GreaterEqual
+            | TokenKind::EqualEqual
+            | TokenKind::BangEqual
+            | TokenKind::Hat
+            | TokenKind::Pipe
+            | TokenKind::AndAnd
+            | TokenKind::PipePipe
+            | TokenKind::QuestionMark
+            | TokenKind::Colon
+            | TokenKind::ColonColon
+            | TokenKind::Semicolon
+            | TokenKind::Ellipsis
+            | TokenKind::Equal
+            | TokenKind::StarEqual
+            | TokenKind::SlashEqual
+            | TokenKind::PercentEqual
+            | TokenKind::PlusEqual
+            | TokenKind::MinusEqual
+            | TokenKind::LessLessEqual
+            | TokenKind::GreaterGreaterEqual
+            | TokenKind::AndEqual
+            | TokenKind::HatEqual
+            | TokenKind::PipeEqual
+            | TokenKind::Comma
+            | TokenKind::Identifier
+            | TokenKind::TypeIdentifier
+            | TokenKind::String
+            | TokenKind::Integer(_)
+            | TokenKind::CharConstant(_) => false,
+
+            TokenKind::Alignas
+            | TokenKind::Alignof
+            | TokenKind::Auto
+            | TokenKind::Bool
+            | TokenKind::Break
+            | TokenKind::Case
+            | TokenKind::Char
+            | TokenKind::Const
+            | TokenKind::Constexpr
+            | TokenKind::Continue
+            | TokenKind::Default
+            | TokenKind::Do
+            | TokenKind::Double
+            | TokenKind::Else
+            | TokenKind::Enum
+            | TokenKind::Extern
+            | TokenKind::False
+            | TokenKind::Float
+            | TokenKind::For
+            | TokenKind::Goto
+            | TokenKind::If
+            | TokenKind::Inline
+            | TokenKind::Int
+            | TokenKind::Long
+            | TokenKind::Nullptr
+            | TokenKind::Register
+            | TokenKind::Restrict
+            | TokenKind::Return
+            | TokenKind::Short
+            | TokenKind::Signed
+            | TokenKind::Sizeof
+            | TokenKind::Static
+            | TokenKind::StaticAssert
+            | TokenKind::Struct
+            | TokenKind::Switch
+            | TokenKind::ThreadLocal
+            | TokenKind::True
+            | TokenKind::Typedef
+            | TokenKind::Typeof
+            | TokenKind::TypeofUnqual
+            | TokenKind::Union
+            | TokenKind::Unsigned
+            | TokenKind::Void
+            | TokenKind::Volatile
+            | TokenKind::While
+            | TokenKind::Atomic
+            | TokenKind::BitInt
+            | TokenKind::Complex
+            | TokenKind::Decimal128
+            | TokenKind::Decimal32
+            | TokenKind::Decimal64
+            | TokenKind::Generic
+            | TokenKind::Imaginary
+            | TokenKind::Noreturn
+            | TokenKind::Lengthof => true,
+        }
+    }
 }
 
 impl std::fmt::Debug for Token<'_> {

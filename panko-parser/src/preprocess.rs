@@ -13,8 +13,7 @@ pub type TokenIter<'a> = impl Iterator<Item = Result<Token<'a>, Error<'a>>>;
 type UnpreprocessedTokens<'a> = Peekable<panko_lex::TokenIter<'a>>;
 
 fn is_identifier(token: &Token) -> bool {
-    // TODO: it’s UB to `#define` a keyword, so we can just treat that as a compile time error
-    token.kind == TokenKind::Identifier
+    token.is_identifier() || token.is_keyword()
 }
 
 #[derive(Debug, Clone, Copy)]
