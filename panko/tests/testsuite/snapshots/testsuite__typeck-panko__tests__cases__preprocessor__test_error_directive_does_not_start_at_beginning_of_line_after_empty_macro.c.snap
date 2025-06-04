@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line_after_empty_macro.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: preprocessor directive `#define` does not start at beginning of line
+   ╭─[panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line_after_empty_macro.c:3:7]
+   │
+ 3 │ EMPTY #define MACRO
+   │       ─────── ─────  
+───╯
