@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/pointers/test_pointer_compatibility_for_pointers_to_arrays_of_unknown_length.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition xs~1 `array<int; 42>` (braced ∅))
+         (definition p~2 `ptr<array<int; ∅>>` (addressof (name xs~1 `array<int; 42>`)))
+         (definition q~3 `ptr<array<int; 42>>` (addressof (name xs~1 `array<int; 42>`)))
+         (return (equal (name p~2 `ptr<array<int; ∅>>`) (name q~3 `ptr<array<int; 42>>`))))))
+
+----- stderr -----
