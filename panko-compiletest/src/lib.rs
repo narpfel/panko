@@ -51,7 +51,7 @@ impl fmt::Display for TestResult {
             Self::Failure => write!(f, "{FG_BOLD}{FG_RED}F{RESET}"),
             Self::XFail => write!(f, "{FG_BOLD}{FG_YELLOW}x{RESET}"),
             Self::XPass => write!(f, "{FG_RED}X{RESET}"),
-            Self::Skip => write!(f, "{FG_YELLOW}S{RESET}"),
+            Self::Skip => write!(f, "{FG_YELLOW}s{RESET}"),
         }
     }
 }
