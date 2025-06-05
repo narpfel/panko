@@ -1,24 +1,72 @@
 #![feature(duration_millis_float)]
+#![feature(exit_status_error)]
 #![feature(internal_output_capture)]
 #![feature(unqualified_local_imports)]
 
+use std::borrow::Borrow;
 use std::fmt;
+use std::io;
 use std::io::Write;
 use std::io::set_output_capture;
 use std::io::stdout;
 use std::panic::AssertUnwindSafe;
 use std::panic::catch_unwind;
+use std::path::Path;
+use std::process::Command;
+use std::process::ExitStatus;
+use std::process::Output;
 use std::sync::Arc;
+use std::sync::LazyLock;
 use std::sync::Mutex;
 use std::time::Instant;
 
+use insta_cmd::get_cargo_bin;
 use itertools::Itertools as _;
+use regex::Captures;
+use regex::Regex;
 
 const FG_BOLD: &str = "\x1B[1m";
 const FG_RED: &str = "\x1B[31m";
 const FG_GREEN: &str = "\x1B[32m";
 const FG_YELLOW: &str = "\x1B[33m";
 const RESET: &str = "\x1B[m";
+
+trait CaptureOutputForLibtest {
+    fn status_with_captured_output(&mut self) -> io::Result<ExitStatus>;
+}
+
+impl CaptureOutputForLibtest for Command {
+    fn status_with_captured_output(&mut self) -> io::Result<ExitStatus> {
+        let output = self.output()?;
+        if !output.stdout.is_empty() {
+            println!("{}", String::from_utf8_lossy(&output.stdout));
+        }
+        if !output.stderr.is_empty() {
+            eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+        }
+        Ok(output.status)
+    }
+}
+
+pub fn relative_to(path: &Path, target: impl AsRef<Path>) -> &Path {
+    path.strip_prefix(target.as_ref()).unwrap()
+}
+
+fn expand_escape_sequences(s: &str) -> String {
+    static EXPAND_ESCAPE_SEQUENCES_RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"\\[0\\n]").unwrap());
+
+    EXPAND_ESCAPE_SEQUENCES_RE
+        .replace_all(s, |captures: &Captures| {
+            match captures.get(0).unwrap().as_str() {
+                r"\0" => "\0",
+                r"\\" => "\\",
+                r"\n" => "\n",
+                _ => unreachable!(),
+            }
+        })
+        .into_owned()
+}
 
 struct Context;
 
@@ -113,17 +161,106 @@ impl TestCase {
     }
 }
 
-fn run_tests() {
-    let mut cases = vec![];
-    for filename in glob::glob("tests/cases/execute/**/test_*.c").unwrap() {
-        cases.push(TestCase {
-            name: filename.as_deref().unwrap().to_string_lossy().into_owned(),
-            test_fn: Box::new(move |_context: &Context| {
-                // TODO: actually test something
-            }),
+pub fn execute_runtest(filename: impl AsRef<Path>) {
+    let source = std::fs::read_to_string(&filename).unwrap();
+
+    let expected_return_code_re =
+        Regex::new(r"(?m)^// \[\[return: (?P<return_code>.*?)\]\]$").unwrap();
+
+    let expected_return_codes = expected_return_code_re.captures_iter(&source).map(|captures| {
+        let return_code = captures.name("return_code").unwrap().as_str();
+        return_code.parse::<i32>().unwrap_or_else(|err| {
+            panic!("while parsing `return_code` in {expected_return_code_re:?}:\n{err:?} in capture {return_code:?}")
+        })
+    }).collect_vec();
+    assert!(
+        expected_return_codes.len() <= 1,
+        "test source invalid: more than one return code set: {expected_return_codes:?}",
+    );
+    let expected_return_code = expected_return_codes.first().copied().unwrap_or(0);
+
+    let expected_print_re = Regex::new(r"(?m)^\s*// \[\[print: (?P<output>.*?)\]\]$").unwrap();
+    let expected_output: String = expected_print_re
+        .captures_iter(&source)
+        .map(|captures| {
+            expand_escape_sequences(&(captures.name("output").unwrap().as_str().to_string() + "\n"))
+        })
+        .collect();
+
+    let cmdline_arguments_re = Regex::new(r"(?m)^// \[\[arg: (?P<arg>.*?)\]\]$").unwrap();
+
+    let cmdline_arguments = cmdline_arguments_re
+        .captures_iter(&source)
+        .map(|captures| expand_escape_sequences(captures.name("arg").unwrap().as_str()))
+        .collect_vec();
+
+    let filename = std::fs::canonicalize(filename).unwrap();
+    let filename = relative_to(
+        &filename,
+        Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap(),
+    );
+
+    let output_dir = tempfile::tempdir().unwrap();
+    let executable_filename = output_dir
+        .path()
+        .join(filename.file_name().unwrap())
+        .with_extension("");
+
+    Command::new(get_cargo_bin("panko"))
+        .env("CLICOLOR_FORCE", "1")
+        .current_dir("..")
+        .arg(filename)
+        .arg("-o")
+        .arg(&executable_filename)
+        .status_with_captured_output()
+        .unwrap()
+        .exit_ok()
+        .unwrap();
+
+    let Output { status, stdout, stderr } = Command::new(&executable_filename)
+        .args(cmdline_arguments.iter().map(Borrow::<str>::borrow))
+        .output()
+        .unwrap();
+    let stdout = std::str::from_utf8(&stdout).unwrap();
+    let stderr = std::str::from_utf8(&stderr).unwrap();
+    let actual_exit_code = status.code().unwrap_or_else(
+        #[cfg(unix)]
+        || {
+            panic!(
+                "process `{}` died with {status}",
+                executable_filename.display(),
+            )
+        },
+        #[cfg(not(unix))]
+        || unreachable!("`ExitStatus::code()` can only be `None` on Unix"),
+    );
+
+    assert_eq!(
+        expected_return_code, actual_exit_code,
+        "test program did not exit with expected return code {expected_return_code}",
+    );
+
+    pretty_assertions::assert_eq!(
+        expected_output,
+        stdout,
+        "expected output (left) did not match output on stdout (right)",
+    );
+    assert_eq!("", stderr, "no output on stderr is expected");
+}
+
+fn discover(pattern: &str) -> impl Iterator<Item = TestCase> {
+    glob::glob(pattern).unwrap().map(|filename| {
+        let filename = filename.unwrap();
+        TestCase {
+            name: filename.display().to_string(),
+            test_fn: Box::new(move |_context: &Context| execute_runtest(filename)),
             expected_result: ExpectedResult::Success,
-        });
-    }
+        }
+    })
+}
+
+fn run_tests() {
+    let cases = discover("tests/cases/execute/**/test_*.c").collect_vec();
     let case_count = cases.len();
     let digit_count = usize::try_from(case_count.ilog10() + 1).unwrap();
     println!("running {} tests ({digit_count})", cases.len());
