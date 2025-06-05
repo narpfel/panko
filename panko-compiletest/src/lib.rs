@@ -39,6 +39,7 @@ enum TestResult {
     Success,
     Failure,
     XFail,
+    XPass,
     #[expect(dead_code)]
     Skip,
 }
@@ -48,7 +49,8 @@ impl fmt::Display for TestResult {
         match self {
             Self::Success => write!(f, "{FG_GREEN}.{RESET}"),
             Self::Failure => write!(f, "{FG_BOLD}{FG_RED}F{RESET}"),
-            Self::XFail => write!(f, "{FG_BOLD}{FG_YELLOW}X{RESET}"),
+            Self::XFail => write!(f, "{FG_BOLD}{FG_YELLOW}x{RESET}"),
+            Self::XPass => write!(f, "{FG_RED}X{RESET}"),
             Self::Skip => write!(f, "{FG_YELLOW}S{RESET}"),
         }
     }
@@ -99,7 +101,7 @@ impl TestCase {
         let result = match catch_unwind(AssertUnwindSafe(|| test_fn.run(&context))) {
             Ok(()) => match expected_result {
                 ExpectedResult::Success => TestResult::Success,
-                ExpectedResult::Failure => TestResult::XFail,
+                ExpectedResult::Failure => TestResult::XPass,
             },
             Err(_panic_payload) => match expected_result {
                 ExpectedResult::Success => TestResult::Failure,
@@ -173,7 +175,7 @@ fn run_tests() {
     }
 
     println!(
-        "test result: {status}, ?? passed, ?? failed, ?? xfailed, ?? skipped; finished in {:.2}s",
+        "test result: {status}, ?? passed, ?? failed, ?? xfailed, ?? xpassed, ?? skipped; finished in {:.2}s",
         time.as_millis_f64() / 1_000.0,
     );
 }
