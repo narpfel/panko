@@ -78,9 +78,8 @@ enum Error<'a> {
     },
 }
 
-impl<'a> From<panko_lex::Error<'a>> for Error<'a> {
-    fn from(error: panko_lex::Error<'a>) -> Self {
-        let panko_lex::Error { at, kind } = error;
+impl<'a> Error<'a> {
+    fn from_lexer_error(kind: panko_lex::ErrorKind, at: Loc<'a>) -> Self {
         match kind {
             panko_lex::ErrorKind::UnterminatedBlockComment => Self::UnterminatedBlockComment { at },
             panko_lex::ErrorKind::Other => Self::LexerFailed { at },
@@ -1073,7 +1072,7 @@ pub fn parse<'a>(
             ParseError::UnrecognizedToken {
                 token: ((), token @ Token { kind: TokenKind::Error(error), .. }, ()),
                 expected: _,
-            } => Error::from(panko_lex::Error { at: token.loc(), kind: error }),
+            } => Error::from_lexer_error(error, token.loc()),
             ParseError::UnrecognizedToken { token, expected } => Error::UnexpectedToken {
                 at: token.1,
                 expected: Strings(

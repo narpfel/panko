@@ -751,18 +751,6 @@ pub enum TokenKind {
     Lengthof,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct Error<'a> {
-    pub at: Loc<'a>,
-    pub kind: ErrorKind,
-}
-
-impl<'a> Error<'a> {
-    pub fn loc(&self) -> Loc<'a> {
-        self.at
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub enum ErrorKind {
     #[default]
