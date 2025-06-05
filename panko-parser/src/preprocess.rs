@@ -138,6 +138,9 @@ impl<'a> Preprocessor<'a> {
 
     fn parse_directive(&mut self) {
         match self.peek() {
+            None => {
+                // null directive at end of file without newline (technically UB)
+            }
             Some(token) if token.kind == TokenKind::Newline => {
                 // eat newline token => null directive
                 self.tokens.next();
@@ -148,7 +151,8 @@ impl<'a> Preprocessor<'a> {
             Some(token) if token.slice() == "undef" => {
                 self.parse_undef();
             }
-            token => todo!("error: unimplemented preprocessor directive starting in {token:?}"),
+            Some(token) =>
+                todo!("error: unimplemented preprocessor directive starting in {token:?}"),
         }
     }
 
