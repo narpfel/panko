@@ -761,12 +761,7 @@ pub enum ErrorKind {
 pub type TokenIter<'a> = impl Iterator<Item = Token<'a>>;
 
 #[define_opaque(TokenIter)]
-pub fn lex<'a>(
-    bump: &'a Bump,
-    filename: &'a Path,
-    physical_src: &str,
-    typedef_names: &'a RefCell<TypedefNames<'a>>,
-) -> TokenIter<'a> {
+pub fn lex<'a>(bump: &'a Bump, filename: &'a Path, physical_src: &str) -> TokenIter<'a> {
     let (logical_src, chunk_starts): (String, Vec<_>) = once(0)
         .chain(memchr::memmem::find_iter(physical_src.as_bytes(), b"\\\n"))
         .chain(once(physical_src.len()))
@@ -790,6 +785,24 @@ pub fn lex<'a>(
         };
 
         let kind = kind.unwrap_or_else(TokenKind::Error);
+        Token { kind, loc }
+    })
+}
+
+pub type LexerHacked<'a, Tokens>
+where
+    Tokens: Iterator<Item = Token<'a>>,
+= impl Iterator<Item = Token<'a>>;
+
+#[define_opaque(LexerHacked)]
+pub fn apply_lexer_hack<'a, Tokens>(
+    tokens: Tokens,
+    typedef_names: &'a RefCell<TypedefNames<'a>>,
+) -> LexerHacked<'a, Tokens>
+where
+    Tokens: Iterator<Item = Token<'a>>,
+{
+    tokens.map(|Token { kind, loc }| {
         let kind = match kind {
             TokenKind::Identifier if typedef_names.borrow().is_type_identifier(loc.slice()) =>
                 TokenKind::TypeIdentifier,
@@ -879,7 +892,7 @@ mod test {
         })
     ])]
     fn test_lexer(bump: Bump, #[case] src: &str, #[case] expected: &[TokenKind]) {
-        let tokens = lex(&bump, Path::new("<src>"), src, &RefCell::default())
+        let tokens = lex(&bump, Path::new("<src>"), src)
             .map(|token| token.kind)
             .collect::<Vec<_>>();
         pretty_assertions::assert_eq!(tokens, expected);
@@ -910,7 +923,7 @@ mod test {
         #[case] src: &str,
         #[case] expected: impl for<'a> FnOnce(TokenIter<'a>),
     ) {
-        expected(lex(&bump, Path::new("<src>"), src, &RefCell::default()))
+        expected(lex(&bump, Path::new("<src>"), src))
     }
 
     #[rstest]

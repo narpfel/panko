@@ -18,6 +18,7 @@ use itertools::Either;
 use itertools::Itertools as _;
 use lalrpop_util::ParseError;
 use lalrpop_util::lalrpop_mod;
+use panko_lex::LexerHacked;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
@@ -1063,7 +1064,7 @@ pub fn parse<'a>(
     sess: &'a ast::Session<'a>,
     typedef_names: &'a RefCell<TypedefNames<'a>>,
     is_in_typedef: &'a Cell<bool>,
-    tokens: TokenIter<'a>,
+    tokens: LexerHacked<'a, TokenIter<'a>>,
 ) -> Result<ast::TranslationUnit<'a>, Box<dyn Report + 'a>> {
     let parser = grammar::TranslationUnitParser::new();
     let parse_tree = parser

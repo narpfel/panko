@@ -68,11 +68,12 @@ fn main() -> Result<()> {
         &args.filename,
         &std::fs::read_to_string(&args.filename)
             .with_context(|| format!("could not open source file `{}`", args.filename.display()))?,
-        &typedef_names,
     );
     let session = &panko_parser::ast::Session::new(bump, args.treat_error_as_bug);
 
     let tokens = panko_parser::preprocess(session, tokens);
+
+    let tokens = panko_lex::apply_lexer_hack(tokens, &typedef_names);
 
     let translation_unit =
         match panko_parser::parse(session, &typedef_names, &is_in_typedef, tokens) {
