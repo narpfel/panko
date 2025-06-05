@@ -185,6 +185,9 @@ pub fn run() {
 
     match catch_unwind(run_tests) {
         Ok(()) => {}
-        Err(panic) => eprintln!("tests panicked with {panic:?}"),
+        Err(panic) => eprintln!(
+            "test setup panicked with {}",
+            panic.downcast_ref::<&str>().unwrap(),
+        ),
     }
 }
