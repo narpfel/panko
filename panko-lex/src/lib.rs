@@ -45,7 +45,8 @@ impl<'a> Token<'a> {
 
     pub fn is_keyword(&self) -> bool {
         match self.kind {
-            TokenKind::BlockComment
+            TokenKind::Error(_)
+            | TokenKind::BlockComment
             | TokenKind::Newline
             | TokenKind::Hash
             | TokenKind::LParen
@@ -424,6 +425,8 @@ fn skip_block_comment(lexer: &mut Lexer<TokenKind>) -> Result<Skip, ErrorKind> {
 #[logos(skip r"[ \r\t\f]+")]
 #[logos(skip r"//[^\n]*")]
 pub enum TokenKind {
+    Error(ErrorKind),
+
     #[token("/*", skip_block_comment)]
     BlockComment,
 
@@ -767,7 +770,7 @@ pub enum ErrorKind {
     UnterminatedBlockComment,
 }
 
-pub type TokenIter<'a> = impl Iterator<Item = Result<Token<'a>, Error<'a>>>;
+pub type TokenIter<'a> = impl Iterator<Item = Token<'a>>;
 
 #[define_opaque(TokenIter)]
 pub fn lex<'a>(
@@ -798,13 +801,13 @@ pub fn lex<'a>(
             source_file,
         };
 
-        let kind = kind.map_err(|kind| Error { at: loc, kind })?;
+        let kind = kind.unwrap_or_else(TokenKind::Error);
         let kind = match kind {
             TokenKind::Identifier if typedef_names.borrow().is_type_identifier(loc.slice()) =>
                 TokenKind::TypeIdentifier,
             kind => kind,
         };
-        Ok(Token { kind, loc })
+        Token { kind, loc }
     })
 }
 
@@ -824,18 +827,19 @@ mod test {
         ($body:expr) => {
             for<'a> |result: TokenIter<'a>| -> () {
                 #[allow(clippy::redundant_closure_call)]
-                let () = $body(result.collect::<Result<Vec<_>, _>>());
+                let () = $body(result.collect::<Vec<Token<'a>>>());
             }
         };
     }
 
     macro_rules! check_err {
         ($pattern:pat $(,)?) => {
-            check!(|result| pretty_assertions::assert_matches!(result, Err($pattern)))
+            check!(|result: Vec<_>| pretty_assertions::assert_matches!(result[..], $pattern))
         };
     }
 
     const FULLWIDTH_NUMBER_4_LEN: usize = '４'.len_utf8();
+    const FULLWIDTH_NUMBER_2_END: usize = '４'.len_utf8() + '２'.len_utf8();
 
     #[rstest]
     #[case::zero_b_literal("0b", &[
@@ -888,24 +892,30 @@ mod test {
     ])]
     fn test_lexer(bump: Bump, #[case] src: &str, #[case] expected: &[TokenKind]) {
         let tokens = lex(&bump, Path::new("<src>"), src, &RefCell::default())
-            .map(|token| Ok(token?.kind))
-            .collect::<Result<Vec<_>, Error>>()
-            .unwrap();
+            .map(|token| token.kind)
+            .collect::<Vec<_>>();
         pretty_assertions::assert_eq!(tokens, expected);
     }
 
     #[rstest]
     #[case::unicode_number(
         "４２",
-        check_err!(
-            Error {
-                at: Loc {
+        check_err!([
+            Token {
+                loc: Loc {
                     span: Span { start: 0, end: FULLWIDTH_NUMBER_4_LEN },
                     source_file: _,
                 },
-                kind: ErrorKind::Other,
+                kind: TokenKind::Error(ErrorKind::Other),
             },
-        ),
+            Token {
+                loc: Loc {
+                    span: Span { start: FULLWIDTH_NUMBER_4_LEN, end: FULLWIDTH_NUMBER_2_END },
+                    source_file: _,
+                },
+                kind: TokenKind::Error(ErrorKind::Other),
+            },
+        ]),
     )]
     fn test_lex_error(
         bump: Bump,

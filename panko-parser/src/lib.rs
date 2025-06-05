@@ -1068,13 +1068,12 @@ pub fn parse<'a>(
 ) -> Result<ast::TranslationUnit<'a>, Box<dyn Report + 'a>> {
     let parser = grammar::TranslationUnitParser::new();
     let parse_tree = parser
-        .parse(
-            sess,
-            typedef_names,
-            is_in_typedef,
-            tokens.map(|token| token.map_err(|err| sess.alloc(Error::from(err)))),
-        )
+        .parse(sess, typedef_names, is_in_typedef, tokens)
         .map_err(|err| match err {
+            ParseError::UnrecognizedToken {
+                token: ((), token @ Token { kind: TokenKind::Error(error), .. }, ()),
+                expected: _,
+            } => Error::from(panko_lex::Error { at: token.loc(), kind: error }),
             ParseError::UnrecognizedToken { token, expected } => Error::UnexpectedToken {
                 at: token.1,
                 expected: Strings(

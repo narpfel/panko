@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::iter::Peekable;
 
-use panko_lex::Error;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
@@ -12,7 +11,7 @@ use crate::preprocess::diagnostics::Diagnostic;
 
 mod diagnostics;
 
-pub type TokenIter<'a> = impl Iterator<Item = Result<Token<'a>, Error<'a>>>;
+pub type TokenIter<'a> = impl Iterator<Item = Token<'a>>;
 
 type UnpreprocessedTokens<'a> = Peekable<panko_lex::TokenIter<'a>>;
 
@@ -89,9 +88,8 @@ impl<'a> Preprocessor<'a> {
         gen move {
             while let Some(token) = self.tokens.next() {
                 match token {
-                    Ok(token) if token.kind == TokenKind::Newline =>
-                        self.previous_was_newline = true,
-                    Ok(token) if token.kind == TokenKind::Hash =>
+                    token if token.kind == TokenKind::Newline => self.previous_was_newline = true,
+                    token if token.kind == TokenKind::Hash =>
                         if self.previous_was_newline {
                             self.parse_directive();
                         }
@@ -117,12 +115,12 @@ impl<'a> Preprocessor<'a> {
                                 ),
                             }
                         },
-                    Ok(token) if let Some(&r#macro) = self.macros.get(token.slice()) => {
+                    token if let Some(&r#macro) = self.macros.get(token.slice()) => {
                         self.previous_was_newline = false;
                         assert!(self.expander.is_empty());
                         self.expander.push(r#macro);
                         while let Some(token) = self.expander.next(&self.macros) {
-                            yield Ok(token);
+                            yield token;
                         }
                     }
                     token => {
@@ -134,20 +132,20 @@ impl<'a> Preprocessor<'a> {
         }
     }
 
-    fn peek(&mut self) -> Option<Result<&Token<'a>, &Error<'a>>> {
-        try { self.tokens.peek()?.as_ref() }
+    fn peek(&mut self) -> Option<&Token<'a>> {
+        self.tokens.peek()
     }
 
     fn parse_directive(&mut self) {
         match self.peek() {
-            Some(Ok(token)) if token.kind == TokenKind::Newline => {
+            Some(token) if token.kind == TokenKind::Newline => {
                 // eat newline token => null directive
                 self.tokens.next();
             }
-            Some(Ok(token)) if token.slice() == "define" => {
+            Some(token) if token.slice() == "define" => {
                 self.parse_define();
             }
-            Some(Ok(token)) if token.slice() == "undef" => {
+            Some(token) if token.slice() == "undef" => {
                 self.parse_undef();
             }
             token => todo!("error: unimplemented preprocessor directive starting in {token:?}"),
@@ -189,12 +187,7 @@ impl<'a> Preprocessor<'a> {
         self.previous_was_newline = true;
         self.tokens
             .by_ref()
-            .take_while(|token| !matches!(token, Ok(Token { kind: TokenKind::Newline, .. })))
-            .map(|token| {
-                token.unwrap_or_else(|err| {
-                    todo!("what happens when there is a lexer error here? {err:?}")
-                })
-            })
+            .take_while(|token| token.kind != TokenKind::Newline)
             .collect()
     }
 }
