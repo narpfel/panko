@@ -198,6 +198,7 @@ impl<'a> Preprocessor<'a> {
                 else {
                     Macro::Object { name: name.slice(), replacement: line }
                 };
+                // TODO: check for redefinition
                 self.macros.insert(name.slice(), r#macro);
             }
             [name, rest @ ..] =>
