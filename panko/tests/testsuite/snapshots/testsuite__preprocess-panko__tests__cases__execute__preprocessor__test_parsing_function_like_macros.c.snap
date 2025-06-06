@@ -1,0 +1,177 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--trace-preprocessor"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:1:9: #define id Function {
+    name: "id",
+    parameter_count: 1,
+    is_varargs: false,
+    replacement: [
+        Literal(
+            LParen("(")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:1:15,
+        ),
+        Parameter(
+            0,
+        ),
+        Literal(
+            RParen(")")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:1:17,
+        ),
+    ],
+}
+panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:9: #define min Function {
+    name: "min",
+    parameter_count: 2,
+    is_varargs: false,
+    replacement: [
+        Literal(
+            LParen("(")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:19,
+        ),
+        Literal(
+            LParen("(")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:20,
+        ),
+        Literal(
+            LParen("(")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:21,
+        ),
+        Parameter(
+            0,
+        ),
+        Literal(
+            RParen(")")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:23,
+        ),
+        Literal(
+            Less("<")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:25,
+        ),
+        Literal(
+            LParen("(")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:27,
+        ),
+        Parameter(
+            1,
+        ),
+        Literal(
+            RParen(")")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:29,
+        ),
+        Literal(
+            RParen(")")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:30,
+        ),
+        Literal(
+            QuestionMark("?")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:32,
+        ),
+        Literal(
+            Identifier("id")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:34,
+        ),
+        Literal(
+            LParen("(")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:36,
+        ),
+        Parameter(
+            0,
+        ),
+        Literal(
+            RParen(")")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:38,
+        ),
+        Literal(
+            Colon(":")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:40,
+        ),
+        Literal(
+            LParen("(")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:42,
+        ),
+        Parameter(
+            1,
+        ),
+        Literal(
+            RParen(")")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:44,
+        ),
+        Literal(
+            RParen(")")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:2:45,
+        ),
+    ],
+}
+panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:4:9: #define LPAREN Function {
+    name: "LPAREN",
+    parameter_count: 0,
+    is_varargs: false,
+    replacement: [
+        Literal(
+            LParen("(")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:4:18,
+        ),
+    ],
+}
+panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:5:9: #define G Function {
+    name: "G",
+    parameter_count: 1,
+    is_varargs: false,
+    replacement: [
+        Literal(
+            Integer(Integer { suffix: None, suffix_len: 0, base: 10, prefix_len: 0 })("42")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:5:14,
+        ),
+    ],
+}
+panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:6:9: #define F Function {
+    name: "F",
+    parameter_count: 3,
+    is_varargs: false,
+    replacement: [
+        Literal(
+            Identifier("G")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:6:25,
+        ),
+        Parameter(
+            0,
+        ),
+        Parameter(
+            1,
+        ),
+        Literal(
+            RParen(")")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:6:31,
+        ),
+    ],
+}
+panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:8:9: #define f Function {
+    name: "f",
+    parameter_count: 1,
+    is_varargs: false,
+    replacement: [
+        Parameter(
+            0,
+        ),
+        Literal(
+            Star("*")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:8:15,
+        ),
+        Literal(
+            Identifier("g")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:8:16,
+        ),
+    ],
+}
+panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:9:9: #define g Function {
+    name: "g",
+    parameter_count: 1,
+    is_varargs: false,
+    replacement: [
+        Literal(
+            Identifier("x")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:9:14,
+        ),
+        Literal(
+            LParen("(")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:9:15,
+        ),
+        Parameter(
+            0,
+        ),
+        Literal(
+            RParen(")")@panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:9:17,
+        ),
+    ],
+}
+panko/tests/cases/execute/preprocessor/test_parsing_function_like_macros.c:11:9: #define x Function {
+    name: "x",
+    parameter_count: 0,
+    is_varargs: false,
+    replacement: [],
+}
+
+----- stderr -----

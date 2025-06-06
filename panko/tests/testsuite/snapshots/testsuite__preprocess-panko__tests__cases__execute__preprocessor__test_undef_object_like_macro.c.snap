@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--trace-preprocessor"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_undef_object_like_macro.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+panko/tests/cases/execute/preprocessor/test_undef_object_like_macro.c:6:9: #define x Object {
+    name: "x",
+    replacement: [
+        Identifier("y")@panko/tests/cases/execute/preprocessor/test_undef_object_like_macro.c:6:11,
+    ],
+}
+panko/tests/cases/execute/preprocessor/test_undef_object_like_macro.c:9:8: #undef x (was present: true)
+
+----- stderr -----

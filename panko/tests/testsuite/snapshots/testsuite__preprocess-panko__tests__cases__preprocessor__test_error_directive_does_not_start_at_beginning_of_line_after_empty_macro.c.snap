@@ -1,0 +1,18 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--trace-preprocessor"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line_after_empty_macro.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line_after_empty_macro.c:1:9: #define EMPTY Object {
+    name: "EMPTY",
+    replacement: [],
+}
+
+----- stderr -----

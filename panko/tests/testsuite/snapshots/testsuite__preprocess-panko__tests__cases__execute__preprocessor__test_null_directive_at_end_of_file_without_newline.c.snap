@@ -1,0 +1,14 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--trace-preprocessor"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_null_directive_at_end_of_file_without_newline.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+----- stderr -----

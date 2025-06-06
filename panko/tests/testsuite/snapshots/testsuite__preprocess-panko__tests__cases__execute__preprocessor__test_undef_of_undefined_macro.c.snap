@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--trace-preprocessor"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_undef_of_undefined_macro.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+panko/tests/cases/execute/preprocessor/test_undef_of_undefined_macro.c:4:8: #undef x (was present: false)
+panko/tests/cases/execute/preprocessor/test_undef_of_undefined_macro.c:5:8: #undef y (was present: false)
+panko/tests/cases/execute/preprocessor/test_undef_of_undefined_macro.c:10:9: #define x Object {
+    name: "x",
+    replacement: [
+        Identifier("y")@panko/tests/cases/execute/preprocessor/test_undef_of_undefined_macro.c:10:11,
+    ],
+}
+panko/tests/cases/execute/preprocessor/test_undef_of_undefined_macro.c:13:8: #undef x (was present: true)
+panko/tests/cases/execute/preprocessor/test_undef_of_undefined_macro.c:15:8: #undef x (was present: false)
+panko/tests/cases/execute/preprocessor/test_undef_of_undefined_macro.c:16:8: #undef y (was present: false)
+
+----- stderr -----

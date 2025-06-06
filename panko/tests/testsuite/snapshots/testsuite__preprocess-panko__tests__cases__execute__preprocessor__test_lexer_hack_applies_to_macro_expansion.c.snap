@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--trace-preprocessor"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_lexer_hack_applies_to_macro_expansion.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+panko/tests/cases/execute/preprocessor/test_lexer_hack_applies_to_macro_expansion.c:3:9: #define MACRO Object {
+    name: "MACRO",
+    replacement: [
+        Identifier("x")@panko/tests/cases/execute/preprocessor/test_lexer_hack_applies_to_macro_expansion.c:3:15,
+    ],
+}
+
+----- stderr -----

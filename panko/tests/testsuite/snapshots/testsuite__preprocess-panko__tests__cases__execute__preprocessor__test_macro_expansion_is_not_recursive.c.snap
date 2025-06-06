@@ -1,0 +1,38 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--trace-preprocessor"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c:10:9: #define a Object {
+    name: "a",
+    replacement: [
+        Identifier("b")@panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c:10:11,
+        Plus("+")@panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c:10:13,
+        Integer(Integer { suffix: None, suffix_len: 0, base: 10, prefix_len: 0 })("1")@panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c:10:15,
+    ],
+}
+panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c:11:9: #define b Object {
+    name: "b",
+    replacement: [
+        Identifier("c")@panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c:11:11,
+        Plus("+")@panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c:11:13,
+        Integer(Integer { suffix: None, suffix_len: 0, base: 10, prefix_len: 0 })("3")@panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c:11:15,
+    ],
+}
+panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c:12:9: #define c Object {
+    name: "c",
+    replacement: [
+        Identifier("a")@panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c:12:11,
+        Plus("+")@panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c:12:13,
+        Integer(Integer { suffix: None, suffix_len: 0, base: 10, prefix_len: 0 })("5")@panko/tests/cases/execute/preprocessor/test_macro_expansion_is_not_recursive.c:12:15,
+    ],
+}
+
+----- stderr -----

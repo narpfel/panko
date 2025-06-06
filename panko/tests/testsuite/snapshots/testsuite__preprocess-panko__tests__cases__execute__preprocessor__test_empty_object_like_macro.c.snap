@@ -1,0 +1,18 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--trace-preprocessor"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_empty_object_like_macro.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+panko/tests/cases/execute/preprocessor/test_empty_object_like_macro.c:1:9: #define EMPTY Object {
+    name: "EMPTY",
+    replacement: [],
+}
+
+----- stderr -----

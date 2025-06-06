@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--trace-preprocessor"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line_followed_by_directive.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line_followed_by_directive.c:5:9: #define double Object {
+    name: "double",
+    replacement: [
+        Identifier("main")@panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line_followed_by_directive.c:5:16,
+    ],
+}
+
+----- stderr -----
