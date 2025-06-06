@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_lexer_hack_applies_to_macro_expansion.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+int printf(char const*, ...);
+ 
+
+ 
+int x = 42;
+ 
+int main() {
+    {
+        typedef int x ;
+        x y = 27;
+        
+        printf("%d\n", y);
+    }
+    
+    printf("%d\n", x );
+}
+
+----- stderr -----

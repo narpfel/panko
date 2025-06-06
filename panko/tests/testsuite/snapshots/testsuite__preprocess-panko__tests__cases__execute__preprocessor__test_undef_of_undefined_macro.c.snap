@@ -1,0 +1,33 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_undef_of_undefined_macro.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+int printf(char const*, ...);
+ 
+
+
+
+ 
+int main() {
+    int x = 42;
+    int y = 27;
+
+    
+    printf("%d, %d\n", y , y);
+
+
+
+
+    
+    printf("%d, %d\n", x, y);
+}
+
+----- stderr -----

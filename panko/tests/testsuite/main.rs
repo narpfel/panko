@@ -63,6 +63,26 @@ fn test(
     );
 }
 
+#[rstest]
+fn test_preprocessor(
+    #[files("tests/cases/**/preprocessor/**/test_*.c")]
+    #[exclude("/test_nosnapshot_.*\\.c$")]
+    filename: PathBuf,
+) {
+    let filename = relative_to(
+        &filename,
+        Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap(),
+    );
+    assert_cmd_snapshot!(
+        format!("preprocess-{}", filename.display()),
+        Command::new(get_cargo_bin("panko"))
+            .current_dir("..")
+            .arg("--print=preprocess")
+            .arg("--stop-after=preprocess")
+            .arg(filename),
+    );
+}
+
 fn expand_escape_sequences(s: &str) -> String {
     static EXPAND_ESCAPE_SEQUENCES_RE: LazyLock<Regex> =
         LazyLock::new(|| Regex::new(r"\\[0\\n]").unwrap());

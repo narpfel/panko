@@ -1,0 +1,19 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/preprocessor/test_error_directive_does_not_start_at_beginning_of_line.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+int main() {
+    int a = 10; 
+    int b = 20; 
+    int c = 30; 
+}
+
+----- stderr -----
