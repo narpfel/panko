@@ -98,8 +98,9 @@ impl<'a> Expander<'a> {
                 }
             };
 
-            if let Some(&r#macro) = macros.get(token.slice())
-                && !self.hidden.contains(token.slice())
+            let name = token.slice();
+            if let Some(&r#macro) = macros.get(name)
+                && !self.hidden.contains(name)
             {
                 self.push(r#macro);
             }
@@ -190,16 +191,17 @@ impl<'a> Preprocessor<'a> {
         let line = self.eat_until_newline();
         match &line[..] {
             [] => todo!("error: empty `#define` directive"),
-            [name, line @ ..] if is_identifier(name) => {
+            [name_tok, line @ ..] if is_identifier(name_tok) => {
                 let line = self.sess.alloc_slice_copy(line);
-                let r#macro = if line.first().is_some_and(|token| is_lparen(name, token)) {
-                    parse_function_like_define(self.sess, name.slice(), line)
+                let name = name_tok.slice();
+                let r#macro = if line.first().is_some_and(|token| is_lparen(name_tok, token)) {
+                    parse_function_like_define(self.sess, name, line)
                 }
                 else {
-                    Macro::Object { name: name.slice(), replacement: line }
+                    Macro::Object { name, replacement: line }
                 };
                 // TODO: check for redefinition
-                self.macros.insert(name.slice(), r#macro);
+                self.macros.insert(name, r#macro);
             }
             [name, rest @ ..] =>
                 todo!("error message: trying to `#define` non-identifier {name:?} with {rest:#?}"),
