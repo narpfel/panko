@@ -221,6 +221,10 @@ impl<'a> Loc<'a> {
         self.span.start
     }
 
+    pub fn end(&self) -> usize {
+        self.span.end
+    }
+
     fn span(&self) -> Range<usize> {
         self.span.start..self.span.end
     }

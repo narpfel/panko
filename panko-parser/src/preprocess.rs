@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::iter::Peekable;
 
+use indexmap::IndexSet;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
@@ -19,6 +20,10 @@ fn is_identifier(token: &Token) -> bool {
     token.is_identifier() || token.is_keyword()
 }
 
+fn is_lparen(previous: &Token, token: &Token) -> bool {
+    token.kind == TokenKind::LParen && previous.loc().end() == token.loc().start()
+}
+
 fn tokens_loc<'a>(tokens: &[Token<'a>]) -> Loc<'a> {
     match tokens {
         [] => unreachable!(),
@@ -28,9 +33,27 @@ fn tokens_loc<'a>(tokens: &[Token<'a>]) -> Loc<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Macro<'a> {
-    name: &'a str,
-    replacement: &'a [Token<'a>],
+enum Replacement<'a> {
+    Literal(#[expect(dead_code)] Token<'a>),
+    Parameter(#[expect(dead_code)] usize),
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Macro<'a> {
+    Object {
+        name: &'a str,
+        replacement: &'a [Token<'a>],
+    },
+    Function {
+        #[expect(dead_code)]
+        name: &'a str,
+        #[expect(dead_code)]
+        parameter_count: usize,
+        #[expect(dead_code)]
+        is_varargs: bool,
+        #[expect(dead_code)]
+        replacement: &'a [Replacement<'a>],
+    },
 }
 
 struct Preprocessor<'a> {
@@ -52,9 +75,14 @@ impl<'a> Expander<'a> {
         self.todo.is_empty()
     }
 
-    fn push(&mut self, Macro { name, replacement }: Macro<'a>) {
-        self.todo.push((name, replacement));
-        assert!(self.hidden.insert(name));
+    fn push(&mut self, r#macro: Macro<'a>) {
+        match r#macro {
+            Macro::Object { name, replacement } => {
+                self.todo.push((name, replacement));
+                assert!(self.hidden.insert(name));
+            }
+            Macro::Function { .. } => todo!("expansion of function-like macros"),
+        }
     }
 
     fn next(&mut self, macros: &HashMap<&'a str, Macro<'a>>) -> Option<Token<'a>> {
@@ -71,7 +99,7 @@ impl<'a> Expander<'a> {
             };
 
             if let Some(&r#macro) = macros.get(token.slice())
-                && !self.hidden.contains(r#macro.name)
+                && !self.hidden.contains(token.slice())
             {
                 self.push(r#macro);
             }
@@ -162,10 +190,15 @@ impl<'a> Preprocessor<'a> {
         let line = self.eat_until_newline();
         match &line[..] {
             [] => todo!("error: empty `#define` directive"),
-            [name, replacement @ ..] if is_identifier(name) => {
-                let replacement = self.sess.alloc_slice_copy(replacement);
-                self.macros
-                    .insert(name.slice(), Macro { name: name.slice(), replacement });
+            [name, line @ ..] if is_identifier(name) => {
+                let line = self.sess.alloc_slice_copy(line);
+                let r#macro = if line.first().is_some_and(|token| is_lparen(name, token)) {
+                    parse_function_like_define(self.sess, name.slice(), line)
+                }
+                else {
+                    Macro::Object { name: name.slice(), replacement: line }
+                };
+                self.macros.insert(name.slice(), r#macro);
             }
             [name, rest @ ..] =>
                 todo!("error message: trying to `#define` non-identifier {name:?} with {rest:#?}"),
@@ -193,6 +226,82 @@ impl<'a> Preprocessor<'a> {
             .by_ref()
             .take_while(|token| token.kind != TokenKind::Newline)
             .collect()
+    }
+}
+
+// TODO: proper error type to differentiate between eof and unexpected token
+fn eat<'a>(tokens: &mut &'a [Token<'a>], kind: TokenKind) -> Result<&'a Token<'a>, ()> {
+    let token = tokens.first().ok_or(())?;
+    if token.kind == kind {
+        tokens.split_off_first();
+        Ok(token)
+    }
+    else {
+        Err(())
+    }
+}
+
+fn parse_function_like_replacement<'a>(
+    parameters: &IndexSet<&str>,
+    _is_varargs: bool,
+    tokens: &'a [Token<'a>],
+) -> Vec<Replacement<'a>> {
+    tokens
+        .iter()
+        .map(|token| {
+            if let Some(param_index) = parameters.get_index_of(token.slice()) {
+                Replacement::Parameter(param_index)
+            }
+            else {
+                Replacement::Literal(*token)
+            }
+        })
+        .collect()
+}
+
+fn parse_function_like_define<'a>(
+    sess: &'a Session<'a>,
+    name: &'a str,
+    mut tokens: &'a [Token<'a>],
+) -> Macro<'a> {
+    assert!(eat(&mut tokens, TokenKind::LParen).is_ok());
+
+    let mut parameters = IndexSet::default();
+    loop {
+        match tokens.first() {
+            Some(token) if matches!(token.kind, TokenKind::RParen | TokenKind::Ellipsis) => break,
+            Some(token) => {
+                tokens.split_off_first();
+                if is_identifier(token) {
+                    assert!(
+                        parameters.insert(token.slice()),
+                        "TODO: error: duplicate parameter name",
+                    )
+                }
+                else {
+                    todo!("error: non-identifier in function-like macro parameter list: {token:?}")
+                }
+            }
+            None => todo!("error: unexpected end of function-like macro parameter list"),
+        }
+
+        if eat(&mut tokens, TokenKind::Comma).is_err() {
+            break;
+        }
+    }
+
+    let is_varargs = eat(&mut tokens, TokenKind::Ellipsis).is_ok();
+    if let Err(()) = eat(&mut tokens, TokenKind::RParen) {
+        todo!("error: expected rparen")
+    }
+
+    let replacement = parse_function_like_replacement(&parameters, is_varargs, tokens);
+
+    Macro::Function {
+        name,
+        parameter_count: parameters.len(),
+        is_varargs,
+        replacement: sess.alloc_slice_copy(&replacement),
     }
 }
 

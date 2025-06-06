@@ -724,6 +724,7 @@ name = "panko-parser"
 version = "0.1.0"
 dependencies = [
  "ariadne",
+ "indexmap",
  "itertools",
  "lalrpop",
  "lalrpop-util",

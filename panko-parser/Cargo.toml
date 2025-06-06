@@ -8,6 +8,7 @@ workspace = true
 
 [dependencies]
 ariadne = { workspace = true }
+indexmap = { workspace = true }
 itertools = { workspace = true }
 lalrpop-util = { workspace = true }
 panko-lex = { path = "../panko-lex" }
