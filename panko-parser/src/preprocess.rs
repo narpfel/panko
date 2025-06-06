@@ -16,6 +16,11 @@ pub type TokenIter<'a> = impl Iterator<Item = Token<'a>>;
 
 type UnpreprocessedTokens<'a> = Peekable<panko_lex::TokenIter<'a>>;
 
+pub enum Trace {
+    No,
+    Yes,
+}
+
 fn is_identifier(token: &Token) -> bool {
     token.is_identifier() || token.is_keyword()
 }
@@ -58,6 +63,7 @@ enum Macro<'a> {
 
 struct Preprocessor<'a> {
     sess: &'a Session<'a>,
+    trace: Trace,
     tokens: UnpreprocessedTokens<'a>,
     previous_was_newline: bool,
     macros: HashMap<&'a str, Macro<'a>>,
@@ -200,6 +206,9 @@ impl<'a> Preprocessor<'a> {
                 else {
                     Macro::Object { name, replacement: line }
                 };
+                if let Trace::Yes = self.trace {
+                    println!("{:?}: #define {name} {macro:#?}", name_tok.loc());
+                }
                 // TODO: check for redefinition
                 self.macros.insert(name, r#macro);
             }
@@ -215,7 +224,15 @@ impl<'a> Preprocessor<'a> {
         match &line[..] {
             [] => todo!("error message: empty `#undef` directive"),
             [name] if is_identifier(name) => {
-                self.macros.remove(name.slice());
+                let loc = name.loc();
+                let name = name.slice();
+                let removed_macro = self.macros.remove(name);
+                if let Trace::Yes = self.trace {
+                    println!(
+                        "{loc:?}: #undef {name} (was present: {})",
+                        removed_macro.is_some(),
+                    );
+                }
             }
             [name] => todo!("error message: trying to `#undef` non-identifier {name:?}"),
             [name, rest @ ..] =>
@@ -308,9 +325,14 @@ fn parse_function_like_define<'a>(
     }
 }
 
-pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -> TokenIter<'a> {
+pub fn preprocess<'a>(
+    sess: &'a Session<'a>,
+    tokens: panko_lex::TokenIter<'a>,
+    trace: Trace,
+) -> TokenIter<'a> {
     Preprocessor {
         sess,
+        trace,
         tokens: tokens.peekable(),
         previous_was_newline: true,
         macros: HashMap::default(),

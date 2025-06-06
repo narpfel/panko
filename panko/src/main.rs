@@ -19,6 +19,7 @@ use yansi::Condition;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 enum Step {
+    Preprocess,
     Ast,
     Scopes,
     Typeck,
@@ -43,6 +44,9 @@ struct Args {
     /// panic whenever a diagnostic is emitted
     #[arg(long)]
     treat_error_as_bug: bool,
+    /// trace internal preprocessor state changes
+    #[arg(long)]
+    trace_preprocessor: bool,
 }
 
 fn main() -> Result<()> {
@@ -69,14 +73,28 @@ fn main() -> Result<()> {
         &std::fs::read_to_string(&args.filename)
             .with_context(|| format!("could not open source file `{}`", args.filename.display()))?,
     );
-    let session = &panko_parser::ast::Session::new(bump, args.treat_error_as_bug);
+    let session = panko_parser::ast::Session::new(bump, args.treat_error_as_bug);
 
-    let tokens = panko_parser::preprocess(session, tokens);
+    let trace_preprocessor = if args.trace_preprocessor {
+        panko_parser::preprocess::Trace::Yes
+    }
+    else {
+        panko_parser::preprocess::Trace::No
+    };
+    let tokens = panko_parser::preprocess(&session, tokens, trace_preprocessor);
+
+    if args.print.contains(&Step::Preprocess) {
+        todo!("printing preprocessed source code not implemented");
+    }
+    if let Some(Step::Preprocess) = args.stop_after {
+        tokens.for_each(|_| ());
+        return Ok(());
+    }
 
     let tokens = panko_lex::apply_lexer_hack(tokens, &typedef_names);
 
     let translation_unit =
-        match panko_parser::parse(session, &typedef_names, &is_in_typedef, tokens) {
+        match panko_parser::parse(&session, &typedef_names, &is_in_typedef, tokens) {
             Ok(translation_unit) => translation_unit,
             Err(err) => {
                 err.print();
@@ -91,7 +109,7 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    let translation_unit = panko_sema::resolve_names(session, translation_unit);
+    let translation_unit = panko_sema::resolve_names(&session, translation_unit);
     session.handle_diagnostics();
 
     if args.print.contains(&Step::Scopes) {
@@ -101,7 +119,7 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    let translation_unit = panko_sema::resolve_types(session, translation_unit);
+    let translation_unit = panko_sema::resolve_types(&session, translation_unit);
     session.handle_diagnostics();
 
     if args.print.contains(&Step::Typeck) {

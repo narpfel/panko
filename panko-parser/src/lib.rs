@@ -36,7 +36,7 @@ pub use crate::preprocess::preprocess;
 
 mod as_sexpr;
 pub mod ast;
-mod preprocess;
+pub mod preprocess;
 pub mod sexpr_builder;
 
 lalrpop_mod!(
