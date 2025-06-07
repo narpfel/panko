@@ -75,6 +75,7 @@ fn main() -> Result<()> {
 
     let tokens = panko_parser::preprocess(session, tokens);
 
+    // TODO: diagnostics emitted by the preprocessor are not handled when stopping here
     if args.print.contains(&Step::Preprocess) {
         panko_parser::preprocess::print_preprocessed_source(tokens);
         return Ok(());
