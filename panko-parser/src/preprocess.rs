@@ -175,8 +175,7 @@ impl<'a> Preprocessor<'a> {
                 // null directive at end of file without newline (technically UB)
             }
             Some(token) if token.kind == TokenKind::Newline => {
-                // eat newline token => null directive
-                self.tokens.next();
+                // null directive
             }
             Some(token) if token.slice() == "define" => {
                 self.parse_define();
