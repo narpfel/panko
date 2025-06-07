@@ -31,12 +31,11 @@ use crate::ast::IntegralKind;
 use crate::ast::ParsedSpecifiers;
 use crate::ast::QualifiedType;
 use crate::ast::Signedness;
-use crate::preprocess::TokenIter;
 pub use crate::preprocess::preprocess;
 
 mod as_sexpr;
 pub mod ast;
-mod preprocess;
+pub mod preprocess;
 pub mod sexpr_builder;
 
 lalrpop_mod!(
@@ -1064,7 +1063,7 @@ pub fn parse<'a>(
     sess: &'a ast::Session<'a>,
     typedef_names: &'a RefCell<TypedefNames<'a>>,
     is_in_typedef: &'a Cell<bool>,
-    tokens: LexerHacked<'a, TokenIter<'a>>,
+    tokens: LexerHacked<'a, impl Iterator<Item = Token<'a>>>,
 ) -> Result<ast::TranslationUnit<'a>, Box<dyn Report + 'a>> {
     let parser = grammar::TranslationUnitParser::new();
     let parse_tree = parser

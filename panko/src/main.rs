@@ -14,11 +14,13 @@ use clap::ValueEnum;
 use color_eyre::Result;
 use color_eyre::eyre::Context;
 use panko_lex::Bump;
+use panko_lex::TokenKind;
 use panko_parser::sexpr_builder::AsSExpr as _;
 use yansi::Condition;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 enum Step {
+    Preprocess,
     Ast,
     Scopes,
     Typeck,
@@ -72,6 +74,16 @@ fn main() -> Result<()> {
     let session = &panko_parser::ast::Session::new(bump, args.treat_error_as_bug);
 
     let tokens = panko_parser::preprocess(session, tokens);
+
+    if args.print.contains(&Step::Preprocess) {
+        panko_parser::preprocess::print_preprocessed_source(tokens);
+        return Ok(());
+    }
+    if let Some(Step::Preprocess) = args.stop_after {
+        return Ok(());
+    }
+
+    let tokens = tokens.filter(|token| token.kind != TokenKind::Newline);
 
     let tokens = panko_lex::apply_lexer_hack(tokens, &typedef_names);
 

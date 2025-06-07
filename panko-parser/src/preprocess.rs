@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use std::iter::Peekable;
 
 use indexmap::IndexSet;
+use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
@@ -117,7 +118,10 @@ impl<'a> Preprocessor<'a> {
         gen move {
             while let Some(token) = self.tokens.next() {
                 match token {
-                    token if token.kind == TokenKind::Newline => self.previous_was_newline = true,
+                    token if token.kind == TokenKind::Newline => {
+                        self.previous_was_newline = true;
+                        yield token;
+                    }
                     token if token.kind == TokenKind::Hash =>
                         if self.previous_was_newline {
                             self.parse_directive();
@@ -227,7 +231,7 @@ impl<'a> Preprocessor<'a> {
         self.previous_was_newline = true;
         self.tokens
             .by_ref()
-            .take_while(|token| token.kind != TokenKind::Newline)
+            .peeking_take_while(|token| token.kind != TokenKind::Newline)
             .collect()
     }
 }
@@ -317,4 +321,22 @@ pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -
         expander: Expander::default(),
     }
     .run()
+}
+
+pub fn print_preprocessed_source(tokens: TokenIter) {
+    tokens.fold(None::<Token>, |last, token| {
+        if let Some(last) = last {
+            if last.kind == TokenKind::Newline {
+                let indent = token.loc().src()[last.loc().end()..]
+                    .find(|c: char| !c.is_whitespace())
+                    .unwrap_or(0);
+                print!("{:indent$}", "");
+            }
+            else if last.loc().end() != token.loc().start() {
+                print!(" ");
+            }
+        }
+        print!("{}", token.slice());
+        Some(token)
+    });
 }
