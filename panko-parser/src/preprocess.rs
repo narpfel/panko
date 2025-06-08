@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::iter::Peekable;
+use std::iter::from_fn;
 
 use indexmap::IndexSet;
 use itertools::Itertools as _;
@@ -37,8 +38,8 @@ fn tokens_loc<'a>(tokens: &[Token<'a>]) -> Loc<'a> {
 
 #[derive(Debug, Clone, Copy)]
 enum Replacement<'a> {
-    Literal(#[expect(dead_code)] Token<'a>),
-    Parameter(#[expect(dead_code)] usize),
+    Literal(Token<'a>),
+    Parameter(usize),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -48,13 +49,11 @@ enum Macro<'a> {
         replacement: &'a [Token<'a>],
     },
     Function {
-        #[expect(dead_code)]
         name: &'a str,
         #[expect(dead_code)]
         parameter_count: usize,
         #[expect(dead_code)]
         is_varargs: bool,
-        #[expect(dead_code)]
         replacement: &'a [Replacement<'a>],
     },
 }
@@ -67,10 +66,64 @@ struct Preprocessor<'a> {
     expander: Expander<'a>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
+enum Expanding<'a> {
+    Object {
+        name: &'a str,
+        replacement: &'a [Token<'a>],
+    },
+    Function {
+        name: &'a str,
+        arguments: Vec<&'a [Token<'a>]>,
+        replacement: &'a [Replacement<'a>],
+    },
+    Tokens {
+        tokens: &'a [Token<'a>],
+    },
+    Token(Option<Token<'a>>),
+}
+
+impl<'a> Expanding<'a> {
+    fn name(&self) -> Option<&'a str> {
+        match self {
+            Expanding::Object { name, .. } | Expanding::Function { name, .. } => Some(name),
+            Expanding::Tokens { tokens: _ } => None,
+            Expanding::Token(_) => None,
+        }
+    }
+
+    fn next(&mut self) -> Expanded<'a> {
+        match self {
+            Self::Object { name: _, replacement } => replacement.split_off_first().into(),
+            Self::Function { name: _, arguments, replacement } =>
+                match replacement.split_off_first() {
+                    Some(Replacement::Literal(token)) => Expanded::Token(*token),
+                    Some(Replacement::Parameter(index)) => Expanded::Many(arguments[*index]),
+                    None => Expanded::Done,
+                },
+            Self::Tokens { tokens } => tokens.split_off_first().into(),
+            Self::Token(token) => token.take().map_or(Expanded::Done, Expanded::Token),
+        }
+    }
+}
+
+enum Expanded<'a> {
+    Token(Token<'a>),
+    Many(&'a [Token<'a>]),
+    Done,
+}
+
+impl<'a> From<Option<&Token<'a>>> for Expanded<'a> {
+    fn from(value: Option<&Token<'a>>) -> Self {
+        value.copied().map_or(Expanded::Done, Expanded::Token)
+    }
+}
+
+#[derive(Debug)]
 struct Expander<'a> {
+    sess: &'a Session<'a>,
     hidden: HashSet<&'a str>,
-    todo: Vec<(&'a str, &'a [Token<'a>])>,
+    todo: Vec<Expanding<'a>>,
 }
 
 impl<'a> Expander<'a> {
@@ -78,24 +131,24 @@ impl<'a> Expander<'a> {
         self.todo.is_empty()
     }
 
-    fn push(&mut self, r#macro: Macro<'a>) {
-        match r#macro {
-            Macro::Object { name, replacement } => {
-                self.todo.push((name, replacement));
-                assert!(self.hidden.insert(name));
-            }
-            Macro::Function { .. } => todo!("expansion of function-like macros"),
+    fn push(&mut self, expanding: Expanding<'a>) {
+        if let Some(name) = expanding.name() {
+            assert!(self.hidden.insert(name));
         }
+        self.todo.push(expanding);
     }
 
     fn next(&mut self, macros: &HashMap<&'a str, Macro<'a>>) -> Option<Token<'a>> {
         loop {
             let token = loop {
-                let (name, tokens) = self.todo.last_mut()?;
-                match tokens.split_off_first() {
-                    Some(token) => break token,
-                    None => {
-                        self.hidden.remove(name);
+                let expanding = self.todo.last_mut()?;
+                match expanding.next() {
+                    Expanded::Token(token) => break token,
+                    Expanded::Many(tokens) => self.todo.push(Expanding::Tokens { tokens }),
+                    Expanded::Done => {
+                        if let Some(name) = expanding.name() {
+                            self.hidden.remove(name);
+                        }
                         self.todo.pop();
                     }
                 }
@@ -105,10 +158,32 @@ impl<'a> Expander<'a> {
             if let Some(&r#macro) = macros.get(name)
                 && !self.hidden.contains(name)
             {
-                self.push(r#macro);
+                // TODO: deduplicate
+                let expanding = match r#macro {
+                    Macro::Object { name, replacement } => Expanding::Object { name, replacement },
+                    Macro::Function {
+                        name,
+                        parameter_count: _,
+                        is_varargs: _,
+                        replacement,
+                    } => match self.next(macros) {
+                        Some(token) if token.kind == TokenKind::LParen => {
+                            let arguments = parse_macro_arguments(
+                                self.sess,
+                                &mut from_fn(|| self.next(macros)).peekable(),
+                            );
+                            Expanding::Function { name, arguments, replacement }
+                        }
+                        not_lparen => {
+                            self.push(Expanding::Token(not_lparen));
+                            return Some(token);
+                        }
+                    },
+                };
+                self.push(expanding);
             }
             else {
-                return Some(*token);
+                return Some(token);
             }
         }
     }
@@ -153,9 +228,14 @@ impl<'a> Preprocessor<'a> {
                     token if let Some(&r#macro) = self.macros.get(token.slice()) => {
                         self.previous_was_newline = false;
                         assert!(self.expander.is_empty());
-                        self.expander.push(r#macro);
-                        while let Some(token) = self.expander.next(&self.macros) {
-                            yield token;
+                        match self.macro_as_expanding(r#macro) {
+                            Some(expanding) => {
+                                self.expander.push(expanding);
+                                while let Some(token) = self.expander.next(&self.macros) {
+                                    yield token;
+                                }
+                            }
+                            None => yield token,
                         }
                     }
                     token => {
@@ -164,6 +244,24 @@ impl<'a> Preprocessor<'a> {
                     }
                 }
             }
+        }
+    }
+
+    fn macro_as_expanding(&mut self, r#macro: Macro<'a>) -> Option<Expanding<'a>> {
+        match r#macro {
+            Macro::Object { name, replacement } => Some(Expanding::Object { name, replacement }),
+            Macro::Function {
+                name,
+                parameter_count: _,
+                is_varargs: _,
+                replacement,
+            } => match self.tokens.next_if(|token| token.kind == TokenKind::LParen) {
+                Some(_) => {
+                    let arguments = parse_macro_arguments(self.sess, self.tokens.by_ref());
+                    Some(Expanding::Function { name, arguments, replacement })
+                }
+                None => None,
+            },
         }
     }
 
@@ -313,13 +411,74 @@ fn parse_function_like_define<'a>(
     }
 }
 
+fn eat_until_in_balanced_parens<'a>(
+    tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
+    predicate: impl Fn(&Token<'a>) -> bool,
+) -> Vec<Token<'a>> {
+    let mut nesting_level = 0_usize;
+    tokens
+        .peeking_take_while(|token| {
+            match token.kind {
+                TokenKind::LParen => nesting_level += 1,
+                TokenKind::RParen => match nesting_level.checked_sub(1) {
+                    Some(value) => {
+                        nesting_level = value;
+                        return true;
+                    }
+                    None => return false,
+                },
+                _ => (),
+            }
+            !predicate(token)
+        })
+        .collect()
+}
+
+fn parse_macro_arguments<'a>(
+    sess: &'a Session<'a>,
+    tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
+) -> Vec<&'a [Token<'a>]> {
+    let mut arguments = Vec::new();
+
+    loop {
+        let token = tokens.peek();
+        if token.is_none_or(|token| token.kind == TokenKind::RParen) {
+            break;
+        }
+        arguments.push(
+            sess.alloc_slice_copy(&eat_until_in_balanced_parens(tokens, |token| {
+                matches!(token.kind, TokenKind::RParen | TokenKind::Comma)
+            })),
+        );
+
+        match tokens.peek() {
+            Some(token) if token.kind == TokenKind::RParen => break,
+            Some(token) if token.kind == TokenKind::Comma => tokens.next(),
+            Some(_) => unreachable!(),
+            None => break,
+        };
+    }
+
+    match tokens.next() {
+        Some(token) if token.kind == TokenKind::RParen => (),
+        Some(_) => unreachable!(),
+        None => todo!("error: missing rparen in function-like macro invocation"),
+    }
+
+    arguments
+}
+
 pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -> TokenIter<'a> {
     Preprocessor {
         sess,
         tokens: tokens.peekable(),
         previous_was_newline: true,
         macros: HashMap::default(),
-        expander: Expander::default(),
+        expander: Expander {
+            sess,
+            hidden: HashSet::default(),
+            todo: Vec::default(),
+        },
     }
     .run()
 }
