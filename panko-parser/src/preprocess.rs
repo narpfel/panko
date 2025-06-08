@@ -22,6 +22,8 @@ fn is_identifier(token: &Token) -> bool {
 }
 
 fn is_lparen(previous: &Token, token: &Token) -> bool {
+    // TODO: this should check that both source files are the same (so that two tokens `#include`d
+    // from different files such that their locations match are not recognised as `lparen`).
     token.kind == TokenKind::LParen && previous.loc().end() == token.loc().start()
 }
 
@@ -331,6 +333,12 @@ pub fn print_preprocessed_source(tokens: TokenIter) {
                     .unwrap_or(0);
                 print!("{:indent$}", "");
             }
+            // TODO: this should check that both source files are the same (so that two tokens
+            // `#include`d from different files such that their locations match are not recognised
+            // as adjacent).
+            // TODO: this does not take into account that `last` could have come from a macro
+            // expansion. The preprocessor should track the original location of each token for
+            // this and for error messages.
             else if last.loc().end() != token.loc().start() {
                 print!(" ");
             }
