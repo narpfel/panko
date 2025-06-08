@@ -58,6 +58,30 @@ enum Macro<'a> {
     },
 }
 
+impl<'a> Macro<'a> {
+    fn expand(
+        &self,
+        sess: &'a Session<'a>,
+        tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
+    ) -> Option<Expanding<'a>> {
+        match self {
+            Self::Object { name, replacement } => Some(Expanding::Object { name, replacement }),
+            Self::Function {
+                name,
+                parameter_count: _,
+                is_varargs: _,
+                replacement,
+            } => match tokens.next_if(|token| token.kind == TokenKind::LParen) {
+                Some(_) => {
+                    let arguments = parse_macro_arguments(sess, tokens);
+                    Some(Expanding::Function { name, arguments, replacement })
+                }
+                None => None,
+            },
+        }
+    }
+}
+
 struct Preprocessor<'a> {
     sess: &'a Session<'a>,
     tokens: UnpreprocessedTokens<'a>,
@@ -158,27 +182,15 @@ impl<'a> Expander<'a> {
             if let Some(&r#macro) = macros.get(name)
                 && !self.hidden.contains(name)
             {
-                // TODO: deduplicate
-                let expanding = match r#macro {
-                    Macro::Object { name, replacement } => Expanding::Object { name, replacement },
-                    Macro::Function {
-                        name,
-                        parameter_count: _,
-                        is_varargs: _,
-                        replacement,
-                    } => match self.next(macros) {
-                        Some(token) if token.kind == TokenKind::LParen => {
-                            let arguments = parse_macro_arguments(
-                                self.sess,
-                                &mut from_fn(|| self.next(macros)).peekable(),
-                            );
-                            Expanding::Function { name, arguments, replacement }
-                        }
-                        not_lparen => {
-                            self.push(Expanding::Token(not_lparen));
-                            return Some(token);
-                        }
-                    },
+                let sess = self.sess;
+                let tokens = &mut from_fn(|| self.next(macros)).peekable();
+                let expanding = match r#macro.expand(sess, tokens) {
+                    Some(expanding) => expanding,
+                    None => {
+                        let maybe_peeked = tokens.next();
+                        self.push(Expanding::Token(maybe_peeked));
+                        return Some(token);
+                    }
                 };
                 self.push(expanding);
             }
@@ -228,7 +240,7 @@ impl<'a> Preprocessor<'a> {
                     token if let Some(&r#macro) = self.macros.get(token.slice()) => {
                         self.previous_was_newline = false;
                         assert!(self.expander.is_empty());
-                        match self.macro_as_expanding(r#macro) {
+                        match r#macro.expand(self.sess, self.tokens.by_ref()) {
                             Some(expanding) => {
                                 self.expander.push(expanding);
                                 while let Some(token) = self.expander.next(&self.macros) {
@@ -244,24 +256,6 @@ impl<'a> Preprocessor<'a> {
                     }
                 }
             }
-        }
-    }
-
-    fn macro_as_expanding(&mut self, r#macro: Macro<'a>) -> Option<Expanding<'a>> {
-        match r#macro {
-            Macro::Object { name, replacement } => Some(Expanding::Object { name, replacement }),
-            Macro::Function {
-                name,
-                parameter_count: _,
-                is_varargs: _,
-                replacement,
-            } => match self.tokens.next_if(|token| token.kind == TokenKind::LParen) {
-                Some(_) => {
-                    let arguments = parse_macro_arguments(self.sess, self.tokens.by_ref());
-                    Some(Expanding::Function { name, arguments, replacement })
-                }
-                None => None,
-            },
         }
     }
 
