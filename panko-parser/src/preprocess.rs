@@ -446,10 +446,6 @@ fn parse_macro_arguments<'a>(
     let mut arguments = Vec::new();
 
     loop {
-        let token = tokens.peek();
-        if token.is_none_or(|token| token.kind == TokenKind::RParen) {
-            break;
-        }
         arguments.push(
             sess.alloc_slice_copy(&eat_until_in_balanced_parens(tokens, |token| {
                 matches!(token.kind, TokenKind::RParen | TokenKind::Comma)
