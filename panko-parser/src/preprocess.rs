@@ -129,8 +129,8 @@ impl<'a> Expanding<'a> {
                     },
                     None => Expanded::Done,
                 },
-            Self::Argument { function_name, tokens } => match tokens.split_off_first() {
-                Some(&token) => Expanded::TokenInArgument { function_name, token },
+            Self::Argument { function_name: _, tokens } => match tokens.split_off_first() {
+                Some(&token) => Expanded::Token(token),
                 None => Expanded::Done,
             },
             Self::Token(token) => token.take().map_or(Expanded::Done, Expanded::Token),
@@ -139,10 +139,6 @@ impl<'a> Expanding<'a> {
 }
 
 enum Expanded<'a> {
-    TokenInArgument {
-        function_name: &'a str,
-        token: Token<'a>,
-    },
     Token(Token<'a>),
     Argument {
         function_name: &'a str,
@@ -184,12 +180,10 @@ impl<'a> Expander<'a> {
 
     fn next(&mut self, macros: &HashMap<&'a str, Macro<'a>>) -> Option<Token<'a>> {
         loop {
-            let (maybe_function_name, token) = loop {
+            let token = loop {
                 let expanding = self.todo.last_mut()?;
                 match expanding.next() {
-                    Expanded::TokenInArgument { function_name, token } =>
-                        break (Some(function_name), token),
-                    Expanded::Token(token) => break (None, token),
+                    Expanded::Token(token) => break token,
                     Expanded::Argument { function_name, tokens } =>
                         self.push(Expanding::Argument { function_name, tokens }),
                     Expanded::Done => {
@@ -209,9 +203,7 @@ impl<'a> Expander<'a> {
 
             let name = token.slice();
             match macros.get(name) {
-                Some(r#macro)
-                    if Some(name) == maybe_function_name || !self.hidden.contains(name) =>
-                {
+                Some(r#macro) if !self.hidden.contains(name) => {
                     let sess = self.sess;
                     let tokens = &mut from_fn(|| self.next(macros)).peekable();
                     match r#macro.expand(sess, tokens) {
