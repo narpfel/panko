@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_function_like_macro_with_nesten_parens_in_argument_list.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+ 
+
+ 
+int f(int x, int y) {
+    return 2 * x + y;
+}
+ 
+int main() {
+    return f(5, 20) - (1 + (100, 2)) + 42 ;
+}
+
+----- stderr -----

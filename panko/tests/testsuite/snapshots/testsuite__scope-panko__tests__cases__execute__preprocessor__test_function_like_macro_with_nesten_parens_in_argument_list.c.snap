@@ -1,0 +1,36 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/preprocessor/test_function_like_macro_with_nesten_parens_in_argument_list.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      f~0 `fn(x: int, y: int) -> int`
+      (params
+         x~1 `int`
+         y~2 `int`)
+      (compound-statement
+         (return (add (multiply 2 (name x~1 `int`)) (name y~2 `int`)))))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (return
+            (add
+               (subtract
+                  (call (name f~0 `fn(x: int, y: int) -> int`)
+                     5
+                     20)
+                  (add 1
+                     (comma
+                        100
+                        2)))
+               42)))))
+
+----- stderr -----

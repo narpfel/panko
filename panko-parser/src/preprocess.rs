@@ -428,19 +428,19 @@ fn eat_until_in_balanced_parens<'a>(
 ) -> Vec<Token<'a>> {
     let mut nesting_level = 0_usize;
     tokens
-        .peeking_take_while(|token| {
-            match token.kind {
-                TokenKind::LParen => nesting_level += 1,
-                TokenKind::RParen => match nesting_level.checked_sub(1) {
-                    Some(value) => {
-                        nesting_level = value;
-                        return true;
-                    }
-                    None => return false,
-                },
-                _ => (),
+        .peeking_take_while(|token| match token.kind {
+            TokenKind::LParen => {
+                nesting_level += 1;
+                true
             }
-            !predicate(token)
+            TokenKind::RParen => match nesting_level.checked_sub(1) {
+                Some(value) => {
+                    nesting_level = value;
+                    true
+                }
+                None => false,
+            },
+            _ => nesting_level != 0 || !predicate(token),
         })
         .collect()
 }
