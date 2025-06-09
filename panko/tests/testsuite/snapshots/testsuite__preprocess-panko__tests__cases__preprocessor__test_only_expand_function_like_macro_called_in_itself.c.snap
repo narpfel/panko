@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/preprocessor/test_only_expand_function_like_macro_called_in_itself.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+
+
+ 
+int main() {
+    LONG( long ) LONG( LONG( long ) LONG( int ) ) x = 42;
+    return _Generic(x, long long: 27 + 1 );
+}
+
+----- stderr -----

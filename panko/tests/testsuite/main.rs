@@ -47,6 +47,7 @@ fn test(
     #[case] step: &str,
     #[files("tests/cases/**/test_*.c")]
     #[exclude("/test_nosnapshot_.*\\.c$")]
+    #[exclude("/test_only_expand_.*\\.c$")]
     filename: PathBuf,
 ) {
     let filename = relative_to(

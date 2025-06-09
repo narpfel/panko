@@ -101,7 +101,8 @@ enum Expanding<'a> {
         arguments: Vec<&'a [Token<'a>]>,
         replacement: &'a [Replacement<'a>],
     },
-    Tokens {
+    Argument {
+        function_name: &'a str,
         tokens: &'a [Token<'a>],
     },
     Token(Option<Token<'a>>),
@@ -111,7 +112,7 @@ impl<'a> Expanding<'a> {
     fn name(&self) -> Option<&'a str> {
         match self {
             Expanding::Object { name, .. } | Expanding::Function { name, .. } => Some(name),
-            Expanding::Tokens { tokens: _ } => None,
+            Expanding::Argument { function_name: _, tokens: _ } => None,
             Expanding::Token(_) => None,
         }
     }
@@ -119,21 +120,34 @@ impl<'a> Expanding<'a> {
     fn next(&mut self) -> Expanded<'a> {
         match self {
             Self::Object { name: _, replacement } => replacement.split_off_first().into(),
-            Self::Function { name: _, arguments, replacement } =>
+            Self::Function { name, arguments, replacement } =>
                 match replacement.split_off_first() {
                     Some(Replacement::Literal(token)) => Expanded::Token(*token),
-                    Some(Replacement::Parameter(index)) => Expanded::Many(arguments[*index]),
+                    Some(Replacement::Parameter(index)) => Expanded::Argument {
+                        function_name: name,
+                        tokens: arguments[*index],
+                    },
                     None => Expanded::Done,
                 },
-            Self::Tokens { tokens } => tokens.split_off_first().into(),
+            Self::Argument { function_name, tokens } => match tokens.split_off_first() {
+                Some(&token) => Expanded::TokenInArgument { function_name, token },
+                None => Expanded::Done,
+            },
             Self::Token(token) => token.take().map_or(Expanded::Done, Expanded::Token),
         }
     }
 }
 
 enum Expanded<'a> {
+    TokenInArgument {
+        function_name: &'a str,
+        token: Token<'a>,
+    },
     Token(Token<'a>),
-    Many(&'a [Token<'a>]),
+    Argument {
+        function_name: &'a str,
+        tokens: &'a [Token<'a>],
+    },
     Done,
 }
 
@@ -157,18 +171,21 @@ impl<'a> Expander<'a> {
 
     fn push(&mut self, expanding: Expanding<'a>) {
         if let Some(name) = expanding.name() {
-            assert!(self.hidden.insert(name));
+            self.hidden.insert(name);
         }
         self.todo.push(expanding);
     }
 
     fn next(&mut self, macros: &HashMap<&'a str, Macro<'a>>) -> Option<Token<'a>> {
         loop {
-            let token = loop {
+            let (maybe_function_name, token) = loop {
                 let expanding = self.todo.last_mut()?;
                 match expanding.next() {
-                    Expanded::Token(token) => break token,
-                    Expanded::Many(tokens) => self.todo.push(Expanding::Tokens { tokens }),
+                    Expanded::TokenInArgument { function_name, token } =>
+                        break (Some(function_name), token),
+                    Expanded::Token(token) => break (None, token),
+                    Expanded::Argument { function_name, tokens } =>
+                        self.push(Expanding::Argument { function_name, tokens }),
                     Expanded::Done => {
                         if let Some(name) = expanding.name() {
                             self.hidden.remove(name);
@@ -180,7 +197,7 @@ impl<'a> Expander<'a> {
 
             let name = token.slice();
             if let Some(&r#macro) = macros.get(name)
-                && !self.hidden.contains(name)
+                && (Some(name) == maybe_function_name || !self.hidden.contains(name))
             {
                 let sess = self.sess;
                 let tokens = &mut from_fn(|| self.next(macros)).peekable();
