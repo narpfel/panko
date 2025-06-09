@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/preprocessor/test_function_like_macro.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition x~1 `long` (sign-extend `long` (42 `int`)))
+         (return (truncate `int` (add `long` (multiply `long` (sign-extend `long` (2 `int`)) (x~1 `long`)) (sign-extend `long` (1 `int`))))))))
+
+----- stderr -----
