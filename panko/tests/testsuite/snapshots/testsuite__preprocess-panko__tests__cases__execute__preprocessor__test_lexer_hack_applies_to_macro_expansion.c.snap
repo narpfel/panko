@@ -11,19 +11,19 @@ success: true
 exit_code: 0
 ----- stdout -----
 int printf(char const*, ...);
- 
 
- 
+
+
 int x = 42;
- 
+
 int main() {
     {
         typedef int x ;
         x y = 27;
-        
+
         printf("%d\n", y);
     }
-    
+
     printf("%d\n", x );
 }
 

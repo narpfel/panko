@@ -12,9 +12,9 @@ exit_code: 0
 ----- stdout -----
 
 
- 
 
- 
+
+
 int main () {
     ;
 }

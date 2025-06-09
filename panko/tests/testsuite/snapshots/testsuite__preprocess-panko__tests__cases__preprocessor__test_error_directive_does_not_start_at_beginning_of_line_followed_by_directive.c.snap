@@ -12,8 +12,8 @@ exit_code: 0
 ----- stdout -----
 
 
- 
-int 
+
+int
 
 main () {
     return 42;

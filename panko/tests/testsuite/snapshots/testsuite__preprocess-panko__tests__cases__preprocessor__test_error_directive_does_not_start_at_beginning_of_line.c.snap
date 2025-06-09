@@ -11,9 +11,9 @@ success: true
 exit_code: 0
 ----- stdout -----
 int main() {
-    int a = 10; 
-    int b = 20; 
-    int c = 30; 
+    int a = 10;
+    int b = 20;
+    int c = 30;
 }
 
 ----- stderr -----

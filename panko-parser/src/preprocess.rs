@@ -486,7 +486,9 @@ pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -
 
 pub fn print_preprocessed_source(tokens: TokenIter) {
     tokens.fold(None::<Token>, |last, token| {
-        if let Some(last) = last {
+        if let Some(last) = last
+            && token.kind != TokenKind::Newline
+        {
             if last.kind == TokenKind::Newline {
                 let indent = token.loc().src()[last.loc().end()..]
                     .find(|c: char| !c.is_whitespace())

@@ -11,9 +11,9 @@ success: true
 exit_code: 0
 ----- stdout -----
 
- 
 
- 
+
+
 int main() {
     return 42;
 }

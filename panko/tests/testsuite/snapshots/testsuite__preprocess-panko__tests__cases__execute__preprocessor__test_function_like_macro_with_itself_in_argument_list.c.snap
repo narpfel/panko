@@ -11,10 +11,10 @@ success: true
 exit_code: 0
 ----- stdout -----
 
- 
 
 
- 
+
+
 int main() {
     long long int x = 42;
     return _Generic(x, long long: 27 + 1 );

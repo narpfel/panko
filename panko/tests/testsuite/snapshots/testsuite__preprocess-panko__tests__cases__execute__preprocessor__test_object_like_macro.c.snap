@@ -11,16 +11,16 @@ success: true
 exit_code: 0
 ----- stdout -----
 
- 
+
 int putchar(int c);
- 
 
 
 
- 
+
+
 int main() {
-    int x = 42; 
-    
+    int x = 42;
+
     putchar ('a');
     putchar ('\n');
     return x;

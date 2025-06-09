@@ -11,24 +11,24 @@ success: true
 exit_code: 0
 ----- stdout -----
 
- 
-int printf(char const*, ...);
- 
 
- 
+int printf(char const*, ...);
+
+
+
 int main() {
     int x = 42;
     int* p = &x;
- 
 
-     
+
+
     int y = 27;
-     
-    
+
+
     printf("*p: %d\n", *p);
-    
+
     printf("x: %d\n", y );
-    
+
     printf("y: %d\n", y);
     return y ;
 }

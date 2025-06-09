@@ -13,7 +13,7 @@ exit_code: 0
 
 
 
- 
+
 int main() {
     LONG( long ) LONG( LONG( long ) LONG( int ) ) x = 42;
     return _Generic(x, long long: 27 + 1 );

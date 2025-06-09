@@ -11,10 +11,10 @@ success: true
 exit_code: 0
 ----- stdout -----
 
- 
 
 
- 
+
+
 int main() {
     long int x = 42;
     return 2 * x + 1 ;

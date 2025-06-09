@@ -11,18 +11,18 @@ success: true
 exit_code: 0
 ----- stdout -----
 
- 
+
 int printf(char const*, ...);
- 
+
 int main() {
     int a = 10;
     int b = 20;
     int c = 30;
- 
 
 
 
-     
+
+
     return a + 5 + 3 + 1 ;
 }
 
