@@ -196,23 +196,22 @@ impl<'a> Expander<'a> {
             };
 
             let name = token.slice();
-            if let Some(&r#macro) = macros.get(name)
-                && (Some(name) == maybe_function_name || !self.hidden.contains(name))
-            {
-                let sess = self.sess;
-                let tokens = &mut from_fn(|| self.next(macros)).peekable();
-                let expanding = match r#macro.expand(sess, tokens) {
-                    Some(expanding) => expanding,
-                    None => {
-                        let maybe_peeked = tokens.next();
-                        self.push(Expanding::Token(maybe_peeked));
-                        return Some(token);
+            match macros.get(name) {
+                Some(r#macro)
+                    if Some(name) == maybe_function_name || !self.hidden.contains(name) =>
+                {
+                    let sess = self.sess;
+                    let tokens = &mut from_fn(|| self.next(macros)).peekable();
+                    match r#macro.expand(sess, tokens) {
+                        Some(expanding) => self.push(expanding),
+                        None => {
+                            let maybe_peeked = tokens.next();
+                            self.push(Expanding::Token(maybe_peeked));
+                            return Some(token);
+                        }
                     }
-                };
-                self.push(expanding);
-            }
-            else {
-                return Some(token);
+                }
+                _ => return Some(token),
             }
         }
     }
@@ -365,13 +364,9 @@ fn parse_function_like_replacement<'a>(
 ) -> Vec<Replacement<'a>> {
     tokens
         .iter()
-        .map(|token| {
-            if let Some(param_index) = parameters.get_index_of(token.slice()) {
-                Replacement::Parameter(param_index)
-            }
-            else {
-                Replacement::Literal(*token)
-            }
+        .map(|token| match parameters.get_index_of(token.slice()) {
+            Some(param_index) => Replacement::Parameter(param_index),
+            None => Replacement::Literal(*token),
         })
         .collect()
 }
