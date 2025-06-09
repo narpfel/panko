@@ -167,12 +167,9 @@ impl<'a> Expander<'a> {
 
     fn push(&mut self, expanding: Expanding<'a>) {
         match expanding {
-            Expanding::Argument { function_name, tokens: _ } => {
-                self.hidden.remove(function_name);
-            }
-            _ if let Some(name) = expanding.name() => {
-                self.hidden.insert(name);
-            }
+            Expanding::Argument { function_name, tokens: _ } =>
+                assert!(self.hidden.remove(function_name)),
+            _ if let Some(name) = expanding.name() => assert!(self.hidden.insert(name)),
             _ => (),
         }
         self.todo.push(expanding);
@@ -188,12 +185,10 @@ impl<'a> Expander<'a> {
                         self.push(Expanding::Argument { function_name, tokens }),
                     Expanded::Done => {
                         match expanding {
-                            Expanding::Argument { function_name, tokens: _ } => {
-                                self.hidden.insert(function_name);
-                            }
-                            _ if let Some(name) = expanding.name() => {
-                                self.hidden.remove(name);
-                            }
+                            Expanding::Argument { function_name, tokens: _ } =>
+                                assert!(self.hidden.insert(function_name)),
+                            _ if let Some(name) = expanding.name() =>
+                                assert!(self.hidden.remove(name)),
                             _ => (),
                         }
                         self.todo.pop();
