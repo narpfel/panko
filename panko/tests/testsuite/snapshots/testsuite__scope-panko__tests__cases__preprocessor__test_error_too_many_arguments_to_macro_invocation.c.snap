@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_too_many_arguments_to_macro_invocation.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: argument count mismatch: too many arguments to function-like macro invocation (expected 0 but got 1)
+    ╭─[panko/tests/cases/preprocessor/test_error_too_many_arguments_to_macro_invocation.c:11:5]
+    │
+ 11 │     ZERO_ARGS(42);
+    │     ────┬────  
+    │         ╰────── this macro expects 0 arguments
+────╯
+
+Error: argument count mismatch: too many arguments to function-like macro invocation (expected 1 but got 2)
+    ╭─[panko/tests/cases/preprocessor/test_error_too_many_arguments_to_macro_invocation.c:12:5]
+    │
+ 12 │     ONE_ARG(1, 2);
+    │     ───┬───  
+    │        ╰───── this macro expects 1 argument
+────╯
+
+Error: argument count mismatch: too many arguments to function-like macro invocation (expected 2 but got 3)
+    ╭─[panko/tests/cases/preprocessor/test_error_too_many_arguments_to_macro_invocation.c:13:5]
+    │
+ 13 │     TWO_ARG(3, 4, 5);
+    │     ───┬───  
+    │        ╰───── this macro expects 2 arguments
+────╯
+
+Error: argument count mismatch: too many arguments to function-like macro invocation (expected 3 but got 4)
+    ╭─[panko/tests/cases/preprocessor/test_error_too_many_arguments_to_macro_invocation.c:14:5]
+    │
+ 14 │     THREE_ARG(6, 7, 8, 9);
+    │     ────┬────  
+    │         ╰────── this macro expects 3 arguments
+────╯

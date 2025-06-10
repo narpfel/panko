@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/preprocessor/test_error_too_many_arguments_to_macro_invocation.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+void zero_args();
+void only_arg(...);
+void arg_1(...), arg_2(...), arg_3(...);
+
+
+
+
+
+
+int main() {
+    zero_args() ;
+    only_arg ( 1 ) ;
+    arg_1 ( 3 ); arg_2 ( 4 ) ;
+    arg_1 ( 6 ); arg_2 ( 7 ); arg_3 ( 8 ) ;
+}
+
+----- stderr -----
