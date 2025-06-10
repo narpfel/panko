@@ -446,10 +446,16 @@ fn eat_until_in_balanced_parens<'a>(
         .collect()
 }
 
+fn eat_newlines<'a>(tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>) {
+    #[expect(clippy::redundant_pattern_matching)]
+    while let Some(_) = tokens.next_if(|token| token.kind == TokenKind::Newline) {}
+}
+
 fn parse_macro_arguments<'a>(
     sess: &'a Session<'a>,
     tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
 ) -> Vec<&'a [Token<'a>]> {
+    eat_newlines(tokens);
     let token = tokens.peek();
     if token.is_none_or(|token| token.kind == TokenKind::RParen) {
         tokens.next();
