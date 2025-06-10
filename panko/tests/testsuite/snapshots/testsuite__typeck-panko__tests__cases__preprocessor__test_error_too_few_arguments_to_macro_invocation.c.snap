@@ -12,14 +12,6 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: argument count mismatch: too few arguments to function-like macro invocation (expected 1 but got 0)
-   ╭─[panko/tests/cases/preprocessor/test_error_too_few_arguments_to_macro_invocation.c:9:5]
-   │
- 9 │     ONE_ARG();
-   │     ───┬───  
-   │        ╰───── this macro expects 1 argument
-───╯
-
 Error: argument count mismatch: too few arguments to function-like macro invocation (expected 2 but got 1)
     ╭─[panko/tests/cases/preprocessor/test_error_too_few_arguments_to_macro_invocation.c:10:5]
     │

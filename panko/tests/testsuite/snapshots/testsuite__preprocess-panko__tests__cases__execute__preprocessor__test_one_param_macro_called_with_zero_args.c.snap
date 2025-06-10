@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_one_param_macro_called_with_zero_args.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+
+
+
+int main() {
+    int value = -42;
+    return - value;
+}
+
+----- stderr -----

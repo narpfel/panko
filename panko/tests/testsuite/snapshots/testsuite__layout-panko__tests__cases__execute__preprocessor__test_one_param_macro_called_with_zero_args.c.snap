@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/preprocessor/test_one_param_macro_called_with_zero_args.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (value~1 `int` @0) (negate `int` @0 (42 `int` @0)))
+         (return (negate `int` @4 (value~1 `int` @0))))))
+
+----- stderr -----
