@@ -1,9 +1,11 @@
 use ariadne::Color::Blue;
 use ariadne::Color::Magenta;
 use ariadne::Color::Red;
+use ariadne::Fmt as _;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_report::Report;
+use panko_report::Sliced as _;
 
 #[derive(Debug, Report)]
 #[exit_code(1)]
@@ -22,5 +24,25 @@ pub(super) enum Diagnostic<'a> {
         at: Token<'a>,
         directive: Token<'a>,
         line: Loc<'a>,
+    },
+
+    #[error(
+        "argument count mismatch: too {determiner} arguments to function-like macro invocation (expected {at_least}{expected} but got {actual})"
+    )]
+    #[diagnostics(
+        at(colour = Red, label = "this macro expects {expected} argument{maybe_plural_s}"),
+    )]
+    #[with(
+        at_least = if *is_varargs { "at least " } else { "" },
+        determiner = if expected > actual { "few" } else { "many" },
+        maybe_plural_s = if *expected != 1 { "s" } else { "" },
+        expected = expected.fg(Blue),
+        actual = actual.fg(Red),
+    )]
+    ArityMismatch {
+        at: Token<'a>,
+        expected: usize,
+        actual: usize,
+        is_varargs: bool,
     },
 }

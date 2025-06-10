@@ -50,9 +50,7 @@ enum Macro<'a> {
     },
     Function {
         name: &'a str,
-        #[expect(dead_code)]
         parameter_count: usize,
-        #[expect(dead_code)]
         is_varargs: bool,
         replacement: &'a [Replacement<'a>],
     },
@@ -63,17 +61,26 @@ impl<'a> Macro<'a> {
         &self,
         sess: &'a Session<'a>,
         tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
+        macro_token: &Token<'a>,
     ) -> Option<Expanding<'a>> {
         match self {
             Self::Object { name, replacement } => Some(Expanding::Object { name, replacement }),
-            Self::Function {
+            &Self::Function {
                 name,
-                parameter_count: _,
-                is_varargs: _,
+                parameter_count,
+                is_varargs,
                 replacement,
             } => match tokens.next_if(|token| token.kind == TokenKind::LParen) {
                 Some(_) => {
                     let arguments = parse_macro_arguments(sess, tokens);
+                    if arguments.len() != parameter_count {
+                        sess.emit(Diagnostic::ArityMismatch {
+                            at: *macro_token,
+                            expected: parameter_count,
+                            actual: arguments.len(),
+                            is_varargs,
+                        })
+                    }
                     Some(Expanding::Function { name, arguments, replacement })
                 }
                 None => None,
@@ -125,7 +132,7 @@ impl<'a> Expanding<'a> {
                     Some(Replacement::Literal(token)) => Expanded::Token(*token),
                     Some(Replacement::Parameter(index)) => Expanded::Argument {
                         function_name: name,
-                        tokens: arguments[*index],
+                        tokens: arguments.get(*index).copied().unwrap_or_default(),
                     },
                     None => Expanded::Done,
                 },
@@ -201,7 +208,7 @@ impl<'a> Expander<'a> {
                 Some(r#macro) if !self.hidden.contains(name) => {
                     let sess = self.sess;
                     let tokens = &mut from_fn(|| self.next(macros)).peekable();
-                    match r#macro.expand(sess, tokens) {
+                    match r#macro.expand(sess, tokens, &token) {
                         Some(expanding) => self.push(expanding),
                         None => {
                             let maybe_peeked = tokens.next();
@@ -255,7 +262,7 @@ impl<'a> Preprocessor<'a> {
                     token if let Some(&r#macro) = self.macros.get(token.slice()) => {
                         self.previous_was_newline = false;
                         assert!(self.expander.is_empty());
-                        match r#macro.expand(self.sess, self.tokens.by_ref()) {
+                        match r#macro.expand(self.sess, self.tokens.by_ref(), &token) {
                             Some(expanding) => {
                                 self.expander.push(expanding);
                                 while let Some(token) = self.expander.next(&self.macros) {
@@ -443,6 +450,12 @@ fn parse_macro_arguments<'a>(
     sess: &'a Session<'a>,
     tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
 ) -> Vec<&'a [Token<'a>]> {
+    let token = tokens.peek();
+    if token.is_none_or(|token| token.kind == TokenKind::RParen) {
+        tokens.next();
+        return Vec::new();
+    }
+
     let mut arguments = Vec::new();
 
     loop {
