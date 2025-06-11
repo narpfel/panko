@@ -397,17 +397,23 @@ fn parse_va_opt<'a>(tokens: &mut &'a [Token<'a>]) -> Result<Replacement<'a>, ()>
 }
 
 fn parse_function_like_replacement<'a>(
+    sess: &'a Session<'a>,
     parameters: &IndexSet<&str>,
-    _is_varargs: bool,
+    is_varargs: bool,
     mut tokens: &'a [Token<'a>],
 ) -> Vec<Replacement<'a>> {
     from_fn(|| try {
         let token = tokens.split_off_first()?;
         match token.slice() {
-            "__VA_OPT__" => match parse_va_opt(&mut tokens) {
-                Ok(va_opt) => va_opt,
-                Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
-            },
+            "__VA_OPT__" => {
+                if !is_varargs {
+                    sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
+                }
+                match parse_va_opt(&mut tokens) {
+                    Ok(va_opt) => va_opt,
+                    Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
+                }
+            }
             name => match parameters.get_index_of(name) {
                 Some(param_index) => Replacement::Parameter(param_index),
                 None => Replacement::Literal(*token),
@@ -453,7 +459,7 @@ fn parse_function_like_define<'a>(
         todo!("error: expected rparen")
     }
 
-    let replacement = parse_function_like_replacement(&parameters, is_varargs, tokens);
+    let replacement = parse_function_like_replacement(sess, &parameters, is_varargs, tokens);
 
     Macro::Function {
         name,

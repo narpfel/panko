@@ -45,4 +45,8 @@ pub(super) enum Diagnostic<'a> {
         actual: usize,
         is_varargs: bool,
     },
+
+    #[error("`{at}` outside of variadic macro")]
+    #[diagnostics(at(colour = Red, label = "`{at}` is forbidden outside of variadic macros"))]
+    VaArgsOrVaOptOutsideOfVariadicMacro { at: Token<'a> },
 }
