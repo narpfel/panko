@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/test_error_arity_mismatch_in_function_call.c
-snapshot_kind: text
 ---
 success: false
 exit_code: 1
@@ -50,5 +49,5 @@ Error: argument count mismatch: too few arguments to function call (expected at 
     │
  16 │     varargs(42);
     │     ───┬───  
-    │        ╰───── this callee expects 2 arguments
+    │        ╰───── this callee expects at least 2 arguments
 ────╯

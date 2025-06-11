@@ -357,7 +357,7 @@ enum Diagnostic<'a> {
         "argument count mismatch: too {determiner} arguments to function call (expected {at_least}{expected} but got {actual})"
     )]
     #[diagnostics(
-        at(colour = Red, label = "this callee expects {expected} argument{maybe_plural_s}"),
+        at(colour = Red, label = "this callee expects {at_least}{expected} argument{maybe_plural_s}"),
     )]
     #[with(
         at_least = if *is_varargs { "at least " } else { "" },
