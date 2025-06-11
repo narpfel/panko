@@ -40,6 +40,7 @@ fn tokens_loc<'a>(tokens: &[Token<'a>]) -> Loc<'a> {
 enum Replacement<'a> {
     Literal(Token<'a>),
     Parameter(usize),
+    VaOpt(&'a [Token<'a>]),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -86,7 +87,12 @@ impl<'a> Macro<'a> {
                             is_varargs,
                         })
                     }
-                    Some(Expanding::Function { name, arguments, replacement })
+                    Some(Expanding::Function {
+                        name,
+                        parameter_count,
+                        arguments,
+                        replacement,
+                    })
                 }
                 None => None,
             },
@@ -110,6 +116,7 @@ enum Expanding<'a> {
     },
     Function {
         name: &'a str,
+        parameter_count: usize,
         arguments: Vec<&'a [Token<'a>]>,
         replacement: &'a [Replacement<'a>],
     },
@@ -132,15 +139,26 @@ impl<'a> Expanding<'a> {
     fn next(&mut self) -> Expanded<'a> {
         match self {
             Self::Object { name: _, replacement } => replacement.split_off_first().into(),
-            Self::Function { name, arguments, replacement } =>
-                match replacement.split_off_first() {
-                    Some(Replacement::Literal(token)) => Expanded::Token(*token),
-                    Some(Replacement::Parameter(index)) => Expanded::Argument {
-                        function_name: name,
-                        tokens: arguments.get(*index).copied().unwrap_or_default(),
-                    },
-                    None => Expanded::Done,
+            Self::Function {
+                name,
+                parameter_count,
+                arguments,
+                replacement,
+            } => match replacement.split_off_first() {
+                Some(Replacement::Literal(token)) => Expanded::Token(*token),
+                Some(Replacement::Parameter(index)) => Expanded::Argument {
+                    function_name: name,
+                    tokens: arguments.get(*index).copied().unwrap_or_default(),
                 },
+                Some(Replacement::VaOpt(tokens)) => {
+                    let tokens = match arguments.len() > *parameter_count {
+                        true => *tokens,
+                        false => &[],
+                    };
+                    Expanded::Argument { function_name: name, tokens }
+                }
+                None => Expanded::Done,
+            },
             Self::Argument { function_name: _, tokens } => match tokens.split_off_first() {
                 Some(&token) => Expanded::Token(token),
                 None => Expanded::Done,
@@ -368,18 +386,35 @@ fn eat<'a>(tokens: &mut &'a [Token<'a>], kind: TokenKind) -> Result<&'a Token<'a
     }
 }
 
+fn parse_va_opt<'a>(tokens: &mut &'a [Token<'a>]) -> Result<Replacement<'a>, ()> {
+    eat(tokens, TokenKind::LParen)?;
+    let iter = &mut tokens.iter().copied().peekable();
+    let va_opt_tokens_count =
+        eat_until_in_balanced_parens(iter, |token| token.kind == TokenKind::RParen).count();
+    let va_opt_tokens = tokens.split_off(..va_opt_tokens_count).unwrap();
+    eat(tokens, TokenKind::RParen)?;
+    Ok(Replacement::VaOpt(va_opt_tokens))
+}
+
 fn parse_function_like_replacement<'a>(
     parameters: &IndexSet<&str>,
     _is_varargs: bool,
-    tokens: &'a [Token<'a>],
+    mut tokens: &'a [Token<'a>],
 ) -> Vec<Replacement<'a>> {
-    tokens
-        .iter()
-        .map(|token| match parameters.get_index_of(token.slice()) {
-            Some(param_index) => Replacement::Parameter(param_index),
-            None => Replacement::Literal(*token),
-        })
-        .collect()
+    from_fn(|| try {
+        let token = tokens.split_off_first()?;
+        match token.slice() {
+            "__VA_OPT__" => match parse_va_opt(&mut tokens) {
+                Ok(va_opt) => va_opt,
+                Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
+            },
+            name => match parameters.get_index_of(name) {
+                Some(param_index) => Replacement::Parameter(param_index),
+                None => Replacement::Literal(*token),
+            },
+        }
+    })
+    .collect()
 }
 
 fn parse_function_like_define<'a>(
@@ -431,24 +466,22 @@ fn parse_function_like_define<'a>(
 fn eat_until_in_balanced_parens<'a>(
     tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
     predicate: impl Fn(&Token<'a>) -> bool,
-) -> Vec<Token<'a>> {
+) -> impl Iterator<Item = Token<'a>> {
     let mut nesting_level = 0_usize;
-    tokens
-        .peeking_take_while(|token| match token.kind {
-            TokenKind::LParen => {
-                nesting_level += 1;
+    tokens.peeking_take_while(move |token| match token.kind {
+        TokenKind::LParen => {
+            nesting_level += 1;
+            true
+        }
+        TokenKind::RParen => match nesting_level.checked_sub(1) {
+            Some(value) => {
+                nesting_level = value;
                 true
             }
-            TokenKind::RParen => match nesting_level.checked_sub(1) {
-                Some(value) => {
-                    nesting_level = value;
-                    true
-                }
-                None => false,
-            },
-            _ => nesting_level != 0 || !predicate(token),
-        })
-        .collect()
+            None => false,
+        },
+        _ => nesting_level != 0 || !predicate(token),
+    })
 }
 
 fn eat_newlines<'a>(tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>) {
@@ -470,11 +503,10 @@ fn parse_macro_arguments<'a>(
     let mut arguments = Vec::new();
 
     loop {
-        arguments.push(
-            sess.alloc_slice_copy(&eat_until_in_balanced_parens(tokens, |token| {
-                matches!(token.kind, TokenKind::RParen | TokenKind::Comma)
-            })),
-        );
+        let argument = eat_until_in_balanced_parens(tokens, |token| {
+            matches!(token.kind, TokenKind::RParen | TokenKind::Comma)
+        });
+        arguments.push(sess.alloc_slice_copy(&argument.collect_vec()));
 
         match tokens.peek() {
             Some(token) if token.kind == TokenKind::RParen => break,

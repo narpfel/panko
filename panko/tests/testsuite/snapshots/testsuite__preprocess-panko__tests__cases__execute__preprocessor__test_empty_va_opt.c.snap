@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_empty_va_opt.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+int printf(char const*, ...);
+
+
+
+int main() {
+
+    printf("%d\n", 1 + 2 );
+
+    printf("%d\n", 2 + 5 );
+
+    printf("%d\n", 3 + 2 );
+}
+
+----- stderr -----
