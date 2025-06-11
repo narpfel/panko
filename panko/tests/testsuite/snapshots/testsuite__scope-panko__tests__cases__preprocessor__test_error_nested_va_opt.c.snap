@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_nested_va_opt.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `__VA_OPT__` nested in another `__VA_OPT__`
+   ╭─[panko/tests/cases/preprocessor/test_error_nested_va_opt.c:1:40]
+   │
+ 1 │ #define MACRO(x, y, ...) __VA_OPT__(42 __VA_OPT__(-)) x + y
+   │                          ─────┬────    ─────┬────  
+   │                               │             ╰────── this `__VA_OPT__` is nested ...
+   │                               │                    
+   │                               ╰──────────────────── ... in this `__VA_OPT__`
+───╯
+
+Error: unexpected token `__VA_OPT__` of kind `Identifier`
+   ╭─[panko/tests/cases/preprocessor/test_error_nested_va_opt.c:1:40]
+   │
+ 1 │ #define MACRO(x, y, ...) __VA_OPT__(42 __VA_OPT__(-)) x + y
+   │                                        ─────┬────  
+   │                                             ╰────── expected one of the following token kinds: [";", ",", "=", "*", "(", "[", "+", "-", "/", "%", "==", "!=", "<", "<=", ">", ">=", "&", "^", "|", "<<", ">>", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|=", "&&", "||", "?", "++", "--"]
+───╯

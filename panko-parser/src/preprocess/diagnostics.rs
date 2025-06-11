@@ -49,4 +49,11 @@ pub(super) enum Diagnostic<'a> {
     #[error("`{at}` outside of variadic macro")]
     #[diagnostics(at(colour = Red, label = "`{at}` is forbidden outside of variadic macros"))]
     VaArgsOrVaOptOutsideOfVariadicMacro { at: Token<'a> },
+
+    #[error("`{at}` nested in another `{va_opt}`")]
+    #[diagnostics(
+        va_opt(colour = Blue, label = "... in this `{va_opt}`"),
+        at(colour = Red, label = "this `{at}` is nested ..."),
+    )]
+    NestedVaOpt { at: Token<'a>, va_opt: Token<'a> },
 }

@@ -386,11 +386,20 @@ fn eat<'a>(tokens: &mut &'a [Token<'a>], kind: TokenKind) -> Result<&'a Token<'a
     }
 }
 
-fn parse_va_opt<'a>(tokens: &mut &'a [Token<'a>]) -> Result<Replacement<'a>, ()> {
+fn parse_va_opt<'a>(
+    sess: &'a Session<'a>,
+    va_opt: &Token<'a>,
+    tokens: &mut &'a [Token<'a>],
+) -> Result<Replacement<'a>, ()> {
     eat(tokens, TokenKind::LParen)?;
     let iter = &mut tokens.iter().copied().peekable();
-    let va_opt_tokens_count =
-        eat_until_in_balanced_parens(iter, |token| token.kind == TokenKind::RParen).count();
+    let va_opt_tokens_count = eat_until_in_balanced_parens(iter, |token| {
+        if token.slice() == "__VA_OPT__" {
+            sess.emit(Diagnostic::NestedVaOpt { at: *token, va_opt: *va_opt })
+        }
+        token.kind == TokenKind::RParen
+    })
+    .count();
     let va_opt_tokens = tokens.split_off(..va_opt_tokens_count).unwrap();
     eat(tokens, TokenKind::RParen)?;
     Ok(Replacement::VaOpt(va_opt_tokens))
@@ -409,7 +418,7 @@ fn parse_function_like_replacement<'a>(
                 if !is_varargs {
                     sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
                 }
-                match parse_va_opt(&mut tokens) {
+                match parse_va_opt(sess, token, &mut tokens) {
                     Ok(va_opt) => va_opt,
                     Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
                 }
