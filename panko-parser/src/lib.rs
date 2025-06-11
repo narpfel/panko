@@ -1064,23 +1064,30 @@ pub fn parse<'a>(
     typedef_names: &'a RefCell<TypedefNames<'a>>,
     is_in_typedef: &'a Cell<bool>,
     tokens: LexerHacked<'a, impl Iterator<Item = Token<'a>>>,
-) -> Result<ast::TranslationUnit<'a>, Box<dyn Report + 'a>> {
+) -> Option<ast::TranslationUnit<'a>> {
     let parser = grammar::TranslationUnitParser::new();
     let parse_tree = parser
         .parse(sess, typedef_names, is_in_typedef, tokens)
-        .map_err(|err| match err {
-            ParseError::UnrecognizedToken {
-                token: ((), token @ Token { kind: TokenKind::Error(error), .. }, ()),
-                expected: _,
-            } => Error::from_lexer_error(error, token.loc()),
-            ParseError::UnrecognizedToken { token, expected } => Error::UnexpectedToken {
-                at: token.1,
-                expected: Strings(
-                    sess.alloc_slice_fill_iter(expected.iter().map(|s| sess.alloc_str(s))),
-                ),
+        .map_err(
+            #[expect(clippy::unused_unit)]
+            |err| -> () {
+                let err = match err {
+                    ParseError::UnrecognizedToken {
+                        token: ((), token @ Token { kind: TokenKind::Error(error), .. }, ()),
+                        expected: _,
+                    } => Error::from_lexer_error(error, token.loc()),
+                    ParseError::UnrecognizedToken { token, expected } => Error::UnexpectedToken {
+                        at: token.1,
+                        expected: Strings(
+                            sess.alloc_slice_fill_iter(expected.iter().map(|s| sess.alloc_str(s))),
+                        ),
+                    },
+                    ParseError::User { error } => *error,
+                    err => todo!("{err:#?}"),
+                };
+                sess.emit(err)
             },
-            ParseError::User { error } => *error,
-            err => todo!("{err:#?}"),
-        })?;
-    Ok(ast::from_parse_tree(sess, parse_tree))
+        )
+        .ok()?;
+    Some(ast::from_parse_tree(sess, parse_tree))
 }

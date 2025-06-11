@@ -90,10 +90,10 @@ fn main() -> Result<()> {
 
     let translation_unit =
         match panko_parser::parse(session, &typedef_names, &is_in_typedef, tokens) {
-            Ok(translation_unit) => translation_unit,
-            Err(err) => {
-                err.print();
-                std::process::exit(err.exit_code().into());
+            Some(translation_unit) => translation_unit,
+            None => {
+                session.handle_diagnostics();
+                unreachable!()
             }
         };
 
