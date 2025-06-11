@@ -73,9 +73,12 @@ impl<'a> Macro<'a> {
             } => match tokens.next_if(|token| token.kind == TokenKind::LParen) {
                 Some(_) => {
                     let arguments = parse_macro_arguments(sess, tokens);
-                    if !(arguments.is_empty() && parameter_count == 1)
-                        && arguments.len() != parameter_count
-                    {
+                    let has_arity_mismatch = match () {
+                        () if arguments.is_empty() && parameter_count == 1 => false,
+                        () if is_varargs => parameter_count > arguments.len(),
+                        () => parameter_count != arguments.len(),
+                    };
+                    if has_arity_mismatch {
                         sess.emit(Diagnostic::ArityMismatch {
                             at: *macro_token,
                             expected: parameter_count,

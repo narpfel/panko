@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/preprocessor/test_error_too_few_arguments_to_varargs_macro_invocation.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+void only_arg(...);
+void arg_1(...), arg_2(...), arg_3(...);
+
+
+
+
+
+
+int main() {
+    ;
+    only_arg ( ) ;
+    arg_1 ( 42 ); arg_2 ( ) ;
+    arg_1 ( 42 ); arg_2 ( 27 ); arg_3 ( ) ;
+}
+
+----- stderr -----

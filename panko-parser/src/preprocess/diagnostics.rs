@@ -30,7 +30,7 @@ pub(super) enum Diagnostic<'a> {
         "argument count mismatch: too {determiner} arguments to function-like macro invocation (expected {at_least}{expected} but got {actual})"
     )]
     #[diagnostics(
-        at(colour = Red, label = "this macro expects {expected} argument{maybe_plural_s}"),
+        at(colour = Red, label = "this macro expects {at_least}{expected} argument{maybe_plural_s}"),
     )]
     #[with(
         at_least = if *is_varargs { "at least " } else { "" },
