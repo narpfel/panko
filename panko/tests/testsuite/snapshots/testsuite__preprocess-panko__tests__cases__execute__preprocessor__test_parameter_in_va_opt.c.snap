@@ -5,15 +5,20 @@ info:
   args:
     - "--print=preprocess"
     - "--stop-after=preprocess"
-    - panko/tests/cases/preprocessor/test_error_nested_va_opt.c
+    - panko/tests/cases/execute/preprocessor/test_parameter_in_va_opt.c
 ---
 success: true
 exit_code: 0
 ----- stdout -----
+int printf(char const*, ...);
+
 
 
 int main() {
-    return 42 - 1 + 2 ;
+
+    printf("%d\n", 10 );
+
+    printf("%d\n", 10 - 6 );
 }
 
 ----- stderr -----

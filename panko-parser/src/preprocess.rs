@@ -40,7 +40,7 @@ fn tokens_loc<'a>(tokens: &[Token<'a>]) -> Loc<'a> {
 enum Replacement<'a> {
     Literal(Token<'a>),
     Parameter(usize),
-    VaOpt(&'a [Token<'a>]),
+    VaOpt(&'a [Replacement<'a>]),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -117,12 +117,16 @@ enum Expanding<'a> {
     Function {
         name: &'a str,
         parameter_count: usize,
-        arguments: Vec<&'a [Token<'a>]>,
+        arguments: &'a [&'a [Replacement<'a>]],
         replacement: &'a [Replacement<'a>],
     },
+    // TODO: this basically duplicates `Self::Function`, but needs different behaviour wrt hideset
+    // tracking
     Argument {
         function_name: &'a str,
-        tokens: &'a [Token<'a>],
+        parameter_count: usize,
+        arguments: &'a [&'a [Replacement<'a>]],
+        replacement: &'a [Replacement<'a>],
     },
     Token(Option<Token<'a>>),
 }
@@ -131,7 +135,7 @@ impl<'a> Expanding<'a> {
     fn name(&self) -> Option<&'a str> {
         match self {
             Expanding::Object { name, .. } | Expanding::Function { name, .. } => Some(name),
-            Expanding::Argument { function_name: _, tokens: _ } => None,
+            Expanding::Argument { .. } => None,
             Expanding::Token(_) => None,
         }
     }
@@ -140,27 +144,36 @@ impl<'a> Expanding<'a> {
         match self {
             Self::Object { name: _, replacement } => replacement.split_off_first().into(),
             Self::Function {
-                name,
+                name: function_name,
+                parameter_count,
+                arguments,
+                replacement,
+            }
+            | Self::Argument {
+                function_name,
                 parameter_count,
                 arguments,
                 replacement,
             } => match replacement.split_off_first() {
                 Some(Replacement::Literal(token)) => Expanded::Token(*token),
                 Some(Replacement::Parameter(index)) => Expanded::Argument {
-                    function_name: name,
-                    tokens: arguments.get(*index).copied().unwrap_or_default(),
+                    function_name,
+                    parameter_count: *parameter_count,
+                    arguments,
+                    replacement: arguments.get(*index).copied().unwrap_or_default(),
                 },
-                Some(Replacement::VaOpt(tokens)) => {
-                    let tokens = match arguments.len() > *parameter_count {
-                        true => *tokens,
+                Some(Replacement::VaOpt(replacement)) => {
+                    let replacement = match arguments.len() > *parameter_count {
+                        true => *replacement,
                         false => &[],
                     };
-                    Expanded::Argument { function_name: name, tokens }
+                    Expanded::Argument {
+                        function_name,
+                        parameter_count: *parameter_count,
+                        arguments,
+                        replacement,
+                    }
                 }
-                None => Expanded::Done,
-            },
-            Self::Argument { function_name: _, tokens } => match tokens.split_off_first() {
-                Some(&token) => Expanded::Token(token),
                 None => Expanded::Done,
             },
             Self::Token(token) => token.take().map_or(Expanded::Done, Expanded::Token),
@@ -172,7 +185,9 @@ enum Expanded<'a> {
     Token(Token<'a>),
     Argument {
         function_name: &'a str,
-        tokens: &'a [Token<'a>],
+        parameter_count: usize,
+        arguments: &'a [&'a [Replacement<'a>]],
+        replacement: &'a [Replacement<'a>],
     },
     Done,
 }
@@ -197,8 +212,9 @@ impl<'a> Expander<'a> {
 
     fn push(&mut self, expanding: Expanding<'a>) {
         match expanding {
-            Expanding::Argument { function_name, tokens: _ } =>
-                assert!(self.hidden.remove(function_name)),
+            Expanding::Argument { function_name, .. } =>
+            // TODO: nested `__VA_OPT__` break this assertion
+                drop(self.hidden.remove(function_name)),
             _ if let Some(name) = expanding.name() => assert!(self.hidden.insert(name)),
             _ => (),
         }
@@ -211,12 +227,22 @@ impl<'a> Expander<'a> {
                 let expanding = self.todo.last_mut()?;
                 match expanding.next() {
                     Expanded::Token(token) => break token,
-                    Expanded::Argument { function_name, tokens } =>
-                        self.push(Expanding::Argument { function_name, tokens }),
+                    Expanded::Argument {
+                        function_name,
+                        parameter_count,
+                        arguments,
+                        replacement,
+                    } => self.push(Expanding::Argument {
+                        function_name,
+                        parameter_count,
+                        arguments,
+                        replacement,
+                    }),
                     Expanded::Done => {
                         match expanding {
-                            Expanding::Argument { function_name, tokens: _ } =>
-                                assert!(self.hidden.insert(function_name)),
+                            Expanding::Argument { function_name, .. } =>
+                            // TODO: nested `__VA_OPT__` break this assertion
+                                drop(self.hidden.insert(function_name)),
                             _ if let Some(name) = expanding.name() =>
                                 assert!(self.hidden.remove(name)),
                             _ => (),
@@ -388,6 +414,8 @@ fn eat<'a>(tokens: &mut &'a [Token<'a>], kind: TokenKind) -> Result<&'a Token<'a
 
 fn parse_va_opt<'a>(
     sess: &'a Session<'a>,
+    parameters: &IndexSet<&str>,
+    is_varargs: bool,
     va_opt: &Token<'a>,
     tokens: &mut &'a [Token<'a>],
 ) -> Result<Replacement<'a>, ()> {
@@ -401,8 +429,10 @@ fn parse_va_opt<'a>(
     })
     .count();
     let va_opt_tokens = tokens.split_off(..va_opt_tokens_count).unwrap();
+    let va_opt_tokens =
+        parse_function_like_replacement(sess, parameters, is_varargs, va_opt_tokens);
     eat(tokens, TokenKind::RParen)?;
-    Ok(Replacement::VaOpt(va_opt_tokens))
+    Ok(Replacement::VaOpt(sess.alloc_slice_copy(&va_opt_tokens)))
 }
 
 fn parse_function_like_replacement<'a>(
@@ -418,7 +448,7 @@ fn parse_function_like_replacement<'a>(
                 if !is_varargs {
                     sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
                 }
-                match parse_va_opt(sess, token, &mut tokens) {
+                match parse_va_opt(sess, parameters, is_varargs, token, &mut tokens) {
                     Ok(va_opt) => va_opt,
                     Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
                 }
@@ -507,12 +537,12 @@ fn eat_newlines<'a>(tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>) {
 fn parse_macro_arguments<'a>(
     sess: &'a Session<'a>,
     tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
-) -> Vec<&'a [Token<'a>]> {
+) -> &'a [&'a [Replacement<'a>]] {
     eat_newlines(tokens);
     let token = tokens.peek();
     if token.is_none_or(|token| token.kind == TokenKind::RParen) {
         tokens.next();
-        return Vec::new();
+        return &[];
     }
 
     let mut arguments = Vec::new();
@@ -521,7 +551,7 @@ fn parse_macro_arguments<'a>(
         let argument = eat_until_in_balanced_parens(tokens, |token| {
             matches!(token.kind, TokenKind::RParen | TokenKind::Comma)
         });
-        arguments.push(sess.alloc_slice_copy(&argument.collect_vec()));
+        arguments.push(sess.alloc_slice_copy(&argument.map(Replacement::Literal).collect_vec()));
 
         match tokens.peek() {
             Some(token) if token.kind == TokenKind::RParen => break,
@@ -537,7 +567,7 @@ fn parse_macro_arguments<'a>(
         None => todo!("error: missing rparen in function-like macro invocation"),
     }
 
-    arguments
+    sess.alloc_slice_copy(&arguments)
 }
 
 pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -> TokenIter<'a> {
