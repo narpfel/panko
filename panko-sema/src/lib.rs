@@ -6,6 +6,7 @@
 #![feature(if_let_guard)]
 #![feature(impl_trait_in_fn_trait_return)]
 #![feature(never_type)]
+#![feature(stmt_expr_attributes)]
 #![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
 

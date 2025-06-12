@@ -12,6 +12,7 @@ use ariadne::Color::Magenta;
 use ariadne::Color::Red;
 use ariadne::Fmt as _;
 use indexmap::IndexMap;
+use itertools::Either;
 use itertools::EitherOrBoth;
 use itertools::Itertools as _;
 use panko_lex::EncodingPrefix;
@@ -2042,20 +2043,15 @@ impl Char {
         }
     }
 
-    gen fn encode_utf8(self) -> u8 {
+    fn encode_utf8(self) -> impl Iterator<Item = u8> {
         match self {
             Char::Codepoint(c) => {
                 let mut storage = [0; char::MAX_LEN_UTF8];
                 let encoded = c.encode_utf8(&mut storage);
-                #[expect(
-                    clippy::needless_range_loop,
-                    reason = "cannot hold references over `yield` points"
-                )]
-                for i in 0..encoded.len() {
-                    yield storage[i];
-                }
+                let len = encoded.len();
+                Either::Left(storage.into_iter().take(len))
             }
-            Char::EscapeSequence(value) => {
+            Char::EscapeSequence(value) =>
                 #[expect(
                     clippy::as_conversions,
                     reason = "\
@@ -2063,9 +2059,8 @@ impl Char {
                         non-prefixed string literals in `parse_escape_sequences`\
                     "
                 )]
-                yield value as u8;
-            }
-        };
+                Either::Right(std::iter::once(value as u8)),
+        }
     }
 }
 
