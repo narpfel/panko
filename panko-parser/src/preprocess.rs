@@ -127,6 +127,7 @@ enum Expanding<'a> {
         parameter_count: usize,
         arguments: &'a [&'a [Replacement<'a>]],
         replacement: &'a [Replacement<'a>],
+        update_hideset: bool,
     },
     Token(Option<Token<'a>>),
 }
@@ -154,6 +155,7 @@ impl<'a> Expanding<'a> {
                 parameter_count,
                 arguments,
                 replacement,
+                update_hideset: _,
             } => match replacement.split_off_first() {
                 Some(Replacement::Literal(token)) => Expanded::Token(*token),
                 Some(Replacement::Parameter(index)) => Expanded::Argument {
@@ -161,6 +163,7 @@ impl<'a> Expanding<'a> {
                     parameter_count: *parameter_count,
                     arguments,
                     replacement: arguments.get(*index).copied().unwrap_or_default(),
+                    update_hideset: true,
                 },
                 Some(Replacement::VaOpt(replacement)) => {
                     let replacement = match arguments.len() > *parameter_count {
@@ -172,6 +175,7 @@ impl<'a> Expanding<'a> {
                         parameter_count: *parameter_count,
                         arguments,
                         replacement,
+                        update_hideset: false,
                     }
                 }
                 None => Expanded::Done,
@@ -188,6 +192,7 @@ enum Expanded<'a> {
         parameter_count: usize,
         arguments: &'a [&'a [Replacement<'a>]],
         replacement: &'a [Replacement<'a>],
+        update_hideset: bool,
     },
     Done,
 }
@@ -212,9 +217,10 @@ impl<'a> Expander<'a> {
 
     fn push(&mut self, expanding: Expanding<'a>) {
         match expanding {
-            Expanding::Argument { function_name, .. } =>
-            // TODO: nested `__VA_OPT__` break this assertion
-                drop(self.hidden.remove(function_name)),
+            Expanding::Argument { function_name, update_hideset, .. } =>
+                if update_hideset {
+                    assert!(self.hidden.remove(function_name))
+                },
             _ if let Some(name) = expanding.name() => assert!(self.hidden.insert(name)),
             _ => (),
         }
@@ -232,17 +238,20 @@ impl<'a> Expander<'a> {
                         parameter_count,
                         arguments,
                         replacement,
+                        update_hideset,
                     } => self.push(Expanding::Argument {
                         function_name,
                         parameter_count,
                         arguments,
                         replacement,
+                        update_hideset,
                     }),
                     Expanded::Done => {
                         match expanding {
-                            Expanding::Argument { function_name, .. } =>
-                            // TODO: nested `__VA_OPT__` break this assertion
-                                drop(self.hidden.insert(function_name)),
+                            Expanding::Argument { function_name, update_hideset, .. } =>
+                                if *update_hideset {
+                                    assert!(self.hidden.insert(function_name))
+                                },
                             _ if let Some(name) = expanding.name() =>
                                 assert!(self.hidden.remove(name)),
                             _ => (),
