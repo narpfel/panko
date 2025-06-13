@@ -1,0 +1,42 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/preprocessor/test_va_args.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (add `int` @24
+                  (1 `int` @24)
+                  (2 `int` @28))))
+         (return
+            (combine `int` @0
+               (combine `int` @4
+                  (add `int` @8
+                     (add `int` @8
+                        (add `int` @8
+                           (1 `int` @8)
+                           (2 `int` @12))
+                        (3 `int` @12))
+                     (4 `int` @12))
+                  (5 `int` @4))
+               (6 `int` @0))))))
+
+----- stderr -----

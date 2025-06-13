@@ -41,6 +41,7 @@ enum Replacement<'a> {
     Literal(Token<'a>),
     Parameter(usize),
     VaOpt(&'a [Replacement<'a>]),
+    VaArgs,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -73,7 +74,7 @@ impl<'a> Macro<'a> {
                 replacement,
             } => match tokens.next_if(|token| token.kind == TokenKind::LParen) {
                 Some(_) => {
-                    let arguments = parse_macro_arguments(sess, tokens);
+                    let arguments = parse_macro_arguments(sess, parameter_count, tokens);
                     let has_arity_mismatch = match () {
                         () if arguments.is_empty() && parameter_count == 1 => false,
                         () if is_varargs => parameter_count > arguments.len(),
@@ -178,6 +179,13 @@ impl<'a> Expanding<'a> {
                         update_hideset: false,
                     }
                 }
+                Some(Replacement::VaArgs) => Expanded::Argument {
+                    function_name,
+                    parameter_count: *parameter_count,
+                    arguments,
+                    replacement: arguments.get(*parameter_count).copied().unwrap_or_default(),
+                    update_hideset: false,
+                },
                 None => Expanded::Done,
             },
             Self::Token(token) => token.take().map_or(Expanded::Done, Expanded::Token),
@@ -462,6 +470,7 @@ fn parse_function_like_replacement<'a>(
                     Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
                 }
             }
+            "__VA_ARGS__" => Replacement::VaArgs,
             name => match parameters.get_index_of(name) {
                 Some(param_index) => Replacement::Parameter(param_index),
                 None => Replacement::Literal(*token),
@@ -545,6 +554,7 @@ fn eat_newlines<'a>(tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>) {
 
 fn parse_macro_arguments<'a>(
     sess: &'a Session<'a>,
+    parameter_count: usize,
     tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
 ) -> &'a [&'a [Replacement<'a>]] {
     eat_newlines(tokens);
@@ -557,10 +567,15 @@ fn parse_macro_arguments<'a>(
     let mut arguments = Vec::new();
 
     loop {
-        let argument = eat_until_in_balanced_parens(tokens, |token| {
-            matches!(token.kind, TokenKind::RParen | TokenKind::Comma)
+        let is_varargs_argument = arguments.len() == parameter_count;
+        let argument = eat_until_in_balanced_parens(tokens, |token| match is_varargs_argument {
+            true => matches!(token.kind, TokenKind::RParen),
+            false => matches!(token.kind, TokenKind::RParen | TokenKind::Comma),
         });
         arguments.push(sess.alloc_slice_copy(&argument.map(Replacement::Literal).collect_vec()));
+        if is_varargs_argument {
+            break;
+        }
 
         match tokens.peek() {
             Some(token) if token.kind == TokenKind::RParen => break,
