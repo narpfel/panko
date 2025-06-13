@@ -167,6 +167,21 @@ impl<'a> Expanding<'a> {
                     update_hideset: true,
                 },
                 Some(Replacement::VaOpt(replacement)) => {
+                    // TODO: This is incorrect: `__VA_OPT__` only expands to something if the `...`
+                    // parameter is non-empty *and* has a non-empty expansion. The second case is
+                    // missing here.
+                    // Example:
+                    //     #define EMPTY
+                    //
+                    //     #define MACRO(...) __VA_OPT__(return 42)
+                    //
+                    //     int main() {
+                    //         MACRO(EMPTY);
+                    //     }
+                    // expands to
+                    //     int main() {
+                    //         ;
+                    //     }
                     let replacement = match arguments.len() > *parameter_count {
                         true => *replacement,
                         false => &[],
