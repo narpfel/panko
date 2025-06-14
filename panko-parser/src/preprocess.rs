@@ -109,7 +109,7 @@ struct Preprocessor<'a> {
     expander: Expander<'a>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 enum Expanding<'a> {
     Object {
         name: &'a str,
@@ -236,6 +236,18 @@ impl<'a> Expander<'a> {
         self.todo.push(expanding);
     }
 
+    fn done(&mut self, expanding: &Expanding<'a>) {
+        match expanding {
+            Expanding::Argument { function_name, update_hideset, .. } =>
+                if *update_hideset {
+                    assert!(self.hidden.insert(function_name))
+                },
+            _ if let Some(name) = expanding.name() => assert!(self.hidden.remove(name)),
+            _ => (),
+        }
+        self.todo.pop();
+    }
+
     fn expand_va_opt(&mut self, macros: &HashMap<&'a str, Macro<'a>>, va_opt: VaOpt<'a>) {
         let VaOpt {
             function_name,
@@ -244,15 +256,16 @@ impl<'a> Expander<'a> {
             replacement,
         } = va_opt;
         let depth = self.todo.len();
-        self.push(Expanding::Argument {
+        let fake_va_args = Expanding::Argument {
             function_name,
             parameter_count,
             arguments,
             replacement: arguments.get(parameter_count).copied().unwrap_or_default(),
             update_hideset: false,
-        });
+        };
+        self.push(fake_va_args);
         if self.next_until(macros, depth).is_some() {
-            self.todo.pop();
+            self.done(&fake_va_args);
             self.push(Expanding::Argument {
                 function_name,
                 parameter_count,
@@ -288,16 +301,8 @@ impl<'a> Expander<'a> {
                     }),
                     Expanded::VaOpt(va_opt) => self.expand_va_opt(macros, va_opt),
                     Expanded::Done => {
-                        match expanding {
-                            Expanding::Argument { function_name, update_hideset, .. } =>
-                                if *update_hideset {
-                                    assert!(self.hidden.insert(function_name))
-                                },
-                            _ if let Some(name) = expanding.name() =>
-                                assert!(self.hidden.remove(name)),
-                            _ => (),
-                        }
-                        self.todo.pop();
+                        let expanding = &{ *expanding };
+                        self.done(expanding)
                     }
                 }
             };
