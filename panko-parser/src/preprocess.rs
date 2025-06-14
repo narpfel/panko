@@ -166,34 +166,12 @@ impl<'a> Expanding<'a> {
                     replacement: arguments.get(*index).copied().unwrap_or_default(),
                     update_hideset: true,
                 },
-                Some(Replacement::VaOpt(replacement)) => {
-                    // TODO: This is incorrect: `__VA_OPT__` only expands to something if the `...`
-                    // parameter is non-empty *and* has a non-empty expansion. The second case is
-                    // missing here.
-                    // Example:
-                    //     #define EMPTY
-                    //
-                    //     #define MACRO(...) __VA_OPT__(return 42)
-                    //
-                    //     int main() {
-                    //         MACRO(EMPTY);
-                    //     }
-                    // expands to
-                    //     int main() {
-                    //         ;
-                    //     }
-                    let replacement = match arguments.len() > *parameter_count {
-                        true => *replacement,
-                        false => &[],
-                    };
-                    Expanded::Argument {
-                        function_name,
-                        parameter_count: *parameter_count,
-                        arguments,
-                        replacement,
-                        update_hideset: false,
-                    }
-                }
+                Some(Replacement::VaOpt(replacement)) => Expanded::VaOpt(VaOpt {
+                    function_name,
+                    parameter_count: *parameter_count,
+                    arguments,
+                    replacement,
+                }),
                 Some(Replacement::VaArgs) => Expanded::Argument {
                     function_name,
                     parameter_count: *parameter_count,
@@ -208,6 +186,13 @@ impl<'a> Expanding<'a> {
     }
 }
 
+struct VaOpt<'a> {
+    function_name: &'a str,
+    parameter_count: usize,
+    arguments: &'a [&'a [Replacement<'a>]],
+    replacement: &'a [Replacement<'a>],
+}
+
 enum Expanded<'a> {
     Token(Token<'a>),
     Argument {
@@ -217,6 +202,7 @@ enum Expanded<'a> {
         replacement: &'a [Replacement<'a>],
         update_hideset: bool,
     },
+    VaOpt(VaOpt<'a>),
     Done,
 }
 
@@ -250,10 +236,41 @@ impl<'a> Expander<'a> {
         self.todo.push(expanding);
     }
 
-    fn next(&mut self, macros: &HashMap<&'a str, Macro<'a>>) -> Option<Token<'a>> {
+    fn expand_va_opt(&mut self, macros: &HashMap<&'a str, Macro<'a>>, va_opt: VaOpt<'a>) {
+        let VaOpt {
+            function_name,
+            parameter_count,
+            arguments,
+            replacement,
+        } = va_opt;
+        let depth = self.todo.len();
+        self.push(Expanding::Argument {
+            function_name,
+            parameter_count,
+            arguments,
+            replacement: arguments.get(parameter_count).copied().unwrap_or_default(),
+            update_hideset: false,
+        });
+        if self.next_until(macros, depth).is_some() {
+            self.todo.pop();
+            self.push(Expanding::Argument {
+                function_name,
+                parameter_count,
+                arguments,
+                replacement,
+                update_hideset: false,
+            });
+        }
+    }
+
+    fn next_until(
+        &mut self,
+        macros: &HashMap<&'a str, Macro<'a>>,
+        depth: usize,
+    ) -> Option<Token<'a>> {
         loop {
             let token = loop {
-                let expanding = self.todo.last_mut()?;
+                let expanding = self.todo.get_mut(depth..)?.last_mut()?;
                 match expanding.next() {
                     Expanded::Token(token) => break token,
                     Expanded::Argument {
@@ -269,6 +286,7 @@ impl<'a> Expander<'a> {
                         replacement,
                         update_hideset,
                     }),
+                    Expanded::VaOpt(va_opt) => self.expand_va_opt(macros, va_opt),
                     Expanded::Done => {
                         match expanding {
                             Expanding::Argument { function_name, update_hideset, .. } =>
@@ -288,7 +306,7 @@ impl<'a> Expander<'a> {
             match macros.get(name) {
                 Some(r#macro) if !self.hidden.contains(name) => {
                     let sess = self.sess;
-                    let tokens = &mut from_fn(|| self.next(macros)).peekable();
+                    let tokens = &mut from_fn(|| self.next_until(macros, depth)).peekable();
                     match r#macro.expand(sess, tokens, &token) {
                         Some(expanding) => self.push(expanding),
                         None => {
@@ -301,6 +319,10 @@ impl<'a> Expander<'a> {
                 _ => return Some(token),
             }
         }
+    }
+
+    fn next(&mut self, macros: &HashMap<&'a str, Macro<'a>>) -> Option<Token<'a>> {
+        self.next_until(macros, 0)
     }
 }
 
