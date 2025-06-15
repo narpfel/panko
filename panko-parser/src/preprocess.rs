@@ -301,8 +301,8 @@ impl<'a> Expander<'a> {
                     }),
                     Expanded::VaOpt(va_opt) => self.expand_va_opt(macros, va_opt),
                     Expanded::Done => {
-                        let expanding = &{ *expanding };
-                        self.done(expanding)
+                        let expanding = *expanding;
+                        self.done(&expanding)
                     }
                 }
             };
