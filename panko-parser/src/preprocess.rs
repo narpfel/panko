@@ -28,7 +28,7 @@ fn is_lparen(previous: &Token, token: &Token) -> bool {
     token.kind == TokenKind::LParen && previous.loc().end() == token.loc().start()
 }
 
-fn tokens_loc<'a>(tokens: &[Token<'a>]) -> Loc<'a> {
+pub(crate) fn tokens_loc<'a>(tokens: &[Token<'a>]) -> Loc<'a> {
     match tokens {
         [] => unreachable!(),
         [token] => token.loc(),

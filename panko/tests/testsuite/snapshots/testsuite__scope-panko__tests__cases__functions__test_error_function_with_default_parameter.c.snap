@@ -1,0 +1,73 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/functions/test_error_function_with_default_parameter.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: default parameters are not allowed
+   ╭─[panko/tests/cases/functions/test_error_function_with_default_parameter.c:1:14]
+   │
+ 1 │ void f(int = 123) {}
+   │        ─┬─   ─┬─  
+   │         │     ╰─── help: remove this initialiser
+   │         │         
+   │         ╰───────── in the declaration of this parameter
+───╯
+
+Error: default parameters are not allowed
+   ╭─[panko/tests/cases/functions/test_error_function_with_default_parameter.c:2:15]
+   │
+ 2 │ void g(int* = 0) {}
+   │        ──┬─   ┬  
+   │          │    ╰── help: remove this initialiser
+   │          │       
+   │          ╰─────── in the declaration of this parameter
+───╯
+
+Error: default parameters are not allowed
+   ╭─[panko/tests/cases/functions/test_error_function_with_default_parameter.c:3:24]
+   │
+ 3 │ void h(int parameter = 42) {}
+   │        ──────┬──────   ─┬  
+   │              │          ╰── help: remove this initialiser
+   │              │             
+   │              ╰───────────── in the declaration of this parameter
+───╯
+
+Error: default parameters are not allowed
+   ╭─[panko/tests/cases/functions/test_error_function_with_default_parameter.c:4:25]
+   │
+ 4 │ void i(int* parameter = 0) {}
+   │        ───────┬──────   ┬  
+   │               │         ╰── help: remove this initialiser
+   │               │            
+   │               ╰──────────── in the declaration of this parameter
+───╯
+
+Error: default parameters are not allowed
+   ╭─[panko/tests/cases/functions/test_error_function_with_default_parameter.c:5:16]
+   │
+ 5 │ void j(int() = 0) {}
+   │        ──┬──   ┬  
+   │          │     ╰── help: remove this initialiser
+   │          │        
+   │          ╰──────── in the declaration of this parameter
+───╯
+
+Error: default parameters are not allowed
+   ╭─[panko/tests/cases/functions/test_error_function_with_default_parameter.c:6:16]
+   │
+ 6 │ void k(int[] = 0) {}
+   │        ──┬──   ┬  
+   │          │     ╰── help: remove this initialiser
+   │          │        
+   │          ╰──────── in the declaration of this parameter
+───╯

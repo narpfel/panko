@@ -114,6 +114,16 @@ enum Diagnostic<'a> {
         specifiers: DeclarationSpecifiers<'a>,
         ty: ParsedSpecifiers<'a>,
     },
+
+    #[error("default parameters are not allowed")]
+    #[diagnostics(
+        param_loc(colour = Blue, label = "in the declaration of this parameter"),
+        at(colour = Red, label = "help: remove this initialiser"),
+    )]
+    DefaultParameter {
+        at: Initialiser<'a>,
+        param_loc: Loc<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -533,6 +543,19 @@ pub enum Initialiser<'a> {
     Expression(Expression<'a>),
 }
 
+impl<'a> Initialiser<'a> {
+    fn loc(&self) -> Loc<'a> {
+        match self {
+            Self::Braced {
+                open_brace,
+                initialiser_list: _,
+                close_brace,
+            } => open_brace.loc().until(close_brace.loc()),
+            Self::Expression(expr) => expr.loc(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct DesignatedInitialiser<'a> {
     pub designation: Option<Designation<'a>>,
@@ -562,10 +585,30 @@ struct Declarator<'a> {
 }
 
 impl<'a> Declarator<'a> {
+    fn loc_with(&self, declaration_specifiers: DeclarationSpecifiers<'a>) -> Loc<'a> {
+        let Self { pointers, direct_declarator } = self;
+        let loc = declaration_specifiers.loc();
+        match direct_declarator.maybe_end_loc() {
+            Some(end) => loc.until(end),
+            None => match pointers {
+                Some(pointers) => loc.until(pointers_loc(pointers)),
+                None => loc,
+            },
+        }
+    }
+
     fn reinterpret_as_concrete(&self, sess: &'a ast::Session<'a>) -> Option<(Token<'a>, Self)> {
         let Self { pointers, direct_declarator } = *self;
         let (name, direct_declarator) = direct_declarator.reinterpret_as_concrete(sess)?;
         Some((name, Self { pointers, direct_declarator }))
+    }
+}
+
+fn pointers_loc<'a>(pointers: &[Pointer<'a>]) -> Loc<'a> {
+    match pointers {
+        [] => unreachable!(),
+        [pointer] => pointer.loc(),
+        [first, .., last] => first.loc().until(last.loc()),
     }
 }
 
@@ -575,11 +618,25 @@ struct Pointer<'a> {
     qualifiers: &'a [TypeQualifier<'a>],
 }
 
+impl<'a> Pointer<'a> {
+    fn loc(&self) -> Loc<'a> {
+        let Self { star, qualifiers } = self;
+        let loc = star.loc();
+        match qualifiers.last() {
+            Some(qualifier) => loc.until(qualifier.loc()),
+            None => loc,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 enum DirectDeclarator<'a> {
     Abstract,
     Identifier(Token<'a>),
-    Parenthesised(&'a Declarator<'a>),
+    Parenthesised {
+        declarator: &'a Declarator<'a>,
+        close_paren: Token<'a>,
+    },
     ArrayDeclarator(ArrayDeclarator<'a>),
     FunctionDeclarator(FunctionDeclarator<'a>),
 }
@@ -589,7 +646,7 @@ impl<'a> DirectDeclarator<'a> {
         match self {
             DirectDeclarator::Abstract => Some(Self::Identifier(name)),
             DirectDeclarator::Identifier(_) => None,
-            DirectDeclarator::Parenthesised(_) => None,
+            DirectDeclarator::Parenthesised { declarator: _, close_paren: _ } => None,
             DirectDeclarator::ArrayDeclarator(array_declarator) =>
                 Some(Self::ArrayDeclarator(ArrayDeclarator {
                     direct_declarator: sess
@@ -612,7 +669,8 @@ impl<'a> DirectDeclarator<'a> {
         match self {
             DirectDeclarator::Abstract => None,
             DirectDeclarator::Identifier(token) => Some(token.slice()),
-            DirectDeclarator::Parenthesised(declarator) => declarator.direct_declarator.name(),
+            DirectDeclarator::Parenthesised { declarator, close_paren: _ } =>
+                declarator.direct_declarator.name(),
             DirectDeclarator::ArrayDeclarator(array_declarator) =>
                 array_declarator.direct_declarator.name(),
             DirectDeclarator::FunctionDeclarator(function_declarator) =>
@@ -624,7 +682,7 @@ impl<'a> DirectDeclarator<'a> {
         match self {
             DirectDeclarator::Abstract => Either::Left(empty()),
             DirectDeclarator::Identifier(_token) => Either::Left(empty()),
-            DirectDeclarator::Parenthesised(declarator) =>
+            DirectDeclarator::Parenthesised { declarator, close_paren: _ } =>
                 declarator.direct_declarator.parameter_names(),
             DirectDeclarator::ArrayDeclarator(_array_declarator) => Either::Left(empty()),
             DirectDeclarator::FunctionDeclarator(function_declarator) => Either::Right(
@@ -649,9 +707,15 @@ impl<'a> DirectDeclarator<'a> {
         match *self {
             Self::Abstract => None,
             Self::Identifier(_) => None,
-            Self::Parenthesised(declarator) => {
+            Self::Parenthesised { declarator, close_paren } => {
                 let (name, declarator) = declarator.reinterpret_as_concrete(sess)?;
-                Some((name, Self::Parenthesised(sess.alloc(declarator))))
+                Some((
+                    name,
+                    Self::Parenthesised {
+                        declarator: sess.alloc(declarator),
+                        close_paren,
+                    },
+                ))
             }
             Self::ArrayDeclarator(ArrayDeclarator {
                 direct_declarator,
@@ -702,6 +766,16 @@ impl<'a> DirectDeclarator<'a> {
                 Some((name, direct_declarator))
             }
         }
+    }
+
+    fn maybe_end_loc(&self) -> Option<Loc<'a>> {
+        Some(match self {
+            Self::Abstract => return None,
+            Self::Identifier(token) => token.loc(),
+            Self::Parenthesised { declarator: _, close_paren } => close_paren.loc(),
+            Self::ArrayDeclarator(array_declarator) => array_declarator.close_bracket.loc(),
+            Self::FunctionDeclarator(function_declarator) => function_declarator.close_paren.loc(),
+        })
     }
 }
 
@@ -857,6 +931,46 @@ pub enum Expression<'a> {
         operand: &'a Expression<'a>,
         fixity: IncrementFixity,
     },
+}
+
+impl<'a> Expression<'a> {
+    fn loc(&self) -> Loc<'a> {
+        match self {
+            Self::Error(report) => report.location(),
+            Self::Name(token) => token.loc(),
+            Self::Integer(token) => token.loc(),
+            Self::CharConstant(token) => token.loc(),
+            Self::String(tokens) => preprocess::tokens_loc(tokens),
+            Self::Parenthesised { open_paren, expr: _, close_paren } =>
+                open_paren.loc().until(close_paren.loc()),
+            Self::Assign { target, value } => target.loc().until(value.loc()),
+            Self::CompoundAssign { target, op: _, value } => target.loc().until(value.loc()),
+            Self::BinOp { lhs, op: _, rhs } => lhs.loc().until(rhs.loc()),
+            Self::UnaryOp { operator, operand } => operator.loc().until(operand.loc()),
+            Self::Call { callee, args: _, close_paren } => callee.loc().until(close_paren.loc()),
+            Self::Sizeof { sizeof, ty: _, close_paren } => sizeof.loc().until(close_paren.loc()),
+            Self::Lengthof { lengthof, ty: _, close_paren } =>
+                lengthof.loc().until(close_paren.loc()),
+            Self::Alignof { alignof, ty: _, close_paren } => alignof.loc().until(close_paren.loc()),
+            Self::Cast { open_paren, ty: _, expr } => open_paren.loc().until(expr.loc()),
+            Self::Subscript { lhs, rhs: _, close_bracket } => lhs.loc().until(close_bracket.loc()),
+            Self::Generic {
+                generic,
+                selector: _,
+                assocs: _,
+                close_paren,
+            } => generic.loc().until(close_paren.loc()),
+            Self::Logical { lhs, op: _, rhs } => lhs.loc().until(rhs.loc()),
+            Self::Conditional {
+                condition,
+                question_mark: _,
+                then: _,
+                or_else,
+            } => condition.loc().until(or_else.loc()),
+            Self::Comma { lhs, rhs } => lhs.loc().until(rhs.loc()),
+            Self::Increment { operator, operand, fixity: _ } => operator.loc().until(operand.loc()),
+        }
+    }
 }
 
 impl<'a> FromError<'a> for Expression<'a> {

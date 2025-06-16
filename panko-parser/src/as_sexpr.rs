@@ -175,7 +175,7 @@ impl AsSExpr for DirectDeclarator<'_> {
         match self {
             DirectDeclarator::Abstract => ().as_sexpr(),
             DirectDeclarator::Identifier(ident) => SExpr::string(ident.slice()),
-            DirectDeclarator::Parenthesised(declarator) => declarator.as_sexpr(),
+            DirectDeclarator::Parenthesised { declarator, close_paren: _ } => declarator.as_sexpr(),
             DirectDeclarator::ArrayDeclarator(array_declarator) => array_declarator.as_sexpr(),
             DirectDeclarator::FunctionDeclarator(function_declarator) =>
                 function_declarator.as_sexpr(),

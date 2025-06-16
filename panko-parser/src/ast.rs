@@ -679,7 +679,8 @@ pub(crate) fn parse_declarator<'a>(
         match declarator.direct_declarator {
             DirectDeclarator::Abstract => break None,
             DirectDeclarator::Identifier(name) => break Some(name),
-            DirectDeclarator::Parenthesised(decl) => declarator = *decl,
+            DirectDeclarator::Parenthesised { declarator: decl, close_paren: _ } =>
+                declarator = *decl,
             DirectDeclarator::ArrayDeclarator(ArrayDeclarator {
                 direct_declarator,
                 type_qualifiers,

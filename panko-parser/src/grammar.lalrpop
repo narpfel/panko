@@ -319,8 +319,8 @@ Pointer: ast::Pointer<'a> = {
 
 DirectDeclarator<NonambiguousIdent, ParenthesisedIdent>: ast::DirectDeclarator<'a> = {
     <NonambiguousIdent> AttributeSpecifierSequence? => ast::DirectDeclarator::Identifier(<>),
-    "(" <Bump<Declarator<ParenthesisedIdent, ParenthesisedIdent>>> ")" =>
-        ast::DirectDeclarator::Parenthesised(<>),
+    "(" <declarator:Bump<Declarator<ParenthesisedIdent, ParenthesisedIdent>>> <close_paren:")"> =>
+        ast::DirectDeclarator::Parenthesised { <> },
     <ArrayDeclarator<NonambiguousIdent, ParenthesisedIdent>> AttributeSpecifierSequence? =>
         ast::DirectDeclarator::ArrayDeclarator(<>),
     <FunctionDeclarator<NonambiguousIdent, ParenthesisedIdent>> AttributeSpecifierSequence? =>
@@ -356,9 +356,14 @@ ParameterDeclaration: ast::ParameterDeclaration<'a> = {
     AttributeSpecifierSequence? <declarator:DeclarationHead<AbstractDeclaratorAllowed>> => {
         let (declaration_specifiers, declarator) = declarator;
         let declarator = try {
-            let declarator = declarator?;
-            assert!(declarator.initialiser.is_none(), "TODO: generate a good error message");
-            declarator.declarator
+            let ast::InitDeclarator { declarator, initialiser } = declarator?;
+            if let Some(initialiser) = initialiser {
+                sess.emit(ast::Diagnostic::DefaultParameter {
+                    at: initialiser,
+                    param_loc: declarator.loc_with(declaration_specifiers),
+                })
+            }
+            declarator
         };
         ast::ParameterDeclaration { declaration_specifiers, declarator }
     },
@@ -402,7 +407,8 @@ AbstractDeclarator: ast::Declarator<'a> = {
 }
 
 DirectAbstractDeclarator: ast::DirectDeclarator<'a> = {
-    "(" <Bump<AbstractDeclarator>> ")" => ast::DirectDeclarator::Parenthesised(<>),
+    "(" <declarator:Bump<AbstractDeclarator>> <close_paren:")"> =>
+        ast::DirectDeclarator::Parenthesised { <> },
     <ArrayAbstractDeclarator> AttributeSpecifierSequence? =>
         ast::DirectDeclarator::ArrayDeclarator(<>),
     <FunctionAbstractDeclarator> AttributeSpecifierSequence? =>
