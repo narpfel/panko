@@ -13,6 +13,8 @@ members = [
 ]
 
 [workspace.lints.rust]
+# TODO: this will require a lot of changes
+mismatched_lifetime_syntaxes = "allow"
 unqualified_local_imports = "warn"
 unused_qualifications = "warn"
 
