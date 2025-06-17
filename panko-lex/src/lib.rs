@@ -27,6 +27,21 @@ pub struct Token<'a> {
 }
 
 impl<'a> Token<'a> {
+    pub fn from_str(bump: &'a Bump, kind: TokenKind, s: &'a str) -> Self {
+        Self {
+            kind,
+            loc: Loc {
+                span: Span { start: 0, end: s.len() },
+                source_file: bump.alloc(SourceFile {
+                    file: Path::new("<scratch area>"),
+                    physical_src: s,
+                    logical_src: s,
+                    chunk_starts: &[0],
+                }),
+            },
+        }
+    }
+
     pub fn synthesised(kind: TokenKind, loc: Loc<'a>) -> Self {
         Self { kind, loc }
     }

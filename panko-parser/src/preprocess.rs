@@ -43,6 +43,7 @@ enum Replacement<'a> {
     Parameter(usize),
     VaOpt(&'a [Replacement<'a>]),
     VaArgs,
+    Stringise(usize),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -170,6 +171,10 @@ impl<'a> Expanding<'a> {
                         replacement: call.get_va_args(),
                         update_hideset: false,
                     },
+                    Some(Replacement::Stringise(index)) => Expanded::Stringise(Stringise {
+                        call: *call,
+                        replacement: call.get(*index),
+                    }),
                     None => Expanded::Done,
                 },
             Self::Token(token) => token.take().map_or(Expanded::Done, Expanded::Token),
@@ -182,6 +187,12 @@ struct VaOpt<'a> {
     replacement: &'a [Replacement<'a>],
 }
 
+#[derive(Debug, Clone, Copy)]
+struct Stringise<'a> {
+    call: FunctionCall<'a>,
+    replacement: &'a [Replacement<'a>],
+}
+
 enum Expanded<'a> {
     Token(Token<'a>),
     Argument {
@@ -190,6 +201,7 @@ enum Expanded<'a> {
         update_hideset: bool,
     },
     VaOpt(VaOpt<'a>),
+    Stringise(Stringise<'a>),
     Done,
 }
 
@@ -250,6 +262,25 @@ impl<'a> Expander<'a> {
         }
     }
 
+    fn stringise(
+        &mut self,
+        macros: &HashMap<&'a str, Macro<'a>>,
+        stringise: Stringise<'a>,
+    ) -> Token<'a> {
+        let Stringise { call, replacement } = stringise;
+        let argument = Expanding::Argument { call, replacement, update_hideset: true };
+        let depth = self.todo.len();
+        self.push(argument);
+        let mut result = vec![b'"'];
+        write_preprocessed_tokens(&mut result, from_fn(|| self.next_until(macros, depth))).unwrap();
+        result.push(b'"');
+        Token::from_str(
+            self.sess.bump,
+            TokenKind::String,
+            self.sess.alloc_str(str::from_utf8(&result).unwrap()),
+        )
+    }
+
     fn next_until(
         &mut self,
         macros: &HashMap<&'a str, Macro<'a>>,
@@ -263,6 +294,7 @@ impl<'a> Expander<'a> {
                     Expanded::Argument { call, replacement, update_hideset } =>
                         self.push(Expanding::Argument { call, replacement, update_hideset }),
                     Expanded::VaOpt(va_opt) => self.expand_va_opt(macros, va_opt),
+                    Expanded::Stringise(stringise) => break self.stringise(macros, stringise),
                     Expanded::Done => {
                         let expanding = *expanding;
                         self.done(&expanding)
@@ -465,20 +497,29 @@ fn parse_function_like_replacement<'a>(
 ) -> Vec<Replacement<'a>> {
     from_fn(|| try {
         let token = tokens.split_off_first()?;
-        match token.slice() {
-            "__VA_OPT__" => {
-                if !is_varargs {
-                    sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
+        match token.kind {
+            TokenKind::Hash => match tokens.split_off_first() {
+                Some(token) if let Some(index) = parameters.get_index_of(token.slice()) =>
+                    Replacement::Stringise(index),
+                Some(_) =>
+                    todo!("error: not a parameter (but allow `__VA_OPT__` and `__VA_ARGS__`)"),
+                None => todo!("error: stringise at end of macro"),
+            },
+            _ => match token.slice() {
+                "__VA_OPT__" => {
+                    if !is_varargs {
+                        sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
+                    }
+                    match parse_va_opt(sess, parameters, is_varargs, token, &mut tokens) {
+                        Ok(va_opt) => va_opt,
+                        Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
+                    }
                 }
-                match parse_va_opt(sess, parameters, is_varargs, token, &mut tokens) {
-                    Ok(va_opt) => va_opt,
-                    Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
-                }
-            }
-            "__VA_ARGS__" => Replacement::VaArgs,
-            name => match parameters.get_index_of(name) {
-                Some(param_index) => Replacement::Parameter(param_index),
-                None => Replacement::Literal(*token),
+                "__VA_ARGS__" => Replacement::VaArgs,
+                name => match parameters.get_index_of(name) {
+                    Some(param_index) => Replacement::Parameter(param_index),
+                    None => Replacement::Literal(*token),
+                },
             },
         }
     })
