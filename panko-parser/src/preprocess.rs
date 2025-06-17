@@ -88,12 +88,8 @@ impl<'a> Macro<'a> {
                             is_varargs,
                         })
                     }
-                    Some(Expanding::Function {
-                        name,
-                        parameter_count,
-                        arguments,
-                        replacement,
-                    })
+                    let call = FunctionCall { name, parameter_count, arguments };
+                    Some(Expanding::Function { call, replacement })
                 }
                 None => None,
             },
@@ -110,23 +106,34 @@ struct Preprocessor<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+struct FunctionCall<'a> {
+    name: &'a str,
+    parameter_count: usize,
+    arguments: &'a [&'a [Replacement<'a>]],
+}
+
+impl<'a> FunctionCall<'a> {
+    fn get(&self, param_index: usize) -> &'a [Replacement<'a>] {
+        self.arguments.get(param_index).copied().unwrap_or_default()
+    }
+
+    fn get_va_args(&self) -> &'a [Replacement<'a>] {
+        self.get(self.parameter_count)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 enum Expanding<'a> {
     Object {
         name: &'a str,
         replacement: &'a [Token<'a>],
     },
     Function {
-        name: &'a str,
-        parameter_count: usize,
-        arguments: &'a [&'a [Replacement<'a>]],
+        call: FunctionCall<'a>,
         replacement: &'a [Replacement<'a>],
     },
-    // TODO: this basically duplicates `Self::Function`, but needs different behaviour wrt hideset
-    // tracking
     Argument {
-        function_name: &'a str,
-        parameter_count: usize,
-        arguments: &'a [&'a [Replacement<'a>]],
+        call: FunctionCall<'a>,
         replacement: &'a [Replacement<'a>],
         update_hideset: bool,
     },
@@ -136,7 +143,8 @@ enum Expanding<'a> {
 impl<'a> Expanding<'a> {
     fn name(&self) -> Option<&'a str> {
         match self {
-            Expanding::Object { name, .. } | Expanding::Function { name, .. } => Some(name),
+            Expanding::Object { name, .. } => Some(name),
+            Expanding::Function { call, replacement: _ } => Some(call.name),
             Expanding::Argument { .. } => None,
             Expanding::Token(_) => None,
         }
@@ -145,60 +153,38 @@ impl<'a> Expanding<'a> {
     fn next(&mut self) -> Expanded<'a> {
         match self {
             Self::Object { name: _, replacement } => replacement.split_off_first().into(),
-            Self::Function {
-                name: function_name,
-                parameter_count,
-                arguments,
-                replacement,
-            }
-            | Self::Argument {
-                function_name,
-                parameter_count,
-                arguments,
-                replacement,
-                update_hideset: _,
-            } => match replacement.split_off_first() {
-                Some(Replacement::Literal(token)) => Expanded::Token(*token),
-                Some(Replacement::Parameter(index)) => Expanded::Argument {
-                    function_name,
-                    parameter_count: *parameter_count,
-                    arguments,
-                    replacement: arguments.get(*index).copied().unwrap_or_default(),
-                    update_hideset: true,
+            Self::Function { call, replacement }
+            | Self::Argument { call, replacement, update_hideset: _ } =>
+                match replacement.split_off_first() {
+                    Some(Replacement::Literal(token)) => Expanded::Token(*token),
+                    Some(Replacement::Parameter(index)) => Expanded::Argument {
+                        call: *call,
+                        replacement: call.get(*index),
+                        update_hideset: true,
+                    },
+                    Some(Replacement::VaOpt(replacement)) =>
+                        Expanded::VaOpt(VaOpt { call: *call, replacement }),
+                    Some(Replacement::VaArgs) => Expanded::Argument {
+                        call: *call,
+                        replacement: call.get_va_args(),
+                        update_hideset: false,
+                    },
+                    None => Expanded::Done,
                 },
-                Some(Replacement::VaOpt(replacement)) => Expanded::VaOpt(VaOpt {
-                    function_name,
-                    parameter_count: *parameter_count,
-                    arguments,
-                    replacement,
-                }),
-                Some(Replacement::VaArgs) => Expanded::Argument {
-                    function_name,
-                    parameter_count: *parameter_count,
-                    arguments,
-                    replacement: arguments.get(*parameter_count).copied().unwrap_or_default(),
-                    update_hideset: false,
-                },
-                None => Expanded::Done,
-            },
             Self::Token(token) => token.take().map_or(Expanded::Done, Expanded::Token),
         }
     }
 }
 
 struct VaOpt<'a> {
-    function_name: &'a str,
-    parameter_count: usize,
-    arguments: &'a [&'a [Replacement<'a>]],
+    call: FunctionCall<'a>,
     replacement: &'a [Replacement<'a>],
 }
 
 enum Expanded<'a> {
     Token(Token<'a>),
     Argument {
-        function_name: &'a str,
-        parameter_count: usize,
-        arguments: &'a [&'a [Replacement<'a>]],
+        call: FunctionCall<'a>,
         replacement: &'a [Replacement<'a>],
         update_hideset: bool,
     },
@@ -226,9 +212,9 @@ impl<'a> Expander<'a> {
 
     fn push(&mut self, expanding: Expanding<'a>) {
         match expanding {
-            Expanding::Argument { function_name, update_hideset, .. } =>
+            Expanding::Argument { call, update_hideset, .. } =>
                 if update_hideset {
-                    assert!(self.hidden.remove(function_name))
+                    assert!(self.hidden.remove(call.name))
                 },
             _ if let Some(name) = expanding.name() => assert!(self.hidden.insert(name)),
             _ => (),
@@ -238,9 +224,9 @@ impl<'a> Expander<'a> {
 
     fn done(&mut self, expanding: &Expanding<'a>) {
         match expanding {
-            Expanding::Argument { function_name, update_hideset, .. } =>
+            Expanding::Argument { call, update_hideset, .. } =>
                 if *update_hideset {
-                    assert!(self.hidden.insert(function_name))
+                    assert!(self.hidden.insert(call.name))
                 },
             _ if let Some(name) = expanding.name() => assert!(self.hidden.remove(name)),
             _ => (),
@@ -249,30 +235,17 @@ impl<'a> Expander<'a> {
     }
 
     fn expand_va_opt(&mut self, macros: &HashMap<&'a str, Macro<'a>>, va_opt: VaOpt<'a>) {
-        let VaOpt {
-            function_name,
-            parameter_count,
-            arguments,
-            replacement,
-        } = va_opt;
+        let VaOpt { call, replacement } = va_opt;
         let depth = self.todo.len();
         let fake_va_args = Expanding::Argument {
-            function_name,
-            parameter_count,
-            arguments,
-            replacement: arguments.get(parameter_count).copied().unwrap_or_default(),
+            call,
+            replacement: call.get_va_args(),
             update_hideset: false,
         };
         self.push(fake_va_args);
         if self.next_until(macros, depth).is_some() {
             self.done(&fake_va_args);
-            self.push(Expanding::Argument {
-                function_name,
-                parameter_count,
-                arguments,
-                replacement,
-                update_hideset: false,
-            });
+            self.push(Expanding::Argument { call, replacement, update_hideset: false });
         }
     }
 
@@ -286,19 +259,8 @@ impl<'a> Expander<'a> {
                 let expanding = self.todo.get_mut(depth..)?.last_mut()?;
                 match expanding.next() {
                     Expanded::Token(token) => break token,
-                    Expanded::Argument {
-                        function_name,
-                        parameter_count,
-                        arguments,
-                        replacement,
-                        update_hideset,
-                    } => self.push(Expanding::Argument {
-                        function_name,
-                        parameter_count,
-                        arguments,
-                        replacement,
-                        update_hideset,
-                    }),
+                    Expanded::Argument { call, replacement, update_hideset } =>
+                        self.push(Expanding::Argument { call, replacement, update_hideset }),
                     Expanded::VaOpt(va_opt) => self.expand_va_opt(macros, va_opt),
                     Expanded::Done => {
                         let expanding = *expanding;
