@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::io::stdout;
 use std::iter::Peekable;
 use std::iter::from_fn;
 
@@ -613,28 +614,37 @@ pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -
     .run()
 }
 
+fn write_preprocessed_tokens<'a>(
+    mut w: impl std::io::Write,
+    mut tokens: impl Iterator<Item = Token<'a>>,
+) -> std::io::Result<()> {
+    tokens
+        .try_fold(None::<Token>, |last, token| {
+            if let Some(last) = last
+                && token.kind != TokenKind::Newline
+            {
+                if last.kind == TokenKind::Newline {
+                    let indent = token.loc().src()[last.loc().end()..]
+                        .find(|c: char| !c.is_whitespace())
+                        .unwrap_or(0);
+                    write!(w, "{:indent$}", "")?;
+                }
+                // TODO: this should check that both source files are the same (so that two tokens
+                // `#include`d from different files such that their locations match are not
+                // recognised as adjacent).
+                // TODO: this does not take into account that `last` could have come from a macro
+                // expansion. The preprocessor should track the original location of each token for
+                // this and for error messages.
+                else if last.loc().end() != token.loc().start() {
+                    write!(w, " ")?;
+                }
+            }
+            write!(w, "{}", token.slice())?;
+            Ok(Some(token))
+        })
+        .map(|_| ())
+}
+
 pub fn print_preprocessed_source(tokens: TokenIter) {
-    tokens.fold(None::<Token>, |last, token| {
-        if let Some(last) = last
-            && token.kind != TokenKind::Newline
-        {
-            if last.kind == TokenKind::Newline {
-                let indent = token.loc().src()[last.loc().end()..]
-                    .find(|c: char| !c.is_whitespace())
-                    .unwrap_or(0);
-                print!("{:indent$}", "");
-            }
-            // TODO: this should check that both source files are the same (so that two tokens
-            // `#include`d from different files such that their locations match are not recognised
-            // as adjacent).
-            // TODO: this does not take into account that `last` could have come from a macro
-            // expansion. The preprocessor should track the original location of each token for
-            // this and for error messages.
-            else if last.loc().end() != token.loc().start() {
-                print!(" ");
-            }
-        }
-        print!("{}", token.slice());
-        Some(token)
-    });
+    write_preprocessed_tokens(stdout().lock(), tokens).unwrap()
 }
