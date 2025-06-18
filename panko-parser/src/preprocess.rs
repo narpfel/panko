@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::fmt::Display;
 use std::io::stdout;
 use std::iter::Peekable;
 use std::iter::from_fn;
@@ -272,7 +273,30 @@ impl<'a> Expander<'a> {
         let depth = self.todo.len();
         self.push(argument);
         let mut result = vec![b'"'];
-        write_preprocessed_tokens(&mut result, from_fn(|| self.next_until(macros, depth))).unwrap();
+
+        struct TokenDisplayer<'a>(Token<'a>);
+
+        impl Display for TokenDisplayer<'_> {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                let Self(token) = self;
+                match token.kind {
+                    TokenKind::String | TokenKind::CharConstant(_) =>
+                        token.slice().chars().try_for_each(|c| match c {
+                            '"' | '\\' => write!(f, "\\{c}"),
+                            _ => write!(f, "{c}"),
+                        }),
+                    _ => write!(f, "{}", token.slice()),
+                }
+            }
+        }
+
+        write_preprocessed_tokens(
+            &mut result,
+            from_fn(|| self.next_until(macros, depth)),
+            TokenDisplayer,
+        )
+        .unwrap();
+
         result.push(b'"');
         Token::from_str(
             self.sess.bump,
@@ -655,9 +679,10 @@ pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -
     .run()
 }
 
-fn write_preprocessed_tokens<'a>(
+fn write_preprocessed_tokens<'a, D: Display>(
     mut w: impl std::io::Write,
     mut tokens: impl Iterator<Item = Token<'a>>,
+    stringify_token: impl Fn(Token<'a>) -> D,
 ) -> std::io::Result<()> {
     tokens
         .try_fold(None::<Token>, |last, token| {
@@ -680,12 +705,12 @@ fn write_preprocessed_tokens<'a>(
                     write!(w, " ")?;
                 }
             }
-            write!(w, "{}", token.slice())?;
+            write!(w, "{}", stringify_token(token))?;
             Ok(Some(token))
         })
         .map(|_| ())
 }
 
 pub fn print_preprocessed_source(tokens: TokenIter) {
-    write_preprocessed_tokens(stdout().lock(), tokens).unwrap()
+    write_preprocessed_tokens(stdout().lock(), tokens, |token| token.slice()).unwrap()
 }
