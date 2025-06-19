@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_empty_define.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `#define` does not define anything
+   ╭─[panko/tests/cases/preprocessor/test_error_empty_define.c:1:1]
+   │
+ 1 │ #define
+   │ ───┬───  
+   │    ╰───── help: add a macro name and an optional expansion
+───╯

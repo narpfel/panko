@@ -56,4 +56,8 @@ pub(super) enum Diagnostic<'a> {
         at(colour = Red, label = "this `{at}` is nested ..."),
     )]
     NestedVaOpt { at: Token<'a>, va_opt: Token<'a> },
+
+    #[error("`{at}` does not define anything")]
+    #[diagnostics(at(colour = Red, label = "help: add a macro name and an optional expansion"))]
+    EmptyDefine { at: Loc<'a> },
 }

@@ -362,7 +362,7 @@ impl<'a> Preprocessor<'a> {
                     }
                     token if token.kind == TokenKind::Hash =>
                         if self.previous_was_newline {
-                            self.parse_directive();
+                            self.parse_directive(&token);
                         }
                         else {
                             let line = self.eat_until_newline();
@@ -412,7 +412,7 @@ impl<'a> Preprocessor<'a> {
         self.tokens.peek()
     }
 
-    fn parse_directive(&mut self) {
+    fn parse_directive(&mut self, hash: &Token<'a>) {
         match self.peek() {
             None => {
                 // null directive at end of file without newline (technically UB)
@@ -421,7 +421,7 @@ impl<'a> Preprocessor<'a> {
                 // null directive
             }
             Some(token) if token.slice() == "define" => {
-                self.parse_define();
+                self.parse_define(hash);
             }
             Some(token) if token.slice() == "undef" => {
                 self.parse_undef();
@@ -431,12 +431,13 @@ impl<'a> Preprocessor<'a> {
         }
     }
 
-    fn parse_define(&mut self) {
-        // eat `define`
-        self.tokens.next();
+    fn parse_define(&mut self, hash: &Token<'a>) {
+        let define = self.tokens.next().unwrap();
         let line = self.eat_until_newline();
         match &line[..] {
-            [] => todo!("error: empty `#define` directive"),
+            [] => self
+                .sess
+                .emit(Diagnostic::EmptyDefine { at: hash.loc().until(define.loc()) }),
             [name_tok, line @ ..] if is_identifier(name_tok) => {
                 let line = self.sess.alloc_slice_copy(line);
                 let name = name_tok.slice();

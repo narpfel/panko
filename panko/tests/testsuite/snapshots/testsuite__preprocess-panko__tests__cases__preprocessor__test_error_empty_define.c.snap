@@ -1,0 +1,17 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/preprocessor/test_error_empty_define.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+
+int main() {}
+
+----- stderr -----
