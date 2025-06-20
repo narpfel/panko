@@ -433,11 +433,10 @@ impl<'a> Preprocessor<'a> {
 
     fn parse_define(&mut self, hash: &Token<'a>) {
         let define = self.tokens.next().unwrap();
+        let define_loc = || hash.loc().until(define.loc());
         let line = self.eat_until_newline();
         match &line[..] {
-            [] => self
-                .sess
-                .emit(Diagnostic::EmptyDefine { at: hash.loc().until(define.loc()) }),
+            [] => self.sess.emit(Diagnostic::EmptyDefine { at: define_loc() }),
             [name_tok, line @ ..] if is_identifier(name_tok) => {
                 let line = self.sess.alloc_slice_copy(line);
                 let name = name_tok.slice();
@@ -450,8 +449,10 @@ impl<'a> Preprocessor<'a> {
                 // TODO: check for redefinition
                 self.macros.insert(name, r#macro);
             }
-            [name, rest @ ..] =>
-                todo!("error message: trying to `#define` non-identifier {name:?} with {rest:#?}"),
+            [non_identifier, ..] => self.sess.emit(Diagnostic::DefineOfNonIdentifier {
+                at: *non_identifier,
+                define: define_loc(),
+            }),
         }
     }
 

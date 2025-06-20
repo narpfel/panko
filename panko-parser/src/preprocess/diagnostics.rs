@@ -60,4 +60,11 @@ pub(super) enum Diagnostic<'a> {
     #[error("`{at}` does not define anything")]
     #[diagnostics(at(colour = Red, label = "help: add a macro name and an optional expansion"))]
     EmptyDefine { at: Loc<'a> },
+
+    #[error("`{define}` of non-identifier `{at}`")]
+    #[diagnostics(
+        define(colour = Blue),
+        at(colour = Red, label = "only identifiers can be `{define}`d"),
+    )]
+    DefineOfNonIdentifier { at: Token<'a>, define: Loc<'a> },
 }

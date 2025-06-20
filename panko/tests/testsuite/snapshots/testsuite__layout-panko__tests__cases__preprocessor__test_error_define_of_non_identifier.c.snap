@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_define_of_non_identifier.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `#define` of non-identifier `+`
+   ╭─[panko/tests/cases/preprocessor/test_error_define_of_non_identifier.c:1:9]
+   │
+ 1 │ #define +
+   │ ─────── ┬  
+   │         ╰── only identifiers can be `#define`d
+───╯
