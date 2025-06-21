@@ -469,8 +469,11 @@ impl<'a> Preprocessor<'a> {
                 at: *non_identifier,
                 define: undef_loc(),
             }),
-            [name, rest @ ..] =>
-                todo!("error message: extraneous tokens in `#undef` of {name:?}: {rest:#?}"),
+            [name, rest @ ..] => self.sess.emit(Diagnostic::ExtraneousTokensInUndef {
+                at: undef_loc(),
+                name: *name,
+                tokens: tokens_loc(rest),
+            }),
         }
     }
 

@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_undef_with_extraneous_tokens.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: extraneous tokens in `#undef` directive
+   ╭─[panko/tests/cases/preprocessor/test_error_undef_with_extraneous_tokens.c:1:1]
+   │
+ 1 │ #undef abc d(e + 42)
+   │ ────── ─── ────┬────  
+   │                ╰────── help: remove this
+───╯

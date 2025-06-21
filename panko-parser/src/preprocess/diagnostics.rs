@@ -1,4 +1,5 @@
 use ariadne::Color::Blue;
+use ariadne::Color::Green;
 use ariadne::Color::Magenta;
 use ariadne::Color::Red;
 use ariadne::Fmt as _;
@@ -71,4 +72,16 @@ pub(super) enum Diagnostic<'a> {
     #[error("`{at}` does not undefine anything")]
     #[diagnostics(at(colour = Red, label = "help: add a macro name"))]
     EmptyUndef { at: Loc<'a> },
+
+    #[error("extraneous tokens in `{at}` directive")]
+    #[diagnostics(
+        at(colour = Blue),
+        name(colour = Green),
+        tokens(colour = Red, label = "help: remove this"),
+    )]
+    ExtraneousTokensInUndef {
+        at: Loc<'a>,
+        name: Token<'a>,
+        tokens: Loc<'a>,
+    },
 }
