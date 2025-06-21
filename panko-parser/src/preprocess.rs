@@ -465,7 +465,10 @@ impl<'a> Preprocessor<'a> {
             [name] if is_identifier(name) => {
                 self.macros.remove(name.slice());
             }
-            [name] => todo!("error message: trying to `#undef` non-identifier {name:?}"),
+            [non_identifier] => self.sess.emit(Diagnostic::DefineOfNonIdentifier {
+                at: *non_identifier,
+                define: undef_loc(),
+            }),
             [name, rest @ ..] =>
                 todo!("error message: extraneous tokens in `#undef` of {name:?}: {rest:#?}"),
         }

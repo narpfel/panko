@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_undef_of_non_identifier.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `#undef` of non-identifier `+`
+   ╭─[panko/tests/cases/preprocessor/test_error_undef_of_non_identifier.c:1:8]
+   │
+ 1 │ #undef +
+   │ ────── ┬  
+   │        ╰── only identifiers can be `#undef`d
+───╯
