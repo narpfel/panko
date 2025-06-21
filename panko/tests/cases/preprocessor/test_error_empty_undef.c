@@ -1,0 +1,3 @@
+#undef
+
+int main() {}

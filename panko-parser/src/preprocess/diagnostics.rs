@@ -67,4 +67,8 @@ pub(super) enum Diagnostic<'a> {
         at(colour = Red, label = "only identifiers can be `{define}`d"),
     )]
     DefineOfNonIdentifier { at: Token<'a>, define: Loc<'a> },
+
+    #[error("`{at}` does not undefine anything")]
+    #[diagnostics(at(colour = Red, label = "help: add a macro name"))]
+    EmptyUndef { at: Loc<'a> },
 }

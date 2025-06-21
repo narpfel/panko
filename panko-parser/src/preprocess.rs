@@ -424,7 +424,7 @@ impl<'a> Preprocessor<'a> {
                 self.parse_define(hash);
             }
             Some(token) if token.slice() == "undef" => {
-                self.parse_undef();
+                self.parse_undef(hash);
             }
             Some(token) =>
                 todo!("error: unimplemented preprocessor directive starting in {token:?}"),
@@ -456,12 +456,12 @@ impl<'a> Preprocessor<'a> {
         }
     }
 
-    fn parse_undef(&mut self) {
-        // eat `undef`
-        self.tokens.next();
+    fn parse_undef(&mut self, hash: &Token<'a>) {
+        let undef = self.tokens.next().unwrap();
+        let undef_loc = || hash.loc().until(undef.loc());
         let line = self.eat_until_newline();
         match &line[..] {
-            [] => todo!("error message: empty `#undef` directive"),
+            [] => self.sess.emit(Diagnostic::EmptyUndef { at: undef_loc() }),
             [name] if is_identifier(name) => {
                 self.macros.remove(name.slice());
             }

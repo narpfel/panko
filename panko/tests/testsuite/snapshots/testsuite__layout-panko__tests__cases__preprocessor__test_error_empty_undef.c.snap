@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_empty_undef.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `#undef` does not undefine anything
+   ╭─[panko/tests/cases/preprocessor/test_error_empty_undef.c:1:1]
+   │
+ 1 │ #undef
+   │ ───┬──  
+   │    ╰──── help: add a macro name
+───╯
