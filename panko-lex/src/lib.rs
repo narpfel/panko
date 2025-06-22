@@ -64,6 +64,7 @@ impl<'a> Token<'a> {
             | TokenKind::BlockComment
             | TokenKind::Newline
             | TokenKind::Hash
+            | TokenKind::HashHash
             | TokenKind::LParen
             | TokenKind::RParen
             | TokenKind::LBrace
@@ -249,12 +250,18 @@ impl<'a> Loc<'a> {
     }
 
     pub fn until(self, other: Self) -> Self {
-        assert_eq!(self.file(), other.file());
-        assert_eq!(self.src(), other.src());
-        let start = self.span.start.min(other.span.start);
-        let end = self.span.end.max(other.span.end);
-        assert!(start <= end);
-        Self { span: Span { start, end }, ..self }
+        if self.file() == other.file() {
+            // TODO: this assumes that `Loc`s are contiguous
+            assert_eq!(self.src(), other.src());
+            let start = self.span.start.min(other.span.start);
+            let end = self.span.end.max(other.span.end);
+            assert!(start <= end);
+            Self { span: Span { start, end }, ..self }
+        }
+        else {
+            // TODO: how to represent locations that span multiple files?
+            self
+        }
     }
 
     pub fn report(&self, kind: ariadne::ReportKind<'a>) -> ariadne::ReportBuilder<'a, Self> {
@@ -454,6 +461,8 @@ pub enum TokenKind {
 
     #[token("#")]
     Hash,
+    #[token("##")]
+    HashHash,
 
     #[token("(")]
     LParen,

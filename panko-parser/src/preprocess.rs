@@ -4,6 +4,7 @@ use std::fmt::Display;
 use std::io::stdout;
 use std::iter::Peekable;
 use std::iter::from_fn;
+use std::path::Path;
 
 use indexmap::IndexSet;
 use itertools::Itertools as _;
@@ -45,6 +46,10 @@ enum Replacement<'a> {
     VaOpt(&'a [Replacement<'a>]),
     VaArgs,
     Stringise(usize),
+    Concat {
+        lhs: &'a Replacement<'a>,
+        rhs: &'a Replacement<'a>,
+    },
 }
 
 impl<'a> Replacement<'a> {
@@ -64,6 +69,7 @@ impl<'a> Replacement<'a> {
             }),
             Self::Stringise(index) =>
                 Expanded::Stringise(Stringise { call, replacement: call.get(*index) }),
+            Self::Concat { lhs, rhs } => Expanded::Concat(Concat { call, lhs, rhs }),
         }
     }
 }
@@ -165,6 +171,8 @@ enum Expanding<'a> {
     },
     Argument(Argument<'a>),
     Token(Option<Token<'a>>),
+    Tokens(&'a [Token<'a>]),
+    Wrapped(Option<Expanded<'a>>),
 }
 
 impl<'a> Expanding<'a> {
@@ -174,6 +182,8 @@ impl<'a> Expanding<'a> {
             Expanding::Function { call, replacement: _ } => Some(call.name),
             Expanding::Argument(_) => None,
             Expanding::Token(_) => None,
+            Expanding::Tokens(_) => None,
+            Expanding::Wrapped(_) => None,
         }
     }
 
@@ -189,10 +199,13 @@ impl<'a> Expanding<'a> {
                 None => Expanded::Done,
             },
             Self::Token(token) => token.take().map_or(Expanded::Done, Expanded::Token),
+            Self::Tokens(tokens) => tokens.split_off_first().into(),
+            Self::Wrapped(expanded) => expanded.take().unwrap_or(Expanded::Done),
         }
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 struct VaOpt<'a> {
     call: FunctionCall<'a>,
     replacement: &'a [Replacement<'a>],
@@ -204,11 +217,20 @@ struct Stringise<'a> {
     replacement: &'a [Replacement<'a>],
 }
 
+#[derive(Debug, Clone, Copy)]
+struct Concat<'a> {
+    call: FunctionCall<'a>,
+    lhs: &'a Replacement<'a>,
+    rhs: &'a Replacement<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
 enum Expanded<'a> {
     Token(Token<'a>),
     Argument(Argument<'a>),
     VaOpt(VaOpt<'a>),
     Stringise(Stringise<'a>),
+    Concat(Concat<'a>),
     Done,
 }
 
@@ -315,6 +337,47 @@ impl<'a> Expander<'a> {
         )
     }
 
+    fn paste(&mut self, macros: &HashMap<&'a str, Macro<'a>>, concat: Concat<'a>) {
+        let Concat { call, lhs, rhs } = concat;
+        let bump = self.sess.bump();
+
+        let lhs = lhs.expand(call);
+        let depth = self.todo.len();
+        self.push(Expanding::Wrapped(Some(lhs)));
+        let mut tokens = from_fn(|| self.next_until(macros, depth)).collect_vec();
+
+        let rhs = rhs.expand(call);
+        let depth = self.todo.len();
+        self.push(Expanding::Wrapped(Some(rhs)));
+
+        let lhs = tokens.pop();
+        let rhs = self.next_until(macros, depth);
+
+        let src = format!(
+            "{}{}",
+            lhs.map_or("", |t| t.slice()),
+            rhs.map_or("", |t| t.slice()),
+        );
+
+        if !src.is_empty() {
+            let pasted_tokens =
+                panko_lex::lex(bump, Path::new("<scratch area>"), &src).collect_vec();
+            match pasted_tokens[..] {
+                [token] => tokens.push(token),
+                _ => {
+                    tokens.extend(pasted_tokens);
+                    todo!(
+                        "error message: pasting {:?} and {:?} yielded {src:?}, an invalid preprocessing token",
+                        lhs.map_or("", |t| t.slice()),
+                        rhs.map_or("", |t| t.slice()),
+                    )
+                }
+            };
+        }
+        tokens.extend(from_fn(|| self.next_until(macros, depth)));
+        self.push(Expanding::Tokens(self.sess.alloc_slice_copy(&tokens)));
+    }
+
     fn next_until(
         &mut self,
         macros: &HashMap<&'a str, Macro<'a>>,
@@ -328,6 +391,7 @@ impl<'a> Expander<'a> {
                     Expanded::Argument(argument) => self.push(Expanding::Argument(argument)),
                     Expanded::VaOpt(va_opt) => self.expand_va_opt(macros, va_opt),
                     Expanded::Stringise(stringise) => break self.stringise(macros, stringise),
+                    Expanded::Concat(concat) => self.paste(macros, concat),
                     Expanded::Done => {
                         let expanding = *expanding;
                         self.done(&expanding)
@@ -538,7 +602,21 @@ fn parse_function_like_replacement<'a>(
 ) -> Vec<Replacement<'a>> {
     from_fn(|| try {
         let token = tokens.split_off_first()?;
+        if let Some(lookahead) = tokens.first()
+            && lookahead.kind == TokenKind::HashHash
+        {
+            let _hash_hash = tokens.split_off_first().unwrap();
+            match tokens.split_off_first() {
+                Some(rhs) =>
+                    return Some(Replacement::Concat {
+                        lhs: sess.alloc(parse_token_as_maybe_parameter(parameters, token)),
+                        rhs: sess.alloc(parse_token_as_maybe_parameter(parameters, rhs)),
+                    }),
+                None => todo!("error: concat at end of macro"),
+            }
+        }
         match token.kind {
+            TokenKind::HashHash => todo!("error: concat at beginning of macro"),
             TokenKind::Hash => match tokens.split_off_first() {
                 Some(token) if let Some(index) = parameters.get_index_of(token.slice()) =>
                     Replacement::Stringise(index),
@@ -557,14 +635,21 @@ fn parse_function_like_replacement<'a>(
                     }
                 }
                 "__VA_ARGS__" => Replacement::VaArgs,
-                name => match parameters.get_index_of(name) {
-                    Some(param_index) => Replacement::Parameter(param_index),
-                    None => Replacement::Literal(*token),
-                },
+                _ => parse_token_as_maybe_parameter(parameters, token),
             },
         }
     })
     .collect()
+}
+
+fn parse_token_as_maybe_parameter<'a>(
+    parameters: &IndexSet<&str>,
+    token: &Token<'a>,
+) -> Replacement<'a> {
+    match parameters.get_index_of(token.slice()) {
+        Some(param_index) => Replacement::Parameter(param_index),
+        None => Replacement::Literal(*token),
+    }
 }
 
 fn parse_function_like_define<'a>(

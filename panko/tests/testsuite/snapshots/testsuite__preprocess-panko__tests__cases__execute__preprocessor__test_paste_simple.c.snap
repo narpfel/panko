@@ -1,0 +1,33 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_paste_simple.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+
+int printf(char const*, ...);
+
+
+
+int main() {
+    int variable = 42;
+
+    printf("%d\n", variable);
+
+    printf("%d\n", - variable);
+
+    printf("%d\n", - variable);
+
+    printf("%d\n", ++ variable);
+
+    return variable + 2;
+}
+
+----- stderr -----
