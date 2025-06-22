@@ -47,6 +47,27 @@ enum Replacement<'a> {
     Stringise(usize),
 }
 
+impl<'a> Replacement<'a> {
+    fn expand(&self, call: FunctionCall<'a>) -> Expanded<'a> {
+        match self {
+            Self::Literal(token) => Expanded::Token(*token),
+            Self::Parameter(index) => Expanded::Argument(Argument {
+                call,
+                replacement: call.get(*index),
+                update_hideset: true,
+            }),
+            Self::VaOpt(replacement) => Expanded::VaOpt(VaOpt { call, replacement }),
+            Self::VaArgs => Expanded::Argument(Argument {
+                call,
+                replacement: call.get_va_args(),
+                update_hideset: false,
+            }),
+            Self::Stringise(index) =>
+                Expanded::Stringise(Stringise { call, replacement: call.get(*index) }),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 enum Macro<'a> {
     Object {
@@ -126,6 +147,13 @@ impl<'a> FunctionCall<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+struct Argument<'a> {
+    call: FunctionCall<'a>,
+    replacement: &'a [Replacement<'a>],
+    update_hideset: bool,
+}
+
+#[derive(Debug, Clone, Copy)]
 enum Expanding<'a> {
     Object {
         name: &'a str,
@@ -135,11 +163,7 @@ enum Expanding<'a> {
         call: FunctionCall<'a>,
         replacement: &'a [Replacement<'a>],
     },
-    Argument {
-        call: FunctionCall<'a>,
-        replacement: &'a [Replacement<'a>],
-        update_hideset: bool,
-    },
+    Argument(Argument<'a>),
     Token(Option<Token<'a>>),
 }
 
@@ -148,7 +172,7 @@ impl<'a> Expanding<'a> {
         match self {
             Expanding::Object { name, .. } => Some(name),
             Expanding::Function { call, replacement: _ } => Some(call.name),
-            Expanding::Argument { .. } => None,
+            Expanding::Argument(_) => None,
             Expanding::Token(_) => None,
         }
     }
@@ -156,28 +180,14 @@ impl<'a> Expanding<'a> {
     fn next(&mut self) -> Expanded<'a> {
         match self {
             Self::Object { name: _, replacement } => replacement.split_off_first().into(),
-            Self::Function { call, replacement }
-            | Self::Argument { call, replacement, update_hideset: _ } =>
-                match replacement.split_off_first() {
-                    Some(Replacement::Literal(token)) => Expanded::Token(*token),
-                    Some(Replacement::Parameter(index)) => Expanded::Argument {
-                        call: *call,
-                        replacement: call.get(*index),
-                        update_hideset: true,
-                    },
-                    Some(Replacement::VaOpt(replacement)) =>
-                        Expanded::VaOpt(VaOpt { call: *call, replacement }),
-                    Some(Replacement::VaArgs) => Expanded::Argument {
-                        call: *call,
-                        replacement: call.get_va_args(),
-                        update_hideset: false,
-                    },
-                    Some(Replacement::Stringise(index)) => Expanded::Stringise(Stringise {
-                        call: *call,
-                        replacement: call.get(*index),
-                    }),
-                    None => Expanded::Done,
-                },
+            Self::Function { call, replacement } => match replacement.split_off_first() {
+                Some(replacement) => replacement.expand(*call),
+                None => Expanded::Done,
+            },
+            Self::Argument(argument) => match argument.replacement.split_off_first() {
+                Some(replacement) => replacement.expand(argument.call),
+                None => Expanded::Done,
+            },
             Self::Token(token) => token.take().map_or(Expanded::Done, Expanded::Token),
         }
     }
@@ -196,11 +206,7 @@ struct Stringise<'a> {
 
 enum Expanded<'a> {
     Token(Token<'a>),
-    Argument {
-        call: FunctionCall<'a>,
-        replacement: &'a [Replacement<'a>],
-        update_hideset: bool,
-    },
+    Argument(Argument<'a>),
     VaOpt(VaOpt<'a>),
     Stringise(Stringise<'a>),
     Done,
@@ -226,7 +232,7 @@ impl<'a> Expander<'a> {
 
     fn push(&mut self, expanding: Expanding<'a>) {
         match expanding {
-            Expanding::Argument { call, update_hideset, .. } =>
+            Expanding::Argument(Argument { call, update_hideset, .. }) =>
                 if update_hideset {
                     assert!(self.hidden.remove(call.name))
                 },
@@ -238,7 +244,7 @@ impl<'a> Expander<'a> {
 
     fn done(&mut self, expanding: &Expanding<'a>) {
         match expanding {
-            Expanding::Argument { call, update_hideset, .. } =>
+            Expanding::Argument(Argument { call, update_hideset, .. }) =>
                 if *update_hideset {
                     assert!(self.hidden.insert(call.name))
                 },
@@ -251,15 +257,19 @@ impl<'a> Expander<'a> {
     fn expand_va_opt(&mut self, macros: &HashMap<&'a str, Macro<'a>>, va_opt: VaOpt<'a>) {
         let VaOpt { call, replacement } = va_opt;
         let depth = self.todo.len();
-        let fake_va_args = Expanding::Argument {
+        let fake_va_args = Expanding::Argument(Argument {
             call,
             replacement: call.get_va_args(),
             update_hideset: false,
-        };
+        });
         self.push(fake_va_args);
         if self.next_until(macros, depth).is_some() {
             self.done(&fake_va_args);
-            self.push(Expanding::Argument { call, replacement, update_hideset: false });
+            self.push(Expanding::Argument(Argument {
+                call,
+                replacement,
+                update_hideset: false,
+            }));
         }
     }
 
@@ -269,7 +279,7 @@ impl<'a> Expander<'a> {
         stringise: Stringise<'a>,
     ) -> Token<'a> {
         let Stringise { call, replacement } = stringise;
-        let argument = Expanding::Argument { call, replacement, update_hideset: true };
+        let argument = Expanding::Argument(Argument { call, replacement, update_hideset: true });
         let depth = self.todo.len();
         self.push(argument);
         let mut result = vec![b'"'];
@@ -315,8 +325,7 @@ impl<'a> Expander<'a> {
                 let expanding = self.todo.get_mut(depth..)?.last_mut()?;
                 match expanding.next() {
                     Expanded::Token(token) => break token,
-                    Expanded::Argument { call, replacement, update_hideset } =>
-                        self.push(Expanding::Argument { call, replacement, update_hideset }),
+                    Expanded::Argument(argument) => self.push(Expanding::Argument(argument)),
                     Expanded::VaOpt(va_opt) => self.expand_va_opt(macros, va_opt),
                     Expanded::Stringise(stringise) => break self.stringise(macros, stringise),
                     Expanded::Done => {
