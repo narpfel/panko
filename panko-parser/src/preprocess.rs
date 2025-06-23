@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::collections::VecDeque;
 use std::fmt::Display;
 use std::io::stdout;
 use std::iter::Peekable;
@@ -159,7 +160,7 @@ struct Argument<'a> {
     update_hideset: bool,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 enum Expanding<'a> {
     Object {
         name: &'a str,
@@ -171,7 +172,7 @@ enum Expanding<'a> {
     },
     Argument(Argument<'a>),
     Token(Option<Token<'a>>),
-    Tokens(&'a [Token<'a>]),
+    Tokens(VecDeque<Token<'a>>),
     Wrapped(Option<Expanded<'a>>),
 }
 
@@ -199,7 +200,7 @@ impl<'a> Expanding<'a> {
                 None => Expanded::Done,
             },
             Self::Token(token) => token.take().into(),
-            Self::Tokens(tokens) => tokens.split_off_first().into(),
+            Self::Tokens(tokens) => tokens.pop_front().into(),
             Self::Wrapped(expanded) => expanded.take().unwrap_or(Expanded::Done),
         }
     }
@@ -290,7 +291,7 @@ impl<'a> Expander<'a> {
             replacement: call.get_va_args(),
             update_hideset: false,
         });
-        self.push(fake_va_args);
+        self.push(fake_va_args.clone());
         if self.next_until(macros, depth).is_some() {
             self.done(&fake_va_args);
             self.push(Expanding::Argument(Argument {
@@ -381,7 +382,7 @@ impl<'a> Expander<'a> {
             };
         }
         tokens.extend(from_fn(|| self.next_until(macros, depth)));
-        self.push(Expanding::Tokens(self.sess.alloc_slice_copy(&tokens)));
+        self.push(Expanding::Tokens(VecDeque::from(tokens)));
     }
 
     fn next_until(
@@ -399,7 +400,7 @@ impl<'a> Expander<'a> {
                     Expanded::Stringise(stringise) => break self.stringise(macros, stringise),
                     Expanded::Concat(concat) => self.paste(macros, concat),
                     Expanded::Done => {
-                        let expanding = *expanding;
+                        let expanding = expanding.clone();
                         self.done(&expanding)
                     }
                 }
