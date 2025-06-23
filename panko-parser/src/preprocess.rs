@@ -601,52 +601,59 @@ fn parse_va_opt<'a>(
     Ok(Replacement::VaOpt(sess.alloc_slice_copy(&va_opt_tokens)))
 }
 
+fn parse_replacement<'a>(
+    sess: &'a Session<'a>,
+    parameters: &IndexSet<&str>,
+    is_varargs: bool,
+    tokens: &mut &'a [Token<'a>],
+) -> Option<Replacement<'a>> {
+    let token = tokens.split_off_first()?;
+    let replacement = match token.kind {
+        TokenKind::HashHash => todo!("error: concat at beginning of macro"),
+        TokenKind::Hash => match tokens.split_off_first() {
+            Some(token) if let Some(index) = parameters.get_index_of(token.slice()) =>
+                Replacement::Stringise(index),
+            Some(_) => todo!("error: not a parameter (but allow `__VA_OPT__` and `__VA_ARGS__`)"),
+            None => todo!("error: stringise at end of macro"),
+        },
+        _ => match token.slice() {
+            "__VA_OPT__" => {
+                if !is_varargs {
+                    sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
+                }
+                match parse_va_opt(sess, parameters, is_varargs, token, tokens) {
+                    Ok(va_opt) => va_opt,
+                    Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
+                }
+            }
+            "__VA_ARGS__" => Replacement::VaArgs,
+            _ => parse_token_as_maybe_parameter(parameters, token),
+        },
+    };
+    if let Some(lookahead) = tokens.first()
+        && lookahead.kind == TokenKind::HashHash
+    {
+        let _hash_hash = tokens.split_off_first().unwrap();
+        match parse_replacement(sess, parameters, is_varargs, tokens) {
+            Some(rhs) => Some(Replacement::Concat {
+                lhs: sess.alloc(replacement),
+                rhs: sess.alloc(rhs),
+            }),
+            None => todo!("error: concat at end of macro"),
+        }
+    }
+    else {
+        Some(replacement)
+    }
+}
+
 fn parse_function_like_replacement<'a>(
     sess: &'a Session<'a>,
     parameters: &IndexSet<&str>,
     is_varargs: bool,
     mut tokens: &'a [Token<'a>],
 ) -> Vec<Replacement<'a>> {
-    from_fn(|| try {
-        let token = tokens.split_off_first()?;
-        if let Some(lookahead) = tokens.first()
-            && lookahead.kind == TokenKind::HashHash
-        {
-            let _hash_hash = tokens.split_off_first().unwrap();
-            match tokens.split_off_first() {
-                Some(rhs) =>
-                    return Some(Replacement::Concat {
-                        lhs: sess.alloc(parse_token_as_maybe_parameter(parameters, token)),
-                        rhs: sess.alloc(parse_token_as_maybe_parameter(parameters, rhs)),
-                    }),
-                None => todo!("error: concat at end of macro"),
-            }
-        }
-        match token.kind {
-            TokenKind::HashHash => todo!("error: concat at beginning of macro"),
-            TokenKind::Hash => match tokens.split_off_first() {
-                Some(token) if let Some(index) = parameters.get_index_of(token.slice()) =>
-                    Replacement::Stringise(index),
-                Some(_) =>
-                    todo!("error: not a parameter (but allow `__VA_OPT__` and `__VA_ARGS__`)"),
-                None => todo!("error: stringise at end of macro"),
-            },
-            _ => match token.slice() {
-                "__VA_OPT__" => {
-                    if !is_varargs {
-                        sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
-                    }
-                    match parse_va_opt(sess, parameters, is_varargs, token, &mut tokens) {
-                        Ok(va_opt) => va_opt,
-                        Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
-                    }
-                }
-                "__VA_ARGS__" => Replacement::VaArgs,
-                _ => parse_token_as_maybe_parameter(parameters, token),
-            },
-        }
-    })
-    .collect()
+    from_fn(|| try { parse_replacement(sess, parameters, is_varargs, &mut tokens)? }).collect()
 }
 
 fn parse_token_as_maybe_parameter<'a>(
