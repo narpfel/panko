@@ -198,7 +198,7 @@ impl<'a> Expanding<'a> {
                 Some(replacement) => replacement.expand(argument.call),
                 None => Expanded::Done,
             },
-            Self::Token(token) => token.take().map_or(Expanded::Done, Expanded::Token),
+            Self::Token(token) => token.take().into(),
             Self::Tokens(tokens) => tokens.split_off_first().into(),
             Self::Wrapped(expanded) => expanded.take().unwrap_or(Expanded::Done),
         }
@@ -234,9 +234,15 @@ enum Expanded<'a> {
     Done,
 }
 
+impl<'a> From<Option<Token<'a>>> for Expanded<'a> {
+    fn from(value: Option<Token<'a>>) -> Self {
+        value.map_or(Expanded::Done, Expanded::Token)
+    }
+}
+
 impl<'a> From<Option<&Token<'a>>> for Expanded<'a> {
     fn from(value: Option<&Token<'a>>) -> Self {
-        value.copied().map_or(Expanded::Done, Expanded::Token)
+        value.copied().into()
     }
 }
 
