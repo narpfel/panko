@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/preprocessor/test_indent_of_token_from_different_source_file.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (expression
+            (noop-type-conversion `ptr<char>`
+               (addressof `ptr<array<char; 9>>`
+                  (string `array<char; 9>` "indented\0"))))
+         (return (42 `int`))
+         (expression
+            (noop-type-conversion `ptr<char>`
+               (addressof `ptr<array<char; 14>>`
+                  (string `array<char; 14>` "also indented\0")))))))
+
+----- stderr -----

@@ -792,7 +792,13 @@ fn write_preprocessed_tokens<'a, D: Display>(
                 && token.kind != TokenKind::Newline
             {
                 if last.kind == TokenKind::Newline {
-                    let indent = token.loc().src()[last.loc().end()..]
+                    // TODO: this breaks indentation if the first token on a line is from a
+                    // different file than the last token on the last line
+                    let indent = token
+                        .loc()
+                        .src()
+                        .get(last.loc().end()..)
+                        .unwrap_or_default()
                         .find(|c: char| !c.is_whitespace())
                         .unwrap_or(0);
                     write!(w, "{:indent$}", "")?;
