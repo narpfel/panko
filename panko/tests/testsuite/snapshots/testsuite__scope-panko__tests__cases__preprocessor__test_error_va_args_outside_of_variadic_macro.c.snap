@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_va_args_outside_of_variadic_macro.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `__VA_ARGS__` outside of variadic macro
+   ╭─[panko/tests/cases/preprocessor/test_error_va_args_outside_of_variadic_macro.c:1:21]
+   │
+ 1 │ #define MACRO(x, y) __VA_ARGS__ - x + y
+   │                     ─────┬─────  
+   │                          ╰─────── `__VA_ARGS__` is forbidden outside of variadic macros
+───╯

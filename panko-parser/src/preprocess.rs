@@ -626,7 +626,12 @@ fn parse_replacement<'a>(
                     Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
                 }
             }
-            "__VA_ARGS__" => Replacement::VaArgs,
+            "__VA_ARGS__" => {
+                if !is_varargs {
+                    sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
+                }
+                Replacement::VaArgs
+            }
             _ => parse_token_as_maybe_parameter(parameters, token),
         },
     };
