@@ -519,11 +519,13 @@ impl<'a> Preprocessor<'a> {
             [] => self.sess.emit(Diagnostic::EmptyDefine { at: define_loc() }),
             [name_tok, line @ ..] if is_identifier(name_tok) => {
                 let line = self.sess.alloc_slice_copy(line);
+                // TODO: check `name` for `__VA_OPT__` and `__VA_ARGS__`
                 let name = name_tok.slice();
                 let r#macro = if line.first().is_some_and(|token| is_lparen(name_tok, token)) {
                     parse_function_like_define(self.sess, name, line)
                 }
                 else {
+                    // TODO: check for `__VA_OPT__` and `__VA_ARGS__` here
                     Macro::Object { name, replacement: line }
                 };
                 // TODO: check for redefinition
@@ -665,6 +667,7 @@ fn parse_token_as_maybe_parameter<'a>(
     parameters: &IndexSet<&str>,
     token: &Token<'a>,
 ) -> Replacement<'a> {
+    // TODO: check for `__VA_OPT__` and `__VA_ARGS__` here
     match parameters.get_index_of(token.slice()) {
         Some(param_index) => Replacement::Parameter(param_index),
         None => Replacement::Literal(*token),
@@ -798,6 +801,7 @@ pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -
         },
     }
     .run()
+    // TODO: check for `__VA_OPT__` and `__VA_ARGS__` here
 }
 
 fn write_preprocessed_tokens<'a, D: Display>(
