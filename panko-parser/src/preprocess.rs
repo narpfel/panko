@@ -653,7 +653,7 @@ fn parse_function_like_replacement<'a>(
     is_varargs: bool,
     mut tokens: &'a [Token<'a>],
 ) -> Vec<Replacement<'a>> {
-    from_fn(|| try { parse_replacement(sess, parameters, is_varargs, &mut tokens)? }).collect()
+    from_fn(|| parse_replacement(sess, parameters, is_varargs, &mut tokens)).collect()
 }
 
 fn parse_token_as_maybe_parameter<'a>(
