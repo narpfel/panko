@@ -611,7 +611,11 @@ fn parse_replacement<'a>(
 ) -> Option<Replacement<'a>> {
     let token = tokens.split_off_first()?;
     let replacement = match token.kind {
-        TokenKind::HashHash => todo!("error: concat at beginning of macro"),
+        TokenKind::HashHash => {
+            let () =
+                sess.emit(Diagnostic::PasteAtBeginningOfMacro { at: *token, kind: "beginning" });
+            parse_replacement(sess, parameters, is_varargs, tokens)?
+        }
         TokenKind::Hash => match tokens.split_off_first() {
             Some(token) if let Some(index) = parameters.get_index_of(token.slice()) =>
                 Replacement::Stringise(index),
@@ -640,13 +644,17 @@ fn parse_replacement<'a>(
     if let Some(lookahead) = tokens.first()
         && lookahead.kind == TokenKind::HashHash
     {
-        let _hash_hash = tokens.split_off_first().unwrap();
+        let hash_hash = tokens.split_off_first().unwrap();
         match parse_replacement(sess, parameters, is_varargs, tokens) {
             Some(rhs) => Some(Replacement::Concat {
                 lhs: sess.alloc(replacement),
                 rhs: sess.alloc(rhs),
             }),
-            None => todo!("error: concat at end of macro"),
+            None => {
+                let () =
+                    sess.emit(Diagnostic::PasteAtBeginningOfMacro { at: *hash_hash, kind: "end" });
+                Some(replacement)
+            }
         }
     }
     else {

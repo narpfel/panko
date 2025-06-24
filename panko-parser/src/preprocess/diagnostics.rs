@@ -84,4 +84,8 @@ pub(super) enum Diagnostic<'a> {
         name: Token<'a>,
         tokens: Loc<'a>,
     },
+
+    #[error("`{at}` at {kind} of macro")]
+    #[diagnostics(at(colour = Red, label = "`{at}` operator must not be at {kind} of macro"))]
+    PasteAtBeginningOfMacro { at: Token<'a>, kind: &'a str },
 }

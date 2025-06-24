@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_error_paste_at_beginning_end_of_macro.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `##` at beginning of macro
+   ╭─[panko/tests/cases/preprocessor/test_error_paste_at_beginning_end_of_macro.c:1:22]
+   │
+ 1 │ #define BEGINNING(x) ## x
+   │                      ─┬  
+   │                       ╰── `##` operator must not be at beginning of macro
+───╯
+
+Error: `##` at end of macro
+   ╭─[panko/tests/cases/preprocessor/test_error_paste_at_beginning_end_of_macro.c:2:18]
+   │
+ 2 │ #define END(x) x ##
+   │                  ─┬  
+   │                   ╰── `##` operator must not be at end of macro
+───╯
+
+Error: `##` at beginning of macro
+   ╭─[panko/tests/cases/preprocessor/test_error_paste_at_beginning_end_of_macro.c:3:16]
+   │
+ 3 │ #define BOTH() ##
+   │                ─┬  
+   │                 ╰── `##` operator must not be at beginning of macro
+───╯
