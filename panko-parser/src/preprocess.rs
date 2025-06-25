@@ -134,6 +134,7 @@ struct Preprocessor<'a> {
     current_is_newline: bool,
     macros: HashMap<&'a str, Macro<'a>>,
     expander: Expander<'a>,
+    if_stack: Vec<bool>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -511,6 +512,25 @@ impl<'a> Preprocessor<'a> {
             Some(token) if token.slice() == "undef" => {
                 self.parse_undef(hash);
             }
+            Some(token) if token.slice() == "if" => {
+                let condition = self.parse_condition();
+                self.if_stack.push(condition);
+                if !condition {
+                    self.skip_to_else();
+                }
+            }
+            Some(token) if token.slice() == "else" => {
+                self.next();
+                match self.if_stack.pop() {
+                    Some(true) => self.skip_to_endif(),
+                    Some(false) => (),
+                    None => todo!("error: unmatched `#else`"),
+                }
+            }
+            Some(token) if token.slice() == "endif" => {
+                self.next();
+                self.if_stack.pop().unwrap();
+            }
             Some(token) =>
                 todo!("error: unimplemented preprocessor directive starting in {token:?}"),
         }
@@ -570,6 +590,57 @@ impl<'a> Preprocessor<'a> {
             .by_ref()
             .peeking_take_while(|token| token.kind != TokenKind::Newline)
             .collect()
+    }
+
+    fn skip_to_else(&mut self) {
+        let mut nesting_level = 0_u64;
+        while let Some((previous_was_newline, token)) = self.next() {
+            if previous_was_newline && token.kind == TokenKind::Hash {
+                match self.next_token() {
+                    Some(token) if token.slice() == "if" => nesting_level += 1,
+                    Some(token) if token.slice() == "endif" => match nesting_level.checked_sub(1) {
+                        Some(level) => nesting_level = level,
+                        None => {
+                            self.if_stack
+                                .pop()
+                                .expect("TODO: error message: unterminated `#if` directive");
+                            return;
+                        }
+                    },
+                    Some(token) if token.slice() == "else" && nesting_level == 0 => return,
+                    Some(_) => (),
+                    None => todo!("error message: unterminated `#if` directive"),
+                }
+            }
+        }
+    }
+
+    fn skip_to_endif(&mut self) {
+        let mut nesting_level = 0_u64;
+        while let Some((previous_was_newline, token)) = self.next() {
+            if previous_was_newline && token.kind == TokenKind::Hash {
+                match self.next_token() {
+                    Some(token) if token.slice() == "if" => nesting_level += 1,
+                    Some(token) if token.slice() == "endif" => match nesting_level.checked_sub(1) {
+                        Some(level) => nesting_level = level,
+                        None => return,
+                    },
+                    Some(_) => (),
+                    None => todo!("error message: unterminated `#if` directive"),
+                }
+            }
+        }
+    }
+
+    fn parse_condition(&mut self) -> bool {
+        // eat `if`
+        self.next();
+        match self.next_token() {
+            Some(token) if token.slice() == "0" => false,
+            Some(token) if token.slice() == "1" => true,
+            Some(_token) => todo!("actually parse a condition"),
+            None => todo!("error message: expected condition for `#if` directive"),
+        }
     }
 }
 
@@ -812,6 +883,7 @@ pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -
             hidden: HashSet::default(),
             todo: Vec::default(),
         },
+        if_stack: Vec::default(),
     }
     .run()
     // TODO: check for `__VA_OPT__` and `__VA_ARGS__` here
