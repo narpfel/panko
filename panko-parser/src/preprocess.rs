@@ -131,7 +131,7 @@ impl<'a> Macro<'a> {
 struct Preprocessor<'a> {
     sess: &'a Session<'a>,
     tokens: UnpreprocessedTokens<'a>,
-    previous_was_newline: bool,
+    current_is_newline: bool,
     macros: HashMap<&'a str, Macro<'a>>,
     expander: Expander<'a>,
 }
@@ -431,17 +431,20 @@ impl<'a> Expander<'a> {
 }
 
 impl<'a> Preprocessor<'a> {
+    fn next(&mut self) -> Option<(bool, Token<'a>)> {
+        let previous_was_newline = self.current_is_newline;
+        let token = self.tokens.next()?;
+        self.current_is_newline = token.kind == TokenKind::Newline;
+        Some((previous_was_newline, token))
+    }
+
     #[define_opaque(TokenIter)]
     fn run(mut self) -> TokenIter<'a> {
         gen move {
-            while let Some(token) = self.tokens.next() {
+            while let Some((previous_was_newline, token)) = self.next() {
                 match token {
-                    token if token.kind == TokenKind::Newline => {
-                        self.previous_was_newline = true;
-                        yield token;
-                    }
                     token if token.kind == TokenKind::Hash =>
-                        if self.previous_was_newline {
+                        if previous_was_newline {
                             self.parse_directive(&token);
                         }
                         else {
@@ -467,7 +470,6 @@ impl<'a> Preprocessor<'a> {
                             }
                         },
                     token if let Some(&r#macro) = self.macros.get(token.slice()) => {
-                        self.previous_was_newline = false;
                         assert!(self.expander.is_empty());
                         match r#macro.expand(self.sess, self.tokens.by_ref(), &token) {
                             Some(expanding) => {
@@ -480,7 +482,6 @@ impl<'a> Preprocessor<'a> {
                         }
                     }
                     token => {
-                        self.previous_was_newline = false;
                         yield token;
                     }
                 }
@@ -512,7 +513,7 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn parse_define(&mut self, hash: &Token<'a>) {
-        let define = self.tokens.next().unwrap();
+        let (_, define) = self.next().unwrap();
         let define_loc = || hash.loc().until(define.loc());
         let line = self.eat_until_newline();
         match &line[..] {
@@ -539,7 +540,7 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn parse_undef(&mut self, hash: &Token<'a>) {
-        let undef = self.tokens.next().unwrap();
+        let (_, undef) = self.next().unwrap();
         let undef_loc = || hash.loc().until(undef.loc());
         let line = self.eat_until_newline();
         match &line[..] {
@@ -560,7 +561,7 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn eat_until_newline(&mut self) -> Vec<Token<'a>> {
-        self.previous_was_newline = true;
+        self.current_is_newline = true;
         self.tokens
             .by_ref()
             .peeking_take_while(|token| token.kind != TokenKind::Newline)
@@ -800,7 +801,7 @@ pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -
     Preprocessor {
         sess,
         tokens: tokens.peekable(),
-        previous_was_newline: true,
+        current_is_newline: true,
         macros: HashMap::default(),
         expander: Expander {
             sess,
