@@ -438,6 +438,10 @@ impl<'a> Preprocessor<'a> {
         Some((previous_was_newline, token))
     }
 
+    fn next_token(&mut self) -> Option<Token<'a>> {
+        Some(self.next()?.1)
+    }
+
     #[define_opaque(TokenIter)]
     fn run(mut self) -> TokenIter<'a> {
         gen move {
@@ -513,7 +517,7 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn parse_define(&mut self, hash: &Token<'a>) {
-        let (_, define) = self.next().unwrap();
+        let define = self.next_token().unwrap();
         let define_loc = || hash.loc().until(define.loc());
         let line = self.eat_until_newline();
         match &line[..] {
@@ -540,7 +544,7 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn parse_undef(&mut self, hash: &Token<'a>) {
-        let (_, undef) = self.next().unwrap();
+        let undef = self.next_token().unwrap();
         let undef_loc = || hash.loc().until(undef.loc());
         let line = self.eat_until_newline();
         match &line[..] {
