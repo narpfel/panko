@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_duplicate_macro_parameter_name.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: duplicate parameter name in function-like macro: `abc`
+   ╭─[panko/tests/cases/preprocessor/test_error_duplicate_macro_parameter_name.c:1:25]
+   │
+ 1 │ #define MACRO(abc, def, abc) abc + def
+   │                         ─┬─  
+   │                          ╰─── this parameter name is already in use
+───╯
+
+Error: argument count mismatch: too many arguments to function-like macro invocation (expected 2 but got 3)
+   ╭─[panko/tests/cases/preprocessor/test_error_duplicate_macro_parameter_name.c:4:12]
+   │
+ 4 │     return MACRO(1, 2, 3);
+   │            ──┬──  
+   │              ╰──── this macro expects 2 arguments
+───╯

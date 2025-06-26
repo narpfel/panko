@@ -772,10 +772,9 @@ fn parse_function_like_define<'a>(
             Some(token) => {
                 tokens.split_off_first();
                 if is_identifier(token) {
-                    assert!(
-                        parameters.insert(token.slice()),
-                        "TODO: error: duplicate parameter name",
-                    )
+                    if !parameters.insert(token.slice()) {
+                        sess.emit(Diagnostic::DuplicateMacroParamName { at: *token })
+                    }
                 }
                 else {
                     todo!("error: non-identifier in function-like macro parameter list: {token:?}")

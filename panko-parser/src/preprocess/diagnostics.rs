@@ -88,4 +88,8 @@ pub(super) enum Diagnostic<'a> {
     #[error("`{at}` at {kind} of macro")]
     #[diagnostics(at(colour = Red, label = "`{at}` operator must not be at {kind} of macro"))]
     PasteAtBeginningOfMacro { at: Token<'a>, kind: &'a str },
+
+    #[error("duplicate parameter name in function-like macro: `{at}`")]
+    #[diagnostics(at(colour = Red, label = "this parameter name is already in use"))]
+    DuplicateMacroParamName { at: Token<'a> },
 }
