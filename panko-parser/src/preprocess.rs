@@ -683,7 +683,7 @@ impl<'a> Preprocessor<'a> {
         let parser = crate::grammar::ConstantExpressionParser::new();
         let expr = parser
             .parse(sess, &typedef_names, &is_in_typedef, tokens)
-            .unwrap();
+            .expect("TODO: handle parser error");
         eval(&expr).is_truthy()
     }
 }
