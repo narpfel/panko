@@ -1,5 +1,3 @@
-#![expect(unused, reason = "TODO: most of this is just stubs")]
-
 use std::ops::Add;
 use std::ops::BitAnd;
 use std::ops::BitOr;
@@ -14,7 +12,6 @@ use std::ops::Shr;
 use std::ops::Sub;
 
 use panko_lex::Integer;
-use panko_lex::IntegerSuffix;
 use panko_lex::TokenKind;
 
 use crate::BinOp;
@@ -74,7 +71,15 @@ impl Mul for Value {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        todo!()
+        match (self, rhs) {
+            (Self::Signed(lhs), Self::Signed(rhs)) =>
+                Self::Signed(lhs.checked_mul(rhs).expect("TODO: signed overflow error")),
+            (Self::Signed(lhs), Self::Unsigned(rhs)) =>
+                Self::Unsigned(lhs.cast_unsigned().wrapping_mul(rhs)),
+            (Self::Unsigned(lhs), Self::Signed(rhs)) =>
+                Self::Unsigned(lhs.wrapping_mul(rhs.cast_unsigned())),
+            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs.wrapping_mul(rhs)),
+        }
     }
 }
 
@@ -82,7 +87,21 @@ impl Div for Value {
     type Output = Self;
 
     fn div(self, rhs: Self) -> Self::Output {
-        todo!()
+        if rhs.into_u64() == 0 {
+            todo!("error: division by zero")
+        }
+        else {
+            match (self, rhs) {
+                (Value::Signed(lhs), Value::Signed(rhs)) =>
+                    Self::Signed(lhs.checked_div(rhs).expect("TODO: signed overflow error")),
+                (Value::Signed(lhs), Value::Unsigned(rhs)) =>
+                    Self::Unsigned(lhs.cast_unsigned().wrapping_div(rhs)),
+                (Value::Unsigned(lhs), Value::Signed(rhs)) =>
+                    Self::Unsigned(lhs.wrapping_div(rhs.cast_unsigned())),
+                (Value::Unsigned(lhs), Value::Unsigned(rhs)) =>
+                    Self::Unsigned(lhs.wrapping_div(rhs)),
+            }
+        }
     }
 }
 
@@ -90,7 +109,21 @@ impl Rem for Value {
     type Output = Self;
 
     fn rem(self, rhs: Self) -> Self::Output {
-        todo!()
+        if rhs.into_u64() == 0 {
+            todo!("error: division by zero")
+        }
+        else {
+            match (self, rhs) {
+                (Value::Signed(lhs), Value::Signed(rhs)) =>
+                    Self::Signed(lhs.checked_rem(rhs).expect("TODO: signed overflow error")),
+                (Value::Signed(lhs), Value::Unsigned(rhs)) =>
+                    Self::Unsigned(lhs.cast_unsigned().wrapping_rem(rhs)),
+                (Value::Unsigned(lhs), Value::Signed(rhs)) =>
+                    Self::Unsigned(lhs.wrapping_rem(rhs.cast_unsigned())),
+                (Value::Unsigned(lhs), Value::Unsigned(rhs)) =>
+                    Self::Unsigned(lhs.wrapping_rem(rhs)),
+            }
+        }
     }
 }
 
@@ -114,7 +147,15 @@ impl Sub for Value {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        todo!()
+        match (self, rhs) {
+            (Self::Signed(lhs), Self::Signed(rhs)) =>
+                Self::Signed(lhs.checked_sub(rhs).expect("TODO: signed overflow error")),
+            (Self::Signed(lhs), Self::Unsigned(rhs)) =>
+                Self::Unsigned(lhs.cast_unsigned().wrapping_sub(rhs)),
+            (Self::Unsigned(lhs), Self::Signed(rhs)) =>
+                Self::Unsigned(lhs.wrapping_sub(rhs.cast_unsigned())),
+            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs.wrapping_sub(rhs)),
+        }
     }
 }
 
@@ -139,7 +180,21 @@ impl Shl for Value {
     type Output = Self;
 
     fn shl(self, rhs: Self) -> Self::Output {
-        todo!()
+        let rhs = match rhs {
+            Self::Signed(rhs) if (0..64).contains(&rhs) => rhs.cast_unsigned(),
+            Self::Unsigned(rhs) if (0..64).contains(&rhs) => rhs,
+            _ => todo!("error: shift rhs is invalid"),
+        };
+        match self {
+            Self::Signed(value) if value < 0 =>
+                todo!("error: left shift is UB for negative values"),
+            Self::Signed(value) => Self::Signed(
+                value
+                    .checked_mul(1 << rhs)
+                    .expect("TODO: signed overflow error"),
+            ),
+            Self::Unsigned(value) => Self::Unsigned(value << rhs),
+        }
     }
 }
 
@@ -147,7 +202,16 @@ impl Shr for Value {
     type Output = Self;
 
     fn shr(self, rhs: Self) -> Self::Output {
-        todo!()
+        let rhs = match rhs {
+            Self::Signed(rhs) if (0..64).contains(&rhs) => rhs.cast_unsigned(),
+            Self::Unsigned(rhs) if (0..64).contains(&rhs) => rhs,
+            _ => todo!("error: shift rhs is invalid"),
+        };
+        let rhs = u32::try_from(rhs).unwrap();
+        match self {
+            Self::Signed(value) => Self::Signed(value.wrapping_shr(rhs)),
+            Self::Unsigned(value) => Self::Unsigned(value.wrapping_shr(rhs)),
+        }
     }
 }
 
@@ -155,7 +219,12 @@ impl BitAnd for Value {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        todo!()
+        match (self, rhs) {
+            (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs & rhs),
+            (Self::Signed(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs.cast_unsigned() & rhs),
+            (Self::Unsigned(lhs), Self::Signed(rhs)) => Self::Unsigned(lhs & rhs.cast_unsigned()),
+            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs & rhs),
+        }
     }
 }
 
@@ -163,7 +232,12 @@ impl BitXor for Value {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        todo!()
+        match (self, rhs) {
+            (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs ^ rhs),
+            (Self::Signed(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs.cast_unsigned() ^ rhs),
+            (Self::Unsigned(lhs), Self::Signed(rhs)) => Self::Unsigned(lhs ^ rhs.cast_unsigned()),
+            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs ^ rhs),
+        }
     }
 }
 
@@ -171,7 +245,12 @@ impl BitOr for Value {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        todo!()
+        match (self, rhs) {
+            (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs | rhs),
+            (Self::Signed(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs.cast_unsigned() | rhs),
+            (Self::Unsigned(lhs), Self::Signed(rhs)) => Self::Unsigned(lhs | rhs.cast_unsigned()),
+            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs | rhs),
+        }
     }
 }
 
@@ -231,11 +310,12 @@ fn eval_logical_op(op: &LogicalOp, lhs: &Expression, rhs: &Expression) -> Value 
 
 pub(super) fn eval(expr: &Expression) -> Value {
     match expr {
-        Expression::Error(report) => unreachable!("the parser does not produce this expr kind"),
-        Expression::Name(token) =>
+        Expression::Error(_report) => unreachable!("the parser does not produce this expr kind"),
+        Expression::Name(_token) =>
             unreachable!("we have expanded all macros and replaced all non-macros with 0"),
         Expression::Integer(token) => {
-            let TokenKind::Integer(Integer { suffix, suffix_len, base, prefix_len }) = token.kind
+            let TokenKind::Integer(Integer { suffix: _, suffix_len, base, prefix_len }) =
+                token.kind
             else {
                 unreachable!()
             };
@@ -248,33 +328,34 @@ pub(super) fn eval(expr: &Expression) -> Value {
                 Err(_) => todo!(),
             }
         }
-        Expression::CharConstant(token) => todo!(),
-        Expression::String(tokens) => todo!("error: apparently not allowed?"),
-        Expression::Parenthesised { open_paren, expr, close_paren } => eval(expr),
-        Expression::Assign { target, value } => unreachable!("prevented by grammar"),
-        Expression::CompoundAssign { target, op, value } => unreachable!("prevented by grammar"),
+        Expression::CharConstant(_token) => todo!(),
+        Expression::String(_tokens) => todo!("error: apparently not allowed?"),
+        Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => eval(expr),
+        Expression::Assign { .. } => unreachable!("prevented by grammar"),
+        Expression::CompoundAssign { .. } => unreachable!("prevented by grammar"),
         Expression::BinOp { lhs, op, rhs } => eval_binop(op, lhs, rhs),
         Expression::UnaryOp { operator, operand } => eval_unary_op(operator, operand),
-        Expression::Call { callee, args, close_paren } => todo!("always a type error"),
-        Expression::Sizeof { sizeof, ty, close_paren } => unreachable!("starts with an identifier"),
-        Expression::Lengthof { lengthof, ty, close_paren } =>
-            unreachable!("starts with an identifier"),
-        Expression::Alignof { alignof, ty, close_paren } =>
-            unreachable!("starts with an identifier"),
-        Expression::Cast { open_paren, ty, expr } =>
-            unreachable!("the type name would contain an identifier"),
-        Expression::Subscript { lhs, rhs, close_bracket } => todo!("error: invalid op"),
-        Expression::Generic { generic, selector, assocs, close_paren } =>
-            unreachable!("starts with an identifier"),
+        Expression::Call { .. } => todo!("always a type error"),
+        Expression::Sizeof { .. } => unreachable!("starts with an identifier"),
+        Expression::Lengthof { .. } => unreachable!("starts with an identifier"),
+        Expression::Alignof { .. } => unreachable!("starts with an identifier"),
+        Expression::Cast { .. } => unreachable!("the type name would contain an identifier"),
+        Expression::Subscript { .. } => todo!("error: invalid op"),
+        Expression::Generic { .. } => unreachable!("starts with an identifier"),
         Expression::Logical { lhs, op, rhs } => eval_logical_op(op, lhs, rhs),
-        Expression::Conditional { condition, question_mark, then, or_else } =>
+        Expression::Conditional {
+            condition,
+            question_mark: _,
+            then,
+            or_else,
+        } =>
             if eval(condition).is_truthy() {
                 eval(then)
             }
             else {
                 eval(or_else)
             },
-        Expression::Comma { lhs, rhs } => todo!("not allowed"),
-        Expression::Increment { operator, operand, fixity } => todo!("not allowed"),
+        Expression::Comma { .. } => todo!("not allowed"),
+        Expression::Increment { .. } => todo!("not allowed"),
     }
 }
