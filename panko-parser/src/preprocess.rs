@@ -1,3 +1,5 @@
+use std::cell::Cell;
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
@@ -9,14 +11,18 @@ use std::path::Path;
 
 use indexmap::IndexSet;
 use itertools::Itertools as _;
+use panko_lex::Integer;
+use panko_lex::IntegerSuffix;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
 
 use crate::ast::Session;
 use crate::preprocess::diagnostics::Diagnostic;
+use crate::preprocess::eval::eval;
 
 mod diagnostics;
+mod eval;
 
 pub type TokenIter<'a> = impl Iterator<Item = Token<'a>>;
 
@@ -635,12 +641,50 @@ impl<'a> Preprocessor<'a> {
     fn parse_condition(&mut self) -> bool {
         // eat `if`
         self.next();
-        match self.next_token() {
-            Some(token) if token.slice() == "0" => false,
-            Some(token) if token.slice() == "1" => true,
-            Some(_token) => todo!("actually parse a condition"),
-            None => todo!("error message: expected condition for `#if` directive"),
-        }
+        let sess = self.sess;
+        let tokens = gen {
+            while let Some(token) = self.next_token() {
+                match token {
+                    token if token.kind == TokenKind::Newline => return,
+                    // TODO: this duplicates code from `run`
+                    token if is_identifier(&token) => match self.macros.get(token.slice()) {
+                        Some(&r#macro) => {
+                            assert!(self.expander.is_empty());
+                            match r#macro.expand(self.sess, self.tokens.by_ref(), &token) {
+                                Some(expanding) => {
+                                    self.expander.push(expanding);
+                                    while let Some(token) = self.expander.next(&self.macros) {
+                                        yield token;
+                                    }
+                                }
+                                None => yield token,
+                            }
+                        }
+                        None =>
+                            yield Token::from_str(
+                                sess.bump,
+                                TokenKind::Integer(Integer {
+                                    suffix: IntegerSuffix::None,
+                                    suffix_len: 0,
+                                    base: 10,
+                                    prefix_len: 0,
+                                }),
+                                if token.slice() == "true" { "1" } else { "0" },
+                            ),
+                    },
+                    token => {
+                        yield token;
+                    }
+                }
+            }
+        };
+        let typedef_names = RefCell::default();
+        let is_in_typedef = Cell::default();
+        let parser = crate::grammar::ConstantExpressionParser::new();
+        let expr = parser
+            .parse(sess, &typedef_names, &is_in_typedef, tokens)
+            .unwrap();
+        eval(&expr).is_truthy()
     }
 }
 
