@@ -74,11 +74,7 @@ impl Mul for Value {
         match (self, rhs) {
             (Self::Signed(lhs), Self::Signed(rhs)) =>
                 Self::Signed(lhs.checked_mul(rhs).expect("TODO: signed overflow error")),
-            (Self::Signed(lhs), Self::Unsigned(rhs)) =>
-                Self::Unsigned(lhs.cast_unsigned().wrapping_mul(rhs)),
-            (Self::Unsigned(lhs), Self::Signed(rhs)) =>
-                Self::Unsigned(lhs.wrapping_mul(rhs.cast_unsigned())),
-            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs.wrapping_mul(rhs)),
+            (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_mul(rhs.into_u64())),
         }
     }
 }
@@ -94,12 +90,7 @@ impl Div for Value {
             match (self, rhs) {
                 (Value::Signed(lhs), Value::Signed(rhs)) =>
                     Self::Signed(lhs.checked_div(rhs).expect("TODO: signed overflow error")),
-                (Value::Signed(lhs), Value::Unsigned(rhs)) =>
-                    Self::Unsigned(lhs.cast_unsigned().wrapping_div(rhs)),
-                (Value::Unsigned(lhs), Value::Signed(rhs)) =>
-                    Self::Unsigned(lhs.wrapping_div(rhs.cast_unsigned())),
-                (Value::Unsigned(lhs), Value::Unsigned(rhs)) =>
-                    Self::Unsigned(lhs.wrapping_div(rhs)),
+                (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_div(rhs.into_u64())),
             }
         }
     }
@@ -116,12 +107,7 @@ impl Rem for Value {
             match (self, rhs) {
                 (Value::Signed(lhs), Value::Signed(rhs)) =>
                     Self::Signed(lhs.checked_rem(rhs).expect("TODO: signed overflow error")),
-                (Value::Signed(lhs), Value::Unsigned(rhs)) =>
-                    Self::Unsigned(lhs.cast_unsigned().wrapping_rem(rhs)),
-                (Value::Unsigned(lhs), Value::Signed(rhs)) =>
-                    Self::Unsigned(lhs.wrapping_rem(rhs.cast_unsigned())),
-                (Value::Unsigned(lhs), Value::Unsigned(rhs)) =>
-                    Self::Unsigned(lhs.wrapping_rem(rhs)),
+                (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_rem(rhs.into_u64())),
             }
         }
     }
@@ -134,11 +120,7 @@ impl Add for Value {
         match (self, rhs) {
             (Self::Signed(lhs), Self::Signed(rhs)) =>
                 Self::Signed(lhs.checked_add(rhs).expect("TODO: signed overflow error")),
-            (Self::Signed(lhs), Self::Unsigned(rhs)) =>
-                Self::Unsigned(lhs.cast_unsigned().wrapping_add(rhs)),
-            (Self::Unsigned(lhs), Self::Signed(rhs)) =>
-                Self::Unsigned(lhs.wrapping_add(rhs.cast_unsigned())),
-            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs.wrapping_add(rhs)),
+            (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_add(rhs.into_u64())),
         }
     }
 }
@@ -150,11 +132,7 @@ impl Sub for Value {
         match (self, rhs) {
             (Self::Signed(lhs), Self::Signed(rhs)) =>
                 Self::Signed(lhs.checked_sub(rhs).expect("TODO: signed overflow error")),
-            (Self::Signed(lhs), Self::Unsigned(rhs)) =>
-                Self::Unsigned(lhs.cast_unsigned().wrapping_sub(rhs)),
-            (Self::Unsigned(lhs), Self::Signed(rhs)) =>
-                Self::Unsigned(lhs.wrapping_sub(rhs.cast_unsigned())),
-            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs.wrapping_sub(rhs)),
+            (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_sub(rhs.into_u64())),
         }
     }
 }
@@ -169,10 +147,16 @@ impl PartialOrd for Value {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         match (self, other) {
             (Self::Signed(lhs), Self::Signed(rhs)) => lhs.partial_cmp(rhs),
-            (Self::Signed(lhs), Self::Unsigned(rhs)) => lhs.cast_unsigned().partial_cmp(rhs),
-            (Self::Unsigned(lhs), Self::Signed(rhs)) => lhs.partial_cmp(&rhs.cast_unsigned()),
-            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => lhs.partial_cmp(rhs),
+            (lhs, rhs) => lhs.into_u64().partial_cmp(&rhs.into_u64()),
         }
+    }
+}
+
+fn check_shift_rhs_is_valid(rhs: Value) -> u64 {
+    match rhs {
+        Value::Signed(rhs) if (0..64).contains(&rhs) => rhs.cast_unsigned(),
+        Value::Unsigned(rhs) if (0..64).contains(&rhs) => rhs,
+        _ => todo!("error: shift rhs is invalid"),
     }
 }
 
@@ -180,11 +164,7 @@ impl Shl for Value {
     type Output = Self;
 
     fn shl(self, rhs: Self) -> Self::Output {
-        let rhs = match rhs {
-            Self::Signed(rhs) if (0..64).contains(&rhs) => rhs.cast_unsigned(),
-            Self::Unsigned(rhs) if (0..64).contains(&rhs) => rhs,
-            _ => todo!("error: shift rhs is invalid"),
-        };
+        let rhs = check_shift_rhs_is_valid(rhs);
         match self {
             Self::Signed(value) if value < 0 =>
                 todo!("error: left shift is UB for negative values"),
@@ -202,11 +182,7 @@ impl Shr for Value {
     type Output = Self;
 
     fn shr(self, rhs: Self) -> Self::Output {
-        let rhs = match rhs {
-            Self::Signed(rhs) if (0..64).contains(&rhs) => rhs.cast_unsigned(),
-            Self::Unsigned(rhs) if (0..64).contains(&rhs) => rhs,
-            _ => todo!("error: shift rhs is invalid"),
-        };
+        let rhs = check_shift_rhs_is_valid(rhs);
         let rhs = u32::try_from(rhs).unwrap();
         match self {
             Self::Signed(value) => Self::Signed(value.wrapping_shr(rhs)),
@@ -221,9 +197,7 @@ impl BitAnd for Value {
     fn bitand(self, rhs: Self) -> Self::Output {
         match (self, rhs) {
             (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs & rhs),
-            (Self::Signed(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs.cast_unsigned() & rhs),
-            (Self::Unsigned(lhs), Self::Signed(rhs)) => Self::Unsigned(lhs & rhs.cast_unsigned()),
-            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs & rhs),
+            (lhs, rhs) => Self::Unsigned(lhs.into_u64() & rhs.into_u64()),
         }
     }
 }
@@ -234,9 +208,7 @@ impl BitXor for Value {
     fn bitxor(self, rhs: Self) -> Self::Output {
         match (self, rhs) {
             (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs ^ rhs),
-            (Self::Signed(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs.cast_unsigned() ^ rhs),
-            (Self::Unsigned(lhs), Self::Signed(rhs)) => Self::Unsigned(lhs ^ rhs.cast_unsigned()),
-            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs ^ rhs),
+            (lhs, rhs) => Self::Unsigned(lhs.into_u64() ^ rhs.into_u64()),
         }
     }
 }
@@ -247,9 +219,7 @@ impl BitOr for Value {
     fn bitor(self, rhs: Self) -> Self::Output {
         match (self, rhs) {
             (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs | rhs),
-            (Self::Signed(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs.cast_unsigned() | rhs),
-            (Self::Unsigned(lhs), Self::Signed(rhs)) => Self::Unsigned(lhs | rhs.cast_unsigned()),
-            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => Self::Unsigned(lhs | rhs),
+            (lhs, rhs) => Self::Unsigned(lhs.into_u64() | rhs.into_u64()),
         }
     }
 }
