@@ -12,6 +12,7 @@ use std::ops::Shr;
 use std::ops::Sub;
 
 use panko_lex::Integer;
+use panko_lex::IntegerSuffix;
 use panko_lex::TokenKind;
 
 use crate::BinOp;
@@ -284,17 +285,27 @@ pub(super) fn eval(expr: &Expression) -> Value {
         Expression::Name(_token) =>
             unreachable!("we have expanded all macros and replaced all non-macros with 0"),
         Expression::Integer(token) => {
-            let TokenKind::Integer(Integer { suffix: _, suffix_len, base, prefix_len }) =
-                token.kind
+            let TokenKind::Integer(Integer { suffix, suffix_len, base, prefix_len }) = token.kind
             else {
                 unreachable!()
+            };
+
+            let from_u64 = match suffix {
+                IntegerSuffix::Unsigned
+                | IntegerSuffix::UnsignedLong
+                | IntegerSuffix::UnsignedLongLong => Value::Unsigned,
+                IntegerSuffix::None | IntegerSuffix::Long | IntegerSuffix::LongLong =>
+                    |value| i64::try_from(value).map_or(Value::Unsigned(value), Value::Signed),
+                IntegerSuffix::BitInt => todo!(),
+                IntegerSuffix::UnsignedBitInt => todo!(),
+                IntegerSuffix::Invalid => todo!(),
             };
 
             let slice = token.slice();
             let number = &slice[prefix_len..slice.len() - suffix_len];
             let number: String = number.chars().filter(|&c| c != '\'').collect();
             match u64::from_str_radix(&number, base) {
-                Ok(value) => i64::try_from(value).map_or(Value::Unsigned(value), Value::Signed),
+                Ok(value) => from_u64(value),
                 Err(_) => todo!(),
             }
         }

@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_if_directive_integer_suffix.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+int puts(char const*);
+
+int main() {
+
+    puts("it works");
+}
+
+
+
+----- stderr -----
