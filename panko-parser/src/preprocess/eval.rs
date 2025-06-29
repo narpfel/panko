@@ -94,15 +94,6 @@ impl<'a> Value<'a> {
         }
     }
 
-    // TODO: can be replaced by `cmp`
-    fn eq(self, other: Self) -> Self {
-        match (&self, &other) {
-            (Self::Error(_), _) | (_, Self::Error(_)) =>
-                Self::Error(self.into_reports().chain(other.into_reports())),
-            (lhs, rhs) => (lhs.as_u64() == rhs.as_u64()).into(),
-        }
-    }
-
     fn cmp(self, other: Self) -> Result<Ordering, Reports<'a>> {
         match (&self, &other) {
             (Self::Error(_), _) | (_, Self::Error(_)) =>
@@ -365,8 +356,8 @@ fn eval_binop<'a>(
         BinOpKind::Modulo => lhs % rhs,
         BinOpKind::Add => ctx(lhs + rhs, expr),
         BinOpKind::Subtract => ctx(lhs - rhs, expr),
-        BinOpKind::Equal => lhs.eq(rhs),
-        BinOpKind::NotEqual => lhs.eq(rhs).logical_negate(),
+        BinOpKind::Equal => lhs.cmp(rhs).map(Ordering::is_eq).into(),
+        BinOpKind::NotEqual => lhs.cmp(rhs).map(Ordering::is_ne).into(),
         BinOpKind::Less => lhs.cmp(rhs).map(Ordering::is_lt).into(),
         BinOpKind::LessEqual => lhs.cmp(rhs).map(Ordering::is_le).into(),
         BinOpKind::Greater => lhs.cmp(rhs).map(Ordering::is_gt).into(),
