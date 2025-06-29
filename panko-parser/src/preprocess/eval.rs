@@ -82,8 +82,8 @@ impl<'a> Value<'a> {
     fn as_u64(&self) -> u64 {
         match self {
             Self::Error(_) => panic!(),
-            Value::Signed(value) => value.cast_unsigned(),
-            Value::Unsigned(value) => *value,
+            Self::Signed(value) => value.cast_unsigned(),
+            Self::Unsigned(value) => *value,
         }
     }
 
@@ -180,7 +180,7 @@ impl<'a> Div for Value<'a> {
         else {
             match (&self, &rhs) {
                 (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
-                (Value::Signed(lhs), Value::Signed(rhs)) =>
+                (Self::Signed(lhs), Self::Signed(rhs)) =>
                     Self::Signed(lhs.checked_div(*rhs).expect("TODO: signed overflow error")),
                 (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_div(rhs.as_u64())),
             }
@@ -198,7 +198,7 @@ impl<'a> Rem for Value<'a> {
         else {
             match (&self, &rhs) {
                 (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
-                (Value::Signed(lhs), Value::Signed(rhs)) =>
+                (Self::Signed(lhs), Self::Signed(rhs)) =>
                     Self::Signed(lhs.checked_rem(*rhs).expect("TODO: signed overflow error")),
                 (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_rem(rhs.as_u64())),
             }
