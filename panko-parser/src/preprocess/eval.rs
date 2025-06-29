@@ -94,6 +94,10 @@ impl<'a> Value<'a> {
         }
     }
 
+    fn chain_errors(self, other: Self) -> Self {
+        Self::Error(self.into_reports().chain(other.into_reports()))
+    }
+
     fn cmp(self, other: Self) -> Result<Ordering, Reports<'a>> {
         match (&self, &other) {
             (Self::Error(_), _) | (_, Self::Error(_)) =>
@@ -105,7 +109,7 @@ impl<'a> Value<'a> {
 
     fn logical_negate(self) -> Self {
         match self {
-            Self::Error(reports) => Self::Error(reports),
+            Self::Error(_) => self,
             Self::Signed(value) => (value == 0).into(),
             Self::Unsigned(value) => (value == 0).into(),
         }
@@ -115,7 +119,7 @@ impl<'a> Value<'a> {
         match self.into_bool() {
             Ok(true) => rhs.into_bool().into(),
             Ok(false) => false.into(),
-            Err(reports) => Self::Error(reports.chain(rhs.into_reports())),
+            Err(reports) => Self::Error(reports).chain_errors(rhs),
         }
     }
 
@@ -123,7 +127,7 @@ impl<'a> Value<'a> {
         match self.into_bool() {
             Ok(true) => true.into(),
             Ok(false) => rhs.into_bool().into(),
-            Err(reports) => Self::Error(reports.chain(rhs.into_reports())),
+            Err(reports) => Self::Error(reports).chain_errors(rhs),
         }
     }
 }
@@ -158,8 +162,7 @@ impl<'a> Mul for Value<'a> {
 
     fn mul(self, rhs: Self) -> Self::Output {
         Ok(match (&self, &rhs) {
-            (Self::Error(_), _) | (_, Self::Error(_)) =>
-                Self::Error(self.into_reports().chain(rhs.into_reports())),
+            (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
             (Self::Signed(lhs), Self::Signed(rhs)) =>
                 Self::Signed(lhs.checked_mul(*rhs).ok_or(EvalError::SignedOverflow)?),
             (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_mul(rhs.as_u64())),
@@ -176,8 +179,7 @@ impl<'a> Div for Value<'a> {
         }
         else {
             match (&self, &rhs) {
-                (Self::Error(_), _) | (_, Self::Error(_)) =>
-                    Self::Error(self.into_reports().chain(rhs.into_reports())),
+                (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
                 (Value::Signed(lhs), Value::Signed(rhs)) =>
                     Self::Signed(lhs.checked_div(*rhs).expect("TODO: signed overflow error")),
                 (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_div(rhs.as_u64())),
@@ -195,8 +197,7 @@ impl<'a> Rem for Value<'a> {
         }
         else {
             match (&self, &rhs) {
-                (Self::Error(_), _) | (_, Self::Error(_)) =>
-                    Self::Error(self.into_reports().chain(rhs.into_reports())),
+                (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
                 (Value::Signed(lhs), Value::Signed(rhs)) =>
                     Self::Signed(lhs.checked_rem(*rhs).expect("TODO: signed overflow error")),
                 (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_rem(rhs.as_u64())),
@@ -210,8 +211,7 @@ impl<'a> Add for Value<'a> {
 
     fn add(self, rhs: Self) -> Self::Output {
         Ok(match (&self, &rhs) {
-            (Self::Error(_), _) | (_, Self::Error(_)) =>
-                Self::Error(self.into_reports().chain(rhs.into_reports())),
+            (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
             (Self::Signed(lhs), Self::Signed(rhs)) =>
                 Self::Signed(lhs.checked_add(*rhs).ok_or(EvalError::SignedOverflow)?),
             (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_add(rhs.as_u64())),
@@ -224,8 +224,7 @@ impl<'a> Sub for Value<'a> {
 
     fn sub(self, rhs: Self) -> Self::Output {
         Ok(match (&self, &rhs) {
-            (Self::Error(_), _) | (_, Self::Error(_)) =>
-                Self::Error(self.into_reports().chain(rhs.into_reports())),
+            (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
             (Self::Signed(lhs), Self::Signed(rhs)) =>
                 Self::Signed(lhs.checked_sub(*rhs).ok_or(EvalError::SignedOverflow)?),
             (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_sub(rhs.as_u64())),
@@ -248,7 +247,7 @@ impl<'a> Shl for Value<'a> {
     fn shl(self, rhs: Self) -> Self::Output {
         let rhs = match check_shift_rhs_is_valid(rhs) {
             Ok(rhs) => rhs,
-            Err(reports) => return Self::Error(self.into_reports().chain(reports)),
+            Err(reports) => return self.chain_errors(Self::Error(reports)),
         };
         match self {
             Self::Error(_) => self,
@@ -270,7 +269,7 @@ impl<'a> Shr for Value<'a> {
     fn shr(self, rhs: Self) -> Self::Output {
         let rhs = match check_shift_rhs_is_valid(rhs) {
             Ok(rhs) => rhs,
-            Err(reports) => return Self::Error(self.into_reports().chain(reports)),
+            Err(reports) => return self.chain_errors(Self::Error(reports)),
         };
         let rhs = u32::try_from(rhs).unwrap();
         match self {
@@ -286,8 +285,7 @@ impl<'a> BitAnd for Value<'a> {
 
     fn bitand(self, rhs: Self) -> Self::Output {
         match (&self, &rhs) {
-            (Self::Error(_), _) | (_, Self::Error(_)) =>
-                Self::Error(self.into_reports().chain(rhs.into_reports())),
+            (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
             (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs & rhs),
             (lhs, rhs) => Self::Unsigned(lhs.as_u64() & rhs.as_u64()),
         }
@@ -299,8 +297,7 @@ impl<'a> BitXor for Value<'a> {
 
     fn bitxor(self, rhs: Self) -> Self::Output {
         match (&self, &rhs) {
-            (Self::Error(_), _) | (_, Self::Error(_)) =>
-                Self::Error(self.into_reports().chain(rhs.into_reports())),
+            (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
             (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs ^ rhs),
             (lhs, rhs) => Self::Unsigned(lhs.as_u64() ^ rhs.as_u64()),
         }
@@ -312,8 +309,7 @@ impl<'a> BitOr for Value<'a> {
 
     fn bitor(self, rhs: Self) -> Self::Output {
         match (&self, &rhs) {
-            (Self::Error(_), _) | (_, Self::Error(_)) =>
-                Self::Error(self.into_reports().chain(rhs.into_reports())),
+            (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
             (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs | rhs),
             (lhs, rhs) => Self::Unsigned(lhs.as_u64() | rhs.as_u64()),
         }
