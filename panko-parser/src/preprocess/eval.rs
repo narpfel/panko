@@ -71,8 +71,7 @@ pub(super) enum Value<'a> {
 }
 
 impl<'a> Value<'a> {
-    #[expect(clippy::wrong_self_convention, reason = "TODO")]
-    pub(super) fn is_truthy(self) -> Result<bool, Reports<'a>> {
+    pub(super) fn into_bool(self) -> Result<bool, Reports<'a>> {
         match self {
             Self::Error(reports) => Err(reports),
             Self::Signed(value) => Ok(value != 0),
@@ -80,8 +79,7 @@ impl<'a> Value<'a> {
         }
     }
 
-    #[expect(clippy::wrong_self_convention, reason = "TODO")]
-    fn into_u64(&self) -> u64 {
+    fn as_u64(&self) -> u64 {
         match self {
             Self::Error(_) => panic!(),
             Value::Signed(value) => value.cast_unsigned(),
@@ -101,7 +99,7 @@ impl<'a> Value<'a> {
         match (&self, &other) {
             (Self::Error(_), _) | (_, Self::Error(_)) =>
                 Self::Error(self.into_reports().chain(other.into_reports())),
-            (lhs, rhs) => (lhs.into_u64() == rhs.into_u64()).into(),
+            (lhs, rhs) => (lhs.as_u64() == rhs.as_u64()).into(),
         }
     }
 
@@ -110,7 +108,7 @@ impl<'a> Value<'a> {
             (Self::Error(_), _) | (_, Self::Error(_)) =>
                 Err(self.into_reports().chain(other.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) => Ok(lhs.cmp(rhs)),
-            (lhs, rhs) => Ok(lhs.into_u64().cmp(&rhs.into_u64())),
+            (lhs, rhs) => Ok(lhs.as_u64().cmp(&rhs.as_u64())),
         }
     }
 
@@ -123,17 +121,17 @@ impl<'a> Value<'a> {
     }
 
     fn logical_and(self, rhs: Value<'a>) -> Value<'a> {
-        match self.is_truthy() {
-            Ok(true) => rhs.is_truthy().into(),
+        match self.into_bool() {
+            Ok(true) => rhs.into_bool().into(),
             Ok(false) => false.into(),
             Err(reports) => Self::Error(reports.chain(rhs.into_reports())),
         }
     }
 
     fn logical_or(self, rhs: Value<'a>) -> Value<'a> {
-        match self.is_truthy() {
+        match self.into_bool() {
             Ok(true) => true.into(),
-            Ok(false) => rhs.is_truthy().into(),
+            Ok(false) => rhs.into_bool().into(),
             Err(reports) => Self::Error(reports.chain(rhs.into_reports())),
         }
     }
@@ -173,7 +171,7 @@ impl<'a> Mul for Value<'a> {
                 Self::Error(self.into_reports().chain(rhs.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) =>
                 Self::Signed(lhs.checked_mul(*rhs).ok_or(EvalError::SignedOverflow)?),
-            (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_mul(rhs.into_u64())),
+            (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_mul(rhs.as_u64())),
         })
     }
 }
@@ -182,7 +180,7 @@ impl<'a> Div for Value<'a> {
     type Output = Self;
 
     fn div(self, rhs: Self) -> Self::Output {
-        if rhs.into_u64() == 0 {
+        if rhs.as_u64() == 0 {
             todo!("error: division by zero")
         }
         else {
@@ -191,7 +189,7 @@ impl<'a> Div for Value<'a> {
                     Self::Error(self.into_reports().chain(rhs.into_reports())),
                 (Value::Signed(lhs), Value::Signed(rhs)) =>
                     Self::Signed(lhs.checked_div(*rhs).expect("TODO: signed overflow error")),
-                (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_div(rhs.into_u64())),
+                (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_div(rhs.as_u64())),
             }
         }
     }
@@ -201,7 +199,7 @@ impl<'a> Rem for Value<'a> {
     type Output = Self;
 
     fn rem(self, rhs: Self) -> Self::Output {
-        if rhs.into_u64() == 0 {
+        if rhs.as_u64() == 0 {
             todo!("error: division by zero")
         }
         else {
@@ -210,7 +208,7 @@ impl<'a> Rem for Value<'a> {
                     Self::Error(self.into_reports().chain(rhs.into_reports())),
                 (Value::Signed(lhs), Value::Signed(rhs)) =>
                     Self::Signed(lhs.checked_rem(*rhs).expect("TODO: signed overflow error")),
-                (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_rem(rhs.into_u64())),
+                (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_rem(rhs.as_u64())),
             }
         }
     }
@@ -225,7 +223,7 @@ impl<'a> Add for Value<'a> {
                 Self::Error(self.into_reports().chain(rhs.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) =>
                 Self::Signed(lhs.checked_add(*rhs).ok_or(EvalError::SignedOverflow)?),
-            (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_add(rhs.into_u64())),
+            (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_add(rhs.as_u64())),
         })
     }
 }
@@ -239,7 +237,7 @@ impl<'a> Sub for Value<'a> {
                 Self::Error(self.into_reports().chain(rhs.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) =>
                 Self::Signed(lhs.checked_sub(*rhs).ok_or(EvalError::SignedOverflow)?),
-            (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_sub(rhs.into_u64())),
+            (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_sub(rhs.as_u64())),
         })
     }
 }
@@ -300,7 +298,7 @@ impl<'a> BitAnd for Value<'a> {
             (Self::Error(_), _) | (_, Self::Error(_)) =>
                 Self::Error(self.into_reports().chain(rhs.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs & rhs),
-            (lhs, rhs) => Self::Unsigned(lhs.into_u64() & rhs.into_u64()),
+            (lhs, rhs) => Self::Unsigned(lhs.as_u64() & rhs.as_u64()),
         }
     }
 }
@@ -313,7 +311,7 @@ impl<'a> BitXor for Value<'a> {
             (Self::Error(_), _) | (_, Self::Error(_)) =>
                 Self::Error(self.into_reports().chain(rhs.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs ^ rhs),
-            (lhs, rhs) => Self::Unsigned(lhs.into_u64() ^ rhs.into_u64()),
+            (lhs, rhs) => Self::Unsigned(lhs.as_u64() ^ rhs.as_u64()),
         }
     }
 }
@@ -326,7 +324,7 @@ impl<'a> BitOr for Value<'a> {
             (Self::Error(_), _) | (_, Self::Error(_)) =>
                 Self::Error(self.into_reports().chain(rhs.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs | rhs),
-            (lhs, rhs) => Self::Unsigned(lhs.into_u64() | rhs.into_u64()),
+            (lhs, rhs) => Self::Unsigned(lhs.as_u64() | rhs.as_u64()),
         }
     }
 }
@@ -460,7 +458,7 @@ pub(super) fn eval<'a>(expr: &Expression<'a>) -> Value<'a> {
             let condition = eval(condition);
             let then = eval(then);
             let or_else = eval(or_else);
-            match condition.is_truthy() {
+            match condition.into_bool() {
                 Ok(true) => then,
                 Ok(false) => or_else,
                 Err(reports) => Value::Error(reports),
