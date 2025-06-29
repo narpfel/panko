@@ -1,0 +1,61 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_signed_overflow_in_if_condition.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: error while evaluating constant expression: SignedOverflow
+   ╭─[panko/tests/cases/preprocessor/test_error_signed_overflow_in_if_condition.c:1:5]
+   │
+ 1 │ #if 0x7fff'ffff'ffff'ffff + 1
+   │     ────────────┬────────────  
+   │                 ╰────────────── while evaluating this expression
+───╯
+
+Error: error while evaluating constant expression: SignedOverflow
+   ╭─[panko/tests/cases/preprocessor/test_error_signed_overflow_in_if_condition.c:4:5]
+   │
+ 4 │ #if -(-0x7fff'ffff'ffff'ffff - 1)
+   │     ──────────────┬──────────────  
+   │                   ╰──────────────── while evaluating this expression
+───╯
+
+Error: error while evaluating constant expression: SignedOverflow
+   ╭─[panko/tests/cases/preprocessor/test_error_signed_overflow_in_if_condition.c:8:6]
+   │
+ 8 │ #if (0x7fff'ffff'ffff'ffff + 1) && -(-0x7fff'ffff'ffff'ffff - 1)
+   │      ────────────┬────────────  
+   │                  ╰────────────── while evaluating this expression
+───╯
+
+Error: error while evaluating constant expression: SignedOverflow
+   ╭─[panko/tests/cases/preprocessor/test_error_signed_overflow_in_if_condition.c:8:36]
+   │
+ 8 │ #if (0x7fff'ffff'ffff'ffff + 1) && -(-0x7fff'ffff'ffff'ffff - 1)
+   │                                    ──────────────┬──────────────  
+   │                                                  ╰──────────────── while evaluating this expression
+───╯
+
+Error: error while evaluating constant expression: SignedOverflow
+    ╭─[panko/tests/cases/preprocessor/test_error_signed_overflow_in_if_condition.c:16:12]
+    │
+ 16 │ #if true ? 0x7fff'ffff'ffff'ffff * 42 : 0x7fff'ffff'ffff'ffff * 2
+    │            ─────────────┬────────────  
+    │                         ╰────────────── while evaluating this expression
+────╯
+
+Error: error while evaluating constant expression: SignedOverflow
+    ╭─[panko/tests/cases/preprocessor/test_error_signed_overflow_in_if_condition.c:19:5]
+    │
+ 19 │ #if 0x7fff'ffff'ffff'ffff * 42 ? 0 : 1
+    │     ─────────────┬────────────  
+    │                  ╰────────────── while evaluating this expression
+────╯

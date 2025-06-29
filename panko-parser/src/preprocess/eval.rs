@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+use std::collections::LinkedList;
 use std::ops::Add;
 use std::ops::BitAnd;
 use std::ops::BitOr;
@@ -11,9 +13,11 @@ use std::ops::Shl;
 use std::ops::Shr;
 use std::ops::Sub;
 
+use ariadne::Color::Red;
 use panko_lex::Integer;
 use panko_lex::IntegerSuffix;
 use panko_lex::TokenKind;
+use panko_report::Report;
 
 use crate::BinOp;
 use crate::BinOpKind;
@@ -24,63 +28,157 @@ use crate::UnaryOp;
 use crate::UnaryOpKind;
 
 #[derive(Debug, Clone, Copy)]
-pub(super) enum Value {
+pub(super) enum EvalError {
+    SignedOverflow,
+}
+
+#[derive(Debug, Clone, Copy, Report)]
+#[exit_code(1)]
+pub(super) enum Diagnostic<'a> {
+    #[error("error while evaluating constant expression: {kind:?}")]
+    #[diagnostics(at(colour = Red, label = "while evaluating this expression"))]
+    EvalError { at: Expression<'a>, kind: EvalError },
+}
+
+#[derive(Debug, Default)]
+pub(super) struct Reports<'a>(LinkedList<Diagnostic<'a>>);
+
+impl<'a> Reports<'a> {
+    fn new(report: Diagnostic<'a>) -> Self {
+        Self(LinkedList::from_iter([report]))
+    }
+
+    fn chain(mut self, mut others: Self) -> Self {
+        self.0.append(&mut others.0);
+        self
+    }
+}
+
+impl<'a> IntoIterator for Reports<'a> {
+    type IntoIter = std::collections::linked_list::IntoIter<Diagnostic<'a>>;
+    type Item = Diagnostic<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+#[derive(Debug)]
+pub(super) enum Value<'a> {
+    Error(Reports<'a>),
     Signed(i64),
     Unsigned(u64),
 }
 
-impl Value {
-    pub(super) fn is_truthy(self) -> bool {
+impl<'a> Value<'a> {
+    #[expect(clippy::wrong_self_convention, reason = "TODO")]
+    pub(super) fn is_truthy(self) -> Result<bool, Reports<'a>> {
         match self {
-            Self::Signed(value) => value != 0,
-            Self::Unsigned(value) => value != 0,
+            Self::Error(reports) => Err(reports),
+            Self::Signed(value) => Ok(value != 0),
+            Self::Unsigned(value) => Ok(value != 0),
         }
     }
 
-    fn into_u64(self) -> u64 {
+    #[expect(clippy::wrong_self_convention, reason = "TODO")]
+    fn into_u64(&self) -> u64 {
         match self {
+            Self::Error(_) => panic!(),
             Value::Signed(value) => value.cast_unsigned(),
-            Value::Unsigned(value) => value,
+            Value::Unsigned(value) => *value,
+        }
+    }
+
+    fn into_reports(self) -> Reports<'a> {
+        match self {
+            Self::Error(reports) => reports,
+            _ => Reports::default(),
+        }
+    }
+
+    // TODO: can be replaced by `cmp`
+    fn eq(self, other: Self) -> Self {
+        match (&self, &other) {
+            (Self::Error(_), _) | (_, Self::Error(_)) =>
+                Self::Error(self.into_reports().chain(other.into_reports())),
+            (lhs, rhs) => (lhs.into_u64() == rhs.into_u64()).into(),
+        }
+    }
+
+    fn cmp(self, other: Self) -> Result<Ordering, Reports<'a>> {
+        match (&self, &other) {
+            (Self::Error(_), _) | (_, Self::Error(_)) =>
+                Err(self.into_reports().chain(other.into_reports())),
+            (Self::Signed(lhs), Self::Signed(rhs)) => Ok(lhs.cmp(rhs)),
+            (lhs, rhs) => Ok(lhs.into_u64().cmp(&rhs.into_u64())),
+        }
+    }
+
+    fn logical_negate(self) -> Self {
+        match self {
+            Self::Error(reports) => Self::Error(reports),
+            Self::Signed(value) => (value == 0).into(),
+            Self::Unsigned(value) => (value == 0).into(),
+        }
+    }
+
+    fn logical_and(self, rhs: Value<'a>) -> Value<'a> {
+        match self.is_truthy() {
+            Ok(true) => rhs.is_truthy().into(),
+            Ok(false) => false.into(),
+            Err(reports) => Self::Error(reports.chain(rhs.into_reports())),
+        }
+    }
+
+    fn logical_or(self, rhs: Value<'a>) -> Value<'a> {
+        match self.is_truthy() {
+            Ok(true) => true.into(),
+            Ok(false) => rhs.is_truthy().into(),
+            Err(reports) => Self::Error(reports.chain(rhs.into_reports())),
         }
     }
 }
 
-impl Neg for Value {
-    type Output = Self;
+impl<'a> Neg for Value<'a> {
+    type Output = Result<Self, EvalError>;
 
     fn neg(self) -> Self::Output {
-        match self {
+        Ok(match self {
+            Self::Error(_) => self,
             Self::Signed(value) =>
-                Self::Signed(value.checked_neg().expect("TODO: signed overflow error")),
+                Self::Signed(value.checked_neg().ok_or(EvalError::SignedOverflow)?),
             Self::Unsigned(value) => Self::Unsigned(value.wrapping_neg()),
-        }
+        })
     }
 }
 
-impl Not for Value {
+impl<'a> Not for Value<'a> {
     type Output = Self;
 
     fn not(self) -> Self::Output {
         match self {
+            Self::Error(_) => self,
             Self::Signed(value) => Self::Signed(!value),
             Self::Unsigned(value) => Self::Unsigned(!value),
         }
     }
 }
 
-impl Mul for Value {
-    type Output = Self;
+impl<'a> Mul for Value<'a> {
+    type Output = Result<Self, EvalError>;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
+        Ok(match (&self, &rhs) {
+            (Self::Error(_), _) | (_, Self::Error(_)) =>
+                Self::Error(self.into_reports().chain(rhs.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) =>
-                Self::Signed(lhs.checked_mul(rhs).expect("TODO: signed overflow error")),
+                Self::Signed(lhs.checked_mul(*rhs).ok_or(EvalError::SignedOverflow)?),
             (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_mul(rhs.into_u64())),
-        }
+        })
     }
 }
 
-impl Div for Value {
+impl<'a> Div for Value<'a> {
     type Output = Self;
 
     fn div(self, rhs: Self) -> Self::Output {
@@ -88,16 +186,18 @@ impl Div for Value {
             todo!("error: division by zero")
         }
         else {
-            match (self, rhs) {
+            match (&self, &rhs) {
+                (Self::Error(_), _) | (_, Self::Error(_)) =>
+                    Self::Error(self.into_reports().chain(rhs.into_reports())),
                 (Value::Signed(lhs), Value::Signed(rhs)) =>
-                    Self::Signed(lhs.checked_div(rhs).expect("TODO: signed overflow error")),
+                    Self::Signed(lhs.checked_div(*rhs).expect("TODO: signed overflow error")),
                 (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_div(rhs.into_u64())),
             }
         }
     }
 }
 
-impl Rem for Value {
+impl<'a> Rem for Value<'a> {
     type Output = Self;
 
     fn rem(self, rhs: Self) -> Self::Output {
@@ -105,68 +205,64 @@ impl Rem for Value {
             todo!("error: division by zero")
         }
         else {
-            match (self, rhs) {
+            match (&self, &rhs) {
+                (Self::Error(_), _) | (_, Self::Error(_)) =>
+                    Self::Error(self.into_reports().chain(rhs.into_reports())),
                 (Value::Signed(lhs), Value::Signed(rhs)) =>
-                    Self::Signed(lhs.checked_rem(rhs).expect("TODO: signed overflow error")),
+                    Self::Signed(lhs.checked_rem(*rhs).expect("TODO: signed overflow error")),
                 (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_rem(rhs.into_u64())),
             }
         }
     }
 }
 
-impl Add for Value {
-    type Output = Self;
+impl<'a> Add for Value<'a> {
+    type Output = Result<Self, EvalError>;
 
     fn add(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
+        Ok(match (&self, &rhs) {
+            (Self::Error(_), _) | (_, Self::Error(_)) =>
+                Self::Error(self.into_reports().chain(rhs.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) =>
-                Self::Signed(lhs.checked_add(rhs).expect("TODO: signed overflow error")),
+                Self::Signed(lhs.checked_add(*rhs).ok_or(EvalError::SignedOverflow)?),
             (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_add(rhs.into_u64())),
-        }
+        })
     }
 }
 
-impl Sub for Value {
-    type Output = Self;
+impl<'a> Sub for Value<'a> {
+    type Output = Result<Self, EvalError>;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
+        Ok(match (&self, &rhs) {
+            (Self::Error(_), _) | (_, Self::Error(_)) =>
+                Self::Error(self.into_reports().chain(rhs.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) =>
-                Self::Signed(lhs.checked_sub(rhs).expect("TODO: signed overflow error")),
+                Self::Signed(lhs.checked_sub(*rhs).ok_or(EvalError::SignedOverflow)?),
             (lhs, rhs) => Self::Unsigned(lhs.into_u64().wrapping_sub(rhs.into_u64())),
-        }
+        })
     }
 }
 
-impl PartialEq for Value {
-    fn eq(&self, other: &Self) -> bool {
-        self.into_u64() == other.into_u64()
-    }
-}
-
-impl PartialOrd for Value {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        match (self, other) {
-            (Self::Signed(lhs), Self::Signed(rhs)) => lhs.partial_cmp(rhs),
-            (lhs, rhs) => lhs.into_u64().partial_cmp(&rhs.into_u64()),
-        }
-    }
-}
-
-fn check_shift_rhs_is_valid(rhs: Value) -> u64 {
+fn check_shift_rhs_is_valid(rhs: Value) -> Result<u64, Reports> {
     match rhs {
-        Value::Signed(rhs) if (0..64).contains(&rhs) => rhs.cast_unsigned(),
-        Value::Unsigned(rhs) if (0..64).contains(&rhs) => rhs,
+        Value::Error(reports) => Err(reports),
+        Value::Signed(rhs) if (0..64).contains(&rhs) => Ok(rhs.cast_unsigned()),
+        Value::Unsigned(rhs) if (0..64).contains(&rhs) => Ok(rhs),
         _ => todo!("error: shift rhs is invalid"),
     }
 }
 
-impl Shl for Value {
+impl<'a> Shl for Value<'a> {
     type Output = Self;
 
     fn shl(self, rhs: Self) -> Self::Output {
-        let rhs = check_shift_rhs_is_valid(rhs);
+        let rhs = match check_shift_rhs_is_valid(rhs) {
+            Ok(rhs) => rhs,
+            Err(reports) => return Self::Error(self.into_reports().chain(reports)),
+        };
         match self {
+            Self::Error(_) => self,
             Self::Signed(value) if value < 0 =>
                 todo!("error: left shift is UB for negative values"),
             Self::Signed(value) => Self::Signed(
@@ -179,73 +275,104 @@ impl Shl for Value {
     }
 }
 
-impl Shr for Value {
+impl<'a> Shr for Value<'a> {
     type Output = Self;
 
     fn shr(self, rhs: Self) -> Self::Output {
-        let rhs = check_shift_rhs_is_valid(rhs);
+        let rhs = match check_shift_rhs_is_valid(rhs) {
+            Ok(rhs) => rhs,
+            Err(reports) => return Self::Error(self.into_reports().chain(reports)),
+        };
         let rhs = u32::try_from(rhs).unwrap();
         match self {
+            Self::Error(_) => self,
             Self::Signed(value) => Self::Signed(value.wrapping_shr(rhs)),
             Self::Unsigned(value) => Self::Unsigned(value.wrapping_shr(rhs)),
         }
     }
 }
 
-impl BitAnd for Value {
+impl<'a> BitAnd for Value<'a> {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
+        match (&self, &rhs) {
+            (Self::Error(_), _) | (_, Self::Error(_)) =>
+                Self::Error(self.into_reports().chain(rhs.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs & rhs),
             (lhs, rhs) => Self::Unsigned(lhs.into_u64() & rhs.into_u64()),
         }
     }
 }
 
-impl BitXor for Value {
+impl<'a> BitXor for Value<'a> {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
+        match (&self, &rhs) {
+            (Self::Error(_), _) | (_, Self::Error(_)) =>
+                Self::Error(self.into_reports().chain(rhs.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs ^ rhs),
             (lhs, rhs) => Self::Unsigned(lhs.into_u64() ^ rhs.into_u64()),
         }
     }
 }
 
-impl BitOr for Value {
+impl<'a> BitOr for Value<'a> {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
+        match (&self, &rhs) {
+            (Self::Error(_), _) | (_, Self::Error(_)) =>
+                Self::Error(self.into_reports().chain(rhs.into_reports())),
             (Self::Signed(lhs), Self::Signed(rhs)) => Self::Signed(lhs | rhs),
             (lhs, rhs) => Self::Unsigned(lhs.into_u64() | rhs.into_u64()),
         }
     }
 }
 
-impl From<bool> for Value {
+impl<'a> From<bool> for Value<'a> {
     fn from(value: bool) -> Self {
         Self::Signed(value.into())
     }
 }
 
-fn eval_binop(op: &BinOp, lhs: &Expression, rhs: &Expression) -> Value {
+impl<'a> From<Result<bool, Reports<'a>>> for Value<'a> {
+    fn from(value: Result<bool, Reports<'a>>) -> Self {
+        match value {
+            Ok(b) => b.into(),
+            Err(reports) => Self::Error(reports),
+        }
+    }
+}
+
+fn ctx<'a>(value: Result<Value<'a>, EvalError>, expr: &Expression<'a>) -> Value<'a> {
+    match value {
+        Ok(value) => value,
+        Err(kind) => Value::Error(Reports::new(Diagnostic::EvalError { at: *expr, kind })),
+    }
+}
+
+fn eval_binop<'a>(
+    expr: &Expression<'a>,
+    op: &BinOp,
+    lhs: &Expression<'a>,
+    rhs: &Expression<'a>,
+) -> Value<'a> {
     let lhs = eval(lhs);
     let rhs = eval(rhs);
     match op.kind {
-        BinOpKind::Multiply => lhs * rhs,
+        BinOpKind::Multiply => ctx(lhs * rhs, expr),
         BinOpKind::Divide => lhs / rhs,
         BinOpKind::Modulo => lhs % rhs,
-        BinOpKind::Add => lhs + rhs,
-        BinOpKind::Subtract => lhs - rhs,
-        BinOpKind::Equal => (lhs == rhs).into(),
-        BinOpKind::NotEqual => (lhs != rhs).into(),
-        BinOpKind::Less => (lhs < rhs).into(),
-        BinOpKind::LessEqual => (lhs <= rhs).into(),
-        BinOpKind::Greater => (lhs > rhs).into(),
-        BinOpKind::GreaterEqual => (lhs >= rhs).into(),
+        BinOpKind::Add => ctx(lhs + rhs, expr),
+        BinOpKind::Subtract => ctx(lhs - rhs, expr),
+        BinOpKind::Equal => lhs.eq(rhs),
+        BinOpKind::NotEqual => lhs.eq(rhs).logical_negate(),
+        BinOpKind::Less => lhs.cmp(rhs).map(Ordering::is_lt).into(),
+        BinOpKind::LessEqual => lhs.cmp(rhs).map(Ordering::is_le).into(),
+        BinOpKind::Greater => lhs.cmp(rhs).map(Ordering::is_gt).into(),
+        BinOpKind::GreaterEqual => lhs.cmp(rhs).map(Ordering::is_ge).into(),
         BinOpKind::LeftShift => lhs << rhs,
         BinOpKind::RightShift => lhs >> rhs,
         BinOpKind::BitAnd => lhs & rhs,
@@ -254,32 +381,32 @@ fn eval_binop(op: &BinOp, lhs: &Expression, rhs: &Expression) -> Value {
     }
 }
 
-fn eval_unary_op(operator: &UnaryOp, operand: &Expression) -> Value {
+fn eval_unary_op<'a>(
+    expr: &Expression<'a>,
+    operator: &UnaryOp,
+    operand: &Expression<'a>,
+) -> Value<'a> {
     let value = eval(operand);
     match operator.kind {
         UnaryOpKind::Addressof => todo!("error: there are no lvalues"),
         UnaryOpKind::Deref => todo!("error: not a pointer"),
         UnaryOpKind::Plus => value,
-        UnaryOpKind::Negate => -value,
+        UnaryOpKind::Negate => ctx(-value, expr),
         UnaryOpKind::Compl => !value,
-        UnaryOpKind::Not => Value::Signed(i64::from(!value.is_truthy())),
+        UnaryOpKind::Not => value.logical_negate(),
         UnaryOpKind::Sizeof => unreachable!("starts with an identifier"),
         UnaryOpKind::Lengthof => unreachable!("starts with an identifier"),
     }
 }
 
-fn eval_logical_op(op: &LogicalOp, lhs: &Expression, rhs: &Expression) -> Value {
-    // TODO: Lazy eval swallows type errors in `rhs`. We should eagerly eval `rhs` and
-    // differentiate between type errors (always propagate) and value-range errors (division by
-    // zero, integer overflow etc.) that are only propagated when `rhs` should be evaluated.
-    let result = match op.kind {
-        LogicalOpKind::And => eval(lhs).is_truthy() && eval(rhs).is_truthy(),
-        LogicalOpKind::Or => eval(lhs).is_truthy() || eval(rhs).is_truthy(),
-    };
-    Value::Signed(result.into())
+fn eval_logical_op<'a>(op: &LogicalOp, lhs: &Expression<'a>, rhs: &Expression<'a>) -> Value<'a> {
+    match op.kind {
+        LogicalOpKind::And => eval(lhs).logical_and(eval(rhs)),
+        LogicalOpKind::Or => eval(lhs).logical_or(eval(rhs)),
+    }
 }
 
-pub(super) fn eval(expr: &Expression) -> Value {
+pub(super) fn eval<'a>(expr: &Expression<'a>) -> Value<'a> {
     match expr {
         Expression::Error(_report) => unreachable!("the parser does not produce this expr kind"),
         Expression::Name(_token) =>
@@ -314,8 +441,8 @@ pub(super) fn eval(expr: &Expression) -> Value {
         Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => eval(expr),
         Expression::Assign { .. } => unreachable!("prevented by grammar"),
         Expression::CompoundAssign { .. } => unreachable!("prevented by grammar"),
-        Expression::BinOp { lhs, op, rhs } => eval_binop(op, lhs, rhs),
-        Expression::UnaryOp { operator, operand } => eval_unary_op(operator, operand),
+        Expression::BinOp { lhs, op, rhs } => eval_binop(expr, op, lhs, rhs),
+        Expression::UnaryOp { operator, operand } => eval_unary_op(expr, operator, operand),
         Expression::Call { .. } => todo!("always a type error"),
         Expression::Sizeof { .. } => unreachable!("starts with an identifier"),
         Expression::Lengthof { .. } => unreachable!("starts with an identifier"),
@@ -329,13 +456,16 @@ pub(super) fn eval(expr: &Expression) -> Value {
             question_mark: _,
             then,
             or_else,
-        } =>
-            if eval(condition).is_truthy() {
-                eval(then)
+        } => {
+            let condition = eval(condition);
+            let then = eval(then);
+            let or_else = eval(or_else);
+            match condition.is_truthy() {
+                Ok(true) => then,
+                Ok(false) => or_else,
+                Err(reports) => Value::Error(reports),
             }
-            else {
-                eval(or_else)
-            },
+        }
         Expression::Comma { .. } => todo!("not allowed"),
         Expression::Increment { .. } => todo!("not allowed"),
     }

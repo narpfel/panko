@@ -684,7 +684,12 @@ impl<'a> Preprocessor<'a> {
         let expr = parser
             .parse(sess, &typedef_names, &is_in_typedef, tokens)
             .expect("TODO: handle parser error");
-        eval(&expr).is_truthy()
+        eval(&expr).is_truthy().unwrap_or_else(|reports| {
+            for report in reports {
+                self.sess.emit(report)
+            }
+            false
+        })
     }
 }
 
