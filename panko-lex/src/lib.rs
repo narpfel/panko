@@ -200,7 +200,7 @@ pub struct Loc<'a> {
 impl std::fmt::Debug for Loc<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let prefix = &self.source_file.physical_src[..ariadne::Span::start(self)];
-        let line = prefix.bytes().filter(|c| *c == b'\n').count() + 1;
+        let line = self.line();
         let column = prefix
             .rfind('\n')
             .map(|i| prefix.len() - i)
@@ -247,6 +247,11 @@ impl<'a> Loc<'a> {
 
     pub fn slice(&self) -> &'a str {
         &self.src()[self.span()]
+    }
+
+    pub fn line(&self) -> usize {
+        let prefix = &self.source_file.physical_src[..ariadne::Span::start(self)];
+        prefix.bytes().filter(|c| *c == b'\n').count() + 1
     }
 
     pub fn until(self, other: Self) -> Self {
