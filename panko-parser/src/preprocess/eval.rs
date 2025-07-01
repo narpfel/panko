@@ -7,7 +7,6 @@ use std::ops::BitXor;
 use std::ops::Mul;
 use std::ops::Neg;
 use std::ops::Not;
-use std::ops::Rem;
 use std::ops::Shl;
 use std::ops::Shr;
 use std::ops::Sub;
@@ -30,6 +29,7 @@ use crate::UnaryOpKind;
 pub(super) enum EvalError {
     SignedOverflow,
     DivisionByZero,
+    RemainderByZero,
 }
 
 #[derive(Debug, Clone, Copy, Report)]
@@ -147,6 +147,19 @@ impl<'a> Value<'a> {
             (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_div(rhs.as_u64())),
         })
     }
+
+    fn rem(self, rhs: Self, expr: &Expression<'a>) -> Result<Self, EvalError> {
+        let rhs = match rhs.try_as_u64() {
+            Some(0) => ctx(Err(EvalError::RemainderByZero), expr),
+            _ => rhs,
+        };
+        Ok(match (&self, &rhs) {
+            (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
+            (Self::Signed(lhs), Self::Signed(rhs)) =>
+                Self::Signed(lhs.checked_rem(*rhs).ok_or(EvalError::SignedOverflow)?),
+            (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_rem(rhs.as_u64())),
+        })
+    }
 }
 
 impl<'a> Neg for Value<'a> {
@@ -184,24 +197,6 @@ impl<'a> Mul for Value<'a> {
                 Self::Signed(lhs.checked_mul(*rhs).ok_or(EvalError::SignedOverflow)?),
             (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_mul(rhs.as_u64())),
         })
-    }
-}
-
-impl<'a> Rem for Value<'a> {
-    type Output = Self;
-
-    fn rem(self, rhs: Self) -> Self::Output {
-        if rhs.as_u64() == 0 {
-            todo!("error: division by zero")
-        }
-        else {
-            match (&self, &rhs) {
-                (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
-                (Self::Signed(lhs), Self::Signed(rhs)) =>
-                    Self::Signed(lhs.checked_rem(*rhs).expect("TODO: signed overflow error")),
-                (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_rem(rhs.as_u64())),
-            }
-        }
     }
 }
 
@@ -348,7 +343,7 @@ fn eval_binop<'a>(
     match op.kind {
         BinOpKind::Multiply => ctx(lhs * rhs, expr),
         BinOpKind::Divide => ctx(lhs.div(rhs, expr), expr),
-        BinOpKind::Modulo => lhs % rhs,
+        BinOpKind::Modulo => ctx(lhs.rem(rhs, expr), expr),
         BinOpKind::Add => ctx(lhs + rhs, expr),
         BinOpKind::Subtract => ctx(lhs - rhs, expr),
         BinOpKind::Equal => lhs.cmp(rhs).map(Ordering::is_eq).into(),

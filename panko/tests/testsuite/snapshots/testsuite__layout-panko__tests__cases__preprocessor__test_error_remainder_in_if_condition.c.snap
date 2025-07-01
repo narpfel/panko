@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_remainder_in_if_condition.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: error while evaluating constant expression: RemainderByZero
+   ╭─[panko/tests/cases/preprocessor/test_error_remainder_in_if_condition.c:1:5]
+   │
+ 1 │ #if 42 % 0
+   │     ───┬──  
+   │        ╰──── while evaluating this expression
+───╯
+
+Error: error while evaluating constant expression: RemainderByZero
+   ╭─[panko/tests/cases/preprocessor/test_error_remainder_in_if_condition.c:4:5]
+   │
+ 4 │ #if (42 % 0) % 0
+   │     ──────┬─────  
+   │           ╰─────── while evaluating this expression
+───╯
+
+Error: error while evaluating constant expression: RemainderByZero
+   ╭─[panko/tests/cases/preprocessor/test_error_remainder_in_if_condition.c:4:6]
+   │
+ 4 │ #if (42 % 0) % 0
+   │      ───┬──  
+   │         ╰──── while evaluating this expression
+───╯
+
+Error: error while evaluating constant expression: SignedOverflow
+   ╭─[panko/tests/cases/preprocessor/test_error_remainder_in_if_condition.c:8:5]
+   │
+ 8 │ #if (-0x7fff'ffff'ffff'ffff - 1) % -1
+   │     ────────────────┬────────────────  
+   │                     ╰────────────────── while evaluating this expression
+───╯
