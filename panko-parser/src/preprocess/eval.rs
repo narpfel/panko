@@ -4,7 +4,6 @@ use std::ops::Add;
 use std::ops::BitAnd;
 use std::ops::BitOr;
 use std::ops::BitXor;
-use std::ops::Div;
 use std::ops::Mul;
 use std::ops::Neg;
 use std::ops::Not;
@@ -30,6 +29,7 @@ use crate::UnaryOpKind;
 #[derive(Debug, Clone, Copy)]
 pub(super) enum EvalError {
     SignedOverflow,
+    DivisionByZero,
 }
 
 #[derive(Debug, Clone, Copy, Report)]
@@ -79,12 +79,16 @@ impl<'a> Value<'a> {
         }
     }
 
-    fn as_u64(&self) -> u64 {
+    fn try_as_u64(&self) -> Option<u64> {
         match self {
-            Self::Error(_) => panic!(),
-            Self::Signed(value) => value.cast_unsigned(),
-            Self::Unsigned(value) => *value,
+            Self::Error(_) => None,
+            Self::Signed(value) => Some(value.cast_unsigned()),
+            Self::Unsigned(value) => Some(*value),
         }
+    }
+
+    fn as_u64(&self) -> u64 {
+        self.try_as_u64().expect("called `as_u64` on an error")
     }
 
     fn into_reports(self) -> Reports<'a> {
@@ -130,6 +134,19 @@ impl<'a> Value<'a> {
             Err(reports) => Self::Error(reports).chain_errors(rhs),
         }
     }
+
+    fn div(self, rhs: Self, expr: &Expression<'a>) -> Result<Self, EvalError> {
+        let rhs = match rhs.try_as_u64() {
+            Some(0) => ctx(Err(EvalError::DivisionByZero), expr),
+            _ => rhs,
+        };
+        Ok(match (&self, &rhs) {
+            (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
+            (Self::Signed(lhs), &Self::Signed(rhs)) =>
+                Self::Signed(lhs.checked_div(rhs).ok_or(EvalError::SignedOverflow)?),
+            (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_div(rhs.as_u64())),
+        })
+    }
 }
 
 impl<'a> Neg for Value<'a> {
@@ -167,24 +184,6 @@ impl<'a> Mul for Value<'a> {
                 Self::Signed(lhs.checked_mul(*rhs).ok_or(EvalError::SignedOverflow)?),
             (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_mul(rhs.as_u64())),
         })
-    }
-}
-
-impl<'a> Div for Value<'a> {
-    type Output = Self;
-
-    fn div(self, rhs: Self) -> Self::Output {
-        if rhs.as_u64() == 0 {
-            todo!("error: division by zero")
-        }
-        else {
-            match (&self, &rhs) {
-                (Self::Error(_), _) | (_, Self::Error(_)) => self.chain_errors(rhs),
-                (Self::Signed(lhs), Self::Signed(rhs)) =>
-                    Self::Signed(lhs.checked_div(*rhs).expect("TODO: signed overflow error")),
-                (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_div(rhs.as_u64())),
-            }
-        }
     }
 }
 
@@ -348,7 +347,7 @@ fn eval_binop<'a>(
     let rhs = eval(rhs);
     match op.kind {
         BinOpKind::Multiply => ctx(lhs * rhs, expr),
-        BinOpKind::Divide => lhs / rhs,
+        BinOpKind::Divide => ctx(lhs.div(rhs, expr), expr),
         BinOpKind::Modulo => lhs % rhs,
         BinOpKind::Add => ctx(lhs + rhs, expr),
         BinOpKind::Subtract => ctx(lhs - rhs, expr),
