@@ -167,12 +167,7 @@ impl<'a> Value<'a> {
             Self::Signed(..0) => ctx(Err(EvalError::NegativeShiftLhs), expr),
             _ => self,
         };
-        let rhs = match rhs {
-            Self::Signed(..0) => ctx(Err(EvalError::NegativeShiftRhs), expr),
-            Self::Signed(64..) | Self::Unsigned(64..) =>
-                ctx(Err(EvalError::ShiftRhsTooLarge), expr),
-            rhs => rhs,
-        };
+        let rhs = check_shift_rhs_is_valid(rhs, expr);
         Ok(match (&lhs, &rhs) {
             (Self::Error(_), _) | (_, Self::Error(_)) => lhs.chain_errors(rhs),
             (Self::Signed(value), rhs) => Self::Signed(
@@ -186,18 +181,21 @@ impl<'a> Value<'a> {
     }
 
     fn shr(self, rhs: Self, expr: &Expression<'a>) -> Result<Self, EvalError> {
-        let rhs = match rhs {
-            Self::Signed(..0) => ctx(Err(EvalError::NegativeShiftRhs), expr),
-            Self::Signed(64..) | Self::Unsigned(64..) =>
-                ctx(Err(EvalError::ShiftRhsTooLarge), expr),
-            rhs => rhs,
-        };
+        let rhs = check_shift_rhs_is_valid(rhs, expr);
         let rhs_value = rhs.try_as_u64().map(|rhs| u32::try_from(rhs).unwrap());
         Ok(match (&self, rhs_value) {
             (Self::Error(_), _) | (_, None) => self.chain_errors(rhs),
             (Self::Signed(value), Some(rhs)) => Self::Signed(value.wrapping_shr(rhs)),
             (Self::Unsigned(value), Some(rhs)) => Self::Unsigned(value.wrapping_shr(rhs)),
         })
+    }
+}
+
+fn check_shift_rhs_is_valid<'a>(rhs: Value<'a>, expr: &Expression<'a>) -> Value<'a> {
+    match rhs {
+        Value::Signed(..0) => ctx(Err(EvalError::NegativeShiftRhs), expr),
+        Value::Signed(64..) | Value::Unsigned(64..) => ctx(Err(EvalError::ShiftRhsTooLarge), expr),
+        rhs => rhs,
     }
 }
 
