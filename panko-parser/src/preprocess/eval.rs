@@ -7,7 +7,6 @@ use std::ops::BitXor;
 use std::ops::Mul;
 use std::ops::Neg;
 use std::ops::Not;
-use std::ops::Shl;
 use std::ops::Shr;
 use std::ops::Sub;
 
@@ -30,6 +29,9 @@ pub(super) enum EvalError {
     SignedOverflow,
     DivisionByZero,
     RemainderByZero,
+    ShiftRhsTooLarge,
+    NegativeShiftLhs,
+    NegativeShiftRhs,
 }
 
 #[derive(Debug, Clone, Copy, Report)]
@@ -160,6 +162,29 @@ impl<'a> Value<'a> {
             (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_rem(rhs.as_u64())),
         })
     }
+
+    fn shl(self, rhs: Self, expr: &Expression<'a>) -> Result<Self, EvalError> {
+        let lhs = match self {
+            Self::Signed(..0) => ctx(Err(EvalError::NegativeShiftLhs), expr),
+            _ => self,
+        };
+        let rhs = match rhs {
+            Self::Signed(..0) => ctx(Err(EvalError::NegativeShiftRhs), expr),
+            Self::Signed(64..) | Self::Unsigned(64..) =>
+                ctx(Err(EvalError::ShiftRhsTooLarge), expr),
+            rhs => rhs,
+        };
+        Ok(match (&lhs, &rhs) {
+            (Self::Error(_), _) | (_, Self::Error(_)) => lhs.chain_errors(rhs),
+            (Self::Signed(value), rhs) => Self::Signed(
+                value
+                    .checked_mul(1 << rhs.as_u64())
+                    .ok_or(EvalError::SignedOverflow)?,
+            ),
+            (Self::Unsigned(value), rhs) =>
+                Self::Unsigned(value.wrapping_shl(u32::try_from(rhs.as_u64()).unwrap())),
+        })
+    }
 }
 
 impl<'a> Neg for Value<'a> {
@@ -232,28 +257,6 @@ fn check_shift_rhs_is_valid(rhs: Value) -> Result<u64, Reports> {
         Value::Signed(rhs) if (0..64).contains(&rhs) => Ok(rhs.cast_unsigned()),
         Value::Unsigned(rhs) if (0..64).contains(&rhs) => Ok(rhs),
         _ => todo!("error: shift rhs is invalid"),
-    }
-}
-
-impl<'a> Shl for Value<'a> {
-    type Output = Self;
-
-    fn shl(self, rhs: Self) -> Self::Output {
-        let rhs = match check_shift_rhs_is_valid(rhs) {
-            Ok(rhs) => rhs,
-            Err(reports) => return self.chain_errors(Self::Error(reports)),
-        };
-        match self {
-            Self::Error(_) => self,
-            Self::Signed(value) if value < 0 =>
-                todo!("error: left shift is UB for negative values"),
-            Self::Signed(value) => Self::Signed(
-                value
-                    .checked_mul(1 << rhs)
-                    .expect("TODO: signed overflow error"),
-            ),
-            Self::Unsigned(value) => Self::Unsigned(value << rhs),
-        }
     }
 }
 
@@ -352,7 +355,7 @@ fn eval_binop<'a>(
         BinOpKind::LessEqual => lhs.cmp(rhs).map(Ordering::is_le).into(),
         BinOpKind::Greater => lhs.cmp(rhs).map(Ordering::is_gt).into(),
         BinOpKind::GreaterEqual => lhs.cmp(rhs).map(Ordering::is_ge).into(),
-        BinOpKind::LeftShift => lhs << rhs,
+        BinOpKind::LeftShift => ctx(lhs.shl(rhs, expr), expr),
         BinOpKind::RightShift => lhs >> rhs,
         BinOpKind::BitAnd => lhs & rhs,
         BinOpKind::BitXor => lhs ^ rhs,
