@@ -7,7 +7,6 @@ use std::ops::BitXor;
 use std::ops::Mul;
 use std::ops::Neg;
 use std::ops::Not;
-use std::ops::Shr;
 use std::ops::Sub;
 
 use ariadne::Color::Red;
@@ -185,6 +184,21 @@ impl<'a> Value<'a> {
                 Self::Unsigned(value.wrapping_shl(u32::try_from(rhs.as_u64()).unwrap())),
         })
     }
+
+    fn shr(self, rhs: Self, expr: &Expression<'a>) -> Result<Self, EvalError> {
+        let rhs = match rhs {
+            Self::Signed(..0) => ctx(Err(EvalError::NegativeShiftRhs), expr),
+            Self::Signed(64..) | Self::Unsigned(64..) =>
+                ctx(Err(EvalError::ShiftRhsTooLarge), expr),
+            rhs => rhs,
+        };
+        let rhs_value = rhs.try_as_u64().map(|rhs| u32::try_from(rhs).unwrap());
+        Ok(match (&self, rhs_value) {
+            (Self::Error(_), _) | (_, None) => self.chain_errors(rhs),
+            (Self::Signed(value), Some(rhs)) => Self::Signed(value.wrapping_shr(rhs)),
+            (Self::Unsigned(value), Some(rhs)) => Self::Unsigned(value.wrapping_shr(rhs)),
+        })
+    }
 }
 
 impl<'a> Neg for Value<'a> {
@@ -248,32 +262,6 @@ impl<'a> Sub for Value<'a> {
                 Self::Signed(lhs.checked_sub(*rhs).ok_or(EvalError::SignedOverflow)?),
             (lhs, rhs) => Self::Unsigned(lhs.as_u64().wrapping_sub(rhs.as_u64())),
         })
-    }
-}
-
-fn check_shift_rhs_is_valid(rhs: Value) -> Result<u64, Reports> {
-    match rhs {
-        Value::Error(reports) => Err(reports),
-        Value::Signed(rhs) if (0..64).contains(&rhs) => Ok(rhs.cast_unsigned()),
-        Value::Unsigned(rhs) if (0..64).contains(&rhs) => Ok(rhs),
-        _ => todo!("error: shift rhs is invalid"),
-    }
-}
-
-impl<'a> Shr for Value<'a> {
-    type Output = Self;
-
-    fn shr(self, rhs: Self) -> Self::Output {
-        let rhs = match check_shift_rhs_is_valid(rhs) {
-            Ok(rhs) => rhs,
-            Err(reports) => return self.chain_errors(Self::Error(reports)),
-        };
-        let rhs = u32::try_from(rhs).unwrap();
-        match self {
-            Self::Error(_) => self,
-            Self::Signed(value) => Self::Signed(value.wrapping_shr(rhs)),
-            Self::Unsigned(value) => Self::Unsigned(value.wrapping_shr(rhs)),
-        }
     }
 }
 
@@ -356,7 +344,7 @@ fn eval_binop<'a>(
         BinOpKind::Greater => lhs.cmp(rhs).map(Ordering::is_gt).into(),
         BinOpKind::GreaterEqual => lhs.cmp(rhs).map(Ordering::is_ge).into(),
         BinOpKind::LeftShift => ctx(lhs.shl(rhs, expr), expr),
-        BinOpKind::RightShift => lhs >> rhs,
+        BinOpKind::RightShift => ctx(lhs.shr(rhs, expr), expr),
         BinOpKind::BitAnd => lhs & rhs,
         BinOpKind::BitXor => lhs ^ rhs,
         BinOpKind::BitOr => lhs | rhs,

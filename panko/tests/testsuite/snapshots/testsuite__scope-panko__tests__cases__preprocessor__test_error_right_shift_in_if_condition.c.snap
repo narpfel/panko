@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_right_shift_in_if_condition.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: error while evaluating constant expression: NegativeShiftRhs
+   ╭─[panko/tests/cases/preprocessor/test_error_right_shift_in_if_condition.c:1:5]
+   │
+ 1 │ #if 42 >> -1
+   │     ────┬───  
+   │         ╰───── while evaluating this expression
+───╯
+
+Error: error while evaluating constant expression: NegativeShiftRhs
+   ╭─[panko/tests/cases/preprocessor/test_error_right_shift_in_if_condition.c:4:5]
+   │
+ 4 │ #if -42 >> -1
+   │     ────┬────  
+   │         ╰────── while evaluating this expression
+───╯
+
+Error: error while evaluating constant expression: ShiftRhsTooLarge
+   ╭─[panko/tests/cases/preprocessor/test_error_right_shift_in_if_condition.c:7:5]
+   │
+ 7 │ #if (42 >> -1) >> 64
+   │     ────────┬───────  
+   │             ╰───────── while evaluating this expression
+───╯
+
+Error: error while evaluating constant expression: NegativeShiftRhs
+   ╭─[panko/tests/cases/preprocessor/test_error_right_shift_in_if_condition.c:7:6]
+   │
+ 7 │ #if (42 >> -1) >> 64
+   │      ────┬───  
+   │          ╰───── while evaluating this expression
+───╯
