@@ -18,6 +18,7 @@ use panko_lex::Token;
 use panko_lex::TokenKind;
 
 use crate::ast::Session;
+use crate::handle_parse_error;
 use crate::preprocess::diagnostics::Diagnostic;
 use crate::preprocess::eval::eval;
 
@@ -696,7 +697,7 @@ impl<'a> Preprocessor<'a> {
         let parser = crate::grammar::ConstantExpressionParser::new();
         let expr = parser
             .parse(sess, &typedef_names, &is_in_typedef, tokens)
-            .expect("TODO: handle parser error");
+            .unwrap_or_else(handle_parse_error(sess));
         eval(&expr).into_bool().unwrap_or_else(|reports| {
             for report in reports {
                 self.sess.emit(report)

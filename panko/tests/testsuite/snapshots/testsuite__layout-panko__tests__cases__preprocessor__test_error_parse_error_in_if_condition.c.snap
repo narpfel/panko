@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_parse_error_in_if_condition.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unexpected token `/` of kind `Slash`
+   ╭─[panko/tests/cases/preprocessor/test_error_parse_error_in_if_condition.c:1:9]
+   │
+ 1 │ #if 2 * / 2
+   │         ┬  
+   │         ╰── expected one of the following token kinds: ["*", "(", "_Generic", "sizeof", "_Lengthof", "alignof", "+", "-", "~", "!", "&", "++", "--", Identifier, Integer, MaybeUnterminatedCharConstant, MaybeUnterminatedString]
+───╯
+
+Error: unexpected token `)` of kind `RParen`
+   ╭─[panko/tests/cases/preprocessor/test_error_parse_error_in_if_condition.c:4:18]
+   │
+ 4 │ #if false && (1 +)
+   │                  ┬  
+   │                  ╰── expected one of the following token kinds: ["*", "(", "_Generic", "sizeof", "_Lengthof", "alignof", "+", "-", "~", "!", "&", "++", "--", Identifier, Integer, MaybeUnterminatedCharConstant, MaybeUnterminatedString]
+───╯

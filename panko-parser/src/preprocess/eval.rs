@@ -22,6 +22,7 @@ use crate::LogicalOp;
 use crate::LogicalOpKind;
 use crate::UnaryOp;
 use crate::UnaryOpKind;
+use crate::ast::FromError;
 
 #[derive(Debug, Clone, Copy)]
 pub(super) enum EvalError {
@@ -188,6 +189,12 @@ impl<'a> Value<'a> {
             (Self::Signed(value), Some(rhs)) => Self::Signed(value.wrapping_shr(rhs)),
             (Self::Unsigned(value), Some(rhs)) => Self::Unsigned(value.wrapping_shr(rhs)),
         })
+    }
+}
+
+impl<'a> FromError<'a> for Value<'a> {
+    fn from_error(_error: &'a dyn Report) -> Self {
+        Self::Error(Reports::default())
     }
 }
 
@@ -376,7 +383,7 @@ fn eval_logical_op<'a>(op: &LogicalOp, lhs: &Expression<'a>, rhs: &Expression<'a
 
 pub(super) fn eval<'a>(expr: &Expression<'a>) -> Value<'a> {
     match expr {
-        Expression::Error(_report) => unreachable!("the parser does not produce this expr kind"),
+        Expression::Error(report) => Value::from_error(*report),
         Expression::Name(_token) =>
             unreachable!("we have expanded all macros and replaced all non-macros with 0"),
         Expression::Integer(token) => {

@@ -1173,6 +1173,28 @@ enum AbstractDeclaratorAllowed {
     No,
 }
 
+fn handle_parse_error<'a, T: FromError<'a>>(
+    sess: &ast::Session<'a>,
+) -> impl FnOnce(ParseError<(), Token<'a>, &'a Error<'a>>) -> T {
+    move |err| {
+        let err = match err {
+            ParseError::UnrecognizedToken {
+                token: ((), token @ Token { kind: TokenKind::Error(error), .. }, ()),
+                expected: _,
+            } => Error::from_lexer_error(error, token.loc()),
+            ParseError::UnrecognizedToken { token, expected } => Error::UnexpectedToken {
+                at: token.1,
+                expected: Strings(
+                    sess.alloc_slice_fill_iter(expected.iter().map(|s| sess.alloc_str(s))),
+                ),
+            },
+            ParseError::User { error } => *error,
+            err => todo!("{err:#?}"),
+        };
+        sess.emit(err)
+    }
+}
+
 pub fn parse<'a>(
     sess: &'a ast::Session<'a>,
     typedef_names: &'a RefCell<TypedefNames<'a>>,
@@ -1182,26 +1204,7 @@ pub fn parse<'a>(
     let parser = grammar::TranslationUnitParser::new();
     let parse_tree = parser
         .parse(sess, typedef_names, is_in_typedef, tokens)
-        .map_err(
-            #[expect(clippy::unused_unit)]
-            |err| -> () {
-                let err = match err {
-                    ParseError::UnrecognizedToken {
-                        token: ((), token @ Token { kind: TokenKind::Error(error), .. }, ()),
-                        expected: _,
-                    } => Error::from_lexer_error(error, token.loc()),
-                    ParseError::UnrecognizedToken { token, expected } => Error::UnexpectedToken {
-                        at: token.1,
-                        expected: Strings(
-                            sess.alloc_slice_fill_iter(expected.iter().map(|s| sess.alloc_str(s))),
-                        ),
-                    },
-                    ParseError::User { error } => *error,
-                    err => todo!("{err:#?}"),
-                };
-                sess.emit(err)
-            },
-        )
+        .map_err(handle_parse_error::<()>(sess))
         .ok()?;
     Some(ast::from_parse_tree(sess, parse_tree))
 }
