@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_integer_literal_too_large_in_if_condition.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: error while evaluating constant expression: DivisionByZero
+   ╭─[panko/tests/cases/preprocessor/test_error_integer_literal_too_large_in_if_condition.c:1:5]
+   │
+ 1 │ #if (-0x1'0000'0000'0000'0000 + 1) / 0
+   │     ─────────────────┬────────────────  
+   │                      ╰────────────────── while evaluating this expression
+───╯
+
+Error: integer literal too large
+   ╭─[panko/tests/cases/preprocessor/test_error_integer_literal_too_large_in_if_condition.c:1:7]
+   │
+ 1 │ #if (-0x1'0000'0000'0000'0000 + 1) / 0
+   │       ───────────┬───────────  
+   │                  ╰───────────── this literal does not fit any integer type
+───╯
+
+Error: integer literal too large
+   ╭─[panko/tests/cases/preprocessor/test_error_integer_literal_too_large_in_if_condition.c:4:16]
+   │
+ 4 │ #if false && (-0x1'0000'0000'0000'0000 + 1) / 0
+   │                ───────────┬───────────  
+   │                           ╰───────────── this literal does not fit any integer type
+───╯
+
+Error: integer literal too large
+   ╭─[panko/tests/cases/preprocessor/test_error_integer_literal_too_large_in_if_condition.c:7:7]
+   │
+ 7 │ #if (-0x1'ffff'ffff'ffff'ffff - 1) % -1
+   │       ───────────┬───────────  
+   │                  ╰───────────── this literal does not fit any integer type
+───╯

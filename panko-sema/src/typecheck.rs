@@ -25,6 +25,7 @@ use panko_parser as cst;
 use panko_parser::BinOp;
 use panko_parser::BinOpKind;
 use panko_parser::IncrementOpKind;
+use panko_parser::IntegerLiteralTooLarge;
 use panko_parser::LogicalOp;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
@@ -282,10 +283,6 @@ enum Diagnostic<'a> {
         lhs: TypedExpression<'a>,
         rhs: TypedExpression<'a>,
     },
-
-    #[error("integer literal too large")]
-    #[diagnostics(at(colour = Red, label = "this literal does not fit any integer type"))]
-    IntegerLiteralTooLarge { at: Token<'a> },
 
     #[error("functions must have a body, not an initialiser")]
     #[diagnostics(
@@ -2286,7 +2283,7 @@ fn typeck_expression<'a>(
                 }
                 Err(error) => match error.kind() {
                     IntErrorKind::PosOverflow =>
-                        sess.emit(Diagnostic::IntegerLiteralTooLarge { at: *token }),
+                        sess.emit(IntegerLiteralTooLarge::IntegerLiteralTooLarge { at: *token }),
                     _ => unreachable!(),
                 },
             }

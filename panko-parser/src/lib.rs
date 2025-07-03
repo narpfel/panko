@@ -126,6 +126,14 @@ enum Diagnostic<'a> {
     },
 }
 
+#[derive(Debug, Clone, Copy, Report)]
+#[exit_code(1)]
+pub enum IntegerLiteralTooLarge<'a> {
+    #[error("integer literal too large")]
+    #[diagnostics(at(colour = Red, label = "this literal does not fit any integer type"))]
+    IntegerLiteralTooLarge { at: Token<'a> },
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
     decls: &'a [ExternalDeclaration<'a>],

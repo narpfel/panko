@@ -698,7 +698,7 @@ impl<'a> Preprocessor<'a> {
         let expr = parser
             .parse(sess, &typedef_names, &is_in_typedef, tokens)
             .unwrap_or_else(handle_parse_error(sess));
-        eval(&expr).into_bool().unwrap_or_else(|reports| {
+        eval(sess, &expr).into_bool().unwrap_or_else(|reports| {
             for report in reports {
                 self.sess.emit(report)
             }

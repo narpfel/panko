@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::LinkedList;
+use std::num::IntErrorKind;
 use std::ops::Add;
 use std::ops::BitAnd;
 use std::ops::BitOr;
@@ -18,11 +19,13 @@ use panko_report::Report;
 use crate::BinOp;
 use crate::BinOpKind;
 use crate::Expression;
+use crate::IntegerLiteralTooLarge;
 use crate::LogicalOp;
 use crate::LogicalOpKind;
 use crate::UnaryOp;
 use crate::UnaryOpKind;
 use crate::ast::FromError;
+use crate::ast::Session;
 
 #[derive(Debug, Clone, Copy)]
 pub(super) enum EvalError {
@@ -329,13 +332,14 @@ fn ctx<'a>(value: Result<Value<'a>, EvalError>, expr: &Expression<'a>) -> Value<
 }
 
 fn eval_binop<'a>(
+    sess: &Session<'a>,
     expr: &Expression<'a>,
     op: &BinOp,
     lhs: &Expression<'a>,
     rhs: &Expression<'a>,
 ) -> Value<'a> {
-    let lhs = eval(lhs);
-    let rhs = eval(rhs);
+    let lhs = eval(sess, lhs);
+    let rhs = eval(sess, rhs);
     match op.kind {
         BinOpKind::Multiply => ctx(lhs * rhs, expr),
         BinOpKind::Divide => ctx(lhs.div(rhs, expr), expr),
@@ -357,11 +361,12 @@ fn eval_binop<'a>(
 }
 
 fn eval_unary_op<'a>(
+    sess: &Session<'a>,
     expr: &Expression<'a>,
     operator: &UnaryOp,
     operand: &Expression<'a>,
 ) -> Value<'a> {
-    let value = eval(operand);
+    let value = eval(sess, operand);
     match operator.kind {
         UnaryOpKind::Addressof => todo!("error: there are no lvalues"),
         UnaryOpKind::Deref => todo!("error: not a pointer"),
@@ -374,14 +379,19 @@ fn eval_unary_op<'a>(
     }
 }
 
-fn eval_logical_op<'a>(op: &LogicalOp, lhs: &Expression<'a>, rhs: &Expression<'a>) -> Value<'a> {
+fn eval_logical_op<'a>(
+    sess: &Session<'a>,
+    op: &LogicalOp,
+    lhs: &Expression<'a>,
+    rhs: &Expression<'a>,
+) -> Value<'a> {
     match op.kind {
-        LogicalOpKind::And => eval(lhs).logical_and(eval(rhs)),
-        LogicalOpKind::Or => eval(lhs).logical_or(eval(rhs)),
+        LogicalOpKind::And => eval(sess, lhs).logical_and(eval(sess, rhs)),
+        LogicalOpKind::Or => eval(sess, lhs).logical_or(eval(sess, rhs)),
     }
 }
 
-pub(super) fn eval<'a>(expr: &Expression<'a>) -> Value<'a> {
+pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
     match expr {
         Expression::Error(report) => Value::from_error(*report),
         Expression::Name(_token) =>
@@ -408,16 +418,20 @@ pub(super) fn eval<'a>(expr: &Expression<'a>) -> Value<'a> {
             let number: String = number.chars().filter(|&c| c != '\'').collect();
             match u64::from_str_radix(&number, base) {
                 Ok(value) => from_u64(value),
-                Err(_) => todo!(),
+                Err(error) => match error.kind() {
+                    IntErrorKind::PosOverflow =>
+                        sess.emit(IntegerLiteralTooLarge::IntegerLiteralTooLarge { at: *token }),
+                    _ => unreachable!(),
+                },
             }
         }
         Expression::CharConstant(_token) => todo!(),
         Expression::String(_tokens) => todo!("error: apparently not allowed?"),
-        Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => eval(expr),
+        Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => eval(sess, expr),
         Expression::Assign { .. } => unreachable!("prevented by grammar"),
         Expression::CompoundAssign { .. } => unreachable!("prevented by grammar"),
-        Expression::BinOp { lhs, op, rhs } => eval_binop(expr, op, lhs, rhs),
-        Expression::UnaryOp { operator, operand } => eval_unary_op(expr, operator, operand),
+        Expression::BinOp { lhs, op, rhs } => eval_binop(sess, expr, op, lhs, rhs),
+        Expression::UnaryOp { operator, operand } => eval_unary_op(sess, expr, operator, operand),
         Expression::Call { .. } => todo!("always a type error"),
         Expression::Sizeof { .. } => unreachable!("starts with an identifier"),
         Expression::Lengthof { .. } => unreachable!("starts with an identifier"),
@@ -425,16 +439,16 @@ pub(super) fn eval<'a>(expr: &Expression<'a>) -> Value<'a> {
         Expression::Cast { .. } => unreachable!("the type name would contain an identifier"),
         Expression::Subscript { .. } => todo!("error: invalid op"),
         Expression::Generic { .. } => unreachable!("starts with an identifier"),
-        Expression::Logical { lhs, op, rhs } => eval_logical_op(op, lhs, rhs),
+        Expression::Logical { lhs, op, rhs } => eval_logical_op(sess, op, lhs, rhs),
         Expression::Conditional {
             condition,
             question_mark: _,
             then,
             or_else,
         } => {
-            let condition = eval(condition);
-            let then = eval(then);
-            let or_else = eval(or_else);
+            let condition = eval(sess, condition);
+            let then = eval(sess, then);
+            let or_else = eval(sess, or_else);
             match condition.into_bool() {
                 Ok(true) => then,
                 Ok(false) => or_else,
