@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_invalid_unary_operator_in_if_condition.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unary `*` is not a preprocessor operator
+   ╭─[panko/tests/cases/preprocessor/test_error_invalid_unary_operator_in_if_condition.c:1:5]
+   │
+ 1 │ #if *(1 + 2) && &(3 * 4)
+   │     ┬───┬───  
+   │     │   ╰───── in this expression
+   │     │         
+   │     ╰───────── unary operator `*` is not allowed in preprocessor expressions
+───╯
+
+Error: unary `&` is not a preprocessor operator
+   ╭─[panko/tests/cases/preprocessor/test_error_invalid_unary_operator_in_if_condition.c:1:17]
+   │
+ 1 │ #if *(1 + 2) && &(3 * 4)
+   │                 ┬───┬───  
+   │                 │   ╰───── in this expression
+   │                 │         
+   │                 ╰───────── unary operator `&` is not allowed in preprocessor expressions
+───╯
+
+Error: unary `&` is not a preprocessor operator
+   ╭─[panko/tests/cases/preprocessor/test_error_invalid_unary_operator_in_if_condition.c:4:15]
+   │
+ 4 │ #if false && (&12345 + *67890)
+   │               ┬──┬──  
+   │               │  ╰──── in this expression
+   │               │       
+   │               ╰─────── unary operator `&` is not allowed in preprocessor expressions
+───╯
+
+Error: unary `*` is not a preprocessor operator
+   ╭─[panko/tests/cases/preprocessor/test_error_invalid_unary_operator_in_if_condition.c:4:24]
+   │
+ 4 │ #if false && (&12345 + *67890)
+   │                        ┬──┬──  
+   │                        │  ╰──── in this expression
+   │                        │       
+   │                        ╰─────── unary operator `*` is not allowed in preprocessor expressions
+───╯

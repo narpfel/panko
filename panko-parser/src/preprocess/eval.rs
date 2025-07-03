@@ -10,9 +10,11 @@ use std::ops::Neg;
 use std::ops::Not;
 use std::ops::Sub;
 
+use ariadne::Color::Blue;
 use ariadne::Color::Red;
 use panko_lex::Integer;
 use panko_lex::IntegerSuffix;
+use panko_lex::Token;
 use panko_lex::TokenKind;
 use panko_report::Report;
 
@@ -43,6 +45,13 @@ pub(super) enum Diagnostic<'a> {
     #[error("error while evaluating constant expression: {kind:?}")]
     #[diagnostics(at(colour = Red, label = "while evaluating this expression"))]
     EvalError { at: Expression<'a>, kind: EvalError },
+
+    #[error("unary `{op}` is not a preprocessor operator")]
+    #[diagnostics(
+        op(colour = Red, label = "unary operator `{op}` is not allowed in preprocessor expressions"),
+        at(colour = Blue, label = "in this expression"),
+    )]
+    DisallowedOperator { at: Expression<'a>, op: Token<'a> },
 }
 
 #[derive(Debug, Default)]
@@ -363,13 +372,13 @@ fn eval_binop<'a>(
 fn eval_unary_op<'a>(
     sess: &Session<'a>,
     expr: &Expression<'a>,
-    operator: &UnaryOp,
+    operator: &UnaryOp<'a>,
     operand: &Expression<'a>,
 ) -> Value<'a> {
     let value = eval(sess, operand);
     match operator.kind {
-        UnaryOpKind::Addressof => todo!("error: there are no lvalues"),
-        UnaryOpKind::Deref => todo!("error: not a pointer"),
+        UnaryOpKind::Addressof | UnaryOpKind::Deref =>
+            sess.emit(Diagnostic::DisallowedOperator { at: *expr, op: operator.token }),
         UnaryOpKind::Plus => value,
         UnaryOpKind::Negate => ctx(-value, expr),
         UnaryOpKind::Compl => !value,
