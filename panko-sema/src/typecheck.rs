@@ -25,7 +25,7 @@ use panko_parser as cst;
 use panko_parser::BinOp;
 use panko_parser::BinOpKind;
 use panko_parser::IncrementOpKind;
-use panko_parser::IntegerLiteralTooLarge;
+use panko_parser::IntegerLiteralDiagnostic;
 use panko_parser::LogicalOp;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
@@ -153,11 +153,6 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "this expression has type `{ty}`"))]
     #[with(ty = at.ty.ty)]
     DerefOfVoidPtr { at: TypedExpression<'a> },
-
-    #[error("invalid integer suffix `{suffix}`")]
-    #[diagnostics(at(colour = Red, label = "invalid integer suffix"))]
-    #[with(suffix = suffix.fg(Red))]
-    InvalidIntegerSuffix { at: Token<'a>, suffix: &'a str },
 
     #[error("invalid application of `{op}` to {kind} `{ty}`")]
     #[diagnostics(at(colour = Red, label = "in this expression"), op(colour = Red))]
@@ -2266,7 +2261,7 @@ fn typeck_expression<'a>(
                 IntegerSuffix::UnsignedBitInt => todo!("unimplemented: `unsigned _BitInt`"),
                 IntegerSuffix::Invalid => {
                     // TODO: use the error
-                    let () = sess.emit(Diagnostic::InvalidIntegerSuffix {
+                    let () = sess.emit(IntegerLiteralDiagnostic::InvalidSuffix {
                         at: *token,
                         suffix: &value[value.len() - suffix_len..],
                     });
@@ -2283,7 +2278,7 @@ fn typeck_expression<'a>(
                 }
                 Err(error) => match error.kind() {
                     IntErrorKind::PosOverflow =>
-                        sess.emit(IntegerLiteralTooLarge::IntegerLiteralTooLarge { at: *token }),
+                        sess.emit(IntegerLiteralDiagnostic::TooLarge { at: *token }),
                     _ => unreachable!(),
                 },
             }

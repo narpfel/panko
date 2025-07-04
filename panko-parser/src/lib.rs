@@ -128,10 +128,15 @@ enum Diagnostic<'a> {
 
 #[derive(Debug, Clone, Copy, Report)]
 #[exit_code(1)]
-pub enum IntegerLiteralTooLarge<'a> {
+pub enum IntegerLiteralDiagnostic<'a> {
     #[error("integer literal too large")]
     #[diagnostics(at(colour = Red, label = "this literal does not fit any integer type"))]
-    IntegerLiteralTooLarge { at: Token<'a> },
+    TooLarge { at: Token<'a> },
+
+    #[error("invalid integer suffix `{suffix}`")]
+    #[diagnostics(at(colour = Red, label = "invalid integer suffix"))]
+    #[with(suffix = suffix.fg(Red))]
+    InvalidSuffix { at: Token<'a>, suffix: &'a str },
 }
 
 #[derive(Debug, Clone, Copy)]

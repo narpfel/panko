@@ -21,7 +21,7 @@ use panko_report::Report;
 use crate::BinOp;
 use crate::BinOpKind;
 use crate::Expression;
-use crate::IntegerLiteralTooLarge;
+use crate::IntegerLiteralDiagnostic;
 use crate::LogicalOp;
 use crate::LogicalOpKind;
 use crate::UnaryOp;
@@ -411,6 +411,8 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
                 unreachable!()
             };
 
+            let slice = token.slice();
+
             let from_u64 = match suffix {
                 IntegerSuffix::Unsigned
                 | IntegerSuffix::UnsignedLong
@@ -419,17 +421,20 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
                     |value| i64::try_from(value).map_or(Value::Unsigned(value), Value::Signed),
                 IntegerSuffix::BitInt => todo!(),
                 IntegerSuffix::UnsignedBitInt => todo!(),
-                IntegerSuffix::Invalid => todo!(),
+                IntegerSuffix::Invalid =>
+                    return sess.emit(IntegerLiteralDiagnostic::InvalidSuffix {
+                        at: *token,
+                        suffix: &slice[slice.len() - suffix_len..],
+                    }),
             };
 
-            let slice = token.slice();
             let number = &slice[prefix_len..slice.len() - suffix_len];
             let number: String = number.chars().filter(|&c| c != '\'').collect();
             match u64::from_str_radix(&number, base) {
                 Ok(value) => from_u64(value),
                 Err(error) => match error.kind() {
                     IntErrorKind::PosOverflow =>
-                        sess.emit(IntegerLiteralTooLarge::IntegerLiteralTooLarge { at: *token }),
+                        sess.emit(IntegerLiteralDiagnostic::TooLarge { at: *token }),
                     _ => unreachable!(),
                 },
             }

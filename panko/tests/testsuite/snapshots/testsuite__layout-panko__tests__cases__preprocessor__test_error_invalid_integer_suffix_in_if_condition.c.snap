@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_invalid_integer_suffix_in_if_condition.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid integer suffix `abc`
+   ╭─[panko/tests/cases/preprocessor/test_error_invalid_integer_suffix_in_if_condition.c:1:5]
+   │
+ 1 │ #if 123abc
+   │     ───┬──  
+   │        ╰──── invalid integer suffix
+───╯
