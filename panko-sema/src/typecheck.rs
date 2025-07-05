@@ -2261,10 +2261,7 @@ fn typeck_expression<'a>(
                 IntegerSuffix::UnsignedBitInt => todo!("unimplemented: `unsigned _BitInt`"),
                 IntegerSuffix::Invalid => {
                     // TODO: use the error
-                    let () = sess.emit(IntegerLiteralDiagnostic::InvalidSuffix {
-                        at: *token,
-                        suffix: &value[value.len() - suffix_len..],
-                    });
+                    let () = sess.emit(IntegerLiteralDiagnostic::InvalidSuffix { at: *token });
                     (Signedness::Signed, IntegralKind::Int)
                 }
             };

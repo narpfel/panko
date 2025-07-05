@@ -422,10 +422,7 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
                 IntegerSuffix::BitInt => todo!(),
                 IntegerSuffix::UnsignedBitInt => todo!(),
                 IntegerSuffix::Invalid =>
-                    return sess.emit(IntegerLiteralDiagnostic::InvalidSuffix {
-                        at: *token,
-                        suffix: &slice[slice.len() - suffix_len..],
-                    }),
+                    return sess.emit(IntegerLiteralDiagnostic::InvalidSuffix { at: *token }),
             };
 
             let number = &slice[prefix_len..slice.len() - suffix_len];

@@ -135,8 +135,14 @@ pub enum IntegerLiteralDiagnostic<'a> {
 
     #[error("invalid integer suffix `{suffix}`")]
     #[diagnostics(at(colour = Red, label = "invalid integer suffix"))]
-    #[with(suffix = suffix.fg(Red))]
-    InvalidSuffix { at: Token<'a>, suffix: &'a str },
+    #[with(
+        suffix_len = match at.kind {
+            TokenKind::Integer(panko_lex::Integer { suffix_len, .. }) => suffix_len,
+            _ => unreachable!(),
+        },
+        suffix = at.slice()[at.slice().len() - suffix_len..].fg(Red),
+    )]
+    InvalidSuffix { at: Token<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
