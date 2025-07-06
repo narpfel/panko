@@ -1,0 +1,34 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_string_literal_in_if_condition.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: string literals are not allowed in preprocessor expressions
+   ╭─[panko/tests/cases/preprocessor/test_error_string_literal_in_if_condition.c:1:5]
+   │
+ 1 │ #if "123abc" + 42
+   │     ────────  
+───╯
+
+Error: string literals are not allowed in preprocessor expressions
+   ╭─[panko/tests/cases/preprocessor/test_error_string_literal_in_if_condition.c:4:10]
+   │
+ 4 │ #if 2 + ("string" "literal")
+   │          ──────────────────  
+───╯
+
+Error: string literals are not allowed in preprocessor expressions
+   ╭─[panko/tests/cases/preprocessor/test_error_string_literal_in_if_condition.c:7:14]
+   │
+ 7 │ #if false && "string" "literal"
+   │              ──────────────────  
+───╯

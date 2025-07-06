@@ -12,11 +12,14 @@ use std::ops::Sub;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
+use ariadne::Fmt as _;
 use panko_lex::Integer;
 use panko_lex::IntegerSuffix;
+use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
 use panko_report::Report;
+use panko_report::Sliced as _;
 
 use crate::BinOp;
 use crate::BinOpKind;
@@ -28,6 +31,7 @@ use crate::UnaryOp;
 use crate::UnaryOpKind;
 use crate::ast::FromError;
 use crate::ast::Session;
+use crate::preprocess::tokens_loc;
 
 #[derive(Debug, Clone, Copy)]
 pub(super) enum EvalError {
@@ -52,6 +56,11 @@ pub(super) enum Diagnostic<'a> {
         at(colour = Blue, label = "in this expression"),
     )]
     DisallowedOperator { at: Expression<'a>, op: Token<'a> },
+
+    #[error("{kind} are not allowed in preprocessor expressions")]
+    #[diagnostics(at(colour = Red))]
+    #[with(kind = kind.fg(Red))]
+    InvalidExpression { at: Loc<'a>, kind: &'a str },
 }
 
 #[derive(Debug, Default)]
@@ -437,7 +446,10 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
             }
         }
         Expression::CharConstant(_token) => todo!(),
-        Expression::String(_tokens) => todo!("error: apparently not allowed?"),
+        Expression::String(tokens) => sess.emit(Diagnostic::InvalidExpression {
+            at: tokens_loc(tokens),
+            kind: "string literals",
+        }),
         Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => eval(sess, expr),
         Expression::Assign { .. } => unreachable!("prevented by grammar"),
         Expression::CompoundAssign { .. } => unreachable!("prevented by grammar"),
