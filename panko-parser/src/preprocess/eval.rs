@@ -447,8 +447,10 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
         Expression::String(_) =>
             sess.emit(Diagnostic::InvalidExpression { at: *expr, kind: "string literals" }),
         Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => eval(sess, expr),
-        Expression::Assign { .. } => unreachable!("prevented by grammar"),
-        Expression::CompoundAssign { .. } => unreachable!("prevented by grammar"),
+        Expression::Assign { .. } =>
+            sess.emit(Diagnostic::InvalidExpression { at: *expr, kind: "assignments" }),
+        Expression::CompoundAssign { .. } =>
+            sess.emit(Diagnostic::InvalidExpression { at: *expr, kind: "compound assignments" }),
         Expression::BinOp { lhs, op, rhs } => eval_binop(sess, expr, op, lhs, rhs),
         Expression::UnaryOp { operator, operand } => eval_unary_op(sess, expr, operator, operand),
         Expression::Call { .. } =>
@@ -457,7 +459,8 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
         Expression::Lengthof { .. } => unreachable!("starts with an identifier"),
         Expression::Alignof { .. } => unreachable!("starts with an identifier"),
         Expression::Cast { .. } => unreachable!("the type name would contain an identifier"),
-        Expression::Subscript { .. } => todo!("error: invalid op"),
+        Expression::Subscript { .. } =>
+            sess.emit(Diagnostic::InvalidExpression { at: *expr, kind: "subscript expressions" }),
         Expression::Generic { .. } => unreachable!("starts with an identifier"),
         Expression::Logical { lhs, op, rhs } => eval_logical_op(sess, op, lhs, rhs),
         Expression::Conditional {
