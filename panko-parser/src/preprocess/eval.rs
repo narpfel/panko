@@ -15,7 +15,6 @@ use ariadne::Color::Red;
 use ariadne::Fmt as _;
 use panko_lex::Integer;
 use panko_lex::IntegerSuffix;
-use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
 use panko_report::Report;
@@ -31,7 +30,6 @@ use crate::UnaryOp;
 use crate::UnaryOpKind;
 use crate::ast::FromError;
 use crate::ast::Session;
-use crate::preprocess::tokens_loc;
 
 #[derive(Debug, Clone, Copy)]
 pub(super) enum EvalError {
@@ -60,7 +58,7 @@ pub(super) enum Diagnostic<'a> {
     #[error("{kind} are not allowed in preprocessor expressions")]
     #[diagnostics(at(colour = Red))]
     #[with(kind = kind.fg(Red))]
-    InvalidExpression { at: Loc<'a>, kind: &'a str },
+    InvalidExpression { at: Expression<'a>, kind: &'a str },
 }
 
 #[derive(Debug, Default)]
@@ -446,16 +444,15 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
             }
         }
         Expression::CharConstant(_token) => todo!(),
-        Expression::String(tokens) => sess.emit(Diagnostic::InvalidExpression {
-            at: tokens_loc(tokens),
-            kind: "string literals",
-        }),
+        Expression::String(_) =>
+            sess.emit(Diagnostic::InvalidExpression { at: *expr, kind: "string literals" }),
         Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => eval(sess, expr),
         Expression::Assign { .. } => unreachable!("prevented by grammar"),
         Expression::CompoundAssign { .. } => unreachable!("prevented by grammar"),
         Expression::BinOp { lhs, op, rhs } => eval_binop(sess, expr, op, lhs, rhs),
         Expression::UnaryOp { operator, operand } => eval_unary_op(sess, expr, operator, operand),
-        Expression::Call { .. } => todo!("always a type error"),
+        Expression::Call { .. } =>
+            sess.emit(Diagnostic::InvalidExpression { at: *expr, kind: "function calls" }),
         Expression::Sizeof { .. } => unreachable!("starts with an identifier"),
         Expression::Lengthof { .. } => unreachable!("starts with an identifier"),
         Expression::Alignof { .. } => unreachable!("starts with an identifier"),
