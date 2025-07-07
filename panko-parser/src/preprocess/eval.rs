@@ -478,7 +478,10 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
                 Err(reports) => Value::Error(reports),
             }
         }
-        Expression::Comma { .. } => todo!("not allowed"),
+        Expression::Comma { .. } => Value::Error(Reports::new(Diagnostic::InvalidExpression {
+            at: *expr,
+            kind: "comma expressions",
+        })),
         Expression::Increment { operator, operand: _, fixity } =>
             sess.emit(Diagnostic::InvalidExpression {
                 at: *expr,

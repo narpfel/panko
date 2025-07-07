@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_comma_in_if_condition.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unexpected token `,` of kind `Comma`
+   ╭─[panko/tests/cases/preprocessor/test_error_comma_in_if_condition.c:1:6]
+   │
+ 1 │ #if 1, 2
+   │      ┬  
+   │      ╰── expected one of the following token kinds: []
+───╯
+
+Error: comma expressions are not allowed in preprocessor expressions
+   ╭─[panko/tests/cases/preprocessor/test_error_comma_in_if_condition.c:4:6]
+   │
+ 4 │ #if (1, 2)
+   │      ────  
+───╯
+
+Error: comma expressions are not allowed in preprocessor expressions
+   ╭─[panko/tests/cases/preprocessor/test_error_comma_in_if_condition.c:7:10]
+   │
+ 7 │ #if 4 * (1, 2)
+   │          ────  
+───╯
