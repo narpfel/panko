@@ -1,0 +1,55 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_error_increment_in_if_condition.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: postfix increment expressions are not allowed in preprocessor expressions
+   ╭─[panko/tests/cases/preprocessor/test_error_increment_in_if_condition.c:1:5]
+   │
+ 1 │ #if 1++
+   │     ───  
+───╯
+
+Error: prefix increment expressions are not allowed in preprocessor expressions
+   ╭─[panko/tests/cases/preprocessor/test_error_increment_in_if_condition.c:4:5]
+   │
+ 4 │ #if ++2
+   │     ───  
+───╯
+
+Error: postfix decrement expressions are not allowed in preprocessor expressions
+   ╭─[panko/tests/cases/preprocessor/test_error_increment_in_if_condition.c:7:10]
+   │
+ 7 │ #if 2 + (3--)
+   │          ───  
+───╯
+
+Error: prefix decrement expressions are not allowed in preprocessor expressions
+    ╭─[panko/tests/cases/preprocessor/test_error_increment_in_if_condition.c:10:10]
+    │
+ 10 │ #if 2 + (--3)
+    │          ───  
+────╯
+
+Error: postfix increment expressions are not allowed in preprocessor expressions
+    ╭─[panko/tests/cases/preprocessor/test_error_increment_in_if_condition.c:13:15]
+    │
+ 13 │ #if false && (5++)
+    │               ───  
+────╯
+
+Error: prefix decrement expressions are not allowed in preprocessor expressions
+    ╭─[panko/tests/cases/preprocessor/test_error_increment_in_if_condition.c:16:15]
+    │
+ 16 │ #if false && (--5)
+    │               ───  
+────╯

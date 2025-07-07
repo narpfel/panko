@@ -479,6 +479,14 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
             }
         }
         Expression::Comma { .. } => todo!("not allowed"),
-        Expression::Increment { .. } => todo!("not allowed"),
+        Expression::Increment { operator, operand: _, fixity } =>
+            sess.emit(Diagnostic::InvalidExpression {
+                at: *expr,
+                kind: sess.alloc_str(&format!(
+                    "{}fix {} expressions",
+                    fixity.str(),
+                    operator.str(),
+                )),
+            }),
     }
 }
