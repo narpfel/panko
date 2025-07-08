@@ -511,6 +511,9 @@ impl<'a> Preprocessor<'a> {
                     }
                 }
             }
+            if !self.if_stack.is_empty() {
+                todo!("error: unterminated `#if`")
+            }
         }
     }
 
