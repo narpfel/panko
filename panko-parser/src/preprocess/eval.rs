@@ -418,20 +418,21 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
                 unreachable!()
             };
 
-            let slice = token.slice();
-
             let from_u64 = match suffix {
                 IntegerSuffix::Unsigned
                 | IntegerSuffix::UnsignedLong
-                | IntegerSuffix::UnsignedLongLong => Value::Unsigned,
-                IntegerSuffix::None | IntegerSuffix::Long | IntegerSuffix::LongLong =>
+                | IntegerSuffix::UnsignedLongLong
+                | IntegerSuffix::UnsignedBitInt => Value::Unsigned,
+                IntegerSuffix::None
+                | IntegerSuffix::Long
+                | IntegerSuffix::LongLong
+                | IntegerSuffix::BitInt =>
                     |value| i64::try_from(value).map_or(Value::Unsigned(value), Value::Signed),
-                IntegerSuffix::BitInt => todo!(),
-                IntegerSuffix::UnsignedBitInt => todo!(),
                 IntegerSuffix::Invalid =>
                     return sess.emit(IntegerLiteralDiagnostic::InvalidSuffix { at: *token }),
             };
 
+            let slice = token.slice();
             let number = &slice[prefix_len..slice.len() - suffix_len];
             let number: String = number.chars().filter(|&c| c != '\'').collect();
             match u64::from_str_radix(&number, base) {
