@@ -540,19 +540,12 @@ impl<'a> Preprocessor<'a> {
                 self.next();
                 self.eval_if();
             }
-            Some(token) if token.slice() == "elif" => match self.if_stack.pop() {
-                Some(true) => self.skip_to_endif(),
-                Some(false) => unreachable!("this case is handled in `skip_to_else`"),
-                None => todo!("error: unmatched `#elif`"),
-            },
-            Some(token) if token.slice() == "else" => {
-                self.next();
+            Some(&token) if ["elif", "else"].contains(&token.slice()) =>
                 match self.if_stack.pop() {
                     Some(true) => self.skip_to_endif(),
-                    Some(false) => (),
-                    None => todo!("error: unmatched `#else`"),
-                }
-            }
+                    Some(false) => unreachable!("this case is handled in `skip_to_else`"),
+                    None => todo!("error: unmatched `#{}`", token.slice()),
+                },
             Some(token) if token.slice() == "endif" => {
                 self.next();
                 self.if_stack.pop().unwrap();
