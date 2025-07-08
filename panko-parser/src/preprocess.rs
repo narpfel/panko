@@ -536,12 +536,15 @@ impl<'a> Preprocessor<'a> {
                 self.parse_undef(hash);
             }
             Some(token) if token.slice() == "if" => {
-                let condition = self.parse_condition();
-                self.if_stack.push(condition);
-                if !condition {
-                    self.skip_to_else();
-                }
+                // eat `if`
+                self.next();
+                self.eval_if();
             }
+            Some(token) if token.slice() == "elif" => match self.if_stack.pop() {
+                Some(true) => self.skip_to_endif(),
+                Some(false) => unreachable!("this case is handled in `skip_to_else`"),
+                None => todo!("error: unmatched `#elif`"),
+            },
             Some(token) if token.slice() == "else" => {
                 self.next();
                 match self.if_stack.pop() {
@@ -630,6 +633,10 @@ impl<'a> Preprocessor<'a> {
                             return;
                         }
                     },
+                    Some(token) if token.slice() == "elif" && nesting_level == 0 => {
+                        self.if_stack.pop().unwrap();
+                        return self.eval_if();
+                    }
                     Some(token) if token.slice() == "else" && nesting_level == 0 => return,
                     Some(_) => (),
                     None => todo!("error message: unterminated `#if` directive"),
@@ -656,8 +663,6 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn parse_condition(&mut self) -> bool {
-        // eat `if`
-        self.next();
         let sess = self.sess;
         let tokens = gen {
             while let Some(token) = self.next_token() {
@@ -707,6 +712,14 @@ impl<'a> Preprocessor<'a> {
             }
             false
         })
+    }
+
+    fn eval_if(&mut self) {
+        let condition = self.parse_condition();
+        self.if_stack.push(condition);
+        if !condition {
+            self.skip_to_else();
+        }
     }
 }
 
