@@ -655,12 +655,36 @@ impl<'a> Preprocessor<'a> {
         }
     }
 
+    fn parse_defined(&mut self) -> &'a str {
+        match self.next_token() {
+            Some(token) if token.kind == TokenKind::LParen => match self.next_token() {
+                Some(token) if is_identifier(&token) => {
+                    let name = token.slice();
+                    assert_eq!(
+                        self.next_token().map(|token| token.kind),
+                        Some(TokenKind::RParen),
+                        "TODO: error message: expected `RParen` in `defined` expression",
+                    );
+                    name
+                }
+                _ => todo!("error: expected identifier in `defined` expression"),
+            },
+            Some(token) if is_identifier(&token) => token.slice(),
+            Some(_) => todo!("error: unexpected token type in `defined` expression"),
+            None => todo!("error: unexpected end of input in `defined` expression"),
+        }
+    }
+
     fn parse_condition(&mut self) -> bool {
         let sess = self.sess;
         let tokens = gen {
             while let Some(token) = self.next_token() {
                 match token {
                     token if token.kind == TokenKind::Newline => return,
+                    token if token.slice() == "defined" => {
+                        let macro_name = self.parse_defined();
+                        yield zero_or_one_from_bool(sess, self.macros.contains_key(macro_name));
+                    }
                     // TODO: this duplicates code from `run`
                     token if is_identifier(&token) => match self.macros.get(token.slice()) {
                         Some(&r#macro) => {
@@ -675,17 +699,7 @@ impl<'a> Preprocessor<'a> {
                                 None => yield token,
                             }
                         }
-                        None =>
-                            yield Token::from_str(
-                                sess.bump,
-                                TokenKind::Integer(Integer {
-                                    suffix: IntegerSuffix::None,
-                                    suffix_len: 0,
-                                    base: 10,
-                                    prefix_len: 0,
-                                }),
-                                if token.slice() == "true" { "1" } else { "0" },
-                            ),
+                        None => yield zero_or_one_from_bool(sess, token.slice() == "true"),
                     },
                     token => {
                         yield token;
@@ -714,6 +728,20 @@ impl<'a> Preprocessor<'a> {
             self.skip_to_else();
         }
     }
+}
+
+fn zero_or_one_from_bool<'a>(sess: &Session<'a>, b: bool) -> Token<'a> {
+    // TODO: this does not track source locations and probably should not allocate
+    Token::from_str(
+        sess.bump,
+        TokenKind::Integer(Integer {
+            suffix: IntegerSuffix::None,
+            suffix_len: 0,
+            base: 10,
+            prefix_len: 0,
+        }),
+        if b { "1" } else { "0" },
+    )
 }
 
 // TODO: proper error type to differentiate between eof and unexpected token
