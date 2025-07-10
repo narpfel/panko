@@ -542,24 +542,8 @@ impl<'a> Preprocessor<'a> {
                 self.eval_if();
             }
             Some(token) if token.slice() == "ifdef" => {
-                let ifdef = self.next_token().unwrap();
-                let condition = match self.eat_if(is_identifier) {
-                    Ok(token) => self.macros.contains_key(token.slice()),
-                    Err(token) => {
-                        let () = self
-                            .sess
-                            .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
-                                at: token,
-                                defined: ifdef,
-                                expectation: "an identifier",
-                            });
-                        false
-                    }
-                };
-                self.if_stack.push(condition);
-                if !condition {
-                    self.skip_to_else();
-                }
+                let condition = self.parse_ifdef();
+                self.eval_if_condition(condition);
             }
             Some(&token) if ["elif", "else"].contains(&token.slice()) =>
                 match self.if_stack.pop() {
@@ -767,6 +751,27 @@ impl<'a> Preprocessor<'a> {
 
     fn eval_if(&mut self) {
         let condition = self.parse_condition();
+        self.eval_if_condition(condition);
+    }
+
+    fn parse_ifdef(&mut self) -> bool {
+        let ifdef = self.next_token().unwrap();
+        match self.eat_if(is_identifier) {
+            Ok(token) => self.macros.contains_key(token.slice()),
+            Err(token) => {
+                let () = self
+                    .sess
+                    .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
+                        at: token,
+                        defined: ifdef,
+                        expectation: "an identifier",
+                    });
+                false
+            }
+        }
+    }
+
+    fn eval_if_condition(&mut self, condition: bool) {
         self.if_stack.push(condition);
         if !condition {
             self.skip_to_else();
