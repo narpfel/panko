@@ -8,6 +8,8 @@ use panko_lex::Token;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
+use crate::ast::FromError;
+
 #[derive(Debug, Report)]
 #[exit_code(1)]
 pub(super) enum Diagnostic<'a> {
@@ -92,4 +94,41 @@ pub(super) enum Diagnostic<'a> {
     #[error("duplicate parameter name in function-like macro: `{at}`")]
     #[diagnostics(at(colour = Red, label = "this parameter name is already in use"))]
     DuplicateMacroParamName { at: Token<'a> },
+
+    #[error("unexpected token `{slice}` of kind `{kind}` in `{defined}` macro expression")]
+    #[diagnostics(
+        defined(colour = Blue, label = "in this `{defined}` expression"),
+        at(colour = Red, label = "expected {expectation} here"),
+    )]
+    #[with(
+        slice = at.slice().escape_debug(),
+        kind = format!("{:?}", at.kind).fg(Red),
+    )]
+    UnexpectedTokenInDefinedExpression {
+        at: Token<'a>,
+        defined: Token<'a>,
+        expectation: &'a str,
+    },
+}
+
+pub(super) struct MaybeError<T>(Option<T>);
+
+impl<T> MaybeError<T> {
+    pub(super) fn new(value: T) -> Self {
+        Self(Some(value))
+    }
+
+    pub(super) fn value(self) -> Option<T> {
+        let Self(value) = self;
+        value
+    }
+}
+
+impl<'a, T> FromError<'a> for MaybeError<T>
+where
+    T: 'a,
+{
+    fn from_error(_error: &'a dyn Report) -> Self {
+        Self(None)
+    }
 }

@@ -20,6 +20,7 @@ use panko_lex::TokenKind;
 use crate::ast::Session;
 use crate::handle_parse_error;
 use crate::preprocess::diagnostics::Diagnostic;
+use crate::preprocess::diagnostics::MaybeError;
 use crate::preprocess::eval::eval;
 
 mod diagnostics;
@@ -655,24 +656,37 @@ impl<'a> Preprocessor<'a> {
         }
     }
 
-    fn parse_defined(&mut self) -> &'a str {
-        match self.next_token() {
-            Some(token) if token.kind == TokenKind::LParen => match self.next_token() {
-                Some(token) if is_identifier(&token) => {
-                    let name = token.slice();
-                    assert_eq!(
-                        self.next_token().map(|token| token.kind),
-                        Some(TokenKind::RParen),
-                        "TODO: error message: expected `RParen` in `defined` expression",
-                    );
-                    name
-                }
-                _ => todo!("error: expected identifier in `defined` expression"),
-            },
-            Some(token) if is_identifier(&token) => token.slice(),
-            Some(_) => todo!("error: unexpected token type in `defined` expression"),
-            None => todo!("error: unexpected end of input in `defined` expression"),
+    fn eat(&mut self, kind: TokenKind) -> Result<Token<'a>, Token<'a>> {
+        match self.peek().copied() {
+            Some(token) if token.kind == kind => Ok(self.next_token().unwrap()),
+            Some(token) => Err(token),
+            None => todo!("error message: UB: source file does not end in trailing newline"),
         }
+    }
+
+    fn parse_defined(&mut self, defined: &Token<'a>) -> MaybeError<&'a str> {
+        let unexpected = |at, expectation| {
+            self.sess
+                .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
+                    at,
+                    defined: *defined,
+                    expectation,
+                })
+        };
+
+        let is_parenthesised = self.eat(TokenKind::LParen).is_ok();
+
+        let result = match self.next_token() {
+            Some(token) if is_identifier(&token) => MaybeError::new(token.slice()),
+            Some(token) => unexpected(token, "an identifier"),
+            None => todo!("error message: UB: source file does not end in trailing newline"),
+        };
+
+        if is_parenthesised && let Err(token) = self.eat(TokenKind::RParen) {
+            return unexpected(token, "a closing parenthesis");
+        }
+
+        result
     }
 
     fn parse_condition(&mut self) -> bool {
@@ -681,10 +695,13 @@ impl<'a> Preprocessor<'a> {
             while let Some(token) = self.next_token() {
                 match token {
                     token if token.kind == TokenKind::Newline => return,
-                    token if token.slice() == "defined" => {
-                        let macro_name = self.parse_defined();
-                        yield zero_or_one_from_bool(sess, self.macros.contains_key(macro_name));
-                    }
+                    // TODO: if there’s a syntax error in the `defined` expression this will leave
+                    // behind some tokens that will probably lead to further errors in the
+                    // expression parser
+                    token if token.slice() == "defined" =>
+                        if let Some(macro_name) = self.parse_defined(&token).value() {
+                            yield zero_or_one_from_bool(sess, self.macros.contains_key(macro_name));
+                        },
                     // TODO: this duplicates code from `run`
                     token if is_identifier(&token) => match self.macros.get(token.slice()) {
                         Some(&r#macro) => {

@@ -1,0 +1,41 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_syntax_error_in_derived_expression.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unexpected token `+` of kind `Plus` in `defined` macro expression
+   ╭─[panko/tests/cases/preprocessor/test_error_syntax_error_in_derived_expression.c:1:19]
+   │
+ 1 │ #if defined(MACRO + 2)
+   │     ───┬───       ┬  
+   │        │          ╰── expected a closing parenthesis here
+   │        │             
+   │        ╰───────────── in this `defined` expression
+───╯
+
+Error: unexpected token `)` of kind `RParen`
+   ╭─[panko/tests/cases/preprocessor/test_error_syntax_error_in_derived_expression.c:1:22]
+   │
+ 1 │ #if defined(MACRO + 2)
+   │                      ┬  
+   │                      ╰── expected one of the following token kinds: []
+───╯
+
+Error: unexpected token `+` of kind `Plus` in `defined` macro expression
+   ╭─[panko/tests/cases/preprocessor/test_error_syntax_error_in_derived_expression.c:4:13]
+   │
+ 4 │ #if defined + 2
+   │     ───┬─── ┬  
+   │        │    ╰── expected an identifier here
+   │        │       
+   │        ╰─────── in this `defined` expression
+───╯
