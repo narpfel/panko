@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/preprocessor/test_error_syntax_error_in_ifndef.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+
+
+int puts(char const*);
+
+
+int main() {}
+
+----- stderr -----

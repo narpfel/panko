@@ -7,6 +7,7 @@ use std::fmt::Display;
 use std::io::stdout;
 use std::iter::Peekable;
 use std::iter::from_fn;
+use std::ops::Not as _;
 use std::path::Path;
 
 use indexmap::IndexSet;
@@ -543,7 +544,11 @@ impl<'a> Preprocessor<'a> {
             }
             Some(token) if token.slice() == "ifdef" => {
                 let condition = self.parse_ifdef();
-                self.eval_if_condition(condition);
+                self.eval_if_condition(condition.value().unwrap_or(false));
+            }
+            Some(token) if token.slice() == "ifndef" => {
+                let condition = self.parse_ifdef();
+                self.eval_if_condition(condition.value().map(bool::not).unwrap_or(false));
             }
             Some(&token) if ["elif", "else"].contains(&token.slice()) =>
                 match self.if_stack.pop() {
@@ -636,7 +641,8 @@ impl<'a> Preprocessor<'a> {
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
                 match self.next_token() {
-                    Some(token) if ["if", "ifdef"].contains(&token.slice()) => nesting_level += 1,
+                    Some(token) if ["if", "ifdef", "ifndef"].contains(&token.slice()) =>
+                        nesting_level += 1,
                     Some(token) if token.slice() == "endif" => match nesting_level.checked_sub(1) {
                         Some(level) => nesting_level = level,
                         None => {
@@ -754,20 +760,17 @@ impl<'a> Preprocessor<'a> {
         self.eval_if_condition(condition);
     }
 
-    fn parse_ifdef(&mut self) -> bool {
+    fn parse_ifdef(&mut self) -> MaybeError<bool> {
         let ifdef = self.next_token().unwrap();
         match self.eat_if(is_identifier) {
-            Ok(token) => self.macros.contains_key(token.slice()),
-            Err(token) => {
-                let () = self
-                    .sess
-                    .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
-                        at: token,
-                        defined: ifdef,
-                        expectation: "an identifier",
-                    });
-                false
-            }
+            Ok(token) => MaybeError::new(self.macros.contains_key(token.slice())),
+            Err(token) => self
+                .sess
+                .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
+                    at: token,
+                    defined: ifdef,
+                    expectation: "an identifier",
+                }),
         }
     }
 
