@@ -1,0 +1,33 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_syntax_error_in_ifdef.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unexpected token `\n` of kind `Newline` in `ifdef` macro expression
+   ╭─[panko/tests/cases/preprocessor/test_error_syntax_error_in_ifdef.c:1:7]
+   │
+ 1 │ #ifdef
+   │  ──┬──┬  
+   │    │  ╰── expected an identifier here
+   │    │     
+   │    ╰───── in this `ifdef` expression
+───╯
+
+Error: unexpected token `\"abc\"` of kind `String` in `ifdef` macro expression
+   ╭─[panko/tests/cases/preprocessor/test_error_syntax_error_in_ifdef.c:5:8]
+   │
+ 5 │ #ifdef "abc"
+   │  ──┬── ──┬──  
+   │    │     ╰──── expected an identifier here
+   │    │          
+   │    ╰────────── in this `ifdef` expression
+───╯

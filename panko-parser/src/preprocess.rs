@@ -541,6 +541,26 @@ impl<'a> Preprocessor<'a> {
                 self.next();
                 self.eval_if();
             }
+            Some(token) if token.slice() == "ifdef" => {
+                let ifdef = self.next_token().unwrap();
+                let condition = match self.eat_if(is_identifier) {
+                    Ok(token) => self.macros.contains_key(token.slice()),
+                    Err(token) => {
+                        let () = self
+                            .sess
+                            .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
+                                at: token,
+                                defined: ifdef,
+                                expectation: "an identifier",
+                            });
+                        false
+                    }
+                };
+                self.if_stack.push(condition);
+                if !condition {
+                    self.skip_to_else();
+                }
+            }
             Some(&token) if ["elif", "else"].contains(&token.slice()) =>
                 match self.if_stack.pop() {
                     Some(true) => self.skip_to_endif(),
@@ -604,6 +624,21 @@ impl<'a> Preprocessor<'a> {
         }
     }
 
+    fn eat(&mut self, kind: TokenKind) -> Result<Token<'a>, Token<'a>> {
+        self.eat_if(|token| token.kind == kind)
+    }
+
+    fn eat_if(
+        &mut self,
+        predicate: impl FnOnce(&Token<'a>) -> bool,
+    ) -> Result<Token<'a>, Token<'a>> {
+        match self.peek().copied() {
+            Some(token) if predicate(&token) => Ok(self.next_token().unwrap()),
+            Some(token) => Err(token),
+            None => todo!("error message: UB: source file does not end in trailing newline"),
+        }
+    }
+
     fn eat_until_newline(&mut self) -> Vec<Token<'a>> {
         self.current_is_newline = true;
         self.tokens
@@ -617,7 +652,7 @@ impl<'a> Preprocessor<'a> {
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
                 match self.next_token() {
-                    Some(token) if token.slice() == "if" => nesting_level += 1,
+                    Some(token) if ["if", "ifdef"].contains(&token.slice()) => nesting_level += 1,
                     Some(token) if token.slice() == "endif" => match nesting_level.checked_sub(1) {
                         Some(level) => nesting_level = level,
                         None => {
@@ -653,14 +688,6 @@ impl<'a> Preprocessor<'a> {
                     None => todo!("error message: unterminated `#if` directive"),
                 }
             }
-        }
-    }
-
-    fn eat(&mut self, kind: TokenKind) -> Result<Token<'a>, Token<'a>> {
-        match self.peek().copied() {
-            Some(token) if token.kind == kind => Ok(self.next_token().unwrap()),
-            Some(token) => Err(token),
-            None => todo!("error message: UB: source file does not end in trailing newline"),
         }
     }
 
