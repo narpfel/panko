@@ -544,13 +544,11 @@ impl<'a> Preprocessor<'a> {
             }
             Some(token) if token.slice() == "ifdef" => {
                 let ifdef = self.next_token().unwrap();
-                let condition = self.parse_ifdef(&ifdef);
-                self.eval_if_condition(condition.value().unwrap_or(false));
+                self.eval_ifdef(&ifdef);
             }
             Some(token) if token.slice() == "ifndef" => {
                 let ifndef = self.next_token().unwrap();
-                let condition = self.parse_ifdef(&ifndef);
-                self.eval_if_condition(condition.value().map(bool::not).unwrap_or(false));
+                self.eval_ifndef(&ifndef);
             }
             Some(&token) if ["elif", "elifdef", "elifndef", "else"].contains(&token.slice()) =>
                 match self.if_stack.pop() {
@@ -660,14 +658,11 @@ impl<'a> Preprocessor<'a> {
                     }
                     Some(token) if token.slice() == "elifdef" && nesting_level == 0 => {
                         self.if_stack.pop().unwrap();
-                        let condition = self.parse_ifdef(&token);
-                        return self.eval_if_condition(condition.value().unwrap_or(false));
+                        return self.eval_ifdef(&token);
                     }
                     Some(token) if token.slice() == "elifndef" && nesting_level == 0 => {
                         self.if_stack.pop().unwrap();
-                        let condition = self.parse_ifdef(&token);
-                        return self
-                            .eval_if_condition(condition.value().map(bool::not).unwrap_or(false));
+                        return self.eval_ifndef(&token);
                     }
                     Some(token) if token.slice() == "else" && nesting_level == 0 => return,
                     Some(_) => (),
@@ -784,6 +779,16 @@ impl<'a> Preprocessor<'a> {
                     expectation: "an identifier",
                 }),
         }
+    }
+
+    fn eval_ifdef(&mut self, ifdef: &Token<'a>) {
+        let condition = self.parse_ifdef(ifdef);
+        self.eval_if_condition(condition.value().unwrap_or(false));
+    }
+
+    fn eval_ifndef(&mut self, ifndef: &Token<'a>) {
+        let condition = self.parse_ifdef(ifndef);
+        self.eval_if_condition(condition.value().map(bool::not).unwrap_or(false));
     }
 
     fn eval_if_condition(&mut self, condition: bool) {
