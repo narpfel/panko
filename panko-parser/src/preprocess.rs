@@ -543,14 +543,16 @@ impl<'a> Preprocessor<'a> {
                 self.eval_if();
             }
             Some(token) if token.slice() == "ifdef" => {
-                let condition = self.parse_ifdef();
+                let ifdef = self.next_token().unwrap();
+                let condition = self.parse_ifdef(&ifdef);
                 self.eval_if_condition(condition.value().unwrap_or(false));
             }
             Some(token) if token.slice() == "ifndef" => {
-                let condition = self.parse_ifdef();
+                let ifndef = self.next_token().unwrap();
+                let condition = self.parse_ifdef(&ifndef);
                 self.eval_if_condition(condition.value().map(bool::not).unwrap_or(false));
             }
-            Some(&token) if ["elif", "else"].contains(&token.slice()) =>
+            Some(&token) if ["elif", "elifdef", "elifndef", "else"].contains(&token.slice()) =>
                 match self.if_stack.pop() {
                     Some(true) => self.skip_to_endif(),
                     Some(false) => unreachable!("this case is handled in `skip_to_else`"),
@@ -656,6 +658,17 @@ impl<'a> Preprocessor<'a> {
                         self.if_stack.pop().unwrap();
                         return self.eval_if();
                     }
+                    Some(token) if token.slice() == "elifdef" && nesting_level == 0 => {
+                        self.if_stack.pop().unwrap();
+                        let condition = self.parse_ifdef(&token);
+                        return self.eval_if_condition(condition.value().unwrap_or(false));
+                    }
+                    Some(token) if token.slice() == "elifndef" && nesting_level == 0 => {
+                        self.if_stack.pop().unwrap();
+                        let condition = self.parse_ifdef(&token);
+                        return self
+                            .eval_if_condition(condition.value().map(bool::not).unwrap_or(false));
+                    }
                     Some(token) if token.slice() == "else" && nesting_level == 0 => return,
                     Some(_) => (),
                     None => todo!("error message: unterminated `#if` directive"),
@@ -760,15 +773,14 @@ impl<'a> Preprocessor<'a> {
         self.eval_if_condition(condition);
     }
 
-    fn parse_ifdef(&mut self) -> MaybeError<bool> {
-        let ifdef = self.next_token().unwrap();
+    fn parse_ifdef(&mut self, ifdef: &Token<'a>) -> MaybeError<bool> {
         match self.eat_if(is_identifier) {
             Ok(token) => MaybeError::new(self.macros.contains_key(token.slice())),
             Err(token) => self
                 .sess
                 .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
                     at: token,
-                    defined: ifdef,
+                    defined: *ifdef,
                     expectation: "an identifier",
                 }),
         }
