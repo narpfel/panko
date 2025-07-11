@@ -726,7 +726,7 @@ impl<'a> Preprocessor<'a> {
                     // expression parser
                     token if token.slice() == "defined" =>
                         if let Some(macro_name) = self.parse_defined(&token).value() {
-                            yield zero_or_one_from_bool(sess, self.macros.contains_key(macro_name));
+                            yield zero_or_one_from_bool(sess, self.is_macro_defined(macro_name));
                         },
                     // TODO: this duplicates code from `run`
                     token if is_identifier(&token) => match self.macros.get(token.slice()) {
@@ -769,9 +769,14 @@ impl<'a> Preprocessor<'a> {
         self.eval_if_condition(condition);
     }
 
+    fn is_macro_defined(&mut self, macro_name: &str) -> bool {
+        ["__has_include", "__has_embed", "__has_c_attribute"].contains(&macro_name)
+            || self.macros.contains_key(macro_name)
+    }
+
     fn parse_ifdef(&mut self, ifdef: &Token<'a>) -> MaybeError<bool> {
         match self.eat_if(is_identifier) {
-            Ok(token) => MaybeError::new(self.macros.contains_key(token.slice())),
+            Ok(ident) => MaybeError::new(self.is_macro_defined(ident.slice())),
             Err(token) => self
                 .sess
                 .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
