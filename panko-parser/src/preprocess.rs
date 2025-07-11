@@ -677,7 +677,8 @@ impl<'a> Preprocessor<'a> {
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
                 match self.next_token() {
-                    Some(token) if token.slice() == "if" => nesting_level += 1,
+                    Some(token) if ["if", "ifdef", "ifndef"].contains(&token.slice()) =>
+                        nesting_level += 1,
                     Some(token) if token.slice() == "endif" => match nesting_level.checked_sub(1) {
                         Some(level) => nesting_level = level,
                         None => return,
