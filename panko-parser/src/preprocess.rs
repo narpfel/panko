@@ -704,17 +704,12 @@ impl<'a> Preprocessor<'a> {
 
         let is_parenthesised = self.eat(TokenKind::LParen).is_ok();
 
-        let result = match self.next_token() {
-            Some(token) if is_identifier(&token) => MaybeError::new(token.slice()),
-            Some(token) => unexpected(token, "an identifier"),
-            None => todo!("error message: UB: source file does not end in trailing newline"),
-        };
-
-        if is_parenthesised && let Err(token) = self.eat(TokenKind::RParen) {
-            return unexpected(token, "a closing parenthesis");
+        match self.eat_if(is_identifier) {
+            Ok(_) if is_parenthesised && let Err(token) = self.eat(TokenKind::RParen) =>
+                unexpected(token, "a closing parenthesis"),
+            Ok(ident) => MaybeError::new(ident.slice()),
+            Err(token) => unexpected(token, "an identifier"),
         }
-
-        result
     }
 
     fn parse_condition(&mut self) -> bool {
