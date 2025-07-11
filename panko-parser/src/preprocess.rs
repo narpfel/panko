@@ -27,6 +27,8 @@ use crate::preprocess::eval::eval;
 mod diagnostics;
 mod eval;
 
+const IF_DIRECTIVE_INTRODUCERS: [&str; 3] = ["if", "ifdef", "ifndef"];
+
 pub type TokenIter<'a> = impl Iterator<Item = Token<'a>>;
 
 type UnpreprocessedTokens<'a> = Peekable<panko_lex::TokenIter<'a>>;
@@ -641,7 +643,7 @@ impl<'a> Preprocessor<'a> {
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
                 match self.next_token() {
-                    Some(token) if ["if", "ifdef", "ifndef"].contains(&token.slice()) =>
+                    Some(token) if IF_DIRECTIVE_INTRODUCERS.contains(&token.slice()) =>
                         nesting_level += 1,
                     Some(token) if token.slice() == "endif" => match nesting_level.checked_sub(1) {
                         Some(level) => nesting_level = level,
@@ -677,7 +679,7 @@ impl<'a> Preprocessor<'a> {
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
                 match self.next_token() {
-                    Some(token) if ["if", "ifdef", "ifndef"].contains(&token.slice()) =>
+                    Some(token) if IF_DIRECTIVE_INTRODUCERS.contains(&token.slice()) =>
                         nesting_level += 1,
                     Some(token) if token.slice() == "endif" => match nesting_level.checked_sub(1) {
                         Some(level) => nesting_level = level,
