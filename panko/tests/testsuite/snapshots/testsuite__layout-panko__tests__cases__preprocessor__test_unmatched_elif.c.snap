@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_unmatched_elif.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `#elif` not preceded by `#if`
+   ╭─[panko/tests/cases/preprocessor/test_unmatched_elif.c:1:2]
+   │
+ 1 │ #elif x
+   │  ──┬─  
+   │    ╰─── this `#elif` does not have a matching `#if`
+───╯
+
+Error: `#elifdef` not preceded by `#if`
+   ╭─[panko/tests/cases/preprocessor/test_unmatched_elif.c:5:2]
+   │
+ 5 │ #elifdef x
+   │  ───┬───  
+   │     ╰───── this `#elifdef` does not have a matching `#if`
+───╯
+
+Error: `#elifndef` not preceded by `#if`
+   ╭─[panko/tests/cases/preprocessor/test_unmatched_elif.c:9:2]
+   │
+ 9 │ #elifndef x
+   │  ────┬───  
+   │      ╰───── this `#elifndef` does not have a matching `#if`
+───╯

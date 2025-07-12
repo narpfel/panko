@@ -552,12 +552,14 @@ impl<'a> Preprocessor<'a> {
                 let ifndef = self.next_token().unwrap();
                 self.eval_ifndef(&ifndef);
             }
-            Some(&token) if ["elif", "elifdef", "elifndef", "else"].contains(&token.slice()) =>
+            Some(&token) if ["elif", "elifdef", "elifndef", "else"].contains(&token.slice()) => {
                 match self.if_stack.pop() {
-                    Some(true) => self.skip_to_endif(),
+                    Some(true) => (),
                     Some(false) => unreachable!("this case is handled in `skip_to_else`"),
-                    None => todo!("error: unmatched `#{}`", token.slice()),
-                },
+                    None => self.sess.emit(Diagnostic::UnmatchedElif { at: token }),
+                }
+                self.skip_to_endif();
+            }
             Some(token) if token.slice() == "endif" => {
                 self.next();
                 self.if_stack.pop().unwrap();

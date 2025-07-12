@@ -109,6 +109,10 @@ pub(super) enum Diagnostic<'a> {
         defined: Token<'a>,
         expectation: &'a str,
     },
+
+    #[error("`#{at}` not preceded by `#if`")]
+    #[diagnostics(at(colour = Red, label = "this `#{at}` does not have a matching `#if`"))]
+    UnmatchedElif { at: Token<'a> },
 }
 
 pub(super) struct MaybeError<T>(Option<T>);
