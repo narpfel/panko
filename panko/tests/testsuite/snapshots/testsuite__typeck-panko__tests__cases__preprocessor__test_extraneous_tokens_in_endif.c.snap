@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_extraneous_tokens_in_endif.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: extraneous tokens in `#endif` directive
+   ╭─[panko/tests/cases/preprocessor/test_extraneous_tokens_in_endif.c:2:1]
+   │
+ 2 │ #endif int f() {}
+   │ ────── ─────┬────  
+   │             ╰────── help: remove this
+───╯

@@ -87,6 +87,13 @@ pub(super) enum Diagnostic<'a> {
         tokens: Loc<'a>,
     },
 
+    #[error("extraneous tokens in `{at}` directive")]
+    #[diagnostics(
+        at(colour = Blue),
+        tokens(colour = Red, label = "help: remove this"),
+    )]
+    ExtraneousTokens { at: Loc<'a>, tokens: Loc<'a> },
+
     #[error("`{at}` at {kind} of macro")]
     #[diagnostics(at(colour = Red, label = "`{at}` operator must not be at {kind} of macro"))]
     PasteAtBeginningOfMacro { at: Token<'a>, kind: &'a str },

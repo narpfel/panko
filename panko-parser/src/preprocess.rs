@@ -677,6 +677,13 @@ impl<'a> Preprocessor<'a> {
             self.sess
                 .emit(Diagnostic::UnmatchedElif { at: endif_loc() })
         }
+        let rest_of_line = self.eat_until_newline();
+        if !rest_of_line.is_empty() {
+            self.sess.emit(Diagnostic::ExtraneousTokens {
+                at: endif_loc(),
+                tokens: tokens_loc(&rest_of_line),
+            })
+        }
     }
 
     fn skip_to_endif(&mut self) {
