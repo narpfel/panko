@@ -553,16 +553,15 @@ impl<'a> Preprocessor<'a> {
                 self.eval_ifndef(&ifndef);
             }
             Some(&token) if ["elif", "elifdef", "elifndef", "else"].contains(&token.slice()) => {
-                match self.if_stack.pop() {
-                    Some(true) => (),
-                    Some(false) => unreachable!("this case is handled in `skip_to_else`"),
-                    None => self.sess.emit(Diagnostic::UnmatchedElif { at: token }),
+                if self.if_stack.is_empty() {
+                    self.sess
+                        .emit(Diagnostic::UnmatchedElif { at: hash.loc().until(token.loc()) })
                 }
                 self.skip_to_endif();
             }
-            Some(token) if token.slice() == "endif" => {
+            Some(&token) if token.slice() == "endif" => {
                 self.next();
-                self.if_stack.pop().unwrap();
+                self.parse_endif(hash, &token, true);
             }
             Some(token) =>
                 todo!("error: unimplemented preprocessor directive starting in {token:?}"),
@@ -644,17 +643,13 @@ impl<'a> Preprocessor<'a> {
         let mut nesting_level = 0_u64;
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
+                let hash = &token;
                 match self.next_token() {
                     Some(token) if IF_DIRECTIVE_INTRODUCERS.contains(&token.slice()) =>
                         nesting_level += 1,
                     Some(token) if token.slice() == "endif" => match nesting_level.checked_sub(1) {
                         Some(level) => nesting_level = level,
-                        None => {
-                            self.if_stack
-                                .pop()
-                                .expect("TODO: error message: unterminated `#if` directive");
-                            return;
-                        }
+                        None => return self.parse_endif(hash, &token, false),
                     },
                     Some(token) if token.slice() == "elif" && nesting_level == 0 => {
                         self.if_stack.pop().unwrap();
@@ -676,16 +671,25 @@ impl<'a> Preprocessor<'a> {
         }
     }
 
+    fn parse_endif(&mut self, hash: &Token<'a>, endif: &Token<'a>, maybe_unmatched: bool) {
+        let endif_loc = || hash.loc().until(endif.loc());
+        if self.if_stack.pop().is_none() && maybe_unmatched {
+            self.sess
+                .emit(Diagnostic::UnmatchedElif { at: endif_loc() })
+        }
+    }
+
     fn skip_to_endif(&mut self) {
         let mut nesting_level = 0_u64;
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
+                let hash = &token;
                 match self.next_token() {
                     Some(token) if IF_DIRECTIVE_INTRODUCERS.contains(&token.slice()) =>
                         nesting_level += 1,
                     Some(token) if token.slice() == "endif" => match nesting_level.checked_sub(1) {
                         Some(level) => nesting_level = level,
-                        None => return,
+                        None => return self.parse_endif(hash, &token, false),
                     },
                     Some(_) => (),
                     None => todo!("error message: unterminated `#if` directive"),

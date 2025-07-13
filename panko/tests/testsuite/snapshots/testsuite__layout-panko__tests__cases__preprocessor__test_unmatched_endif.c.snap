@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_unmatched_endif.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `#endif` not preceded by `#if`
+   ╭─[panko/tests/cases/preprocessor/test_unmatched_endif.c:1:1]
+   │
+ 1 │ #endif
+   │ ───┬──  
+   │    ╰──── this `#endif` does not have a matching `#if`
+───╯
