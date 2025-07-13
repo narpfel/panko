@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_extraneous_tokens_in_ifdef.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: extraneous tokens in `#ifndef` directive
+   ╭─[panko/tests/cases/preprocessor/test_extraneous_tokens_in_ifdef.c:1:1]
+   │
+ 1 │ #ifndef x int puts(char const*);
+   │ ───────   ───────────┬──────────  
+   │                      ╰──────────── help: remove this
+───╯
+
+Error: use of undeclared identifier `puts`
+   ╭─[panko/tests/cases/preprocessor/test_extraneous_tokens_in_ifdef.c:5:5]
+   │
+ 5 │     puts("it works");
+   │     ──┬─  
+   │       ╰─── this name has not been declared
+───╯

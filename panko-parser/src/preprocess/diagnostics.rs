@@ -133,6 +133,10 @@ impl<T> MaybeError<T> {
         let Self(value) = self;
         value
     }
+
+    pub(super) fn is_some(&self) -> bool {
+        self.0.is_some()
+    }
 }
 
 impl<'a, T> FromError<'a> for MaybeError<T>

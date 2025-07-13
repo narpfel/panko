@@ -546,11 +546,11 @@ impl<'a> Preprocessor<'a> {
             }
             Some(token) if token.slice() == "ifdef" => {
                 let ifdef = self.next_token().unwrap();
-                self.eval_ifdef(&ifdef);
+                self.eval_ifdef(hash, &ifdef);
             }
             Some(token) if token.slice() == "ifndef" => {
                 let ifndef = self.next_token().unwrap();
-                self.eval_ifndef(&ifndef);
+                self.eval_ifndef(hash, &ifndef);
             }
             Some(&token) if ["elif", "elifdef", "elifndef", "else"].contains(&token.slice()) => {
                 if self.if_stack.is_empty() {
@@ -657,11 +657,11 @@ impl<'a> Preprocessor<'a> {
                     }
                     Some(token) if token.slice() == "elifdef" && nesting_level == 0 => {
                         self.if_stack.pop().unwrap();
-                        return self.eval_ifdef(&token);
+                        return self.eval_ifdef(hash, &token);
                     }
                     Some(token) if token.slice() == "elifndef" && nesting_level == 0 => {
                         self.if_stack.pop().unwrap();
-                        return self.eval_ifndef(&token);
+                        return self.eval_ifndef(hash, &token);
                     }
                     Some(token) if token.slice() == "else" && nesting_level == 0 => return,
                     Some(_) => (),
@@ -784,26 +784,37 @@ impl<'a> Preprocessor<'a> {
             || self.macros.contains_key(macro_name)
     }
 
-    fn parse_ifdef(&mut self, ifdef: &Token<'a>) -> MaybeError<bool> {
-        match self.eat_if(is_identifier) {
+    fn parse_ifdef(&mut self, hash: &Token<'a>, ifdef: &Token<'a>) -> MaybeError<bool> {
+        let result = match self.eat_if(is_identifier) {
             Ok(ident) => MaybeError::new(self.is_macro_defined(ident.slice())),
-            Err(token) => self
-                .sess
-                .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
-                    at: token,
-                    defined: *ifdef,
-                    expectation: "an identifier",
-                }),
+            Err(token) => {
+                // ignore erroneous token
+                self.next();
+                self.sess
+                    .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
+                        at: token,
+                        defined: *ifdef,
+                        expectation: "an identifier",
+                    })
+            }
+        };
+        let extraneous = self.eat_until_newline();
+        if result.is_some() && !extraneous.is_empty() {
+            self.sess.emit(Diagnostic::ExtraneousTokens {
+                at: hash.loc().until(ifdef.loc()),
+                tokens: tokens_loc(&extraneous),
+            })
         }
+        result
     }
 
-    fn eval_ifdef(&mut self, ifdef: &Token<'a>) {
-        let condition = self.parse_ifdef(ifdef);
+    fn eval_ifdef(&mut self, hash: &Token<'a>, ifdef: &Token<'a>) {
+        let condition = self.parse_ifdef(hash, ifdef);
         self.eval_if_condition(condition.value().unwrap_or(false));
     }
 
-    fn eval_ifndef(&mut self, ifndef: &Token<'a>) {
-        let condition = self.parse_ifdef(ifndef);
+    fn eval_ifndef(&mut self, hash: &Token<'a>, ifndef: &Token<'a>) {
+        let condition = self.parse_ifdef(hash, ifndef);
         self.eval_if_condition(condition.value().map(bool::not).unwrap_or(false));
     }
 
