@@ -1,0 +1,49 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_ifdef_error_recovery.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unexpected token `\n` of kind `Newline` in `ifdef` macro expression
+   ╭─[panko/tests/cases/preprocessor/test_ifdef_error_recovery.c:1:7]
+   │
+ 1 │ #ifdef
+   │  ──┬──┬  
+   │    │  ╰── expected an identifier here
+   │    │     
+   │    ╰───── in this `ifdef` expression
+───╯
+
+Error: extraneous tokens in `#ifdef` directive
+   ╭─[panko/tests/cases/preprocessor/test_ifdef_error_recovery.c:4:1]
+   │
+ 4 │ #ifdef + a
+   │ ──────   ┬  
+   │          ╰── help: remove this
+───╯
+
+Error: unexpected token `+` of kind `Plus` in `ifdef` macro expression
+   ╭─[panko/tests/cases/preprocessor/test_ifdef_error_recovery.c:4:8]
+   │
+ 4 │ #ifdef + a
+   │  ──┬── ┬  
+   │    │   ╰── expected an identifier here
+   │    │      
+   │    ╰────── in this `ifdef` expression
+───╯
+
+Error: extraneous tokens in `#ifndef` directive
+   ╭─[panko/tests/cases/preprocessor/test_ifdef_error_recovery.c:7:1]
+   │
+ 7 │ #ifndef x int puts(char const*);
+   │ ───────   ───────────┬──────────  
+   │                      ╰──────────── help: remove this
+───╯

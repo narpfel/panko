@@ -787,22 +787,22 @@ impl<'a> Preprocessor<'a> {
     fn parse_ifdef(&mut self, hash: &Token<'a>, ifdef: &Token<'a>) -> MaybeError<bool> {
         let result = match self.eat_if(is_identifier) {
             Ok(ident) => MaybeError::new(self.is_macro_defined(ident.slice())),
-            Err(token) => {
-                // ignore erroneous token
-                self.next();
-                self.sess
-                    .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
-                        at: token,
-                        defined: *ifdef,
-                        expectation: "an identifier",
-                    })
-            }
+            Err(token) => self
+                .sess
+                .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
+                    at: token,
+                    defined: *ifdef,
+                    expectation: "an identifier",
+                }),
         };
         let extraneous = self.eat_until_newline();
-        if result.is_some() && !extraneous.is_empty() {
+        let extraneous = extraneous
+            .get(if result.is_some() { 0 } else { 1 }..)
+            .unwrap_or_default();
+        if !extraneous.is_empty() {
             self.sess.emit(Diagnostic::ExtraneousTokens {
                 at: hash.loc().until(ifdef.loc()),
-                tokens: tokens_loc(&extraneous),
+                tokens: tokens_loc(extraneous),
             })
         }
         result
