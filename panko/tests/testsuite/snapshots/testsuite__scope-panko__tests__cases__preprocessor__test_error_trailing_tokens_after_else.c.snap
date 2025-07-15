@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_trailing_tokens_after_else.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: extraneous tokens in `#else` directive
+   ╭─[panko/tests/cases/preprocessor/test_error_trailing_tokens_after_else.c:2:1]
+   │
+ 2 │ #else a
+   │ ───── ┬  
+   │       ╰── help: remove this
+───╯
+
+Error: extraneous tokens in `#else` directive
+    ╭─[panko/tests/cases/preprocessor/test_error_trailing_tokens_after_else.c:14:1]
+    │
+ 14 │ #else a
+    │ ───── ┬  
+    │       ╰── help: remove this
+────╯

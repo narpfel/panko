@@ -553,9 +553,14 @@ impl<'a> Preprocessor<'a> {
                 self.eval_ifndef(hash, &ifndef);
             }
             Some(&token) if ["elif", "elifdef", "elifndef", "else"].contains(&token.slice()) => {
+                // eat token
+                let _ = self.next_token().unwrap();
                 if self.if_stack.is_empty() {
                     self.sess
                         .emit(Diagnostic::UnmatchedElif { at: hash.loc().until(token.loc()) })
+                }
+                if token.slice() == "else" {
+                    self.parse_else(hash, &token);
                 }
                 self.skip_to_endif();
             }
@@ -639,6 +644,20 @@ impl<'a> Preprocessor<'a> {
             .collect()
     }
 
+    fn require_no_trailing_tokens(&mut self, at: impl FnOnce() -> Loc<'a>) {
+        let rest_of_line = self.eat_until_newline();
+        if !rest_of_line.is_empty() {
+            self.sess.emit(Diagnostic::ExtraneousTokens {
+                at: at(),
+                tokens: tokens_loc(&rest_of_line),
+            })
+        }
+    }
+
+    fn parse_else(&mut self, hash: &Token<'a>, r#else: &Token<'a>) {
+        self.require_no_trailing_tokens(|| hash.loc().until(r#else.loc()))
+    }
+
     fn skip_to_else(&mut self) {
         let mut nesting_level = 0_u64;
         while let Some((previous_was_newline, token)) = self.next() {
@@ -663,7 +682,8 @@ impl<'a> Preprocessor<'a> {
                         self.if_stack.pop().unwrap();
                         return self.eval_ifndef(hash, &token);
                     }
-                    Some(token) if token.slice() == "else" && nesting_level == 0 => return,
+                    Some(token) if token.slice() == "else" && nesting_level == 0 =>
+                        return self.parse_else(hash, &token),
                     Some(_) => (),
                     None => todo!("error message: unterminated `#if` directive"),
                 }
@@ -677,13 +697,7 @@ impl<'a> Preprocessor<'a> {
             self.sess
                 .emit(Diagnostic::UnmatchedElif { at: endif_loc() })
         }
-        let rest_of_line = self.eat_until_newline();
-        if !rest_of_line.is_empty() {
-            self.sess.emit(Diagnostic::ExtraneousTokens {
-                at: endif_loc(),
-                tokens: tokens_loc(&rest_of_line),
-            })
-        }
+        self.require_no_trailing_tokens(endif_loc)
     }
 
     fn skip_to_endif(&mut self) {
