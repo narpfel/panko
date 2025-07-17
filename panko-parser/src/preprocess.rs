@@ -60,6 +60,7 @@ enum Replacement<'a> {
     Stringise(usize),
     Concat {
         lhs: &'a Replacement<'a>,
+        hash_hash: Token<'a>,
         rhs: &'a Replacement<'a>,
     },
 }
@@ -81,7 +82,8 @@ impl<'a> Replacement<'a> {
             }),
             Self::Stringise(index) =>
                 Expanded::Stringise(Stringise { call, replacement: call.get(*index) }),
-            Self::Concat { lhs, rhs } => Expanded::Concat(Concat { call, lhs, rhs }),
+            Self::Concat { lhs, hash_hash, rhs } =>
+                Expanded::Concat(Concat { call, lhs, hash_hash: *hash_hash, rhs }),
         }
     }
 }
@@ -247,6 +249,7 @@ struct Stringise<'a> {
 struct Concat<'a> {
     call: FunctionCall<'a>,
     lhs: &'a Replacement<'a>,
+    hash_hash: Token<'a>,
     rhs: &'a Replacement<'a>,
 }
 
@@ -370,7 +373,7 @@ impl<'a> Expander<'a> {
     }
 
     fn paste(&mut self, macros: &HashMap<&'a str, Macro<'a>>, concat: Concat<'a>) {
-        let Concat { call, lhs, rhs } = concat;
+        let Concat { call, lhs, hash_hash, rhs } = concat;
         let bump = self.sess.bump();
 
         let lhs = lhs.expand(call);
@@ -398,11 +401,15 @@ impl<'a> Expander<'a> {
                 [token] => tokens.push(token),
                 _ => {
                     tokens.extend(pasted_tokens);
-                    todo!(
-                        "error message: pasting {:?} and {:?} yielded {src:?}, an invalid preprocessing token",
-                        lhs.map_or("", |t| t.slice()),
-                        rhs.map_or("", |t| t.slice()),
-                    )
+                    self.sess.emit(Diagnostic::InvalidPaste {
+                        at: lhs
+                            .unwrap_or(hash_hash)
+                            .loc()
+                            .until(rhs.unwrap_or(hash_hash).loc()),
+                        lhs: lhs.map_or("", |t| t.slice()),
+                        rhs: rhs.map_or("", |t| t.slice()),
+                        result: self.sess.alloc_str(&src),
+                    })
                 }
             };
         }
@@ -934,6 +941,7 @@ fn parse_replacement<'a>(
         match parse_replacement(sess, parameters, is_varargs, tokens) {
             Some(rhs) => Some(Replacement::Concat {
                 lhs: sess.alloc(replacement),
+                hash_hash: *hash_hash,
                 rhs: sess.alloc(rhs),
             }),
             None => {

@@ -120,6 +120,22 @@ pub(super) enum Diagnostic<'a> {
     #[error("`{at}` not preceded by `#if`")]
     #[diagnostics(at(colour = Red, label = "this `{at}` does not have a matching `#if`"))]
     UnmatchedElif { at: Loc<'a> },
+
+    #[error("pasting `{lhs}` and `{rhs}` yields `{result}`, an invalid preprocessing token")]
+    #[diagnostics(
+        at(colour = Red, label = "in this paste"),
+    )]
+    #[with(
+        lhs = lhs.escape_debug().fg(Red),
+        rhs = rhs.escape_debug().fg(Red),
+        result = result.escape_debug().fg(Red),
+    )]
+    InvalidPaste {
+        at: Loc<'a>,
+        lhs: &'a str,
+        rhs: &'a str,
+        result: &'a str,
+    },
 }
 
 pub(super) struct MaybeError<T>(Option<T>);

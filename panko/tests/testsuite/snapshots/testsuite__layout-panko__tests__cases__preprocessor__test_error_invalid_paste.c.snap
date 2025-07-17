@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_invalid_paste.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: pasting `+` and `2` yields `+2`, an invalid preprocessing token
+   ╭─[panko/tests/cases/preprocessor/test_error_invalid_paste.c:4:14]
+   │
+ 4 │     return F(+, 2);
+   │              ──┬─  
+   │                ╰─── in this paste
+───╯
