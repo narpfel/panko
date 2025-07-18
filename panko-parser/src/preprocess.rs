@@ -485,25 +485,20 @@ impl<'a> Preprocessor<'a> {
                         }
                         else {
                             let line = self.eat_until_newline();
-                            match &line[..] {
-                                [] => self
-                                    .sess
-                                    .emit(Diagnostic::HashOutsideDirective { at: token }),
+                            let diagnostic = match &line[..] {
+                                [] => Diagnostic::HashOutsideDirective { at: token },
                                 [directive, line @ ..] if is_identifier(directive) =>
-                                    self.sess.emit(
-                                        Diagnostic::NamedDirectiveDoesNotStartAtBeginningOfLine {
-                                            at: token,
-                                            directive: *directive,
-                                            line: tokens_loc(line),
-                                        },
-                                    ),
-                                line => self.sess.emit(
-                                    Diagnostic::DirectiveDoesNotStartAtBeginningOfLine {
+                                    Diagnostic::NamedDirectiveDoesNotStartAtBeginningOfLine {
                                         at: token,
+                                        directive: *directive,
                                         line: tokens_loc(line),
                                     },
-                                ),
-                            }
+                                line => Diagnostic::DirectiveDoesNotStartAtBeginningOfLine {
+                                    at: token,
+                                    line: tokens_loc(line),
+                                },
+                            };
+                            self.sess.emit(diagnostic)
                         },
                     token if let Some(&r#macro) = self.macros.get(token.slice()) => {
                         assert!(self.expander.is_empty());
