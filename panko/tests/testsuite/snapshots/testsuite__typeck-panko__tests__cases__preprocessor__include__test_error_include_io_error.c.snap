@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/include/test_error_include_io_error.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: could not open `#include` file `"non-existent.h"`: No such file or directory (os error 2)
+   ╭─[panko/tests/cases/preprocessor/include/test_error_include_io_error.c:1:10]
+   │
+ 1 │ #include "non-existent.h"
+   │ ──────── ────────┬───────  
+   │                  ╰───────── could not open this file
+───╯
+
+Error: could not open `#include` file `"directory"`: Is a directory (os error 21)
+   ╭─[panko/tests/cases/preprocessor/include/test_error_include_io_error.c:3:10]
+   │
+ 3 │ #include "directory"
+   │ ──────── ─────┬─────  
+   │               ╰─────── could not open this file
+───╯

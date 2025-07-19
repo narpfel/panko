@@ -1,0 +1,39 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/include/test_include.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+
+
+
+
+int puts( char const*);
+int printf( char const*, ...);
+
+
+
+int variable = 27;
+
+
+
+
+
+
+int main() {
+
+    puts("it works");
+
+    printf("VALUE: %d\n", 42 );
+
+    printf("variable: %d\n", variable);
+}
+
+----- stderr -----

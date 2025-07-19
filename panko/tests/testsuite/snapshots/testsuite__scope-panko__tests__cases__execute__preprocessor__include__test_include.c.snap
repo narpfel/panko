@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/preprocessor/include/test_include.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (declaration printf~1 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (definition variable~2 `int` 27)
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "it works")))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "VALUE: %d\n")
+               42))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "variable: %d\n")
+               (name variable~2 `int`))))))
+
+----- stderr -----

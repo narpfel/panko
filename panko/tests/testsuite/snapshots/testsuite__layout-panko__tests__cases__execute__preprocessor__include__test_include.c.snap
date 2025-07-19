@@ -1,0 +1,47 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/preprocessor/include/test_include.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (declaration (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (definition (variable~2 `int` (static variable)) (27 `int` (static variable)))
+   (function-definition
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 9>>` @16
+                        (string `array<char; 9>` @void "it works\0"))))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 11>>` @16
+                        (string `array<char; 11>` @void "VALUE: %d\n\0"))))
+               (42 `int` @24)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 14>>` @16
+                        (string `array<char; 14>` @void "variable: %d\n\0"))))
+               (variable~2 `int` (static variable)))))))
+
+----- stderr -----

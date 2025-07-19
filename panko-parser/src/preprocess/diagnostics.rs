@@ -136,6 +136,17 @@ pub(super) enum Diagnostic<'a> {
         rhs: &'a str,
         result: &'a str,
     },
+
+    #[error("could not open `{include}` file `{at}`: {error}")]
+    #[diagnostics(
+        include(colour = Blue),
+        at(colour = Red, label = "could not open this file"),
+    )]
+    CouldNotReadIncludeFile {
+        at: Loc<'a>,
+        include: Loc<'a>,
+        error: &'a str,
+    },
 }
 
 pub(super) struct MaybeError<T>(Option<T>);

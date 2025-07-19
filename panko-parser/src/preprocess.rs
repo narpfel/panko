@@ -3,6 +3,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
+use std::ffi::OsStr;
 use std::fmt::Display;
 use std::io::stdout;
 use std::iter::Peekable;
@@ -12,6 +13,7 @@ use std::path::Path;
 
 use indexmap::IndexSet;
 use itertools::Itertools as _;
+use panko_lex::Bump;
 use panko_lex::Integer;
 use panko_lex::IntegerSuffix;
 use panko_lex::Loc;
@@ -32,6 +34,11 @@ const IF_DIRECTIVE_INTRODUCERS: [&str; 3] = ["if", "ifdef", "ifndef"];
 pub type TokenIter<'a> = impl Iterator<Item = Token<'a>>;
 
 type UnpreprocessedTokens<'a> = Peekable<panko_lex::TokenIter<'a>>;
+
+fn alloc_path(bump: &Bump, path: impl AsRef<Path>) -> &Path {
+    let bytes = bump.alloc_slice_copy(path.as_ref().as_os_str().as_encoded_bytes());
+    Path::new(unsafe { OsStr::from_encoded_bytes_unchecked(bytes) })
+}
 
 fn is_identifier(token: &Token) -> bool {
     token.is_identifier() || token.is_keyword()
@@ -156,7 +163,7 @@ impl<'a> Macro<'a> {
 
 struct Preprocessor<'a> {
     sess: &'a Session<'a>,
-    tokens: UnpreprocessedTokens<'a>,
+    tokens: Vec<UnpreprocessedTokens<'a>>,
     current_is_newline: bool,
     macros: HashMap<&'a str, Macro<'a>>,
     expander: Expander<'a>,
@@ -465,7 +472,12 @@ impl<'a> Expander<'a> {
 impl<'a> Preprocessor<'a> {
     fn next(&mut self) -> Option<(bool, Token<'a>)> {
         let previous_was_newline = self.current_is_newline;
-        let token = self.tokens.next()?;
+        let token = loop {
+            match self.tokens.last_mut()?.next() {
+                Some(token) => break token,
+                None => self.tokens.pop(),
+            };
+        };
         self.current_is_newline = token.kind == TokenKind::Newline;
         Some((previous_was_newline, token))
     }
@@ -502,7 +514,11 @@ impl<'a> Preprocessor<'a> {
                         },
                     token if let Some(&r#macro) = self.macros.get(token.slice()) => {
                         assert!(self.expander.is_empty());
-                        match r#macro.expand(self.sess, self.tokens.by_ref(), &token) {
+                        match r#macro.expand(
+                            self.sess,
+                            self.tokens.last_mut().expect("TODO").by_ref(),
+                            &token,
+                        ) {
                             Some(expanding) => {
                                 self.expander.push(expanding);
                                 while let Some(token) = self.expander.next(&self.macros) {
@@ -524,7 +540,14 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn peek(&mut self) -> Option<&Token<'a>> {
-        self.tokens.peek()
+        loop {
+            let token = self.tokens.last_mut()?.peek();
+            match token {
+                // TODO: can’t use `token` here due to borrowck limitation (fixed by polonius)
+                Some(_) => return self.tokens.last_mut()?.peek(),
+                None => self.tokens.pop(),
+            };
+        }
     }
 
     fn parse_directive(&mut self, hash: &Token<'a>) {
@@ -569,6 +592,9 @@ impl<'a> Preprocessor<'a> {
             Some(&token) if token.slice() == "endif" => {
                 self.next();
                 self.parse_endif(hash, &token, true);
+            }
+            Some(token) if token.slice() == "include" => {
+                self.eval_include(hash);
             }
             Some(token) =>
                 todo!("error: unimplemented preprocessor directive starting in {token:?}"),
@@ -641,6 +667,8 @@ impl<'a> Preprocessor<'a> {
     fn eat_until_newline(&mut self) -> Vec<Token<'a>> {
         self.current_is_newline = true;
         self.tokens
+            .last_mut()
+            .expect("TODO")
             .by_ref()
             .peeking_take_while(|token| token.kind != TokenKind::Newline)
             .collect()
@@ -758,7 +786,11 @@ impl<'a> Preprocessor<'a> {
                     token if is_identifier(&token) => match self.macros.get(token.slice()) {
                         Some(&r#macro) => {
                             assert!(self.expander.is_empty());
-                            match r#macro.expand(self.sess, self.tokens.by_ref(), &token) {
+                            match r#macro.expand(
+                                self.sess,
+                                self.tokens.last_mut().expect("TODO").by_ref(),
+                                &token,
+                            ) {
                                 Some(expanding) => {
                                     self.expander.push(expanding);
                                     while let Some(token) = self.expander.next(&self.macros) {
@@ -838,6 +870,34 @@ impl<'a> Preprocessor<'a> {
         self.if_stack.push(condition);
         if !condition {
             self.skip_to_else();
+        }
+    }
+
+    fn eval_include(&mut self, hash: &Token<'a>) {
+        let include = self.next_token().unwrap();
+        let include_loc = || hash.loc().until(include.loc());
+        let filename_token = self.next_token();
+        let filename = match filename_token {
+            Some(token) if token.kind == TokenKind::String =>
+                &token.slice()[1..token.slice().len() - 1],
+            Some(token) if token.kind == TokenKind::Less => todo!(),
+            Some(_) => todo!("this should expand macros and try to parse the expanded tokens"),
+            None => todo!("error message: end of input"),
+        };
+        self.require_no_trailing_tokens(include_loc);
+        let filename = alloc_path(
+            self.sess.bump,
+            include.loc().file().parent().unwrap().join(filename),
+        );
+        match std::fs::read_to_string(filename) {
+            Ok(src) => self
+                .tokens
+                .push(panko_lex::lex(self.sess.bump(), filename, &src).peekable()),
+            Err(err) => self.sess.emit(Diagnostic::CouldNotReadIncludeFile {
+                at: filename_token.unwrap().loc(),
+                include: include_loc(),
+                error: self.sess.alloc_str(&err.to_string()),
+            }),
         }
     }
 }
@@ -1087,7 +1147,7 @@ fn parse_macro_arguments<'a>(
 pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -> TokenIter<'a> {
     Preprocessor {
         sess,
-        tokens: tokens.peekable(),
+        tokens: vec![tokens.peekable()],
         current_is_newline: true,
         macros: HashMap::from_iter([("__LINE__", Macro::Line)]),
         expander: Expander {
