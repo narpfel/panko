@@ -25,9 +25,11 @@ use crate::handle_parse_error;
 use crate::preprocess::diagnostics::Diagnostic;
 use crate::preprocess::diagnostics::MaybeError;
 use crate::preprocess::eval::eval;
+use crate::preprocess::iterator_stack::Stacked;
 
 mod diagnostics;
 mod eval;
+mod iterator_stack;
 
 const IF_DIRECTIVE_INTRODUCERS: [&str; 3] = ["if", "ifdef", "ifndef"];
 
@@ -164,7 +166,7 @@ impl<'a> Macro<'a> {
 
 struct Preprocessor<'a> {
     sess: &'a Session<'a>,
-    tokens: Vec<UnpreprocessedTokens<'a>>,
+    tokens: Stacked<UnpreprocessedTokens<'a>>,
     current_is_newline: bool,
     macros: HashMap<&'a str, Macro<'a>>,
     expander: Expander<'a>,
@@ -473,12 +475,7 @@ impl<'a> Expander<'a> {
 impl<'a> Preprocessor<'a> {
     fn next(&mut self) -> Option<(bool, Token<'a>)> {
         let previous_was_newline = self.current_is_newline;
-        let token = loop {
-            match self.tokens.last_mut()?.next() {
-                Some(token) => break token,
-                None => self.tokens.pop(),
-            };
-        };
+        let token = self.tokens.next()?;
         self.current_is_newline = token.kind == TokenKind::Newline;
         Some((previous_was_newline, token))
     }
@@ -515,11 +512,7 @@ impl<'a> Preprocessor<'a> {
                         },
                     token if let Some(&r#macro) = self.macros.get(token.slice()) => {
                         assert!(self.expander.is_empty());
-                        match r#macro.expand(
-                            self.sess,
-                            self.tokens.last_mut().expect("TODO").by_ref(),
-                            &token,
-                        ) {
+                        match r#macro.expand(self.sess, self.tokens.last_by_ref(), &token) {
                             Some(expanding) => {
                                 self.expander.push(expanding);
                                 while let Some(token) = self.expander.next(&self.macros) {
@@ -541,14 +534,7 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn peek(&mut self) -> Option<&Token<'a>> {
-        loop {
-            let token = self.tokens.last_mut()?.peek();
-            match token {
-                // TODO: can’t use `token` here due to borrowck limitation (fixed by polonius)
-                Some(_) => return self.tokens.last_mut()?.peek(),
-                None => self.tokens.pop(),
-            };
-        }
+        self.tokens.peek()
     }
 
     fn parse_directive(&mut self, hash: &Token<'a>) {
@@ -668,8 +654,6 @@ impl<'a> Preprocessor<'a> {
     fn eat_until_newline(&mut self) -> Vec<Token<'a>> {
         self.current_is_newline = true;
         self.tokens
-            .last_mut()
-            .expect("TODO")
             .by_ref()
             .peeking_take_while(|token| token.kind != TokenKind::Newline)
             .collect()
@@ -787,11 +771,7 @@ impl<'a> Preprocessor<'a> {
                     token if is_identifier(&token) => match self.macros.get(token.slice()) {
                         Some(&r#macro) => {
                             assert!(self.expander.is_empty());
-                            match r#macro.expand(
-                                self.sess,
-                                self.tokens.last_mut().expect("TODO").by_ref(),
-                                &token,
-                            ) {
+                            match r#macro.expand(self.sess, self.tokens.last_by_ref(), &token) {
                                 Some(expanding) => {
                                     self.expander.push(expanding);
                                     while let Some(token) = self.expander.next(&self.macros) {
@@ -1155,7 +1135,7 @@ fn parse_macro_arguments<'a>(
 pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -> TokenIter<'a> {
     Preprocessor {
         sess,
-        tokens: vec![tokens.peekable()],
+        tokens: Stacked::new(tokens.peekable()),
         current_is_newline: true,
         macros: HashMap::from_iter([("__LINE__", Macro::Line)]),
         expander: Expander {
