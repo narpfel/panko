@@ -2725,6 +2725,7 @@ fn typeck_expression<'a>(
                 .unwrap_or_else(|| {
                     let expr =
                         sess.emit(Diagnostic::GenericWithoutMatch { at: selector, expr: *expr });
+                    // TODO: should be `Type::Error`
                     TypedExpression { ty: Type::int().unqualified(), expr }
                 })
         }
