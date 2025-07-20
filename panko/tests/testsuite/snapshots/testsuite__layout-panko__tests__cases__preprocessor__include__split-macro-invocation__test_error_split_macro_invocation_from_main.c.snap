@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/include/split-macro-invocation/test_error_split_macro_invocation_from_main.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: missing closing parenthesis in function-like macro invocation
+   ╭─[panko/tests/cases/preprocessor/include/split-macro-invocation/test_error_split_macro_invocation_from_main.c:6:9]
+   │
+ 6 │         MACRO(123
+   │         ──┬──  
+   │           ╰──── this macro misses a closing parenthesis
+───╯
+
+Error: argument count mismatch: too few arguments to function-like macro invocation (expected 2 but got 1)
+   ╭─[panko/tests/cases/preprocessor/include/split-macro-invocation/test_error_split_macro_invocation_from_main.c:6:9]
+   │
+ 6 │         MACRO(123
+   │         ──┬──  
+   │           ╰──── this macro expects 2 arguments
+───╯
+
+Error: unexpected token `#` of kind `Hash`
+   ╭─[panko/tests/cases/preprocessor/include/split-macro-invocation/test_error_split_macro_invocation_from_main.c:7:1]
+   │
+ 7 │ #include "second.h"
+   │ ┬  
+   │ ╰── expected one of the following token kinds: [",", "=", "*", "(", ")", "[", "+", "-", "/", "%", "==", "!=", "<", "<=", ">", ">=", "&", "^", "|", "<<", ">>", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|=", "&&", "||", "?", "++", "--"]
+───╯

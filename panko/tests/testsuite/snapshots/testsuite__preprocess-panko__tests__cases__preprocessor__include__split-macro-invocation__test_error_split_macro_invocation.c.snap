@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/preprocessor/include/split-macro-invocation/test_error_split_macro_invocation.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+int main() {
+    return
+
+
+(( 42
+) + ( + 2))
+, 27)
+
+        ;
+}
+
+----- stderr -----
