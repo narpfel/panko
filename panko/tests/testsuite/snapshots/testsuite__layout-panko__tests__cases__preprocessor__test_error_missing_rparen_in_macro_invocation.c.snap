@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_missing_rparen_in_macro_invocation.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unexpected token `+` of kind `Plus`
+   ╭─[panko/tests/cases/preprocessor/test_error_missing_rparen_in_macro_invocation.c:1:27]
+   │
+ 1 │ #define MACRO(a, b) a + b + 2
+   │                           ┬  
+   │                           ╰── expected one of the following token kinds: ["auto", "constexpr", "extern", "register", "static", "thread_local", "typedef", "void", "char", "short", "int", "long", "float", "double", "signed", "unsigned", "bool", "_Complex", "_Decimal32", "_Decimal64", "_Decimal128", "const", "restrict", "volatile", "_Atomic", "inline", "_Noreturn", TypedefName]
+───╯
+
+Error: missing closing parenthesis in function-like macro invocation
+   ╭─[panko/tests/cases/preprocessor/test_error_missing_rparen_in_macro_invocation.c:4:12]
+   │
+ 4 │     return MACRO(10, 20;
+   │            ──┬──  
+   │              ╰──── this macro misses a closing parenthesis
+───╯

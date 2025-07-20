@@ -147,6 +147,10 @@ pub(super) enum Diagnostic<'a> {
         include: Loc<'a>,
         error: &'a str,
     },
+
+    #[error("missing closing parenthesis in function-like macro invocation")]
+    #[diagnostics(at(colour = Red, label = "this macro misses a closing parenthesis"))]
+    MissingRParenInMacroInvocation { at: Token<'a> },
 }
 
 pub(super) struct MaybeError<T>(Option<T>);

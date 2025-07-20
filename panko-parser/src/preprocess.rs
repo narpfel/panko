@@ -126,7 +126,8 @@ impl<'a> Macro<'a> {
                 replacement,
             } => match tokens.next_if(|token| token.kind == TokenKind::LParen) {
                 Some(_) => {
-                    let arguments = parse_macro_arguments(sess, parameter_count, tokens);
+                    let arguments =
+                        parse_macro_arguments(sess, macro_token, parameter_count, tokens);
                     let has_arity_mismatch = match () {
                         () if arguments.is_empty() && parameter_count == 1 => false,
                         () if is_varargs => parameter_count > arguments.len(),
@@ -1104,6 +1105,7 @@ fn eat_newlines<'a>(tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>) {
 
 fn parse_macro_arguments<'a>(
     sess: &'a Session<'a>,
+    macro_name: &Token<'a>,
     parameter_count: usize,
     tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
 ) -> &'a [&'a [Replacement<'a>]] {
@@ -1138,7 +1140,7 @@ fn parse_macro_arguments<'a>(
     match tokens.next() {
         Some(token) if token.kind == TokenKind::RParen => (),
         Some(_) => unreachable!(),
-        None => todo!("error: missing rparen in function-like macro invocation"),
+        None => sess.emit(Diagnostic::MissingRParenInMacroInvocation { at: *macro_name }),
     }
 
     sess.alloc_slice_copy(&arguments)
