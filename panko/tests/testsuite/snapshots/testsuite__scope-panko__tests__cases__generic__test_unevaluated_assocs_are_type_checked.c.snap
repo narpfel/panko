@@ -5,7 +5,7 @@ info:
   args:
     - "--print=scopes"
     - "--stop-after=scopes"
-    - panko/tests/cases/execute/generic/test_unevaluated_assocs_are_not_type_checked.c
+    - panko/tests/cases/generic/test_unevaluated_assocs_are_type_checked.c
 ---
 success: true
 exit_code: 0

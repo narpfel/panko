@@ -2672,7 +2672,8 @@ fn typeck_expression<'a>(
                 .iter()
                 .filter_map(|assoc| match assoc {
                     GenericAssociation::Ty { ty: _, expr: _ } => None,
-                    GenericAssociation::Default { default, expr } => Some((default, expr)),
+                    GenericAssociation::Default { default, expr } =>
+                        Some((default, typeck_expression(sess, expr, context))),
                 })
                 .at_most_one()
                 .unwrap_or_else(|mut duplicate_defaults| {
@@ -2701,7 +2702,7 @@ fn typeck_expression<'a>(
                                 generic: *generic,
                             })
                         }
-                        Some((ty, expr))
+                        Some((ty, typeck_expression(sess, expr, context)))
                     }
                     GenericAssociation::Default { default: _, expr: _ } => None,
                 })
@@ -2719,9 +2720,8 @@ fn typeck_expression<'a>(
 
             assocs
                 .get(&selector_ty)
-                .map(|(_ty, expr)| expr)
-                .or(default.as_ref())
-                .map(|expr| typeck_expression(sess, expr, context))
+                .map(|(_ty, expr)| *expr)
+                .or(default)
                 .unwrap_or_else(|| {
                     let expr =
                         sess.emit(Diagnostic::GenericWithoutMatch { at: selector, expr: *expr });
