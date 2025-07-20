@@ -1110,11 +1110,17 @@ fn parse_macro_arguments<'a>(
     tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
 ) -> &'a [&'a [Replacement<'a>]] {
     eat_newlines(tokens);
-    let token = tokens.peek();
-    if token.is_none_or(|token| token.kind == TokenKind::RParen) {
-        tokens.next();
-        return &[];
-    }
+    match tokens.peek() {
+        Some(token) if token.kind == TokenKind::RParen => {
+            tokens.next();
+            return &[];
+        }
+        None => {
+            let () = sess.emit(Diagnostic::MissingRParenInMacroInvocation { at: *macro_name });
+            return &[];
+        }
+        Some(_) => (),
+    };
 
     let mut arguments = Vec::new();
 

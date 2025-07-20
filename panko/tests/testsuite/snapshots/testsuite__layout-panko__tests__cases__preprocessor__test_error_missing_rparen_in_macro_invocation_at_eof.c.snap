@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_missing_rparen_in_macro_invocation_at_eof.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: missing closing parenthesis in function-like macro invocation
+   ╭─[panko/tests/cases/preprocessor/test_error_missing_rparen_in_macro_invocation_at_eof.c:5:1]
+   │
+ 5 │ MACRO(
+   │ ──┬──  
+   │   ╰──── this macro misses a closing parenthesis
+───╯
