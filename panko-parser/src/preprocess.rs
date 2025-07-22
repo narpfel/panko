@@ -949,7 +949,10 @@ fn parse_replacement<'a>(
             Some(token) if let Some(index) = parameters.get_index_of(token.slice()) =>
                 Replacement::Stringise(index),
             Some(_) => todo!("error: not a parameter (but allow `__VA_OPT__` and `__VA_ARGS__`)"),
-            None => todo!("error: stringise at end of macro"),
+            None => {
+                let () = sess.emit(Diagnostic::StringiseAtEndOfMacro { at: *token });
+                return None;
+            }
         },
         _ => match token.slice() {
             "__VA_OPT__" => {

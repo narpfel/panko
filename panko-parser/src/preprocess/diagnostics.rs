@@ -151,6 +151,10 @@ pub(super) enum Diagnostic<'a> {
     #[error("missing closing parenthesis in function-like macro invocation")]
     #[diagnostics(at(colour = Red, label = "this macro misses a closing parenthesis"))]
     MissingRParenInMacroInvocation { at: Token<'a> },
+
+    #[error("stringise operator `{at}` at end of macro definition")]
+    #[diagnostics(at(colour = Red, label = "this `{at}` must be followed by a macro parameter"))]
+    StringiseAtEndOfMacro { at: Token<'a> },
 }
 
 pub(super) struct MaybeError<T>(Option<T>);

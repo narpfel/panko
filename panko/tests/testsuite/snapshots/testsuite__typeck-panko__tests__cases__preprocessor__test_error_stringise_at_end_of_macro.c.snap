@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_error_stringise_at_end_of_macro.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: stringise operator `#` at end of macro definition
+   ╭─[panko/tests/cases/preprocessor/test_error_stringise_at_end_of_macro.c:1:28]
+   │
+ 1 │ #define MACRO(param) param #
+   │                            ┬  
+   │                            ╰── this `#` must be followed by a macro parameter
+───╯
