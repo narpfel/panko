@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_error_function_like_macro_definition_without_closing_paren.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: missing closing parenthesis in function-like macro definition
+   ╭─[panko/tests/cases/preprocessor/test_error_function_like_macro_definition_without_closing_paren.c:1:9]
+   │
+ 1 │ #define MACRO(x
+   │         ──┬──  
+   │           ╰──── this macro misses a closing parenthesis
+───╯
+
+Error: missing closing parenthesis in function-like macro definition
+   ╭─[panko/tests/cases/preprocessor/test_error_function_like_macro_definition_without_closing_paren.c:2:9]
+   │
+ 2 │ #define ANOTHER_MACRO(
+   │         ──────┬──────  
+   │               ╰──────── this macro misses a closing parenthesis
+───╯

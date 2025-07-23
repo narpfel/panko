@@ -13,7 +13,10 @@ repos:
       - id: check-toml
       - id: check-yaml
       - id: end-of-file-fixer
-        exclude: '^panko/tests/cases/execute/preprocessor/test_null_directive_at_end_of_file_without_newline\.c$'
+        exclude: '(?x)^(
+          panko/tests/cases/execute/preprocessor/test_null_directive_at_end_of_file_without_newline\.c
+          | panko/tests/cases/preprocessor/test_error_function_like_macro_definition_without_closing_paren\.c
+        )$'
       - id: file-contents-sorter
         files: \.gitignore
         args: ["--unique"]

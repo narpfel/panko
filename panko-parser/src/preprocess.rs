@@ -599,7 +599,7 @@ impl<'a> Preprocessor<'a> {
                 // TODO: check `name` for `__VA_OPT__` and `__VA_ARGS__`
                 let name = name_tok.slice();
                 let r#macro = if line.first().is_some_and(|token| is_lparen(name_tok, token)) {
-                    parse_function_like_define(self.sess, name, line)
+                    parse_function_like_define(self.sess, name_tok, line)
                 }
                 else {
                     // TODO: check for `__VA_OPT__` and `__VA_ARGS__` here
@@ -1017,7 +1017,7 @@ fn parse_token_as_maybe_parameter<'a>(
 
 fn parse_function_like_define<'a>(
     sess: &'a Session<'a>,
-    name: &'a str,
+    name: &Token<'a>,
     mut tokens: &'a [Token<'a>],
 ) -> Macro<'a> {
     assert!(eat(&mut tokens, TokenKind::LParen).is_ok());
@@ -1037,7 +1037,7 @@ fn parse_function_like_define<'a>(
                     todo!("error: non-identifier in function-like macro parameter list: {token:?}")
                 }
             }
-            None => todo!("error: unexpected end of function-like macro parameter list"),
+            None => break,
         }
 
         if eat(&mut tokens, TokenKind::Comma).is_err() {
@@ -1047,13 +1047,13 @@ fn parse_function_like_define<'a>(
 
     let is_varargs = eat(&mut tokens, TokenKind::Ellipsis).is_ok();
     if let Err(()) = eat(&mut tokens, TokenKind::RParen) {
-        todo!("error: expected rparen")
+        sess.emit(Diagnostic::MissingRParenInMacroInvocation { at: *name, kind: "definition" })
     }
 
     let replacement = parse_function_like_replacement(sess, &parameters, is_varargs, tokens);
 
     Macro::Function {
-        name,
+        name: name.slice(),
         parameter_count: parameters.len(),
         is_varargs,
         replacement: sess.alloc_slice_copy(&replacement),
@@ -1099,7 +1099,10 @@ fn parse_macro_arguments<'a>(
             return &[];
         }
         None => {
-            let () = sess.emit(Diagnostic::MissingRParenInMacroInvocation { at: *macro_name });
+            let () = sess.emit(Diagnostic::MissingRParenInMacroInvocation {
+                at: *macro_name,
+                kind: "invocation",
+            });
             return &[];
         }
         Some(_) => (),
@@ -1129,7 +1132,10 @@ fn parse_macro_arguments<'a>(
     match tokens.next() {
         Some(token) if token.kind == TokenKind::RParen => (),
         Some(_) => unreachable!(),
-        None => sess.emit(Diagnostic::MissingRParenInMacroInvocation { at: *macro_name }),
+        None => sess.emit(Diagnostic::MissingRParenInMacroInvocation {
+            at: *macro_name,
+            kind: "invocation",
+        }),
     }
 
     sess.alloc_slice_copy(&arguments)

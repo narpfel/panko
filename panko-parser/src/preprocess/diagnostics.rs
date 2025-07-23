@@ -148,9 +148,9 @@ pub(super) enum Diagnostic<'a> {
         error: &'a str,
     },
 
-    #[error("missing closing parenthesis in function-like macro invocation")]
+    #[error("missing closing parenthesis in function-like macro {kind}")]
     #[diagnostics(at(colour = Red, label = "this macro misses a closing parenthesis"))]
-    MissingRParenInMacroInvocation { at: Token<'a> },
+    MissingRParenInMacroInvocation { at: Token<'a>, kind: &'a str },
 
     #[error("stringise operator `{at}` at end of macro definition")]
     #[diagnostics(at(colour = Red, label = "this `{at}` must be followed by a macro parameter"))]
