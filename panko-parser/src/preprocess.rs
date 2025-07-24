@@ -1034,7 +1034,7 @@ fn parse_function_like_define<'a>(
                     }
                 }
                 else {
-                    todo!("error: non-identifier in function-like macro parameter list: {token:?}")
+                    sess.emit(Diagnostic::NonIdentifierParameter { at: *token })
                 }
             }
             None => break,

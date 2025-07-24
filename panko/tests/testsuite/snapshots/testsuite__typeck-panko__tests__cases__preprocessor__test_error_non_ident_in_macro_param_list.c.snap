@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_error_non_ident_in_macro_param_list.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: non-identifier `+` of kind `Plus` in function-like macro parameter list
+   ╭─[panko/tests/cases/preprocessor/test_error_non_ident_in_macro_param_list.c:1:15]
+   │
+ 1 │ #define MACRO(+) something
+   │               ┬  
+   │               ╰── only identifiers are allowed as parameter names
+───╯

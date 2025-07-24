@@ -155,6 +155,11 @@ pub(super) enum Diagnostic<'a> {
     #[error("stringise operator `{at}` at end of macro definition")]
     #[diagnostics(at(colour = Red, label = "this `{at}` must be followed by a macro parameter"))]
     StringiseAtEndOfMacro { at: Token<'a> },
+
+    #[error("non-identifier `{at}` of kind `{kind}` in function-like macro parameter list")]
+    #[diagnostics(at(colour = Red, label = "only identifiers are allowed as parameter names"))]
+    #[with(kind = format!("{:?}", at.kind).fg(Red))]
+    NonIdentifierParameter { at: Token<'a> },
 }
 
 pub(super) struct MaybeError<T>(Option<T>);
