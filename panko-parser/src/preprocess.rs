@@ -1046,6 +1046,8 @@ fn parse_function_like_define<'a>(
     }
 
     let is_varargs = eat(&mut tokens, TokenKind::Ellipsis).is_ok();
+    // TODO: differentiate between `#define M(a, b` and `#define M(a b)` (that case should not emit
+    // a missing rparen error)
     if let Err(()) = eat(&mut tokens, TokenKind::RParen) {
         sess.emit(Diagnostic::MissingRParenInMacroInvocation { at: *name, kind: "definition" })
     }
