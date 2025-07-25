@@ -121,6 +121,13 @@ pub(super) enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "this `{at}` does not have a matching `#if`"))]
     UnmatchedElif { at: Loc<'a> },
 
+    #[error("unterminated `{at}` directive")]
+    #[diagnostics(
+        at(colour = Red, label = "this directive does not have a corresponding `{endif}`"),
+    )]
+    #[with(endif = "#endif".fg(Blue))]
+    UnterminatedIf { at: Loc<'a> },
+
     #[error("pasting `{lhs}` and `{rhs}` yields `{result}`, an invalid preprocessing token")]
     #[diagnostics(
         at(colour = Red, label = "in this paste"),

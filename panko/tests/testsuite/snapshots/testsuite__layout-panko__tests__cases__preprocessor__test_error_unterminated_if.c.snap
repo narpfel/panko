@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/test_error_unterminated_if.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unterminated `#if` directive
+   ╭─[panko/tests/cases/preprocessor/test_error_unterminated_if.c:1:1]
+   │
+ 1 │ #if true
+   │ ─┬─  
+   │  ╰─── this directive does not have a corresponding `#endif`
+───╯
+
+Error: unterminated `#ifdef` directive
+   ╭─[panko/tests/cases/preprocessor/test_error_unterminated_if.c:2:1]
+   │
+ 2 │ #ifdef __LINE__
+   │ ───┬──  
+   │    ╰──── this directive does not have a corresponding `#endif`
+───╯

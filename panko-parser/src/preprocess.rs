@@ -170,7 +170,7 @@ struct Preprocessor<'a> {
     current_is_newline: bool,
     macros: HashMap<&'a str, Macro<'a>>,
     expander: Expander<'a>,
-    if_stack: Vec<bool>,
+    if_stack: Vec<(bool, Loc<'a>)>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -527,8 +527,8 @@ impl<'a> Preprocessor<'a> {
                     }
                 }
             }
-            if !self.if_stack.is_empty() {
-                todo!("error: unterminated `#if`")
+            while let Some((_, at)) = self.if_stack.pop() {
+                self.sess.emit(Diagnostic::UnterminatedIf { at })
             }
         }
     }
@@ -552,9 +552,8 @@ impl<'a> Preprocessor<'a> {
                 self.parse_undef(hash);
             }
             Some(token) if token.slice() == "if" => {
-                // eat `if`
-                self.next();
-                self.eval_if();
+                let r#if = self.next_token().unwrap();
+                self.eval_if(hash.loc().until(r#if.loc()));
             }
             Some(token) if token.slice() == "ifdef" => {
                 let ifdef = self.next_token().unwrap();
@@ -687,7 +686,7 @@ impl<'a> Preprocessor<'a> {
                     },
                     Some(token) if token.slice() == "elif" && nesting_level == 0 => {
                         self.if_stack.pop().unwrap();
-                        return self.eval_if();
+                        return self.eval_if(hash.loc().until(token.loc()));
                     }
                     Some(token) if token.slice() == "elifdef" && nesting_level == 0 => {
                         self.if_stack.pop().unwrap();
@@ -803,9 +802,9 @@ impl<'a> Preprocessor<'a> {
         })
     }
 
-    fn eval_if(&mut self) {
+    fn eval_if(&mut self, loc: Loc<'a>) {
         let condition = self.parse_condition();
-        self.eval_if_condition(condition);
+        self.eval_if_condition(loc, condition);
     }
 
     fn is_macro_defined(&mut self, macro_name: &str) -> bool {
@@ -839,16 +838,22 @@ impl<'a> Preprocessor<'a> {
 
     fn eval_ifdef(&mut self, hash: &Token<'a>, ifdef: &Token<'a>) {
         let condition = self.parse_ifdef(hash, ifdef);
-        self.eval_if_condition(condition.value().unwrap_or(false));
+        self.eval_if_condition(
+            hash.loc().until(ifdef.loc()),
+            condition.value().unwrap_or(false),
+        );
     }
 
     fn eval_ifndef(&mut self, hash: &Token<'a>, ifndef: &Token<'a>) {
         let condition = self.parse_ifdef(hash, ifndef);
-        self.eval_if_condition(condition.value().map(bool::not).unwrap_or(false));
+        self.eval_if_condition(
+            hash.loc().until(ifndef.loc()),
+            condition.value().map(bool::not).unwrap_or(false),
+        );
     }
 
-    fn eval_if_condition(&mut self, condition: bool) {
-        self.if_stack.push(condition);
+    fn eval_if_condition(&mut self, loc: Loc<'a>, condition: bool) {
+        self.if_stack.push((condition, loc));
         if !condition {
             self.skip_to_else();
         }
