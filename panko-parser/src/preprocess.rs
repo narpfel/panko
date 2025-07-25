@@ -703,6 +703,7 @@ impl<'a> Preprocessor<'a> {
                 }
             }
         }
+        todo!("error: reached end of file without finding `#else` or `#endif`")
     }
 
     fn parse_endif(&mut self, hash: &Token<'a>, endif: &Token<'a>, maybe_unmatched: bool) {
@@ -731,6 +732,7 @@ impl<'a> Preprocessor<'a> {
                 }
             }
         }
+        todo!("error: reached end of file without finding `#endif`")
     }
 
     fn parse_defined(&mut self, defined: &Token<'a>) -> MaybeError<&'a str> {
