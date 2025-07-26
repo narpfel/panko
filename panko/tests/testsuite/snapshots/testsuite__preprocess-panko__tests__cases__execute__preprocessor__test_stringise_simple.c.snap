@@ -19,6 +19,8 @@ int printf(char const*, ...);
 int main() {
 
     printf("%s\n", "a; 42 + 27; b" );
+
+    printf("%s\n", "some" "thing" );
     return _Lengthof( "a b c" );
 }
 

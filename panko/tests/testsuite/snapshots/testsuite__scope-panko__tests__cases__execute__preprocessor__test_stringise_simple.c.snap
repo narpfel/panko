@@ -19,6 +19,10 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%s\n")
                (string "a; 42 + 27; b")))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%s\n")
+               (string "some" "thing")))
          (return (lengthof (string "a b c"))))))
 
 ----- stderr -----

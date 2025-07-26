@@ -255,7 +255,12 @@ impl<'a> Loc<'a> {
     }
 
     pub fn until(self, other: Self) -> Self {
-        if self.file() == other.file() {
+        // TODO: This check is incorrect for two tokens that are in different files with the same
+        // name (`<scratch area>` and `<synthesised>` files are special-cased). Would be fixed by a
+        // string/file/token interner.
+        if self.file() == other.file()
+            && !["<synthesised>".as_ref(), "<scratch area>".as_ref()].contains(&self.file())
+        {
             // TODO: this assumes that `Loc`s are contiguous
             assert_eq!(self.src(), other.src());
             let start = self.span.start.min(other.span.start);

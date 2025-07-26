@@ -26,6 +26,17 @@ exit_code: 0
                (noop-type-conversion `ptr<char>` @24
                   (addressof `ptr<array<char; 14>>` @24
                      (string `array<char; 14>` @void "a; 42 + 27; b\0")))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%s\n\0"))))
+               (noop-type-conversion `ptr<char>` @24
+                  (addressof `ptr<array<char; 10>>` @24
+                     (string `array<char; 10>` @void "something\0")))))
          (return (truncate `int` @0 (6 `unsigned long` @8))))))
 
 ----- stderr -----
