@@ -470,8 +470,10 @@ pub enum TokenKind {
     Newline,
 
     #[token("#")]
+    #[token("%:")]
     Hash,
     #[token("##")]
+    #[token("%:%:")]
     HashHash,
 
     #[token("(")]

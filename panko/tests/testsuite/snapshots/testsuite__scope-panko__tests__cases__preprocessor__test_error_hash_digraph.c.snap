@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_hash_digraph.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `%:%:` at end of macro
+   ╭─[panko/tests/cases/preprocessor/test_error_hash_digraph.c:1:28]
+   │
+ 1 │ #define ANOTHER_MACRO(x) x %:%:
+   │                            ──┬─  
+   │                              ╰─── `%:%:` operator must not be at end of macro
+───╯
