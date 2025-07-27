@@ -170,7 +170,7 @@ struct Preprocessor<'a> {
     current_is_newline: bool,
     macros: HashMap<&'a str, Macro<'a>>,
     expander: Expander<'a>,
-    if_stack: Vec<(bool, Loc<'a>)>,
+    if_stack: Vec<Loc<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -528,7 +528,7 @@ impl<'a> Preprocessor<'a> {
                 }
             }
             let unterminated_ifs = std::mem::take(&mut self.if_stack);
-            self.emit_unterminated_if_errors(unterminated_ifs.into_iter().map(|(_, loc)| loc));
+            self.emit_unterminated_if_errors(unterminated_ifs);
         }
     }
 
@@ -862,7 +862,7 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn eval_if_condition(&mut self, loc: Loc<'a>, condition: bool) {
-        self.if_stack.push((condition, loc));
+        self.if_stack.push(loc);
         if !condition {
             self.skip_to_else();
         }
