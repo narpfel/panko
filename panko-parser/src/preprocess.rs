@@ -527,9 +527,8 @@ impl<'a> Preprocessor<'a> {
                     }
                 }
             }
-            while let Some((_, at)) = self.if_stack.pop() {
-                self.sess.emit(Diagnostic::UnterminatedIf { at })
-            }
+            let unterminated_ifs = std::mem::take(&mut self.if_stack);
+            self.emit_unterminated_if_errors(unterminated_ifs.into_iter().map(|(_, loc)| loc));
         }
     }
 
@@ -672,38 +671,46 @@ impl<'a> Preprocessor<'a> {
         self.require_no_trailing_tokens(|| hash.loc().until(r#else.loc()))
     }
 
+    fn emit_unterminated_if_errors(&mut self, unterminated_ifs: impl IntoIterator<Item = Loc<'a>>) {
+        for at in unterminated_ifs {
+            self.sess.emit(Diagnostic::UnterminatedIf { at })
+        }
+    }
+
     fn skip_to_else(&mut self) {
-        let mut nesting_level = 0_u64;
+        let mut nested_conditionals = Vec::new();
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
                 let hash = &token;
                 match self.next_token() {
                     Some(token) if IF_DIRECTIVE_INTRODUCERS.contains(&token.slice()) =>
-                        nesting_level += 1,
-                    Some(token) if token.slice() == "endif" => match nesting_level.checked_sub(1) {
-                        Some(level) => nesting_level = level,
-                        None => return self.parse_endif(hash, &token, false),
-                    },
-                    Some(token) if token.slice() == "elif" && nesting_level == 0 => {
+                        nested_conditionals.push(hash.loc().until(token.loc())),
+                    Some(token) if token.slice() == "endif" =>
+                        if nested_conditionals.pop().is_none() {
+                            return self.parse_endif(hash, &token, false);
+                        },
+                    Some(token) if token.slice() == "elif" && nested_conditionals.is_empty() => {
                         self.if_stack.pop().unwrap();
                         return self.eval_if(hash.loc().until(token.loc()));
                     }
-                    Some(token) if token.slice() == "elifdef" && nesting_level == 0 => {
+                    Some(token) if token.slice() == "elifdef" && nested_conditionals.is_empty() => {
                         self.if_stack.pop().unwrap();
                         return self.eval_ifdef(hash, &token);
                     }
-                    Some(token) if token.slice() == "elifndef" && nesting_level == 0 => {
+                    Some(token)
+                        if token.slice() == "elifndef" && nested_conditionals.is_empty() =>
+                    {
                         self.if_stack.pop().unwrap();
                         return self.eval_ifndef(hash, &token);
                     }
-                    Some(token) if token.slice() == "else" && nesting_level == 0 =>
+                    Some(token) if token.slice() == "else" && nested_conditionals.is_empty() =>
                         return self.parse_else(hash, &token),
                     Some(_) => (),
-                    None => todo!("error message: unterminated `#if` directive"),
+                    None => break,
                 }
             }
         }
-        todo!("error: reached end of file without finding `#else` or `#endif`")
+        self.emit_unterminated_if_errors(nested_conditionals);
     }
 
     fn parse_endif(&mut self, hash: &Token<'a>, endif: &Token<'a>, maybe_unmatched: bool) {
@@ -716,23 +723,23 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn skip_to_endif(&mut self) {
-        let mut nesting_level = 0_u64;
+        let mut nested_conditionals = Vec::new();
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
                 let hash = &token;
                 match self.next_token() {
                     Some(token) if IF_DIRECTIVE_INTRODUCERS.contains(&token.slice()) =>
-                        nesting_level += 1,
-                    Some(token) if token.slice() == "endif" => match nesting_level.checked_sub(1) {
-                        Some(level) => nesting_level = level,
-                        None => return self.parse_endif(hash, &token, false),
-                    },
+                        nested_conditionals.push(hash.loc().until(token.loc())),
+                    Some(token) if token.slice() == "endif" =>
+                        if nested_conditionals.pop().is_none() {
+                            return self.parse_endif(hash, &token, false);
+                        },
                     Some(_) => (),
-                    None => todo!("error message: unterminated `#if` directive"),
+                    None => break,
                 }
             }
         }
-        todo!("error: reached end of file without finding `#endif`")
+        self.emit_unterminated_if_errors(nested_conditionals);
     }
 
     fn parse_defined(&mut self, defined: &Token<'a>) -> MaybeError<&'a str> {

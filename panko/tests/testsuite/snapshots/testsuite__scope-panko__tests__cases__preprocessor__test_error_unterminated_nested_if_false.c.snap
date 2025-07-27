@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_unterminated_nested_if_false.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unterminated `#if` directive
+   ╭─[panko/tests/cases/preprocessor/test_error_unterminated_nested_if_false.c:1:1]
+   │
+ 1 │ #if false
+   │ ─┬─  
+   │  ╰─── this directive does not have a corresponding `#endif`
+───╯
+
+Error: unterminated `#if` directive
+   ╭─[panko/tests/cases/preprocessor/test_error_unterminated_nested_if_false.c:2:1]
+   │
+ 2 │ #if true
+   │ ─┬─  
+   │  ╰─── this directive does not have a corresponding `#endif`
+───╯
