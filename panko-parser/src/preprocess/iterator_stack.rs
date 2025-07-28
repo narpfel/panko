@@ -12,6 +12,14 @@ impl<T> Stacked<T> {
     pub(super) fn push(&mut self, iter: T) {
         self.0.push(iter)
     }
+
+    pub(super) fn pop(&mut self) -> Option<T> {
+        self.0.pop()
+    }
+
+    pub(super) fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 impl<T> Stacked<T>

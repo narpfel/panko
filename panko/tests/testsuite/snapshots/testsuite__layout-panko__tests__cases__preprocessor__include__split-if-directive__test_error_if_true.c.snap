@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/include/split-if-directive/test_error_if_true.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unterminated `#if` directive
+   ╭─[panko/tests/cases/preprocessor/include/split-if-directive/if_true.h:1:1]
+   │
+ 1 │ #if true
+   │ ─┬─  
+   │  ╰─── this directive does not have a corresponding `#endif`
+───╯
+
+Error: `#endif` not preceded by `#if`
+   ╭─[panko/tests/cases/preprocessor/include/split-if-directive/test_error_if_true.c:2:1]
+   │
+ 2 │ #endif
+   │ ───┬──  
+   │    ╰──── this `#endif` does not have a matching `#if`
+───╯

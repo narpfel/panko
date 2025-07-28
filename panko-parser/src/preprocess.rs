@@ -475,7 +475,7 @@ impl<'a> Expander<'a> {
 impl<'a> Preprocessor<'a> {
     fn next(&mut self) -> Option<(bool, Token<'a>)> {
         let previous_was_newline = self.current_is_newline;
-        let token = self.tokens.next()?;
+        let token = self.tokens.last_by_ref().next()?;
         self.current_is_newline = token.kind == TokenKind::Newline;
         Some((previous_was_newline, token))
     }
@@ -487,48 +487,51 @@ impl<'a> Preprocessor<'a> {
     #[define_opaque(TokenIter)]
     fn run(mut self) -> TokenIter<'a> {
         gen move {
-            while let Some((previous_was_newline, token)) = self.next() {
-                match token {
-                    token if token.kind == TokenKind::Hash =>
-                        if previous_was_newline {
-                            self.parse_directive(&token);
-                        }
-                        else {
-                            let line = self.eat_until_newline();
-                            let diagnostic = match &line[..] {
-                                [] => Diagnostic::HashOutsideDirective { at: token },
-                                [directive, line @ ..] if is_identifier(directive) =>
-                                    Diagnostic::NamedDirectiveDoesNotStartAtBeginningOfLine {
+            while !self.tokens.is_empty() {
+                while let Some((previous_was_newline, token)) = self.next() {
+                    match token {
+                        token if token.kind == TokenKind::Hash =>
+                            if previous_was_newline {
+                                self.parse_directive(&token);
+                            }
+                            else {
+                                let line = self.eat_until_newline();
+                                let diagnostic = match &line[..] {
+                                    [] => Diagnostic::HashOutsideDirective { at: token },
+                                    [directive, line @ ..] if is_identifier(directive) =>
+                                        Diagnostic::NamedDirectiveDoesNotStartAtBeginningOfLine {
+                                            at: token,
+                                            directive: *directive,
+                                            line: tokens_loc(line),
+                                        },
+                                    line => Diagnostic::DirectiveDoesNotStartAtBeginningOfLine {
                                         at: token,
-                                        directive: *directive,
                                         line: tokens_loc(line),
                                     },
-                                line => Diagnostic::DirectiveDoesNotStartAtBeginningOfLine {
-                                    at: token,
-                                    line: tokens_loc(line),
-                                },
-                            };
-                            self.sess.emit(diagnostic)
-                        },
-                    token if let Some(&r#macro) = self.macros.get(token.slice()) => {
-                        assert!(self.expander.is_empty());
-                        match r#macro.expand(self.sess, self.tokens.last_by_ref(), &token) {
-                            Some(expanding) => {
-                                self.expander.push(expanding);
-                                while let Some(token) = self.expander.next(&self.macros) {
-                                    yield token;
+                                };
+                                self.sess.emit(diagnostic)
+                            },
+                        token if let Some(&r#macro) = self.macros.get(token.slice()) => {
+                            assert!(self.expander.is_empty());
+                            match r#macro.expand(self.sess, self.tokens.last_by_ref(), &token) {
+                                Some(expanding) => {
+                                    self.expander.push(expanding);
+                                    while let Some(token) = self.expander.next(&self.macros) {
+                                        yield token;
+                                    }
                                 }
+                                None => yield token,
                             }
-                            None => yield token,
+                        }
+                        token => {
+                            yield token;
                         }
                     }
-                    token => {
-                        yield token;
-                    }
                 }
+                let unterminated_ifs = std::mem::take(&mut self.if_stack);
+                self.emit_unterminated_if_errors(unterminated_ifs);
+                self.tokens.pop();
             }
-            let unterminated_ifs = std::mem::take(&mut self.if_stack);
-            self.emit_unterminated_if_errors(unterminated_ifs);
         }
     }
 
