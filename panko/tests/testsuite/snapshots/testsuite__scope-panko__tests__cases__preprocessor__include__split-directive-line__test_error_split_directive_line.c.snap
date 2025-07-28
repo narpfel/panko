@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/include/split-directive-line/test_error_split_directive_line.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `#undef` does not undefine anything
+   ╭─[panko/tests/cases/preprocessor/include/split-directive-line/undef.h:1:1]
+   │
+ 1 │ #undef
+   │ ───┬──  
+   │    ╰──── help: add a macro name
+───╯
+
+Error: unexpected token `42` of kind `Integer(Integer { suffix: None, suffix_len: 0, base: 10, prefix_len: 0 })`
+   ╭─[panko/tests/cases/preprocessor/include/split-directive-line/test_error_split_directive_line.c:3:15]
+   │
+ 3 │ #define MACRO 42
+   │               ─┬  
+   │                ╰── expected one of the following token kinds: ["auto", "constexpr", "extern", "register", "static", "thread_local", "typedef", "void", "char", "short", "int", "long", "float", "double", "signed", "unsigned", "bool", "_Complex", "_Decimal32", "_Decimal64", "_Decimal128", "const", "restrict", "volatile", "_Atomic", "inline", "_Noreturn", TypedefName]
+───╯
