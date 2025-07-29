@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/preprocessor/test_file_macro.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 7>>` @16
+                        (string `array<char; 7>` @void "%s:%d\n\0"))))
+               (noop-type-conversion `ptr<char>` @24
+                  (addressof `ptr<array<char; 57>>` @24
+                     (string `array<char; 57>` @void "panko/tests/cases/execute/preprocessor/test_file_macro.c\0")))
+               (5 `int` @32))))))
+
+----- stderr -----

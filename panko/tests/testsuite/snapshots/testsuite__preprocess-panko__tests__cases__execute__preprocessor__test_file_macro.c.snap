@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_file_macro.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+int printf(char const*, ...);
+
+int main() {
+
+    printf("%s:%d\n", "panko/tests/cases/execute/preprocessor/test_file_macro.c" , 5 );
+}
+
+----- stderr -----
