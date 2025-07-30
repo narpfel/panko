@@ -13,6 +13,7 @@ use std::path::Path;
 
 use indexmap::IndexSet;
 use itertools::Itertools as _;
+use itertools::PeekingNext;
 use panko_lex::Bump;
 use panko_lex::Integer;
 use panko_lex::IntegerSuffix;
@@ -58,16 +59,33 @@ impl<'a> UnpreprocessedTokens<'a> {
     fn pop_if(&mut self) -> Option<Loc<'a>> {
         self.unclosed_ifs.pop()
     }
-}
 
-impl<'a> Iterator for UnpreprocessedTokens<'a> {
-    type Item = (bool, Token<'a>);
-
-    fn next(&mut self) -> Option<Self::Item> {
+    fn next_full(&mut self) -> Option<(bool, Token<'a>)> {
         let previous_was_newline = self.previous_was_newline;
         let token = self.tokens.next()?;
         self.previous_was_newline = token.kind == TokenKind::Newline;
         Some((previous_was_newline, token))
+    }
+}
+
+impl<'a> Iterator for UnpreprocessedTokens<'a> {
+    type Item = Token<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        try { self.next_full()?.1 }
+    }
+}
+
+impl<'a> PeekingNext for UnpreprocessedTokens<'a> {
+    fn peeking_next<F>(&mut self, accept: F) -> Option<Self::Item>
+    where
+        Self: Sized,
+        F: FnOnce(&Self::Item) -> bool,
+    {
+        match accept(self.tokens.peek()?) {
+            true => self.next(),
+            false => None,
+        }
     }
 }
 
@@ -151,7 +169,7 @@ impl<'a> Macro<'a> {
     fn expand(
         &self,
         sess: &'a Session<'a>,
-        tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
+        tokens: &mut impl PeekingNext<Item = Token<'a>>,
         macro_token: &Token<'a>,
     ) -> Option<Expanding<'a>> {
         match self {
@@ -161,7 +179,7 @@ impl<'a> Macro<'a> {
                 parameter_count,
                 is_varargs,
                 replacement,
-            } => match tokens.next_if(|token| token.kind == TokenKind::LParen) {
+            } => match tokens.peeking_next(|token| token.kind == TokenKind::LParen) {
                 Some(_) => {
                     let arguments =
                         parse_macro_arguments(sess, macro_token, parameter_count, tokens);
@@ -512,11 +530,11 @@ impl<'a> Expander<'a> {
 
 impl<'a> Preprocessor<'a> {
     fn next(&mut self) -> Option<(bool, Token<'a>)> {
-        self.tokens.last_mut().next()
+        self.tokens.last_mut().next_full()
     }
 
     fn next_token(&mut self) -> Option<Token<'a>> {
-        Some(self.next()?.1)
+        self.tokens.last_mut().next()
     }
 
     #[define_opaque(TokenIter)]
@@ -548,11 +566,7 @@ impl<'a> Preprocessor<'a> {
                             },
                         token if let Some(&r#macro) = self.macros.get(token.slice()) => {
                             assert!(self.expander.is_empty());
-                            match r#macro.expand(
-                                self.sess,
-                                self.tokens.last_mut().tokens.by_ref(),
-                                &token,
-                            ) {
+                            match r#macro.expand(self.sess, self.tokens.last_mut(), &token) {
                                 Some(expanding) => {
                                     self.expander.push(expanding);
                                     while let Some(token) = self.expander.next(&self.macros) {
@@ -695,7 +709,6 @@ impl<'a> Preprocessor<'a> {
     fn eat_until_newline(&mut self) -> Vec<Token<'a>> {
         self.tokens
             .last_mut()
-            .tokens
             .peeking_take_while(|token| token.kind != TokenKind::Newline)
             .collect()
     }
@@ -816,11 +829,7 @@ impl<'a> Preprocessor<'a> {
                     token if is_identifier(&token) => match self.macros.get(token.slice()) {
                         Some(&r#macro) => {
                             assert!(self.expander.is_empty());
-                            match r#macro.expand(
-                                self.sess,
-                                self.tokens.last_mut().tokens.by_ref(),
-                                &token,
-                            ) {
+                            match r#macro.expand(self.sess, self.tokens.last_mut(), &token) {
                                 Some(expanding) => {
                                     self.expander.push(expanding);
                                     while let Some(token) = self.expander.next(&self.macros) {
@@ -1127,7 +1136,7 @@ fn parse_function_like_define<'a>(
 }
 
 fn eat_until_in_balanced_parens<'a>(
-    tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
+    tokens: &mut impl PeekingNext<Item = Token<'a>>,
     predicate: impl Fn(&Token<'a>) -> bool,
 ) -> impl Iterator<Item = Token<'a>> {
     let mut nesting_level = 0_usize;
@@ -1147,32 +1156,22 @@ fn eat_until_in_balanced_parens<'a>(
     })
 }
 
-fn eat_newlines<'a>(tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>) {
+fn eat_newlines<'a>(tokens: &mut impl PeekingNext<Item = Token<'a>>) {
     #[expect(clippy::redundant_pattern_matching)]
-    while let Some(_) = tokens.next_if(|token| token.kind == TokenKind::Newline) {}
+    while let Some(_) = tokens.peeking_next(|token| token.kind == TokenKind::Newline) {}
 }
 
 fn parse_macro_arguments<'a>(
     sess: &'a Session<'a>,
     macro_name: &Token<'a>,
     parameter_count: usize,
-    tokens: &mut Peekable<impl Iterator<Item = Token<'a>>>,
+    tokens: &mut impl PeekingNext<Item = Token<'a>>,
 ) -> &'a [&'a [Replacement<'a>]] {
     eat_newlines(tokens);
-    match tokens.peek() {
-        Some(token) if token.kind == TokenKind::RParen => {
-            tokens.next();
-            return &[];
-        }
-        None => {
-            let () = sess.emit(Diagnostic::MissingRParenInMacroInvocation {
-                at: *macro_name,
-                kind: "invocation",
-            });
-            return &[];
-        }
-        Some(_) => (),
-    };
+    #[expect(clippy::redundant_pattern_matching)]
+    if let Some(_) = tokens.peeking_next(|token| token.kind == TokenKind::RParen) {
+        return &[];
+    }
 
     let mut arguments = Vec::new();
 
@@ -1183,25 +1182,27 @@ fn parse_macro_arguments<'a>(
             false => matches!(token.kind, TokenKind::RParen | TokenKind::Comma),
         });
         arguments.push(sess.alloc_slice_copy(&argument.map(Replacement::Literal).collect_vec()));
-        if is_varargs_argument {
-            break;
-        }
 
-        match tokens.peek() {
+        match tokens.next() {
             Some(token) if token.kind == TokenKind::RParen => break,
-            Some(token) if token.kind == TokenKind::Comma => tokens.next(),
+            Some(token) if token.kind == TokenKind::Comma => (),
             Some(_) => unreachable!(),
-            None => break,
+            None => {
+                let () = sess.emit(Diagnostic::MissingRParenInMacroInvocation {
+                    at: *macro_name,
+                    kind: "invocation",
+                });
+                let is_newline = |replacement| {
+                    matches!(
+                        replacement,
+                        &Replacement::Literal(token) if token.kind == TokenKind::Newline,
+                    )
+                };
+                let is_first_argument = arguments.len() == 1;
+                arguments.pop_if(|argument| is_first_argument && argument.iter().all(is_newline));
+                break;
+            }
         };
-    }
-
-    match tokens.next() {
-        Some(token) if token.kind == TokenKind::RParen => (),
-        Some(_) => unreachable!(),
-        None => sess.emit(Diagnostic::MissingRParenInMacroInvocation {
-            at: *macro_name,
-            kind: "invocation",
-        }),
     }
 
     sess.alloc_slice_copy(&arguments)
