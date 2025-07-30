@@ -35,7 +35,75 @@ const IF_DIRECTIVE_INTRODUCERS: [&str; 3] = ["if", "ifdef", "ifndef"];
 
 pub type TokenIter<'a> = impl Iterator<Item = Token<'a>>;
 
-type UnpreprocessedTokens<'a> = Peekable<panko_lex::TokenIter<'a>>;
+struct UnclosedIfs<'a> {
+    sess: &'a Session<'a>,
+    locs: Vec<Loc<'a>>,
+}
+
+impl<'a> UnclosedIfs<'a> {
+    fn new(sess: &'a Session<'a>) -> Self {
+        Self { sess, locs: Vec::default() }
+    }
+
+    fn emit_unterminated_if_errors(&mut self) {
+        for at in std::mem::take(&mut self.locs) {
+            self.sess.emit(Diagnostic::UnterminatedIf { at })
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.locs.is_empty()
+    }
+
+    fn push(&mut self, loc: Loc<'a>) {
+        self.locs.push(loc)
+    }
+
+    fn pop(&mut self) -> Option<Loc<'a>> {
+        self.locs.pop()
+    }
+}
+
+impl Drop for UnclosedIfs<'_> {
+    fn drop(&mut self) {
+        self.emit_unterminated_if_errors()
+    }
+}
+
+struct UnpreprocessedTokens<'a> {
+    previous_was_newline: bool,
+    tokens: Peekable<panko_lex::TokenIter<'a>>,
+    unclosed_ifs: UnclosedIfs<'a>,
+}
+
+impl<'a> UnpreprocessedTokens<'a> {
+    fn new(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -> Self {
+        Self {
+            previous_was_newline: true,
+            tokens: tokens.peekable(),
+            unclosed_ifs: UnclosedIfs::new(sess),
+        }
+    }
+
+    fn push_if(&mut self, loc: Loc<'a>) {
+        self.unclosed_ifs.push(loc)
+    }
+
+    fn pop_if(&mut self) -> Option<Loc<'a>> {
+        self.unclosed_ifs.pop()
+    }
+}
+
+impl<'a> Iterator for UnpreprocessedTokens<'a> {
+    type Item = (bool, Token<'a>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let previous_was_newline = self.previous_was_newline;
+        let token = self.tokens.next()?;
+        self.previous_was_newline = token.kind == TokenKind::Newline;
+        Some((previous_was_newline, token))
+    }
+}
 
 fn alloc_path(bump: &Bump, path: impl AsRef<Path>) -> &Path {
     let bytes = bump.alloc_slice_copy(path.as_ref().as_os_str().as_encoded_bytes());
@@ -173,10 +241,8 @@ impl<'a> Macro<'a> {
 struct Preprocessor<'a> {
     sess: &'a Session<'a>,
     tokens: Stacked<UnpreprocessedTokens<'a>>,
-    current_is_newline: bool,
     macros: HashMap<&'a str, Macro<'a>>,
     expander: Expander<'a>,
-    if_stack: Vec<Loc<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -480,10 +546,7 @@ impl<'a> Expander<'a> {
 
 impl<'a> Preprocessor<'a> {
     fn next(&mut self) -> Option<(bool, Token<'a>)> {
-        let previous_was_newline = self.current_is_newline;
-        let token = self.tokens.last_by_ref().next()?;
-        self.current_is_newline = token.kind == TokenKind::Newline;
-        Some((previous_was_newline, token))
+        self.tokens.last_by_ref().next()
     }
 
     fn next_token(&mut self) -> Option<Token<'a>> {
@@ -519,7 +582,11 @@ impl<'a> Preprocessor<'a> {
                             },
                         token if let Some(&r#macro) = self.macros.get(token.slice()) => {
                             assert!(self.expander.is_empty());
-                            match r#macro.expand(self.sess, self.tokens.last_by_ref(), &token) {
+                            match r#macro.expand(
+                                self.sess,
+                                self.tokens.last_by_ref().tokens.by_ref(),
+                                &token,
+                            ) {
                                 Some(expanding) => {
                                     self.expander.push(expanding);
                                     while let Some(token) = self.expander.next(&self.macros) {
@@ -534,15 +601,13 @@ impl<'a> Preprocessor<'a> {
                         }
                     }
                 }
-                let unterminated_ifs = std::mem::take(&mut self.if_stack);
-                self.emit_unterminated_if_errors(unterminated_ifs);
                 self.tokens.pop();
             }
         }
     }
 
     fn peek(&mut self) -> Option<&Token<'a>> {
-        self.tokens.peek()
+        self.tokens.last_by_ref().tokens.peek()
     }
 
     fn parse_directive(&mut self, hash: &Token<'a>) {
@@ -574,7 +639,7 @@ impl<'a> Preprocessor<'a> {
             Some(&token) if ["elif", "elifdef", "elifndef", "else"].contains(&token.slice()) => {
                 // eat token
                 let _ = self.next_token().unwrap();
-                if self.if_stack.is_empty() {
+                if self.tokens.last_by_ref().unclosed_ifs.is_empty() {
                     self.sess
                         .emit(Diagnostic::UnmatchedElif { at: hash.loc().until(token.loc()) })
                 }
@@ -659,9 +724,9 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn eat_until_newline(&mut self) -> Vec<Token<'a>> {
-        self.current_is_newline = true;
         self.tokens
-            .by_ref()
+            .last_by_ref()
+            .tokens
             .peeking_take_while(|token| token.kind != TokenKind::Newline)
             .collect()
     }
@@ -680,14 +745,8 @@ impl<'a> Preprocessor<'a> {
         self.require_no_trailing_tokens(|| hash.loc().until(r#else.loc()))
     }
 
-    fn emit_unterminated_if_errors(&mut self, unterminated_ifs: impl IntoIterator<Item = Loc<'a>>) {
-        for at in unterminated_ifs {
-            self.sess.emit(Diagnostic::UnterminatedIf { at })
-        }
-    }
-
     fn skip_to_else(&mut self) {
-        let mut nested_conditionals = Vec::new();
+        let mut nested_conditionals = UnclosedIfs::new(self.sess);
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
                 let hash = &token;
@@ -699,17 +758,17 @@ impl<'a> Preprocessor<'a> {
                             return self.parse_endif(hash, &token, false);
                         },
                     Some(token) if token.slice() == "elif" && nested_conditionals.is_empty() => {
-                        self.if_stack.pop().unwrap();
+                        self.tokens.last_by_ref().pop_if().unwrap();
                         return self.eval_if(hash.loc().until(token.loc()));
                     }
                     Some(token) if token.slice() == "elifdef" && nested_conditionals.is_empty() => {
-                        self.if_stack.pop().unwrap();
+                        self.tokens.last_by_ref().pop_if().unwrap();
                         return self.eval_ifdef(hash, &token);
                     }
                     Some(token)
                         if token.slice() == "elifndef" && nested_conditionals.is_empty() =>
                     {
-                        self.if_stack.pop().unwrap();
+                        self.tokens.last_by_ref().pop_if().unwrap();
                         return self.eval_ifndef(hash, &token);
                     }
                     Some(token) if token.slice() == "else" && nested_conditionals.is_empty() =>
@@ -719,12 +778,11 @@ impl<'a> Preprocessor<'a> {
                 }
             }
         }
-        self.emit_unterminated_if_errors(nested_conditionals);
     }
 
     fn parse_endif(&mut self, hash: &Token<'a>, endif: &Token<'a>, maybe_unmatched: bool) {
         let endif_loc = || hash.loc().until(endif.loc());
-        if self.if_stack.pop().is_none() && maybe_unmatched {
+        if self.tokens.last_by_ref().pop_if().is_none() && maybe_unmatched {
             self.sess
                 .emit(Diagnostic::UnmatchedElif { at: endif_loc() })
         }
@@ -732,7 +790,7 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn skip_to_endif(&mut self) {
-        let mut nested_conditionals = Vec::new();
+        let mut nested_conditionals = UnclosedIfs::new(self.sess);
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
                 let hash = &token;
@@ -748,7 +806,6 @@ impl<'a> Preprocessor<'a> {
                 }
             }
         }
-        self.emit_unterminated_if_errors(nested_conditionals);
     }
 
     fn parse_defined(&mut self, defined: &Token<'a>) -> MaybeError<&'a str> {
@@ -788,7 +845,11 @@ impl<'a> Preprocessor<'a> {
                     token if is_identifier(&token) => match self.macros.get(token.slice()) {
                         Some(&r#macro) => {
                             assert!(self.expander.is_empty());
-                            match r#macro.expand(self.sess, self.tokens.last_by_ref(), &token) {
+                            match r#macro.expand(
+                                self.sess,
+                                self.tokens.last_by_ref().tokens.by_ref(),
+                                &token,
+                            ) {
                                 Some(expanding) => {
                                     self.expander.push(expanding);
                                     while let Some(token) = self.expander.next(&self.macros) {
@@ -871,7 +932,7 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn eval_if_condition(&mut self, loc: Loc<'a>, condition: bool) {
-        self.if_stack.push(loc);
+        self.tokens.last_by_ref().push_if(loc);
         if !condition {
             self.skip_to_else();
         }
@@ -894,9 +955,10 @@ impl<'a> Preprocessor<'a> {
             include.loc().file().parent().unwrap().join(filename),
         );
         match std::fs::read_to_string(filename) {
-            Ok(src) => self
-                .tokens
-                .push(panko_lex::lex(self.sess.bump(), filename, &src).peekable()),
+            Ok(src) => self.tokens.push(UnpreprocessedTokens::new(
+                self.sess,
+                panko_lex::lex(self.sess.bump(), filename, &src),
+            )),
             Err(err) => self.sess.emit(Diagnostic::CouldNotReadIncludeFile {
                 at: filename_token.unwrap().loc(),
                 include: include_loc(),
@@ -1169,15 +1231,13 @@ fn parse_macro_arguments<'a>(
 pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -> TokenIter<'a> {
     Preprocessor {
         sess,
-        tokens: Stacked::new(tokens.peekable()),
-        current_is_newline: true,
+        tokens: Stacked::new(UnpreprocessedTokens::new(sess, tokens)),
         macros: HashMap::from_iter([("__LINE__", Macro::Line), ("__FILE__", Macro::File)]),
         expander: Expander {
             sess,
             hidden: HashSet::default(),
             todo: Vec::default(),
         },
-        if_stack: Vec::default(),
     }
     .run()
     // TODO: check for `__VA_OPT__` and `__VA_ARGS__` here
