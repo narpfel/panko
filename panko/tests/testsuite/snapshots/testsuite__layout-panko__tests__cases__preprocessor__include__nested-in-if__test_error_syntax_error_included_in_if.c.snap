@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/include/nested-in-if/test_error_syntax_error_included_in_if.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unexpected token `syntax` of kind `Identifier`
+   ╭─[panko/tests/cases/preprocessor/include/nested-in-if/syntax_error.h:1:1]
+   │
+ 1 │ syntax error
+   │ ───┬──  
+   │    ╰──── expected one of the following token kinds: ["auto", "constexpr", "extern", "register", "static", "thread_local", "typedef", "void", "char", "short", "int", "long", "float", "double", "signed", "unsigned", "bool", "_Complex", "_Decimal32", "_Decimal64", "_Decimal128", "const", "restrict", "volatile", "_Atomic", "inline", "_Noreturn", TypedefName]
+───╯

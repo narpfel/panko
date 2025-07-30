@@ -45,7 +45,8 @@ impl<'a> UnclosedIfs<'a> {
         Self { sess, locs: Vec::default() }
     }
 
-    fn emit_unterminated_if_errors(&mut self) {
+    // TODO: it’s too easy to forget to call this
+    fn emit_unterminated_if_errors(mut self) {
         for at in std::mem::take(&mut self.locs) {
             self.sess.emit(Diagnostic::UnterminatedIf { at })
         }
@@ -61,12 +62,6 @@ impl<'a> UnclosedIfs<'a> {
 
     fn pop(&mut self) -> Option<Loc<'a>> {
         self.locs.pop()
-    }
-}
-
-impl Drop for UnclosedIfs<'_> {
-    fn drop(&mut self) {
-        self.emit_unterminated_if_errors()
     }
 }
 
@@ -601,7 +596,11 @@ impl<'a> Preprocessor<'a> {
                         }
                     }
                 }
-                self.tokens.pop();
+                self.tokens
+                    .pop()
+                    .unwrap()
+                    .unclosed_ifs
+                    .emit_unterminated_if_errors();
             }
         }
     }
@@ -778,6 +777,7 @@ impl<'a> Preprocessor<'a> {
                 }
             }
         }
+        nested_conditionals.emit_unterminated_if_errors()
     }
 
     fn parse_endif(&mut self, hash: &Token<'a>, endif: &Token<'a>, maybe_unmatched: bool) {
@@ -806,6 +806,7 @@ impl<'a> Preprocessor<'a> {
                 }
             }
         }
+        nested_conditionals.emit_unterminated_if_errors()
     }
 
     fn parse_defined(&mut self, defined: &Token<'a>) -> MaybeError<&'a str> {

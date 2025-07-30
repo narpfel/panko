@@ -1,0 +1,19 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/preprocessor/include/nested-in-if/test_error_syntax_error_included_in_if.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+
+syntax error
+
+
+
+----- stderr -----
