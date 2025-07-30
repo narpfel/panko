@@ -146,6 +146,7 @@ fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
         .with_extension("");
 
     Command::new(get_cargo_bin("panko"))
+        .env("CLICOLOR_FORCE", "1")
         .current_dir("..")
         .arg(filename)
         .arg("-o")
