@@ -16,10 +16,10 @@ use panko_parser::UnaryOp;
 use panko_parser::ast;
 use panko_parser::ast::FromError;
 use panko_parser::ast::Session;
+use panko_parser::nonempty;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
-use crate::nonempty;
 use crate::ty;
 
 mod as_sexpr;

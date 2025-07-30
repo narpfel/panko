@@ -2,7 +2,7 @@ use std::ops::Index;
 use std::slice::SliceIndex;
 
 #[derive(Clone)]
-pub(crate) struct Vec<T>(std::vec::Vec<T>);
+pub struct Vec<T>(std::vec::Vec<T>);
 
 impl<T> std::fmt::Debug for Vec<T>
 where
@@ -14,19 +14,23 @@ where
 }
 
 impl<T> Vec<T> {
-    pub(crate) fn new(value: T) -> Self {
+    pub fn new(value: T) -> Self {
         Vec(vec![value])
     }
 
-    pub(crate) fn len(&self) -> usize {
+    #[expect(
+        clippy::len_without_is_empty,
+        reason = "`is_empty` is not necessary for a `nonempty::Vec`"
+    )]
+    pub fn len(&self) -> usize {
         self.0.len()
     }
 
-    pub(crate) fn push(&mut self, value: T) {
+    pub fn push(&mut self, value: T) {
         self.0.push(value)
     }
 
-    pub(crate) fn pop(&mut self) -> Option<T> {
+    pub fn pop(&mut self) -> Option<T> {
         if self.0.len() == 1 {
             None
         }
@@ -35,11 +39,11 @@ impl<T> Vec<T> {
         }
     }
 
-    pub(crate) fn iter(&self) -> std::slice::Iter<'_, T> {
+    pub fn iter(&self) -> std::slice::Iter<'_, T> {
         self.0.iter()
     }
 
-    pub(crate) fn last_mut(&mut self) -> &mut T {
+    pub fn last_mut(&mut self) -> &mut T {
         self.0.last_mut().unwrap()
     }
 }
