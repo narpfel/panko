@@ -35,35 +35,7 @@ const IF_DIRECTIVE_INTRODUCERS: [&str; 3] = ["if", "ifdef", "ifndef"];
 
 pub type TokenIter<'a> = impl Iterator<Item = Token<'a>>;
 
-struct UnclosedIfs<'a> {
-    sess: &'a Session<'a>,
-    locs: Vec<Loc<'a>>,
-}
-
-impl<'a> UnclosedIfs<'a> {
-    fn new(sess: &'a Session<'a>) -> Self {
-        Self { sess, locs: Vec::default() }
-    }
-
-    // TODO: it’s too easy to forget to call this
-    fn emit_unterminated_if_errors(mut self) {
-        for at in std::mem::take(&mut self.locs) {
-            self.sess.emit(Diagnostic::UnterminatedIf { at })
-        }
-    }
-
-    fn is_empty(&self) -> bool {
-        self.locs.is_empty()
-    }
-
-    fn push(&mut self, loc: Loc<'a>) {
-        self.locs.push(loc)
-    }
-
-    fn pop(&mut self) -> Option<Loc<'a>> {
-        self.locs.pop()
-    }
-}
+type UnclosedIfs<'a> = Vec<Loc<'a>>;
 
 struct UnpreprocessedTokens<'a> {
     previous_was_newline: bool,
@@ -72,11 +44,11 @@ struct UnpreprocessedTokens<'a> {
 }
 
 impl<'a> UnpreprocessedTokens<'a> {
-    fn new(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -> Self {
+    fn new(tokens: panko_lex::TokenIter<'a>) -> Self {
         Self {
             previous_was_newline: true,
             tokens: tokens.peekable(),
-            unclosed_ifs: UnclosedIfs::new(sess),
+            unclosed_ifs: UnclosedIfs::default(),
         }
     }
 
@@ -596,11 +568,12 @@ impl<'a> Preprocessor<'a> {
                         }
                     }
                 }
-                self.tokens
-                    .pop()
-                    .unwrap()
-                    .unclosed_ifs
-                    .emit_unterminated_if_errors();
+                if let Some(tokens) = self.tokens.pop() {
+                    emit_unterminated_if_errors(self.sess, &tokens.unclosed_ifs);
+                }
+                else {
+                    break;
+                }
             }
         }
     }
@@ -745,7 +718,7 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn skip_to_else(&mut self) {
-        let mut nested_conditionals = UnclosedIfs::new(self.sess);
+        let mut nested_conditionals = UnclosedIfs::default();
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
                 let hash = &token;
@@ -777,7 +750,7 @@ impl<'a> Preprocessor<'a> {
                 }
             }
         }
-        nested_conditionals.emit_unterminated_if_errors()
+        emit_unterminated_if_errors(self.sess, &nested_conditionals)
     }
 
     fn parse_endif(&mut self, hash: &Token<'a>, endif: &Token<'a>, maybe_unmatched: bool) {
@@ -790,7 +763,7 @@ impl<'a> Preprocessor<'a> {
     }
 
     fn skip_to_endif(&mut self) {
-        let mut nested_conditionals = UnclosedIfs::new(self.sess);
+        let mut nested_conditionals = UnclosedIfs::default();
         while let Some((previous_was_newline, token)) = self.next() {
             if previous_was_newline && token.kind == TokenKind::Hash {
                 let hash = &token;
@@ -806,7 +779,7 @@ impl<'a> Preprocessor<'a> {
                 }
             }
         }
-        nested_conditionals.emit_unterminated_if_errors()
+        emit_unterminated_if_errors(self.sess, &nested_conditionals)
     }
 
     fn parse_defined(&mut self, defined: &Token<'a>) -> MaybeError<&'a str> {
@@ -956,16 +929,24 @@ impl<'a> Preprocessor<'a> {
             include.loc().file().parent().unwrap().join(filename),
         );
         match std::fs::read_to_string(filename) {
-            Ok(src) => self.tokens.push(UnpreprocessedTokens::new(
-                self.sess,
-                panko_lex::lex(self.sess.bump(), filename, &src),
-            )),
+            Ok(src) => self.tokens.push(UnpreprocessedTokens::new(panko_lex::lex(
+                self.sess.bump(),
+                filename,
+                &src,
+            ))),
             Err(err) => self.sess.emit(Diagnostic::CouldNotReadIncludeFile {
                 at: filename_token.unwrap().loc(),
                 include: include_loc(),
                 error: self.sess.alloc_str(&err.to_string()),
             }),
         }
+    }
+}
+
+// TODO: it’s too easy to forget to call this
+fn emit_unterminated_if_errors<'a>(sess: &Session<'a>, unclosed_ifs: &UnclosedIfs<'a>) {
+    for loc in unclosed_ifs {
+        sess.emit(Diagnostic::UnterminatedIf { at: *loc })
     }
 }
 
@@ -1232,7 +1213,7 @@ fn parse_macro_arguments<'a>(
 pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -> TokenIter<'a> {
     Preprocessor {
         sess,
-        tokens: Stacked::new(UnpreprocessedTokens::new(sess, tokens)),
+        tokens: Stacked::new(UnpreprocessedTokens::new(tokens)),
         macros: HashMap::from_iter([("__LINE__", Macro::Line), ("__FILE__", Macro::File)]),
         expander: Expander {
             sess,
