@@ -30,6 +30,21 @@ enum Step {
     Link,
 }
 
+#[derive(Debug, Clone, Parser)]
+struct IncludePaths {
+    #[arg(long = "iquote")]
+    quoted: Vec<PathBuf>,
+    #[arg(short = 'I', long = "isystem")]
+    bracketed: Vec<PathBuf>,
+}
+
+impl From<IncludePaths> for panko_parser::preprocess::IncludePaths {
+    fn from(paths: IncludePaths) -> Self {
+        let IncludePaths { quoted, bracketed } = paths;
+        Self::new(quoted, bracketed)
+    }
+}
+
 #[derive(Debug, Parser)]
 struct Args {
     filename: PathBuf,
@@ -45,6 +60,8 @@ struct Args {
     /// panic whenever a diagnostic is emitted
     #[arg(long)]
     treat_error_as_bug: bool,
+    #[clap(flatten)]
+    include_paths: IncludePaths,
 }
 
 fn main() -> Result<()> {
@@ -73,7 +90,7 @@ fn main() -> Result<()> {
     );
     let session = &panko_parser::ast::Session::new(bump, args.treat_error_as_bug);
 
-    let tokens = panko_parser::preprocess(session, tokens);
+    let tokens = panko_parser::preprocess(session, tokens, args.include_paths.into());
 
     // TODO: diagnostics emitted by the preprocessor are not handled when stopping here
     if args.print.contains(&Step::Preprocess) {

@@ -27,9 +27,11 @@ use crate::nonempty;
 use crate::preprocess::diagnostics::Diagnostic;
 use crate::preprocess::diagnostics::MaybeError;
 use crate::preprocess::eval::eval;
+pub use crate::preprocess::include_paths::IncludePaths;
 
 mod diagnostics;
 mod eval;
+mod include_paths;
 
 const IF_DIRECTIVE_INTRODUCERS: [&str; 3] = ["if", "ifdef", "ifndef"];
 
@@ -227,6 +229,7 @@ struct Preprocessor<'a> {
     tokens: nonempty::Vec<UnpreprocessedTokens<'a>>,
     macros: HashMap<&'a str, Macro<'a>>,
     expander: Expander<'a>,
+    include_paths: IncludePaths,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -921,27 +924,44 @@ impl<'a> Preprocessor<'a> {
     fn eval_include(&mut self, hash: &Token<'a>) {
         let include = self.next_token().unwrap();
         let include_loc = || hash.loc().until(include.loc());
-        let filename_token = self.next_token();
-        let filename = match filename_token {
-            Some(token) if token.kind == TokenKind::String =>
-                &token.slice()[1..token.slice().len() - 1],
-            Some(token) if token.kind == TokenKind::Less => todo!(),
-            Some(_) => todo!("this should expand macros and try to parse the expanded tokens"),
-            None => todo!("error message: end of input"),
+        let tokens = self.eat_until_newline();
+        let ((filename, src), loc) = match &tokens[..] {
+            [] => todo!("error message: `#include` does not include anything"),
+            [token] if token.kind == TokenKind::String => {
+                let string = token.slice();
+                let from_filename = include.loc().file();
+                let filename = Path::new(&string[1..string.len() - 1]);
+                if filename == Path::new("") {
+                    todo!("error message: `#include` does not include anything");
+                }
+                let included_file = self.include_paths.lookup_quoted(from_filename, filename);
+                (included_file, token.loc())
+            }
+            [less, rest @ .., greater]
+                if less.kind == TokenKind::Less && greater.kind == TokenKind::Greater =>
+            {
+                if rest.is_empty() {
+                    todo!("error message: `#include` does not include anything");
+                }
+                let loc = tokens_loc(rest);
+                let filename = loc.slice();
+                (self.include_paths.lookup_bracketed(filename), loc)
+            }
+            tokens => todo!(
+                "this should expand macros and try to parse the expanded tokens; \
+                otherwise error message: invalid `#include` directive with tokens {tokens:#?}"
+            ),
         };
-        self.require_no_trailing_tokens(include_loc);
-        let filename = alloc_path(
-            self.sess.bump,
-            include.loc().file().parent().unwrap().join(filename),
-        );
-        match std::fs::read_to_string(filename) {
+
+        let filename = alloc_path(self.sess.bump, &filename);
+        match src {
             Ok(src) => self.tokens.push(UnpreprocessedTokens::new(panko_lex::lex(
                 self.sess.bump(),
                 filename,
                 &src,
             ))),
             Err(err) => self.sess.emit(Diagnostic::CouldNotReadIncludeFile {
-                at: filename_token.unwrap().loc(),
+                at: loc,
                 include: include_loc(),
                 error: self.sess.alloc_str(&err.to_string()),
             }),
@@ -1208,7 +1228,11 @@ fn parse_macro_arguments<'a>(
     sess.alloc_slice_copy(&arguments)
 }
 
-pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -> TokenIter<'a> {
+pub fn preprocess<'a>(
+    sess: &'a Session<'a>,
+    tokens: panko_lex::TokenIter<'a>,
+    include_paths: IncludePaths,
+) -> TokenIter<'a> {
     Preprocessor {
         sess,
         tokens: nonempty::Vec::new(UnpreprocessedTokens::new(tokens)),
@@ -1218,6 +1242,7 @@ pub fn preprocess<'a>(sess: &'a Session<'a>, tokens: panko_lex::TokenIter<'a>) -
             hidden: HashSet::default(),
             todo: Vec::default(),
         },
+        include_paths,
     }
     .run()
     // TODO: check for `__VA_OPT__` and `__VA_ARGS__` here
