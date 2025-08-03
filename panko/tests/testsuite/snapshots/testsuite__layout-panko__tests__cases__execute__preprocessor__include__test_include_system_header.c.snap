@@ -1,0 +1,52 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/preprocessor/include/test_include_system_header.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (x~1 `int` @0)
+            (not-equal `int` @0
+               (bit-xor `int` @0
+                  (1 `int` @0)
+                  (0 `int` @4))
+               (bit-and `int` @4
+                  (0 `int` @4)
+                  (1 `int` @8))))
+         (expression
+            (combine `int` @4
+               (assign `ptr<int>` @8
+                  (unnamed-temporary~2 `ptr<int>` @8)
+                  (addressof `ptr<int>` @8
+                     (x~1 `int` @0)))
+               (assign `int` @4
+                  (deref `int` @4 (unnamed-temporary~2 `ptr<int>` @8))
+                  (bit-or `int` @16
+                     (deref `int` @16 (unnamed-temporary~2 `ptr<int>` @8))
+                     (24 `int` @24)))))
+         (expression
+            (combine `int` @4
+               (assign `ptr<int>` @8
+                  (unnamed-temporary~3 `ptr<int>` @8)
+                  (addressof `ptr<int>` @8
+                     (x~1 `int` @0)))
+               (assign `int` @4
+                  (deref `int` @4 (unnamed-temporary~3 `ptr<int>` @8))
+                  (bit-and `int` @16
+                     (deref `int` @16 (unnamed-temporary~3 `ptr<int>` @8))
+                     (15 `int` @24)))))
+         (return
+            (equal `int` @4
+               (x~1 `int` @0)
+               (9 `int` @8))))))
+
+----- stderr -----

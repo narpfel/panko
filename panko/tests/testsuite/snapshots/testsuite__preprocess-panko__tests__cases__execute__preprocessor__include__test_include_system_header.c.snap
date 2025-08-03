@@ -1,0 +1,42 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/include/test_include_system_header.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int main() {
+    int x = (1 ^ 0) != (0 & 1);
+    x |= 0b1'1000;
+    x &= 0xf;
+    return x == 0b1001;
+}
+
+----- stderr -----

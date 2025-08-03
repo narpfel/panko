@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/preprocessor/include/test_include_system_header.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition x~1 `int` (not-equal `int` (bit-xor `int` `int` (1 `int`) (0 `int`)) (bit-and `int` `int` (0 `int`) (1 `int`))))
+         (expression
+            (combine `int`
+               (assign `ptr<int>` (unnamed-temporary~2 `ptr<int>`)
+                  (addressof `ptr<int>`
+                     (x~1 `int`)))
+               (assign `int` (deref `int` (unnamed-temporary~2 `ptr<int>`)) (bit-or `int` (deref `int` (unnamed-temporary~2 `ptr<int>`)) (0b1'1000 `int`)))))
+         (expression
+            (combine `int`
+               (assign `ptr<int>` (unnamed-temporary~3 `ptr<int>`)
+                  (addressof `ptr<int>`
+                     (x~1 `int`)))
+               (assign `int` (deref `int` (unnamed-temporary~3 `ptr<int>`)) (bit-and `int` (deref `int` (unnamed-temporary~3 `ptr<int>`)) (0xf `int`)))))
+         (return (equal `int` (x~1 `int`) (0b1001 `int`))))))
+
+----- stderr -----

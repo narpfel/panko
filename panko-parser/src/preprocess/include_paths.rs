@@ -15,6 +15,12 @@ pub struct IncludePaths {
 
 impl IncludePaths {
     pub fn new(quoted: Vec<PathBuf>, mut bracketed: Vec<PathBuf>) -> Self {
+        bracketed.push(
+            Path::new(env!("CARGO_MANIFEST_DIR"))
+                .parent()
+                .unwrap()
+                .join("sysroot/include"),
+        );
         bracketed.extend(["/usr/local/include", "/usr/include"].map(PathBuf::from));
         Self { quoted, bracketed }
     }
