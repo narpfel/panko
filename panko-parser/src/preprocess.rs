@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -924,18 +925,42 @@ impl<'a> Preprocessor<'a> {
     fn eval_include(&mut self, hash: &Token<'a>) {
         let include = self.next_token().unwrap();
         let include_loc = || hash.loc().until(include.loc());
-        let tokens = self.eat_until_newline();
-        let ((filename, src), loc) = match &tokens[..] {
+        let tokens = &mut self.eat_until_newline().into_iter().peekable();
+        let tokens = gen {
+            while let Some(token) = tokens.next() {
+                match token {
+                    token if let Some(&r#macro) = self.macros.get(token.slice()) => {
+                        assert!(self.expander.is_empty());
+                        match r#macro.expand(self.sess, tokens, &token) {
+                            Some(expanding) => {
+                                self.expander.push(expanding);
+                                while let Some(token) = self.expander.next(&self.macros) {
+                                    yield token;
+                                }
+                            }
+                            None => yield token,
+                        }
+                    }
+                    token => {
+                        yield token;
+                    }
+                }
+            }
+        };
+        let tokens = tokens.collect_vec();
+        let (original_name, (included_filename, src), loc) = match &tokens[..] {
             [] => todo!("error message: `#include` does not include anything"),
             [token] if token.kind == TokenKind::String => {
                 let string = token.slice();
                 let from_filename = include.loc().file();
-                let filename = Path::new(&string[1..string.len() - 1]);
-                if filename == Path::new("") {
+                let filename = &string[1..string.len() - 1];
+                if filename.is_empty() {
                     todo!("error message: `#include` does not include anything");
                 }
-                let included_file = self.include_paths.lookup_quoted(from_filename, filename);
-                (included_file, token.loc())
+                let included_file = self
+                    .include_paths
+                    .lookup_quoted(from_filename, Path::new(filename));
+                (Cow::Borrowed(filename), included_file, token.loc())
             }
             [less, rest @ .., greater]
                 if less.kind == TokenKind::Less && greater.kind == TokenKind::Greater =>
@@ -944,16 +969,19 @@ impl<'a> Preprocessor<'a> {
                     todo!("error message: `#include` does not include anything");
                 }
                 let loc = tokens_loc(rest);
-                let filename = loc.slice();
-                (self.include_paths.lookup_bracketed(filename), loc)
+                let mut filename = Vec::new();
+                write_preprocessed_tokens(&mut filename, rest.iter().copied(), |token| {
+                    token.slice()
+                })
+                .unwrap();
+                let filename = String::from_utf8(filename).unwrap();
+                let included_file = self.include_paths.lookup_bracketed(&filename);
+                (Cow::Owned(filename), included_file, loc)
             }
-            tokens => todo!(
-                "this should expand macros and try to parse the expanded tokens; \
-                otherwise error message: invalid `#include` directive with tokens {tokens:#?}"
-            ),
+            tokens => todo!("error message: invalid `#include` directive with tokens {tokens:#?}"),
         };
 
-        let filename = alloc_path(self.sess.bump, &filename);
+        let filename = alloc_path(self.sess.bump, &included_filename);
         match src {
             Ok(src) => self.tokens.push(UnpreprocessedTokens::new(panko_lex::lex(
                 self.sess.bump(),
@@ -964,6 +992,7 @@ impl<'a> Preprocessor<'a> {
                 at: loc,
                 include: include_loc(),
                 error: self.sess.alloc_str(&err.to_string()),
+                filename: self.sess.alloc_str(&original_name),
             }),
         }
     }

@@ -144,15 +144,17 @@ pub(super) enum Diagnostic<'a> {
         result: &'a str,
     },
 
-    #[error("could not open `{include}` file `{at}`: {error}")]
+    #[error("could not open `{include}` file `{filename}`: {error}")]
     #[diagnostics(
         include(colour = Blue),
         at(colour = Red, label = "could not open this file"),
     )]
+    #[with(filename = format!("{filename:?}").fg(Red))]
     CouldNotReadIncludeFile {
         at: Loc<'a>,
         include: Loc<'a>,
         error: &'a str,
+        filename: &'a str,
     },
 
     #[error("missing closing parenthesis in function-like macro {kind}")]
