@@ -69,6 +69,10 @@ impl<'a> UnpreprocessedTokens<'a> {
         self.previous_was_newline = token.kind == TokenKind::Newline;
         Some((previous_was_newline, token))
     }
+
+    fn until_newline(&mut self) -> impl Iterator<Item = <Self as Iterator>::Item> {
+        self.peeking_take_while(|token| token.kind != TokenKind::Newline)
+    }
 }
 
 impl<'a> Iterator for UnpreprocessedTokens<'a> {
@@ -355,6 +359,33 @@ struct Expander<'a> {
 impl<'a> Expander<'a> {
     fn is_empty(&self) -> bool {
         self.todo.is_empty()
+    }
+
+    gen fn expand_macros(
+        &mut self,
+        macros: &HashMap<&'a str, Macro<'a>>,
+        tokens: impl Iterator<Item = Token<'a>>,
+    ) -> Token<'a> {
+        let mut tokens = tokens.peekable();
+        while let Some(token) = tokens.next() {
+            match token {
+                token if let Some(&r#macro) = macros.get(token.slice()) => {
+                    assert!(self.is_empty());
+                    match r#macro.expand(self.sess, tokens.by_ref(), &token) {
+                        Some(expanding) => {
+                            self.push(expanding);
+                            while let Some(token) = self.next(macros) {
+                                yield token;
+                            }
+                        }
+                        None => yield token,
+                    }
+                }
+                token => {
+                    yield token;
+                }
+            }
+        }
     }
 
     fn push(&mut self, expanding: Expanding<'a>) {
@@ -925,29 +956,8 @@ impl<'a> Preprocessor<'a> {
     fn eval_include(&mut self, hash: &Token<'a>) {
         let include = self.next_token().unwrap();
         let include_loc = || hash.loc().until(include.loc());
-        let tokens = &mut self.eat_until_newline().into_iter().peekable();
-        let tokens = gen {
-            while let Some(token) = tokens.next() {
-                match token {
-                    token if let Some(&r#macro) = self.macros.get(token.slice()) => {
-                        assert!(self.expander.is_empty());
-                        match r#macro.expand(self.sess, tokens, &token) {
-                            Some(expanding) => {
-                                self.expander.push(expanding);
-                                while let Some(token) = self.expander.next(&self.macros) {
-                                    yield token;
-                                }
-                            }
-                            None => yield token,
-                        }
-                    }
-                    token => {
-                        yield token;
-                    }
-                }
-            }
-        };
-        let tokens = tokens.collect_vec();
+        let tokens = self.tokens.last_mut().until_newline();
+        let tokens: Vec<_> = self.expander.expand_macros(&self.macros, tokens).collect();
         let (original_name, (included_filename, src), loc) = match &tokens[..] {
             [] => todo!("error message: `#include` does not include anything"),
             [token] if token.kind == TokenKind::String => {
