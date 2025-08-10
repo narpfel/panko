@@ -1,14 +1,24 @@
+use std::sync::LazyLock;
+
 use ariadne::Color::Blue;
 use ariadne::Color::Green;
 use ariadne::Color::Magenta;
 use ariadne::Color::Red;
-use ariadne::Fmt as _;
+use ariadne::Fmt;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
 use crate::ast::FromError;
+
+type BlueStr = impl Fmt + std::fmt::Display;
+
+#[define_opaque(BlueStr)]
+static QUOTED_FILENAME: LazyLock<BlueStr> = LazyLock::new(|| r#""filename""#.fg(Blue));
+
+#[define_opaque(BlueStr)]
+static BRACKETED_FILENAME: LazyLock<BlueStr> = LazyLock::new(|| "<filename>".fg(Blue));
 
 #[derive(Debug, Report)]
 #[exit_code(1)]
@@ -171,10 +181,8 @@ pub(super) enum Diagnostic<'a> {
     NonIdentifierParameter { at: Token<'a> },
 
     #[error("`{at}` directive does not include anything")]
-    #[diagnostics(at(colour = Red, label = "expected either `{quoted}` or `{bracketed}`"))]
-    #[with(
-        quoted = r#""filename""#.fg(Blue),
-        bracketed = "<filename>".fg(Blue),
+    #[diagnostics(
+        at(colour = Red, label = "expected either `{QUOTED_FILENAME}` or `{BRACKETED_FILENAME}`")
     )]
     IncludeDoesNotIncludeAnything { at: Loc<'a> },
 
@@ -185,11 +193,7 @@ pub(super) enum Diagnostic<'a> {
     #[error("invalid syntax in `{include}` directive")]
     #[diagnostics(
         include(colour = Blue),
-        at(colour = Red, label = "expected either `{quoted}` or `{bracketed}`"),
-    )]
-    #[with(
-        quoted = r#""filename""#.fg(Blue),
-        bracketed = "<filename>".fg(Blue),
+        at(colour = Red, label = "expected either `{QUOTED_FILENAME}` or `{BRACKETED_FILENAME}`"),
     )]
     InvalidSyntaxInInclude { at: Loc<'a>, include: Loc<'a> },
 }
