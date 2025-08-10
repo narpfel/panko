@@ -1,0 +1,50 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/include/test_error_syntax_error_in_include_directive.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid syntax in `#include` directive
+   ╭─[panko/tests/cases/preprocessor/include/test_error_syntax_error_in_include_directive.c:1:10]
+   │
+ 1 │ #include syntax error
+   │ ──────── ──────┬─────  
+   │                ╰─────── expected either `"filename"` or `<filename>`
+───╯
+
+Error: invalid syntax in `#include` directive
+   ╭─[panko/tests/cases/preprocessor/include/test_error_syntax_error_in_include_directive.c:3:15]
+   │
+ 3 │ #define MACRO more
+   │               ──┬─  
+   │                 ╰─── expected either `"filename"` or `<filename>`
+   │ 
+ 7 │ #include MACRO
+   │ ────────  
+───╯
+
+Error: invalid syntax in `#include` directive
+   ╭─[panko/tests/cases/preprocessor/include/test_error_syntax_error_in_include_directive.c:3:15]
+   │
+ 3 │ ╭─▶ #define MACRO more
+   ┆ ┆   
+ 9 │ ├─▶ #include MACRO tokens
+   │ │   ────────                
+   │ ╰─────────────────────────── expected either `"filename"` or `<filename>`
+───╯
+
+Error: invalid syntax in `#include` directive
+   ╭─[panko/tests/cases/preprocessor/include/test_error_syntax_error_in_include_directive.c:5:10]
+   │
+ 5 │ #include some MACRO tokens
+   │ ──────── ────────┬────────  
+   │                  ╰────────── expected either `"filename"` or `<filename>`
+───╯

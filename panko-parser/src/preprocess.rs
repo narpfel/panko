@@ -989,7 +989,11 @@ impl<'a> Preprocessor<'a> {
                 let included_file = self.include_paths.lookup_bracketed(&filename);
                 (Cow::Owned(filename), included_file, loc)
             }
-            tokens => todo!("error message: invalid `#include` directive with tokens {tokens:#?}"),
+            tokens =>
+                return self.sess.emit(Diagnostic::InvalidSyntaxInInclude {
+                    at: tokens_loc(tokens),
+                    include: include_loc(),
+                }),
         };
 
         let filename = alloc_path(self.sess.bump, &included_filename);

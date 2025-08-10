@@ -181,6 +181,17 @@ pub(super) enum Diagnostic<'a> {
     #[error("empty filename in `{include}` directive")]
     #[diagnostics(at(colour = Red, label = "filename must be nonempty"), include(colour = Blue))]
     EmptyFilenameInInclude { at: Loc<'a>, include: Loc<'a> },
+
+    #[error("invalid syntax in `{include}` directive")]
+    #[diagnostics(
+        include(colour = Blue),
+        at(colour = Red, label = "expected either `{quoted}` or `{bracketed}`"),
+    )]
+    #[with(
+        quoted = r#""filename""#.fg(Blue),
+        bracketed = "<filename>".fg(Blue),
+    )]
+    InvalidSyntaxInInclude { at: Loc<'a>, include: Loc<'a> },
 }
 
 pub(super) struct MaybeError<T>(Option<T>);
