@@ -96,6 +96,52 @@ impl<'a> PeekingNext for UnpreprocessedTokens<'a> {
     }
 }
 
+trait PeekableIterator: PeekingNext {
+    fn peek(&mut self) -> Option<&Self::Item>;
+}
+
+impl PeekableIterator for UnpreprocessedTokens<'_> {
+    fn peek(&mut self) -> Option<&Self::Item> {
+        self.tokens.peek()
+    }
+}
+
+impl<T> PeekableIterator for Peekable<T>
+where
+    T: Iterator,
+{
+    fn peek(&mut self) -> Option<&Self::Item> {
+        Peekable::peek(self)
+    }
+}
+
+trait Eat<'a>: PeekableIterator<Item = Token<'a>> {
+    fn eat(&mut self, kind: TokenKind) -> Result<Token<'a>, Token<'a>> {
+        self.eat_if(|token| token.kind == kind)
+    }
+
+    fn eat_if(
+        &mut self,
+        predicate: impl FnOnce(&Token<'a>) -> bool,
+    ) -> Result<Token<'a>, Token<'a>> {
+        match self.peek().copied() {
+            Some(token) if predicate(&token) => Ok(self.next().unwrap()),
+            Some(token) => Err(token),
+            None => todo!("error message: UB: source file does not end in trailing newline"),
+        }
+    }
+
+    fn eat_until_newline(&mut self) -> Vec<Token<'a>>
+    where
+        Self: Sized,
+    {
+        self.peeking_take_while(|token| token.kind != TokenKind::Newline)
+            .collect()
+    }
+}
+
+impl<'a, T> Eat<'a> for T where T: PeekableIterator<Item = Token<'a>> {}
+
 fn alloc_path(bump: &Bump, path: impl AsRef<Path>) -> &Path {
     let bytes = bump.alloc_slice_copy(path.as_ref().as_os_str().as_encoded_bytes());
     Path::new(unsafe { OsStr::from_encoded_bytes_unchecked(bytes) })
@@ -726,26 +772,8 @@ impl<'a> Preprocessor<'a> {
         }
     }
 
-    fn eat(&mut self, kind: TokenKind) -> Result<Token<'a>, Token<'a>> {
-        self.eat_if(|token| token.kind == kind)
-    }
-
-    fn eat_if(
-        &mut self,
-        predicate: impl FnOnce(&Token<'a>) -> bool,
-    ) -> Result<Token<'a>, Token<'a>> {
-        match self.peek().copied() {
-            Some(token) if predicate(&token) => Ok(self.next_token().unwrap()),
-            Some(token) => Err(token),
-            None => todo!("error message: UB: source file does not end in trailing newline"),
-        }
-    }
-
     fn eat_until_newline(&mut self) -> Vec<Token<'a>> {
-        self.tokens
-            .last_mut()
-            .peeking_take_while(|token| token.kind != TokenKind::Newline)
-            .collect()
+        self.tokens.last_mut().eat_until_newline()
     }
 
     fn require_no_trailing_tokens(&mut self, at: impl FnOnce() -> Loc<'a>) {
@@ -827,61 +855,29 @@ impl<'a> Preprocessor<'a> {
         emit_unterminated_if_errors(self.sess, &nested_conditionals)
     }
 
-    fn parse_defined(&mut self, defined: &Token<'a>) -> MaybeError<&'a str> {
-        let unexpected = |at, expectation| {
-            self.sess
-                .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
-                    at,
-                    defined: *defined,
-                    expectation,
-                })
-        };
-
-        let is_parenthesised = self.eat(TokenKind::LParen).is_ok();
-
-        match self.eat_if(is_identifier) {
-            Ok(_) if is_parenthesised && let Err(token) = self.eat(TokenKind::RParen) =>
-                unexpected(token, "a closing parenthesis"),
-            Ok(ident) => MaybeError::new(ident.slice()),
-            Err(token) => unexpected(token, "an identifier"),
-        }
-    }
-
     fn parse_condition(&mut self) -> bool {
         let sess = self.sess;
+        let tokens = &mut self.tokens.last_mut().until_newline().peekable();
         let tokens = gen {
-            while let Some(token) = self.next_token() {
-                match token {
-                    token if token.kind == TokenKind::Newline => return,
-                    // TODO: if there’s a syntax error in the `defined` expression this will leave
-                    // behind some tokens that will probably lead to further errors in the
-                    // expression parser
-                    token if token.slice() == "defined" =>
-                        if let Some(macro_name) = self.parse_defined(&token).value() {
-                            yield zero_or_one_from_bool(sess, self.is_macro_defined(macro_name));
+            while let Some(token) = tokens.next() {
+                // TODO: if there’s a syntax error in the `defined` expression this will leave
+                // behind some tokens that will probably lead to further errors in the
+                // expression parser
+                match token.slice() == "defined" {
+                    true =>
+                        if let Some(macro_name) = parse_defined(sess, tokens, &token).value() {
+                            let is_defined = is_macro_defined(&self.macros, macro_name);
+                            yield zero_or_one_from_bool(sess, is_defined)
                         },
-                    // TODO: this duplicates code from `run`
-                    token if is_identifier(&token) => match self.macros.get(token.slice()) {
-                        Some(&r#macro) => {
-                            assert!(self.expander.is_empty());
-                            match r#macro.expand(self.sess, self.tokens.last_mut(), &token) {
-                                Some(expanding) => {
-                                    self.expander.push(expanding);
-                                    while let Some(token) = self.expander.next(&self.macros) {
-                                        yield token;
-                                    }
-                                }
-                                None => yield token,
-                            }
-                        }
-                        None => yield zero_or_one_from_bool(sess, token.slice() == "true"),
-                    },
-                    token => {
-                        yield token;
-                    }
+                    false => yield token,
                 }
             }
         };
+        let tokens = self.expander.expand_macros(&self.macros, tokens);
+        let tokens = tokens.map(|token| match is_identifier(&token) {
+            true => zero_or_one_from_bool(sess, token.slice() == "true"),
+            false => token,
+        });
         let typedef_names = RefCell::default();
         let is_in_typedef = Cell::default();
         let parser = crate::grammar::ConstantExpressionParser::new();
@@ -898,17 +894,13 @@ impl<'a> Preprocessor<'a> {
 
     fn eval_if(&mut self, loc: Loc<'a>) {
         let condition = self.parse_condition();
+        let _ = self.tokens.last_mut().eat(TokenKind::Newline);
         self.eval_if_condition(loc, condition);
     }
 
-    fn is_macro_defined(&mut self, macro_name: &str) -> bool {
-        ["__has_include", "__has_embed", "__has_c_attribute"].contains(&macro_name)
-            || self.macros.contains_key(macro_name)
-    }
-
     fn parse_ifdef(&mut self, hash: &Token<'a>, ifdef: &Token<'a>) -> MaybeError<bool> {
-        let result = match self.eat_if(is_identifier) {
-            Ok(ident) => MaybeError::new(self.is_macro_defined(ident.slice())),
+        let result = match self.tokens.last_mut().eat_if(is_identifier) {
+            Ok(ident) => MaybeError::new(is_macro_defined(&self.macros, ident.slice())),
             Err(token) => self
                 .sess
                 .emit(Diagnostic::UnexpectedTokenInDefinedExpression {
@@ -1005,6 +997,34 @@ impl<'a> Preprocessor<'a> {
                 filename: self.sess.alloc_str(&original_name),
             }),
         }
+    }
+}
+
+fn is_macro_defined(macros: &HashMap<&str, Macro>, macro_name: &str) -> bool {
+    ["__has_include", "__has_embed", "__has_c_attribute"].contains(&macro_name)
+        || macros.contains_key(macro_name)
+}
+
+fn parse_defined<'a>(
+    sess: &Session<'a>,
+    tokens: &mut impl Eat<'a>,
+    defined: &Token<'a>,
+) -> MaybeError<&'a str> {
+    let unexpected = |at, expectation| {
+        sess.emit(Diagnostic::UnexpectedTokenInDefinedExpression {
+            at,
+            defined: *defined,
+            expectation,
+        })
+    };
+
+    let is_parenthesised = tokens.eat(TokenKind::LParen).is_ok();
+
+    match tokens.eat_if(is_identifier) {
+        Ok(_) if is_parenthesised && let Err(token) = tokens.eat(TokenKind::RParen) =>
+            unexpected(token, "a closing parenthesis"),
+        Ok(ident) => MaybeError::new(ident.slice()),
+        Err(token) => unexpected(token, "an identifier"),
     }
 }
 
