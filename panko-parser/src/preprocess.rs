@@ -951,7 +951,10 @@ impl<'a> Preprocessor<'a> {
         let tokens = self.tokens.last_mut().until_newline();
         let tokens: Vec<_> = self.expander.expand_macros(&self.macros, tokens).collect();
         let (original_name, (included_filename, src), loc) = match &tokens[..] {
-            [] => todo!("error message: `#include` does not include anything"),
+            [] =>
+                return self
+                    .sess
+                    .emit(Diagnostic::IncludeDoesNotIncludeAnything { at: include_loc() }),
             [token] if token.kind == TokenKind::String => {
                 let string = token.slice();
                 let from_filename = include.loc().file();

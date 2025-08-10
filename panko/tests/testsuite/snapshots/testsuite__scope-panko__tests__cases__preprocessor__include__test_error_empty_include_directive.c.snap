@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/include/test_error_empty_include_directive.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `#include` directive does not include anything
+   ╭─[panko/tests/cases/preprocessor/include/test_error_empty_include_directive.c:1:1]
+   │
+ 1 │ #include
+   │ ────┬───  
+   │     ╰───── expected either `"filename"` or `<filename>`
+───╯

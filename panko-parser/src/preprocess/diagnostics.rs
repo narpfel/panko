@@ -169,6 +169,14 @@ pub(super) enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "only identifiers are allowed as parameter names"))]
     #[with(kind = format!("{:?}", at.kind).fg(Red))]
     NonIdentifierParameter { at: Token<'a> },
+
+    #[error("`{at}` directive does not include anything")]
+    #[diagnostics(at(colour = Red, label = "expected either `{quoted}` or `{bracketed}`"))]
+    #[with(
+        quoted = r#""filename""#.fg(Blue),
+        bracketed = "<filename>".fg(Blue),
+    )]
+    IncludeDoesNotIncludeAnything { at: Loc<'a> },
 }
 
 pub(super) struct MaybeError<T>(Option<T>);
