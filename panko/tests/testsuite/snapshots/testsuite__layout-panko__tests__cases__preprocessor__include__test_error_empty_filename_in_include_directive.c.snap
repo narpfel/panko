@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/preprocessor/include/test_error_empty_filename_in_include_directive.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: empty filename in `#include` directive
+   ╭─[panko/tests/cases/preprocessor/include/test_error_empty_filename_in_include_directive.c:1:10]
+   │
+ 1 │ #include ""
+   │ ──────── ─┬  
+   │           │  
+   │           ╰── filename must be nonempty
+───╯
+
+Error: empty filename in `#include` directive
+   ╭─[panko/tests/cases/preprocessor/include/test_error_empty_filename_in_include_directive.c:2:10]
+   │
+ 2 │ #include <>
+   │ ──────── ─┬  
+   │           │  
+   │           ╰── filename must be nonempty
+───╯
+
+Error: empty filename in `#include` directive
+   ╭─[panko/tests/cases/preprocessor/include/test_error_empty_filename_in_include_directive.c:4:16]
+   │
+ 4 │ #define QUOTED ""
+   │                ─┬  
+   │                 ╰── filename must be nonempty
+   │ 
+ 7 │ #include QUOTED
+   │ ────────  
+───╯
+
+Error: empty filename in `#include` directive
+   ╭─[panko/tests/cases/preprocessor/include/test_error_empty_filename_in_include_directive.c:5:16]
+   │
+ 5 │ ╭─▶ #define RANGLE >
+   ┆ ┆   
+ 8 │ ├─▶ #include <RANGLE
+   │ │   ────────           
+   │ │                      
+   │ ╰────────────────────── filename must be nonempty
+───╯

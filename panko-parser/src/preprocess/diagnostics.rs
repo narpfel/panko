@@ -177,6 +177,10 @@ pub(super) enum Diagnostic<'a> {
         bracketed = "<filename>".fg(Blue),
     )]
     IncludeDoesNotIncludeAnything { at: Loc<'a> },
+
+    #[error("empty filename in `{include}` directive")]
+    #[diagnostics(at(colour = Red, label = "filename must be nonempty"), include(colour = Blue))]
+    EmptyFilenameInInclude { at: Loc<'a>, include: Loc<'a> },
 }
 
 pub(super) struct MaybeError<T>(Option<T>);

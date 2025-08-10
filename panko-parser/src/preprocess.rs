@@ -960,7 +960,10 @@ impl<'a> Preprocessor<'a> {
                 let from_filename = include.loc().file();
                 let filename = &string[1..string.len() - 1];
                 if filename.is_empty() {
-                    todo!("error message: `#include` does not include anything");
+                    return self.sess.emit(Diagnostic::EmptyFilenameInInclude {
+                        at: token.loc(),
+                        include: include_loc(),
+                    });
                 }
                 let included_file = self
                     .include_paths
@@ -971,7 +974,10 @@ impl<'a> Preprocessor<'a> {
                 if less.kind == TokenKind::Less && greater.kind == TokenKind::Greater =>
             {
                 if rest.is_empty() {
-                    todo!("error message: `#include` does not include anything");
+                    return self.sess.emit(Diagnostic::EmptyFilenameInInclude {
+                        at: less.loc().until(greater.loc()),
+                        include: include_loc(),
+                    });
                 }
                 let loc = tokens_loc(rest);
                 let mut filename = Vec::new();
