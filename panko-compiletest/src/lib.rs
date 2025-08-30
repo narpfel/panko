@@ -1,6 +1,7 @@
 #![feature(duration_millis_float)]
 #![feature(exit_status_error)]
 #![feature(internal_output_capture)]
+#![feature(mpmc_channel)]
 #![feature(result_option_map_or_default)]
 #![feature(string_from_utf8_lossy_owned)]
 #![feature(unqualified_local_imports)]
@@ -12,6 +13,8 @@ use std::io;
 use std::io::Write;
 use std::io::set_output_capture;
 use std::io::stdout;
+use std::iter::repeat_n;
+use std::num::NonZero;
 use std::panic::AssertUnwindSafe;
 use std::panic::catch_unwind;
 use std::path::Path;
@@ -21,6 +24,9 @@ use std::process::Output;
 use std::sync::Arc;
 use std::sync::LazyLock;
 use std::sync::Mutex;
+use std::sync::mpmc;
+use std::sync::mpsc;
+use std::thread;
 use std::time::Instant;
 
 use insta_cmd::get_cargo_bin;
@@ -281,32 +287,52 @@ fn discover(pattern: &str) -> impl Iterator<Item = TestCase> {
 }
 
 fn run_tests() {
+    let start = Instant::now();
+
     let cases = discover("tests/cases/execute/**/test_*.c").collect_vec();
     let case_count = cases.len();
     let digit_count = usize::try_from(case_count.ilog10() + 1).unwrap();
     println!("running {} tests", cases.len());
 
-    let start = Instant::now();
+    let (tx, test_case_receiver) = mpmc::channel();
+    for case in cases {
+        tx.send(case).unwrap();
+    }
+    drop(tx);
+
+    let (result_sender, result_receiver) = mpsc::channel();
+
+    let runners = repeat_n(
+        (test_case_receiver, result_sender),
+        thread::available_parallelism().map_or(1, NonZero::get),
+    )
+    .map(|(test_case_receiver, result_sender)| {
+        thread::spawn(move || {
+            while let Ok(case) = test_case_receiver.recv() {
+                result_sender.send(case.run()).unwrap();
+            }
+        })
+    })
+    .collect_vec();
+
     let chunk_size = 87;
-    let chunks = cases.into_iter().chunks(chunk_size);
     let mut outcomes = Outcomes::default();
 
-    for (i, chunk) in chunks.into_iter().enumerate() {
-        let chunk = chunk.collect_vec();
-        let chunk_len = chunk.len();
-        for case in chunk {
-            let (name, result, output) = case.run();
-            print!("{result}");
-            outcomes.add(name, result, String::from_utf8_lossy_owned(output));
-            stdout().flush().unwrap();
-        }
-        if chunk_len == chunk_size {
-            println!(" {:>digit_count$}/{case_count}", (i + 1) * chunk_size);
-        }
-        else {
-            println!();
+    for (i, (name, result, output)) in result_receiver.iter().enumerate() {
+        print!("{result}");
+        outcomes.add(name, result, String::from_utf8_lossy_owned(output));
+        stdout().flush().unwrap();
+        let i = i + 1;
+        if i.is_multiple_of(chunk_size) {
+            println!(" {i:>digit_count$}/{case_count}");
         }
     }
+    println!();
+
+    for runner in runners {
+        runner.join().unwrap();
+    }
+
     let time = start.elapsed();
 
     let failures = outcomes.get(TestResult::Failure);
