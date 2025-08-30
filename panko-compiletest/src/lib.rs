@@ -284,7 +284,7 @@ fn run_tests() {
     let cases = discover("tests/cases/execute/**/test_*.c").collect_vec();
     let case_count = cases.len();
     let digit_count = usize::try_from(case_count.ilog10() + 1).unwrap();
-    println!("running {} tests ({digit_count})", cases.len());
+    println!("running {} tests", cases.len());
 
     let start = Instant::now();
     let chunk_size = 87;
@@ -332,8 +332,8 @@ fn run_tests() {
     }
 
     println!(
-        "test result: {status}, {passed} passed, {failed} failed, {xfailed} xfailed, \
-        {xpassed} xpassed, {skipped} skipped; finished in {:.2}s",
+        "test result: {status}. {passed} passed; {failed} failed; {xfailed} xfailed; \
+        {xpassed} xpassed; {skipped} skipped; finished in {:.2}s",
         time.as_millis_f64() / 1_000.0,
         passed = outcomes.get(TestResult::Success).len(),
         failed = outcomes.get(TestResult::Failure).len(),
