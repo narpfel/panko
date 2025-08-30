@@ -1,9 +1,12 @@
 #![feature(duration_millis_float)]
 #![feature(exit_status_error)]
 #![feature(internal_output_capture)]
+#![feature(result_option_map_or_default)]
+#![feature(string_from_utf8_lossy_owned)]
 #![feature(unqualified_local_imports)]
 
 use std::borrow::Borrow;
+use std::collections::HashMap;
 use std::fmt;
 use std::io;
 use std::io::Write;
@@ -83,12 +86,12 @@ where
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 enum TestResult {
     Success,
     Failure,
     XFail,
     XPass,
-    #[expect(dead_code)]
     Skip,
 }
 
@@ -108,6 +111,24 @@ enum ExpectedResult {
     Success,
     #[expect(dead_code)]
     Failure,
+}
+
+#[derive(Default)]
+struct Outcomes {
+    outcomes: HashMap<TestResult, Vec<(String, String)>>,
+}
+
+impl Outcomes {
+    fn add(&mut self, case: String, result: TestResult, output: String) {
+        self.outcomes
+            .entry(result)
+            .or_default()
+            .push((case, output))
+    }
+
+    fn get(&self, result: TestResult) -> &[(String, String)] {
+        self.outcomes.get(&result).map_or_default(Vec::as_slice)
+    }
 }
 
 struct TestCase {
@@ -268,7 +289,7 @@ fn run_tests() {
     let start = Instant::now();
     let chunk_size = 87;
     let chunks = cases.into_iter().chunks(chunk_size);
-    let mut failures = Vec::new();
+    let mut outcomes = Outcomes::default();
 
     for (i, chunk) in chunks.into_iter().enumerate() {
         let chunk = chunk.collect_vec();
@@ -276,9 +297,7 @@ fn run_tests() {
         for case in chunk {
             let (name, result, output) = case.run();
             print!("{result}");
-            if matches!(result, TestResult::Failure) {
-                failures.push((name, output));
-            }
+            outcomes.add(name, result, String::from_utf8_lossy_owned(output));
             stdout().flush().unwrap();
         }
         if chunk_len == chunk_size {
@@ -290,6 +309,7 @@ fn run_tests() {
     }
     let time = start.elapsed();
 
+    let failures = outcomes.get(TestResult::Failure);
     let status = if failures.is_empty() {
         format!("{FG_GREEN}ok{RESET}")
     }
@@ -299,21 +319,27 @@ fn run_tests() {
 
     if !failures.is_empty() {
         println!("\nfailures:\n");
-        for (name, output) in &failures {
+        for (name, output) in failures {
             println!("---- {name} stdout ----");
-            println!("{}", String::from_utf8_lossy(output));
+            println!("{output}")
         }
 
         println!("\nfailures:");
-        for (name, _) in &failures {
+        for (name, _) in failures {
             println!("    {name}");
         }
         println!();
     }
 
     println!(
-        "test result: {status}, ?? passed, ?? failed, ?? xfailed, ?? xpassed, ?? skipped; finished in {:.2}s",
+        "test result: {status}, {passed} passed, {failed} failed, {xfailed} xfailed, \
+        {xpassed} xpassed, {skipped} skipped; finished in {:.2}s",
         time.as_millis_f64() / 1_000.0,
+        passed = outcomes.get(TestResult::Success).len(),
+        failed = outcomes.get(TestResult::Failure).len(),
+        xfailed = outcomes.get(TestResult::XFail).len(),
+        xpassed = outcomes.get(TestResult::XPass).len(),
+        skipped = outcomes.get(TestResult::Skip).len(),
     );
 }
 
