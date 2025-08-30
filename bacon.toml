@@ -19,9 +19,12 @@ need_stdout = false
 
 [jobs.test]
 command = [
-    "cargo", "test", "--color", "always",
+    "cargo", "insta", "test",
+    "--color", "always",
     "--profile=clif",
     "--tests",
+    "--unreferenced=reject",
+    "--check",
     "--", "--color", "always", # see https://github.com/Canop/bacon/issues/124
     "--quiet",
 ]
