@@ -1,5 +1,6 @@
 #![feature(duration_millis_float)]
 #![feature(exit_status_error)]
+#![feature(gen_blocks)]
 #![feature(internal_output_capture)]
 #![feature(mpmc_channel)]
 #![feature(result_option_map_or_default)]
@@ -8,6 +9,7 @@
 
 use std::borrow::Borrow;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fmt;
 use std::io;
 use std::io::Write;
@@ -18,6 +20,7 @@ use std::num::NonZero;
 use std::panic::AssertUnwindSafe;
 use std::panic::catch_unwind;
 use std::path::Path;
+use std::path::PathBuf;
 use std::process::Command;
 use std::process::ExitStatus;
 use std::process::Output;
@@ -29,6 +32,7 @@ use std::sync::mpsc;
 use std::thread;
 use std::time::Instant;
 
+use insta_cmd::assert_cmd_snapshot;
 use insta_cmd::get_cargo_bin;
 use itertools::Itertools as _;
 use regex::Captures;
@@ -275,21 +279,57 @@ pub fn execute_runtest(filename: impl AsRef<Path>) {
     assert_eq!("", stderr, "no output on stderr is expected");
 }
 
-fn discover(pattern: &str) -> impl Iterator<Item = TestCase> {
-    glob::glob(pattern).unwrap().map(|filename| {
-        let filename = filename.unwrap();
-        TestCase {
+fn execute_preprocessor_test(filename: impl AsRef<Path>) {
+    let filename = std::fs::canonicalize(filename).unwrap();
+    let filename = relative_to(
+        filename.as_ref(),
+        Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap(),
+    );
+    assert_cmd_snapshot!(
+        format!("preprocess-{}", filename.display()),
+        Command::new(get_cargo_bin("panko"))
+            .current_dir("..")
+            .arg("--print=preprocess")
+            .arg("--stop-after=preprocess")
+            .arg(filename),
+    );
+}
+
+gen fn test_cases_from_filename(filename: PathBuf) -> TestCase {
+    let components: HashSet<_> = filename
+        .iter()
+        .filter_map(|c| Some(c.to_str()?.to_owned()))
+        .collect();
+
+    if components.contains("execute") {
+        let filename = filename.clone();
+        yield TestCase {
             name: filename.display().to_string(),
             test_fn: Box::new(move |_context: &Context| execute_runtest(filename)),
             expected_result: ExpectedResult::Success,
-        }
+        };
+    }
+    if components.contains("preprocessor") {
+        let filename = filename.clone();
+        yield TestCase {
+            name: filename.display().to_string(),
+            test_fn: Box::new(move |_context: &Context| execute_preprocessor_test(filename)),
+            expected_result: ExpectedResult::Success,
+        };
+    }
+}
+
+fn discover(pattern: &str) -> impl Iterator<Item = TestCase> {
+    glob::glob(pattern).unwrap().flat_map(|filename| {
+        let filename = filename.unwrap();
+        test_cases_from_filename(filename)
     })
 }
 
 fn run_tests() {
     let start = Instant::now();
 
-    let cases = discover("tests/cases/execute/**/test_*.c").collect_vec();
+    let cases = discover("tests/cases/**/test_*.c").collect_vec();
     let case_count = cases.len();
     let digit_count = usize::try_from(case_count.ilog10() + 1).unwrap();
     println!("running {} tests", cases.len());
