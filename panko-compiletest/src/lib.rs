@@ -399,7 +399,7 @@ fn run_tests() {
 
     println!(
         "test result: {status}. {passed} passed; {failed} failed; {xfailed} xfailed; \
-        {xpassed} xpassed; {skipped} skipped; finished in {:.2}s",
+        {xpassed} xpassed; {skipped} skipped; finished in {:.2}s\n",
         time.as_millis_f64() / 1_000.0,
         passed = outcomes.get(TestResult::Success).len(),
         failed = outcomes.get(TestResult::Failure).len(),
