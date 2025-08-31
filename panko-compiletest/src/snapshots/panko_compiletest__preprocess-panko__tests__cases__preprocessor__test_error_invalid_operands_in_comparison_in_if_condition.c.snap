@@ -1,0 +1,21 @@
+---
+source: panko-compiletest/src/lib.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/preprocessor/test_error_invalid_operands_in_comparison_in_if_condition.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+int puts(char const*);
+
+
+int main() {
+    puts("error");
+}
+
+----- stderr -----
