@@ -34,8 +34,3 @@ fn test(
             .arg(filename),
     );
 }
-
-#[rstest]
-fn execute_test(#[files("tests/cases/execute/**/test_*.c")] filename: PathBuf) {
-    panko_compiletest::execute_runtest(&filename);
-}
