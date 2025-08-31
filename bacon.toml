@@ -72,11 +72,20 @@ background = true
 watch = ["../c"]
 env.CLICOLOR_FORCE = "1"
 
-[jobs.rebuild-tests]
-command = ["touch", "panko/tests/testsuite/main.rs"]
-need_stdout = false
+[jobs.accept-snapshots]
+command = [
+    "cargo", "insta", "test",
+    "--color", "always",
+    "--profile=clif",
+    "--tests",
+    "--unreferenced=reject",
+    "--accept",
+    "--", "--color", "always", # see https://github.com/Canop/bacon/issues/124
+    "--quiet",
+]
+need_stdout = true
 on_success = "back"
 
 [keybindings]
+shift-a = "job:accept-snapshots"
 shift-t = "job:covtest"
-shift-r = "job:rebuild-tests"
