@@ -320,7 +320,7 @@ gen fn test_cases_from_filename(filename: PathBuf) -> TestCase {
     if components.contains("execute") {
         let filename = filename.clone();
         yield TestCase {
-            name: filename.display().to_string(),
+            name: format!("execute::{}", filename.display()),
             test_fn: Box::new(move |_context: &Context| execute_runtest(filename)),
             expected_result: ExpectedResult::Success,
         };
@@ -328,7 +328,7 @@ gen fn test_cases_from_filename(filename: PathBuf) -> TestCase {
     if components.contains("preprocessor") {
         let filename = filename.clone();
         yield TestCase {
-            name: filename.display().to_string(),
+            name: format!("preprocessor::{}", filename.display()),
             test_fn: Box::new(move |_context: &Context| execute_preprocessor_test(filename)),
             expected_result: ExpectedResult::Success,
         };
@@ -344,7 +344,7 @@ gen fn test_cases_from_filename(filename: PathBuf) -> TestCase {
         {
             let filename = filename.clone();
             yield TestCase {
-                name: filename.display().to_string(),
+                name: format!("{step}::{}", filename.display()),
                 test_fn: Box::new(move |_context: &Context| {
                     execute_step_test(filename, snapshot_name_prefix, step)
                 }),
