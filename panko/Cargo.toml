@@ -7,7 +7,7 @@ edition = "2024"
 workspace = true
 
 [[test]]
-name = "compiletest"
+name = "testsuite"
 harness = false
 
 [dependencies]
@@ -20,7 +20,4 @@ panko-sema = { path = "../panko-sema" }
 yansi = { workspace = true }
 
 [dev-dependencies]
-insta-cmd = { workspace = true }
 panko-compiletest = { path = "../panko-compiletest" }
-pretty_assertions = { workspace = true }
-rstest = { workspace = true }

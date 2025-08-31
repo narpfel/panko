@@ -295,6 +295,22 @@ fn execute_preprocessor_test(filename: impl AsRef<Path>) {
     );
 }
 
+fn execute_step_test(filename: impl AsRef<Path>, snapshot_name_prefix: &str, step: &str) {
+    let filename = std::fs::canonicalize(filename).unwrap();
+    let filename = relative_to(
+        &filename,
+        Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap(),
+    );
+    assert_cmd_snapshot!(
+        format!("{snapshot_name_prefix}-{}", filename.display()),
+        Command::new(get_cargo_bin("panko"))
+            .current_dir("..")
+            .arg(format!("--print={step}"))
+            .arg(format!("--stop-after={step}"))
+            .arg(filename),
+    );
+}
+
 gen fn test_cases_from_filename(filename: PathBuf) -> TestCase {
     let components: HashSet<_> = filename
         .iter()
@@ -316,6 +332,25 @@ gen fn test_cases_from_filename(filename: PathBuf) -> TestCase {
             test_fn: Box::new(move |_context: &Context| execute_preprocessor_test(filename)),
             expected_result: ExpectedResult::Success,
         };
+    }
+    for (snapshot_name_prefix, step) in [
+        ("scope", "scopes"),
+        ("typeck", "typeck"),
+        ("layout", "layout"),
+    ] {
+        if let Some(name) = filename.file_name()
+            && let Some(name) = name.to_str()
+            && !(name.starts_with("test_nosnapshot_") || name.starts_with("test_only_expand_"))
+        {
+            let filename = filename.clone();
+            yield TestCase {
+                name: filename.display().to_string(),
+                test_fn: Box::new(move |_context: &Context| {
+                    execute_step_test(filename, snapshot_name_prefix, step)
+                }),
+                expected_result: ExpectedResult::Success,
+            }
+        }
     }
 }
 
