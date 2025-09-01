@@ -279,22 +279,6 @@ pub fn execute_runtest(filename: impl AsRef<Path>) {
     assert_eq!("", stderr, "no output on stderr is expected");
 }
 
-fn execute_preprocessor_test(filename: impl AsRef<Path>) {
-    let filename = std::fs::canonicalize(filename).unwrap();
-    let filename = relative_to(
-        filename.as_ref(),
-        Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap(),
-    );
-    assert_cmd_snapshot!(
-        format!("preprocess-{}", filename.display()),
-        Command::new(get_cargo_bin("panko"))
-            .current_dir("..")
-            .arg("--print=preprocess")
-            .arg("--stop-after=preprocess")
-            .arg(filename),
-    );
-}
-
 fn execute_step_test(filename: impl AsRef<Path>, snapshot_name_prefix: &str, step: &str) {
     let filename = std::fs::canonicalize(filename).unwrap();
     let filename = relative_to(
@@ -329,7 +313,9 @@ gen fn test_cases_from_filename(filename: PathBuf) -> TestCase {
         let filename = filename.clone();
         yield TestCase {
             name: format!("preprocessor::{}", filename.display()),
-            test_fn: Box::new(move |_context: &Context| execute_preprocessor_test(filename)),
+            test_fn: Box::new(move |_context: &Context| {
+                execute_step_test(filename, "preprocess", "preprocess")
+            }),
             expected_result: ExpectedResult::Success,
         };
     }
