@@ -367,7 +367,7 @@ fn run_tests() {
     let cases = discover("tests/cases/**/test_*.c").collect_vec();
     let case_count = cases.len();
     let digit_count = usize::try_from(case_count.ilog10() + 1).unwrap();
-    println!("running {} tests", cases.len());
+    println!("\nrunning {} tests", cases.len());
 
     let (tx, test_case_receiver) = mpmc::channel();
     for case in cases {
