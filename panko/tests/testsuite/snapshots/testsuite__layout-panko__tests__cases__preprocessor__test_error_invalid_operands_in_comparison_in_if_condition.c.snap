@@ -1,10 +1,10 @@
 ---
-source: panko-compiletest/src/lib.rs
+source: panko/tests/testsuite/main.rs
 info:
   program: panko
   args:
-    - "--print=typeck"
-    - "--stop-after=typeck"
+    - "--print=layout"
+    - "--stop-after=layout"
     - panko/tests/cases/preprocessor/test_error_invalid_operands_in_comparison_in_if_condition.c
 ---
 success: false

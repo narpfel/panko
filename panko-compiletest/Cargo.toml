@@ -8,7 +8,6 @@ workspace = true
 
 [dependencies]
 color-eyre = { workspace = true }
-glob = { workspace = true }
 insta-cmd = { workspace = true }
 itertools = { workspace = true }
 pretty_assertions = { workspace = true }

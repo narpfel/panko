@@ -670,6 +670,8 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "color-eyre",
+ "glob",
+ "insta-cmd",
  "panko-codegen",
  "panko-compiletest",
  "panko-lex",
@@ -695,7 +697,6 @@ name = "panko-compiletest"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
- "glob",
  "insta-cmd",
  "itertools",
  "pretty_assertions",

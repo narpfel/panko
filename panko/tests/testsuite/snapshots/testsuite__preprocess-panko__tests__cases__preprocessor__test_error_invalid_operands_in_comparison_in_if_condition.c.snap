@@ -1,5 +1,5 @@
 ---
-source: panko-compiletest/src/lib.rs
+source: panko/tests/testsuite/main.rs
 info:
   program: panko
   args:

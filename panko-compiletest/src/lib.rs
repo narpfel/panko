@@ -1,6 +1,5 @@
 #![feature(duration_millis_float)]
 #![feature(exit_status_error)]
-#![feature(gen_blocks)]
 #![feature(internal_output_capture)]
 #![feature(mpmc_channel)]
 #![feature(result_option_map_or_default)]
@@ -9,7 +8,6 @@
 
 use std::borrow::Borrow;
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::fmt;
 use std::io;
 use std::io::Write;
@@ -20,7 +18,6 @@ use std::num::NonZero;
 use std::panic::AssertUnwindSafe;
 use std::panic::catch_unwind;
 use std::path::Path;
-use std::path::PathBuf;
 use std::process::Command;
 use std::process::ExitStatus;
 use std::process::Output;
@@ -32,7 +29,6 @@ use std::sync::mpsc;
 use std::thread;
 use std::time::Instant;
 
-use insta_cmd::assert_cmd_snapshot;
 use insta_cmd::get_cargo_bin;
 use itertools::Itertools as _;
 use regex::Captures;
@@ -81,9 +77,9 @@ fn expand_escape_sequences(s: &str) -> String {
         .into_owned()
 }
 
-struct Context;
+pub struct Context;
 
-trait TestFn {
+pub trait TestFn {
     fn run(self: Box<Self>, context: &Context);
 }
 
@@ -117,9 +113,8 @@ impl fmt::Display for TestResult {
     }
 }
 
-enum ExpectedResult {
+pub enum ExpectedResult {
     Success,
-    #[expect(dead_code)]
     Failure,
 }
 
@@ -141,10 +136,10 @@ impl Outcomes {
     }
 }
 
-struct TestCase {
-    name: String,
-    test_fn: Box<dyn TestFn + Send>,
-    expected_result: ExpectedResult,
+pub struct TestCase {
+    pub name: String,
+    pub test_fn: Box<dyn TestFn + Send>,
+    pub expected_result: ExpectedResult,
 }
 
 struct OutputCapture {
@@ -279,78 +274,10 @@ pub fn execute_runtest(filename: impl AsRef<Path>) {
     assert_eq!("", stderr, "no output on stderr is expected");
 }
 
-fn execute_step_test(filename: impl AsRef<Path>, snapshot_name_prefix: &str, step: &str) {
-    let filename = std::fs::canonicalize(filename).unwrap();
-    let filename = relative_to(
-        &filename,
-        Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap(),
-    );
-    assert_cmd_snapshot!(
-        format!("{snapshot_name_prefix}-{}", filename.display()),
-        Command::new(get_cargo_bin("panko"))
-            .current_dir("..")
-            .arg(format!("--print={step}"))
-            .arg(format!("--stop-after={step}"))
-            .arg(filename),
-    );
-}
-
-gen fn test_cases_from_filename(filename: PathBuf) -> TestCase {
-    let components: HashSet<_> = filename
-        .iter()
-        .filter_map(|c| Some(c.to_str()?.to_owned()))
-        .collect();
-
-    if components.contains("execute") {
-        let filename = filename.clone();
-        yield TestCase {
-            name: format!("execute::{}", filename.display()),
-            test_fn: Box::new(move |_context: &Context| execute_runtest(filename)),
-            expected_result: ExpectedResult::Success,
-        };
-    }
-    if components.contains("preprocessor") {
-        let filename = filename.clone();
-        yield TestCase {
-            name: format!("preprocessor::{}", filename.display()),
-            test_fn: Box::new(move |_context: &Context| {
-                execute_step_test(filename, "preprocess", "preprocess")
-            }),
-            expected_result: ExpectedResult::Success,
-        };
-    }
-    for (snapshot_name_prefix, step) in [
-        ("scope", "scopes"),
-        ("typeck", "typeck"),
-        ("layout", "layout"),
-    ] {
-        if let Some(name) = filename.file_name()
-            && let Some(name) = name.to_str()
-            && !(name.starts_with("test_nosnapshot_") || name.starts_with("test_only_expand_"))
-        {
-            let filename = filename.clone();
-            yield TestCase {
-                name: format!("{step}::{}", filename.display()),
-                test_fn: Box::new(move |_context: &Context| {
-                    execute_step_test(filename, snapshot_name_prefix, step)
-                }),
-                expected_result: ExpectedResult::Success,
-            }
-        }
-    }
-}
-
-fn discover(pattern: &str) -> impl Iterator<Item = TestCase> {
-    glob::glob(pattern).unwrap().flat_map(|filename| {
-        let filename = filename.unwrap();
-        test_cases_from_filename(filename)
-    })
-}
-
-fn run_tests() {
+fn run_tests(cases: impl Iterator<Item = TestCase>) {
     let start = Instant::now();
 
-    let cases = discover("tests/cases/**/test_*.c").collect_vec();
+    let cases = cases.collect_vec();
     let case_count = cases.len();
     let digit_count = usize::try_from(case_count.ilog10() + 1).unwrap();
     println!("\nrunning {} tests", cases.len());
@@ -430,10 +357,10 @@ fn run_tests() {
     );
 }
 
-pub fn run() {
+pub fn run(cases: impl Iterator<Item = TestCase>) {
     color_eyre::install().unwrap();
 
-    match catch_unwind(run_tests) {
+    match catch_unwind(AssertUnwindSafe(|| run_tests(cases))) {
         Ok(()) => {}
         Err(panic) => eprintln!(
             "test setup panicked with {}",
