@@ -41,7 +41,7 @@ fn test_cases_from_filename(filename: PathBuf) -> impl Iterator<Item = TestCase>
             let filename = filename.clone();
             yield TestCase {
                 name: format!("execute::{}", filename.display()),
-                test_fn: Box::new(move |_context: &Context| execute_runtest(filename)),
+                test_fn: Box::new(move |context: &Context| execute_runtest(context, filename)),
                 expected_result: ExpectedResult::Success,
             };
         }

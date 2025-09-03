@@ -1,0 +1,36 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/preprocessor/test_macro_replacement_leads_to_macro_invocation.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      f~1 `fn(x: int) -> int`
+      (params
+         x~2 `int`)
+      (compound-statement
+         (return (multiply (name x~2 `int`) 3))))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (definition g~4 `int` 3)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (multiply 2
+                  (call (name g~4 `int`)
+                     9))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (multiply (multiply 2 9) (name g~4 `int`)))))))
+
+----- stderr -----

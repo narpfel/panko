@@ -1,0 +1,33 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/preprocessor/test_macro_replacement_leads_to_macro_invocation.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid operands to binary operator `*`
+    ╭─[panko/tests/cases/execute/preprocessor/test_macro_replacement_leads_to_macro_invocation.c:12:15]
+    │
+ 12 │ #define f(a) a*g
+    │               ─┬  
+    │                ╰── this is of type `void`
+    │ 
+ 18 │     printf("%d\n", f(2)(9));
+    │                      ┬  
+    │                      ╰── this is of type `int`
+────╯
+
+Error: value of type `int` is not callable because it is not a function or function pointer
+    ╭─[panko/tests/cases/execute/preprocessor/test_macro_replacement_leads_to_macro_invocation.c:12:16]
+    │
+ 12 │ #define f(a) a*g
+    │                ┬  
+    │                ╰── this is not callable because it is of type `int`
+────╯

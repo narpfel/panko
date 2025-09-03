@@ -7,6 +7,7 @@
 #![feature(unqualified_local_imports)]
 
 use std::borrow::Borrow;
+use std::cell::Cell;
 use std::collections::HashMap;
 use std::fmt;
 use std::io;
@@ -77,7 +78,21 @@ fn expand_escape_sequences(s: &str) -> String {
         .into_owned()
 }
 
-pub struct Context;
+pub struct Context {
+    expected_result: Cell<ExpectedResult>,
+}
+
+impl Context {
+    fn new(expected_result: ExpectedResult) -> Self {
+        Self {
+            expected_result: Cell::new(expected_result),
+        }
+    }
+
+    fn expect_failure(&self) {
+        self.expected_result.set(ExpectedResult::Failure);
+    }
+}
 
 pub trait TestFn {
     fn run(self: Box<Self>, context: &Context);
@@ -113,6 +128,7 @@ impl fmt::Display for TestResult {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum ExpectedResult {
     Success,
     Failure,
@@ -170,9 +186,11 @@ impl Drop for OutputCapture {
 impl TestCase {
     fn run(self) -> (String, TestResult, Vec<u8>) {
         let Self { name, test_fn, expected_result } = self;
-        let context = Context;
+        let context = Context::new(expected_result);
         let output_capture = OutputCapture::new();
-        let result = match catch_unwind(AssertUnwindSafe(|| test_fn.run(&context))) {
+        let result = catch_unwind(AssertUnwindSafe(|| test_fn.run(&context)));
+        let expected_result = context.expected_result.get();
+        let result = match result {
             Ok(()) => match expected_result {
                 ExpectedResult::Success => TestResult::Success,
                 ExpectedResult::Failure => TestResult::XPass,
@@ -187,8 +205,14 @@ impl TestCase {
     }
 }
 
-pub fn execute_runtest(filename: impl AsRef<Path>) {
+pub fn execute_runtest(context: &Context, filename: impl AsRef<Path>) {
     let source = std::fs::read_to_string(&filename).unwrap();
+
+    let known_bug_re = Regex::new(r"(?m)^// \[\[known-bug\]\]$").unwrap();
+    let is_known_bug = known_bug_re.is_match(&source);
+    if is_known_bug {
+        context.expect_failure();
+    }
 
     let expected_return_code_re =
         Regex::new(r"(?m)^// \[\[return: (?P<return_code>.*?)\]\]$").unwrap();
