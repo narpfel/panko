@@ -1,0 +1,71 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/preprocessor/test_empty_macro_before_open_paren.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition
+      (a~1 `fn() -> void` (static a))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 2>>` @16
+                        (string `array<char; 2>` @void "a\0"))))))))
+   (function-definition
+      (b~2 `fn() -> void` (static b))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 2>>` @16
+                        (string `array<char; 2>` @void "b\0"))))))))
+   (function-definition
+      (c~3 `fn() -> void` (static c))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 2>>` @16
+                        (string `array<char; 2>` @void "c\0"))))))))
+   (function-definition
+      (d~4 `fn() -> void` (static d))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 2>>` @16
+                        (string `array<char; 2>` @void "d\0"))))))))
+   (function-definition
+      (main~5 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (d~4 `fn() -> void` (static d)))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (d~4 `fn() -> void` (static d))))))))
+
+----- stderr -----

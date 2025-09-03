@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/preprocessor/test_empty_macro_before_open_paren.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      a~1 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "a")))))
+   (function-definition
+      b~2 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "b")))))
+   (function-definition
+      c~3 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "c")))))
+   (function-definition
+      d~4 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "d")))))
+   (function-definition
+      main~5 `fn() -> int`
+      (compound-statement
+         (expression (call (name d~4 `fn() -> void`)))
+         (expression (call (name d~4 `fn() -> void`))))))
+
+----- stderr -----
