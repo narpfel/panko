@@ -122,7 +122,7 @@ impl fmt::Display for TestResult {
             Self::Success => write!(f, "{FG_GREEN}.{RESET}"),
             Self::Failure => write!(f, "{FG_BOLD}{FG_RED}F{RESET}"),
             Self::XFail => write!(f, "{FG_BOLD}{FG_YELLOW}x{RESET}"),
-            Self::XPass => write!(f, "{FG_RED}X{RESET}"),
+            Self::XPass => write!(f, "{FG_BOLD}{FG_RED}X{RESET}"),
             Self::Skip => write!(f, "{FG_YELLOW}s{RESET}"),
         }
     }
@@ -188,7 +188,12 @@ impl TestCase {
         let Self { name, test_fn, expected_result } = self;
         let context = Context::new(expected_result);
         let output_capture = OutputCapture::new();
-        let result = catch_unwind(AssertUnwindSafe(|| test_fn.run(&context)));
+        let result = catch_unwind(AssertUnwindSafe(|| {
+            test_fn.run(&context);
+            if let ExpectedResult::Failure = context.expected_result.get() {
+                eprintln!("test {FG_BOLD}`{name}`{RESET} was marked xfail but passed");
+            }
+        }));
         let expected_result = context.expected_result.get();
         let result = match result {
             Ok(()) => match expected_result {
@@ -347,23 +352,28 @@ fn run_tests(cases: impl Iterator<Item = TestCase>) {
 
     let time = start.elapsed();
 
-    let failures = outcomes.get(TestResult::Failure);
-    let status = if failures.is_empty() {
+    let (failures, xpassed) = (
+        outcomes.get(TestResult::Failure),
+        outcomes.get(TestResult::XPass),
+    );
+    let is_failed = !failures.is_empty() || !xpassed.is_empty();
+    let status = if is_failed {
         format!("{FG_GREEN}ok{RESET}")
     }
     else {
         format!("{FG_RED}FAILED{RESET}")
     };
 
-    if !failures.is_empty() {
+    if is_failed {
         println!("\nfailures:\n");
-        for (name, output) in failures {
+        let failures = failures.iter().chain(xpassed).collect_vec();
+        for (name, output) in &failures {
             println!("---- {name} stdout ----");
             println!("{output}")
         }
 
         println!("\nfailures:");
-        for (name, _) in failures {
+        for (name, _) in &failures {
             println!("    {name}");
         }
         println!();
