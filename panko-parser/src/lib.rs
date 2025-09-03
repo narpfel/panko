@@ -1,8 +1,10 @@
 #![feature(assert_matches)]
+#![feature(closure_track_caller)]
 #![feature(coverage_attribute)]
 #![feature(gen_blocks)]
 #![feature(if_let_guard)]
 #![feature(never_type)]
+#![feature(stmt_expr_attributes)]
 #![feature(try_blocks)]
 #![feature(type_alias_impl_trait)]
 #![feature(unqualified_local_imports)]
@@ -350,7 +352,8 @@ impl<'a> TypeSpecifier<'a> {
         type Kind<'a> = TypeSpecifierKind<'a>;
         type Parsed<'a> = ParsedSpecifiers<'a>;
 
-        let error_full = |message: &'a str| {
+        let error_full = #[track_caller]
+        |message: &'a str| {
             let () = sess.emit(Diagnostic::InvalidTypeSpecifierCombination {
                 message,
                 at: *self,
@@ -360,7 +363,8 @@ impl<'a> TypeSpecifier<'a> {
             ty
         };
 
-        let error = || error_full("invalid combination of type specifiers");
+        let error = #[track_caller]
+        || error_full("invalid combination of type specifiers");
 
         match self.kind {
             Kind::Void => match ty {
