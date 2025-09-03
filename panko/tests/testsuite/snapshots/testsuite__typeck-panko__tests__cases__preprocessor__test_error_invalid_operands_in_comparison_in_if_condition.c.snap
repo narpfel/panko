@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_error_invalid_operands_in_comparison_in_if_condition.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: string literals are not allowed in preprocessor expressions
+   ╭─[panko/tests/cases/preprocessor/test_error_invalid_operands_in_comparison_in_if_condition.c:1:6]
+   │
+ 1 │ #if ("hello" < 1) || (0 > (0x7fff'ffff'ffff'ffff + 1))
+   │      ───────  
+───╯
+
+Error: error while evaluating constant expression: SignedOverflow
+   ╭─[panko/tests/cases/preprocessor/test_error_invalid_operands_in_comparison_in_if_condition.c:1:28]
+   │
+ 1 │ #if ("hello" < 1) || (0 > (0x7fff'ffff'ffff'ffff + 1))
+   │                            ────────────┬────────────  
+   │                                        ╰────────────── while evaluating this expression
+───╯

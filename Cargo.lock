@@ -670,16 +670,13 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "color-eyre",
+ "glob",
  "insta-cmd",
- "itertools",
  "panko-codegen",
+ "panko-compiletest",
  "panko-lex",
  "panko-parser",
  "panko-sema",
- "pretty_assertions",
- "regex",
- "rstest",
- "tempfile",
  "yansi",
 ]
 
@@ -693,6 +690,18 @@ dependencies = [
  "panko-parser",
  "panko-report",
  "panko-sema",
+]
+
+[[package]]
+name = "panko-compiletest"
+version = "0.1.0"
+dependencies = [
+ "color-eyre",
+ "insta-cmd",
+ "itertools",
+ "pretty_assertions",
+ "regex",
+ "tempfile",
 ]
 
 [[package]]
