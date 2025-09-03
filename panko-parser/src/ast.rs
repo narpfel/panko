@@ -49,6 +49,16 @@ enum Diagnostic<'a> {
         at: TypeQualifier<'a>,
     },
 
+    #[error("declaration with duplicate `{first}` storage class specifier")]
+    #[diagnostics(
+        first(colour = Blue, label = "first `{first}` here"),
+        at(colour = Red, label = "help: remove this `{at}`"),
+    )]
+    DuplicateStorageClassSpecifier {
+        first: cst::StorageClassSpecifier<'a>,
+        at: cst::StorageClassSpecifier<'a>,
+    },
+
     #[error("declaration does not specify a type")]
     #[diagnostics(at(colour = Red, label = "type missing"))]
     DeclarationWithoutType { at: cst::DeclarationSpecifiers<'a> },
@@ -626,7 +636,13 @@ pub(crate) fn parse_declaration_specifiers<'a>(
         match specifier {
             cst::DeclarationSpecifier::StorageClass(class)
                 if let StorageClassSpecifierKind::Typedef = class.kind =>
-                storage_class = Some(*class),
+                match &mut storage_class {
+                    storage_class @ None => *storage_class = Some(*class),
+                    Some(storage_class) => sess.emit(Diagnostic::DuplicateStorageClassSpecifier {
+                        first: *storage_class,
+                        at: *class,
+                    }),
+                },
             cst::DeclarationSpecifier::StorageClass(storage_class) => todo!("{storage_class:#?}"),
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Specifier(specifier)) =>
                 ty = specifier.parse(sess, specifiers, i, ty),

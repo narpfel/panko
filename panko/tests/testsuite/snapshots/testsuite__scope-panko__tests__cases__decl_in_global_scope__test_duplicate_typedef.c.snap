@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/decl_in_global_scope/test_duplicate_typedef.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: declaration with duplicate `typedef` storage class specifier
+   ╭─[panko/tests/cases/decl_in_global_scope/test_duplicate_typedef.c:1:9]
+   │
+ 1 │ typedef typedef int x;
+   │ ───┬─── ───┬───  
+   │    │       ╰───── help: remove this `typedef`
+   │    │             
+   │    ╰───────────── first `typedef` here
+───╯

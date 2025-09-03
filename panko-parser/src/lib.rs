@@ -242,6 +242,10 @@ impl<'a> StorageClassSpecifier<'a> {
     fn loc(&self) -> Loc<'a> {
         self.token.loc()
     }
+
+    fn slice(&self) -> &'a str {
+        self.token.slice()
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
