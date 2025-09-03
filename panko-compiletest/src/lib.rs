@@ -357,11 +357,9 @@ fn run_tests(cases: impl Iterator<Item = TestCase>) {
         outcomes.get(TestResult::XPass),
     );
     let is_failed = !failures.is_empty() || !xpassed.is_empty();
-    let status = if is_failed {
-        format!("{FG_GREEN}ok{RESET}")
-    }
-    else {
-        format!("{FG_RED}FAILED{RESET}")
+    let status = match is_failed {
+        true => format!("{FG_RED}FAILED{RESET}"),
+        false => format!("{FG_GREEN}ok{RESET}"),
     };
 
     if is_failed {
