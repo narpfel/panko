@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/pointers/test_ptr_cmp_between_differently_qualified_pointers.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: comparison of pointers to incompatible types
+   ╭─[panko/tests/cases/execute/pointers/test_ptr_cmp_between_differently_qualified_pointers.c:8:14]
+   │
+ 8 │     return p == p2;
+   │            ┬ ─┬ ─┬  
+   │            │  │  ╰── this is of type `ptr<int const>`
+   │            │  │     
+   │            │  ╰───── pointer comparisons are only allowed between pointers to compatible types
+   │            │        
+   │            ╰──────── this is of type `ptr<int>`
+───╯
