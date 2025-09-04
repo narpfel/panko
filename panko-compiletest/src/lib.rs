@@ -172,7 +172,7 @@ impl OutputCapture {
         }
     }
 
-    fn get(&self) -> Vec<u8> {
+    fn get(self) -> Vec<u8> {
         std::mem::take(&mut self.output.lock().unwrap())
     }
 }
