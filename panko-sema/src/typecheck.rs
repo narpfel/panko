@@ -1235,7 +1235,7 @@ fn convert<'a>(
         (Type::Function(_), _) =>
             sess.emit(Diagnostic::IllegalInitialiserForFunction { at: expr, ty: target }),
 
-        (Type::BOOL, Type::Pointer(_)) => convert(),
+        (Type::BOOL, Type::Pointer(_) | Type::Nullptr) => convert(),
 
         (Type::Pointer(_), Type::Nullptr) => convert(),
 
