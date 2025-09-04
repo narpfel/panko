@@ -1671,6 +1671,12 @@ fn typeck_binop<'a>(
         (Type::Pointer(lhs_pointee_ty), Type::Pointer(rhs_pointee_ty))
             if matches!(op.kind, BinOpKind::Subtract) =>
             typeck_ptrdiff(sess, op, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
+        // TODO: allow `nullptr <op> <null pointer constant>`
+        (Type::Nullptr, Type::Nullptr | Type::Pointer(_)) | (Type::Pointer(_), Type::Nullptr)
+            if matches!(op.kind, BinOpKind::Equal | BinOpKind::NotEqual) =>
+        // TODO: this will generate `PtrCmp` operations with different parameter types, maybe
+        // insert some `NoopTypeConversion`s?
+            typeck_ptrcmp(sess, lhs, *op, rhs),
         _ => sess.emit(Diagnostic::InvalidOperandsForBinaryOperator { at: *op, lhs, rhs }),
     }
 }
@@ -1869,7 +1875,8 @@ fn typeck_ptrcmp<'a>(
     rhs: TypedExpression<'a>,
 ) -> TypedExpression<'a> {
     // TODO: should check for type compatibility, not exact equality
-    let expr = if lhs.ty.ty != rhs.ty.ty {
+    let expr = if lhs.ty.ty != Type::Nullptr && rhs.ty.ty != Type::Nullptr && lhs.ty.ty != rhs.ty.ty
+    {
         sess.emit(Diagnostic::IncompatibleTypesInPtrCmp { at: op.token, lhs, rhs })
     }
     else {
