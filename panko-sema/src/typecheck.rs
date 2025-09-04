@@ -708,6 +708,7 @@ pub(crate) enum Expression<'a> {
     SignExtend(&'a TypedExpression<'a>),
     ZeroExtend(&'a TypedExpression<'a>),
     VoidCast(&'a TypedExpression<'a>),
+    BoolCast(&'a TypedExpression<'a>),
     Parenthesised {
         open_paren: Token<'a>,
         expr: &'a TypedExpression<'a>,
@@ -884,6 +885,7 @@ impl<'a> TypedExpression<'a> {
             | Expression::SignExtend(_)
             | Expression::ZeroExtend(_)
             | Expression::VoidCast(_)
+            | Expression::BoolCast(_)
             | Expression::Assign { .. }
             | Expression::IntegralBinOp { .. }
             | Expression::PtrAdd { .. }
@@ -921,7 +923,8 @@ impl<'a> Expression<'a> {
             | Expression::Truncate(inner)
             | Expression::SignExtend(inner)
             | Expression::ZeroExtend(inner)
-            | Expression::VoidCast(inner) => inner.loc(),
+            | Expression::VoidCast(inner)
+            | Expression::BoolCast(inner) => inner.loc(),
             Expression::Assign { target, value } => target.loc().until(value.loc()),
             Expression::Parenthesised { open_paren, expr: _, close_paren } =>
                 open_paren.loc().until(close_paren.loc()),
@@ -1202,10 +1205,11 @@ fn convert<'a>(
         _ => Expression::ZeroExtend,
     };
     let convert = || {
-        let cast = match target_ty.size().cmp(&expr_ty.size()) {
-            Ordering::Less => Expression::Truncate,
-            Ordering::Equal => Expression::NoopTypeConversion,
-            Ordering::Greater => extend_kind,
+        let cast = match (target_ty, target_ty.size().cmp(&expr_ty.size())) {
+            (Type::BOOL, _) => Expression::BoolCast,
+            (_, Ordering::Less) => Expression::Truncate,
+            (_, Ordering::Equal) => Expression::NoopTypeConversion,
+            (_, Ordering::Greater) => extend_kind,
         };
         cast(sess.alloc(expr))
     };
@@ -1227,6 +1231,8 @@ fn convert<'a>(
         // TODO: handle nullptr literals
         (Type::Function(_), _) =>
             sess.emit(Diagnostic::IllegalInitialiserForFunction { at: expr, ty: target }),
+
+        (Type::BOOL, Type::Pointer(_)) => convert(),
 
         (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(_))
         | (Type::Pointer(_), Type::Arithmetic(Arithmetic::Integral(_)))
@@ -1582,14 +1588,16 @@ fn compare_by_size_with_unsigned_as_tie_breaker(ty: &Arithmetic) -> impl Ord + u
 
 fn integral_promote(ty: Arithmetic) -> Arithmetic {
     match ty {
-        Arithmetic::Integral(Integral {
-            signedness: _,
-            kind: IntegralKind::PlainChar | IntegralKind::Char | IntegralKind::Short,
-        }) => Arithmetic::Integral(Integral {
-            signedness: Signedness::Signed,
-            kind: IntegralKind::Int,
-        }),
-        ty => ty,
+        Arithmetic::Integral(int) => match int.kind {
+            IntegralKind::Bool
+            | IntegralKind::PlainChar
+            | IntegralKind::Char
+            | IntegralKind::Short => Arithmetic::Integral(Integral {
+                signedness: Signedness::Signed,
+                kind: IntegralKind::Int,
+            }),
+            IntegralKind::Int | IntegralKind::Long | IntegralKind::LongLong => ty,
+        },
     }
 }
 
@@ -2220,6 +2228,18 @@ fn parse_string_literal<'a>(sess: &'a Session<'a>, tokens: &[Token<'a>]) -> Stri
     }
 }
 
+fn typeck_bool_literal<'a>(token: &Token<'a>) -> TypedExpression<'a> {
+    let value = match token.kind {
+        TokenKind::False => 0,
+        TokenKind::True => 1,
+        _ => unreachable!(),
+    };
+    TypedExpression {
+        ty: Type::bool().unqualified(),
+        expr: Expression::Integer { value, token: *token },
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 enum Context {
     Default,
@@ -2244,9 +2264,10 @@ fn typeck_expression<'a>(
             }
         }
         scope::Expression::Integer { value, token } => {
-            let TokenKind::Integer(Integer { suffix, suffix_len, base, prefix_len }) = token.kind
-            else {
-                unreachable!()
+            let Integer { suffix, suffix_len, base, prefix_len } = match token.kind {
+                TokenKind::Integer(int) => int,
+                TokenKind::True | TokenKind::False => return typeck_bool_literal(token),
+                _ => unreachable!(),
             };
             let number = &value[prefix_len..value.len() - suffix_len];
             let number: String = number.chars().filter(|&c| c != '\'').collect();

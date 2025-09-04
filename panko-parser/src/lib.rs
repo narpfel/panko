@@ -466,6 +466,13 @@ impl<'a> TypeSpecifier<'a> {
                 Parsed::None => Parsed::Typedef(self.token),
                 _ => error(),
             },
+            Kind::Bool => match ty {
+                Parsed::None => Parsed::Int {
+                    signedness: Some(Signedness::Unsigned),
+                    kind: Some(IntegralKind::Bool),
+                },
+                _ => error(),
+            },
             _ => todo!("unimplemented type specifier: {self:#?}"),
         }
     }

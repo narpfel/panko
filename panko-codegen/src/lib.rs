@@ -421,6 +421,7 @@ impl<'a> Codegen<'a> {
                 Expression::SignExtend(_) => todo!(),
                 Expression::ZeroExtend(_) => todo!(),
                 Expression::VoidCast(_) => todo!(),
+                Expression::BoolCast(_) => todo!(),
                 Expression::Assign { .. } => todo!(),
                 Expression::IntegralBinOp { .. } => todo!(),
                 Expression::PtrAdd { .. } => todo!(),
@@ -660,6 +661,12 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
             Expression::VoidCast(expr) => self.expr(expr),
+            Expression::BoolCast(inner) => {
+                self.expr(inner);
+                self.emit_args("cmp", &[inner, &0]);
+                self.emit("setne al");
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
+            }
             Expression::Assign { target, value } => match target.expr {
                 Expression::Name(_) => {
                     self.expr(target);

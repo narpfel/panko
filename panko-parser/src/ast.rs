@@ -233,6 +233,7 @@ pub struct Integral {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum IntegralKind {
+    Bool,
     PlainChar,
     /// explicitly `signed char` or `unsigned char`
     Char,
@@ -358,8 +359,8 @@ impl fmt::Display for Type<'_> {
 impl fmt::Display for Integral {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { kind, signedness } = self;
-        if let (IntegralKind::Char, signedness) | (_, signedness @ Signedness::Unsigned) =
-            (kind, signedness)
+        if !matches!(kind, IntegralKind::Bool)
+            && let (IntegralKind::Char, _) | (_, Signedness::Unsigned) = (kind, signedness)
         {
             write!(f, "{signedness} ")?;
         }
@@ -500,17 +501,18 @@ impl Arithmetic {
 
     pub fn conversion_rank(&self) -> u64 {
         match self {
+            Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Bool }) => 1,
             Arithmetic::Integral(Integral {
                 signedness: _,
                 kind: IntegralKind::Char | IntegralKind::PlainChar,
-            }) => 1,
-            Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Short }) => 2,
-            Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Int }) => 3,
-            Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Long }) => 4,
+            }) => 2,
+            Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Short }) => 3,
+            Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Int }) => 4,
+            Arithmetic::Integral(Integral { signedness: _, kind: IntegralKind::Long }) => 5,
             Arithmetic::Integral(Integral {
                 signedness: _,
                 kind: IntegralKind::LongLong,
-            }) => 5,
+            }) => 6,
         }
     }
 }
@@ -532,12 +534,14 @@ impl Integral {
         u64: TryFrom<T>,
     {
         match (self.signedness, self.kind) {
+            (Signedness::Signed, IntegralKind::Bool) => unreachable!(),
             (Signedness::Signed, IntegralKind::PlainChar) => i8::try_from(value).is_ok(),
             (Signedness::Signed, IntegralKind::Char) => i8::try_from(value).is_ok(),
             (Signedness::Signed, IntegralKind::Short) => i16::try_from(value).is_ok(),
             (Signedness::Signed, IntegralKind::Int) => i32::try_from(value).is_ok(),
             (Signedness::Signed, IntegralKind::Long) => i64::try_from(value).is_ok(),
             (Signedness::Signed, IntegralKind::LongLong) => i64::try_from(value).is_ok(),
+            (Signedness::Unsigned, IntegralKind::Bool) => matches!(u8::try_from(value), Ok(0 | 1)),
             (Signedness::Unsigned, IntegralKind::PlainChar) => unreachable!(),
             (Signedness::Unsigned, IntegralKind::Char) => u8::try_from(value).is_ok(),
             (Signedness::Unsigned, IntegralKind::Short) => u16::try_from(value).is_ok(),
@@ -551,6 +555,7 @@ impl Integral {
 impl IntegralKind {
     fn size(&self) -> u64 {
         match self {
+            IntegralKind::Bool => 1,
             IntegralKind::PlainChar => 1,
             IntegralKind::Char => 1,
             IntegralKind::Short => 2,
@@ -564,6 +569,7 @@ impl IntegralKind {
 impl fmt::Display for IntegralKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            IntegralKind::Bool => write!(f, "bool"),
             IntegralKind::PlainChar => write!(f, "char"),
             IntegralKind::Char => write!(f, "char"),
             IntegralKind::Short => write!(f, "short"),

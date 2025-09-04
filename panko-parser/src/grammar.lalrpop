@@ -123,6 +123,9 @@ extern {
         "." => Token { kind: TokenKind::Dot, .. },
         "..." => Token { kind: TokenKind::Ellipsis, .. },
 
+        "true" => Token { kind: TokenKind::True, .. },
+        "false" => Token { kind: TokenKind::False, .. },
+
         Identifier => Token { kind: TokenKind::Identifier, .. },
         TypedefName => Token { kind: TokenKind::TypeIdentifier, .. },
         Integer => Token { kind: TokenKind::Integer(_), .. },
@@ -591,6 +594,7 @@ PrimaryExpression: ast::Expression<'a> = {
     Identifier => ast::Expression::Name(<>),
     Integer => ast::Expression::Integer(<>),
     CharConstant => ast::Expression::CharConstant(<>),
+    PredefinedConstant,
     Some<String> => ast::Expression::String(<>),
     <open_paren:"("> <expr:Bump<Expression>> <close_paren:")"> => ast::Expression::Parenthesised { <> },
     <generic:"_Generic"> "("
@@ -818,6 +822,12 @@ CharConstant: ast::Token<'a> = {
             Err(sess.alloc(ast::Error::UnterminatedCharConstant { at: token.loc() }).into())
         }
     },
+}
+
+PredefinedConstant: ast::Expression<'a> = {
+    "true" => ast::Expression::Integer(<>),
+    "false" => ast::Expression::Integer(<>),
+    // TODO: nullptr
 }
 
 Bump<T>: &'a T = {

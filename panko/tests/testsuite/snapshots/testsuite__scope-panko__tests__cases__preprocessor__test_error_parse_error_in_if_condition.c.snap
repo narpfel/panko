@@ -17,7 +17,7 @@ Error: unexpected token `/` of kind `Slash`
    │
  1 │ #if 2 * / 2
    │         ┬  
-   │         ╰── expected one of the following token kinds: ["*", "(", "_Generic", "sizeof", "_Lengthof", "alignof", "+", "-", "~", "!", "&", "++", "--", Identifier, Integer, MaybeUnterminatedCharConstant, MaybeUnterminatedString]
+   │         ╰── expected one of the following token kinds: ["*", "(", "_Generic", "sizeof", "_Lengthof", "alignof", "+", "-", "~", "!", "&", "++", "--", "true", "false", Identifier, Integer, MaybeUnterminatedCharConstant, MaybeUnterminatedString]
 ───╯
 
 Error: unexpected token `)` of kind `RParen`
@@ -25,5 +25,5 @@ Error: unexpected token `)` of kind `RParen`
    │
  4 │ #if false && (1 +)
    │                  ┬  
-   │                  ╰── expected one of the following token kinds: ["*", "(", "_Generic", "sizeof", "_Lengthof", "alignof", "+", "-", "~", "!", "&", "++", "--", Identifier, Integer, MaybeUnterminatedCharConstant, MaybeUnterminatedString]
+   │                  ╰── expected one of the following token kinds: ["*", "(", "_Generic", "sizeof", "_Lengthof", "alignof", "+", "-", "~", "!", "&", "++", "--", "true", "false", Identifier, Integer, MaybeUnterminatedCharConstant, MaybeUnterminatedString]
 ───╯

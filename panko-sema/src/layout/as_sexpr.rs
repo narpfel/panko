@@ -134,6 +134,7 @@ impl AsSExpr for Expression<'_> {
             Expression::SignExtend(from) => SExpr::new("sign-extend").inherit(from),
             Expression::ZeroExtend(from) => SExpr::new("zero-extend").inherit(from),
             Expression::VoidCast(from) => SExpr::new("void-cast").inherit(from),
+            Expression::BoolCast(from) => SExpr::new("bool-cast").inherit(from),
             Expression::Assign { target, value } => SExpr::new("assign").lines([target, value]),
             Expression::IntegralBinOp { ty: _, lhs, op, rhs } =>
                 SExpr::new(op.str()).lines([lhs, rhs]),

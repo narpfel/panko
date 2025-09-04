@@ -174,6 +174,15 @@ pub enum Type<'a, TypeofExpr, LengthExpr> {
 }
 
 impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
+    pub(crate) const BOOL: Self = Self::bool();
+
+    pub(crate) const fn bool() -> Self {
+        Self::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::Bool,
+        }))
+    }
+
     pub(crate) const fn char() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Signed,
