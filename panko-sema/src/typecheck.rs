@@ -700,6 +700,7 @@ pub(crate) enum Expression<'a> {
         token: Token<'a>,
     },
     String(StringLiteral<'a>),
+    Nullptr(Token<'a>),
     NoopTypeConversion(&'a TypedExpression<'a>),
     // TODO: `Truncate`, `SignExtend`, `ZeroExtend` and `VoidCast` lose location information when
     // representing an explicit cast. They should take an optional location (or better:
@@ -879,7 +880,8 @@ impl<'a> TypedExpression<'a> {
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.is_lvalue(),
             Expression::Deref { .. } => self.ty.ty.is_object() && !matches!(self.ty.ty, Type::Void),
             Expression::String(_) => true,
-            Expression::Integer { .. }
+            Expression::Nullptr(_)
+            | Expression::Integer { .. }
             | Expression::NoopTypeConversion(_)
             | Expression::Truncate(_)
             | Expression::SignExtend(_)
@@ -919,6 +921,7 @@ impl<'a> Expression<'a> {
             Expression::Name(reference) => reference.loc(),
             Expression::Integer { value: _, token } => token.loc(),
             Expression::String(string) => string.loc(),
+            Expression::Nullptr(nullptr) => nullptr.loc(),
             Expression::NoopTypeConversion(inner)
             | Expression::Truncate(inner)
             | Expression::SignExtend(inner)
@@ -1069,7 +1072,7 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Function(FunctionType { params, return_type, is_varargs }) => {
             let return_type = sess.alloc(typeck_ty(sess, *return_type, IsParameter::No));
             match return_type.ty {
-                Type::Arithmetic(_) | Type::Pointer(_) | Type::Void => (),
+                Type::Arithmetic(_) | Type::Pointer(_) | Type::Void | Type::Nullptr => (),
                 Type::Array(_) | Type::Function(_) =>
                     sess.emit(Diagnostic::InvalidFunctionReturnType {
                         at: return_type.loc,
@@ -1111,6 +1114,7 @@ fn typeck_ty_with_initialiser<'a>(
                 }
             };
         }
+        ty::Type::Nullptr => Type::Nullptr,
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -1191,7 +1195,6 @@ fn convert<'a>(
     kind: ConversionKind,
 ) -> TypedExpression<'a> {
     // TODO: forbid ptr <=> float
-    // TODO: only allow nullptr => {bool, void, ptr<T>}
     // TODO: if target is nullptr_t, expr must be nullptr or a null pointer constant
     // TODO: check that target is a scalar type or void
     // TODO: check that expr_ty is a scalar type when target_ty != void
@@ -1226,14 +1229,17 @@ fn convert<'a>(
             else {
                 convert()
             },
+
         // TODO: clang (but not gcc) allows implicitly converting `Type::Function(_)` to
         // `Type::Pointer(_)` (with a warning).
-        // TODO: handle nullptr literals
         (Type::Function(_), _) =>
             sess.emit(Diagnostic::IllegalInitialiserForFunction { at: expr, ty: target }),
 
         (Type::BOOL, Type::Pointer(_)) => convert(),
 
+        (Type::Pointer(_), Type::Nullptr) => convert(),
+
+        // TODO: handle nullptr literals
         (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(_))
         | (Type::Pointer(_), Type::Arithmetic(Arithmetic::Integral(_)))
             if kind == ConversionKind::Explicit =>
@@ -2314,6 +2320,10 @@ fn typeck_expression<'a>(
                 expr: Expression::String(string),
             }
         }
+        scope::Expression::Nullptr(nullptr) => TypedExpression {
+            ty: Type::Nullptr.unqualified(),
+            expr: Expression::Nullptr(*nullptr),
+        },
         scope::Expression::Parenthesised { open_paren, expr, close_paren } => {
             let expr = sess.alloc(typeck_expression(sess, expr, context));
             TypedExpression {
@@ -2817,9 +2827,10 @@ fn typeck_expression<'a>(
                 }
                 (Type::Array(_), _) | (_, Type::Array(_)) => unreachable!(),
                 (Type::Function(_), _) | (_, Type::Function(_)) => unreachable!(),
-                (Type::Arithmetic(_), Type::Pointer(_) | Type::Void)
+                (Type::Arithmetic(_), Type::Pointer(_) | Type::Void | Type::Nullptr)
                 | (Type::Pointer(_), Type::Arithmetic(_) | Type::Void)
-                | (Type::Void, _) => {
+                | (Type::Void, _)
+                | (Type::Nullptr, Type::Arithmetic(_) | Type::Void) => {
                     // TODO: use this error
                     let () = sess.emit(Diagnostic::ConditionalExprOperandTypesIncompatible {
                         at: *question_mark,
@@ -2829,6 +2840,8 @@ fn typeck_expression<'a>(
                     });
                     then.ty.ty
                 }
+                (Type::Nullptr, ty @ (Type::Pointer(_) | Type::Nullptr))
+                | (ty @ Type::Pointer(_), Type::Nullptr) => ty,
             };
             let result_ty = result_ty.unqualified();
             TypedExpression {

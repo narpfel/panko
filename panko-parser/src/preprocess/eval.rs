@@ -447,6 +447,8 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
         Expression::CharConstant(_token) => todo!(),
         Expression::String(_) =>
             sess.emit(Diagnostic::InvalidExpression { at: *expr, kind: "string literals" }),
+        Expression::Nullptr(_) =>
+            sess.emit(Diagnostic::InvalidExpression { at: *expr, kind: "nullptr literals" }),
         Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => eval(sess, expr),
         Expression::Assign { .. } =>
             sess.emit(Diagnostic::InvalidExpression { at: *expr, kind: "assignments" }),

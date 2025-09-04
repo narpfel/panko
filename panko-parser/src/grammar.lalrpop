@@ -125,6 +125,7 @@ extern {
 
         "true" => Token { kind: TokenKind::True, .. },
         "false" => Token { kind: TokenKind::False, .. },
+        "nullptr" => Token { kind: TokenKind::Nullptr, .. },
 
         Identifier => Token { kind: TokenKind::Identifier, .. },
         TypedefName => Token { kind: TokenKind::TypeIdentifier, .. },
@@ -827,7 +828,7 @@ CharConstant: ast::Token<'a> = {
 PredefinedConstant: ast::Expression<'a> = {
     "true" => ast::Expression::Integer(<>),
     "false" => ast::Expression::Integer(<>),
-    // TODO: nullptr
+    "nullptr" => ast::Expression::Nullptr(<>),
 }
 
 Bump<T>: &'a T = {

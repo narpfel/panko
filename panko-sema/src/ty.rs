@@ -170,6 +170,7 @@ pub enum Type<'a, TypeofExpr, LengthExpr> {
     Function(FunctionType<'a, TypeofExpr, LengthExpr>),
     Void,
     Typeof { expr: TypeofExpr, unqual: bool },
+    Nullptr,
     // TODO
 }
 
@@ -328,10 +329,7 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
     }
 
     pub(crate) fn is_scalar(&self) -> bool {
-        matches!(
-            self,
-            Type::Arithmetic(_) | Type::Pointer(_), // TODO: | Type::Nullptr
-        )
+        matches!(self, Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr)
     }
 
     pub fn is_array(&self) -> bool {
@@ -360,6 +358,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Function(_) => unreachable!("functions are not objects and don’t have a size"),
             Type::Void => unreachable!("void is not an object and doesn’t have a size"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
+            Type::Nullptr => 8,
         }
     }
 
@@ -372,6 +371,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
                 unreachable!("functions are not objects and don’t have an alignment"),
             Type::Void => unreachable!("void is not an object and doesn’t have an alignment"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
+            Type::Nullptr => 8,
         }
     }
 
@@ -386,6 +386,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Array(ArrayType { ty: _, length, loc: _ }) => length.is_known(),
             Type::Void => false,
             Type::Typeof { expr, unqual: _ } => match *expr {},
+            Type::Nullptr => true,
         }
     }
 
@@ -420,6 +421,7 @@ where
             Type::Function(function) => write!(f, "{function}"),
             Type::Void => write!(f, "void"),
             Type::Typeof { .. } => todo!(),
+            Type::Nullptr => write!(f, "nullptr_t"),
         }
     }
 }

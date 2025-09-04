@@ -141,6 +141,7 @@ impl AsSExpr for Expression<'_> {
             Expression::Integer { value, token: _ } => SExpr::string(Cow::Borrowed(*value)),
             Expression::CharConstant(char) => SExpr::string(char.slice()),
             Expression::String(tokens) => SExpr::new("string").inherit_many(*tokens),
+            Expression::Nullptr(nullptr) => SExpr::string(nullptr.slice()),
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.as_sexpr(),
             Expression::Assign { target, value } =>
                 SExpr::new("assign").inherit(target).inherit(value),

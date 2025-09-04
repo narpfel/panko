@@ -1,0 +1,44 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/nullptr/test_nullptr_to_ptr_conversion.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration puts~1 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (definition p~3 `ptr<int>` nullptr)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%p\n")
+               (cast `ptr<void>` (name p~3 `ptr<int>`))))
+         (expression
+            (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+               (conditional
+                  (name p~3 `ptr<int>`)
+                  (string "truthy")
+                  (string "falsy"))))
+         (expression
+            (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+               (conditional
+                  (addressof (name p~3 `ptr<int>`))
+                  (string "truthy")
+                  (string "falsy"))))
+         (expression
+            (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+               (conditional
+                  nullptr
+                  (string "someptr")
+                  (string "nullptr"))))
+         (return (cast `unsigned long` (cast `ptr<int>` nullptr))))))
+
+----- stderr -----

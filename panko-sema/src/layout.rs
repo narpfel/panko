@@ -120,6 +120,7 @@ pub enum Expression<'a> {
     Name(Reference<'a>),
     Integer(u64),
     String(&'a ByteStr),
+    Nullptr,
     NoopTypeConversion(&'a LayoutedExpression<'a>),
     Truncate(&'a LayoutedExpression<'a>),
     SignExtend(&'a LayoutedExpression<'a>),
@@ -282,6 +283,7 @@ fn layout_ty<'a>(
                 is_varargs,
             }),
         ty::Type::Void => Type::Void,
+        ty::Type::Nullptr => Type::Nullptr,
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -427,6 +429,7 @@ fn layout_expression_in_slot<'a>(
             stack.temporary(Type::Void),
             Expression::String(string.value()),
         ),
+        typecheck::Expression::Nullptr(_nullptr) => (make_slot(), Expression::Nullptr),
         typecheck::Expression::NoopTypeConversion(expr) => {
             let expr = layout_expression_in_slot(stack, bump, expr, target_slot);
             (expr.slot, Expression::NoopTypeConversion(bump.alloc(expr)))

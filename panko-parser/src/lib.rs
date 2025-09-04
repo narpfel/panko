@@ -887,6 +887,7 @@ pub enum Expression<'a> {
     Integer(Token<'a>),
     CharConstant(Token<'a>),
     String(&'a [Token<'a>]),
+    Nullptr(Token<'a>),
     Parenthesised {
         open_paren: Token<'a>,
         expr: &'a Expression<'a>,
@@ -976,6 +977,7 @@ impl<'a> Expression<'a> {
             Self::Integer(token) => token.loc(),
             Self::CharConstant(token) => token.loc(),
             Self::String(tokens) => preprocess::tokens_loc(tokens),
+            Self::Nullptr(token) => token.loc(),
             Self::Parenthesised { open_paren, expr: _, close_paren } =>
                 open_paren.loc().until(close_paren.loc()),
             Self::Assign { target, value } => target.loc().until(value.loc()),

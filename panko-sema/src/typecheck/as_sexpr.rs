@@ -137,6 +137,7 @@ impl AsSExpr for Expression<'_> {
             Expression::Integer { value: _, token } => SExpr::string(token.slice()),
             Expression::String(string) =>
                 SExpr::new("string").inline_string(format!("{:?}", string.value())),
+            Expression::Nullptr(nullptr) => SExpr::string(nullptr.slice()),
             Expression::NoopTypeConversion(expr) =>
                 SExpr::new("noop-type-conversion").inherit(expr),
             Expression::Truncate(truncate) => SExpr::new("truncate").inherit(truncate),

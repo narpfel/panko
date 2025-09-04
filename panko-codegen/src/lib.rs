@@ -130,7 +130,7 @@ impl Register {
 impl Display for TypedRegister<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let size = match self.ty {
-            Type::Arithmetic(_) | Type::Pointer(_) => self.ty.size(),
+            Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => self.ty.size(),
             Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
             Type::Typeof { expr, unqual: _ } => match *expr {},
         };
@@ -289,7 +289,7 @@ impl<'a> Codegen<'a> {
         let ty = tgt.ty();
         assert_eq!(ty, src.ty());
         match ty {
-            Type::Arithmetic(_) | Type::Pointer(_) => {
+            Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => {
                 self.emit_args("mov", &[&Rax.with_ty(ty), &src]);
                 self.emit_args("mov", &[&tgt, &Rax.with_ty(ty)]);
             }
@@ -416,6 +416,7 @@ impl<'a> Codegen<'a> {
                 Expression::String(_string) => unreachable!(
                     "either contained in a `noop-type-conversion` or in an initialiser",
                 ),
+                Expression::Nullptr => self.zero(ty.size()),
                 Expression::NoopTypeConversion(_) => todo!(),
                 Expression::Truncate(_) => todo!(),
                 Expression::SignExtend(_) => todo!(),
@@ -636,6 +637,10 @@ impl<'a> Codegen<'a> {
             Expression::String(_string) => unreachable!(
                 "strings are either used as array initialisers or as operands to addressof operators, but never separately",
             ),
+            Expression::Nullptr => {
+                self.emit("xor eax, eax");
+                self.emit_args("mov", &[expr, &Rax.typed(expr)]);
+            }
             Expression::NoopTypeConversion(inner) => {
                 assert_eq!(expr.ty.ty.size(), inner.ty.ty.size());
                 assert_eq!(expr.slot, inner.slot);
