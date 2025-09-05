@@ -60,6 +60,7 @@ extern {
         "_Decimal32" => Token { kind: TokenKind::Decimal32, .. },
         "_Decimal64" => Token { kind: TokenKind::Decimal64, .. },
         "_Decimal128" => Token { kind: TokenKind::Decimal128, .. },
+        "typeof" => Token { kind: TokenKind::Typeof, .. },
 
         // TypeQualifierToken
         "const" => Token { kind: TokenKind::Const, .. },
@@ -491,7 +492,7 @@ TypeSpecifier: ast::TypeSpecifier<'a> = {
     StructOrUnionSpecifier => todo!(),
     EnumSpecifier => todo!(),
     TypedefName => ast::TypeSpecifier::new(<>),
-    TypeofSpecifier => todo!(),
+    TypeofSpecifier,
 }
 
 TypeSpecifierToken = {
@@ -515,7 +516,16 @@ BitIntTypeSpecifier: () = {}
 AtomicTypeSpecifier: () = {}
 StructOrUnionSpecifier: () = {}
 EnumSpecifier: () = {}
-TypeofSpecifier: () = {}
+TypeofSpecifier: ast::TypeSpecifier<'a> = {
+    <token:"typeof"> "(" <expr:Bump<Expression>> ")" =>
+        ast::TypeSpecifier {
+            token,
+            kind: ast::TypeSpecifierKind::Typeof {
+                unqual: false,
+                expr,
+            },
+        },
+}
 
 TypeQualifier: ast::TypeQualifier<'a> = {
     TypeQualifierToken => ast::TypeQualifier::new(<>),

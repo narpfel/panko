@@ -473,6 +473,10 @@ impl<'a> TypeSpecifier<'a> {
                 },
                 _ => error(),
             },
+            Kind::Typeof { unqual, expr } => match ty {
+                Parsed::None => Parsed::Typeof { unqual, expr },
+                _ => error(),
+            },
             _ => todo!("unimplemented type specifier: {self:#?}"),
         }
     }
@@ -504,7 +508,10 @@ enum TypeSpecifierKind<'a> {
     // struct-or-union-specifier
     // enum-specifier
     TypedefName,
-    // typeof-specifier
+    Typeof {
+        unqual: bool,
+        expr: &'a Expression<'a>,
+    },
 }
 
 fn type_specifier_kind(token_kind: TokenKind) -> TypeSpecifierKind<'static> {

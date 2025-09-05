@@ -420,7 +420,12 @@ where
             Type::Array(array) => write!(f, "{array}"),
             Type::Function(function) => write!(f, "{function}"),
             Type::Void => write!(f, "void"),
-            Type::Typeof { .. } => todo!(),
+            Type::Typeof { expr, unqual } => write!(
+                f,
+                "typeof{}({})",
+                if *unqual { "_unqual" } else { "" },
+                expr.as_sexpr(),
+            ),
             Type::Nullptr => write!(f, "nullptr_t"),
         }
     }

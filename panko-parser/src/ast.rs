@@ -217,6 +217,10 @@ pub enum Type<'a> {
     Function(FunctionType<'a>),
     Void,
     Typedef(Token<'a>),
+    Typeof {
+        unqual: bool,
+        expr: &'a Expression<'a>,
+    },
     // TODO
 }
 
@@ -352,6 +356,12 @@ impl fmt::Display for Type<'_> {
             Type::Function(function) => write!(f, "{function}"),
             Type::Void => write!(f, "void"),
             Type::Typedef(name) => write!(f, "typedef<{}>", name.slice()),
+            Type::Typeof { unqual, expr } => write!(
+                f,
+                "typeof{}({})",
+                if *unqual { "_unqual" } else { "" },
+                expr.as_sexpr(),
+            ),
         }
     }
 }
@@ -604,6 +614,10 @@ pub(crate) enum ParsedSpecifiers<'a> {
         signedness: Option<Signedness>,
     },
     Typedef(Token<'a>),
+    Typeof {
+        unqual: bool,
+        expr: &'a Expression<'a>,
+    },
 }
 
 impl<'a> ParsedSpecifiers<'a> {
@@ -626,6 +640,7 @@ impl<'a> ParsedSpecifiers<'a> {
                 kind: kind.unwrap_or(IntegralKind::Int),
             })),
             Self::Typedef(token) => Type::Typedef(token),
+            Self::Typeof { unqual, expr } => Type::Typeof { unqual, expr },
         }
     }
 }

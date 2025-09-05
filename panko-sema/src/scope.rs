@@ -765,6 +765,10 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
                 loc,
             };
         }
+        ast::Type::Typeof { unqual, expr } => Type::Typeof {
+            expr: scopes.sess.alloc(resolve_expr(scopes, expr)),
+            unqual,
+        },
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
