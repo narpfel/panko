@@ -1,0 +1,93 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/preprocessor/include/test_stddef.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (typedef ptrdiff_t `long`)
+   (typedef size_t `unsigned long`)
+   (typedef max_align_t `long long`)
+   (typedef wchar_t `int`)
+   (typedef nullptr_t `nullptr_t`)
+   (declaration (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (definition (xs~2 `array<int; 2>` @0) (braced ∅))
+         (definition (p~3 `ptr<int>` @8)
+            (addressof `ptr<int>` @8
+               (deref `int` @8
+                  (ptr-add `ptr<int>` @16
+                     (noop-type-conversion `ptr<int>` @16
+                        (addressof `ptr<array<int; 2>>` @16
+                           (xs~2 `array<int; 2>` @0)))
+                     (sign-extend `unsigned long` @24 (0 `int` @32))))))
+         (definition (p2~4 `ptr<int const>` @16)
+            (noop-type-conversion `ptr<int const>` @16
+               (addressof `ptr<int>` @16
+                  (deref `int` @16
+                     (ptr-add `ptr<int>` @24
+                        (noop-type-conversion `ptr<int>` @24
+                           (addressof `ptr<array<int; 2>>` @24
+                              (xs~2 `array<int; 2>` @0)))
+                        (sign-extend `unsigned long` @32 (1 `int` @40)))))))
+         (expression
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @32
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 9>>` @40
+                        (string `array<char; 9>` @void "it works\0"))))))
+         (expression
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @32
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 9>>` @40
+                        (string `array<char; 9>` @void "it works\0"))))))
+         (expression
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @32
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 9>>` @40
+                        (string `array<char; 9>` @void "it works\0"))))))
+         (expression
+            (assign `ptr<int>` @8
+               (p~3 `ptr<int>` @8)
+               (noop-type-conversion `ptr<int>` @8 (nullptr `nullptr_t` @8))))
+         (expression
+            (conditional `int` @24
+               (nullptr `nullptr_t` @64)
+               (call `int` @24
+                  (addressof `ptr<fn(∅: ptr<char const>) -> int>` @32
+                     (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+                  (noop-type-conversion `ptr<char const>` @40
+                     (noop-type-conversion `ptr<char>` @40
+                        (addressof `ptr<array<char; 9>>` @40
+                           (string `array<char; 9>` @void "not null\0")))))
+               (call `int` @24
+                  (addressof `ptr<fn(∅: ptr<char const>) -> int>` @48
+                     (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+                  (noop-type-conversion `ptr<char const>` @56
+                     (noop-type-conversion `ptr<char>` @56
+                        (addressof `ptr<array<char; 5>>` @56
+                           (string `array<char; 5>` @void "null\0")))))))
+         (definition (null~5 `nullptr_t` @24) (nullptr `nullptr_t` @24))
+         (return
+            (conditional `int` @32
+               (null~5 `nullptr_t` @24)
+               (1 `int` @32)
+               (2 `int` @32))))))
+
+----- stderr -----

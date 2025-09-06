@@ -1,0 +1,51 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/include/test_stddef.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+
+
+
+typedef typeof((char*)nullptr - (char*)nullptr) ptrdiff_t;
+typedef typeof(sizeof(char)) size_t;
+
+
+typedef long long max_align_t;
+
+typedef int wchar_t;
+typedef typeof(nullptr) nullptr_t;
+
+
+
+
+
+
+int puts(char const*);
+
+int main() {
+    int xs[2] = {};
+    int* p = &xs[0];
+    int const* p2 = &xs[1];
+
+    puts(_Generic(p2 - p, ptrdiff_t: "it works"));
+
+    puts(_Generic(sizeof xs, size_t: "it works"));
+
+    puts(_Generic(_Lengthof xs, size_t: "it works"));
+    p = nullptr ;
+
+nullptr ? puts("not null") : puts("null");
+
+    nullptr_t null = nullptr;
+    return null ? 1 : 2;
+}
+
+----- stderr -----

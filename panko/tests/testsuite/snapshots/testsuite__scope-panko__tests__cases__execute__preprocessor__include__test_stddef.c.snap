@@ -1,0 +1,56 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/preprocessor/include/test_stddef.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (typedef ptrdiff_t `typeof((subtract (cast `ptr<char>` nullptr) (cast `ptr<char>` nullptr)))`)
+   (typedef size_t `typeof((sizeof `char`))`)
+   (typedef max_align_t `long long`)
+   (typedef wchar_t `int`)
+   (typedef nullptr_t `typeof(nullptr)`)
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition xs~2 `array<int; 2>` (braced ∅))
+         (definition p~3 `ptr<int>` (addressof (subscript (name xs~2 `array<int; 2>`) 0)))
+         (definition p2~4 `ptr<int const>` (addressof (subscript (name xs~2 `array<int; 2>`) 1)))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (generic
+                  (subtract (name p2~4 `ptr<int const>`) (name p~3 `ptr<int>`))
+                  (assoc `typeof((subtract (cast `ptr<char>` nullptr) (cast `ptr<char>` nullptr)))` (string "it works")))))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (generic
+                  (sizeof (name xs~2 `array<int; 2>`))
+                  (assoc `typeof((sizeof `char`))` (string "it works")))))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (generic
+                  (lengthof (name xs~2 `array<int; 2>`))
+                  (assoc `typeof((sizeof `char`))` (string "it works")))))
+         (expression (assign (name p~3 `ptr<int>`) nullptr))
+         (expression
+            (conditional
+               nullptr
+               (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+                  (string "not null"))
+               (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+                  (string "null"))))
+         (definition null~5 `typeof(nullptr)` nullptr)
+         (return
+            (conditional
+               (name null~5 `typeof(nullptr)`)
+               1
+               2)))))
+
+----- stderr -----
