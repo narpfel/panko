@@ -1222,7 +1222,9 @@ fn convert<'a>(
         (Type::Void, _) if kind == ConversionKind::Explicit =>
             Expression::VoidCast(sess.alloc(expr)),
 
-        (Type::Arithmetic(_), Type::Arithmetic(_)) | (Type::Pointer(_), Type::Pointer(_)) =>
+        (Type::Arithmetic(_), Type::Arithmetic(_))
+        | (Type::Pointer(_), Type::Pointer(_))
+        | (Type::Nullptr, Type::Nullptr) =>
             if kind == ConversionKind::Implicit && target_ty == expr_ty {
                 return expr;
             }

@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/nullptr/test_assignment_to_nullptr.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (a~1 `nullptr_t` @0) (nullptr `nullptr_t` @0))
+         (definition (b~2 `nullptr_t` @8) (noop-type-conversion `nullptr_t` @8 (nullptr `nullptr_t` @8)))
+         (expression
+            (assign `nullptr_t` @0
+               (a~1 `nullptr_t` @0)
+               (nullptr `nullptr_t` @0)))
+         (expression
+            (assign `nullptr_t` @8
+               (b~2 `nullptr_t` @8)
+               (noop-type-conversion `nullptr_t` @8 (nullptr `nullptr_t` @8)))))))
+
+----- stderr -----
