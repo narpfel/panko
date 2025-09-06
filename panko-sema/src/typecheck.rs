@@ -1917,6 +1917,7 @@ fn typeck_ptrdiff<'a>(
     rhs: TypedExpression<'a>,
     rhs_pointee_ty: &QualifiedType<'a>,
 ) -> TypedExpression<'a> {
+    // TODO: should check for type compatibility, not exact equality
     let expr = if lhs_pointee_ty.ty != rhs_pointee_ty.ty {
         sess.emit(Diagnostic::PtrDiffIncompatiblePointeeTypes { at: op.token, lhs, rhs })
     }
