@@ -1,0 +1,46 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/include/test_stddef_include_guard.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+
+
+
+
+
+
+typedef typeof((char*)nullptr - (char*)nullptr) ptrdiff_t;
+typedef typeof(sizeof(char)) size_t;
+
+
+typedef long long max_align_t;
+
+typedef int wchar_t;
+typedef typeof(nullptr) nullptr_t;
+
+
+
+
+
+
+
+
+
+int NULL = 42;
+
+
+
+
+int main() {
+    return NULL;
+}
+
+----- stderr -----
