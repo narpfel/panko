@@ -1,5 +1,5 @@
-#ifndef __ISO646_H
-#define __ISO646_H
+#ifndef __PANKO_ISO646_H
+#define __PANKO_ISO646_H
 
 #define and &&
 #define and_eq &=
