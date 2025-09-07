@@ -61,6 +61,7 @@ extern {
         "_Decimal64" => Token { kind: TokenKind::Decimal64, .. },
         "_Decimal128" => Token { kind: TokenKind::Decimal128, .. },
         "typeof" => Token { kind: TokenKind::Typeof, .. },
+        "typeof_unqual" => Token { kind: TokenKind::TypeofUnqual, .. },
 
         // TypeQualifierToken
         "const" => Token { kind: TokenKind::Const, .. },
@@ -517,14 +518,19 @@ AtomicTypeSpecifier: () = {}
 StructOrUnionSpecifier: () = {}
 EnumSpecifier: () = {}
 TypeofSpecifier: ast::TypeSpecifier<'a> = {
-    <token:"typeof"> "(" <expr:Bump<Expression>> ")" =>
+    <r#typeof:TypeofAndIsUnqual> "(" <expr:Bump<Expression>> ")" =>
         ast::TypeSpecifier {
-            token,
+            token: r#typeof.0,
             kind: ast::TypeSpecifierKind::Typeof {
-                unqual: false,
+                unqual: r#typeof.1,
                 expr,
             },
         },
+}
+
+TypeofAndIsUnqual: (Token<'a>, bool) = {
+    "typeof" => (<>, false),
+    "typeof_unqual" => (<>, true),
 }
 
 TypeQualifier: ast::TypeQualifier<'a> = {

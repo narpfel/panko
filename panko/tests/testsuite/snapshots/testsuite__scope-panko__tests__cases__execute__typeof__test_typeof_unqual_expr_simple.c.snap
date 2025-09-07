@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/typeof/test_typeof_unqual_expr_simple.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition x~2 `int const` 42)
+         (definition y~3 `typeof_unqual((name x~2 `int const`))` 27)
+         (expression (assign (name y~3 `typeof_unqual((name x~2 `int const`))`) 5))
+         (definition p~4 `typeof_unqual((addressof (name x~2 `int const`)))` nullptr)
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (generic
+                  (name p~4 `typeof_unqual((addressof (name x~2 `int const`)))`)
+                  (assoc `ptr<int const>` (string "it works")))))
+         (return (name y~3 `typeof_unqual((name x~2 `int const`))`)))))
+
+----- stderr -----

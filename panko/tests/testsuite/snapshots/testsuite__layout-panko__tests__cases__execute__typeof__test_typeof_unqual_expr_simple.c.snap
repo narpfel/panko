@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/typeof/test_typeof_unqual_expr_simple.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (definition (x~2 `int const` @0) (42 `int` @0))
+         (definition (y~3 `int` @4) (27 `int` @4))
+         (expression
+            (assign `int` @4
+               (y~3 `int` @4)
+               (5 `int` @4)))
+         (definition (p~4 `ptr<int const>` @8) (noop-type-conversion `ptr<int const>` @8 (nullptr `nullptr_t` @8)))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @24
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 9>>` @32
+                        (string `array<char; 9>` @void "it works\0"))))))
+         (return (y~3 `int` @4)))))
+
+----- stderr -----
