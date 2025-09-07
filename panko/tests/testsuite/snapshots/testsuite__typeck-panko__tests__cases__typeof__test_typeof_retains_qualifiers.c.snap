@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/typeof/test_typeof_retains_qualifiers.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to `const` value `y`
+   ╭─[panko/tests/cases/typeof/test_typeof_retains_qualifiers.c:4:5]
+   │
+ 3 │     typeof(x) y = 27;
+   │               ┬  
+   │               ╰── note: `y` declared here
+ 4 │     y = 0;
+   │     ┬  
+   │     ╰── this value is `const`
+───╯

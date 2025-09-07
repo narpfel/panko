@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/typeof/test_typeof_retains_qualifiers.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition x~1 `int const` 42)
+         (definition y~2 `typeof((name x~1 `int const`))` 27)
+         (expression (assign (name y~2 `typeof((name x~1 `int const`))`) 0)))))
+
+----- stderr -----
