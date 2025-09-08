@@ -1101,16 +1101,19 @@ fn typeck_ty_with_initialiser<'a>(
         }
         ty::Type::Void => Type::Void,
         ty::Type::Typeof { expr, unqual } => {
-            let expr = typeck_expression(sess, expr, Context::Typeof);
+            let ty = match expr {
+                scope::Typeof::Expr(expr) => typeck_expression(sess, expr, Context::Typeof).ty,
+                scope::Typeof::Ty(ty) => typeck_ty(sess, *ty, is_parameter),
+            };
             return if unqual {
-                expr.ty.ty.unqualified()
+                ty.ty.unqualified()
             }
             else {
                 QualifiedType {
-                    is_const: is_const | expr.ty.is_const,
-                    is_volatile: is_volatile | expr.ty.is_volatile,
-                    ty: expr.ty.ty,
-                    loc: expr.ty.loc,
+                    is_const: is_const | ty.is_const,
+                    is_volatile: is_volatile | ty.is_volatile,
+                    ty: ty.ty,
+                    loc: ty.loc,
                 }
             };
         }

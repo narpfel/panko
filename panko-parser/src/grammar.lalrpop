@@ -526,6 +526,14 @@ TypeofSpecifier: ast::TypeSpecifier<'a> = {
                 expr,
             },
         },
+    <r#typeof:TypeofAndIsUnqual> "(" <ty:Bump<TypeName>> ")" =>
+        ast::TypeSpecifier {
+            token: r#typeof.0,
+            kind: ast::TypeSpecifierKind::TypeofTy {
+                unqual: r#typeof.1,
+                ty,
+            },
+        },
 }
 
 TypeofAndIsUnqual: (Token<'a>, bool) = {

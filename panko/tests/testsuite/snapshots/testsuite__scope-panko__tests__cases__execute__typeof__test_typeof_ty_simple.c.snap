@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/typeof/test_typeof_ty_simple.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      main~0 `fn() -> typeof(`int`)`
+      (compound-statement
+         (definition x~1 `typeof(`ptr<int const>`)` nullptr)
+         (definition xs~2 `typeof(`array<typeof(`int const`); 5>`)` (braced ∅))
+         (expression (assign (name x~1 `typeof(`ptr<int const>`)`) (name xs~2 `typeof(`array<typeof(`int const`); 5>`)`)))
+         (definition ys~3 `typeof(`array<int const; 5>`)` (braced ∅))
+         (expression (cast `ptr<typeof(`int`)>` nullptr))
+         (return (add (subscript (name x~1 `typeof(`ptr<int const>`)`) 0) (subscript (name ys~3 `typeof(`array<int const; 5>`)`) (subtract (lengthof (name ys~3 `typeof(`array<int const; 5>`)`)) 1)))))))
+
+----- stderr -----

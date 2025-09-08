@@ -20,6 +20,7 @@ use super::Reference;
 use super::Statement;
 use super::TranslationUnit;
 use super::Typedef;
+use super::Typeof;
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {
@@ -198,5 +199,14 @@ impl AsSExpr for GenericAssociation<'_> {
             GenericAssociation::Default { default, expr } => (default, expr),
         };
         SExpr::new("assoc").inherit(ty).inherit(expr)
+    }
+}
+
+impl AsSExpr for Typeof<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Expr(expr) => expr.as_sexpr(),
+            Self::Ty(ty) => ty.as_sexpr(),
+        }
     }
 }

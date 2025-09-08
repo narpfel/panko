@@ -73,7 +73,7 @@ enum Diagnostic<'a> {
     },
 }
 
-type TypeofExpr<'a> = &'a Expression<'a>;
+type TypeofExpr<'a> = Typeof<'a>;
 type LengthExpr<'a> = Option<&'a Expression<'a>>;
 type ArrayType<'a> = ty::ArrayType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
 type FunctionType<'a> = ty::FunctionType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
@@ -347,6 +347,12 @@ pub(crate) enum GenericAssociation<'a> {
         default: Token<'a>,
         expr: Expression<'a>,
     },
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum Typeof<'a> {
+    Expr(&'a Expression<'a>),
+    Ty(&'a QualifiedType<'a>),
 }
 
 impl<'a> Typedef<'a> {
@@ -766,7 +772,11 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             };
         }
         ast::Type::Typeof { unqual, expr } => Type::Typeof {
-            expr: scopes.sess.alloc(resolve_expr(scopes, expr)),
+            expr: Typeof::Expr(scopes.sess.alloc(resolve_expr(scopes, expr))),
+            unqual,
+        },
+        ast::Type::TypeofTy { unqual, ty } => Type::Typeof {
+            expr: Typeof::Ty(scopes.sess.alloc(resolve_ty(scopes, ty))),
             unqual,
         },
     };
@@ -1155,9 +1165,13 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             let target_temporary = scopes.temporary(
                 target.loc(),
                 Type::Pointer(
-                    scopes
-                        .sess
-                        .alloc(Type::Typeof { expr: target, unqual: false }.unqualified()),
+                    scopes.sess.alloc(
+                        Type::Typeof {
+                            expr: Typeof::Expr(target),
+                            unqual: false,
+                        }
+                        .unqualified(),
+                    ),
                 )
                 .unqualified(),
             );
@@ -1237,8 +1251,9 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::Increment { operator, operand, fixity } => {
             let operand = scopes.sess.alloc(resolve_expr(scopes, operand));
             let reference = scopes.temporary(operand.loc(), Type::Void.unqualified());
-            let typeof_operand_unqual = Type::Typeof { expr: operand, unqual: true };
-            let typeof_operand = Type::Typeof { expr: operand, unqual: false };
+            let expr = Typeof::Expr(operand);
+            let typeof_operand_unqual = Type::Typeof { expr, unqual: true };
+            let typeof_operand = Type::Typeof { expr, unqual: false };
             Expression::Increment {
                 operator: *operator,
                 operand,

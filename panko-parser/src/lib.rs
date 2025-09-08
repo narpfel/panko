@@ -477,6 +477,10 @@ impl<'a> TypeSpecifier<'a> {
                 Parsed::None => Parsed::Typeof { unqual, expr },
                 _ => error(),
             },
+            Kind::TypeofTy { unqual, ty: typeof_ty } => match ty {
+                Parsed::None => Parsed::TypeofTy { unqual, ty: typeof_ty },
+                _ => error(),
+            },
             _ => todo!("unimplemented type specifier: {self:#?}"),
         }
     }
@@ -511,6 +515,10 @@ enum TypeSpecifierKind<'a> {
     Typeof {
         unqual: bool,
         expr: &'a Expression<'a>,
+    },
+    TypeofTy {
+        unqual: bool,
+        ty: &'a QualifiedType<'a>,
     },
 }
 

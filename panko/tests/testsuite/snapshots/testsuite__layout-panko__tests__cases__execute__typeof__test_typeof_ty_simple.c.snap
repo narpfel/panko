@@ -1,0 +1,42 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/typeof/test_typeof_ty_simple.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (x~1 `ptr<int const>` @0) (noop-type-conversion `ptr<int const>` @0 (nullptr `nullptr_t` @0)))
+         (definition (xs~2 `array<int const; 5>` @8) (braced ∅))
+         (expression
+            (assign `ptr<int const>` @0
+               (x~1 `ptr<int const>` @0)
+               (noop-type-conversion `ptr<int const>` @0
+                  (addressof `ptr<array<int const; 5>>` @0
+                     (xs~2 `array<int const; 5>` @8)))))
+         (definition (ys~3 `array<int const; 5>` @28) (braced ∅))
+         (expression (noop-type-conversion `ptr<int>` @48 (nullptr `nullptr_t` @48)))
+         (return
+            (add `int` @48
+               (deref `int const` @48
+                  (ptr-add `ptr<int const>` @56
+                     (x~1 `ptr<int const>` @0)
+                     (sign-extend `unsigned long` @64 (0 `int` @72))))
+               (deref `int const` @64
+                  (ptr-add `ptr<int const>` @72
+                     (noop-type-conversion `ptr<int const>` @72
+                        (addressof `ptr<array<int const; 5>>` @72
+                           (ys~3 `array<int const; 5>` @28)))
+                     (subtract `unsigned long` @80
+                        (5 `unsigned long` @80)
+                        (sign-extend `unsigned long` @88 (1 `int` @96))))))))))
+
+----- stderr -----

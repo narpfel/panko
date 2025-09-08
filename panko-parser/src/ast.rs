@@ -221,6 +221,10 @@ pub enum Type<'a> {
         unqual: bool,
         expr: &'a Expression<'a>,
     },
+    TypeofTy {
+        unqual: bool,
+        ty: &'a QualifiedType<'a>,
+    },
     // TODO
 }
 
@@ -361,6 +365,12 @@ impl fmt::Display for Type<'_> {
                 "typeof{}({})",
                 if *unqual { "_unqual" } else { "" },
                 expr.as_sexpr(),
+            ),
+            Type::TypeofTy { unqual, ty } => write!(
+                f,
+                "typeof{}({})",
+                if *unqual { "_unqual" } else { "" },
+                ty.as_sexpr(),
             ),
         }
     }
@@ -618,6 +628,10 @@ pub(crate) enum ParsedSpecifiers<'a> {
         unqual: bool,
         expr: &'a Expression<'a>,
     },
+    TypeofTy {
+        unqual: bool,
+        ty: &'a QualifiedType<'a>,
+    },
 }
 
 impl<'a> ParsedSpecifiers<'a> {
@@ -641,6 +655,7 @@ impl<'a> ParsedSpecifiers<'a> {
             })),
             Self::Typedef(token) => Type::Typedef(token),
             Self::Typeof { unqual, expr } => Type::Typeof { unqual, expr },
+            Self::TypeofTy { unqual, ty } => Type::TypeofTy { unqual, ty },
         }
     }
 }
