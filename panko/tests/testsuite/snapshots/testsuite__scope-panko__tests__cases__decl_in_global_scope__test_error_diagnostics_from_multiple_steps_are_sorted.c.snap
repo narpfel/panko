@@ -12,15 +12,15 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: duplicate definition for `duplicate`
-   ╭─[panko/tests/cases/decl_in_global_scope/test_error_diagnostics_from_multiple_steps_are_sorted.c:2:5]
+Error: value name `duplicate` redeclared as `typedef` name
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_diagnostics_from_multiple_steps_are_sorted.c:2:1]
    │
  1 │ int duplicate = 42;
    │     ────┬────  
-   │         ╰────── previously defined here
- 2 │ int duplicate = 27;
-   │     ────┬────  
-   │         ╰────── duplicate definition
+   │         ╰────── originally declared here as a value name
+ 2 │ typedef int duplicate;
+   │ ─────┬─────  
+   │      ╰─────── redeclared here as a `typedef` name
 ───╯
 
 Error: declaration does not specify a type

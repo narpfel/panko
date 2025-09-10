@@ -1,3 +1,3 @@
 int duplicate = 42;
-int duplicate = 27;
+typedef int duplicate;
 const type_missing;

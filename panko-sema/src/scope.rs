@@ -26,7 +26,7 @@ mod as_sexpr;
 
 #[derive(Debug, Report)]
 #[exit_code(1)]
-enum Diagnostic<'a> {
+pub(crate) enum Diagnostic<'a> {
     #[error("duplicate definition for `{at}`")]
     #[diagnostics(
         previous_definition(colour = Blue, label = "previously defined here"),
@@ -311,7 +311,8 @@ pub struct Reference<'a> {
     pub(crate) storage_duration: StorageDuration,
     pub(crate) previous_definition: Option<&'a Self>,
     pub(crate) is_parameter: IsParameter,
-    pub(crate) initialiser: Option<&'a Initialiser<'a>>,
+    pub(crate) is_in_global_scope: IsInGlobalScope,
+    pub(crate) initialiser: Option<RefInitialiser<'a>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -328,10 +329,22 @@ pub(crate) enum IsParameter {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) enum IsInGlobalScope {
+    Yes,
+    No,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub enum StorageDuration {
     Static,
     Automatic,
     // TODO: thread local
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum RefInitialiser<'a> {
+    Initialiser(&'a Initialiser<'a>),
+    FunctionBody,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -589,6 +602,7 @@ struct Scopes<'a> {
 }
 
 impl<'a> Scopes<'a> {
+    #[expect(clippy::too_many_arguments, reason = "TODO: `kind` is unnecessary")]
     fn add(
         &mut self,
         name: &'a str,
@@ -597,6 +611,7 @@ impl<'a> Scopes<'a> {
         kind: RefKind,
         storage_duration: StorageDuration,
         is_parameter: IsParameter,
+        is_in_global_scope: IsInGlobalScope,
     ) -> Result<Reference<'a>, QualifiedType<'a>> {
         if let Entry::Occupied(entry) = self.lookup_ty_innermost(name) {
             return Err(*entry.get());
@@ -614,20 +629,12 @@ impl<'a> Scopes<'a> {
             storage_duration,
             previous_definition: None,
             is_parameter,
+            is_in_global_scope,
             initialiser: None,
         };
         match self.lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
                 let previous_definition = entry.get_mut();
-                if matches!(kind, RefKind::Definition)
-                    && matches!(previous_definition.kind, RefKind::Definition)
-                {
-                    sess.emit(Diagnostic::AlreadyDefined {
-                        at: reference.loc(),
-                        previous_definition: previous_definition.loc,
-                    })
-                }
-
                 let reference = Reference {
                     id: previous_definition.id,
                     previous_definition: Some(
@@ -635,12 +642,7 @@ impl<'a> Scopes<'a> {
                     ),
                     ..reference
                 };
-
-                if kind >= previous_definition.kind {
-                    // this builds a linked list of all previous definitions
-                    *previous_definition = reference;
-                }
-
+                *previous_definition = reference;
                 Ok(reference)
             }
             Entry::Vacant(entry) => {
@@ -681,6 +683,7 @@ impl<'a> Scopes<'a> {
             storage_duration: StorageDuration::Automatic,
             previous_definition: None,
             is_parameter: IsParameter::No,
+            is_in_global_scope: IsInGlobalScope::No,
             initialiser: None,
         }
     }
@@ -730,7 +733,7 @@ impl<'a> Scopes<'a> {
     fn add_initialiser(
         &mut self,
         reference: &Reference<'a>,
-        initialiser: Option<&'a Initialiser<'a>>,
+        initialiser: Option<RefInitialiser<'a>>,
     ) {
         match self.lookup_innermost(reference.name) {
             Entry::Occupied(mut entry) => entry.get_mut().initialiser = initialiser,
@@ -852,9 +855,14 @@ fn resolve_function_definition<'a>(
         RefKind::Definition,
         StorageDuration::Static,
         IsParameter::No,
+        IsInGlobalScope::Yes,
     );
     let reference = match maybe_reference {
-        Ok(reference) => reference,
+        Ok(reference) => {
+            let initialiser = Some(RefInitialiser::FunctionBody);
+            scopes.add_initialiser(&reference, initialiser);
+            Reference { initialiser, ..reference }
+        }
         Err(ty) =>
             return scopes.sess.emit(Diagnostic::TypedefRedeclaredAsValue {
                 at: *name,
@@ -907,6 +915,7 @@ fn resolve_function_definition<'a>(
                     RefKind::Definition,
                     StorageDuration::Automatic,
                     IsParameter::Yes,
+                    IsInGlobalScope::No,
                 );
                 match maybe_reference {
                     Ok(reference) => reference,
@@ -1051,10 +1060,6 @@ fn resolve_declaration<'a>(
                 },
         }
     };
-    let storage_duration = match ty.ty {
-        Type::Function(_) => StorageDuration::Static,
-        _ => storage_duration,
-    };
 
     let maybe_reference = scopes.add(
         name.slice(),
@@ -1063,6 +1068,12 @@ fn resolve_declaration<'a>(
         kind,
         storage_duration,
         IsParameter::No,
+        if scopes.is_in_global_scope() {
+            IsInGlobalScope::Yes
+        }
+        else {
+            IsInGlobalScope::No
+        },
     );
     let reference = match maybe_reference {
         Ok(reference) => reference,
@@ -1075,7 +1086,7 @@ fn resolve_declaration<'a>(
     };
     // TODO: move resolving the initialiser into `Scopes::add` so that the `add_initialiser` call
     // cannot be forgotten
-    let initialiser = try {
+    let initialiser: Option<_> = try {
         let initialiser = match initialiser.as_ref()? {
             ast::Initialiser::Braced {
                 open_brace,
@@ -1095,9 +1106,13 @@ fn resolve_declaration<'a>(
         };
         scopes.sess.alloc(initialiser)
     };
-    scopes.add_initialiser(&reference, initialiser);
+    let ref_initialiser = initialiser.map(RefInitialiser::Initialiser);
+    scopes.add_initialiser(&reference, ref_initialiser);
     DeclarationOrTypedef::Declaration(Declaration {
-        reference: Reference { initialiser, ..reference },
+        reference: Reference {
+            initialiser: ref_initialiser,
+            ..reference
+        },
         initialiser,
     })
 }

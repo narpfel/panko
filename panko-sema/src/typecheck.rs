@@ -47,6 +47,7 @@ use crate::scope::Designator;
 use crate::scope::GenericAssociation;
 use crate::scope::Id;
 use crate::scope::IncrementFixity;
+use crate::scope::IsInGlobalScope;
 use crate::scope::IsParameter;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
@@ -1047,7 +1048,7 @@ fn typeck_ty_with_initialiser<'a>(
                 })
                 .unwrap_or(ArrayLength::Unknown);
             let length = if let Some(reference) = reference
-                && let Some(initialiser) = reference.initialiser
+                && let Some(scope::RefInitialiser::Initialiser(initialiser)) = reference.initialiser
                 && let ArrayLength::Unknown = length
                 && let reference = typeck_reference(sess, *reference, NeedsInitialiser::No)
                 && let initialiser = typeck_initialiser(sess, initialiser, &reference)
@@ -1130,6 +1131,7 @@ fn typeck_ty<'a>(
     typeck_ty_with_initialiser(sess, ty, is_parameter, None)
 }
 
+#[derive(Debug, Clone, Copy)]
 enum NeedsInitialiser {
     No,
     Yes,
@@ -1146,49 +1148,60 @@ fn typeck_reference<'a>(
         ty,
         id,
         usage_location,
-        kind,
+        kind: _,
         storage_duration,
         previous_definition,
         is_parameter,
-        initialiser: _,
+        is_in_global_scope,
+        initialiser,
     } = reference;
-    let reference = Reference {
+
+    // TODO: this should be replaced by a more ECS-ish approach to avoid re-typechecking the
+    // initialiser for every usage of references to arrays with unknown length.
+    let ty = typeck_ty_with_initialiser(
+        sess,
+        ty,
+        is_parameter,
+        matches!(needs_initialiser, NeedsInitialiser::Yes).then_some(&reference),
+    );
+    let ty = match previous_definition {
+        Some(previous_definition) => {
+            // TODO: this is quadratic in the number of previous decls for this name
+            let previous_ty = typeck_reference(sess, *previous_definition, needs_initialiser).ty;
+            ty.composite_ty(sess.bump(), &previous_ty).unwrap_or(ty)
+        }
+        None => ty,
+    };
+
+    let kind = if initialiser.is_some() {
+        RefKind::Definition
+    }
+    else {
+        match ty.ty {
+            Type::Function(_) => RefKind::Declaration,
+            _ =>
+                if let IsInGlobalScope::Yes = is_in_global_scope {
+                    RefKind::TentativeDefinition
+                }
+                else {
+                    RefKind::Definition
+                },
+        }
+    };
+    let storage_duration = match ty.ty {
+        Type::Function(_) => StorageDuration::Static,
+        _ => storage_duration,
+    };
+
+    Reference {
         name,
         loc,
-        // TODO: this should be replaced by a more ECS-ish approach to avoid re-typechecking the
-        // initialiser for every usage of references to arrays with unknown length.
-        ty: typeck_ty_with_initialiser(
-            sess,
-            ty,
-            is_parameter,
-            matches!(needs_initialiser, NeedsInitialiser::Yes).then_some(&reference),
-        ),
+        ty,
         id,
         usage_location,
         kind,
         storage_duration,
-    };
-    let ty = match previous_definition {
-        Some(previous_definition) => {
-            // TODO: this is quadratic in the number of previous decls for this name
-            // TODO: this will also emit quadratically many error messages
-            let previous_definition =
-                typeck_reference(sess, *previous_definition, needs_initialiser);
-            reference
-                .ty
-                .composite_ty(sess.bump(), &previous_definition.ty)
-                .unwrap_or_else(|| {
-                    // TODO: use this error to generate a `Type::Error`
-                    let () = sess.emit(Diagnostic::AlreadyDefinedWithDifferentType {
-                        at: reference,
-                        previous_definition,
-                    });
-                    reference.ty
-                })
-        }
-        None => reference.ty,
-    };
-    Reference { ty, ..reference }
+    }
 }
 
 fn convert<'a>(
@@ -1292,7 +1305,7 @@ fn typeck_function_definition<'a>(
     );
 
     FunctionDefinition {
-        reference: typeck_reference(sess, reference, NeedsInitialiser::No),
+        reference: typeck_reference_declaration(sess, reference, NeedsInitialiser::No),
         params,
         storage_class,
         inline,
@@ -1512,12 +1525,49 @@ fn typeck_initialiser<'a>(
     }
 }
 
+fn typeck_reference_declaration<'a>(
+    sess: &'a Session<'a>,
+    reference: scope::Reference<'a>,
+    needs_initialiser: NeedsInitialiser,
+) -> Reference<'a> {
+    let previous_definition = reference.previous_definition;
+    let reference = typeck_reference(sess, reference, needs_initialiser);
+    if let Some(previous_definition) = previous_definition {
+        if matches!(reference.kind, RefKind::Definition)
+            && matches!(previous_definition.kind, RefKind::Definition)
+        {
+            sess.emit(scope::Diagnostic::AlreadyDefined {
+                at: reference.loc(),
+                previous_definition: previous_definition.loc,
+            })
+        }
+        else {
+            // TODO: this is quadratic in the number of previous decls for this name
+            let previous_definition =
+                typeck_reference(sess, *previous_definition, needs_initialiser);
+            // TODO: this re-computes the composite type (see `typeck_reference`)
+            if reference
+                .ty
+                .composite_ty(sess.bump(), &previous_definition.ty)
+                .is_none()
+            {
+                // TODO: use this error to generate a `Type::Error`
+                sess.emit(Diagnostic::AlreadyDefinedWithDifferentType {
+                    at: reference,
+                    previous_definition,
+                })
+            }
+        }
+    }
+    reference
+}
+
 fn typeck_declaration<'a>(
     sess: &'a Session<'a>,
     declaration: &scope::Declaration<'a>,
 ) -> Declaration<'a> {
     let scope::Declaration { reference, initialiser } = *declaration;
-    let reference = typeck_reference(sess, reference, NeedsInitialiser::Yes);
+    let reference = typeck_reference_declaration(sess, reference, NeedsInitialiser::Yes);
     let initialiser = try { typeck_initialiser(sess, initialiser?, &reference) };
     let reference =
         if matches!(reference.kind, RefKind::Definition) && !reference.ty.ty.is_complete() {

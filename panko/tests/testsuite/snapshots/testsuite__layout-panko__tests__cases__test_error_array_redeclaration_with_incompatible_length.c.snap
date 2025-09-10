@@ -44,14 +44,3 @@ Error: redeclaration of `zs` with different type: `array<int; 1>` vs. `array<int
     │     ─┬  
     │      ╰── new declaration with different type `array<int; 2>`
 ────╯
-
-Error: redeclaration of `zs` with different type: `array<int; 1>` vs. `array<int; 2>`
-    ╭─[panko/tests/cases/test_error_array_redeclaration_with_incompatible_length.c:11:5]
-    │
- 10 │ int zs[1];
-    │     ─┬  
-    │      ╰── previously declared here with type `array<int; 1>`
- 11 │ int zs[2];
-    │     ─┬  
-    │      ╰── new declaration with different type `array<int; 2>`
-────╯

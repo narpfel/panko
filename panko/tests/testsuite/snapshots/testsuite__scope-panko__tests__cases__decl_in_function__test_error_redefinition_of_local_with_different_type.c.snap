@@ -7,29 +7,17 @@ info:
     - "--stop-after=scopes"
     - panko/tests/cases/decl_in_function/test_error_redefinition_of_local_with_different_type.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit
+   (function-definition
+      a~0 `fn() -> int`
+      (compound-statement
+         (definition x~1 `int` 42)
+         (definition x~1 `int const` 27)
+         (definition a~3 `int` 0)
+         (definition a~3 `char` 1)
+         (return (name x~1 `int const`)))))
 
 ----- stderr -----
-Error: duplicate definition for `x`
-   ╭─[panko/tests/cases/decl_in_function/test_error_redefinition_of_local_with_different_type.c:3:15]
-   │
- 2 │     int x = 42;
-   │         ┬  
-   │         ╰── previously defined here
- 3 │     int const x = 27;
-   │               ┬  
-   │               ╰── duplicate definition
-───╯
-
-Error: duplicate definition for `a`
-   ╭─[panko/tests/cases/decl_in_function/test_error_redefinition_of_local_with_different_type.c:5:10]
-   │
- 4 │     int a = 0;
-   │         ┬  
-   │         ╰── previously defined here
- 5 │     char a = 1;
-   │          ┬  
-   │          ╰── duplicate definition
-───╯
