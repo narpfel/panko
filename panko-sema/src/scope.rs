@@ -721,8 +721,13 @@ impl<'a> Scopes<'a> {
         id
     }
 
-    fn is_in_global_scope(&self) -> bool {
-        self.scopes.len() == 1
+    fn is_in_global_scope(&self) -> IsInGlobalScope {
+        if self.scopes.len() == 1 {
+            IsInGlobalScope::Yes
+        }
+        else {
+            IsInGlobalScope::No
+        }
     }
 
     fn add_initialiser(
@@ -1044,12 +1049,7 @@ fn resolve_declaration<'a>(
         ty,
         storage_duration,
         IsParameter::No,
-        if scopes.is_in_global_scope() {
-            IsInGlobalScope::Yes
-        }
-        else {
-            IsInGlobalScope::No
-        },
+        scopes.is_in_global_scope(),
     );
     let reference = match maybe_reference {
         Ok(reference) => reference,
