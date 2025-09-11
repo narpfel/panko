@@ -6,7 +6,6 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/execute/arrays/test_multidimensional_array_length.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -23,7 +22,7 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 1)
                (lengthof `array<array<ptr<long>; 400>; 100>`)))
-         (definition xs~4 `array<array<int; 27>; 42>` ∅)
+         (declaration xs~4 `array<array<int; 27>; 42>` ∅)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 1)
@@ -32,7 +31,7 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 1)
                (lengthof (deref (name xs~4 `array<array<int; 27>; 42>`)))))
-         (definition ys~5 `ptr<array<array<int; 27>; 42>>` ∅)
+         (declaration ys~5 `ptr<array<array<int; 27>; 42>>` ∅)
          (return (add (lengthof (deref (name ys~5 `ptr<array<array<int; 27>; 42>>`))) (lengthof (deref (deref (name ys~5 `ptr<array<array<int; 27>; 42>>`)))))))))
 
 ----- stderr -----

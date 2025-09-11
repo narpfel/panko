@@ -36,7 +36,7 @@ exit_code: 0
                (call (name strcmp~1 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int`)
                   (string "q\12q")
                   (string "q\nq"))))
-         (definition s~3 `ptr<char const>` (string "\1" "1"))
+         (declaration s~3 `ptr<char const>` (string "\1" "1"))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d%s\n")

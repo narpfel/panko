@@ -16,15 +16,15 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (definition x~3 `unsigned long` 42)
-         (definition y~4 `typeof((name x~3 `unsigned long`))` 27)
+         (declaration x~3 `unsigned long` 42)
+         (declaration y~4 `typeof((name x~3 `unsigned long`))` 27)
          (expression
             (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
                (generic
                   (add (name x~3 `unsigned long`) (name y~4 `typeof((name x~3 `unsigned long`))`))
                   (assoc `typeof((add (name x~3 `unsigned long`) (name y~4 `typeof((name x~3 `unsigned long`))`)))` (string "it works")))))
-         (definition p~5 `ptr<typeof((add (name x~3 `unsigned long`) (name y~4 `typeof((name x~3 `unsigned long`))`))) const> const` (addressof (name x~3 `unsigned long`)))
-         (definition xs~6 `array<typeof((name x~3 `unsigned long`)); 10>` (braced ∅))
+         (declaration p~5 `ptr<typeof((add (name x~3 `unsigned long`) (name y~4 `typeof((name x~3 `unsigned long`))`))) const> const` (addressof (name x~3 `unsigned long`)))
+         (declaration xs~6 `array<typeof((name x~3 `unsigned long`)); 10>` (braced ∅))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")

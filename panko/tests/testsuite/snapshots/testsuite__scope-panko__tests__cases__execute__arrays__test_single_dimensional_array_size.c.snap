@@ -6,7 +6,6 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/execute/arrays/test_single_dimensional_array_size.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -15,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition xs~1 `array<int; 5>` ∅)
+         (declaration xs~1 `array<int; 5>` ∅)
          (return (sizeof (name xs~1 `array<int; 5>`))))))
 
 ----- stderr -----

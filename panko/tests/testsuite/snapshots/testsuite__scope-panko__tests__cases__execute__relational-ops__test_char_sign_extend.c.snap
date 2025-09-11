@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition c~1 `char` 128)
-         (definition x~2 `unsigned int` 200)
+         (declaration c~1 `char` 128)
+         (declaration x~2 `unsigned int` 200)
          (return (add (less (name c~1 `char`) 0) (greater (name c~1 `char`) (name x~2 `unsigned int`)))))))
 
 ----- stderr -----

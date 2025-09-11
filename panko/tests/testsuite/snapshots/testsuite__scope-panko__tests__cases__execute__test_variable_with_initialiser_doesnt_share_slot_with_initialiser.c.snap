@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `int` 42)
-         (definition b~2 `int` (name a~1 `int`))
+         (declaration a~1 `int` 42)
+         (declaration b~2 `int` (name a~1 `int`))
          (expression (assign (name b~2 `int`) 27))
          (return (name a~1 `int`)))))
 

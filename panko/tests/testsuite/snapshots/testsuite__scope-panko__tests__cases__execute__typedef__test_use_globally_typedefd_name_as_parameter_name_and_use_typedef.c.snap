@@ -18,7 +18,7 @@ exit_code: 0
          a~1 `int`)
       (compound-statement
          (return (name a~1 `int`))))
-   (definition global_value~2 `int` 42)
+   (declaration global_value~2 `int` 42)
    (function-definition
       main~3 `fn() -> int`
       (compound-statement

@@ -37,8 +37,8 @@ exit_code: 0
                5
                6
                7))
-         (definition value~11 `int` 27)
-         (definition p~12 `ptr<int>` (addressof (name value~11 `int`)))
+         (declaration value~11 `int` 27)
+         (declaration p~12 `ptr<int>` (addressof (name value~11 `int`)))
          (return (deref (name p~12 `ptr<int>`))))))
 
 ----- stderr -----

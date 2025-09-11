@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition empty_1~1 `array<int; 0>` ∅)
-         (definition empty_2~2 `array<int; 0>` (braced ∅))
-         (definition empty_3~3 `array<int; ∅>` (braced ∅)))))
+         (declaration empty_1~1 `array<int; 0>` ∅)
+         (declaration empty_2~2 `array<int; 0>` (braced ∅))
+         (declaration empty_3~3 `array<int; ∅>` (braced ∅)))))
 
 ----- stderr -----

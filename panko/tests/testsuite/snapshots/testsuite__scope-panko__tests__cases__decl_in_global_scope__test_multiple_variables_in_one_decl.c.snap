@@ -11,15 +11,15 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (tentative-definition a~0 `int` ∅)
-   (tentative-definition b~1 `int` ∅)
-   (tentative-definition c~2 `int` ∅)
-   (tentative-definition d~3 `ptr<int>` ∅)
-   (tentative-definition e~4 `ptr<int>` ∅)
-   (tentative-definition f~5 `int` ∅)
-   (tentative-definition g~6 `int` ∅)
+   (declaration a~0 `int` ∅)
+   (declaration b~1 `int` ∅)
+   (declaration c~2 `int` ∅)
+   (declaration d~3 `ptr<int>` ∅)
+   (declaration e~4 `ptr<int>` ∅)
+   (declaration f~5 `int` ∅)
+   (declaration g~6 `int` ∅)
    (declaration h~7 `fn() -> int` ∅)
    (declaration i~8 `fn(∅: int) -> int` ∅)
-   (tentative-definition j~9 `int` ∅))
+   (declaration j~9 `int` ∅))
 
 ----- stderr -----

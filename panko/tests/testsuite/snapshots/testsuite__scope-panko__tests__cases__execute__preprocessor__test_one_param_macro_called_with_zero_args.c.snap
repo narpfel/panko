@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition value~1 `int` (negate 42))
+         (declaration value~1 `int` (negate 42))
          (return (negate (name value~1 `int`))))))
 
 ----- stderr -----

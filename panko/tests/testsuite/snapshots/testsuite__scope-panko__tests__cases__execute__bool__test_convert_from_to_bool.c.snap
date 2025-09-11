@@ -15,19 +15,19 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (definition x~2 `int` 42)
-         (definition p~3 `ptr<int>` (addressof (name x~2 `int`)))
-         (definition from_ptr~4 `bool` (name p~3 `ptr<int>`))
+         (declaration x~2 `int` 42)
+         (declaration p~3 `ptr<int>` (addressof (name x~2 `int`)))
+         (declaration from_ptr~4 `bool` (name p~3 `ptr<int>`))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
                (name from_ptr~4 `bool`)))
-         (definition from_zero~5 `bool` 0ull)
+         (declaration from_zero~5 `bool` 0ull)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
                (name from_zero~5 `bool`)))
-         (definition b~6 `bool` 42)
+         (declaration b~6 `bool` 42)
          (return (add (name b~6 `bool`) 1ul)))))
 
 ----- stderr -----

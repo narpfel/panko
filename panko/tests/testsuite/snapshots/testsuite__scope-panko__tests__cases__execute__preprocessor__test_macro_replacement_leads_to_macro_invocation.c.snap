@@ -21,7 +21,7 @@ exit_code: 0
    (function-definition
       main~3 `fn() -> int`
       (compound-statement
-         (definition g~4 `int` 3)
+         (declaration g~4 `int` 3)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")

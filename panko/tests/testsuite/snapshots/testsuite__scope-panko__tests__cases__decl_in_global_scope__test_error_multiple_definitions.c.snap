@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (definition value~0 `int` 42)
-   (definition value~0 `int` 27)
+   (declaration value~0 `int` 42)
+   (declaration value~0 `int` 27)
    (function-definition
       f~2 `fn() -> int`
       (compound-statement

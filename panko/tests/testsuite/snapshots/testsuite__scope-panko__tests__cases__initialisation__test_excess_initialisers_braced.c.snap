@@ -14,13 +14,13 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int`
+         (declaration x~1 `int`
             (braced
                1
                (braced
                   2
                   3)))
-         (definition xs~2 `array<int; 2>`
+         (declaration xs~2 `array<int; 2>`
             (braced
                1
                2
@@ -28,7 +28,7 @@ exit_code: 0
                   3)
                (braced
                   4)))
-         (definition ys~3 `array<array<int; 2>; 2>`
+         (declaration ys~3 `array<array<int; 2>; 2>`
             (braced
                1
                2
@@ -36,7 +36,7 @@ exit_code: 0
                4
                (braced
                   5)))
-         (definition zs~4 `array<array<int; 2>; 3>`
+         (declaration zs~4 `array<array<int; 2>; 3>`
             (braced
                (braced
                   1
@@ -47,7 +47,7 @@ exit_code: 0
                (braced
                   4
                   5)))
-         (definition qs~5 `array<int; 2>`
+         (declaration qs~5 `array<int; 2>`
             (braced
                1
                2
@@ -55,7 +55,7 @@ exit_code: 0
                   3
                   4)
                5))
-         (definition ws~6 `array<array<int; 2>; 3>`
+         (declaration ws~6 `array<array<int; 2>; 3>`
             (braced
                (braced
                   1
@@ -72,22 +72,22 @@ exit_code: 0
                7
                8
                9))
-         (definition excess_empty_braces_in_scalar~7 `int`
+         (declaration excess_empty_braces_in_scalar~7 `int`
             (braced
                42
                (braced ∅)))
-         (definition excess_empty_braces_in_array~8 `array<int; 2>`
+         (declaration excess_empty_braces_in_array~8 `array<int; 2>`
             (braced
                1
                2
                (braced ∅)))
-         (definition excess_empty_braces_in_array_2~9 `array<int; 2>`
+         (declaration excess_empty_braces_in_array_2~9 `array<int; 2>`
             (braced
                1
                2
                (braced ∅)
                4))
-         (definition nested_braces_dont_emit_nested_errors~10 `int`
+         (declaration nested_braces_dont_emit_nested_errors~10 `int`
             (braced
                1
                (braced

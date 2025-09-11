@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `long` 42)
+         (declaration x~1 `long` 42)
          (return (add (multiply 2 (name x~1 `long`)) 1)))))
 
 ----- stderr -----

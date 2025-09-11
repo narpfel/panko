@@ -17,7 +17,7 @@ exit_code: 0
       main~2 `fn() -> int`
       (compound-statement
          (compound-statement
-            (definition strings~3 `array<array<array<char; 100>; 2>; ∅>`
+            (declaration strings~3 `array<array<array<char; 100>; 2>; ∅>`
                (braced
                   (designation ((index 0)) (string "first"))
                   (string "also first")
@@ -50,7 +50,7 @@ exit_code: 0
                   (lengthof (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 0))
                   (lengthof (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 0) 0)))))
          (compound-statement
-            (definition strings~4 `array<array<char; 100>; ∅>`
+            (declaration strings~4 `array<array<char; 100>; ∅>`
                (braced
                   (string "string")
                   (braced

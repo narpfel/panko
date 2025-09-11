@@ -18,8 +18,8 @@ exit_code: 0
          main.unnamed_parameter.0~2 `int`
          argv~3 `ptr<ptr<char>>`)
       (compound-statement
-         (definition i~4 `int` 42)
-         (definition one~5 `char` 1)
+         (declaration i~4 `int` 42)
+         (declaration one~5 `char` 1)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 1)
@@ -48,7 +48,7 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 1)
                (left-shift (name i~4 `int`) 10)))
-         (definition u~6 `unsigned int` 0xffff'ffff)
+         (declaration u~6 `unsigned int` 0xffff'ffff)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 2)
@@ -57,7 +57,7 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 2)
                (right-shift (name u~6 `unsigned int`) (name one~5 `char`))))
-         (definition n~7 `int` (name u~6 `unsigned int`))
+         (declaration n~7 `int` (name u~6 `unsigned int`))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 2)
@@ -74,7 +74,7 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 2)
                (right-shift (name n~7 `int`) 0)))
-         (definition l~8 `long` 0xa5a5'a5a5'a5a5'a5a5l)
+         (declaration l~8 `long` 0xa5a5'a5a5'a5a5'a5a5l)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 3)

@@ -14,10 +14,10 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition p1~1 `ptr<long>` ∅)
-         (definition b~2 `unsigned long long` 42)
-         (definition p2~3 `ptr<long>` (add (name b~2 `unsigned long long`) (name p1~1 `ptr<long>`)))
-         (definition p3~4 `ptr<long>` (subtract (name p2~3 `ptr<long>`) (name b~2 `unsigned long long`)))
+         (declaration p1~1 `ptr<long>` ∅)
+         (declaration b~2 `unsigned long long` 42)
+         (declaration p2~3 `ptr<long>` (add (name b~2 `unsigned long long`) (name p1~1 `ptr<long>`)))
+         (declaration p3~4 `ptr<long>` (subtract (name p2~3 `ptr<long>`) (name b~2 `unsigned long long`)))
          (return (equal (name p3~4 `ptr<long>`) (name p1~1 `ptr<long>`))))))
 
 ----- stderr -----

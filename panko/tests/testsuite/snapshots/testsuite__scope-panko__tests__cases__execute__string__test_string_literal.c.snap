@@ -19,11 +19,11 @@ exit_code: 0
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (string "some string" " " "concatenated")))
-         (definition char_star~2 `ptr<char>` (string "char star"))
+         (declaration char_star~2 `ptr<char>` (string "char star"))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (name char_star~2 `ptr<char>`)))
-         (definition char_const_star~3 `ptr<char const>` (string "char const star"))
+         (declaration char_const_star~3 `ptr<char const>` (string "char const star"))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (name char_const_star~3 `ptr<char const>`)))

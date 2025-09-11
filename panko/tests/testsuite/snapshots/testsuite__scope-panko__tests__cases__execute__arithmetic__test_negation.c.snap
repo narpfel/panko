@@ -22,12 +22,12 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
                (negate 42)))
-         (definition l~4 `long` 27)
+         (declaration l~4 `long` 27)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 2))
                (negate (name l~4 `long`))))
-         (definition s~5 `unsigned short` 5)
+         (declaration s~5 `unsigned short` 5)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))

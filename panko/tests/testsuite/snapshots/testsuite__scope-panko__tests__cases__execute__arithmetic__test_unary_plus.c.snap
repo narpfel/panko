@@ -18,14 +18,14 @@ exit_code: 0
          main.unnamed_parameter.0~2 `int`
          argv~3 `ptr<ptr<char>>`)
       (compound-statement
-         (definition c~4 `unsigned char` 42)
-         (definition i~5 `int` (plus (name c~4 `unsigned char`)))
+         (declaration c~4 `unsigned char` 42)
+         (declaration i~5 `int` (plus (name c~4 `unsigned char`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
                (name i~5 `int`)))
-         (definition l~6 `unsigned long` 42)
-         (definition l2~7 `unsigned long` (plus (name l~6 `unsigned long`)))
+         (declaration l~6 `unsigned long` 42)
+         (declaration l2~7 `unsigned long` (plus (name l~6 `unsigned long`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 2))

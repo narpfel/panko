@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition error~1 `array<int; ∅>`
+         (declaration error~1 `array<int; ∅>`
             (braced
                (sizeof (name error~1 `array<int; ∅>`))
                (lengthof (name error~1 `array<int; ∅>`)))))))

@@ -16,7 +16,7 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (definition ptr~2 `ptr<fn(∅: ptr<char const>) -> int>` (name puts~0 `fn(∅: ptr<char const>) -> int`))
+         (declaration ptr~2 `ptr<fn(∅: ptr<char const>) -> int>` (name puts~0 `fn(∅: ptr<char const>) -> int`))
          (expression
             (call (name ptr~2 `ptr<fn(∅: ptr<char const>) -> int>`)
                (string "hello world"))))))

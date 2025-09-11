@@ -15,13 +15,13 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (definition as_integral_value~2 `array<char; ∅>`
+         (declaration as_integral_value~2 `array<char; ∅>`
             (braced
                '%'
                'd'
                '\n'
                0))
-         (definition as_char~3 `array<char; ∅>`
+         (declaration as_char~3 `array<char; ∅>`
             (braced
                '<'
                '%'

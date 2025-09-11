@@ -16,7 +16,7 @@ exit_code: 0
    (typedef max_align_t `long long`)
    (typedef wchar_t `int`)
    (typedef nullptr_t `typeof(nullptr)`)
-   (definition NULL~0 `int` 42)
+   (declaration NULL~0 `int` 42)
    (function-definition
       main~1 `fn() -> int`
       (compound-statement

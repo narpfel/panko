@@ -11,9 +11,9 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (tentative-definition a~0 `int` ∅)
-   (tentative-definition a~0 `int const` ∅)
-   (tentative-definition f~2 `int` ∅)
+   (declaration a~0 `int` ∅)
+   (declaration a~0 `int const` ∅)
+   (declaration f~2 `int` ∅)
    (declaration f~2 `fn() -> int` ∅)
    (declaration g~4 `fn(∅: int) -> int` ∅)
    (declaration g~4 `fn(x: int) -> int` ∅)

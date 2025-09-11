@@ -15,8 +15,8 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (definition x~2 `int` 42)
-         (definition p~3 `ptr<int>` (addressof (name x~2 `int`)))
+         (declaration x~2 `int` 42)
+         (declaration p~3 `ptr<int>` (addressof (name x~2 `int`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
@@ -33,7 +33,7 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
                (not-equal nullptr nullptr)))
-         (definition null~4 `ptr<array<long; 10>>` nullptr)
+         (declaration null~4 `ptr<array<long; 10>>` nullptr)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")

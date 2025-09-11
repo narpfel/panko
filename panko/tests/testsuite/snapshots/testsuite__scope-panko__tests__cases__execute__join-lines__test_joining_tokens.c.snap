@@ -21,7 +21,7 @@ exit_code: 0
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (string "hello world")))
-         (definition value~2 `int` 42)
+         (declaration value~2 `int` 42)
          (return (name value~2 `int`)))))
 
 ----- stderr -----

@@ -14,24 +14,24 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition abc~1 `array<short; 27>` (string "abc"))
-         (definition xs~2 `array<int; 42>` (string "abc"))
-         (definition ys~3 `array<int; 123>`
+         (declaration abc~1 `array<short; 27>` (string "abc"))
+         (declaration xs~2 `array<int; 42>` (string "abc"))
+         (declaration ys~3 `array<int; 123>`
             (braced
                (string "abc")))
-         (definition zs~4 `array<array<int; 100>; 7>`
+         (declaration zs~4 `array<array<int; 100>; 7>`
             (braced
                (string "abc")
                (braced
                   (string "d"))))
-         (definition ws~5 `array<array<int; 100>; 5>`
+         (declaration ws~5 `array<array<int; 100>; 5>`
             (braced
                (braced
                   (string "abc"))
                (braced
                   (string "d"))))
-         (definition multidimensional~6 `array<array<int; 4>; 9>` (string "abc"))
-         (definition another_multidimensional~7 `array<array<int; 5>; 10>`
+         (declaration multidimensional~6 `array<array<int; 4>; 9>` (string "abc"))
+         (declaration another_multidimensional~7 `array<array<int; 5>; 10>`
             (braced
                (string "def"))))))
 

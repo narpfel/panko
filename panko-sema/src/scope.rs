@@ -307,7 +307,6 @@ pub struct Reference<'a> {
     pub(crate) ty: QualifiedType<'a>,
     pub(crate) id: Id,
     pub(crate) usage_location: Loc<'a>,
-    pub(crate) kind: RefKind,
     pub(crate) storage_duration: StorageDuration,
     pub(crate) previous_definition: Option<&'a Self>,
     pub(crate) is_parameter: IsParameter,
@@ -602,13 +601,11 @@ struct Scopes<'a> {
 }
 
 impl<'a> Scopes<'a> {
-    #[expect(clippy::too_many_arguments, reason = "TODO: `kind` is unnecessary")]
     fn add(
         &mut self,
         name: &'a str,
         loc: Loc<'a>,
         ty: QualifiedType<'a>,
-        kind: RefKind,
         storage_duration: StorageDuration,
         is_parameter: IsParameter,
         is_in_global_scope: IsInGlobalScope,
@@ -625,7 +622,6 @@ impl<'a> Scopes<'a> {
             ty,
             id,
             usage_location: loc,
-            kind,
             storage_duration,
             previous_definition: None,
             is_parameter,
@@ -679,7 +675,6 @@ impl<'a> Scopes<'a> {
             ty,
             id,
             usage_location: loc,
-            kind: RefKind::Definition,
             storage_duration: StorageDuration::Automatic,
             previous_definition: None,
             is_parameter: IsParameter::No,
@@ -852,7 +847,6 @@ fn resolve_function_definition<'a>(
         name.slice(),
         name.loc(),
         ty,
-        RefKind::Definition,
         StorageDuration::Static,
         IsParameter::No,
         IsInGlobalScope::Yes,
@@ -912,7 +906,6 @@ fn resolve_function_definition<'a>(
                     name,
                     param.loc,
                     param.ty,
-                    RefKind::Definition,
                     StorageDuration::Automatic,
                     IsParameter::Yes,
                     IsInGlobalScope::No,
@@ -1045,27 +1038,10 @@ fn resolve_declaration<'a>(
         None => (),
     }
 
-    let kind = if initialiser.is_some() {
-        RefKind::Definition
-    }
-    else {
-        match ty.ty {
-            Type::Function(_) => RefKind::Declaration,
-            _ =>
-                if scopes.is_in_global_scope() {
-                    RefKind::TentativeDefinition
-                }
-                else {
-                    RefKind::Definition
-                },
-        }
-    };
-
     let maybe_reference = scopes.add(
         name.slice(),
         name.loc(),
         ty,
-        kind,
         storage_duration,
         IsParameter::No,
         if scopes.is_in_global_scope() {

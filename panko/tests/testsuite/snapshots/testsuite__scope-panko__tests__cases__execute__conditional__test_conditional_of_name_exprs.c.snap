@@ -16,8 +16,8 @@ exit_code: 0
       main~1 `fn() -> int`
       (compound-statement
          (compound-statement
-            (definition x~2 `int` 42)
-            (definition y~3 `int` 27)
+            (declaration x~2 `int` 42)
+            (declaration y~3 `int` 27)
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")
@@ -33,8 +33,8 @@ exit_code: 0
                      (name x~2 `int`)
                      (name y~3 `int`)))))
          (compound-statement
-            (definition x~4 `short` 42)
-            (definition y~5 `short` 27)
+            (declaration x~4 `short` 42)
+            (declaration y~5 `short` 27)
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")
@@ -50,8 +50,8 @@ exit_code: 0
                      (name x~4 `short`)
                      (name y~5 `short`)))))
          (compound-statement
-            (definition x~6 `long` 42)
-            (definition y~7 `long` 27)
+            (declaration x~6 `long` 42)
+            (declaration y~7 `long` 27)
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%ld\n")

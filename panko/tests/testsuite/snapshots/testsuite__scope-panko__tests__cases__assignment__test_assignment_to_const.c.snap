@@ -14,28 +14,28 @@ exit_code: 0
    (function-definition
       f~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `int const` 42)
+         (declaration a~1 `int const` 42)
          (expression (assign (name a~1 `int const`) 27))
          (return (name a~1 `int const`))))
    (function-definition
       g~2 `fn() -> int`
       (compound-statement
-         (definition b~3 `ptr<int const>` ∅)
-         (definition c~4 `ptr<int const>` ∅)
+         (declaration b~3 `ptr<int const>` ∅)
+         (declaration c~4 `ptr<int const>` ∅)
          (expression (assign (name b~3 `ptr<int const>`) (name c~4 `ptr<int const>`)))
          (return 0)))
    (function-definition
       h~5 `fn() -> int`
       (compound-statement
-         (definition d~6 `ptr<int> const` ∅)
-         (definition e~7 `ptr<int>` ∅)
+         (declaration d~6 `ptr<int> const` ∅)
+         (declaration e~7 `ptr<int>` ∅)
          (expression (assign (name d~6 `ptr<int> const`) (name e~7 `ptr<int>`)))
          (return 0)))
    (function-definition
       i~8 `fn() -> int`
       (compound-statement
-         (definition f~9 `ptr<int>` ∅)
-         (definition g~10 `ptr<int> const` ∅)
+         (declaration f~9 `ptr<int>` ∅)
+         (declaration g~10 `ptr<int> const` ∅)
          (expression (assign (name f~9 `ptr<int>`) (name g~10 `ptr<int> const`)))
          (return 0))))
 

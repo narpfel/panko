@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `int` 42)
+         (declaration a~1 `int` 42)
          (expression (assign (deref (name a~1 `int`)) 2))
          (expression (deref 42))
          (expression (subscript 42 27))

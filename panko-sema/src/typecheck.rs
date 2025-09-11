@@ -1148,7 +1148,6 @@ fn typeck_reference<'a>(
         ty,
         id,
         usage_location,
-        kind: _,
         storage_duration,
         previous_definition,
         is_parameter,
@@ -1533,6 +1532,8 @@ fn typeck_reference_declaration<'a>(
     let previous_definition = reference.previous_definition;
     let reference = typeck_reference(sess, reference, needs_initialiser);
     if let Some(previous_definition) = previous_definition {
+        // TODO: this is quadratic in the number of previous decls for this name
+        let previous_definition = typeck_reference(sess, *previous_definition, needs_initialiser);
         if matches!(reference.kind, RefKind::Definition)
             && matches!(previous_definition.kind, RefKind::Definition)
         {
@@ -1542,9 +1543,6 @@ fn typeck_reference_declaration<'a>(
             })
         }
         else {
-            // TODO: this is quadratic in the number of previous decls for this name
-            let previous_definition =
-                typeck_reference(sess, *previous_definition, needs_initialiser);
             // TODO: this re-computes the composite type (see `typeck_reference`)
             if reference
                 .ty

@@ -16,7 +16,7 @@ exit_code: 0
       (compound-statement
          (typedef a `int`)
          (declaration f~1 `fn(a: int) -> int` ∅)
-         (definition b~2 `int` 42)
+         (declaration b~2 `int` 42)
          (return
             (add (name b~2 `int`)
                (call (name f~1 `fn(a: int) -> int`)

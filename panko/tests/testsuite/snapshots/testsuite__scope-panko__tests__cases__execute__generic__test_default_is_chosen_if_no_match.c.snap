@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition c~1 `char` 0)
+         (declaration c~1 `char` 0)
          (return
             (generic
                (name c~1 `char`)

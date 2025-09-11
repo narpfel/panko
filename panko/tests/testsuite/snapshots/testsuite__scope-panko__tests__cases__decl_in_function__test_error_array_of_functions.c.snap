@@ -6,7 +6,6 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/decl_in_function/test_error_array_of_functions.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -15,6 +14,6 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition functions~1 `array<fn(∅: int, ∅: int) -> int; 42>` ∅))))
+         (declaration functions~1 `array<fn(∅: int, ∅: int) -> int; 42>` ∅))))
 
 ----- stderr -----

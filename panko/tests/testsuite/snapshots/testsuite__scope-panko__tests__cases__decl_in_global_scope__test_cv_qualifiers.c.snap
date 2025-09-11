@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (tentative-definition a~0 `int volatile` ∅)
-   (tentative-definition b~1 `int const volatile` ∅)
-   (tentative-definition c~2 `int const volatile` ∅))
+   (declaration a~0 `int volatile` ∅)
+   (declaration b~1 `int const volatile` ∅)
+   (declaration c~2 `int const volatile` ∅))
 
 ----- stderr -----

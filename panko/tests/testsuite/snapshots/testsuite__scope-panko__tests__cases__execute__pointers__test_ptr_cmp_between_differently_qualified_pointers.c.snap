@@ -14,9 +14,9 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int` 42)
-         (definition p~2 `ptr<int>` (addressof (name x~1 `int`)))
-         (definition p2~3 `ptr<int const>` (addressof (name x~1 `int`)))
+         (declaration x~1 `int` 42)
+         (declaration p~2 `ptr<int>` (addressof (name x~1 `int`)))
+         (declaration p2~3 `ptr<int const>` (addressof (name x~1 `int`)))
          (return (equal (name p~2 `ptr<int>`) (name p2~3 `ptr<int const>`))))))
 
 ----- stderr -----

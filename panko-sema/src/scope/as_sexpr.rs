@@ -61,7 +61,7 @@ impl AsSExpr for ParamRefs<'_> {
 
 impl AsSExpr for Declaration<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::new(self.reference.kind.str())
+        SExpr::new("declaration")
             .inherit(&self.reference)
             .inherit(&self.initialiser)
     }

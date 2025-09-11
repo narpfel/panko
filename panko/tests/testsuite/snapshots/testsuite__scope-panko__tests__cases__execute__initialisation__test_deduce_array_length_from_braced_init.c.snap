@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (definition array~2 `array<array<int; 3>; ∅>`
+         (declaration array~2 `array<array<int; 3>; ∅>`
             (braced
                (braced
                   1)

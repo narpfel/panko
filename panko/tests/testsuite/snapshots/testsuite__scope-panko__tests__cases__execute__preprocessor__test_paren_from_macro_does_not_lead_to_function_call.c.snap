@@ -19,7 +19,7 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (definition called~3 `int` 42)
+         (declaration called~3 `int` 42)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")

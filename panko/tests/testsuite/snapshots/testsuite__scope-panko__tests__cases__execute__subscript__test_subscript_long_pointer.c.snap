@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (definition p~2 `ptr<long>`
+         (declaration p~2 `ptr<long>`
             (call (name calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`)
                2
                (sizeof `long`)))

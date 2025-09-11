@@ -18,17 +18,17 @@ exit_code: 0
          (compound-statement
             (typedef name `int`)
             (compound-statement
-               (definition name~2 `long` (negate 42))
+               (declaration name~2 `long` (negate 42))
                (expression
                   (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                      (string "%ld\n")
                      (name name~2 `long`))))
-            (definition x~3 `int` 123)
+            (declaration x~3 `int` 123)
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")
                   (name x~3 `int`))))
-         (definition name~4 `int` 42)
+         (declaration name~4 `int` 42)
          (return (name name~4 `int`)))))
 
 ----- stderr -----

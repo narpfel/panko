@@ -14,9 +14,9 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition xs~1 `array<int; 42>` (braced ∅))
-         (definition p~2 `ptr<array<int; ∅>>` (addressof (name xs~1 `array<int; 42>`)))
-         (definition q~3 `ptr<array<int; 42>>` (addressof (name xs~1 `array<int; 42>`)))
+         (declaration xs~1 `array<int; 42>` (braced ∅))
+         (declaration p~2 `ptr<array<int; ∅>>` (addressof (name xs~1 `array<int; 42>`)))
+         (declaration q~3 `ptr<array<int; 42>>` (addressof (name xs~1 `array<int; 42>`)))
          (return (equal (name p~2 `ptr<array<int; ∅>>`) (name q~3 `ptr<array<int; 42>>`))))))
 
 ----- stderr -----

@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (tentative-definition zero~0 `int` ∅)
+   (declaration zero~0 `int` ∅)
    (function-definition
       main~1 `fn() -> int`
       (compound-statement

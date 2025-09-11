@@ -6,7 +6,6 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/execute/conditional/test_conditional_with_pointers.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -15,12 +14,12 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition c_vp~1 `ptr<void const>` ∅)
-         (definition vp~2 `ptr<void>` ∅)
-         (definition c_ip~3 `ptr<int const>` ∅)
-         (definition v_ip~4 `ptr<int volatile>` ∅)
-         (definition ip~5 `ptr<int>` ∅)
-         (definition c_cp~6 `ptr<char const>` ∅)
+         (declaration c_vp~1 `ptr<void const>` ∅)
+         (declaration vp~2 `ptr<void>` ∅)
+         (declaration c_ip~3 `ptr<int const>` ∅)
+         (declaration v_ip~4 `ptr<int volatile>` ∅)
+         (declaration ip~5 `ptr<int>` ∅)
+         (declaration c_cp~6 `ptr<char const>` ∅)
          (expression
             (generic
                (conditional

@@ -14,10 +14,10 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> typeof(`int`)`
       (compound-statement
-         (definition x~1 `typeof(`ptr<int const>`)` nullptr)
-         (definition xs~2 `typeof(`array<typeof(`int const`); 5>`)` (braced ∅))
+         (declaration x~1 `typeof(`ptr<int const>`)` nullptr)
+         (declaration xs~2 `typeof(`array<typeof(`int const`); 5>`)` (braced ∅))
          (expression (assign (name x~1 `typeof(`ptr<int const>`)`) (name xs~2 `typeof(`array<typeof(`int const`); 5>`)`)))
-         (definition ys~3 `typeof(`array<int const; 5>`)` (braced ∅))
+         (declaration ys~3 `typeof(`array<int const; 5>`)` (braced ∅))
          (expression (cast `ptr<typeof(`int`)>` nullptr))
          (return (add (subscript (name x~1 `typeof(`ptr<int const>`)`) 0) (subscript (name ys~3 `typeof(`array<int const; 5>`)`) (subtract (lengthof (name ys~3 `typeof(`array<int const; 5>`)`)) 1)))))))
 

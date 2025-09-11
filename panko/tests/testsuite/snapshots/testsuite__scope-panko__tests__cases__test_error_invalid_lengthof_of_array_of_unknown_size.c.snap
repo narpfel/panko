@@ -6,13 +6,12 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/test_error_invalid_lengthof_of_array_of_unknown_size.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (tentative-definition xs~0 `array<int; ∅>` ∅)
+   (declaration xs~0 `array<int; ∅>` ∅)
    (function-definition
       main~1 `fn() -> int`
       (compound-statement

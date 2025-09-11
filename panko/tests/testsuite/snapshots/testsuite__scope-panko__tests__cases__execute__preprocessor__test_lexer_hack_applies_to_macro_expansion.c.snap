@@ -12,13 +12,13 @@ exit_code: 0
 ----- stdout -----
 (translation-unit
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (definition x~1 `int` 42)
+   (declaration x~1 `int` 42)
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
          (compound-statement
             (typedef x `int`)
-            (definition y~3 `int` 27)
+            (declaration y~3 `int` 27)
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")

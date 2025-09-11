@@ -14,9 +14,9 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int const` ∅)
-         (definition y~2 `int const` 27)
-         (definition mutable~3 `int` ∅)
+         (declaration x~1 `int const` ∅)
+         (declaration y~2 `int const` 27)
+         (declaration mutable~3 `int` ∅)
          (expression (assign (assign (name mutable~3 `int`) (assign (name x~1 `int const`) (name y~2 `int const`))) 42))
          (expression (assign (name mutable~3 `int`) 123))
          (expression (assign (name x~1 `int const`) 42))

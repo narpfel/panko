@@ -15,9 +15,9 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (definition a~2 `int` 10)
-         (definition b~3 `int` 20)
-         (definition c~4 `int` 30)
+         (declaration a~2 `int` 10)
+         (declaration b~3 `int` 20)
+         (declaration c~4 `int` 30)
          (return (add (add (add (name a~2 `int`) 5) 3) 1)))))
 
 ----- stderr -----

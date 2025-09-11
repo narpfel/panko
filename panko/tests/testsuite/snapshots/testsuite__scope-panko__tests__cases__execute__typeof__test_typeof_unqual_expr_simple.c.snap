@@ -15,10 +15,10 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (definition x~2 `int const` 42)
-         (definition y~3 `typeof_unqual((name x~2 `int const`))` 27)
+         (declaration x~2 `int const` 42)
+         (declaration y~3 `typeof_unqual((name x~2 `int const`))` 27)
          (expression (assign (name y~3 `typeof_unqual((name x~2 `int const`))`) 5))
-         (definition p~4 `typeof_unqual((addressof (name x~2 `int const`)))` nullptr)
+         (declaration p~4 `typeof_unqual((addressof (name x~2 `int const`)))` nullptr)
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (generic

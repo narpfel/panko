@@ -17,7 +17,7 @@ exit_code: 0
       main~2 `fn() -> int`
       (compound-statement
          (compound-statement
-            (definition string~3 `array<char; ∅>` (string "string"))
+            (declaration string~3 `array<char; ∅>` (string "string"))
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%s\n")
@@ -27,7 +27,7 @@ exit_code: 0
                   (string "%zu\n")
                   (lengthof (name string~3 `array<char; ∅>`)))))
          (compound-statement
-            (definition string~4 `array<char; 3>` (string "string"))
+            (declaration string~4 `array<char; 3>` (string "string"))
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%.*s\n")
@@ -38,7 +38,7 @@ exit_code: 0
                   (string "%zu\n")
                   (lengthof (name string~4 `array<char; 3>`)))))
          (compound-statement
-            (definition string~5 `array<char; 100>` (string "string"))
+            (declaration string~5 `array<char; 100>` (string "string"))
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%s\n")
@@ -48,7 +48,7 @@ exit_code: 0
                   (string "%zu\n")
                   (lengthof (name string~5 `array<char; 100>`)))))
          (compound-statement
-            (definition string~6 `array<char; ∅>`
+            (declaration string~6 `array<char; ∅>`
                (braced
                   (string "string")))
             (expression
@@ -59,7 +59,7 @@ exit_code: 0
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%zu\n")
                   (lengthof (name string~6 `array<char; ∅>`)))))
-         (definition strings~7 `array<array<char; 100>; ∅>`
+         (declaration strings~7 `array<array<char; 100>; ∅>`
             (braced
                (string "first")
                (string "second")
@@ -74,7 +74,7 @@ exit_code: 0
             (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
                (subscript (name strings~7 `array<array<char; 100>; ∅>`) 2)))
          (compound-statement
-            (definition strings~8 `array<array<array<char; 100>; 5>; ∅>`
+            (declaration strings~8 `array<array<array<char; 100>; 5>; ∅>`
                (braced
                   (designation ((index 0)) (string "first"))
                   (designation ((index 1))

@@ -18,7 +18,7 @@ exit_code: 0
          main.unnamed_parameter.0~2 `int`
          argv~3 `ptr<ptr<char>>`)
       (compound-statement
-         (definition xs~4 `array<array<int; 2>; 2>`
+         (declaration xs~4 `array<array<int; 2>; 2>`
             (braced
                (braced
                   1)

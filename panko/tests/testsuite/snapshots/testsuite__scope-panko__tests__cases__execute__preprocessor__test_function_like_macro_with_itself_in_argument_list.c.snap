@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `long long` 42)
+         (declaration x~1 `long long` 42)
          (return
             (generic
                (name x~1 `long long`)

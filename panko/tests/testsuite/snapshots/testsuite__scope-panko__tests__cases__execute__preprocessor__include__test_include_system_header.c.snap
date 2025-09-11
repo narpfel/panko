@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int` (not-equal (bit-xor 1 0) (bit-and 0 1)))
+         (declaration x~1 `int` (not-equal (bit-xor 1 0) (bit-and 0 1)))
          (expression (bit-or-assign (name x~1 `int`) 0b1'1000))
          (expression (bit-and-assign (name x~1 `int`) 0xf))
          (return (equal (name x~1 `int`) 0b1001)))))

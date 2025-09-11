@@ -14,13 +14,13 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int`
+         (declaration x~1 `int`
             (braced
                (designation ((index 0)) 42)))
-         (definition xs~2 `array<int; 2>`
+         (declaration xs~2 `array<int; 2>`
             (braced
                (designation ((index 0) (index 0)) 42)))
-         (definition xss~3 `array<array<int; 2>; 2>`
+         (declaration xss~3 `array<array<int; 2>; 2>`
             (braced
                (designation ((index 0) (index 0) (index 0)) 42))))))
 

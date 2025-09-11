@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int` 42)
-         (definition p~2 `ptr<void>` (addressof (name x~1 `int`)))
+         (declaration x~1 `int` 42)
+         (declaration p~2 `ptr<void>` (addressof (name x~1 `int`)))
          (expression (deref (name p~2 `ptr<void>`))))))
 
 ----- stderr -----

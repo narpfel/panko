@@ -17,12 +17,12 @@ exit_code: 0
       (compound-statement
          (compound-statement
             (typedef name `char const`)
-            (definition x~2 `char const` 'a')
+            (declaration x~2 `char const` 'a')
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%c\n")
                   (name x~2 `char const`))))
-         (definition name~3 `int` 42)
+         (declaration name~3 `int` 42)
          (return (name name~3 `int`)))))
 
 ----- stderr -----

@@ -83,7 +83,7 @@ exit_code: 0
             (generic
                (sizeof 42)
                (assoc `unsigned long` 0)))
-         (definition p~5 `ptr<int>`
+         (declaration p~5 `ptr<int>`
             (call (name calloc~1 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`)
                1
                (sizeof (deref (name p~5 `ptr<int>`)))))

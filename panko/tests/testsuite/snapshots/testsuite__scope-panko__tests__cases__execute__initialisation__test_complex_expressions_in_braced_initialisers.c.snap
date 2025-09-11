@@ -32,24 +32,24 @@ exit_code: 0
          main.unnamed_parameter.0~4 `int`
          argv~5 `ptr<ptr<char>>`)
       (compound-statement
-         (definition x~6 `int`
+         (declaration x~6 `int`
             (braced
                42))
-         (definition y~7 `int`
+         (declaration y~7 `int`
             (braced
                (name x~6 `int`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~5 `ptr<ptr<char>>`) 1)
                (name y~7 `int`)))
-         (definition z~8 `int`
+         (declaration z~8 `int`
             (braced
                (negate (name x~6 `int`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~5 `ptr<ptr<char>>`) 1)
                (name z~8 `int`)))
-         (definition xs~9 `array<int; 2>`
+         (declaration xs~9 `array<int; 2>`
             (braced
                (name x~6 `int`)
                (braced
@@ -62,8 +62,8 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~5 `ptr<ptr<char>>`) 1)
                (subscript (name xs~9 `array<int; 2>`) 1)))
-         (definition two~10 `int` 2)
-         (definition ys~11 `array<int; 3>`
+         (declaration two~10 `int` 2)
+         (declaration ys~11 `array<int; 3>`
             (braced
                (name two~10 `int`)
                (call (name fib~1 `fn(n: int) -> int`)

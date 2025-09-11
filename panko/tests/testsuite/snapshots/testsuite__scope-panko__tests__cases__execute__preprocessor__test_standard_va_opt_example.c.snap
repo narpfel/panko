@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (definition x~0 `int` 42)
+   (declaration x~0 `int` 42)
    (function-definition
       main~1 `fn() -> int`
       (compound-statement

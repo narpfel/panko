@@ -6,7 +6,6 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/test_error_definition_of_array_of_unknown_size.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -15,6 +14,6 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition xs~1 `array<int; ∅>` ∅))))
+         (declaration xs~1 `array<int; ∅>` ∅))))
 
 ----- stderr -----

@@ -20,9 +20,9 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (definition xs~2 `array<int; 2>` (braced ∅))
-         (definition p~3 `ptr<int>` (addressof (subscript (name xs~2 `array<int; 2>`) 0)))
-         (definition p2~4 `ptr<int const>` (addressof (subscript (name xs~2 `array<int; 2>`) 1)))
+         (declaration xs~2 `array<int; 2>` (braced ∅))
+         (declaration p~3 `ptr<int>` (addressof (subscript (name xs~2 `array<int; 2>`) 0)))
+         (declaration p2~4 `ptr<int const>` (addressof (subscript (name xs~2 `array<int; 2>`) 1)))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (generic
@@ -46,7 +46,7 @@ exit_code: 0
                   (string "not null"))
                (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                   (string "null"))))
-         (definition null~5 `typeof(nullptr)` nullptr)
+         (declaration null~5 `typeof(nullptr)` nullptr)
          (return
             (conditional
                (name null~5 `typeof(nullptr)`)

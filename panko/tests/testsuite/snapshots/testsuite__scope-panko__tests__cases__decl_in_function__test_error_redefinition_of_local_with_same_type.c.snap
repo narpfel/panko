@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       a~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int` 42)
-         (definition x~1 `int` 27)
+         (declaration x~1 `int` 42)
+         (declaration x~1 `int` 27)
          (return (name x~1 `int`)))))
 
 ----- stderr -----

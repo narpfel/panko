@@ -21,7 +21,7 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (definition name~3 `ptr<fn(∅: int) -> int>` (name f~0 `fn(name: int) -> int`))
+         (declaration name~3 `ptr<fn(∅: int) -> int>` (name f~0 `fn(name: int) -> int`))
          (return
             (call (name name~3 `ptr<fn(∅: int) -> int>`)
                21)))))

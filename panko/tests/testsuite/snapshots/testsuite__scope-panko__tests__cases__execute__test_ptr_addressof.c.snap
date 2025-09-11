@@ -14,10 +14,10 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition i1~1 `int` 42)
-         (definition i2~2 `int` 27)
-         (definition p1~3 `ptr<int>` (addressof (name i1~1 `int`)))
-         (definition p2~4 `ptr<int>` (addressof (name i2~2 `int`)))
+         (declaration i1~1 `int` 42)
+         (declaration i2~2 `int` 27)
+         (declaration p1~3 `ptr<int>` (addressof (name i1~1 `int`)))
+         (declaration p2~4 `ptr<int>` (addressof (name i2~2 `int`)))
          (return (add (add (add (equal (name p1~3 `ptr<int>`) (addressof (name i1~1 `int`))) (equal (name p2~4 `ptr<int>`) (addressof (name i2~2 `int`)))) (equal (add (name p1~3 `ptr<int>`) 1) (name p2~4 `ptr<int>`))) (equal (subtract (name p2~4 `ptr<int>`) 1) (name p1~3 `ptr<int>`)))))))
 
 ----- stderr -----

@@ -20,8 +20,8 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (definition x~3 `int` 40)
-         (definition p~4 `ptr<fn(∅: int) -> int>` (addressof (name f~0 `fn(x: int) -> int`)))
+         (declaration x~3 `int` 40)
+         (declaration p~4 `ptr<fn(∅: int) -> int>` (addressof (name f~0 `fn(x: int) -> int`)))
          (return
             (call (deref (deref (deref (deref (name p~4 `ptr<fn(∅: int) -> int>`)))))
                (name x~3 `int`))))))

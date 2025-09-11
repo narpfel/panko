@@ -6,7 +6,6 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/execute/arithmetic/test_arithmetic_between_const_and_nonconst.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -15,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int const` 42)
-         (definition y~2 `int` 27)
+         (declaration x~1 `int const` 42)
+         (declaration y~2 `int` 27)
          (return (add (name x~1 `int const`) (name y~2 `int`))))))
 
 ----- stderr -----

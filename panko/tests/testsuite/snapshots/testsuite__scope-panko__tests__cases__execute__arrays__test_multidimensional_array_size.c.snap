@@ -6,7 +6,6 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/execute/arrays/test_multidimensional_array_size.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -23,7 +22,7 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 1)
                (sizeof `array<array<int; 500>; 200>`)))
-         (definition xs~4 `array<array<int; 3>; 5>` ∅)
+         (declaration xs~4 `array<array<int; 3>; 5>` ∅)
          (return (sizeof (name xs~4 `array<array<int; 3>; 5>`))))))
 
 ----- stderr -----

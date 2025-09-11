@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition p~1 `ptr<int const>` ∅)
-         (definition c~2 `ptr<char const>` ∅)
+         (declaration p~1 `ptr<int const>` ∅)
+         (declaration c~2 `ptr<char const>` ∅)
          (expression
             (conditional
                1

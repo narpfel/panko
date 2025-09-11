@@ -18,6 +18,6 @@ exit_code: 0
          (compound-statement
             (declaration name~1 `fn() -> fn() -> int` ∅))
          (compound-statement
-            (definition name~2 `array<fn() -> int; 42>` ∅)))))
+            (declaration name~2 `array<fn() -> int; 42>` ∅)))))
 
 ----- stderr -----

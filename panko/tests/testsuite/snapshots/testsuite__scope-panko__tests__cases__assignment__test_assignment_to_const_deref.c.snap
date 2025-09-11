@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition p~1 `ptr<long const>` (cast `ptr<long>` 0))
+         (declaration p~1 `ptr<long const>` (cast `ptr<long>` 0))
          (expression (assign (deref (name p~1 `ptr<long const>`)) 42))
          (expression (assign (deref (add (name p~1 `ptr<long const>`) 1)) 42))
          (expression (assign (subscript (name p~1 `ptr<long const>`) 0) 42))

@@ -18,7 +18,7 @@ exit_code: 0
          main.unnamed_parameter.0~2 `int`
          argv~3 `ptr<ptr<char>>`)
       (compound-statement
-         (definition i~4 `int` 42)
+         (declaration i~4 `int` 42)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
@@ -31,9 +31,9 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
                (not (not (not (name i~4 `int`))))))
-         (definition j~5 `int` (not (name i~4 `int`)))
-         (definition k~6 `int` (not (not (name i~4 `int`))))
-         (definition l~7 `int` (not (not (not (name i~4 `int`)))))
+         (declaration j~5 `int` (not (name i~4 `int`)))
+         (declaration k~6 `int` (not (not (name i~4 `int`))))
+         (declaration l~7 `int` (not (not (not (name i~4 `int`)))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
@@ -50,7 +50,7 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
                (not 0)))
-         (definition p~8 `ptr<int>` (addressof (name i~4 `int`)))
+         (declaration p~8 `ptr<int>` (addressof (name i~4 `int`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
@@ -63,7 +63,7 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
                (not (not (not (name p~8 `ptr<int>`))))))
-         (definition c~9 `char` 42)
+         (declaration c~9 `char` 42)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
@@ -72,7 +72,7 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
                (not (not (name c~9 `char`)))))
-         (definition c2~10 `char` 0)
+         (declaration c2~10 `char` 0)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
@@ -81,7 +81,7 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
                (not (not (name c2~10 `char`)))))
-         (definition c3~11 `char` (not 27))
+         (declaration c3~11 `char` (not 27))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (deref (add (name argv~3 `ptr<ptr<char>>`) 1))

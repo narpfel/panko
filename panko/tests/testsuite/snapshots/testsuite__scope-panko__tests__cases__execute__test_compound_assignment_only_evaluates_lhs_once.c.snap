@@ -6,7 +6,6 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/execute/test_compound_assignment_only_evaluates_lhs_once.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -28,7 +27,7 @@ exit_code: 0
    (function-definition
       main~3 `fn() -> int`
       (compound-statement
-         (definition x~4 `int` 42)
+         (declaration x~4 `int` 42)
          (expression
             (add-assign
                (deref

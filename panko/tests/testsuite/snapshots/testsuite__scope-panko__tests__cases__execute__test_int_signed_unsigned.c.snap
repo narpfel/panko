@@ -15,8 +15,8 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (definition x~2 `int` (negate 42))
-         (definition y~3 `unsigned int` 27)
+         (declaration x~2 `int` (negate 42))
+         (declaration y~3 `unsigned int` 27)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")

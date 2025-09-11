@@ -13,7 +13,7 @@ exit_code: 0
 (translation-unit
    (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
    (declaration printf~1 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (definition variable~2 `int` 27)
+   (declaration variable~2 `int` 27)
    (function-definition
       main~3 `fn() -> int`
       (compound-statement

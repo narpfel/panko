@@ -6,12 +6,11 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/decl_in_global_scope/test_error_function_definition_with_initialiser.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (definition f~0 `fn(∅: int) -> int` 42))
+   (declaration f~0 `fn(∅: int) -> int` 42))
 
 ----- stderr -----

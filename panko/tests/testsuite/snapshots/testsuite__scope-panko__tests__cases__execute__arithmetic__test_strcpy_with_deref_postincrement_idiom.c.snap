@@ -16,10 +16,10 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (definition str~3 `array<char; ∅>` (string "hello"))
-         (definition copy~4 `array<char; 6>` ∅)
-         (definition src~5 `ptr<char>` (name str~3 `array<char; ∅>`))
-         (definition tgt~6 `ptr<char>` (name copy~4 `array<char; 6>`))
+         (declaration str~3 `array<char; ∅>` (string "hello"))
+         (declaration copy~4 `array<char; 6>` ∅)
+         (declaration src~5 `ptr<char>` (name str~3 `array<char; ∅>`))
+         (declaration tgt~6 `ptr<char>` (name copy~4 `array<char; 6>`))
          (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
          (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
          (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))

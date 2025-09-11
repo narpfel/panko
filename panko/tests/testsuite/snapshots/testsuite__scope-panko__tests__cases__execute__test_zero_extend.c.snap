@@ -29,73 +29,73 @@ exit_code: 0
          argv~6 `ptr<ptr<char>>`)
       (compound-statement
          (compound-statement
-            (definition c~7 `unsigned char` 42)
+            (declaration c~7 `unsigned char` 42)
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name c~7 `unsigned char`)))
-            (definition s~8 `unsigned short` (name c~7 `unsigned char`))
+            (declaration s~8 `unsigned short` (name c~7 `unsigned char`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name s~8 `unsigned short`)))
-            (definition i~9 `unsigned int` (name c~7 `unsigned char`))
+            (declaration i~9 `unsigned int` (name c~7 `unsigned char`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name i~9 `unsigned int`)))
-            (definition j~10 `unsigned int` (name s~8 `unsigned short`))
+            (declaration j~10 `unsigned int` (name s~8 `unsigned short`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name j~10 `unsigned int`)))
-            (definition l~11 `unsigned long` (name c~7 `unsigned char`))
+            (declaration l~11 `unsigned long` (name c~7 `unsigned char`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name l~11 `unsigned long`)))
-            (definition m~12 `unsigned long` (name s~8 `unsigned short`))
+            (declaration m~12 `unsigned long` (name s~8 `unsigned short`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name m~12 `unsigned long`)))
-            (definition n~13 `unsigned long` (name i~9 `unsigned int`))
+            (declaration n~13 `unsigned long` (name i~9 `unsigned int`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name n~13 `unsigned long`))))
          (compound-statement
-            (definition c~14 `unsigned char` 250)
+            (declaration c~14 `unsigned char` 250)
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name c~14 `unsigned char`)))
-            (definition s~15 `unsigned short` (name c~14 `unsigned char`))
+            (declaration s~15 `unsigned short` (name c~14 `unsigned char`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name s~15 `unsigned short`)))
-            (definition i~16 `unsigned int` (name c~14 `unsigned char`))
+            (declaration i~16 `unsigned int` (name c~14 `unsigned char`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name i~16 `unsigned int`)))
-            (definition j~17 `unsigned int` (name s~15 `unsigned short`))
+            (declaration j~17 `unsigned int` (name s~15 `unsigned short`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name j~17 `unsigned int`)))
-            (definition l~18 `unsigned long` (name c~14 `unsigned char`))
+            (declaration l~18 `unsigned long` (name c~14 `unsigned char`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name l~18 `unsigned long`)))
-            (definition m~19 `unsigned long` (name s~15 `unsigned short`))
+            (declaration m~19 `unsigned long` (name s~15 `unsigned short`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)
                   (name m~19 `unsigned long`)))
-            (definition n~20 `unsigned long` (name i~16 `unsigned int`))
+            (declaration n~20 `unsigned long` (name i~16 `unsigned int`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void`)
                   (name argv~6 `ptr<ptr<char>>`)

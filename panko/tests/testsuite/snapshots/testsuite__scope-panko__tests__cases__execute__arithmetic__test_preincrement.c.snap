@@ -6,7 +6,6 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/execute/arithmetic/test_preincrement.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
@@ -32,7 +31,7 @@ exit_code: 0
          main.unnamed_parameter.0~5 `int`
          argv~6 `ptr<ptr<char>>`)
       (compound-statement
-         (definition x~7 `int` 42)
+         (declaration x~7 `int` 42)
          (expression
             (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~6 `ptr<ptr<char>>`) 1)

@@ -18,7 +18,7 @@ exit_code: 0
             (generic
                (lengthof `array<int; 42>`)
                (assoc `unsigned long` 0)))
-         (definition xs~1 `array<int; ∅>`
+         (declaration xs~1 `array<int; ∅>`
             (braced
                1
                2))

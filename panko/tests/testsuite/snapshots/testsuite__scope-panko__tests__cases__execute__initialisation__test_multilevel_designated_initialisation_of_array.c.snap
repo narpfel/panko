@@ -17,7 +17,7 @@ exit_code: 0
       (params
          x~2 `int`)
       (compound-statement
-         (definition s~3 `array<char; ∅>`
+         (declaration s~3 `array<char; ∅>`
             (braced
                37
                100
@@ -34,7 +34,7 @@ exit_code: 0
          main.unnamed_parameter.0~5 `int`
          argv~6 `ptr<ptr<char>>`)
       (compound-statement
-         (definition xs~7 `array<array<int; 2>; 2>`
+         (declaration xs~7 `array<array<int; 2>; 2>`
             (braced
                (designation ((index 0) (index 0))
                   (call (name f~1 `fn(x: int) -> int`)

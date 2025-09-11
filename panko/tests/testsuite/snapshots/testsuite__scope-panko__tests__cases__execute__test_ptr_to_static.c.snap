@@ -11,12 +11,12 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (definition x~0 `int` 42)
+   (declaration x~0 `int` 42)
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (definition p~2 `ptr<int>` (addressof (name x~0 `int`)))
-         (definition local_copy~3 `int` (deref (name p~2 `ptr<int>`)))
+         (declaration p~2 `ptr<int>` (addressof (name x~0 `int`)))
+         (declaration local_copy~3 `int` (deref (name p~2 `ptr<int>`)))
          (expression (assign (deref (name p~2 `ptr<int>`)) 27))
          (return (add (add (name local_copy~3 `int`) (deref (name p~2 `ptr<int>`))) (name x~0 `int`))))))
 

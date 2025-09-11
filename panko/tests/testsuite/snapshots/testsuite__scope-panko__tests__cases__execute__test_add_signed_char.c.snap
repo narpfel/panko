@@ -14,9 +14,9 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `signed char` 90)
-         (definition b~2 `signed char` 110)
-         (definition result~3 `int` (add (name a~1 `signed char`) (name b~2 `signed char`)))
+         (declaration a~1 `signed char` 90)
+         (declaration b~2 `signed char` 110)
+         (declaration result~3 `int` (add (name a~1 `signed char`) (name b~2 `signed char`)))
          (return (name result~3 `int`)))))
 
 ----- stderr -----

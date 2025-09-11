@@ -14,9 +14,9 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `int` 42)
-         (definition b~2 `int` 27)
-         (definition p~3 `ptr<int const> const` (addressof (name b~2 `int`)))
+         (declaration a~1 `int` 42)
+         (declaration b~2 `int` 27)
+         (declaration p~3 `ptr<int const> const` (addressof (name b~2 `int`)))
          (expression
             (assign
                (generic

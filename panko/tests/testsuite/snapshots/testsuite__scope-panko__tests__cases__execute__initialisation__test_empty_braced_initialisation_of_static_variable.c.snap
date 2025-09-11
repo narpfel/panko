@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit
-   (definition x~0 `int` (braced ∅))
-   (definition xs~1 `array<array<int; 2>; 2>` (braced ∅))
+   (declaration x~0 `int` (braced ∅))
+   (declaration xs~1 `array<array<int; 2>; 2>` (braced ∅))
    (function-definition
       main~2 `fn() -> int`
       (compound-statement

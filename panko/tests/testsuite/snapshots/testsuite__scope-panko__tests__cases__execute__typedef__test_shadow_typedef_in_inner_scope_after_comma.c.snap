@@ -21,16 +21,16 @@ exit_code: 0
       (compound-statement
          (typedef function `int`)
          (compound-statement
-            (definition a~2 `int` ∅)
-            (definition name~3 `int` 42)
-            (definition b~4 `int` ∅)
-            (definition ptr~5 `ptr<int>` (addressof (name name~3 `int`)))
-            (definition c~6 `int` ∅)
+            (declaration a~2 `int` ∅)
+            (declaration name~3 `int` 42)
+            (declaration b~4 `int` ∅)
+            (declaration ptr~5 `ptr<int>` (addressof (name name~3 `int`)))
+            (declaration c~6 `int` ∅)
             (declaration function~7 `fn(∅: int) -> int` ∅)
-            (definition d~8 `int` ∅)
-            (definition fptr~9 `ptr<fn(∅: int) -> int>` (name function~7 `fn(∅: int) -> int`))
-            (definition e~10 `int` ∅)
-            (definition xs~11 `array<int; 5>`
+            (declaration d~8 `int` ∅)
+            (declaration fptr~9 `ptr<fn(∅: int) -> int>` (name function~7 `fn(∅: int) -> int`))
+            (declaration e~10 `int` ∅)
+            (declaration xs~11 `array<int; 5>`
                (braced
                   123))
             (expression

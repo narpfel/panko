@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int const` 42)
-         (definition y~2 `typeof((name x~1 `int const`))` 27)
+         (declaration x~1 `int const` 42)
+         (declaration y~2 `typeof((name x~1 `int const`))` 27)
          (expression (assign (name y~2 `typeof((name x~1 `int const`))`) 0)))))
 
 ----- stderr -----

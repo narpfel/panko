@@ -43,20 +43,20 @@ exit_code: 0
    (function-definition
       f~8 `fn() -> int`
       (compound-statement
-         (definition a~9 `int` 42)
+         (declaration a~9 `int` 42)
          (expression (name a~9 `int`))
          (return (name a~9 `int`))))
    (function-definition
       g~10 `fn() -> char`
       (compound-statement
-         (definition c~11 `char` 0)
+         (declaration c~11 `char` 0)
          (return (name c~11 `char`))))
    (function-definition
       h~12 `fn() -> int`
       (compound-statement
-         (definition a~13 `int` 42)
+         (declaration a~13 `int` 42)
          (compound-statement
-            (definition a~14 `int` 27)
+            (declaration a~14 `int` 27)
             (return (name a~14 `int`)))))
    (function-definition
       i~15 `fn(a: int) -> int`
@@ -64,14 +64,14 @@ exit_code: 0
          a~16 `int`)
       (compound-statement
          (compound-statement
-            (definition a~17 `int` 42))
+            (declaration a~17 `int` 42))
          (return (name a~16 `int`))))
    (function-definition
       j~18 `fn() -> int`
       (compound-statement
-         (definition a~19 `int` 42)
+         (declaration a~19 `int` 42)
          (compound-statement
-            (definition a~20 `int` 27)
+            (declaration a~20 `int` 27)
             (expression (name a~20 `int`)))
          (return (name a~19 `int`)))))
 
