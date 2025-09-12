@@ -49,6 +49,7 @@ use crate::scope::Id;
 use crate::scope::IncrementFixity;
 use crate::scope::IsInGlobalScope;
 use crate::scope::IsParameter;
+use crate::scope::Redeclared;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
 use crate::ty;
@@ -585,6 +586,12 @@ pub(crate) enum ExternalDeclaration<'a> {
     Error(&'a dyn Report),
 }
 
+impl<'a> FromError<'a> for ExternalDeclaration<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Error(error)
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Typedef<'a> {
     ty: QualifiedType<'a>,
@@ -664,6 +671,12 @@ pub(crate) enum Statement<'a> {
     Expression(Option<TypedExpression<'a>>),
     Compound(CompoundStatement<'a>),
     Return(Option<TypedExpression<'a>>),
+}
+
+impl<'a> FromError<'a> for Statement<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Expression(Some(TypedExpression::from_error(error)))
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1638,7 +1651,29 @@ fn typeck_statement<'a>(
             };
             Statement::Return(expr)
         }
+        scope::Statement::Redeclared(redeclared) => typeck_redeclaration_error(sess, redeclared),
     }
+}
+
+fn typeck_redeclaration_error<'a, Error>(
+    sess: &'a Session<'a>,
+    redeclared: &Redeclared<'a>,
+) -> Error
+where
+    Error: FromError<'a>,
+{
+    let ty = typeck_ty(sess, *redeclared.ty(), IsParameter::No);
+    let kind = match ty.ty.is_function() {
+        true => "function",
+        false => "value",
+    };
+    let diagnostic = match *redeclared {
+        Redeclared::ValueAsTypedef { at, reference } =>
+            scope::Diagnostic::ValueRedeclaredAsTypedef { at, reference, kind },
+        Redeclared::TypedefAsValue { at, typedef_ty, value_ty: _ } =>
+            scope::Diagnostic::TypedefRedeclaredAsValue { at, ty: typedef_ty, kind },
+    };
+    sess.emit(diagnostic)
 }
 
 fn compare_by_size_with_unsigned_as_tie_breaker(ty: &Arithmetic) -> impl Ord + use<> {
@@ -3045,6 +3080,8 @@ pub fn resolve_types<'a>(
             scope::ExternalDeclaration::Declaration(decl) =>
                 ExternalDeclaration::Declaration(typeck_declaration(sess, decl)),
             scope::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
+            scope::ExternalDeclaration::Redeclared(redeclared) =>
+                typeck_redeclaration_error(sess, redeclared),
         })),
     }
 }

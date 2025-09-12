@@ -286,6 +286,7 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
         Self::int()
     }
 
+    // TODO: this ICE’s for `typeof`, but is only called in `Self::escape_sequence_ty`
     pub(crate) const fn make_unsigned(&self) -> Self {
         match self {
             Self::Arithmetic(Arithmetic::Integral(Integral { signedness: _, kind })) =>
@@ -319,7 +320,9 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
     {
         self.to_string()
     }
+}
 
+impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
     pub(crate) fn is_object(&self) -> bool {
         !self.is_function()
     }
@@ -335,9 +338,7 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
     pub fn is_array(&self) -> bool {
         matches!(self, Type::Array(_))
     }
-}
 
-impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
     pub fn size(&self) -> u64 {
         match self {
             Type::Arithmetic(arithmetic) => arithmetic.size(),
@@ -439,7 +440,7 @@ pub struct QualifiedType<'a, TypeofExpr, LengthExpr> {
     pub(crate) loc: Loc<'a>,
 }
 
-impl<TypeofExpr, LengthExpr> QualifiedType<'_, TypeofExpr, LengthExpr> {
+impl<'a, TypeofExpr, LengthExpr> QualifiedType<'a, TypeofExpr, LengthExpr> {
     // TODO: this is a temporary hack until the `Report` derive macro handles stringification
     // better
     pub(crate) fn slice(&self) -> String
@@ -450,7 +451,7 @@ impl<TypeofExpr, LengthExpr> QualifiedType<'_, TypeofExpr, LengthExpr> {
         self.to_string()
     }
 
-    pub fn loc(&self) -> Loc {
+    pub fn loc(&self) -> Loc<'a> {
         self.loc
     }
 }

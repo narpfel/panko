@@ -7,51 +7,20 @@ info:
     - "--stop-after=scopes"
     - panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_pointer_uses_value_in_message.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit
+   (declaration a~0 `ptr<fn() -> int>` ∅)
+   (redeclared a)
+   (typedef b `int`)
+   (redeclared b)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (declaration c~2 `ptr<fn() -> int>` ∅)
+         (redeclared c)
+         (typedef d `int`)
+         (redeclared d))))
 
 ----- stderr -----
-Error: value name `a` redeclared as `typedef` name
-   ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_pointer_uses_value_in_message.c:5:1]
-   │
- 4 │ int (*a)();
-   │       ┬  
-   │       ╰── originally declared here as a value name
- 5 │ typedef int a;
-   │ ─────┬─────  
-   │      ╰─────── redeclared here as a `typedef` name
-───╯
-
-Error: `typedef` name `b` redeclared as value name
-   ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_pointer_uses_value_in_message.c:8:7]
-   │
- 7 │ typedef int b;
-   │ ─────┬─────  
-   │      ╰─────── originally declared here as a `typedef` name
- 8 │ int (*b)();
-   │       ┬  
-   │       ╰── redeclared here as a value name
-───╯
-
-Error: value name `c` redeclared as `typedef` name
-    ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_pointer_uses_value_in_message.c:12:5]
-    │
- 11 │     int (*c)();
-    │           ┬  
-    │           ╰── originally declared here as a value name
- 12 │     typedef int c;
-    │     ─────┬─────  
-    │          ╰─────── redeclared here as a `typedef` name
-────╯
-
-Error: `typedef` name `d` redeclared as value name
-    ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_pointer_uses_value_in_message.c:15:11]
-    │
- 14 │     typedef int d;
-    │     ─────┬─────  
-    │          ╰─────── originally declared here as a `typedef` name
- 15 │     int (*d)();
-    │           ┬  
-    │           ╰── redeclared here as a value name
-────╯

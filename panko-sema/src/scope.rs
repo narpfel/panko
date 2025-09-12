@@ -101,6 +101,7 @@ pub(crate) enum ExternalDeclaration<'a> {
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Error(&'a dyn Report),
+    Redeclared(Redeclared<'a>),
 }
 
 impl<'a> FromError<'a> for ExternalDeclaration<'a> {
@@ -110,16 +111,46 @@ impl<'a> FromError<'a> for ExternalDeclaration<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) enum Redeclared<'a> {
+    ValueAsTypedef {
+        at: QualifiedType<'a>,
+        reference: Reference<'a>,
+    },
+    TypedefAsValue {
+        at: Token<'a>,
+        typedef_ty: QualifiedType<'a>,
+        value_ty: QualifiedType<'a>,
+    },
+}
+
+impl<'a> Redeclared<'a> {
+    pub(crate) fn ty(&self) -> &QualifiedType<'a> {
+        match self {
+            Self::ValueAsTypedef { at: _, reference } => &reference.ty,
+            Self::TypedefAsValue { at: _, typedef_ty: _, value_ty } => value_ty,
+        }
+    }
+
+    fn name(&self) -> &'a str {
+        match self {
+            Self::ValueAsTypedef { at: _, reference } => reference.name,
+            Self::TypedefAsValue { at, typedef_ty: _, value_ty: _ } => at.slice(),
+        }
+    }
+
+    fn loc(&self) -> Loc<'a> {
+        match self {
+            Self::ValueAsTypedef { at, reference: _ } => at.loc(),
+            Self::TypedefAsValue { at, typedef_ty: _, value_ty: _ } => at.loc(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum DeclarationOrTypedef<'a> {
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
-    Error(&'a dyn Report),
-}
-
-impl<'a> FromError<'a> for DeclarationOrTypedef<'a> {
-    fn from_error(error: &'a dyn Report) -> Self {
-        Self::Error(error)
-    }
+    Redeclared(Redeclared<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -196,12 +227,7 @@ pub(crate) enum Statement<'a> {
         return_: Token<'a>,
         expr: MaybeExpr<'a>,
     },
-}
-
-impl<'a> FromError<'a> for Statement<'a> {
-    fn from_error(error: &'a dyn Report) -> Self {
-        Self::Expression(Some(Expression::from_error(error)))
-    }
+    Redeclared(Redeclared<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -426,6 +452,7 @@ impl<'a> Statement<'a> {
                     loc
                 }
             }
+            Statement::Redeclared(redeclared) => redeclared.loc(),
         }
     }
 
@@ -1009,15 +1036,6 @@ fn resolve_declaration<'a>(
     let ast::Declaration { ty, name, initialiser, storage_class } = decl;
     let ty = resolve_ty(scopes, ty);
 
-    let ty_kind = |ty: QualifiedType| {
-        if ty.ty.is_function() {
-            "function"
-        }
-        else {
-            "value"
-        }
-    };
-
     match storage_class {
         Some(cst::StorageClassSpecifier {
             token: _,
@@ -1032,10 +1050,9 @@ fn resolve_declaration<'a>(
                         previously_declared_as,
                     }),
                 Err(reference) =>
-                    return scopes.sess.emit(Diagnostic::ValueRedeclaredAsTypedef {
+                    return DeclarationOrTypedef::Redeclared(Redeclared::ValueAsTypedef {
                         at: ty,
                         reference,
-                        kind: ty_kind(reference.ty),
                     }),
             }
         }
@@ -1054,10 +1071,10 @@ fn resolve_declaration<'a>(
     let reference = match maybe_reference {
         Ok(reference) => reference,
         Err(typedef_ty) =>
-            return scopes.sess.emit(Diagnostic::TypedefRedeclaredAsValue {
+            return DeclarationOrTypedef::Redeclared(Redeclared::TypedefAsValue {
                 at: *name,
-                ty: typedef_ty,
-                kind: ty_kind(ty),
+                typedef_ty,
+                value_ty: ty,
             }),
     };
     // TODO: move resolving the initialiser into `Scopes::add` so that the `add_initialiser` call
@@ -1100,7 +1117,7 @@ fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> State
                 DeclarationOrTypedef::Declaration(declaration) =>
                     Statement::Declaration(declaration),
                 DeclarationOrTypedef::Typedef(typedef) => Statement::Typedef(typedef),
-                DeclarationOrTypedef::Error(error) => Statement::from_error(error),
+                DeclarationOrTypedef::Redeclared(redeclared) => Statement::Redeclared(redeclared),
             },
         ast::Statement::Expression(expr) =>
             Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
@@ -1283,7 +1300,8 @@ pub fn resolve_names<'a>(
                     DeclarationOrTypedef::Declaration(declaration) =>
                         ExternalDeclaration::Declaration(declaration),
                     DeclarationOrTypedef::Typedef(typedef) => ExternalDeclaration::Typedef(typedef),
-                    DeclarationOrTypedef::Error(error) => ExternalDeclaration::Error(error),
+                    DeclarationOrTypedef::Redeclared(redeclared) =>
+                        ExternalDeclaration::Redeclared(redeclared),
                 },
         })),
     }

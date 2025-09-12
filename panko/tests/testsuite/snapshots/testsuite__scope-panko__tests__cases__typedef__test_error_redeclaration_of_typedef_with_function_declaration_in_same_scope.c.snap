@@ -7,51 +7,20 @@ info:
     - "--stop-after=scopes"
     - panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_declaration_in_same_scope.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit
+   (typedef a `int`)
+   (redeclared a)
+   (declaration b~0 `fn() -> int` ∅)
+   (redeclared b)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (typedef c `int`)
+         (redeclared c)
+         (declaration d~2 `fn() -> int` ∅)
+         (redeclared d))))
 
 ----- stderr -----
-Error: `typedef` name `a` redeclared as function name
-   ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_declaration_in_same_scope.c:2:5]
-   │
- 1 │ typedef int a;
-   │ ─────┬─────  
-   │      ╰─────── originally declared here as a `typedef` name
- 2 │ int a();
-   │     ┬  
-   │     ╰── redeclared here as a function name
-───╯
-
-Error: function name `b` redeclared as `typedef` name
-   ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_declaration_in_same_scope.c:5:1]
-   │
- 4 │ int b();
-   │     ┬  
-   │     ╰── originally declared here as a function name
- 5 │ typedef int b;
-   │ ─────┬─────  
-   │      ╰─────── redeclared here as a `typedef` name
-───╯
-
-Error: `typedef` name `c` redeclared as function name
-   ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_declaration_in_same_scope.c:9:9]
-   │
- 8 │     typedef int c;
-   │     ─────┬─────  
-   │          ╰─────── originally declared here as a `typedef` name
- 9 │     int c();
-   │         ┬  
-   │         ╰── redeclared here as a function name
-───╯
-
-Error: function name `d` redeclared as `typedef` name
-    ╭─[panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_declaration_in_same_scope.c:12:5]
-    │
- 11 │     int d();
-    │         ┬  
-    │         ╰── originally declared here as a function name
- 12 │     typedef int d;
-    │     ─────┬─────  
-    │          ╰─────── redeclared here as a `typedef` name
-────╯

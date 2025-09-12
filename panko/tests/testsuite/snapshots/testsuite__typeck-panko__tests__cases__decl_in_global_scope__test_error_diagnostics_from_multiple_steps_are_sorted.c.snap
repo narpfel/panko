@@ -12,15 +12,12 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: value name `duplicate` redeclared as `typedef` name
-   ╭─[panko/tests/cases/decl_in_global_scope/test_error_diagnostics_from_multiple_steps_are_sorted.c:2:1]
+Error: expected `;` after declaration (or did you mean to declare a function: `f()`?)
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_diagnostics_from_multiple_steps_are_sorted.c:1:5]
    │
- 1 │ int duplicate = 42;
-   │     ────┬────  
-   │         ╰────── originally declared here as a value name
- 2 │ typedef int duplicate;
-   │ ─────┬─────  
-   │      ╰─────── redeclared here as a `typedef` name
+ 1 │ int f {}
+   │     ┬  
+   │     ╰── in this declaration
 ───╯
 
 Error: declaration does not specify a type

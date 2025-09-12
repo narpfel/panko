@@ -16,6 +16,7 @@ use super::FunctionDefinition;
 use super::GenericAssociation;
 use super::Initialiser;
 use super::ParamRefs;
+use super::Redeclared;
 use super::Reference;
 use super::Statement;
 use super::TranslationUnit;
@@ -35,7 +36,14 @@ impl AsSExpr for ExternalDeclaration<'_> {
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
             ExternalDeclaration::Typedef(typedef) => typedef.as_sexpr(),
             ExternalDeclaration::Error(_error) => SExpr::new("error"),
+            ExternalDeclaration::Redeclared(redeclared) => redeclared.as_sexpr(),
         }
+    }
+}
+
+impl AsSExpr for Redeclared<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::new("redeclared").inline_string(self.name().to_owned())
     }
 }
 
@@ -130,6 +138,7 @@ impl AsSExpr for Statement<'_> {
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),
             Statement::Return { return_: _, expr } => SExpr::new("return").inherit(expr),
+            Statement::Redeclared(redeclared) => redeclared.as_sexpr(),
         }
     }
 }

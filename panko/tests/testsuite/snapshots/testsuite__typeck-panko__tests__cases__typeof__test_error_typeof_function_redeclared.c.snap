@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/typeof/test_error_typeof_function_redeclared.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: function name `f` redeclared as `typedef` name
+   ╭─[panko/tests/cases/typeof/test_error_typeof_function_redeclared.c:4:1]
+   │
+ 3 │ typeof(puts) f;
+   │              ┬  
+   │              ╰── originally declared here as a function name
+ 4 │ typedef int f;
+   │ ─────┬─────  
+   │      ╰─────── redeclared here as a `typedef` name
+───╯
+
+Error: `typedef` name `f2` redeclared as function name
+   ╭─[panko/tests/cases/typeof/test_error_typeof_function_redeclared.c:7:14]
+   │
+ 6 │ typedef int f2;
+   │ ─────┬─────  
+   │      ╰─────── originally declared here as a `typedef` name
+ 7 │ typeof(puts) f2;
+   │              ─┬  
+   │               ╰── redeclared here as a function name
+───╯
