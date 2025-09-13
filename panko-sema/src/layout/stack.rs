@@ -1,3 +1,4 @@
+use std::assert_matches::assert_matches;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 
@@ -10,6 +11,7 @@ use super::Slot;
 use super::Type;
 use super::layout_ty;
 use crate::scope::Id;
+use crate::scope::Linkage;
 use crate::scope::StorageDuration;
 use crate::typecheck;
 
@@ -92,13 +94,16 @@ impl<'a> Stack<'a> {
                     id,
                     usage_location: _,
                     kind,
+                    linkage,
                     storage_duration,
                 } = reference;
                 let ty = layout_ty(self, bump, ty);
                 let slot = match storage_duration {
                     StorageDuration::Static => Slot::Static(reference.name()),
-                    StorageDuration::Automatic =>
-                        maybe_slot.unwrap_or_else(|| self.slots.add_slot(ty.ty)),
+                    StorageDuration::Automatic => {
+                        assert_matches!(linkage, Linkage::None);
+                        maybe_slot.unwrap_or_else(|| self.slots.add_slot(ty.ty))
+                    }
                 };
                 *self
                     .ids

@@ -671,7 +671,8 @@ pub(crate) fn parse_declaration_specifiers<'a>(
     for (i, specifier) in specifiers.0.iter().enumerate() {
         match specifier {
             cst::DeclarationSpecifier::StorageClass(class)
-                if let StorageClassSpecifierKind::Typedef = class.kind =>
+                if let StorageClassSpecifierKind::Extern | StorageClassSpecifierKind::Typedef =
+                    class.kind =>
                 match &mut storage_class {
                     storage_class @ None => *storage_class = Some(*class),
                     Some(storage_class) => sess.emit(Diagnostic::DuplicateStorageClassSpecifier {

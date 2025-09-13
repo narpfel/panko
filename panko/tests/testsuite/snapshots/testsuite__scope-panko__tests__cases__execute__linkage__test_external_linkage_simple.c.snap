@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/linkage/test_external_linkage_simple.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (declaration printf~2 `fn(∅: ptr<char const>, ...) -> int` ∅)
+         (declaration x~3 `int` ∅)
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "it works")))
+         (expression
+            (call (name printf~2 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name x~3 `int`)))))
+   (declaration x~4 `int` 42))
+
+----- stderr -----

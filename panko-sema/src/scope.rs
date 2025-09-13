@@ -333,6 +333,7 @@ pub struct Reference<'a> {
     pub(crate) ty: QualifiedType<'a>,
     pub(crate) id: Id,
     pub(crate) usage_location: Loc<'a>,
+    pub(crate) linkage: Option<Linkage>,
     pub(crate) storage_duration: StorageDuration,
     pub(crate) previous_definition: Option<&'a Self>,
     pub(crate) is_parameter: IsParameter,
@@ -364,6 +365,13 @@ pub enum StorageDuration {
     Static,
     Automatic,
     // TODO: thread local
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Linkage {
+    External,
+    // TODO: Internal,
+    None,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -628,11 +636,16 @@ struct Scopes<'a> {
 }
 
 impl<'a> Scopes<'a> {
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "TODO: consolidate some parameters"
+    )]
     fn add(
         &mut self,
         name: &'a str,
         loc: Loc<'a>,
         ty: QualifiedType<'a>,
+        linkage: Option<Linkage>,
         storage_duration: StorageDuration,
         is_parameter: IsParameter,
         is_in_global_scope: IsInGlobalScope,
@@ -649,6 +662,7 @@ impl<'a> Scopes<'a> {
             ty,
             id,
             usage_location: loc,
+            linkage,
             storage_duration,
             previous_definition: None,
             is_parameter,
@@ -702,6 +716,7 @@ impl<'a> Scopes<'a> {
             ty,
             id,
             usage_location: loc,
+            linkage: Some(Linkage::None),
             storage_duration: StorageDuration::Automatic,
             previous_definition: None,
             is_parameter: IsParameter::No,
@@ -879,6 +894,7 @@ fn resolve_function_definition<'a>(
         name.slice(),
         name.loc(),
         ty,
+        None::<Linkage>,
         StorageDuration::Static,
         IsParameter::No,
         IsInGlobalScope::Yes,
@@ -938,6 +954,7 @@ fn resolve_function_definition<'a>(
                     name,
                     param.loc,
                     param.ty,
+                    Some(Linkage::None),
                     StorageDuration::Automatic,
                     IsParameter::Yes,
                     IsInGlobalScope::No,
@@ -1036,11 +1053,8 @@ fn resolve_declaration<'a>(
     let ast::Declaration { ty, name, initialiser, storage_class } = decl;
     let ty = resolve_ty(scopes, ty);
 
-    match storage_class {
-        Some(cst::StorageClassSpecifier {
-            token: _,
-            kind: StorageClassSpecifierKind::Typedef,
-        }) => {
+    let linkage = match try { storage_class.as_ref()?.kind } {
+        Some(StorageClassSpecifierKind::Typedef) => {
             let previously_declared_as = scopes.add_ty(name.slice(), ty);
             match previously_declared_as {
                 Ok(previously_declared_as) =>
@@ -1056,14 +1070,16 @@ fn resolve_declaration<'a>(
                     }),
             }
         }
-        Some(storage_class) => todo!("not implemented: storage class {:?}", storage_class.kind),
-        None => (),
-    }
+        Some(StorageClassSpecifierKind::Extern) => Some(Linkage::External),
+        Some(storage_class) => todo!("not implemented: storage class {:?}", storage_class),
+        None => None,
+    };
 
     let maybe_reference = scopes.add(
         name.slice(),
         name.loc(),
         ty,
+        linkage,
         storage_duration,
         IsParameter::No,
         scopes.is_in_global_scope(),

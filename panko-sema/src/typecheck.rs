@@ -49,6 +49,7 @@ use crate::scope::Id;
 use crate::scope::IncrementFixity;
 use crate::scope::IsInGlobalScope;
 use crate::scope::IsParameter;
+use crate::scope::Linkage;
 use crate::scope::Redeclared;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
@@ -840,6 +841,7 @@ pub(crate) struct Reference<'a> {
     pub(crate) id: Id,
     pub(crate) usage_location: Loc<'a>,
     pub(crate) kind: RefKind,
+    pub(crate) linkage: Linkage,
     pub(crate) storage_duration: StorageDuration,
 }
 
@@ -1161,6 +1163,7 @@ fn typeck_reference<'a>(
         ty,
         id,
         usage_location,
+        linkage,
         storage_duration,
         previous_definition,
         is_parameter,
@@ -1191,18 +1194,28 @@ fn typeck_reference<'a>(
     else {
         match ty.ty {
             Type::Function(_) => RefKind::Declaration,
-            _ =>
-                if let IsInGlobalScope::Yes = is_in_global_scope {
-                    RefKind::TentativeDefinition
-                }
-                else {
-                    RefKind::Definition
-                },
+            _ => match (is_in_global_scope, linkage) {
+                (IsInGlobalScope::Yes, None) => RefKind::TentativeDefinition,
+                (IsInGlobalScope::Yes, Some(Linkage::External)) => RefKind::Declaration,
+                (IsInGlobalScope::Yes, Some(Linkage::None)) => unreachable!(),
+                (IsInGlobalScope::No, Some(Linkage::External)) => RefKind::Declaration,
+                (IsInGlobalScope::No, None | Some(Linkage::None)) => RefKind::Definition,
+            },
         }
     };
+    let linkage = linkage.unwrap_or(match ty.ty {
+        Type::Function(_) => Linkage::External,
+        _ => match is_in_global_scope {
+            IsInGlobalScope::No => Linkage::None,
+            IsInGlobalScope::Yes => Linkage::External,
+        },
+    });
     let storage_duration = match ty.ty {
         Type::Function(_) => StorageDuration::Static,
-        _ => storage_duration,
+        _ => match linkage {
+            Linkage::External => StorageDuration::Static,
+            Linkage::None => storage_duration,
+        },
     };
 
     Reference {
@@ -1212,6 +1225,7 @@ fn typeck_reference<'a>(
         id,
         usage_location,
         kind,
+        linkage,
         storage_duration,
     }
 }
