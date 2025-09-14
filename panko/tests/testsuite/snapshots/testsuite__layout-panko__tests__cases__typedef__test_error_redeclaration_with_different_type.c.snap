@@ -20,7 +20,7 @@ Error: redeclaration of type alias `in_global_scope` with different type
    │       ╰─────── previously declared as `long` here
  2 │ typedef long const in_global_scope;
    │                    ───────┬───────  
-   │                           ╰───────── redeclarared as different type `long const` here
+   │                           ╰───────── redeclared as different type `long const` here
 ───╯
 
 Error: redeclaration of type alias `in_local_scope` with different type
@@ -31,5 +31,5 @@ Error: redeclaration of type alias `in_local_scope` with different type
    │          ╰─────── previously declared as `int` here
  6 │     typedef int const in_local_scope;
    │                       ───────┬──────  
-   │                              ╰──────── redeclarared as different type `int const` here
+   │                              ╰──────── redeclared as different type `int const` here
 ───╯

@@ -513,7 +513,7 @@ enum Diagnostic<'a> {
             colour = Blue,
             label = "previously declared as `{previously_declared_as}` here",
         ),
-        at(colour = Red, label = "redeclarared as different type `{ty}` here"),
+        at(colour = Red, label = "redeclared as different type `{ty}` here"),
     )]
     TypedefRedeclared {
         at: scope::Typedef<'a>,
