@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/typeof/test_typeof_of_function_is_decl.c"
    (declaration puts~0 `typeof(`fn(∅: ptr<char const>) -> int`)` ∅)
    (declaration puts~0 `typeof((name puts~0 `typeof(`fn(∅: ptr<char const>) -> int`)`))` ∅)
    (function-definition

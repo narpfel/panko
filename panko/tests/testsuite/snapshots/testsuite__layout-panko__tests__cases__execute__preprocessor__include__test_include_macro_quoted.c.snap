@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/preprocessor/include/test_include_macro_quoted.c"
    (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (function-definition
       (main~1 `fn() -> int` (static main))

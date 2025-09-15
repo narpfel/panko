@@ -6,12 +6,11 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/execute/conditional/test_conditional_with_pointers.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/conditional/test_conditional_with_pointers.c"
    (function-definition
       (main~0 `fn() -> int` (static main))
       (compound-statement

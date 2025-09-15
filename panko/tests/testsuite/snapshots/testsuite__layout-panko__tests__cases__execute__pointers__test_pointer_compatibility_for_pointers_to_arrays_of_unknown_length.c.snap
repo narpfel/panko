@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/pointers/test_pointer_compatibility_for_pointers_to_arrays_of_unknown_length.c"
    (function-definition
       (main~0 `fn() -> int` (static main))
       (compound-statement

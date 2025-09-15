@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/call/test_params_on_stack.c"
    (declaration f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int` ∅)
    (function-definition
       id~1 `fn(n: int) -> int`

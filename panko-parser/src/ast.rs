@@ -3,6 +3,7 @@ use std::cell::Ref;
 use std::cell::RefCell;
 use std::fmt;
 use std::iter::once;
+use std::path::Path;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
@@ -174,6 +175,7 @@ pub type GenericAssociation<'a> = cst::GenericAssociation<'a>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
+    pub filename: &'a Path,
     pub decls: &'a [ExternalDeclaration<'a>],
 }
 
@@ -801,10 +803,11 @@ pub(crate) fn from_parse_tree<'a>(
     sess: &'a Session<'a>,
     parse_tree: cst::TranslationUnit<'a>,
 ) -> TranslationUnit<'a> {
+    let cst::TranslationUnit { filename, decls } = parse_tree;
     TranslationUnit {
+        filename,
         decls: sess.alloc_slice_copy(
-            &parse_tree
-                .decls
+            &decls
                 .iter()
                 .flat_map(|decl| ExternalDeclaration::from_parse_tree(sess, decl))
                 .collect_vec(),

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/typedef/test_error_redeclaration_with_different_identifier_kind_as_pointer.c"
    (typedef global `int`)
    (redeclared global)
    (declaration another_global~0 `ptr<int>` ∅)

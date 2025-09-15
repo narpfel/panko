@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/decl_in_function/test_declare_function_in_function.c"
    (function-definition
       f~0 `fn() -> int`
       (compound-statement

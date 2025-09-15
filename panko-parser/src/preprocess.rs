@@ -882,7 +882,7 @@ impl<'a> Preprocessor<'a> {
         let is_in_typedef = Cell::default();
         let parser = crate::grammar::ConstantExpressionParser::new();
         let expr = parser
-            .parse(sess, &typedef_names, &is_in_typedef, tokens)
+            .parse(sess, &typedef_names, &is_in_typedef, Path::new(""), tokens)
             .unwrap_or_else(handle_parse_error(sess));
         eval(sess, &expr).into_bool().unwrap_or_else(|reports| {
             for report in reports {

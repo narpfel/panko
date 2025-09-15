@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/test_error_uncallable.c"
    (function-definition
       f~0 `fn() -> void`
       (compound-statement))

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/decl_in_global_scope/test_simple.c"
    (declaration x~0 `int` ∅)
    (declaration y~1 `int` 42))
 

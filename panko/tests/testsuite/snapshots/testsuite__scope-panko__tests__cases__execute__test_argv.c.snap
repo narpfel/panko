@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/test_argv.c"
    (declaration strlen~0 `fn(∅: ptr<char const>) -> unsigned long` ∅)
    (function-definition
       main~1 `fn(argc: int, argv: ptr<ptr<char>>) -> int`

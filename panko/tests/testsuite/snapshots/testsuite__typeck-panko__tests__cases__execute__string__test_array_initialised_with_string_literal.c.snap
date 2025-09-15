@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/string/test_array_initialised_with_string_literal.c"
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (declaration puts~1 `fn(∅: ptr<char const>) -> int` ∅)
    (function-definition

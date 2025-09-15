@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/test_error_invalid_implicit_conversion.c"
    (function-definition
       a~0 `fn() -> int`
       (compound-statement

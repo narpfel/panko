@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/arrays/test_multidimensional_array_as_parameter.c"
    (function-definition
       (f~0 `fn(xs: ptr<array<int; 2>>) -> int` (static f))
       (params

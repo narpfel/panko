@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_declaration_in_same_scope.c"
    (typedef a `int`)
    (redeclared a)
    (declaration b~0 `fn() -> int` ∅)

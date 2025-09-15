@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/implicit_conversion/test_implicit_ptr_cast.c"
    (function-definition
       const_can_be_added~0 `fn() -> ptr<int const>`
       (compound-statement

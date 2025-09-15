@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/call/test_simple_declaration.c"
    (declaration (f~0 `fn(∅: int) -> int` (static f)) ∅)
    (function-definition
       (main~1 `fn() -> int` (static main))

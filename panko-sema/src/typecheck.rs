@@ -4,6 +4,7 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
 use std::num::IntErrorKind;
+use std::path::Path;
 use std::str::Chars;
 
 use ariadne::Color::Blue;
@@ -576,6 +577,7 @@ pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, !, ArrayLength<&'a Typ
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
+    pub(crate) filename: &'a Path,
     pub(crate) decls: &'a [ExternalDeclaration<'a>],
 }
 
@@ -3085,8 +3087,10 @@ pub fn resolve_types<'a>(
     sess: &'a Session<'a>,
     translation_unit: scope::TranslationUnit<'a>,
 ) -> TranslationUnit<'a> {
+    let scope::TranslationUnit { filename, decls } = translation_unit;
     TranslationUnit {
-        decls: sess.alloc_slice_fill_iter(translation_unit.decls.iter().map(|decl| match decl {
+        filename,
+        decls: sess.alloc_slice_fill_iter(decls.iter().map(|decl| match decl {
             scope::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(typeck_function_definition(sess, def)),
             scope::ExternalDeclaration::Typedef(typedef) =>

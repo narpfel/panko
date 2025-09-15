@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/logical-ops/test_logical_or.c"
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (declaration f~1 `fn() -> int` ∅)
    (declaration g~2 `fn() -> int` ∅)

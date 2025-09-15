@@ -6,12 +6,11 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/execute/logical-ops/test_logical_and.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/logical-ops/test_logical_and.c"
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (declaration f~1 `fn() -> int` ∅)
    (function-definition

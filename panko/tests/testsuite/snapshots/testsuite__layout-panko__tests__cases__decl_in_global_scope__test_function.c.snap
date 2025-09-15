@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/decl_in_global_scope/test_function.c"
    (declaration (a~0 `fn() -> int` (static a)) ∅)
    (declaration (b~1 `fn(∅: int) -> int` (static b)) ∅)
    (declaration (c~2 `fn(a: int) -> int` (static c)) ∅)

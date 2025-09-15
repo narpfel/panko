@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/decl_in_function/test_error_redefinition_of_local_with_different_type.c"
    (function-definition
       a~0 `fn() -> int`
       (compound-statement

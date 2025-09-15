@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/equality-ops/test_ptr_neq.c"
    (function-definition
       main~0 `fn() -> int`
       (compound-statement

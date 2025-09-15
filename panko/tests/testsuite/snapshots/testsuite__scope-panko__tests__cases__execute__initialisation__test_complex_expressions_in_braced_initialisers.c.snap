@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/initialisation/test_complex_expressions_in_braced_initialisers.c"
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (function-definition
       fib~1 `fn(n: int) -> int`

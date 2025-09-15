@@ -12,6 +12,7 @@
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::iter::empty;
+use std::path::Path;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
@@ -150,6 +151,7 @@ pub enum IntegerLiteralDiagnostic<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
+    filename: &'a Path,
     decls: &'a [ExternalDeclaration<'a>],
 }
 
@@ -1249,13 +1251,14 @@ fn handle_parse_error<'a, T: FromError<'a>>(
 
 pub fn parse<'a>(
     sess: &'a ast::Session<'a>,
+    filename: &'a Path,
     typedef_names: &'a RefCell<TypedefNames<'a>>,
     is_in_typedef: &'a Cell<bool>,
     tokens: LexerHacked<'a, impl Iterator<Item = Token<'a>>>,
 ) -> Option<ast::TranslationUnit<'a>> {
     let parser = grammar::TranslationUnitParser::new();
     let parse_tree = parser
-        .parse(sess, typedef_names, is_in_typedef, tokens)
+        .parse(sess, typedef_names, is_in_typedef, filename, tokens)
         .map_err(handle_parse_error::<()>(sess))
         .ok()?;
     Some(ast::from_parse_tree(sess, parse_tree))

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/char/test_prefixed_char_literal_types.c"
    (function-definition
       (main~0 `fn() -> int` (static main))
       (compound-statement

@@ -6,12 +6,11 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/decl_in_global_scope/test_error_declare_varargs_function_with_void_param.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/decl_in_global_scope/test_error_declare_varargs_function_with_void_param.c"
    (declaration f~0 `fn(∅: void, ...) -> int` ∅))
 
 ----- stderr -----

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/preprocessor/test_null_directive_at_end_of_file_without_newline.c"
    (function-definition
       (main~0 `fn() -> int` (static main))
       (compound-statement)))

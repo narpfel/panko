@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/decl_in_global_scope/test_error_multiple_definitions.c"
    (declaration value~0 `int` 42)
    (declaration value~0 `int` 27)
    (function-definition

@@ -6,12 +6,11 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/test_error_arity_mismatch_in_function_call.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/test_error_arity_mismatch_in_function_call.c"
    (function-definition
       zero_params~0 `fn() -> void`
       (compound-statement))

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/test_error_array_redeclaration_with_incompatible_length.c"
    (declaration xs~0 `array<int; ∅>` ∅)
    (declaration xs~0 `array<int; 1>` ∅)
    (declaration xs~0 `array<int; 2>` ∅)

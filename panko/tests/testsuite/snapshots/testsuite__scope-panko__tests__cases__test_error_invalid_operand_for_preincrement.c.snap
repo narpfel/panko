@@ -6,12 +6,11 @@ info:
     - "--print=scopes"
     - "--stop-after=scopes"
     - panko/tests/cases/test_error_invalid_operand_for_preincrement.c
-snapshot_kind: text
 ---
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/test_error_invalid_operand_for_preincrement.c"
    (function-definition
       f~0 `fn() -> void`
       (compound-statement))

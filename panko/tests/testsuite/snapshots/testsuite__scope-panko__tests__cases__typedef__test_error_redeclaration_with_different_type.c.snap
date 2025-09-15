@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/typedef/test_error_redeclaration_with_different_type.c"
    (typedef in_global_scope `long`)
    (typedef in_global_scope `long const`)
    (function-definition

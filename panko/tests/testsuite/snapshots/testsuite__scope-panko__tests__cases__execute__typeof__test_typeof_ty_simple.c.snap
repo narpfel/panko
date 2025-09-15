@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/typeof/test_typeof_ty_simple.c"
    (function-definition
       main~0 `fn() -> typeof(`int`)`
       (compound-statement

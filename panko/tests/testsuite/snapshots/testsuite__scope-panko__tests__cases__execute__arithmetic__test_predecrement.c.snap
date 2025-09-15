@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/arithmetic/test_predecrement.c"
    (declaration putchar~0 `fn(∅: int) -> int` ∅)
    (declaration printf~1 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (function-definition

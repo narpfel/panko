@@ -21,7 +21,10 @@ use super::TranslationUnit;
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::new("translation-unit").lines(self.decls)
+        let Self { filename, decls } = self;
+        SExpr::new("translation-unit")
+            .inherit(filename)
+            .lines(*decls)
     }
 }
 

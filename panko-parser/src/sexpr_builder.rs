@@ -2,6 +2,7 @@ use std::borrow::Cow;
 use std::fmt;
 use std::iter::once;
 use std::iter::repeat;
+use std::path::Path;
 
 use itertools::Either;
 use panko_lex::Token;
@@ -285,5 +286,11 @@ where
 impl AsSExpr for ! {
     fn as_sexpr(&self) -> SExpr {
         match *self {}
+    }
+}
+
+impl AsSExpr for &Path {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::string(format!("{self:?}").cyan().bold().to_string())
     }
 }

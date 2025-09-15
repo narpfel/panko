@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/test_error_definition_of_array_of_unknown_size.c"
    (function-definition
       main~0 `fn() -> int`
       (compound-statement

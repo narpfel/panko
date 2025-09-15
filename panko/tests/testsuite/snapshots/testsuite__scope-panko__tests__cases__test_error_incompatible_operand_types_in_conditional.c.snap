@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/test_error_incompatible_operand_types_in_conditional.c"
    (function-definition
       void_function~0 `fn() -> void`
       (compound-statement))

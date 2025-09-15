@@ -1,4 +1,5 @@
 use std::bstr::ByteStr;
+use std::path::Path;
 
 use panko_lex::Bump;
 use panko_lex::Loc;
@@ -29,6 +30,7 @@ type QualifiedType<'a> = ty::QualifiedType<'a, !, ArrayLength<'a>>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
+    filename: &'a Path,
     pub decls: &'a [ExternalDeclaration<'a>],
 }
 
@@ -598,8 +600,10 @@ pub fn layout<'a>(
     bump: &'a Bump,
     translation_unit: typecheck::TranslationUnit<'a>,
 ) -> TranslationUnit<'a> {
+    let typecheck::TranslationUnit { filename, decls } = translation_unit;
     TranslationUnit {
-        decls: bump.alloc_slice_fill_iter(translation_unit.decls.iter().map(|decl| match decl {
+        filename,
+        decls: bump.alloc_slice_fill_iter(decls.iter().map(|decl| match decl {
             typecheck::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(layout_function_definition(bump, def)),
             typecheck::ExternalDeclaration::Declaration(decl) =>

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/test_zero_extend.c"
    (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (function-definition
       (print~1 `fn(argv: ptr<ptr<char>>, l: unsigned long) -> void` (static print))

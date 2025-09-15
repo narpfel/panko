@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/arrays/test_define_already_declared_array.c"
    (tentative-definition xs~0 `array<int; ∅>` ∅)
    (function-definition
       main~1 `fn() -> int`

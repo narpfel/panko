@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/typedef/test_shadow_typedef_in_inner_scope_parenthesised_in_parameter_list.c"
    (function-definition
       main~0 `fn() -> int`
       (compound-statement

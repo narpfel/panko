@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/test_hello_world.c"
    (declaration putchar~0 `fn(∅: int) -> int` ∅)
    (function-definition
       main~1 `fn() -> int`

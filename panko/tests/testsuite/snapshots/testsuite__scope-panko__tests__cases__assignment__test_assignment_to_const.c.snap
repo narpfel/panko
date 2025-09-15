@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/assignment/test_assignment_to_const.c"
    (function-definition
       f~0 `fn() -> int`
       (compound-statement

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/preprocessor/include/test_stddef_include_guard.c"
    (typedef ptrdiff_t `typeof((subtract (cast `ptr<char>` nullptr) (cast `ptr<char>` nullptr)))`)
    (typedef size_t `typeof((sizeof `char`))`)
    (typedef max_align_t `long long`)

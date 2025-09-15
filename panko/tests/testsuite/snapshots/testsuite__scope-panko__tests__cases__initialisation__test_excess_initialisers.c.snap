@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/initialisation/test_excess_initialisers.c"
    (declaration static_int~0 `int`
       (braced
          1

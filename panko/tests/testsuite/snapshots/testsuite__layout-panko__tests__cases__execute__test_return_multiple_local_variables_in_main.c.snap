@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/test_return_multiple_local_variables_in_main.c"
    (function-definition
       (main~0 `fn() -> int` (static main))
       (compound-statement

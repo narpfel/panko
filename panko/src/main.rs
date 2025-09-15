@@ -105,14 +105,20 @@ fn main() -> Result<()> {
 
     let tokens = panko_lex::apply_lexer_hack(tokens, &typedef_names);
 
-    let translation_unit =
-        match panko_parser::parse(session, &typedef_names, &is_in_typedef, tokens) {
-            Some(translation_unit) => translation_unit,
-            None => {
-                session.handle_diagnostics();
-                unreachable!()
-            }
-        };
+    let translation_unit = panko_parser::parse(
+        session,
+        &args.filename,
+        &typedef_names,
+        &is_in_typedef,
+        tokens,
+    );
+    let translation_unit = match translation_unit {
+        Some(translation_unit) => translation_unit,
+        None => {
+            session.handle_diagnostics();
+            unreachable!()
+        }
+    };
 
     if args.print.contains(&Step::Ast) {
         println!("{}", translation_unit.as_sexpr());

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/initialisation/test_initialise_ineligible_array_with_string_literal.c"
    (function-definition
       main~0 `fn() -> int`
       (compound-statement

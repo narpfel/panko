@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
+use std::path::Path;
 
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
@@ -92,6 +93,7 @@ pub(crate) struct Id(pub(crate) u64);
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
+    pub(crate) filename: &'a Path,
     pub(crate) decls: &'a [ExternalDeclaration<'a>],
 }
 
@@ -1307,8 +1309,10 @@ pub fn resolve_names<'a>(
         scopes: nonempty::Vec::default(),
         next_id: 0,
     };
+    let ast::TranslationUnit { filename, decls } = translation_unit;
     TranslationUnit {
-        decls: sess.alloc_slice_fill_iter(translation_unit.decls.iter().map(|decl| match decl {
+        filename,
+        decls: sess.alloc_slice_fill_iter(decls.iter().map(|decl| match decl {
             ast::ExternalDeclaration::FunctionDefinition(def) =>
                 resolve_function_definition(scopes, def),
             ast::ExternalDeclaration::Declaration(decl) =>

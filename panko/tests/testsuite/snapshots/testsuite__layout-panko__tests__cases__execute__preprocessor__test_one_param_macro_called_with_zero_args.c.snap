@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/preprocessor/test_one_param_macro_called_with_zero_args.c"
    (function-definition
       (main~0 `fn() -> int` (static main))
       (compound-statement

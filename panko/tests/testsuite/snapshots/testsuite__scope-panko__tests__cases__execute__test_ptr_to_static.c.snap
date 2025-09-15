@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/test_ptr_to_static.c"
    (declaration x~0 `int` 42)
    (function-definition
       main~1 `fn() -> int`

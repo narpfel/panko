@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/test_error_invalid_sizeof_operand.c"
    (declaration f~0 `fn() -> void` ∅)
    (function-definition
       main~1 `fn() -> int`

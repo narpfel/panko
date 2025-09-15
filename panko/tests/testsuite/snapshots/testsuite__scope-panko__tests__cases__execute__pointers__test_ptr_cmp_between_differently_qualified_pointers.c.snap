@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/pointers/test_ptr_cmp_between_differently_qualified_pointers.c"
    (function-definition
       main~0 `fn() -> int`
       (compound-statement

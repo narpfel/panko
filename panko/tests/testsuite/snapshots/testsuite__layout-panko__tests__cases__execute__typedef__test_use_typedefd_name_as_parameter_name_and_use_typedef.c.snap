@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/typedef/test_use_typedefd_name_as_parameter_name_and_use_typedef.c"
    (function-definition
       (main~0 `fn() -> int` (static main))
       (compound-statement

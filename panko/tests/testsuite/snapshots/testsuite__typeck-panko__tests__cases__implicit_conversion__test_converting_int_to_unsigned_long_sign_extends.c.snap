@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/implicit_conversion/test_converting_int_to_unsigned_long_sign_extends.c"
    (function-definition
       main~0 `fn() -> int`
       (compound-statement

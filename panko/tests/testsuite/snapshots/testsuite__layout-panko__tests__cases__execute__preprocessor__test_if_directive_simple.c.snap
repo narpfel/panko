@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/preprocessor/test_if_directive_simple.c"
    (declaration (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
    (function-definition
       (main~1 `fn() -> int` (static main))

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/typedef/test_typedef_of_function_type.c"
    (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
    (typedef FunctionPtr `fn(∅: ptr<char const>) -> int`)
    (function-definition

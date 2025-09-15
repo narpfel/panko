@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c"
    (declaration a~0 `fn() -> fn() -> int` ∅)
    (declaration b~1 `ptr<fn() -> int>` ∅)
    (declaration c~2 `fn() -> ptr<fn() -> fn() -> int>` ∅)

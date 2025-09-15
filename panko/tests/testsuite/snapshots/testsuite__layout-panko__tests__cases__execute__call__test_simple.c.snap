@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/call/test_simple.c"
    (function-definition
       (f~0 `fn(x: int) -> int` (static f))
       (params

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/typedef/test_use_typedef_name_in_same_decl.c"
    (typedef i32 `int`)
    (typedef function `fn(∅: int) -> int`))
 

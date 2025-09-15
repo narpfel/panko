@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/preprocessor/include/test_stddef.c"
    (typedef ptrdiff_t `long`)
    (typedef size_t `unsigned long`)
    (typedef max_align_t `long long`)

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/typedef/test_void_type_alias_for_zero_parameter_function.c"
    (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
    (typedef v `void`)
    (declaration f~1 `fn() -> void` ∅)

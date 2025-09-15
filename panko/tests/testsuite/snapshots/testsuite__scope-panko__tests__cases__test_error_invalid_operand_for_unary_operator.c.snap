@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/test_error_invalid_operand_for_unary_operator.c"
    (function-definition
       main~0 `fn() -> int`
       (compound-statement

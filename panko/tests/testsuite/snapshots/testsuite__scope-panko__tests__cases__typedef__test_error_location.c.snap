@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/typedef/test_error_location.c"
    (typedef array `array<int; ∅>`)
    (function-definition
       main~0 `fn() -> int`

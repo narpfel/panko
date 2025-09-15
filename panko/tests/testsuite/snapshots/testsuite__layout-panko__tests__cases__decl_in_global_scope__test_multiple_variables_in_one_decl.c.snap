@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/decl_in_global_scope/test_multiple_variables_in_one_decl.c"
    (tentative-definition (a~0 `int` (static a)) ∅)
    (tentative-definition (b~1 `int` (static b)) ∅)
    (tentative-definition (c~2 `int` (static c)) ∅)

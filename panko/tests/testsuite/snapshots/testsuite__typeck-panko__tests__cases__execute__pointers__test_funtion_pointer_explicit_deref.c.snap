@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/pointers/test_funtion_pointer_explicit_deref.c"
    (function-definition
       f~0 `fn(x: int) -> int`
       (params

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/decl_in_global_scope/test_error_function_definition_with_initialiser.c"
    (declaration f~0 `fn(∅: int) -> int` 42))
 
 ----- stderr -----

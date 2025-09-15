@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/decl_in_global_scope/test_error_function_type_is_qualified.c"
    (typedef F `fn() -> int`)
    (declaration f~0 `fn() -> int const` ∅)
    (declaration g~1 `fn() -> int const` ∅)

@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/test_compound_assignment_only_evaluates_lhs_once.c"
    (declaration putchar~0 `fn(∅: int) -> int` ∅)
    (function-definition
       f~1 `fn(p: ptr<int>) -> ptr<int>`

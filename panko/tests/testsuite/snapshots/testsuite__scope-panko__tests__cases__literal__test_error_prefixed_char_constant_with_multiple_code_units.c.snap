@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/literal/test_error_prefixed_char_constant_with_multiple_code_units.c"
    (function-definition
       main~0 `fn() -> int`
       (compound-statement

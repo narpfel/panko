@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/preprocessor/test_stringise_simple.c"
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (function-definition
       main~1 `fn() -> int`

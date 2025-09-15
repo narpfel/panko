@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/typedef/test_error_redeclaration_of_typedef_with_function_pointer_uses_value_in_message.c"
    (declaration a~0 `ptr<fn() -> int>` ∅)
    (redeclared a)
    (typedef b `int`)

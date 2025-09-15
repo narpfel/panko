@@ -10,7 +10,7 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit
+(translation-unit "panko/tests/cases/execute/test_return_without_expr.c"
    (declaration exit~0 `fn(∅: int) -> void` ∅)
    (function-definition
       f~1 `fn() -> void`

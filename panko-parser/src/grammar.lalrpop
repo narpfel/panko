@@ -1,5 +1,6 @@
 use std::cell::Cell;
 use std::cell::RefCell;
+use std::path::Path;
 
 use panko_lex::Token;
 use panko_lex::TokenKind;
@@ -12,6 +13,7 @@ grammar<'a, 'b>(
     sess: &'a Session<'a>,
     typedef_names: &'b RefCell<TypedefNames<'a>>,
     is_in_typedef: &'b Cell<bool>,
+    filename: &'a Path,
 );
 
 extern {
@@ -142,7 +144,7 @@ pub ConstantExpression: ast::Expression<'a> = {
 }
 
 pub TranslationUnit: ast::TranslationUnit<'a> = {
-    Many<ExternalDeclaration> => ast::TranslationUnit { decls: <> },
+    Many<ExternalDeclaration> => ast::TranslationUnit { filename, decls: <> },
 }
 
 ExternalDeclaration: ast::ExternalDeclaration<'a> = {
