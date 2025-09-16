@@ -233,7 +233,7 @@ fn compile(
         return Ok(Err(()));
     }
 
-    let assembly_filename = object_filename.with_extension("S");
+    let assembly_filename = object_filename.with_extension("s");
     write!(
         File::create(&assembly_filename).wrap_err_with(|| {
             format!(
