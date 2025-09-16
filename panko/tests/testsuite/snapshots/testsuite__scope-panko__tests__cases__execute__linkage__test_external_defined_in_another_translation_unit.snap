@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/main.c
+    - panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/x.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/main.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration x~1 `int` ∅)
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name x~1 `int`))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/x.c"
+   (declaration x~0 `int` 42))
+
+----- stderr -----

@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/main.c
+    - panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/x.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/main.c"
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration (x~1 `int` (static x)) ∅)
+   (function-definition
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (x~1 `int` (static x)))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/x.c"
+   (definition (x~0 `int` (static x)) (42 `int` (static x))))
+
+----- stderr -----

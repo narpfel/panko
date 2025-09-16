@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/main.c
+    - panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/x.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/main.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration x~1 `int` ∅)
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (x~1 `int`))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/x.c"
+   (definition x~0 `int` (42 `int`)))
+
+----- stderr -----

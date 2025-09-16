@@ -19,6 +19,7 @@ use std::num::NonZero;
 use std::panic::AssertUnwindSafe;
 use std::panic::catch_unwind;
 use std::path::Path;
+use std::path::PathBuf;
 use std::process::Command;
 use std::process::ExitStatus;
 use std::process::Output;
@@ -210,8 +211,13 @@ impl TestCase {
     }
 }
 
-pub fn execute_runtest(context: &Context, filename: impl AsRef<Path>) {
-    let source = std::fs::read_to_string(&filename).unwrap();
+pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathBuf>) {
+    let source: String = filenames
+        .iter()
+        .map(std::fs::read_to_string)
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap()
+        .join("\n");
 
     let known_bug_re = Regex::new(r"(?m)^// \[\[known-bug\]\]$").unwrap();
     let is_known_bug = known_bug_re.is_match(&source);
@@ -249,22 +255,27 @@ pub fn execute_runtest(context: &Context, filename: impl AsRef<Path>) {
         .map(|captures| expand_escape_sequences(captures.name("arg").unwrap().as_str()))
         .collect_vec();
 
-    let filename = std::fs::canonicalize(filename).unwrap();
-    let filename = relative_to(
-        &filename,
-        Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap(),
-    );
+    let filenames = filenames
+        .into_iter()
+        .map(|filename| {
+            relative_to(
+                &std::fs::canonicalize(filename).unwrap(),
+                Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap(),
+            )
+            .to_owned()
+        })
+        .collect_vec();
 
     let output_dir = tempfile::tempdir().unwrap();
     let executable_filename = output_dir
         .path()
-        .join(filename.file_name().unwrap())
+        .join(test_name.file_name().unwrap())
         .with_extension("");
 
     Command::new(get_cargo_bin("panko"))
         .env("CLICOLOR_FORCE", "1")
         .current_dir("..")
-        .arg(filename)
+        .args(filenames)
         .arg("-o")
         .arg(&executable_filename)
         .status_with_captured_output()
