@@ -69,7 +69,6 @@ struct Args {
 struct CompileArgs {
     stop_after: Option<Step>,
     print: Vec<Step>,
-    output_filename: Option<PathBuf>,
     debug: bool,
     treat_error_as_bug: bool,
     include_paths: IncludePaths,
@@ -95,14 +94,9 @@ fn main() -> Result<()> {
         true => args.stop_after,
         false => args.stop_after.or(Some(Step::Assemble)),
     };
-    let output_filename = match args.filenames.len() == 1 {
-        true => args.output_filename.clone(),
-        false => None,
-    };
     let compile_args = CompileArgs {
         stop_after,
         print: args.print,
-        output_filename,
         debug: args.debug,
         treat_error_as_bug: args.treat_error_as_bug,
         include_paths: args.include_paths,
@@ -111,7 +105,19 @@ fn main() -> Result<()> {
     let object_filenames: Result<Vec<Result<_, ()>>> = args
         .filenames
         .iter()
-        .map(|filename| compile(filename, &compile_args))
+        .map(|filename| {
+            compile(
+                filename,
+                args.output_filename
+                    .as_ref()
+                    .map_or(Path::new(""), |path| {
+                        path.parent().expect("TODO: is this unreachable?")
+                    })
+                    .join(filename.file_name().expect("TODO: is this unreachable?"))
+                    .with_extension("o"),
+                &compile_args,
+            )
+        })
         .collect();
 
     if let Some(Step::Assemble) = args.stop_after {
@@ -127,7 +133,8 @@ fn main() -> Result<()> {
         .output_filename
         .unwrap_or_else(|| match &args.filenames[..] {
             [] => unreachable!(),
-            [filename] => filename.with_extension(""),
+            [filename] => Path::new(filename.file_name().expect("TODO: is this unreachable?"))
+                .with_extension(""),
             [_, _, ..] => PathBuf::from("a.out"),
         });
 
@@ -140,7 +147,11 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn compile(filename: &Path, args: &CompileArgs) -> Result<Result<PathBuf, ()>> {
+fn compile(
+    filename: &Path,
+    object_filename: PathBuf,
+    args: &CompileArgs,
+) -> Result<Result<PathBuf, ()>> {
     let bump = &Bump::new();
     let typedef_names = RefCell::default();
     let is_in_typedef = Cell::new(false);
@@ -222,16 +233,12 @@ fn compile(filename: &Path, args: &CompileArgs) -> Result<Result<PathBuf, ()>> {
         return Ok(Err(()));
     }
 
-    let output_filename = args
-        .output_filename
-        .clone()
-        .unwrap_or_else(|| filename.with_extension("S"));
-
+    let assembly_filename = object_filename.with_extension("S");
     write!(
-        File::create(&output_filename).wrap_err_with(|| {
+        File::create(&assembly_filename).wrap_err_with(|| {
             format!(
                 "could not create output file `{}`",
-                output_filename.display(),
+                assembly_filename.display(),
             )
         })?,
         "{}{}",
@@ -241,13 +248,12 @@ fn compile(filename: &Path, args: &CompileArgs) -> Result<Result<PathBuf, ()>> {
     .wrap_err_with(|| {
         format!(
             "could not write to output file `{}`",
-            output_filename.display(),
+            object_filename.display(),
         )
     })?;
 
-    let object_filename = output_filename.with_extension("o");
     Command::new("as")
-        .arg(&output_filename)
+        .arg(&assembly_filename)
         .arg("-o")
         .arg(&object_filename)
         .status()
