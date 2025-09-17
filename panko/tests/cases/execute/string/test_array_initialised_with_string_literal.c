@@ -12,13 +12,6 @@ int main() {
         printf("%zu\n", _Lengthof string);
     }
     {
-        char string[3] = "string";
-        // [[print: str]]
-        printf("%.*s\n", _Lengthof string, string);
-        // [[print: 3]]
-        printf("%zu\n", _Lengthof string);
-    }
-    {
         char string[100] = "string";
         // [[print: string]]
         printf("%s\n", string);

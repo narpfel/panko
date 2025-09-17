@@ -1345,6 +1345,7 @@ fn typeck_function_definition<'a>(
 
 fn typeck_array_initialisation_with_string<'a>(
     sess: &'a Session<'a>,
+    reference: &Reference<'a>,
     array_ty: &ArrayType<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
     initialiser: &scope::Expression<'a>,
 ) -> TypedExpression<'a> {
@@ -1352,7 +1353,29 @@ fn typeck_array_initialisation_with_string<'a>(
     if let Type::Arithmetic(Arithmetic::Integral(integral)) = array_ty.ty.ty
         && let IntegralKind::Char | IntegralKind::PlainChar = integral.kind
     {
-        typeck_expression(sess, initialiser, Context::ArrayInitialisationByString)
+        let expr = typeck_expression(sess, initialiser, Context::ArrayInitialisationByString);
+        let Type::Array(string_ty) = expr.ty.ty
+        else {
+            unreachable!()
+        };
+        match (array_ty.length, string_ty.length) {
+            (_, ArrayLength::Variable(_) | ArrayLength::Unknown) =>
+                unreachable!("string literals have constant length"),
+            (ArrayLength::Variable(_), _) =>
+                unreachable!("VLAs cannot be initialised with string literals"),
+            (ArrayLength::Constant(space), ArrayLength::Constant(literal_length))
+                if space < literal_length =>
+                sess.emit(Diagnostic::ExcessInitialiser {
+                    at: scope::Initialiser::Expression(*initialiser),
+                    reference: *reference,
+                    iterator: SubobjectIterator::Array {
+                        ty: *array_ty,
+                        index: literal_length,
+                        offset: 0,
+                    },
+                }),
+            (ArrayLength::Constant(_) | ArrayLength::Unknown, ArrayLength::Constant(_)) => expr,
+        }
     }
     else {
         sess.emit(Diagnostic::ArrayInitialisationByStringLiteralTypeMismatch {
@@ -1386,7 +1409,12 @@ fn typeck_initialiser_list<'a>(
             subobject.offset,
             SubobjectInitialiser {
                 subobject,
-                initialiser: typeck_array_initialisation_with_string(sess, &array_ty, initialiser),
+                initialiser: typeck_array_initialisation_with_string(
+                    sess,
+                    reference,
+                    &array_ty,
+                    initialiser,
+                ),
             },
         );
         let _ = subobjects.try_leave_subobject(AllowExplicit::No);
@@ -1476,7 +1504,9 @@ fn typeck_initialiser_list<'a>(
                     subobject.offset,
                     SubobjectInitialiser {
                         subobject,
-                        initialiser: typeck_array_initialisation_with_string(sess, &array_ty, expr),
+                        initialiser: typeck_array_initialisation_with_string(
+                            sess, reference, &array_ty, expr,
+                        ),
                     },
                 );
             }
@@ -1541,7 +1571,7 @@ fn typeck_initialiser<'a>(
         scope::Initialiser::Expression(initialiser) => {
             let initialiser = match initialiser {
                 scope::Expression::String(_) if let Type::Array(array_ty) = reference.ty.ty =>
-                    typeck_array_initialisation_with_string(sess, &array_ty, initialiser),
+                    typeck_array_initialisation_with_string(sess, reference, &array_ty, initialiser),
                 _ => convert_as_if_by_assignment(
                     sess,
                     reference.ty,

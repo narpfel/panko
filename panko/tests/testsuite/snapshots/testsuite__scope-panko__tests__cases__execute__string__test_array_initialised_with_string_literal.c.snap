@@ -27,54 +27,43 @@ exit_code: 0
                   (string "%zu\n")
                   (lengthof (name string~3 `array<char; ∅>`)))))
          (compound-statement
-            (declaration string~4 `array<char; 3>` (string "string"))
-            (expression
-               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  (string "%.*s\n")
-                  (lengthof (name string~4 `array<char; 3>`))
-                  (name string~4 `array<char; 3>`)))
-            (expression
-               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-                  (string "%zu\n")
-                  (lengthof (name string~4 `array<char; 3>`)))))
-         (compound-statement
-            (declaration string~5 `array<char; 100>` (string "string"))
+            (declaration string~4 `array<char; 100>` (string "string"))
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%s\n")
-                  (name string~5 `array<char; 100>`)))
+                  (name string~4 `array<char; 100>`)))
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%zu\n")
-                  (lengthof (name string~5 `array<char; 100>`)))))
+                  (lengthof (name string~4 `array<char; 100>`)))))
          (compound-statement
-            (declaration string~6 `array<char; ∅>`
+            (declaration string~5 `array<char; ∅>`
                (braced
                   (string "string")))
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%s\n")
-                  (name string~6 `array<char; ∅>`)))
+                  (name string~5 `array<char; ∅>`)))
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%zu\n")
-                  (lengthof (name string~6 `array<char; ∅>`)))))
-         (declaration strings~7 `array<array<char; 100>; ∅>`
+                  (lengthof (name string~5 `array<char; ∅>`)))))
+         (declaration strings~6 `array<array<char; 100>; ∅>`
             (braced
                (string "first")
                (string "second")
                (string "third")))
          (expression
             (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-               (subscript (name strings~7 `array<array<char; 100>; ∅>`) 0)))
+               (subscript (name strings~6 `array<array<char; 100>; ∅>`) 0)))
          (expression
             (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-               (subscript (name strings~7 `array<array<char; 100>; ∅>`) 1)))
+               (subscript (name strings~6 `array<array<char; 100>; ∅>`) 1)))
          (expression
             (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-               (subscript (name strings~7 `array<array<char; 100>; ∅>`) 2)))
+               (subscript (name strings~6 `array<array<char; 100>; ∅>`) 2)))
          (compound-statement
-            (declaration strings~8 `array<array<array<char; 100>; 5>; ∅>`
+            (declaration strings~7 `array<array<array<char; 100>; 5>; ∅>`
                (braced
                   (designation ((index 0)) (string "first"))
                   (designation ((index 1))
@@ -83,13 +72,13 @@ exit_code: 0
                   (string "third")))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (name strings~8 `array<array<array<char; 100>; 5>; ∅>`) 0)))
+                  (subscript (name strings~7 `array<array<array<char; 100>; 5>; ∅>`) 0)))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (name strings~8 `array<array<array<char; 100>; 5>; ∅>`) 1)))
+                  (subscript (name strings~7 `array<array<array<char; 100>; 5>; ∅>`) 1)))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (name strings~8 `array<array<array<char; 100>; 5>; ∅>`) 2))))
-         (return (add (lengthof (name strings~7 `array<array<char; 100>; ∅>`)) (lengthof (subscript (name strings~7 `array<array<char; 100>; ∅>`) 0)))))))
+                  (subscript (name strings~7 `array<array<array<char; 100>; 5>; ∅>`) 2))))
+         (return (add (lengthof (name strings~6 `array<array<char; 100>; ∅>`)) (lengthof (subscript (name strings~6 `array<array<char; 100>; ∅>`) 0)))))))
 
 ----- stderr -----

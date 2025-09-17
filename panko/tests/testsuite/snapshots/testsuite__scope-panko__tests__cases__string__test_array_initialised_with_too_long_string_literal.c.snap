@@ -1,0 +1,19 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/string/test_array_initialised_with_too_long_string_literal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/string/test_array_initialised_with_too_long_string_literal.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration string~1 `array<char; 3>` (string "string")))))
+
+----- stderr -----

@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/string/test_array_initialised_with_too_long_string_literal.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/string/test_array_initialised_with_too_long_string_literal.c:2:22]
+   │
+ 2 │     char string[3] = "string";
+   │          ───┬──      ────┬───  
+   │             │            ╰───── trying to initialise element at index 6 for `array<char; 3>`
+   │             │                  
+   │             ╰────────────────── while initialising this variable
+───╯
