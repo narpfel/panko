@@ -403,11 +403,5 @@ fn run_tests(cases: impl Iterator<Item = TestCase>) {
 pub fn run(cases: impl Iterator<Item = TestCase>) {
     color_eyre::install().unwrap();
 
-    match catch_unwind(AssertUnwindSafe(|| run_tests(cases))) {
-        Ok(()) => {}
-        Err(panic) => eprintln!(
-            "test setup panicked with {}",
-            panic.downcast_ref::<&str>().unwrap(),
-        ),
-    }
+    run_tests(cases)
 }
