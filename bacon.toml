@@ -63,7 +63,7 @@ command = [
     "--",
     "--print=layout",
     "--print=codegen",
-    "-o/tmp/main.S",
+    "-o/tmp/main",
     "c/main.c",
 ]
 need_stdout = true
