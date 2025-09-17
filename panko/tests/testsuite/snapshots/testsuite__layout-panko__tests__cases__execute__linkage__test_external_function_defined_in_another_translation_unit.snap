@@ -1,0 +1,64 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/f.c
+    - panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/main.c
+    - panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/x.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/f.c"
+   (declaration (x~0 `int` (static x)) ∅)
+   (function-definition
+      (f~1 `fn(y: int) -> int` (static f))
+      (params
+         (y~2 `int` @0))
+      (compound-statement
+         (return
+            (add `int` @4
+               (x~0 `int` (static x))
+               (y~2 `int` @0))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/main.c"
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration (f~1 `fn(∅: int) -> int` (static f)) ∅)
+   (declaration (x~2 `int` (static x)) ∅)
+   (function-definition
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (call `int` @24
+                  (addressof `ptr<fn(∅: int) -> int>` @32
+                     (f~1 `fn(∅: int) -> int` (static f)))
+                  (10 `int` @40))))
+         (expression
+            (assign `int` (static x)
+               (x~2 `int` (static x))
+               (20 `int` (static x))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (call `int` @24
+                  (addressof `ptr<fn(∅: int) -> int>` @32
+                     (f~1 `fn(∅: int) -> int` (static f)))
+                  (123 `int` @40)))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/x.c"
+   (definition (x~0 `int` (static x)) (5 `int` (static x))))
+
+----- stderr -----
