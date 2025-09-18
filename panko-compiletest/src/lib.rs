@@ -7,7 +7,7 @@
 #![feature(unqualified_local_imports)]
 
 use std::borrow::Borrow;
-use std::cell::Cell;
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
 use std::io;
@@ -35,6 +35,7 @@ use insta_cmd::get_cargo_bin;
 use itertools::Itertools as _;
 use regex::Captures;
 use regex::Regex;
+use regex::bytes;
 
 const FG_BOLD: &str = "\x1B[1m";
 const FG_RED: &str = "\x1B[31m";
@@ -80,18 +81,34 @@ fn expand_escape_sequences(s: &str) -> String {
 }
 
 pub struct Context {
-    expected_result: Cell<ExpectedResult>,
+    expected_result: RefCell<ExpectedResult>,
 }
 
 impl Context {
     fn new(expected_result: ExpectedResult) -> Self {
         Self {
-            expected_result: Cell::new(expected_result),
+            expected_result: RefCell::new(expected_result),
         }
     }
 
     fn expect_failure(&self) {
-        self.expected_result.set(ExpectedResult::Failure);
+        *self.expected_result.borrow_mut() = ExpectedResult::Failure;
+    }
+
+    fn should_fail_with_output(&self, regex: &str) {
+        let mut expected_result = self.expected_result.borrow_mut();
+        let regexes = match &mut *expected_result {
+            result @ (ExpectedResult::Success | ExpectedResult::Failure) => {
+                *result = ExpectedResult::ShouldFailWithOutput(Vec::new());
+                let ExpectedResult::ShouldFailWithOutput(regexes) = &mut *result
+                else {
+                    unreachable!()
+                };
+                regexes
+            }
+            ExpectedResult::ShouldFailWithOutput(regexes) => regexes,
+        };
+        regexes.push(bytes::Regex::new(regex).unwrap());
     }
 }
 
@@ -129,10 +146,11 @@ impl fmt::Display for TestResult {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum ExpectedResult {
     Success,
     Failure,
+    ShouldFailWithOutput(Vec<bytes::Regex>),
 }
 
 #[derive(Default)]
@@ -153,12 +171,6 @@ impl Outcomes {
     }
 }
 
-pub struct TestCase {
-    pub name: String,
-    pub test_fn: Box<dyn TestFn + Send>,
-    pub expected_result: ExpectedResult,
-}
-
 struct OutputCapture {
     old: Option<Arc<Mutex<Vec<u8>>>>,
     output: Arc<Mutex<Vec<u8>>>,
@@ -173,6 +185,10 @@ impl OutputCapture {
         }
     }
 
+    fn read(&self) -> Vec<u8> {
+        self.output.lock().unwrap().clone()
+    }
+
     fn get(self) -> Vec<u8> {
         std::mem::take(&mut self.output.lock().unwrap())
     }
@@ -184,6 +200,22 @@ impl Drop for OutputCapture {
     }
 }
 
+fn check_should_panic(name: &str, output: &[u8], expecteds: &[bytes::Regex]) -> TestResult {
+    for expected in expecteds {
+        if !expected.is_match(output) {
+            eprintln!("{FG_BOLD}`{name}`{RESET}: output did not match `{expected:?}`");
+            return TestResult::Failure;
+        }
+    }
+    TestResult::Success
+}
+
+pub struct TestCase {
+    pub name: String,
+    pub test_fn: Box<dyn TestFn + Send>,
+    pub expected_result: ExpectedResult,
+}
+
 impl TestCase {
     fn run(self) -> (String, TestResult, Vec<u8>) {
         let Self { name, test_fn, expected_result } = self;
@@ -191,23 +223,25 @@ impl TestCase {
         let output_capture = OutputCapture::new();
         let result = catch_unwind(AssertUnwindSafe(|| {
             test_fn.run(&context);
-            if let ExpectedResult::Failure = context.expected_result.get() {
+            if let ExpectedResult::Failure = *context.expected_result.borrow() {
                 eprintln!("test {FG_BOLD}`{name}`{RESET} was marked xfail but passed");
             }
         }));
-        let expected_result = context.expected_result.get();
+        let expected_result = &*context.expected_result.borrow();
         let result = match result {
             Ok(()) => match expected_result {
                 ExpectedResult::Success => TestResult::Success,
                 ExpectedResult::Failure => TestResult::XPass,
+                ExpectedResult::ShouldFailWithOutput(_) => TestResult::Failure,
             },
             Err(_panic_payload) => match expected_result {
                 ExpectedResult::Success => TestResult::Failure,
                 ExpectedResult::Failure => TestResult::XFail,
+                ExpectedResult::ShouldFailWithOutput(expected_messages) =>
+                    check_should_panic(&name, &output_capture.read(), expected_messages),
             },
         };
-        let output = output_capture.get();
-        (name, result, output)
+        (name, result, output_capture.get())
     }
 }
 
@@ -223,6 +257,15 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
     let is_known_bug = known_bug_re.is_match(&source);
     if is_known_bug {
         context.expect_failure();
+    }
+
+    let compile_error_re =
+        Regex::new(r"(?m)^// \[\[compile-error: (?P<error_message>.*?)\]\]$").unwrap();
+    let compile_error_messages = compile_error_re
+        .captures_iter(&source)
+        .map(|captures| captures.name("error_message").unwrap().as_str());
+    for error_message in compile_error_messages {
+        context.should_fail_with_output(error_message);
     }
 
     let expected_return_code_re =

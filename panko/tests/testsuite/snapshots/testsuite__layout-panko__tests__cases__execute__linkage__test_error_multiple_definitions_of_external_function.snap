@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/f1.c
+    - panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/f2.c
+    - panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/main.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/f1.c"
+   (function-definition
+      (f~0 `fn() -> int` (static f))
+      (compound-statement
+         (return (10 `int` @0)))))
+(translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/f2.c"
+   (function-definition
+      (f~0 `fn() -> int` (static f))
+      (compound-statement
+         (return (20 `int` @0)))))
+(translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/main.c"
+   (declaration (f~0 `fn() -> int` (static f)) ∅)
+   (function-definition
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (return
+            (call `int` @0
+               (addressof `ptr<fn() -> int>` @8
+                  (f~0 `fn() -> int` (static f))))))))
+
+----- stderr -----

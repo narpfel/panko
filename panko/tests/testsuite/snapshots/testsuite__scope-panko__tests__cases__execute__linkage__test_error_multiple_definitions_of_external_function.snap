@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/f1.c
+    - panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/f2.c
+    - panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/main.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/f1.c"
+   (function-definition
+      f~0 `fn() -> int`
+      (compound-statement
+         (return 10))))
+(translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/f2.c"
+   (function-definition
+      f~0 `fn() -> int`
+      (compound-statement
+         (return 20))))
+(translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/main.c"
+   (declaration f~0 `fn() -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (return (call (name f~0 `fn() -> int`))))))
+
+----- stderr -----
