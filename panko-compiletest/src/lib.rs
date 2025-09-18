@@ -95,18 +95,18 @@ impl Context {
         *self.expected_result.borrow_mut() = ExpectedResult::Failure;
     }
 
-    fn should_fail_with_output(&self, regex: &str) {
+    fn should_panic_with_output(&self, regex: &str) {
         let mut expected_result = self.expected_result.borrow_mut();
         let regexes = match &mut *expected_result {
             result @ (ExpectedResult::Success | ExpectedResult::Failure) => {
-                *result = ExpectedResult::ShouldFailWithOutput(Vec::new());
-                let ExpectedResult::ShouldFailWithOutput(regexes) = &mut *result
+                *result = ExpectedResult::ShouldPanic(Vec::new());
+                let ExpectedResult::ShouldPanic(regexes) = &mut *result
                 else {
                     unreachable!()
                 };
                 regexes
             }
-            ExpectedResult::ShouldFailWithOutput(regexes) => regexes,
+            ExpectedResult::ShouldPanic(regexes) => regexes,
         };
         regexes.push(bytes::Regex::new(regex).unwrap());
     }
@@ -150,7 +150,7 @@ impl fmt::Display for TestResult {
 pub enum ExpectedResult {
     Success,
     Failure,
-    ShouldFailWithOutput(Vec<bytes::Regex>),
+    ShouldPanic(Vec<bytes::Regex>),
 }
 
 #[derive(Default)]
@@ -232,12 +232,12 @@ impl TestCase {
             Ok(()) => match expected_result {
                 ExpectedResult::Success => TestResult::Success,
                 ExpectedResult::Failure => TestResult::XPass,
-                ExpectedResult::ShouldFailWithOutput(_) => TestResult::Failure,
+                ExpectedResult::ShouldPanic(_) => TestResult::Failure,
             },
             Err(_panic_payload) => match expected_result {
                 ExpectedResult::Success => TestResult::Failure,
                 ExpectedResult::Failure => TestResult::XFail,
-                ExpectedResult::ShouldFailWithOutput(expected_messages) =>
+                ExpectedResult::ShouldPanic(expected_messages) =>
                     check_should_panic(&name, &output_capture.read(), expected_messages),
             },
         };
@@ -265,7 +265,7 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
         .captures_iter(&source)
         .map(|captures| captures.name("error_message").unwrap().as_str());
     for error_message in compile_error_messages {
-        context.should_fail_with_output(error_message);
+        context.should_panic_with_output(error_message);
     }
 
     let expected_return_code_re =
