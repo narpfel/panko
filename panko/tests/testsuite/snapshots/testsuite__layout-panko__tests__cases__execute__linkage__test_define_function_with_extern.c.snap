@@ -1,0 +1,40 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/linkage/test_define_function_with_extern.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_define_function_with_extern.c"
+   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition
+      (f~1 `fn(x: int) -> void` (static f))
+      (params
+         (x~2 `int` @0))
+      (compound-statement
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 10>>` @16
+                        (string `array<char; 10>` @void "in f: %d\n\0"))))
+               (add `int` @24
+                  (x~2 `int` @0)
+                  (1 `int` @28))))))
+   (function-definition
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn(x: int) -> void>` @0
+                  (f~1 `fn(x: int) -> void` (static f)))
+               (4 `int` @8))))))
+
+----- stderr -----

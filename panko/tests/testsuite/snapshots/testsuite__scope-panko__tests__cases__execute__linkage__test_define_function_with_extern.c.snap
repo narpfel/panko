@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/linkage/test_define_function_with_extern.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_define_function_with_extern.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      f~1 `fn(x: int) -> void`
+      (params
+         x~2 `int`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "in f: %d\n")
+               (add (name x~2 `int`) 1)))))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name f~1 `fn(x: int) -> void`)
+               4)))))
+
+----- stderr -----

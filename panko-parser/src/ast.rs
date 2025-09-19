@@ -325,7 +325,13 @@ impl<'a> FunctionDefinition<'a> {
         let cst::FunctionDefinition { declaration_specifiers, declarator, body } = *def;
         let DeclarationSpecifiers { storage_class, ty } =
             parse_declaration_specifiers(sess, declaration_specifiers);
-        assert_matches!(storage_class, None, "TODO: handle `storage_class`");
+        // TODO: `extern` is the default, so we can ignore it for now (until implementing
+        // `static`).
+        assert_matches!(
+            try { storage_class?.kind },
+            Some(StorageClassSpecifierKind::Extern) | None,
+            "TODO: handle `storage_class` {storage_class:?}",
+        );
         let (ty, name) = parse_declarator(sess, ty, declarator);
         let name =
             name.unwrap_or_else(|| unreachable!("[parser] syntax error: declaration without name"));
