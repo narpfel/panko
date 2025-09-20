@@ -468,7 +468,7 @@ impl<'a> Codegen<'a> {
 
         self.block(2);
         let name = format!(".L.{id}");
-        self.directive("globl", &[&name]);
+        self.directive("local", &[&name]);
         self.directive("data", &[]);
         self.directive("type", &[&name, &"@object"]);
         self.directive("size", &[&name, &(value.len() + 1)]);
