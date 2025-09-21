@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_global_variable/first_definition.c
+    - panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_global_variable/main.c
+    - panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_global_variable/second_definition.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_global_variable/first_definition.c"
+   (declaration x~0 `int` 42))
+(translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_global_variable/main.c"
+   (declaration x~0 `int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (return (name x~0 `int`)))))
+(translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_global_variable/second_definition.c"
+   (declaration x~0 `int` 27))
+
+----- stderr -----
