@@ -7,6 +7,7 @@
 #![feature(unqualified_local_imports)]
 
 use std::borrow::Borrow;
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
@@ -82,23 +83,25 @@ fn expand_escape_sequences(s: &str) -> String {
 
 pub struct Context {
     expected_result: RefCell<ExpectedResult>,
+    expects_failure: Cell<bool>,
 }
 
 impl Context {
     fn new(expected_result: ExpectedResult) -> Self {
         Self {
             expected_result: RefCell::new(expected_result),
+            expects_failure: Cell::new(false),
         }
     }
 
     fn expect_failure(&self) {
-        *self.expected_result.borrow_mut() = ExpectedResult::Failure;
+        self.expects_failure.set(true);
     }
 
     fn should_panic_with_output(&self, regex: &str) {
         let mut expected_result = self.expected_result.borrow_mut();
         let regexes = match &mut *expected_result {
-            result @ (ExpectedResult::Success | ExpectedResult::Failure) => {
+            result @ ExpectedResult::Success => {
                 *result = ExpectedResult::ShouldPanic(Vec::new());
                 let ExpectedResult::ShouldPanic(regexes) = &mut *result
                 else {
@@ -149,7 +152,6 @@ impl fmt::Display for TestResult {
 #[derive(Debug, Clone)]
 pub enum ExpectedResult {
     Success,
-    Failure,
     ShouldPanic(Vec<bytes::Regex>),
 }
 
@@ -223,22 +225,34 @@ impl TestCase {
         let output_capture = OutputCapture::new();
         let result = catch_unwind(AssertUnwindSafe(|| {
             test_fn.run(&context);
-            if let ExpectedResult::Failure = *context.expected_result.borrow() {
+            if context.expects_failure.get() {
                 eprintln!("test {FG_BOLD}`{name}`{RESET} was marked xfail but passed");
             }
         }));
         let expected_result = &*context.expected_result.borrow();
+        let expects_failure = context.expects_failure.get();
         let result = match result {
-            Ok(()) => match expected_result {
-                ExpectedResult::Success => TestResult::Success,
-                ExpectedResult::Failure => TestResult::XPass,
-                ExpectedResult::ShouldPanic(_) => TestResult::Failure,
+            Ok(()) => match (expected_result, expects_failure) {
+                (ExpectedResult::Success, false) => TestResult::Success,
+                (ExpectedResult::Success, true) => TestResult::XPass,
+                (ExpectedResult::ShouldPanic(_), false) => TestResult::Failure,
+                (ExpectedResult::ShouldPanic(_), true) => TestResult::XFail,
             },
-            Err(_panic_payload) => match expected_result {
-                ExpectedResult::Success => TestResult::Failure,
-                ExpectedResult::Failure => TestResult::XFail,
-                ExpectedResult::ShouldPanic(expected_messages) =>
-                    check_should_panic(&name, &output_capture.read(), expected_messages),
+            Err(_panic_payload) => match (expected_result, expects_failure) {
+                (ExpectedResult::Success, false) => TestResult::Failure,
+                (ExpectedResult::Success, true) => TestResult::XFail,
+                (ExpectedResult::ShouldPanic(expected_messages), _) => {
+                    let result =
+                        check_should_panic(&name, &output_capture.read(), expected_messages);
+                    match expects_failure {
+                        false => result,
+                        true => match result {
+                            TestResult::Success => TestResult::XPass,
+                            TestResult::Failure => TestResult::XFail,
+                            _ => unreachable!(),
+                        },
+                    }
+                }
             },
         };
         (name, result, output_capture.get())

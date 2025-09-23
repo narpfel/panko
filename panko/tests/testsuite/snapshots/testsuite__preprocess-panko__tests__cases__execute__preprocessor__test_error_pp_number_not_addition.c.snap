@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=preprocess"
+    - "--stop-after=preprocess"
+    - panko/tests/cases/execute/preprocessor/test_error_pp_number_not_addition.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+
+
+int main() {
+    int name = 12;
+    return 0x1e+name;
+}
+
+----- stderr -----

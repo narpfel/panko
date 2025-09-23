@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/preprocessor/test_error_pp_number_not_addition.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/preprocessor/test_error_pp_number_not_addition.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration name~1 `int` 12)
+         (return (add 0x1e (name name~1 `int`))))))
+
+----- stderr -----

@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/preprocessor/test_error_pp_number_not_addition.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/preprocessor/test_error_pp_number_not_addition.c"
+   (function-definition
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (name~1 `int` @0) (12 `int` @0))
+         (return
+            (add `int` @4
+               (30 `int` @4)
+               (name~1 `int` @0))))))
+
+----- stderr -----
