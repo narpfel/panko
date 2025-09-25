@@ -13,8 +13,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/f.c"
-   (declaration (x~0 `int` (static x)) ∅)
-   (function-definition
+   (declaration external (x~0 `int` (static x)) ∅)
+   (function-definition external
       (f~1 `fn(y: int) -> int` (static f))
       (params
          (y~2 `int` @0))
@@ -24,10 +24,10 @@ exit_code: 0
                (x~0 `int` (static x))
                (y~2 `int` @0))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/main.c"
-   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (declaration (f~1 `fn(∅: int) -> int` (static f)) ∅)
-   (declaration (x~2 `int` (static x)) ∅)
-   (function-definition
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration external (f~1 `fn(∅: int) -> int` (static f)) ∅)
+   (declaration external (x~2 `int` (static x)) ∅)
+   (function-definition external
       (main~3 `fn() -> int` (static main))
       (compound-statement
          (expression
@@ -59,6 +59,6 @@ exit_code: 0
                      (f~1 `fn(∅: int) -> int` (static f)))
                   (123 `int` @40)))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/x.c"
-   (definition (x~0 `int` (static x)) (5 `int` (static x))))
+   (definition external (x~0 `int` (static x)) (5 `int` (static x))))
 
 ----- stderr -----

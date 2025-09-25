@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/arrays/test_array_as_function_parameter.c"
-   (function-definition
+   (function-definition external
       (f~0 `fn(xs: ptr<int>) -> int` (static f))
       (params
          (xs~1 `ptr<int>` @0))
@@ -26,7 +26,7 @@ exit_code: 0
                   (ptr-add `ptr<int>` @32
                      (xs~1 `ptr<int>` @0)
                      (sign-extend `unsigned long` @40 (1 `int` @48))))))))
-   (function-definition
+   (function-definition external
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (definition (xs~3 `array<int; 2>` @0) ∅)

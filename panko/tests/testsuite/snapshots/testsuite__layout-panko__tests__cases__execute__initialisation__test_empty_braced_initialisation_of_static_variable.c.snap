@@ -11,9 +11,9 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/initialisation/test_empty_braced_initialisation_of_static_variable.c"
-   (definition (x~0 `int` (static x)) (braced ∅))
-   (definition (xs~1 `array<array<int; 2>; 2>` (static xs)) (braced ∅))
-   (function-definition
+   (definition external (x~0 `int` (static x)) (braced ∅))
+   (definition external (xs~1 `array<array<int; 2>; 2>` (static xs)) (braced ∅))
+   (function-definition external
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (return

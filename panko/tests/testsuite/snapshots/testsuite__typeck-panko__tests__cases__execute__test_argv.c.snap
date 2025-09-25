@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/test_argv.c"
-   (declaration strlen~0 `fn(∅: ptr<char const>) -> unsigned long` ∅)
-   (function-definition
+   (declaration external strlen~0 `fn(∅: ptr<char const>) -> unsigned long` ∅)
+   (function-definition external
       main~1 `fn(argc: int, argv: ptr<ptr<char>>) -> int`
       (params
          argc~2 `int`

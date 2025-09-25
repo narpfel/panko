@@ -11,9 +11,9 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/logical-ops/test_logical_and.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (declaration f~1 `fn() -> int` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration external f~1 `fn() -> int` ∅)
+   (function-definition external
       main~2 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
       (params
          main.unnamed_parameter.0~3 `int`
@@ -89,7 +89,7 @@ exit_code: 0
                      (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
                   (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~4 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
                   (1 `int`))))))
-   (function-definition
+   (function-definition external
       f~1 `fn() -> int`
       (compound-statement
          (return (0 `int`)))))

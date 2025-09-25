@@ -11,14 +11,14 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/call/test_params_on_stack.c"
-   (declaration f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int` ∅)
-   (function-definition
+   (declaration external f~0 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> int` ∅)
+   (function-definition external
       id~1 `fn(n: int) -> int`
       (params
          n~2 `int`)
       (compound-statement
          (return (n~2 `int`))))
-   (function-definition
+   (function-definition external
       main~3 `fn() -> int`
       (compound-statement
          (return
@@ -39,7 +39,7 @@ exit_code: 0
                      (id~1 `fn(n: int) -> int`))
                   (10 `int`))
                (11 `int`)))))
-   (function-definition
+   (function-definition external
       f~0 `fn(a1: int, a2: int, a3: int, a4: int, a5: int, a6: int, a7: int, a8: int, a9: int, a10: int, a11: int) -> int`
       (params
          a1~5 `int`

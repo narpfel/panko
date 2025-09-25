@@ -12,13 +12,13 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/typedef/test_shadow_typedef_in_inner_scope_with_function_pointer_value.c"
    (typedef name `int`)
-   (function-definition
+   (function-definition external
       f~0 `fn(name: int) -> int`
       (params
          name~1 `int`)
       (compound-statement
          (return (multiply `int` (name~1 `int`) (2 `int`)))))
-   (function-definition
+   (function-definition external
       main~2 `fn() -> int`
       (compound-statement
          (definition name~3 `ptr<fn(∅: int) -> int>`

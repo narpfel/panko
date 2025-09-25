@@ -11,14 +11,14 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/typedef/test_shadow_typedef_in_inner_scope_parenthesised_in_parameter_list.c"
-   (function-definition
+   (function-definition external
       main~0 `fn() -> int`
       (compound-statement
          (typedef name `int`)
          (compound-statement
-            (declaration f~1 `fn(∅: ptr<fn() -> int>) -> int` ∅)
-            (declaration g~2 `fn(∅: ptr<fn(∅: int) -> int>) -> int` ∅)
-            (declaration h~3 `fn(∅: ptr<fn(∅: int) -> int>) -> int` ∅)
-            (declaration i~4 `fn(name: int) -> int` ∅)))))
+            (declaration external f~1 `fn(∅: ptr<fn() -> int>) -> int` ∅)
+            (declaration external g~2 `fn(∅: ptr<fn(∅: int) -> int>) -> int` ∅)
+            (declaration external h~3 `fn(∅: ptr<fn(∅: int) -> int>) -> int` ∅)
+            (declaration external i~4 `fn(name: int) -> int` ∅)))))
 
 ----- stderr -----

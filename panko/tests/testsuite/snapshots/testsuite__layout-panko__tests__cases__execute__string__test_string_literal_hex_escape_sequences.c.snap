@@ -11,9 +11,9 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/string/test_string_literal_hex_escape_sequences.c"
-   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (declaration (strcmp~1 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int` (static strcmp)) ∅)
-   (function-definition
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration external (strcmp~1 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int` (static strcmp)) ∅)
+   (function-definition external
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (expression

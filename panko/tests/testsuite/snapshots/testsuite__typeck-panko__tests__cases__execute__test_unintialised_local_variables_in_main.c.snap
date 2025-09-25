@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/test_unintialised_local_variables_in_main.c"
-   (function-definition
+   (function-definition external
       main~0 `fn() -> int`
       (compound-statement
          (definition a~1 `int` ∅)

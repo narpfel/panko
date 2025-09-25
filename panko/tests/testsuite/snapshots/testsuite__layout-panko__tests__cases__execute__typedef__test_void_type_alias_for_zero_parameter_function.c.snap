@@ -11,10 +11,10 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/typedef/test_void_type_alias_for_zero_parameter_function.c"
-   (declaration (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
    (typedef v `void`)
-   (declaration (f~1 `fn() -> void` (static f)) ∅)
-   (function-definition
+   (declaration external (f~1 `fn() -> void` (static f)) ∅)
+   (function-definition external
       (f~1 `fn() -> void` (static f))
       (compound-statement
          (expression
@@ -25,14 +25,14 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "f\0"))))))))
-   (declaration (g~3 `fn(∅: ptr<fn() -> void>) -> void` (static g)) ∅)
-   (function-definition
+   (declaration external (g~3 `fn(∅: ptr<fn() -> void>) -> void` (static g)) ∅)
+   (function-definition external
       (g~3 `fn(v: ptr<fn() -> void>) -> void` (static g))
       (params
          (v~5 `ptr<fn() -> void>` @0))
       (compound-statement
          (expression (call `void` @void (v~5 `ptr<fn() -> void>` @0)))))
-   (function-definition
+   (function-definition external
       (print_g~6 `fn() -> void` (static print_g))
       (compound-statement
          (expression
@@ -43,7 +43,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "g\0"))))))))
-   (function-definition
+   (function-definition external
       (main~7 `fn() -> int` (static main))
       (compound-statement
          (expression

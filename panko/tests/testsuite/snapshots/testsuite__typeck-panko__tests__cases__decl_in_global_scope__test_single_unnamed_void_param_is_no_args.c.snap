@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_single_unnamed_void_param_is_no_args.c"
-   (declaration f~0 `fn() -> int` ∅)
-   (declaration f~0 `fn() -> int` ∅))
+   (declaration external f~0 `fn() -> int` ∅)
+   (declaration external f~0 `fn() -> int` ∅))
 
 ----- stderr -----

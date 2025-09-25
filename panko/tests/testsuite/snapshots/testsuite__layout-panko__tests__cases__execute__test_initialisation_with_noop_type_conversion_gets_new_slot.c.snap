@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/test_initialisation_with_noop_type_conversion_gets_new_slot.c"
-   (function-definition
+   (function-definition external
       (main~0 `fn() -> int` (static main))
       (compound-statement
          (definition (a~1 `unsigned int` @0) (noop-type-conversion `unsigned int` @0 (42 `int` @0)))

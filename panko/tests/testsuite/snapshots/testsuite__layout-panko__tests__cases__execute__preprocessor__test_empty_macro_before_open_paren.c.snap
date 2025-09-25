@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/preprocessor/test_empty_macro_before_open_paren.c"
-   (declaration (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition
+   (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition external
       (a~1 `fn() -> void` (static a))
       (compound-statement
          (expression
@@ -23,7 +23,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "a\0"))))))))
-   (function-definition
+   (function-definition external
       (b~2 `fn() -> void` (static b))
       (compound-statement
          (expression
@@ -34,7 +34,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "b\0"))))))))
-   (function-definition
+   (function-definition external
       (c~3 `fn() -> void` (static c))
       (compound-statement
          (expression
@@ -45,7 +45,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "c\0"))))))))
-   (function-definition
+   (function-definition external
       (d~4 `fn() -> void` (static d))
       (compound-statement
          (expression
@@ -56,7 +56,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "d\0"))))))))
-   (function-definition
+   (function-definition external
       (main~5 `fn() -> int` (static main))
       (compound-statement
          (expression

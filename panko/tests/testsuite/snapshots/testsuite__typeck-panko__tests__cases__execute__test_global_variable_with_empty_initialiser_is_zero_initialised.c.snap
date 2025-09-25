@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/test_global_variable_with_empty_initialiser_is_zero_initialised.c"
-   (tentative-definition zero~0 `int` ∅)
-   (function-definition
+   (tentative-definition external zero~0 `int` ∅)
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (return (zero~0 `int`)))))

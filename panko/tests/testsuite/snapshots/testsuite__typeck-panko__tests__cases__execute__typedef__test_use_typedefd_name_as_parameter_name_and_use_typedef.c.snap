@@ -11,11 +11,11 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/typedef/test_use_typedefd_name_as_parameter_name_and_use_typedef.c"
-   (function-definition
+   (function-definition external
       main~0 `fn() -> int`
       (compound-statement
          (typedef a `int`)
-         (declaration f~1 `fn(a: int) -> int` ∅)
+         (declaration external f~1 `fn(a: int) -> int` ∅)
          (definition b~2 `int` (42 `int`))
          (return
             (add `int` (b~2 `int`)
@@ -23,7 +23,7 @@ exit_code: 0
                   (addressof `ptr<fn(a: int) -> int>`
                      (f~1 `fn(a: int) -> int`))
                   (b~2 `int`))))))
-   (function-definition
+   (function-definition external
       f~3 `fn(a: int) -> int`
       (params
          a~4 `int`)

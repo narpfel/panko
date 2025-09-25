@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/arrays/test_define_already_declared_array.c"
-   (tentative-definition (xs~0 `array<int; ∅>` (static xs)) ∅)
-   (function-definition
+   (tentative-definition external (xs~0 `array<int; ∅>` (static xs)) ∅)
+   (function-definition external
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (expression
@@ -47,6 +47,6 @@ exit_code: 0
                         (addressof `ptr<array<int; ∅>>` @24
                            (xs~0 `array<int; ∅>` (static xs))))
                      (sign-extend `unsigned long` @32 (12345 `int` @40))))))))
-   (tentative-definition (xs~0 `array<int; 12346>` (static xs)) ∅))
+   (tentative-definition external (xs~0 `array<int; 12346>` (static xs)) ∅))
 
 ----- stderr -----

@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/arrays/test_multidimensional_array_as_parameter.c"
-   (function-definition
+   (function-definition external
       f~0 `fn(xs: ptr<array<int; 2>>) -> int`
       (params
          xs~1 `ptr<array<int; 2>>`)
@@ -30,7 +30,7 @@ exit_code: 0
                         (addressof `ptr<array<int; 2>>`
                            (deref `array<int; 2>` (ptr-add `ptr<array<int; 2>>` (xs~1 `ptr<array<int; 2>>`) (sign-extend `unsigned long` (1 `int`))))))
                      (sign-extend `unsigned long` (1 `int`))))))))
-   (function-definition
+   (function-definition external
       main~2 `fn() -> int`
       (compound-statement
          (definition xs~3 `array<array<int; 2>; 2>` ∅)

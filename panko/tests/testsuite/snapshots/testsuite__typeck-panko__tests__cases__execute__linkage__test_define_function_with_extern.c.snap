@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_define_function_with_extern.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
       f~1 `fn(x: int) -> void`
       (params
          x~2 `int`)
@@ -26,7 +26,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "in f: %d\n\0"))))
                (add `int` (x~2 `int`) (1 `int`))))))
-   (function-definition
+   (function-definition external
       main~3 `fn() -> int`
       (compound-statement
          (expression

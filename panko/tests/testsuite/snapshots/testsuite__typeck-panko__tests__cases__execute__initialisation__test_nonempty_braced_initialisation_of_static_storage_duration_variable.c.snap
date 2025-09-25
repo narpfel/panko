@@ -11,17 +11,17 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/initialisation/test_nonempty_braced_initialisation_of_static_storage_duration_variable.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (definition xs~1 `array<int; 100>`
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (definition external xs~1 `array<int; 100>`
       (braced
          (subobject +0 (42 `int`))
          (subobject +4 (27 `int`))
          (subobject +8 (5 `int`))
          (subobject +12 (2147483647 `int`))))
-   (definition value~2 `int`
+   (definition external value~2 `int`
       (braced
          (subobject +0 (123 `int`))))
-   (function-definition
+   (function-definition external
       main~3 `fn(∅: int, ∅: ptr<ptr<char>>) -> int`
       (params
          main.unnamed_parameter.0~4 `int`

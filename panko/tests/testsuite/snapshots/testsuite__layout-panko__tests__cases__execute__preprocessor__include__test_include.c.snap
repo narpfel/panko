@@ -11,10 +11,10 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/preprocessor/include/test_include.c"
-   (declaration (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (declaration (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (definition (variable~2 `int` (static variable)) (27 `int` (static variable)))
-   (function-definition
+   (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (declaration external (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (definition external (variable~2 `int` (static variable)) (27 `int` (static variable)))
+   (function-definition external
       (main~3 `fn() -> int` (static main))
       (compound-statement
          (expression

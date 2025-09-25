@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/generic/test_default_is_not_chosen_even_if_it_is_first.c"
-   (function-definition
+   (function-definition external
       (main~0 `fn() -> int` (static main))
       (compound-statement
          (return (5 `int` @0)))))

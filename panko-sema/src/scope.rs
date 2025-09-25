@@ -18,6 +18,7 @@ use panko_parser::ast;
 use panko_parser::ast::FromError;
 use panko_parser::ast::Session;
 use panko_parser::nonempty;
+use panko_parser::sexpr_builder::SExpr;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
@@ -374,6 +375,15 @@ pub enum Linkage {
     External,
     // TODO: Internal,
     None,
+}
+
+impl Linkage {
+    pub(crate) fn in_sexpr(self, sexpr: SExpr) -> SExpr {
+        match self {
+            Self::External => sexpr.inline_string("external".to_string()),
+            Self::None => sexpr,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]

@@ -11,6 +11,7 @@ use panko_report::Report;
 
 use crate::layout::stack::Stack;
 use crate::scope::Id;
+use crate::scope::Linkage;
 use crate::scope::RefKind;
 use crate::ty;
 use crate::ty::ArrayType;
@@ -193,6 +194,7 @@ pub struct Reference<'a> {
     id: Id,
     kind: RefKind,
     slot: Slot<'a>,
+    linkage: Linkage,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
