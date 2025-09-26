@@ -1,7 +1,6 @@
 extern int printf(char const*, ...);
 int puts(char const*);
 
-// TODO: function definitions ignore `static`
 static void f() {
     puts("in f");
 }

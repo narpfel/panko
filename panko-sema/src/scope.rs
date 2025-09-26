@@ -895,18 +895,23 @@ fn resolve_function_definition<'a>(
 ) -> ExternalDeclaration<'a> {
     let ast::FunctionDefinition {
         name,
-        storage_class: _,
+        storage_class,
         inline,
         noreturn,
         ty,
         body,
     } = def;
     let ty = resolve_ty(scopes, ty);
+    let linkage = match try { storage_class.as_ref()?.kind } {
+        Some(StorageClassSpecifierKind::Extern) | None => Some(Linkage::External),
+        Some(StorageClassSpecifierKind::Static) => Some(Linkage::Internal),
+        kind => unreachable!("invalid or unimplemented StorageClassSpecifierKind {kind:?}"),
+    };
     let maybe_reference = scopes.add(
         name.slice(),
         name.loc(),
         ty,
-        None::<Linkage>,
+        linkage,
         StorageDuration::Static,
         IsParameter::No,
         IsInGlobalScope::Yes,

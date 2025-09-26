@@ -13,7 +13,7 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_for_function_declarations.c"
    (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (declaration external puts~1 `fn(∅: ptr<char const>) -> int` ∅)
-   (function-definition external
+   (function-definition internal
       f~2 `fn() -> void`
       (compound-statement
          (expression
