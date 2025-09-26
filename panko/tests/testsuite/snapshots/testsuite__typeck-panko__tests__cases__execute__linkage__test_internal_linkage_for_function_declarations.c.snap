@@ -1,0 +1,91 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/linkage/test_internal_linkage_for_function_declarations.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_for_function_declarations.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration external puts~1 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition external
+      f~2 `fn() -> void`
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>`
+                  (puts~1 `fn(∅: ptr<char const>) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "in f\0"))))))))
+   (declaration external g~3 `fn(∅: int) -> void` ∅)
+   (declaration internal h~4 `fn(x: int) -> void` ∅)
+   (declaration internal i~5 `fn() -> void` ∅)
+   (function-definition external
+      main~6 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (f~2 `fn() -> void`))))
+         (expression
+            (call `void`
+               (addressof `ptr<fn(∅: int) -> void>`
+                  (g~3 `fn(∅: int) -> void`))
+               (4 `int`)))
+         (expression
+            (call `void`
+               (addressof `ptr<fn(x: int) -> void>`
+                  (h~4 `fn(x: int) -> void`))
+               (9 `int`)))
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (i~5 `fn() -> void`))))))
+   (function-definition external
+      g~3 `fn(x: int) -> void`
+      (params
+         x~8 `int`)
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "in g: %d\n\0"))))
+               (add `int` (x~8 `int`) (1 `int`))))))
+   (function-definition internal
+      h~4 `fn(x: int) -> void`
+      (params
+         x~10 `int`)
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "in h: %d\n\0"))))
+               (add `int` (x~10 `int`) (1 `int`))))))
+   (function-definition internal
+      i~5 `fn() -> void`
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>`
+                  (puts~1 `fn(∅: ptr<char const>) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "in i\0")))))))))
+
+----- stderr -----

@@ -68,6 +68,31 @@ mod as_sexpr;
 mod tests;
 
 #[derive(Debug, Report)]
+#[exit_code(2)]
+enum TodoError<'a> {
+    #[error("TODO: {msg}")]
+    #[diagnostics(at(colour = Red))]
+    #[with(msg = yansi::Paint::bold(&msg.fg(Red)).to_string())]
+    Error { at: Loc<'a>, msg: String },
+}
+
+macro_rules! error_todo {
+    ($at:expr) => {
+        error_todo!($at, "")
+    };
+    ($at:expr, $msg:expr) => {{
+        let at = $at.loc();
+        let msg = $msg;
+        let msg = format!(
+            "unimplemented error{}{msg}",
+            if msg.is_empty() { "" } else { ": " }
+        );
+        TodoError::Error { at, msg: msg.clone() }.print();
+        todo!("{msg}")
+    }};
+}
+
+#[derive(Debug, Report)]
 #[exit_code(1)]
 enum Diagnostic<'a> {
     #[error("redeclaration of `{at}` with different type: `{original_ty}` vs. `{new_ty}`")]
@@ -654,7 +679,7 @@ pub(crate) struct SubobjectInitialiser<'a> {
 pub(crate) struct FunctionDefinition<'a> {
     pub(crate) reference: Reference<'a>,
     pub(crate) params: ParamRefs<'a>,
-    pub(crate) storage_class: Option<cst::StorageClassSpecifier<'a>>,
+    pub(crate) linkage: Linkage,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) is_varargs: bool,
@@ -1181,13 +1206,32 @@ fn typeck_reference<'a>(
         is_parameter,
         matches!(needs_initialiser, NeedsInitialiser::Yes).then_some(&reference),
     );
-    let ty = match previous_definition {
+    let (ty, linkage) = match previous_definition {
         Some(previous_definition) => {
             // TODO: this is quadratic in the number of previous decls for this name
-            let previous_ty = typeck_reference(sess, *previous_definition, needs_initialiser).ty;
-            ty.composite_ty(sess.bump(), &previous_ty).unwrap_or(ty)
+            let previous_definition =
+                typeck_reference(sess, *previous_definition, needs_initialiser);
+            let previous_linkage = previous_definition.linkage;
+            let previous_ty = previous_definition.ty;
+            let composite_ty = ty.composite_ty(sess.bump(), &previous_ty).unwrap_or(ty);
+            let linkage = linkage
+                .or(matches!(composite_ty.ty, Type::Function(_)).then_some(Linkage::External));
+            let linkage = match (linkage, previous_linkage) {
+                (Some(Linkage::None), Linkage::None) => Some(Linkage::None),
+                (Some(Linkage::External), Linkage::External) => Some(Linkage::External),
+                (Some(Linkage::External), Linkage::Internal) => Some(Linkage::Internal),
+                (Some(Linkage::Internal), Linkage::Internal) => Some(Linkage::Internal),
+                (None, _) => None,
+                (Some(Linkage::External | Linkage::Internal), Linkage::None) =>
+                    error_todo!(reference),
+                (Some(Linkage::Internal | Linkage::None), Linkage::External) =>
+                    error_todo!(reference),
+                (Some(Linkage::None), Linkage::Internal) =>
+                    unreachable!("todo: really unreachable?"),
+            };
+            (composite_ty, linkage)
         }
-        None => ty,
+        None => (ty, linkage),
     };
 
     let kind = if initialiser.is_some() {
@@ -1197,9 +1241,11 @@ fn typeck_reference<'a>(
         match ty.ty {
             Type::Function(_) => RefKind::Declaration,
             _ => match (is_in_global_scope, linkage) {
-                (IsInGlobalScope::Yes, None) => RefKind::TentativeDefinition,
+                (IsInGlobalScope::Yes, None | Some(Linkage::Internal)) =>
+                    RefKind::TentativeDefinition,
                 (IsInGlobalScope::Yes, Some(Linkage::External)) => RefKind::Declaration,
                 (IsInGlobalScope::Yes, Some(Linkage::None)) => unreachable!(),
+                (IsInGlobalScope::No, Some(Linkage::Internal)) => todo!(),
                 (IsInGlobalScope::No, Some(Linkage::External)) => RefKind::Declaration,
                 (IsInGlobalScope::No, None | Some(Linkage::None)) => RefKind::Definition,
             },
@@ -1216,6 +1262,7 @@ fn typeck_reference<'a>(
         Type::Function(_) => StorageDuration::Static,
         _ => match linkage {
             Linkage::External => StorageDuration::Static,
+            Linkage::Internal => StorageDuration::Static,
             Linkage::None => storage_duration,
         },
     };
@@ -1316,13 +1363,14 @@ fn typeck_function_definition<'a>(
     let scope::FunctionDefinition {
         reference,
         params,
-        storage_class,
         inline,
         noreturn,
         is_varargs,
         body,
     } = *definition;
 
+    let reference = typeck_reference_declaration(sess, reference, NeedsInitialiser::No);
+    let linkage = reference.linkage;
     let params = ParamRefs(
         sess.alloc_slice_fill_iter(
             params
@@ -1333,9 +1381,9 @@ fn typeck_function_definition<'a>(
     );
 
     FunctionDefinition {
-        reference: typeck_reference_declaration(sess, reference, NeedsInitialiser::No),
+        reference,
         params,
-        storage_class,
+        linkage,
         inline,
         noreturn,
         is_varargs,
@@ -1593,6 +1641,9 @@ fn typeck_reference_declaration<'a>(
     if let Some(previous_definition) = previous_definition {
         // TODO: this is quadratic in the number of previous decls for this name
         let previous_definition = typeck_reference(sess, *previous_definition, needs_initialiser);
+        if previous_definition.linkage != reference.linkage {
+            error_todo!(reference, "redeclaration with different linkage");
+        }
         if matches!(reference.kind, RefKind::Definition)
             && matches!(previous_definition.kind, RefKind::Definition)
         {

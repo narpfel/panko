@@ -37,6 +37,7 @@ use panko_sema::layout::Subobject;
 use panko_sema::layout::SubobjectInitialiser;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::Type;
+use panko_sema::scope::Linkage;
 use panko_sema::scope::RefKind;
 use panko_sema::ty::ArrayType;
 use panko_sema::typecheck::ArrayLength;
@@ -325,11 +326,12 @@ impl<'a> Codegen<'a> {
 
     fn function_definition(&mut self, def: &'a FunctionDefinition<'a>) {
         self.block(2);
-        assert!(
-            def.storage_class.is_none(),
-            "TODO: only non-static functions are implemented",
-        );
-        self.directive("globl", &[&def.name()]);
+        let visibility = match def.linkage {
+            Linkage::External => "globl",
+            Linkage::Internal => "local",
+            Linkage::None => unreachable!("functions always have linkage"),
+        };
+        self.directive(visibility, &[&def.name()]);
         self.directive("text", &[]);
         self.directive("type", &[&def.name(), &"@function"]);
         self.label(def.name());
