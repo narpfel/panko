@@ -83,7 +83,6 @@ impl<'a> Subobject<'a> {
 pub struct FunctionDefinition<'a> {
     pub reference: Reference<'a>,
     pub params: ParamRefs<'a>,
-    pub linkage: Linkage,
     #[expect(unused)]
     inline: Option<cst::FunctionSpecifier<'a>>,
     #[expect(unused)]
@@ -304,7 +303,6 @@ fn layout_function_definition<'a>(
     let typecheck::FunctionDefinition {
         reference,
         params,
-        linkage,
         inline,
         noreturn,
         is_varargs,
@@ -321,7 +319,6 @@ fn layout_function_definition<'a>(
     FunctionDefinition {
         reference,
         params,
-        linkage,
         inline,
         noreturn,
         stack_size,

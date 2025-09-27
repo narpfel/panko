@@ -326,7 +326,7 @@ impl<'a> Codegen<'a> {
 
     fn function_definition(&mut self, def: &'a FunctionDefinition<'a>) {
         self.block(2);
-        let visibility = match def.linkage {
+        let visibility = match def.reference.linkage() {
             Linkage::External => "globl",
             Linkage::Internal => "local",
             Linkage::None => unreachable!("functions always have linkage"),

@@ -679,7 +679,6 @@ pub(crate) struct SubobjectInitialiser<'a> {
 pub(crate) struct FunctionDefinition<'a> {
     pub(crate) reference: Reference<'a>,
     pub(crate) params: ParamRefs<'a>,
-    pub(crate) linkage: Linkage,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) is_varargs: bool,
@@ -1370,7 +1369,6 @@ fn typeck_function_definition<'a>(
     } = *definition;
 
     let reference = typeck_reference_declaration(sess, reference, NeedsInitialiser::No);
-    let linkage = reference.linkage;
     let params = ParamRefs(
         sess.alloc_slice_fill_iter(
             params
@@ -1383,7 +1381,6 @@ fn typeck_function_definition<'a>(
     FunctionDefinition {
         reference,
         params,
-        linkage,
         inline,
         noreturn,
         is_varargs,
