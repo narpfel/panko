@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/test_explicit_cast.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
       f~1 `fn(fmt: ptr<char const>) -> void`
       (params
          fmt~2 `ptr<char const>`)
@@ -23,11 +23,11 @@ exit_code: 0
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
                (fmt~2 `ptr<char const>`)
                (123 `int`)))))
-   (function-definition
+   (function-definition external
       g~3 `fn() -> int`
       (compound-statement
          (return (42 `int`))))
-   (function-definition
+   (function-definition external
       main~4 `fn(argc: int, argv: ptr<ptr<char>>) -> int`
       (params
          argc~5 `int`

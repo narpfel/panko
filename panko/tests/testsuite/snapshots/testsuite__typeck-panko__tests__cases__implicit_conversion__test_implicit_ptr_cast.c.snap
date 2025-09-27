@@ -11,17 +11,17 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/implicit_conversion/test_implicit_ptr_cast.c"
-   (function-definition
+   (function-definition external
       const_can_be_added~0 `fn() -> ptr<int const>`
       (compound-statement
          (definition p~1 `ptr<int>` ∅)
          (return (noop-type-conversion `ptr<int const>` (p~1 `ptr<int>`)))))
-   (function-definition
+   (function-definition external
       const_can_be_removed~2 `fn() -> ptr<int>`
       (compound-statement
          (definition p~3 `ptr<int const>` ∅)
          (return (noop-type-conversion `ptr<int>` (p~3 `ptr<int const>`)))))
-   (function-definition
+   (function-definition external
       cast_between_completely_different_ptr_types~4 `fn() -> ptr<ptr<char>>`
       (compound-statement
          (definition p~5 `ptr<int>` ∅)

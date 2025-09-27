@@ -11,10 +11,10 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_function_param_qualifiers_are_not_part_of_the_function_type.c"
-   (declaration (f~0 `fn(∅: int) -> int` (static f)) ∅)
-   (declaration (f~0 `fn(∅: int) -> int` (static f)) ∅)
-   (declaration (f~0 `fn(∅: int) -> int` (static f)) ∅)
-   (declaration (f~0 `fn(x: int) -> int` (static f)) ∅)
-   (declaration (f~0 `fn(∅: int) -> int` (static f)) ∅))
+   (declaration external (f~0 `fn(∅: int) -> int` (static f)) ∅)
+   (declaration external (f~0 `fn(∅: int) -> int` (static f)) ∅)
+   (declaration external (f~0 `fn(∅: int) -> int` (static f)) ∅)
+   (declaration external (f~0 `fn(x: int) -> int` (static f)) ∅)
+   (declaration external (f~0 `fn(∅: int) -> int` (static f)) ∅))
 
 ----- stderr -----

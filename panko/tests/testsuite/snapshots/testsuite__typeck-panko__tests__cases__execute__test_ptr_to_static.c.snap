@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/test_ptr_to_static.c"
-   (definition x~0 `int` (42 `int`))
-   (function-definition
+   (definition external x~0 `int` (42 `int`))
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (definition p~2 `ptr<int>`

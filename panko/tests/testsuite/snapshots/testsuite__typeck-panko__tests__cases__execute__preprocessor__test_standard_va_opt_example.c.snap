@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/preprocessor/test_standard_va_opt_example.c"
-   (definition x~0 `int` (42 `int`))
-   (function-definition
+   (definition external x~0 `int` (42 `int`))
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (return (x~0 `int`)))))

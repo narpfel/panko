@@ -11,11 +11,11 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/preprocessor/test_empty_object_like_macro.c"
-   (function-definition
+   (function-definition external
       f~0 `fn() -> void`
       (compound-statement
          (return ∅)))
-   (function-definition
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (expression

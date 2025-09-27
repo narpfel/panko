@@ -11,54 +11,54 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_function_definition.c"
-   (function-definition
+   (function-definition external
       a~0 `fn() -> int`
       (compound-statement
          (return (42 `int`))))
-   (function-definition
+   (function-definition external
       b~1 `fn(∅: int) -> int`
       (params
          b.unnamed_parameter.0~2 `int`)
       (compound-statement
          (return (42 `int`))))
-   (function-definition
+   (function-definition external
       c~3 `fn(a: int) -> int`
       (params
          a~4 `int`)
       (compound-statement
          (return (a~4 `int`))))
-   (function-definition
+   (function-definition external
       d~5 `fn(a: int) -> int`
       (params
          a~6 `int`)
       (compound-statement
          (compound-statement
             (return (a~6 `int`)))))
-   (function-definition
+   (function-definition external
       e~7 `fn() -> int`
       (compound-statement
          (compound-statement)
          (expression ∅)
          (return (42 `int`))))
-   (function-definition
+   (function-definition external
       f~8 `fn() -> int`
       (compound-statement
          (definition a~9 `int` (42 `int`))
          (expression (a~9 `int`))
          (return (a~9 `int`))))
-   (function-definition
+   (function-definition external
       g~10 `fn() -> char`
       (compound-statement
          (definition c~11 `char` (truncate `char` (0 `int`)))
          (return (c~11 `char`))))
-   (function-definition
+   (function-definition external
       h~12 `fn() -> int`
       (compound-statement
          (definition a~13 `int` (42 `int`))
          (compound-statement
             (definition a~14 `int` (27 `int`))
             (return (a~14 `int`)))))
-   (function-definition
+   (function-definition external
       i~15 `fn(a: int) -> int`
       (params
          a~16 `int`)
@@ -66,7 +66,7 @@ exit_code: 0
          (compound-statement
             (definition a~17 `int` (42 `int`)))
          (return (a~16 `int`))))
-   (function-definition
+   (function-definition external
       j~18 `fn() -> int`
       (compound-statement
          (definition a~19 `int` (42 `int`))

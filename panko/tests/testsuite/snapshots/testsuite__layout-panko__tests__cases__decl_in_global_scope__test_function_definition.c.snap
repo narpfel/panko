@@ -11,54 +11,54 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_function_definition.c"
-   (function-definition
+   (function-definition external
       (a~0 `fn() -> int` (static a))
       (compound-statement
          (return (42 `int` @0))))
-   (function-definition
+   (function-definition external
       (b~1 `fn(∅: int) -> int` (static b))
       (params
          (b.unnamed_parameter.0~2 `int` @0))
       (compound-statement
          (return (42 `int` @4))))
-   (function-definition
+   (function-definition external
       (c~3 `fn(a: int) -> int` (static c))
       (params
          (a~4 `int` @0))
       (compound-statement
          (return (a~4 `int` @0))))
-   (function-definition
+   (function-definition external
       (d~5 `fn(a: int) -> int` (static d))
       (params
          (a~6 `int` @0))
       (compound-statement
          (compound-statement
             (return (a~6 `int` @0)))))
-   (function-definition
+   (function-definition external
       (e~7 `fn() -> int` (static e))
       (compound-statement
          (compound-statement)
          (expression ∅)
          (return (42 `int` @0))))
-   (function-definition
+   (function-definition external
       (f~8 `fn() -> int` (static f))
       (compound-statement
          (definition (a~9 `int` @0) (42 `int` @0))
          (expression (a~9 `int` @0))
          (return (a~9 `int` @0))))
-   (function-definition
+   (function-definition external
       (g~10 `fn() -> char` (static g))
       (compound-statement
          (definition (c~11 `char` @0) (truncate `char` @0 (0 `int` @4)))
          (return (c~11 `char` @0))))
-   (function-definition
+   (function-definition external
       (h~12 `fn() -> int` (static h))
       (compound-statement
          (definition (a~13 `int` @0) (42 `int` @0))
          (compound-statement
             (definition (a~14 `int` @4) (27 `int` @4))
             (return (a~14 `int` @4)))))
-   (function-definition
+   (function-definition external
       (i~15 `fn(a: int) -> int` (static i))
       (params
          (a~16 `int` @0))
@@ -66,7 +66,7 @@ exit_code: 0
          (compound-statement
             (definition (a~17 `int` @4) (42 `int` @4)))
          (return (a~16 `int` @0))))
-   (function-definition
+   (function-definition external
       (j~18 `fn() -> int` (static j))
       (compound-statement
          (definition (a~19 `int` @0) (42 `int` @0))

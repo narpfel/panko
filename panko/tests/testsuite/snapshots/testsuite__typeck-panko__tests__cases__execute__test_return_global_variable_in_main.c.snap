@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/test_return_global_variable_in_main.c"
-   (definition return_value~0 `int` (5 `int`))
-   (function-definition
+   (definition external return_value~0 `int` (5 `int`))
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (return (return_value~0 `int`)))))

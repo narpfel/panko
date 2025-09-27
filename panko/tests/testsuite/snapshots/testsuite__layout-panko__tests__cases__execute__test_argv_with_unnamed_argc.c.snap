@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/test_argv_with_unnamed_argc.c"
-   (declaration (strlen~0 `fn(∅: ptr<char const>) -> unsigned long` (static strlen)) ∅)
-   (function-definition
+   (declaration external (strlen~0 `fn(∅: ptr<char const>) -> unsigned long` (static strlen)) ∅)
+   (function-definition external
       (main~1 `fn(∅: int, argv: ptr<ptr<char>>) -> int` (static main))
       (params
          (main.unnamed_parameter.0~2 `int` @0)

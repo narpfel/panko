@@ -1,0 +1,95 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/linkage/test_internal_linkage_for_function_declarations.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_for_function_declarations.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration external (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition internal
+      (f~2 `fn() -> void` (static f))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "in f\0"))))))))
+   (declaration external (g~3 `fn(∅: int) -> void` (static g)) ∅)
+   (declaration internal (h~4 `fn(x: int) -> void` (static h)) ∅)
+   (declaration internal (i~5 `fn() -> void` (static i)) ∅)
+   (function-definition external
+      (main~6 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (f~2 `fn() -> void` (static f)))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn(∅: int) -> void>` @0
+                  (g~3 `fn(∅: int) -> void` (static g)))
+               (4 `int` @8)))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn(x: int) -> void>` @0
+                  (h~4 `fn(x: int) -> void` (static h)))
+               (9 `int` @8)))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (i~5 `fn() -> void` (static i)))))))
+   (function-definition external
+      (g~3 `fn(x: int) -> void` (static g))
+      (params
+         (x~8 `int` @0))
+      (compound-statement
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 10>>` @16
+                        (string `array<char; 10>` @void "in g: %d\n\0"))))
+               (add `int` @24
+                  (x~8 `int` @0)
+                  (1 `int` @28))))))
+   (function-definition internal
+      (h~4 `fn(x: int) -> void` (static h))
+      (params
+         (x~10 `int` @0))
+      (compound-statement
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 10>>` @16
+                        (string `array<char; 10>` @void "in h: %d\n\0"))))
+               (add `int` @24
+                  (x~10 `int` @0)
+                  (1 `int` @28))))))
+   (function-definition internal
+      (i~5 `fn() -> void` (static i))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "in i\0")))))))))
+
+----- stderr -----

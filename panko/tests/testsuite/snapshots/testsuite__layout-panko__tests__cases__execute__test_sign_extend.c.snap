@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/test_sign_extend.c"
-   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (function-definition
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external
       (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void` (static print))
       (params
          (argv~2 `ptr<ptr<char>>` @0)
@@ -28,7 +28,7 @@ exit_code: 0
                         (argv~2 `ptr<ptr<char>>` @0)
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (l~3 `long` @8)))))
-   (function-definition
+   (function-definition external
       (main~4 `fn(∅: int, argv: ptr<ptr<char>>) -> int` (static main))
       (params
          (main.unnamed_parameter.0~5 `int` @0)

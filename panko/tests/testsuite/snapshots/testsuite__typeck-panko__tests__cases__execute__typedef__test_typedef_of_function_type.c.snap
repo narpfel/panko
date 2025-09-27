@@ -11,9 +11,9 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/typedef/test_typedef_of_function_type.c"
-   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (declaration external puts~0 `fn(∅: ptr<char const>) -> int` ∅)
    (typedef FunctionPtr `fn(∅: ptr<char const>) -> int`)
-   (function-definition
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (definition ptr~2 `ptr<fn(∅: ptr<char const>) -> int>`

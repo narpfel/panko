@@ -1,4 +1,3 @@
-use std::assert_matches::assert_matches;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::fmt;
@@ -325,19 +324,18 @@ impl<'a> FunctionDefinition<'a> {
         let cst::FunctionDefinition { declaration_specifiers, declarator, body } = *def;
         let DeclarationSpecifiers { storage_class, ty } =
             parse_declaration_specifiers(sess, declaration_specifiers);
-        // TODO: `extern` is the default, so we can ignore it for now (until implementing
-        // `static`).
-        assert_matches!(
-            try { storage_class?.kind },
-            Some(StorageClassSpecifierKind::Extern) | None,
-            "TODO: handle `storage_class` {storage_class:?}",
-        );
+        let storage_class = match try { storage_class?.kind } {
+            Some(StorageClassSpecifierKind::Extern) => storage_class,
+            Some(StorageClassSpecifierKind::Static) => storage_class,
+            Some(storage_class) => todo!("handle storage_class {storage_class:?}"),
+            None => None,
+        };
         let (ty, name) = parse_declarator(sess, ty, declarator);
         let name =
             name.unwrap_or_else(|| unreachable!("[parser] syntax error: declaration without name"));
         Self {
             name,
-            storage_class: None,
+            storage_class,
             inline: None,
             noreturn: None,
             ty,
@@ -679,8 +677,9 @@ pub(crate) fn parse_declaration_specifiers<'a>(
     for (i, specifier) in specifiers.0.iter().enumerate() {
         match specifier {
             cst::DeclarationSpecifier::StorageClass(class)
-                if let StorageClassSpecifierKind::Extern | StorageClassSpecifierKind::Typedef =
-                    class.kind =>
+                if let StorageClassSpecifierKind::Extern
+                | StorageClassSpecifierKind::Static
+                | StorageClassSpecifierKind::Typedef = class.kind =>
                 match &mut storage_class {
                     storage_class @ None => *storage_class = Some(*class),
                     Some(storage_class) => sess.emit(Diagnostic::DuplicateStorageClassSpecifier {

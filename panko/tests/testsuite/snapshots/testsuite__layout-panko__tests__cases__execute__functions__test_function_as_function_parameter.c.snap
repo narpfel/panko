@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/functions/test_function_as_function_parameter.c"
-   (function-definition
+   (function-definition external
       (plus_1~0 `fn(x: int) -> int` (static plus_1))
       (params
          (x~1 `int` @0))
@@ -20,8 +20,8 @@ exit_code: 0
             (add `int` @4
                (x~1 `int` @0)
                (1 `int` @8)))))
-   (declaration (f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int` (static f)) ∅)
-   (function-definition
+   (declaration external (f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int` (static f)) ∅)
+   (function-definition external
       (main~3 `fn() -> int` (static main))
       (compound-statement
          (return
@@ -30,7 +30,7 @@ exit_code: 0
                   (f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int` (static f)))
                (addressof `ptr<fn(x: int) -> int>` @16
                   (plus_1~0 `fn(x: int) -> int` (static plus_1)))))))
-   (function-definition
+   (function-definition external
       (f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int` (static f))
       (params
          (callback~5 `ptr<fn(∅: int) -> int>` @0))

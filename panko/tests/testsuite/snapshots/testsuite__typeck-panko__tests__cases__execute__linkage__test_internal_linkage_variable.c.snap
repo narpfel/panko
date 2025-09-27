@@ -1,0 +1,43 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/linkage/test_internal_linkage_variable.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variable.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (tentative-definition internal x~1 `int` ∅)
+   (definition internal y~2 `int` (32 `int`))
+   (function-definition external
+      main~3 `fn() -> int`
+      (compound-statement
+         (expression
+            (combine `int`
+               (assign `ptr<int>` (unnamed-temporary~4 `ptr<int>`)
+                  (addressof `ptr<int>`
+                     (y~2 `int`)))
+               (assign `int` (deref `int` (unnamed-temporary~4 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~4 `ptr<int>`)) (10 `int`)))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (y~2 `int`)))
+         (expression
+            (combine `int`
+               (assign `ptr<int>` (unnamed-temporary~5 `ptr<int>`)
+                  (addressof `ptr<int>`
+                     (x~1 `int`)))
+               (assign `int` (deref `int` (unnamed-temporary~5 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~5 `ptr<int>`)) (++ `int`)))))
+         (return (x~1 `int`)))))
+
+----- stderr -----

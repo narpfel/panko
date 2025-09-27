@@ -11,10 +11,10 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/string/test_string_literal_with_non_ascii_escape_sequences.c"
-   (declaration (strcmp~0 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int` (static strcmp)) ∅)
-   (declaration (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (declaration (puts~2 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition
+   (declaration external (strcmp~0 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int` (static strcmp)) ∅)
+   (declaration external (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration external (puts~2 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition external
       (main~3 `fn() -> int` (static main))
       (compound-statement
          (expression

@@ -13,14 +13,14 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_global_variable/first_definition.c"
-   (definition (x~0 `int` (static x)) (42 `int` (static x))))
+   (definition external (x~0 `int` (static x)) (42 `int` (static x))))
 (translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_global_variable/main.c"
-   (declaration (x~0 `int` (static x)) ∅)
-   (function-definition
+   (declaration external (x~0 `int` (static x)) ∅)
+   (function-definition external
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (return (x~0 `int` (static x))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_global_variable/second_definition.c"
-   (definition (x~0 `int` (static x)) (27 `int` (static x))))
+   (definition external (x~0 `int` (static x)) (27 `int` (static x))))
 
 ----- stderr -----

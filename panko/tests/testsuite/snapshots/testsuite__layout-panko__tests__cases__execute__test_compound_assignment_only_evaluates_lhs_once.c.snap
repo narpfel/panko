@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/test_compound_assignment_only_evaluates_lhs_once.c"
-   (declaration (putchar~0 `fn(∅: int) -> int` (static putchar)) ∅)
-   (function-definition
+   (declaration external (putchar~0 `fn(∅: int) -> int` (static putchar)) ∅)
+   (function-definition external
       (f~1 `fn(p: ptr<int>) -> ptr<int>` (static f))
       (params
          (p~2 `ptr<int>` @0))
@@ -28,7 +28,7 @@ exit_code: 0
                   (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (10 `int` @24)))
          (return (p~2 `ptr<int>` @0))))
-   (function-definition
+   (function-definition external
       (main~3 `fn() -> int` (static main))
       (compound-statement
          (definition (x~4 `int` @0) (42 `int` @0))

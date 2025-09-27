@@ -12,9 +12,9 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/main.c"
-   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (declaration (x~1 `int` (static x)) ∅)
-   (function-definition
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration external (x~1 `int` (static x)) ∅)
+   (function-definition external
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (expression
@@ -27,6 +27,6 @@ exit_code: 0
                         (string `array<char; 4>` @void "%d\n\0"))))
                (x~1 `int` (static x)))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/x.c"
-   (definition (x~0 `int` (static x)) (42 `int` (static x))))
+   (definition external (x~0 `int` (static x)) (42 `int` (static x))))
 
 ----- stderr -----

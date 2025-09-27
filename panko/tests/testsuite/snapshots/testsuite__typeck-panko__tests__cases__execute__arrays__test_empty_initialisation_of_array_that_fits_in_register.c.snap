@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/arrays/test_empty_initialisation_of_array_that_fits_in_register.c"
-   (function-definition
+   (function-definition external
       main~0 `fn() -> int`
       (compound-statement
          (definition a1~1 `array<char; 1>` (braced ∅))

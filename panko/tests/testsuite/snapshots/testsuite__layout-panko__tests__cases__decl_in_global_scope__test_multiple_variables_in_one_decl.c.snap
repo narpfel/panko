@@ -11,15 +11,15 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_multiple_variables_in_one_decl.c"
-   (tentative-definition (a~0 `int` (static a)) ∅)
-   (tentative-definition (b~1 `int` (static b)) ∅)
-   (tentative-definition (c~2 `int` (static c)) ∅)
-   (tentative-definition (d~3 `ptr<int>` (static d)) ∅)
-   (tentative-definition (e~4 `ptr<int>` (static e)) ∅)
-   (tentative-definition (f~5 `int` (static f)) ∅)
-   (tentative-definition (g~6 `int` (static g)) ∅)
-   (declaration (h~7 `fn() -> int` (static h)) ∅)
-   (declaration (i~8 `fn(∅: int) -> int` (static i)) ∅)
-   (tentative-definition (j~9 `int` (static j)) ∅))
+   (tentative-definition external (a~0 `int` (static a)) ∅)
+   (tentative-definition external (b~1 `int` (static b)) ∅)
+   (tentative-definition external (c~2 `int` (static c)) ∅)
+   (tentative-definition external (d~3 `ptr<int>` (static d)) ∅)
+   (tentative-definition external (e~4 `ptr<int>` (static e)) ∅)
+   (tentative-definition external (f~5 `int` (static f)) ∅)
+   (tentative-definition external (g~6 `int` (static g)) ∅)
+   (declaration external (h~7 `fn() -> int` (static h)) ∅)
+   (declaration external (i~8 `fn(∅: int) -> int` (static i)) ∅)
+   (tentative-definition external (j~9 `int` (static j)) ∅))
 
 ----- stderr -----

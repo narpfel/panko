@@ -1,0 +1,56 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/f.c
+    - panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/g.c
+    - panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/main.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/f.c"
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      function~1 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "f")))))
+   (function-definition
+      f~2 `fn() -> void`
+      (compound-statement
+         (expression (call (name function~1 `fn() -> void`))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/g.c"
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      function~1 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "g")))))
+   (function-definition
+      g~2 `fn() -> void`
+      (compound-statement
+         (expression (call (name function~1 `fn() -> void`))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/main.c"
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (declaration f~1 `fn() -> void` ∅)
+   (declaration g~2 `fn() -> void` ∅)
+   (function-definition
+      function~3 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "function")))))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (expression (call (name f~1 `fn() -> void`)))
+         (expression (call (name g~2 `fn() -> void`)))
+         (expression (call (name function~3 `fn() -> void`))))))
+
+----- stderr -----

@@ -11,17 +11,17 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_function.c"
-   (declaration a~0 `fn() -> int` ∅)
-   (declaration b~1 `fn(∅: int) -> int` ∅)
-   (declaration c~2 `fn(a: int) -> int` ∅)
-   (declaration d~3 `fn(∅: int, ∅: int) -> int` ∅)
-   (declaration e~4 `fn() -> ptr<int>` ∅)
-   (tentative-definition f~5 `ptr<fn(∅: int) -> int>` ∅)
-   (tentative-definition g~6 `ptr<fn(∅: ptr<int>) -> int>` ∅)
-   (tentative-definition h~7 `ptr<fn(∅: ptr<fn() -> int>) -> int>` ∅)
-   (declaration i~8 `fn(a: ptr<fn() -> int>) -> int` ∅)
-   (declaration j~9 `fn(a: ptr<fn(∅: int) -> int>) -> int` ∅)
-   (declaration k~10 `fn(a: ptr<fn(a: int) -> int>) -> int` ∅)
-   (declaration l~11 `fn(∅: int, ∅: ptr<fn() -> int>) -> int` ∅))
+   (declaration external a~0 `fn() -> int` ∅)
+   (declaration external b~1 `fn(∅: int) -> int` ∅)
+   (declaration external c~2 `fn(a: int) -> int` ∅)
+   (declaration external d~3 `fn(∅: int, ∅: int) -> int` ∅)
+   (declaration external e~4 `fn() -> ptr<int>` ∅)
+   (tentative-definition external f~5 `ptr<fn(∅: int) -> int>` ∅)
+   (tentative-definition external g~6 `ptr<fn(∅: ptr<int>) -> int>` ∅)
+   (tentative-definition external h~7 `ptr<fn(∅: ptr<fn() -> int>) -> int>` ∅)
+   (declaration external i~8 `fn(a: ptr<fn() -> int>) -> int` ∅)
+   (declaration external j~9 `fn(a: ptr<fn(∅: int) -> int>) -> int` ∅)
+   (declaration external k~10 `fn(a: ptr<fn(a: int) -> int>) -> int` ∅)
+   (declaration external l~11 `fn(∅: int, ∅: ptr<fn() -> int>) -> int` ∅))
 
 ----- stderr -----

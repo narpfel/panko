@@ -1,0 +1,34 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/linkage/test_internal_linkage_for_function_definitions.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_for_function_definitions.c"
+   (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition internal
+      (f~1 `fn() -> void` (static f))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "in f\0"))))))))
+   (function-definition external
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (f~1 `fn() -> void` (static f))))))))
+
+----- stderr -----

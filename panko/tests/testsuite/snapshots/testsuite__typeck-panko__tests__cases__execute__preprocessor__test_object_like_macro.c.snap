@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/preprocessor/test_object_like_macro.c"
-   (declaration putchar~0 `fn(c: int) -> int` ∅)
-   (function-definition
+   (declaration external putchar~0 `fn(c: int) -> int` ∅)
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (definition x~2 `int` (42 `int`))

@@ -13,7 +13,7 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/typedef/test_redeclaration_with_same_type.c"
    (typedef in_global_scope `long`)
    (typedef in_global_scope `long`)
-   (function-definition
+   (function-definition external
       main~0 `fn() -> int`
       (compound-statement
          (typedef in_local_scope `int`)

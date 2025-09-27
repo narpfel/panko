@@ -11,9 +11,9 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/arithmetic/test_sizeof.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (declaration calloc~1 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration external calloc~1 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>` ∅)
+   (function-definition external
       main~2 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
       (params
          main.unnamed_parameter.0~3 `int`

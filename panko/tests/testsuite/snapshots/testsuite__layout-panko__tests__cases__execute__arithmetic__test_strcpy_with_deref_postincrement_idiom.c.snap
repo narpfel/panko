@@ -11,9 +11,9 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/arithmetic/test_strcpy_with_deref_postincrement_idiom.c"
-   (declaration (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (declaration (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration external (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition external
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (definition (str~3 `array<char; 6>` @0) (string `array<char; 6>` @void "hello\0"))

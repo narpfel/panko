@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/arrays/test_single_dimensional_array_size.c"
-   (function-definition
+   (function-definition external
       main~0 `fn() -> int`
       (compound-statement
          (definition xs~1 `array<int; 5>` ∅)

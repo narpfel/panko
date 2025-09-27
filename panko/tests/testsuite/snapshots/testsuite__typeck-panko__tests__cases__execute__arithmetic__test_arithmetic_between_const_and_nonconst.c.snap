@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/arithmetic/test_arithmetic_between_const_and_nonconst.c"
-   (function-definition
+   (function-definition external
       main~0 `fn() -> int`
       (compound-statement
          (definition x~1 `int const` (42 `int`))

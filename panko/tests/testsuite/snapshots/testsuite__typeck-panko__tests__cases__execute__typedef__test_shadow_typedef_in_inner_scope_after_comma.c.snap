@@ -11,12 +11,12 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/typedef/test_shadow_typedef_in_inner_scope_after_comma.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (typedef name `int`)
    (typedef ptr `int`)
    (typedef fptr `int`)
    (typedef xs `int`)
-   (function-definition
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (typedef function `int`)
@@ -28,7 +28,7 @@ exit_code: 0
                (addressof `ptr<int>`
                   (name~3 `int`)))
             (definition c~6 `int` ∅)
-            (declaration function~7 `fn(∅: int) -> int` ∅)
+            (declaration external function~7 `fn(∅: int) -> int` ∅)
             (definition d~8 `int` ∅)
             (definition fptr~9 `ptr<fn(∅: int) -> int>`
                (addressof `ptr<fn(∅: int) -> int>`
@@ -97,7 +97,7 @@ exit_code: 0
                            (addressof `ptr<array<int; 5>>`
                               (xs~11 `array<int; 5>`)))
                         (sign-extend `unsigned long` (0 `int`)))))))))
-   (function-definition
+   (function-definition external
       function~13 `fn(value: int) -> int`
       (params
          value~14 `int`)

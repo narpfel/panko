@@ -13,18 +13,18 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/f.c"
-   (declaration x~0 `int` ∅)
-   (function-definition
+   (declaration external x~0 `int` ∅)
+   (function-definition external
       f~1 `fn(y: int) -> int`
       (params
          y~2 `int`)
       (compound-statement
          (return (add `int` (x~0 `int`) (y~2 `int`))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/main.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (declaration f~1 `fn(∅: int) -> int` ∅)
-   (declaration x~2 `int` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration external f~1 `fn(∅: int) -> int` ∅)
+   (declaration external x~2 `int` ∅)
+   (function-definition external
       main~3 `fn() -> int`
       (compound-statement
          (expression
@@ -53,6 +53,6 @@ exit_code: 0
                      (f~1 `fn(∅: int) -> int`))
                   (123 `int`)))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/x.c"
-   (definition x~0 `int` (5 `int`)))
+   (definition external x~0 `int` (5 `int`)))
 
 ----- stderr -----

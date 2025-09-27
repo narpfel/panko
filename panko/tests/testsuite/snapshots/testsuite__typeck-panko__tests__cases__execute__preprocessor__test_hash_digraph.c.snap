@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/preprocessor/test_hash_digraph.c"
-   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
-   (function-definition
+   (declaration external puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (expression

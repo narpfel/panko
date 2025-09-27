@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/call/test_params_on_stack_with_addressof_operator.c"
-   (function-definition
+   (function-definition external
       (seven_params~0 `fn(x1: int, x2: int, x3: int, x4: int, x5: int, x6: int, x7: int) -> void` (static seven_params))
       (params
          (x1~1 `int` @0)
@@ -22,7 +22,7 @@ exit_code: 0
          (x6~6 `int` @20)
          (x7~7 `int` @24))
       (compound-statement))
-   (function-definition
+   (function-definition external
       (main~8 `fn(argc: int, ∅: ptr<ptr<char>>) -> int` (static main))
       (params
          (argc~9 `int` @0)

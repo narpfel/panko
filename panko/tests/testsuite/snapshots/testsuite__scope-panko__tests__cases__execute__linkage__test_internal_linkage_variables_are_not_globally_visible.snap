@@ -1,0 +1,76 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/f.c
+    - panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/g.c
+    - panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/main.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/f.c"
+   (declaration x~0 `int` 27)
+   (function-definition
+      f~1 `fn() -> int`
+      (compound-statement
+         (return (name x~0 `int`))))
+   (function-definition
+      add_f~2 `fn(y: int) -> void`
+      (params
+         y~3 `int`)
+      (compound-statement
+         (expression (add-assign (name x~0 `int`) (name y~3 `int`))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/g.c"
+   (declaration x~0 `int` 10)
+   (function-definition
+      g~1 `fn() -> int`
+      (compound-statement
+         (return (name x~0 `int`))))
+   (function-definition
+      add_g~2 `fn(y: int) -> void`
+      (params
+         y~3 `int`)
+      (compound-statement
+         (expression (add-assign (name x~0 `int`) (name y~3 `int`))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/main.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration f~1 `fn() -> int` ∅)
+   (declaration add_f~2 `fn(∅: int) -> void` ∅)
+   (declaration g~3 `fn() -> int` ∅)
+   (declaration add_g~4 `fn(∅: int) -> void` ∅)
+   (declaration x~5 `int` 42)
+   (function-definition
+      print_variables~6 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name x~5 `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (call (name f~1 `fn() -> int`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (call (name g~3 `fn() -> int`))))))
+   (function-definition
+      main~7 `fn() -> int`
+      (compound-statement
+         (expression (call (name print_variables~6 `fn() -> void`)))
+         (expression (assign (name x~5 `int`) 123))
+         (expression (call (name print_variables~6 `fn() -> void`)))
+         (expression
+            (call (name add_f~2 `fn(∅: int) -> void`)
+               10))
+         (expression (call (name print_variables~6 `fn() -> void`)))
+         (expression
+            (call (name add_g~4 `fn(∅: int) -> void`)
+               5))
+         (expression (call (name print_variables~6 `fn() -> void`))))))
+
+----- stderr -----

@@ -105,10 +105,14 @@ impl<'a> Stack<'a> {
                         maybe_slot.unwrap_or_else(|| self.slots.add_slot(ty.ty))
                     }
                 };
-                *self
-                    .ids
-                    .entry(reference.id)
-                    .or_insert(Reference { name, ty, id, kind, slot })
+                *self.ids.entry(reference.id).or_insert(Reference {
+                    name,
+                    ty,
+                    id,
+                    kind,
+                    slot,
+                    linkage,
+                })
             }
         }
     }

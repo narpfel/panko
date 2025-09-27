@@ -18,6 +18,7 @@ use panko_parser::ast;
 use panko_parser::ast::FromError;
 use panko_parser::ast::Session;
 use panko_parser::nonempty;
+use panko_parser::sexpr_builder::SExpr;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
@@ -202,7 +203,6 @@ pub(crate) enum Designator<'a> {
 pub(crate) struct FunctionDefinition<'a> {
     pub(crate) reference: Reference<'a>,
     pub(crate) params: ParamRefs<'a>,
-    pub(crate) storage_class: Option<cst::StorageClassSpecifier<'a>>,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) is_varargs: bool,
@@ -369,11 +369,21 @@ pub enum StorageDuration {
     // TODO: thread local
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Linkage {
     External,
-    // TODO: Internal,
+    Internal,
     None,
+}
+
+impl Linkage {
+    pub(crate) fn in_sexpr(self, sexpr: SExpr) -> SExpr {
+        match self {
+            Self::External => sexpr.inline_string("external".to_string()),
+            Self::Internal => sexpr.inline_string("internal".to_string()),
+            Self::None => sexpr,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -892,11 +902,16 @@ fn resolve_function_definition<'a>(
         body,
     } = def;
     let ty = resolve_ty(scopes, ty);
+    let linkage = match try { storage_class.as_ref()?.kind } {
+        Some(StorageClassSpecifierKind::Extern) | None => Some(Linkage::External),
+        Some(StorageClassSpecifierKind::Static) => Some(Linkage::Internal),
+        kind => unreachable!("invalid or unimplemented StorageClassSpecifierKind {kind:?}"),
+    };
     let maybe_reference = scopes.add(
         name.slice(),
         name.loc(),
         ty,
-        None::<Linkage>,
+        linkage,
         StorageDuration::Static,
         IsParameter::No,
         IsInGlobalScope::Yes,
@@ -974,7 +989,6 @@ fn resolve_function_definition<'a>(
     ExternalDeclaration::FunctionDefinition(FunctionDefinition {
         reference,
         params: ParamRefs(params),
-        storage_class: *storage_class,
         inline: *inline,
         noreturn: *noreturn,
         is_varargs,
@@ -1073,6 +1087,7 @@ fn resolve_declaration<'a>(
             }
         }
         Some(StorageClassSpecifierKind::Extern) => Some(Linkage::External),
+        Some(StorageClassSpecifierKind::Static) => Some(Linkage::Internal),
         Some(storage_class) => todo!("not implemented: storage class {:?}", storage_class),
         None => None,
     };

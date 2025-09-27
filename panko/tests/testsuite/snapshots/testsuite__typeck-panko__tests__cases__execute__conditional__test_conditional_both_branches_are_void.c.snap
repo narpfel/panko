@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/conditional/test_conditional_both_branches_are_void.c"
-   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
-   (function-definition
+   (declaration external puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition external
       f~1 `fn() -> void`
       (compound-statement
          (expression
@@ -23,7 +23,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 2>>`
                         (string `array<char; 2>` "f\0"))))))))
-   (function-definition
+   (function-definition external
       g~2 `fn() -> void`
       (compound-statement
          (expression
@@ -34,7 +34,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 2>>`
                         (string `array<char; 2>` "g\0"))))))))
-   (function-definition
+   (function-definition external
       main~3 `fn() -> int`
       (compound-statement
          (expression

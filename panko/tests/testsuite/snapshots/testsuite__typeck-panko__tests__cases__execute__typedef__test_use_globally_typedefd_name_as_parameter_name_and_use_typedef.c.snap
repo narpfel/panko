@@ -12,14 +12,14 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/typedef/test_use_globally_typedefd_name_as_parameter_name_and_use_typedef.c"
    (typedef a `int`)
-   (function-definition
+   (function-definition external
       f~0 `fn(a: int) -> int`
       (params
          a~1 `int`)
       (compound-statement
          (return (a~1 `int`))))
-   (definition global_value~2 `int` (42 `int`))
-   (function-definition
+   (definition external global_value~2 `int` (42 `int`))
+   (function-definition external
       main~3 `fn() -> int`
       (compound-statement
          (return

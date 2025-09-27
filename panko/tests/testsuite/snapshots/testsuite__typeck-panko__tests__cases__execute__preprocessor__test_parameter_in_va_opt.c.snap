@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/preprocessor/test_parameter_in_va_opt.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (expression

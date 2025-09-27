@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/char/test_signed_unsigned_char.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (definition a~2 `char` (truncate `char` ('a' `int`)))

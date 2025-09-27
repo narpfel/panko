@@ -1,0 +1,86 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/f.c
+    - panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/g.c
+    - panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/main.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/f.c"
+   (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition internal
+      (function~1 `fn() -> void` (static function))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 2>>` @16
+                        (string `array<char; 2>` @void "f\0"))))))))
+   (function-definition external
+      (f~2 `fn() -> void` (static f))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (function~1 `fn() -> void` (static function))))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/g.c"
+   (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition internal
+      (function~1 `fn() -> void` (static function))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 2>>` @16
+                        (string `array<char; 2>` @void "g\0"))))))))
+   (function-definition external
+      (g~2 `fn() -> void` (static g))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (function~1 `fn() -> void` (static function))))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/main.c"
+   (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (declaration external (f~1 `fn() -> void` (static f)) ∅)
+   (declaration external (g~2 `fn() -> void` (static g)) ∅)
+   (function-definition external
+      (function~3 `fn() -> void` (static function))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 9>>` @16
+                        (string `array<char; 9>` @void "function\0"))))))))
+   (function-definition external
+      (main~4 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (f~1 `fn() -> void` (static f)))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (g~2 `fn() -> void` (static g)))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (function~3 `fn() -> void` (static function))))))))
+
+----- stderr -----

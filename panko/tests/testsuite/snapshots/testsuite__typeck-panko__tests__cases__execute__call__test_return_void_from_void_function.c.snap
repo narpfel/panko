@@ -11,17 +11,17 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/call/test_return_void_from_void_function.c"
-   (function-definition
+   (function-definition external
       f~0 `fn() -> void`
       (compound-statement))
-   (function-definition
+   (function-definition external
       g~1 `fn() -> void`
       (compound-statement
          (return
             (call `void`
                (addressof `ptr<fn() -> void>`
                   (f~0 `fn() -> void`))))))
-   (function-definition
+   (function-definition external
       main~2 `fn() -> int`
       (compound-statement
          (expression

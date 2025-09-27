@@ -11,9 +11,9 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/string/test_string_literal_octal_escape_sequences.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (declaration strcmp~1 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration external strcmp~1 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int` ∅)
+   (function-definition external
       main~2 `fn() -> int`
       (compound-statement
          (expression

@@ -11,9 +11,9 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/nullptr/test_nullptr_to_ptr_conversion.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (declaration puts~1 `fn(∅: ptr<char const>) -> int` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration external puts~1 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition external
       main~2 `fn() -> int`
       (compound-statement
          (definition p~3 `ptr<int>` (noop-type-conversion `ptr<int>` (nullptr `nullptr_t`)))

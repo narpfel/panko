@@ -13,18 +13,18 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/f1.c"
-   (function-definition
+   (function-definition external
       f~0 `fn() -> int`
       (compound-statement
          (return (10 `int`)))))
 (translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/f2.c"
-   (function-definition
+   (function-definition external
       f~0 `fn() -> int`
       (compound-statement
          (return (20 `int`)))))
 (translation-unit "panko/tests/cases/execute/linkage/test_error_multiple_definitions_of_external_function/main.c"
-   (declaration f~0 `fn() -> int` ∅)
-   (function-definition
+   (declaration external f~0 `fn() -> int` ∅)
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (return
