@@ -245,6 +245,10 @@ impl<'a> Reference<'a> {
     pub fn slot(&self) -> Slot<'a> {
         self.slot
     }
+
+    pub fn linkage(&self) -> Linkage {
+        self.linkage
+    }
 }
 
 fn layout_array_length<'a>(

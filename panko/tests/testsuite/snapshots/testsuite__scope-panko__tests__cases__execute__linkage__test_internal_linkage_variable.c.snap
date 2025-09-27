@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/linkage/test_internal_linkage_variable.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variable.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration x~1 `int` ∅)
+   (declaration y~2 `int` 32)
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (expression (add-assign (name y~2 `int`) 10))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name y~2 `int`)))
+         (expression (pre-increment (name x~1 `int`)))
+         (return (name x~1 `int`)))))
+
+----- stderr -----

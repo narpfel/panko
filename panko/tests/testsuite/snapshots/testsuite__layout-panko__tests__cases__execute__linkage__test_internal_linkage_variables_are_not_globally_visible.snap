@@ -1,0 +1,134 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/f.c
+    - panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/g.c
+    - panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/main.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/f.c"
+   (definition internal (x~0 `int` (static x)) (27 `int` (static x)))
+   (function-definition external
+      (f~1 `fn() -> int` (static f))
+      (compound-statement
+         (return (x~0 `int` (static x)))))
+   (function-definition external
+      (add_f~2 `fn(y: int) -> void` (static add_f))
+      (params
+         (y~3 `int` @0))
+      (compound-statement
+         (expression
+            (combine `int` @4
+               (assign `ptr<int>` @8
+                  (unnamed-temporary~4 `ptr<int>` @8)
+                  (addressof `ptr<int>` @8
+                     (x~0 `int` (static x))))
+               (assign `int` @4
+                  (deref `int` @4 (unnamed-temporary~4 `ptr<int>` @8))
+                  (add `int` @16
+                     (deref `int` @16 (unnamed-temporary~4 `ptr<int>` @8))
+                     (y~3 `int` @0))))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/g.c"
+   (definition internal (x~0 `int` (static x)) (10 `int` (static x)))
+   (function-definition external
+      (g~1 `fn() -> int` (static g))
+      (compound-statement
+         (return (x~0 `int` (static x)))))
+   (function-definition external
+      (add_g~2 `fn(y: int) -> void` (static add_g))
+      (params
+         (y~3 `int` @0))
+      (compound-statement
+         (expression
+            (combine `int` @4
+               (assign `ptr<int>` @8
+                  (unnamed-temporary~4 `ptr<int>` @8)
+                  (addressof `ptr<int>` @8
+                     (x~0 `int` (static x))))
+               (assign `int` @4
+                  (deref `int` @4 (unnamed-temporary~4 `ptr<int>` @8))
+                  (add `int` @16
+                     (deref `int` @16 (unnamed-temporary~4 `ptr<int>` @8))
+                     (y~3 `int` @0))))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/main.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration external (f~1 `fn() -> int` (static f)) ∅)
+   (declaration external (add_f~2 `fn(∅: int) -> void` (static add_f)) ∅)
+   (declaration external (g~3 `fn() -> int` (static g)) ∅)
+   (declaration external (add_g~4 `fn(∅: int) -> void` (static add_g)) ∅)
+   (definition external (x~5 `int` (static x)) (42 `int` (static x)))
+   (function-definition external
+      (print_variables~6 `fn() -> void` (static print_variables))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (x~5 `int` (static x))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (call `int` @24
+                  (addressof `ptr<fn() -> int>` @32
+                     (f~1 `fn() -> int` (static f))))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (call `int` @24
+                  (addressof `ptr<fn() -> int>` @32
+                     (g~3 `fn() -> int` (static g))))))))
+   (function-definition external
+      (main~7 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (print_variables~6 `fn() -> void` (static print_variables)))))
+         (expression
+            (assign `int` (static x)
+               (x~5 `int` (static x))
+               (123 `int` (static x))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (print_variables~6 `fn() -> void` (static print_variables)))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn(∅: int) -> void>` @0
+                  (add_f~2 `fn(∅: int) -> void` (static add_f)))
+               (10 `int` @8)))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (print_variables~6 `fn() -> void` (static print_variables)))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn(∅: int) -> void>` @0
+                  (add_g~4 `fn(∅: int) -> void` (static add_g)))
+               (5 `int` @8)))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (print_variables~6 `fn() -> void` (static print_variables))))))))
+
+----- stderr -----

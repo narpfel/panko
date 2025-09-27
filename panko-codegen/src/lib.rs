@@ -203,7 +203,7 @@ enum ShouldZero {
 
 #[derive(Debug, Default)]
 struct Codegen<'a> {
-    tentative_definitions: IndexMap<&'a str, Type<'a>>,
+    tentative_definitions: IndexMap<&'a str, (Linkage, Type<'a>)>,
     defined: IndexSet<&'a str>,
     current_function: Option<&'a FunctionDefinition<'a>>,
     code: String,
@@ -392,6 +392,7 @@ impl<'a> Codegen<'a> {
     fn object_definition(
         &mut self,
         name: &str,
+        linkage: Linkage,
         ty: Type,
         initialiser: Option<StaticInitialiser<'_>>,
     ) {
@@ -402,8 +403,13 @@ impl<'a> Codegen<'a> {
             _ => ty.size(),
         };
 
+        let visibility = match linkage {
+            Linkage::External => "globl",
+            Linkage::Internal => "local",
+            Linkage::None => "local",
+        };
         self.block(2);
-        self.directive("globl", &[&name]);
+        self.directive(visibility, &[&name]);
         self.directive("data", &[]);
         self.directive("type", &[&name, &"@object"]);
         self.directive("size", &[&name, &size]);
@@ -490,12 +496,13 @@ impl<'a> Codegen<'a> {
 
     fn external_declaration(&mut self, decl: &Declaration<'a>) {
         let name = decl.reference.name();
+        let linkage = decl.reference.linkage();
         let ty = decl.reference.ty.ty;
         match decl.reference.kind() {
             RefKind::Declaration => (),
             RefKind::TentativeDefinition =>
                 if !self.defined.contains(name) {
-                    self.tentative_definitions.insert(name, ty);
+                    self.tentative_definitions.insert(name, (linkage, ty));
                 },
             RefKind::Definition => {
                 self.tentative_definitions.shift_remove(name);
@@ -517,7 +524,7 @@ impl<'a> Codegen<'a> {
                         Initialiser::Expression(expr) => StaticInitialiser::Expression(&expr.expr),
                     }
                 };
-                self.object_definition(name, ty, initialiser)
+                self.object_definition(name, linkage, ty, initialiser)
             }
         }
     }
@@ -1001,9 +1008,9 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
         cg.directive("quad", &[&name]);
     }
 
-    for (name, ty) in mem::take(&mut cg.tentative_definitions) {
+    for (name, (linkage, ty)) in mem::take(&mut cg.tentative_definitions) {
         assert!(!cg.defined.contains(&name));
-        cg.object_definition(name, ty, None);
+        cg.object_definition(name, linkage, ty, None);
     }
 
     for (id, value) in mem::take(&mut cg.strings) {
