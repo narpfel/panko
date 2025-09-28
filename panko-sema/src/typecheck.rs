@@ -1368,7 +1368,6 @@ fn typeck_function_definition<'a>(
         body,
     } = *definition;
 
-    let reference = typeck_reference_declaration(sess, reference, NeedsInitialiser::No);
     let params = ParamRefs(
         sess.alloc_slice_fill_iter(
             params
@@ -1379,7 +1378,7 @@ fn typeck_function_definition<'a>(
     );
 
     FunctionDefinition {
-        reference,
+        reference: typeck_reference_declaration(sess, reference, NeedsInitialiser::No),
         params,
         inline,
         noreturn,
