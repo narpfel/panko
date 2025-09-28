@@ -11,11 +11,11 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_function/test_declare_function_in_function.c"
-   (function-definition
+   (function-definition external
       (f~0 `fn() -> int` (static f))
       (compound-statement
-         (declaration (g~1 `fn() -> int` (static g)) ∅)
-         (declaration (g~1 `fn() -> int` (static g)) ∅)
+         (declaration external (g~1 `fn() -> int` (static g)) ∅)
+         (declaration external (g~1 `fn() -> int` (static g)) ∅)
          (return (42 `int` @0)))))
 
 ----- stderr -----

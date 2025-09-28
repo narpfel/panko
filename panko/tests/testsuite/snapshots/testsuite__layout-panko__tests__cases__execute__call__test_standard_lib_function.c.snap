@@ -11,10 +11,10 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/call/test_standard_lib_function.c"
-   (function-definition
+   (function-definition external
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (declaration (isalnum~1 `fn(∅: int) -> int` (static isalnum)) ∅)
+         (declaration external (isalnum~1 `fn(∅: int) -> int` (static isalnum)) ∅)
          (return
             (not-equal `int` @0
                (call `int` @0

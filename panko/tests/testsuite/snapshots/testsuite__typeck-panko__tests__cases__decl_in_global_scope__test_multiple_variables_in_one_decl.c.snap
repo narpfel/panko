@@ -11,15 +11,15 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_multiple_variables_in_one_decl.c"
-   (tentative-definition a~0 `int` ∅)
-   (tentative-definition b~1 `int` ∅)
-   (tentative-definition c~2 `int` ∅)
-   (tentative-definition d~3 `ptr<int>` ∅)
-   (tentative-definition e~4 `ptr<int>` ∅)
-   (tentative-definition f~5 `int` ∅)
-   (tentative-definition g~6 `int` ∅)
-   (declaration h~7 `fn() -> int` ∅)
-   (declaration i~8 `fn(∅: int) -> int` ∅)
-   (tentative-definition j~9 `int` ∅))
+   (tentative-definition external a~0 `int` ∅)
+   (tentative-definition external b~1 `int` ∅)
+   (tentative-definition external c~2 `int` ∅)
+   (tentative-definition external d~3 `ptr<int>` ∅)
+   (tentative-definition external e~4 `ptr<int>` ∅)
+   (tentative-definition external f~5 `int` ∅)
+   (tentative-definition external g~6 `int` ∅)
+   (declaration external h~7 `fn() -> int` ∅)
+   (declaration external i~8 `fn(∅: int) -> int` ∅)
+   (tentative-definition external j~9 `int` ∅))
 
 ----- stderr -----

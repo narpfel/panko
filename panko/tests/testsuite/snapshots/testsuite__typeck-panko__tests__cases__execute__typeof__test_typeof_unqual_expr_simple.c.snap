@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/typeof/test_typeof_unqual_expr_simple.c"
-   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
-   (function-definition
+   (declaration external puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (definition x~2 `int const` (42 `int`))

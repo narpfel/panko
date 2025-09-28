@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/arrays/test_tentative_definition_of_array_of_unknown_size.c"
-   (tentative-definition (xs~0 `array<int; ∅>` (static xs)) ∅)
-   (function-definition
+   (tentative-definition external (xs~0 `array<int; ∅>` (static xs)) ∅)
+   (function-definition external
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (expression

@@ -11,12 +11,12 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/preprocessor/test_paren_from_macro_does_not_lead_to_function_call.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
       a~1 `fn() -> int`
       (compound-statement
          (return (27 `int`))))
-   (function-definition
+   (function-definition external
       main~2 `fn() -> int`
       (compound-statement
          (definition called~3 `int` (42 `int`))

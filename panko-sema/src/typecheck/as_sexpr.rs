@@ -64,7 +64,9 @@ impl AsSExpr for Typedef<'_> {
 
 impl AsSExpr for FunctionDefinition<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::new("function-definition")
+        self.reference
+            .linkage
+            .in_sexpr(SExpr::new("function-definition"))
             .lines([&self.reference])
             .lines(if self.params.0.is_empty() {
                 Either::Left(iter::empty())
@@ -84,7 +86,9 @@ impl AsSExpr for ParamRefs<'_> {
 
 impl AsSExpr for Declaration<'_> {
     fn as_sexpr(&self) -> SExpr {
-        SExpr::new(self.reference.kind().str())
+        self.reference
+            .linkage
+            .in_sexpr(SExpr::new(self.reference.kind().str()))
             .inherit(&self.reference)
             .inherit(&self.initialiser)
     }

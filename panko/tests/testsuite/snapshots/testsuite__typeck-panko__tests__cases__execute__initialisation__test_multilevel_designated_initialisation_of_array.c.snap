@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/initialisation/test_multilevel_designated_initialisation_of_array.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
       f~1 `fn(x: int) -> int`
       (params
          x~2 `int`)
@@ -33,7 +33,7 @@ exit_code: 0
                         (s~3 `array<char; 4>`))))
                (x~2 `int`)))
          (return (x~2 `int`))))
-   (function-definition
+   (function-definition external
       main~4 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
       (params
          main.unnamed_parameter.0~5 `int`

@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/typedef/test_typedef_in_function_scope_does_not_leak.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
       f~1 `fn() -> void`
       (compound-statement
          (typedef name `char const`)
@@ -26,7 +26,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%c\n\0"))))
                (sign-extend `int` (x~2 `char const`))))))
-   (function-definition
+   (function-definition external
       main~3 `fn() -> int`
       (compound-statement
          (expression

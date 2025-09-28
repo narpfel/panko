@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/call/test_simple_declaration.c"
-   (declaration (f~0 `fn(∅: int) -> int` (static f)) ∅)
-   (function-definition
+   (declaration external (f~0 `fn(∅: int) -> int` (static f)) ∅)
+   (function-definition external
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (return
@@ -20,7 +20,7 @@ exit_code: 0
                (addressof `ptr<fn(∅: int) -> int>` @8
                   (f~0 `fn(∅: int) -> int` (static f)))
                (42 `int` @16)))))
-   (function-definition
+   (function-definition external
       (f~0 `fn(x: int) -> int` (static f))
       (params
          (x~3 `int` @0))

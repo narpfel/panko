@@ -12,8 +12,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_linkage_of_string_literals/extern_fn.c"
-   (declaration (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition
+   (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition external
       (extern_fn~1 `fn() -> void` (static extern_fn))
       (compound-statement
          (expression
@@ -25,9 +25,9 @@ exit_code: 0
                      (addressof `ptr<array<char; 6>>` @16
                         (string `array<char; 6>` @void "world\0")))))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_linkage_of_string_literals/main.c"
-   (declaration (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (declaration (extern_fn~1 `fn() -> void` (static extern_fn)) ∅)
-   (function-definition
+   (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (declaration external (extern_fn~1 `fn() -> void` (static extern_fn)) ∅)
+   (function-definition external
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (expression

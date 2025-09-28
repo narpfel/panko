@@ -1,0 +1,61 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/linkage/test_internal_linkage_for_function_declarations.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_for_function_declarations.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration puts~1 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      f~2 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+               (string "in f")))))
+   (declaration g~3 `fn(∅: int) -> void` ∅)
+   (declaration h~4 `fn(x: int) -> void` ∅)
+   (declaration i~5 `fn() -> void` ∅)
+   (function-definition
+      main~6 `fn() -> int`
+      (compound-statement
+         (expression (call (name f~2 `fn() -> void`)))
+         (expression
+            (call (name g~3 `fn(∅: int) -> void`)
+               4))
+         (expression
+            (call (name h~4 `fn(x: int) -> void`)
+               9))
+         (expression (call (name i~5 `fn() -> void`)))))
+   (function-definition
+      g~3 `fn(x: int) -> void`
+      (params
+         x~8 `int`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "in g: %d\n")
+               (add (name x~8 `int`) 1)))))
+   (function-definition
+      h~4 `fn(x: int) -> void`
+      (params
+         x~10 `int`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "in h: %d\n")
+               (add (name x~10 `int`) 1)))))
+   (function-definition
+      i~5 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
+               (string "in i"))))))
+
+----- stderr -----

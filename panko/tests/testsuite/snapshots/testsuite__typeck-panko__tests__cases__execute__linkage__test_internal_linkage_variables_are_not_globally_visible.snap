@@ -1,0 +1,121 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/f.c
+    - panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/g.c
+    - panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/main.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/f.c"
+   (definition internal x~0 `int` (27 `int`))
+   (function-definition external
+      f~1 `fn() -> int`
+      (compound-statement
+         (return (x~0 `int`))))
+   (function-definition external
+      add_f~2 `fn(y: int) -> void`
+      (params
+         y~3 `int`)
+      (compound-statement
+         (expression
+            (combine `int`
+               (assign `ptr<int>` (unnamed-temporary~4 `ptr<int>`)
+                  (addressof `ptr<int>`
+                     (x~0 `int`)))
+               (assign `int` (deref `int` (unnamed-temporary~4 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~4 `ptr<int>`)) (y~3 `int`))))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/g.c"
+   (definition internal x~0 `int` (10 `int`))
+   (function-definition external
+      g~1 `fn() -> int`
+      (compound-statement
+         (return (x~0 `int`))))
+   (function-definition external
+      add_g~2 `fn(y: int) -> void`
+      (params
+         y~3 `int`)
+      (compound-statement
+         (expression
+            (combine `int`
+               (assign `ptr<int>` (unnamed-temporary~4 `ptr<int>`)
+                  (addressof `ptr<int>`
+                     (x~0 `int`)))
+               (assign `int` (deref `int` (unnamed-temporary~4 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~4 `ptr<int>`)) (y~3 `int`))))))))
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/main.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration external f~1 `fn() -> int` ∅)
+   (declaration external add_f~2 `fn(∅: int) -> void` ∅)
+   (declaration external g~3 `fn() -> int` ∅)
+   (declaration external add_g~4 `fn(∅: int) -> void` ∅)
+   (definition external x~5 `int` (42 `int`))
+   (function-definition external
+      print_variables~6 `fn() -> void`
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (x~5 `int`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (call `int`
+                  (addressof `ptr<fn() -> int>`
+                     (f~1 `fn() -> int`)))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (call `int`
+                  (addressof `ptr<fn() -> int>`
+                     (g~3 `fn() -> int`)))))))
+   (function-definition external
+      main~7 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (print_variables~6 `fn() -> void`))))
+         (expression (assign `int` (x~5 `int`) (123 `int`)))
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (print_variables~6 `fn() -> void`))))
+         (expression
+            (call `void`
+               (addressof `ptr<fn(∅: int) -> void>`
+                  (add_f~2 `fn(∅: int) -> void`))
+               (10 `int`)))
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (print_variables~6 `fn() -> void`))))
+         (expression
+            (call `void`
+               (addressof `ptr<fn(∅: int) -> void>`
+                  (add_g~4 `fn(∅: int) -> void`))
+               (5 `int`)))
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (print_variables~6 `fn() -> void`)))))))
+
+----- stderr -----

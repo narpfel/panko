@@ -11,16 +11,16 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_pointer.c"
-   (tentative-definition (x~0 `ptr<int>` (static x)) ∅)
-   (tentative-definition (y~1 `ptr<int>` (static y)) ∅)
-   (tentative-definition (a~2 `ptr<int const>` (static a)) ∅)
-   (tentative-definition (b~3 `ptr<int> const` (static b)) ∅)
-   (tentative-definition (c~4 `ptr<int const> const` (static c)) ∅)
-   (tentative-definition (d~5 `ptr<int const>` (static d)) ∅)
-   (tentative-definition (e~6 `ptr<int const> const` (static e)) ∅)
-   (tentative-definition (f~7 `ptr<ptr<int>>` (static f)) ∅)
-   (tentative-definition (g~8 `ptr<ptr<int const>>` (static g)) ∅)
-   (tentative-definition (h~9 `ptr<ptr<int>> const` (static h)) ∅)
-   (tentative-definition (i~10 `ptr<ptr<int> const>` (static i)) ∅))
+   (tentative-definition external (x~0 `ptr<int>` (static x)) ∅)
+   (tentative-definition external (y~1 `ptr<int>` (static y)) ∅)
+   (tentative-definition external (a~2 `ptr<int const>` (static a)) ∅)
+   (tentative-definition external (b~3 `ptr<int> const` (static b)) ∅)
+   (tentative-definition external (c~4 `ptr<int const> const` (static c)) ∅)
+   (tentative-definition external (d~5 `ptr<int const>` (static d)) ∅)
+   (tentative-definition external (e~6 `ptr<int const> const` (static e)) ∅)
+   (tentative-definition external (f~7 `ptr<ptr<int>>` (static f)) ∅)
+   (tentative-definition external (g~8 `ptr<ptr<int const>>` (static g)) ∅)
+   (tentative-definition external (h~9 `ptr<ptr<int>> const` (static h)) ∅)
+   (tentative-definition external (i~10 `ptr<ptr<int> const>` (static i)) ∅))
 
 ----- stderr -----

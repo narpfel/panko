@@ -11,13 +11,13 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/typeof/test_typeof_of_function_is_decl.c"
-   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
-   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
-   (function-definition
+   (declaration external puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (declaration external puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition external
       main~2 `fn() -> int`
       (compound-statement
-         (declaration puts~3 `fn(∅: ptr<char const>) -> int` ∅)
-         (declaration puts~3 `fn(∅: ptr<char const>) -> int` ∅)
+         (declaration external puts~3 `fn(∅: ptr<char const>) -> int` ∅)
+         (declaration external puts~3 `fn(∅: ptr<char const>) -> int` ∅)
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`

@@ -11,15 +11,15 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/typedef/test_shadow_typedef_in_inner_scope_parenthesised.c"
-   (function-definition
+   (function-definition external
       main~0 `fn() -> int`
       (compound-statement
          (typedef name `int`)
          (compound-statement
-            (declaration name~1 `fn() -> int` ∅)
+            (declaration external name~1 `fn() -> int` ∅)
             (expression (0 `int`)))
          (compound-statement
-            (declaration name~2 `fn() -> int` ∅)
+            (declaration external name~2 `fn() -> int` ∅)
             (expression (0 `int`)))
          (compound-statement
             (definition name~3 `array<int; 42>` ∅)

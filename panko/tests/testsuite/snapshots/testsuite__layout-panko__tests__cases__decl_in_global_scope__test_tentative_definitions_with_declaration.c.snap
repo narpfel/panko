@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_tentative_definitions_with_declaration.c"
-   (tentative-definition (value~0 `int` (static value)) ∅)
-   (definition (value~0 `int` (static value)) (42 `int` (static value)))
-   (tentative-definition (value~0 `int` (static value)) ∅))
+   (tentative-definition external (value~0 `int` (static value)) ∅)
+   (definition external (value~0 `int` (static value)) (42 `int` (static value)))
+   (tentative-definition external (value~0 `int` (static value)) ∅))
 
 ----- stderr -----

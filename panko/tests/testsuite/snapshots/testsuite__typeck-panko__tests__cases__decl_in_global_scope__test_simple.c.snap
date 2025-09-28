@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_simple.c"
-   (tentative-definition x~0 `int` ∅)
-   (definition y~1 `int` (42 `int`)))
+   (tentative-definition external x~0 `int` ∅)
+   (definition external y~1 `int` (42 `int`)))
 
 ----- stderr -----

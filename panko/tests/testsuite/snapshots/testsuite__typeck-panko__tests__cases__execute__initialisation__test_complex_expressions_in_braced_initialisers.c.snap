@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/initialisation/test_complex_expressions_in_braced_initialisers.c"
-   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (function-definition
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
       fib~1 `fn(n: int) -> int`
       (params
          n~2 `int`)
@@ -30,7 +30,7 @@ exit_code: 0
                      (addressof `ptr<fn(n: int) -> int>`
                         (fib~1 `fn(n: int) -> int`))
                      (subtract `int` (n~2 `int`) (2 `int`))))))))
-   (function-definition
+   (function-definition external
       main~3 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
       (params
          main.unnamed_parameter.0~4 `int`

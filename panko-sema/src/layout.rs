@@ -11,6 +11,7 @@ use panko_report::Report;
 
 use crate::layout::stack::Stack;
 use crate::scope::Id;
+use crate::scope::Linkage;
 use crate::scope::RefKind;
 use crate::ty;
 use crate::ty::ArrayType;
@@ -82,7 +83,6 @@ impl<'a> Subobject<'a> {
 pub struct FunctionDefinition<'a> {
     pub reference: Reference<'a>,
     pub params: ParamRefs<'a>,
-    pub storage_class: Option<cst::StorageClassSpecifier<'a>>,
     #[expect(unused)]
     inline: Option<cst::FunctionSpecifier<'a>>,
     #[expect(unused)]
@@ -193,6 +193,7 @@ pub struct Reference<'a> {
     id: Id,
     kind: RefKind,
     slot: Slot<'a>,
+    linkage: Linkage,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -242,6 +243,10 @@ impl<'a> Reference<'a> {
 
     pub fn slot(&self) -> Slot<'a> {
         self.slot
+    }
+
+    pub fn linkage(&self) -> Linkage {
+        self.linkage
     }
 }
 
@@ -298,7 +303,6 @@ fn layout_function_definition<'a>(
     let typecheck::FunctionDefinition {
         reference,
         params,
-        storage_class,
         inline,
         noreturn,
         is_varargs,
@@ -315,7 +319,6 @@ fn layout_function_definition<'a>(
     FunctionDefinition {
         reference,
         params,
-        storage_class,
         inline,
         noreturn,
         stack_size,

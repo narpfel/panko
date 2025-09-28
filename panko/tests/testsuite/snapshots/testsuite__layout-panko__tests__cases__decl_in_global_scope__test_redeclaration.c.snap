@@ -11,13 +11,13 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_redeclaration.c"
-   (declaration (f~0 `fn() -> int` (static f)) ∅)
-   (declaration (f~0 `fn() -> int` (static f)) ∅)
-   (function-definition
+   (declaration external (f~0 `fn() -> int` (static f)) ∅)
+   (declaration external (f~0 `fn() -> int` (static f)) ∅)
+   (function-definition external
       (f~0 `fn() -> int` (static f))
       (compound-statement
          (return (42 `int` @0))))
-   (declaration (f~0 `fn() -> int` (static f)) ∅)
-   (declaration (f~0 `fn() -> int` (static f)) ∅))
+   (declaration external (f~0 `fn() -> int` (static f)) ∅)
+   (declaration external (f~0 `fn() -> int` (static f)) ∅))
 
 ----- stderr -----

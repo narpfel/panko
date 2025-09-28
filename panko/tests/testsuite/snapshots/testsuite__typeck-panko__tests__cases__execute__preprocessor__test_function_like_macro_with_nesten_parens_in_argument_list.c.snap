@@ -11,14 +11,14 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/preprocessor/test_function_like_macro_with_nesten_parens_in_argument_list.c"
-   (function-definition
+   (function-definition external
       f~0 `fn(x: int, y: int) -> int`
       (params
          x~1 `int`
          y~2 `int`)
       (compound-statement
          (return (add `int` (multiply `int` (2 `int`) (x~1 `int`)) (y~2 `int`)))))
-   (function-definition
+   (function-definition external
       main~3 `fn() -> int`
       (compound-statement
          (return

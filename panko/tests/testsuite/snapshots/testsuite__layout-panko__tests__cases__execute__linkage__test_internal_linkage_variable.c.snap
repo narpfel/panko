@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/linkage/test_internal_linkage_variable.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variable.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (tentative-definition internal (x~1 `int` (static x)) ∅)
+   (definition internal (y~2 `int` (static y)) (32 `int` (static y)))
+   (function-definition external
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (combine `int` @0
+               (assign `ptr<int>` @8
+                  (unnamed-temporary~4 `ptr<int>` @8)
+                  (addressof `ptr<int>` @8
+                     (y~2 `int` (static y))))
+               (assign `int` @0
+                  (deref `int` @0 (unnamed-temporary~4 `ptr<int>` @8))
+                  (add `int` @16
+                     (deref `int` @16 (unnamed-temporary~4 `ptr<int>` @8))
+                     (10 `int` @24)))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (y~2 `int` (static y))))
+         (expression
+            (combine `int` @0
+               (assign `ptr<int>` @8
+                  (unnamed-temporary~5 `ptr<int>` @8)
+                  (addressof `ptr<int>` @8
+                     (x~1 `int` (static x))))
+               (assign `int` @0
+                  (deref `int` @0 (unnamed-temporary~5 `ptr<int>` @8))
+                  (add `int` @16
+                     (deref `int` @16 (unnamed-temporary~5 `ptr<int>` @8))
+                     (1 `int` @24)))))
+         (return (x~1 `int` (static x))))))
+
+----- stderr -----

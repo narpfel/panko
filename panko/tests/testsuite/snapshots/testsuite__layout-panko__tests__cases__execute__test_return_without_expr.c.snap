@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/test_return_without_expr.c"
-   (declaration (exit~0 `fn(∅: int) -> void` (static exit)) ∅)
-   (function-definition
+   (declaration external (exit~0 `fn(∅: int) -> void` (static exit)) ∅)
+   (function-definition external
       (f~1 `fn() -> void` (static f))
       (compound-statement
          (return ∅)
@@ -21,7 +21,7 @@ exit_code: 0
                (addressof `ptr<fn(∅: int) -> void>` @0
                   (exit~0 `fn(∅: int) -> void` (static exit)))
                (42 `int` @8)))))
-   (function-definition
+   (function-definition external
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (expression

@@ -11,8 +11,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/subscript/test_subscript_long_pointer.c"
-   (declaration calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>` ∅)
-   (function-definition
+   (declaration external calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>` ∅)
+   (function-definition external
       main~1 `fn() -> int`
       (compound-statement
          (definition p~2 `ptr<long>`
