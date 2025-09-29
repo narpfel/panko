@@ -196,9 +196,9 @@ enum StaticInitialiser<'a> {
     Expression(&'a Expression<'a>),
 }
 
-impl<'a> StaticInitialiser<'a> {
-    fn from_initialiser(initialiser: Option<&'a Initialiser<'a>>) -> Option<Self> {
-        let initialiser = match initialiser? {
+impl<'a> From<&'a Initialiser<'a>> for StaticInitialiser<'a> {
+    fn from(initialiser: &'a Initialiser<'a>) -> Self {
+        match initialiser {
             Initialiser::Braced { subobject_initialisers } => Self::Braced {
                 subobject_initialisers: subobject_initialisers
                     .iter()
@@ -211,8 +211,7 @@ impl<'a> StaticInitialiser<'a> {
                     .collect(),
             },
             Initialiser::Expression(expr) => Self::Expression(&expr.expr),
-        };
-        Some(initialiser)
+        }
     }
 }
 
@@ -528,7 +527,7 @@ impl<'a> Codegen<'a> {
             RefKind::Definition => {
                 self.tentative_definitions.shift_remove(name);
                 self.defined.insert(name);
-                let initialiser = StaticInitialiser::from_initialiser(decl.initialiser.as_ref());
+                let initialiser = try { StaticInitialiser::from(decl.initialiser.as_ref()?) };
                 self.object_definition(name, linkage, ty, initialiser)
             }
         }
@@ -551,7 +550,7 @@ impl<'a> Codegen<'a> {
                             (
                                 reference.linkage(),
                                 reference.ty.ty,
-                                StaticInitialiser::from_initialiser(initialiser.as_ref()),
+                                try { StaticInitialiser::from(initialiser.as_ref()?) },
                             ),
                         );
                     }
