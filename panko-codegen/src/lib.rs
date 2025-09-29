@@ -223,7 +223,7 @@ enum ShouldZero {
 
 #[derive(Debug, Default)]
 struct Codegen<'a> {
-    tentative_definitions: IndexMap<&'a str, (Linkage, Type<'a>, Option<StaticInitialiser<'a>>)>,
+    deferred_definitions: IndexMap<&'a str, (Linkage, Type<'a>, Option<StaticInitialiser<'a>>)>,
     defined: IndexSet<&'a str>,
     current_function: Option<&'a FunctionDefinition<'a>>,
     code: String,
@@ -522,10 +522,10 @@ impl<'a> Codegen<'a> {
             RefKind::Declaration => (),
             RefKind::TentativeDefinition =>
                 if !self.defined.contains(name) {
-                    self.tentative_definitions.insert(name, (linkage, ty, None));
+                    self.deferred_definitions.insert(name, (linkage, ty, None));
                 },
             RefKind::Definition => {
-                self.tentative_definitions.shift_remove(name);
+                self.deferred_definitions.shift_remove(name);
                 self.defined.insert(name);
                 let initialiser = try { StaticInitialiser::from(decl.initialiser.as_ref()?) };
                 self.object_definition(name, linkage, ty, initialiser)
@@ -545,7 +545,7 @@ impl<'a> Codegen<'a> {
                 match reference.slot() {
                     Slot::Automatic(_) => self.initialise(reference, initialiser.as_ref()),
                     Slot::Static(name) if reference.ty.ty.is_object() => {
-                        self.tentative_definitions.insert(
+                        self.deferred_definitions.insert(
                             name,
                             (
                                 reference.linkage(),
@@ -1030,7 +1030,7 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
         cg.directive("quad", &[&name]);
     }
 
-    for (name, (linkage, ty, initialiser)) in mem::take(&mut cg.tentative_definitions) {
+    for (name, (linkage, ty, initialiser)) in mem::take(&mut cg.deferred_definitions) {
         assert!(!cg.defined.contains(&name));
         cg.object_definition(name, linkage, ty, initialiser);
     }
