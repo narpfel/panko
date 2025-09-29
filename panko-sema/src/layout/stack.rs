@@ -99,7 +99,14 @@ impl<'a> Stack<'a> {
                 } = reference;
                 let ty = layout_ty(self, bump, ty);
                 let slot = match storage_duration {
-                    StorageDuration::Static => Slot::Static(reference.name()),
+                    StorageDuration::Static => match linkage {
+                        Linkage::External | Linkage::Internal => Slot::Static(reference.name()),
+                        Linkage::None => Slot::Static(bump.alloc_str(&format!(
+                            "{}.{}",
+                            reference.name(),
+                            reference.id.0,
+                        ))),
+                    },
                     StorageDuration::Automatic => {
                         assert_matches!(linkage, Linkage::None);
                         maybe_slot.unwrap_or_else(|| self.slots.add_slot(ty.ty))

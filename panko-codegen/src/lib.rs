@@ -188,11 +188,32 @@ impl<'a> SubobjectAtReference<'a> {
     }
 }
 
+#[derive(Debug)]
 enum StaticInitialiser<'a> {
     Braced {
         subobject_initialisers: Vec<SubobjectInitialiser<'a, &'a Expression<'a>>>,
     },
     Expression(&'a Expression<'a>),
+}
+
+impl<'a> StaticInitialiser<'a> {
+    fn from_initialiser(initialiser: Option<&'a Initialiser<'a>>) -> Option<Self> {
+        let initialiser = match initialiser? {
+            Initialiser::Braced { subobject_initialisers } => Self::Braced {
+                subobject_initialisers: subobject_initialisers
+                    .iter()
+                    .map(
+                        |SubobjectInitialiser { subobject, initialiser }| SubobjectInitialiser {
+                            subobject: *subobject,
+                            initialiser: &initialiser.expr,
+                        },
+                    )
+                    .collect(),
+            },
+            Initialiser::Expression(expr) => Self::Expression(&expr.expr),
+        };
+        Some(initialiser)
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -203,7 +224,7 @@ enum ShouldZero {
 
 #[derive(Debug, Default)]
 struct Codegen<'a> {
-    tentative_definitions: IndexMap<&'a str, (Linkage, Type<'a>)>,
+    tentative_definitions: IndexMap<&'a str, (Linkage, Type<'a>, Option<StaticInitialiser<'a>>)>,
     defined: IndexSet<&'a str>,
     current_function: Option<&'a FunctionDefinition<'a>>,
     code: String,
@@ -502,28 +523,12 @@ impl<'a> Codegen<'a> {
             RefKind::Declaration => (),
             RefKind::TentativeDefinition =>
                 if !self.defined.contains(name) {
-                    self.tentative_definitions.insert(name, (linkage, ty));
+                    self.tentative_definitions.insert(name, (linkage, ty, None));
                 },
             RefKind::Definition => {
                 self.tentative_definitions.shift_remove(name);
                 self.defined.insert(name);
-                let initialiser = try {
-                    match decl.initialiser.as_ref()? {
-                        Initialiser::Braced { subobject_initialisers } =>
-                            StaticInitialiser::Braced {
-                                subobject_initialisers: subobject_initialisers
-                                    .iter()
-                                    .map(|SubobjectInitialiser { subobject, initialiser }| {
-                                        SubobjectInitialiser {
-                                            subobject: *subobject,
-                                            initialiser: &initialiser.expr,
-                                        }
-                                    })
-                                    .collect(),
-                            },
-                        Initialiser::Expression(expr) => StaticInitialiser::Expression(&expr.expr),
-                    }
-                };
+                let initialiser = StaticInitialiser::from_initialiser(decl.initialiser.as_ref());
                 self.object_definition(name, linkage, ty, initialiser)
             }
         }
@@ -535,46 +540,23 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    fn stmt(&mut self, stmt: &Statement<'a>) {
+    fn stmt(&mut self, stmt: &'a Statement<'a>) {
         match stmt {
             Statement::Declaration(Declaration { reference, initialiser }) =>
-                match initialiser.as_ref() {
-                    Some(Initialiser::Expression(LayoutedExpression {
-                        expr: Expression::String(string),
-                        ..
-                    })) if reference.ty.ty.is_array() => {
-                        self.initialise_with_string(reference, ShouldZero::Yes, string);
-                    }
-                    Some(Initialiser::Expression(initialiser)) => {
-                        self.expr(initialiser);
-                        if reference.slot() != initialiser.slot {
-                            self.copy(reference, initialiser);
-                        }
-                    }
-                    Some(Initialiser::Braced { subobject_initialisers }) => {
-                        self.memset_zero(reference);
-
-                        subobject_initialisers.iter().for_each(
-                            |SubobjectInitialiser { subobject, initialiser }| {
-                                let target = SubobjectAtReference {
-                                    reference: *reference,
-                                    subobject: *subobject,
-                                };
-
-                                if let Expression::String(string) = initialiser.expr {
-                                    self.initialise_with_string(&target, ShouldZero::No, string);
-                                }
-                                else {
-                                    self.expr(initialiser);
-
-                                    if target.slot() != initialiser.slot {
-                                        self.copy(&target, initialiser);
-                                    }
-                                }
-                            },
+                match reference.slot() {
+                    Slot::Automatic(_) => self.initialise(reference, initialiser.as_ref()),
+                    Slot::Static(name) if reference.ty.ty.is_object() => {
+                        self.tentative_definitions.insert(
+                            name,
+                            (
+                                reference.linkage(),
+                                reference.ty.ty,
+                                StaticInitialiser::from_initialiser(initialiser.as_ref()),
+                            ),
                         );
                     }
-                    None => (),
+                    Slot::Static(_) => (),
+                    Slot::Void | Slot::StaticWithOffset { .. } => unreachable!(),
                 },
             Statement::Typedef(_) => {
                 // TODO: emit the type in case of a VMT
@@ -608,6 +590,47 @@ impl<'a> Codegen<'a> {
                 self.emit_args("movabs", &[&Rcx, &size]);
                 self.emit("rep stosb");
             }
+        }
+    }
+
+    fn initialise(&mut self, reference: &Reference, initialiser: Option<&Initialiser<'a>>) {
+        match initialiser {
+            Some(Initialiser::Expression(LayoutedExpression {
+                expr: Expression::String(string),
+                ..
+            })) if reference.ty.ty.is_array() => {
+                self.initialise_with_string(reference, ShouldZero::Yes, string);
+            }
+            Some(Initialiser::Expression(initialiser)) => {
+                self.expr(initialiser);
+                if reference.slot() != initialiser.slot {
+                    self.copy(reference, initialiser);
+                }
+            }
+            Some(Initialiser::Braced { subobject_initialisers }) => {
+                self.memset_zero(reference);
+
+                subobject_initialisers.iter().for_each(
+                    |SubobjectInitialiser { subobject, initialiser }| {
+                        let target = SubobjectAtReference {
+                            reference: *reference,
+                            subobject: *subobject,
+                        };
+
+                        if let Expression::String(string) = initialiser.expr {
+                            self.initialise_with_string(&target, ShouldZero::No, string);
+                        }
+                        else {
+                            self.expr(initialiser);
+
+                            if target.slot() != initialiser.slot {
+                                self.copy(&target, initialiser);
+                            }
+                        }
+                    },
+                );
+            }
+            None => (),
         }
     }
 
@@ -1008,9 +1031,9 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
         cg.directive("quad", &[&name]);
     }
 
-    for (name, (linkage, ty)) in mem::take(&mut cg.tentative_definitions) {
+    for (name, (linkage, ty, initialiser)) in mem::take(&mut cg.tentative_definitions) {
         assert!(!cg.defined.contains(&name));
-        cg.object_definition(name, linkage, ty, None);
+        cg.object_definition(name, linkage, ty, initialiser);
     }
 
     for (id, value) in mem::take(&mut cg.strings) {

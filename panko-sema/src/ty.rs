@@ -323,7 +323,7 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
 }
 
 impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
-    pub(crate) fn is_object(&self) -> bool {
+    pub fn is_object(&self) -> bool {
         !self.is_function()
     }
 

@@ -1,0 +1,97 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/linkage/test_static_block_scope_variables.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_static_block_scope_variables.c"
+   (function-definition external
+      f~0 `fn() -> int`
+      (compound-statement
+         (definition x~1 `int` (42 `int`))
+         (return
+            (combine `int`
+               (combine `int`
+                  (combine `int`
+                     (assign `ptr<int>` (unnamed-temporary~3 `ptr<int>`)
+                        (addressof `ptr<int>`
+                           (x~1 `int`)))
+                     (assign `int` (unnamed-temporary~4 `int`) (deref `int` (unnamed-temporary~3 `ptr<int>`))))
+                  (combine `int`
+                     (assign `ptr<int>` (unnamed-temporary~2 `ptr<int>`)
+                        (addressof `ptr<int>`
+                           (deref `int` (unnamed-temporary~3 `ptr<int>`))))
+                     (assign `int` (deref `int` (unnamed-temporary~2 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~2 `ptr<int>`)) (++ `int`)))))
+               (unnamed-temporary~4 `int`)))))
+   (function-definition external
+      g~5 `fn() -> int`
+      (compound-statement
+         (definition x~6 `int` (27 `int`))
+         (return
+            (combine `int`
+               (combine `int`
+                  (combine `int`
+                     (assign `ptr<int>` (unnamed-temporary~8 `ptr<int>`)
+                        (addressof `ptr<int>`
+                           (x~6 `int`)))
+                     (assign `int` (unnamed-temporary~9 `int`) (deref `int` (unnamed-temporary~8 `ptr<int>`))))
+                  (combine `int`
+                     (assign `ptr<int>` (unnamed-temporary~7 `ptr<int>`)
+                        (addressof `ptr<int>`
+                           (deref `int` (unnamed-temporary~8 `ptr<int>`))))
+                     (assign `int` (deref `int` (unnamed-temporary~7 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~7 `ptr<int>`)) (++ `int`)))))
+               (unnamed-temporary~9 `int`)))))
+   (function-definition external
+      main~10 `fn() -> int`
+      (compound-statement
+         (declaration external printf~11 `fn(∅: ptr<char const>, ...) -> int` ∅)
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~11 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (call `int`
+                  (addressof `ptr<fn() -> int>`
+                     (f~0 `fn() -> int`)))
+               (call `int`
+                  (addressof `ptr<fn() -> int>`
+                     (g~5 `fn() -> int`)))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~11 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (call `int`
+                  (addressof `ptr<fn() -> int>`
+                     (f~0 `fn() -> int`)))
+               (call `int`
+                  (addressof `ptr<fn() -> int>`
+                     (g~5 `fn() -> int`)))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~11 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (call `int`
+                  (addressof `ptr<fn() -> int>`
+                     (f~0 `fn() -> int`)))
+               (call `int`
+                  (addressof `ptr<fn() -> int>`
+                     (g~5 `fn() -> int`))))))))
+
+----- stderr -----

@@ -1087,9 +1087,16 @@ fn resolve_declaration<'a>(
             }
         }
         Some(StorageClassSpecifierKind::Extern) => Some(Linkage::External),
-        Some(StorageClassSpecifierKind::Static) => Some(Linkage::Internal),
+        Some(StorageClassSpecifierKind::Static) => match scopes.is_in_global_scope() {
+            IsInGlobalScope::Yes => Some(Linkage::Internal),
+            IsInGlobalScope::No => Some(Linkage::None),
+        },
         Some(storage_class) => todo!("not implemented: storage class {:?}", storage_class),
         None => None,
+    };
+    let storage_duration = match linkage {
+        Some(_) => StorageDuration::Static,
+        None => storage_duration,
     };
 
     let maybe_reference = scopes.add(
