@@ -356,7 +356,7 @@ pub(crate) enum IsParameter {
     No,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) enum IsInGlobalScope {
     Yes,
     No,

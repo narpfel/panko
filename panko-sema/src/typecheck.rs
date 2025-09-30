@@ -545,6 +545,10 @@ enum Diagnostic<'a> {
         at: scope::Typedef<'a>,
         previously_declared_as: scope::QualifiedType<'a>,
     },
+
+    #[error("function declared at block scope cannot have a storage class other than `extern`")]
+    #[diagnostics(at(colour = Red))]
+    BlockScopeFunctionWithInvalidStorageClass { at: Loc<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1265,6 +1269,14 @@ fn typeck_reference<'a>(
             Linkage::None => storage_duration,
         },
     };
+
+    if let Type::Function(_) = ty.ty
+        && linkage != Linkage::External
+        && is_in_global_scope == IsInGlobalScope::No
+    {
+        // TODO: use this error
+        sess.emit(Diagnostic::BlockScopeFunctionWithInvalidStorageClass { at: loc })
+    }
 
     Reference {
         name,

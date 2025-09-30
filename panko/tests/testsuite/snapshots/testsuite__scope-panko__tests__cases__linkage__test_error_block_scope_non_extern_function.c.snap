@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/linkage/test_error_block_scope_non_extern_function.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/linkage/test_error_block_scope_non_extern_function.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration allowed~1 `fn() -> void` ∅)
+         (declaration also_allowed~2 `fn() -> void` ∅)
+         (declaration f~3 `fn() -> void` ∅)
+         (expression (call (name f~3 `fn() -> void`))))))
+
+----- stderr -----

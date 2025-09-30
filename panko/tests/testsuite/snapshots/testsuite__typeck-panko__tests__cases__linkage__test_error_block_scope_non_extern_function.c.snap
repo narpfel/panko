@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/linkage/test_error_block_scope_non_extern_function.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: function declared at block scope cannot have a storage class other than `extern`
+   ╭─[panko/tests/cases/linkage/test_error_block_scope_non_extern_function.c:5:17]
+   │
+ 5 │     static void f();
+   │                 ─  
+───╯
+
+Error: function declared at block scope cannot have a storage class other than `extern`
+   ╭─[panko/tests/cases/linkage/test_error_block_scope_non_extern_function.c:5:17]
+   │
+ 5 │     static void f();
+   │                 ─  
+───╯
