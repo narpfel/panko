@@ -1270,14 +1270,6 @@ fn typeck_reference<'a>(
         },
     };
 
-    if let Type::Function(_) = ty.ty
-        && linkage != Linkage::External
-        && is_in_global_scope == IsInGlobalScope::No
-    {
-        // TODO: use this error
-        sess.emit(Diagnostic::BlockScopeFunctionWithInvalidStorageClass { at: loc })
-    }
-
     Reference {
         name,
         loc,
@@ -1644,8 +1636,19 @@ fn typeck_reference_declaration<'a>(
     reference: scope::Reference<'a>,
     needs_initialiser: NeedsInitialiser,
 ) -> Reference<'a> {
-    let previous_definition = reference.previous_definition;
+    let scope::Reference {
+        previous_definition, is_in_global_scope, ..
+    } = reference;
     let reference = typeck_reference(sess, reference, needs_initialiser);
+
+    if let Type::Function(_) = reference.ty.ty
+        && reference.linkage != Linkage::External
+        && is_in_global_scope == IsInGlobalScope::No
+    {
+        // TODO: use this error
+        sess.emit(Diagnostic::BlockScopeFunctionWithInvalidStorageClass { at: reference.loc })
+    }
+
     if let Some(previous_definition) = previous_definition {
         // TODO: this is quadratic in the number of previous decls for this name
         let previous_definition = typeck_reference(sess, *previous_definition, needs_initialiser);

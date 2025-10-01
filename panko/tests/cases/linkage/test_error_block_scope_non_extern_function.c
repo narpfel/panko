@@ -3,6 +3,6 @@ int main() {
     extern void also_allowed();
 
     static void f();
-    // TODO: this should not emit the error again
+    // this does not emit the error again
     f();
 }
