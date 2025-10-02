@@ -1247,8 +1247,10 @@ fn typeck_reference<'a>(
                 (IsInGlobalScope::Yes, None | Some(Linkage::Internal)) =>
                     RefKind::TentativeDefinition,
                 (IsInGlobalScope::Yes, Some(Linkage::External)) => RefKind::Declaration,
-                (IsInGlobalScope::Yes, Some(Linkage::None)) => unreachable!(),
-                (IsInGlobalScope::No, Some(Linkage::Internal)) => todo!(),
+                (IsInGlobalScope::Yes, Some(Linkage::None)) =>
+                    unreachable!("global variables always have external or internal linkage"),
+                (IsInGlobalScope::No, Some(Linkage::Internal)) =>
+                    unreachable!("block-scope variables can’t have internal linkage"),
                 (IsInGlobalScope::No, Some(Linkage::External)) => RefKind::Declaration,
                 (IsInGlobalScope::No, None | Some(Linkage::None)) => RefKind::Definition,
             },
