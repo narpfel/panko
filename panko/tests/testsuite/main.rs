@@ -64,8 +64,12 @@ fn test_cases_from_filename(path: PathBuf) -> impl Iterator<Item = TestCase> {
             vec![path.clone()]
         }
         else {
-            return;
+            unreachable!(
+                "test case `{path:?}` is neither a single-file test case nor a directory test case",
+            );
         };
+
+        assert!(!filenames.is_empty());
 
         if components.contains("execute") {
             let path = path.clone();
