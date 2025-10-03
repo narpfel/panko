@@ -1647,7 +1647,7 @@ fn typeck_reference_declaration<'a>(
         && reference.linkage != Linkage::External
         && is_in_global_scope == IsInGlobalScope::No
     {
-        // TODO: use this error
+        // TODO: use this error and/or adjust the linkage to `extern`
         sess.emit(Diagnostic::BlockScopeFunctionWithInvalidStorageClass { at: reference.loc })
     }
 
