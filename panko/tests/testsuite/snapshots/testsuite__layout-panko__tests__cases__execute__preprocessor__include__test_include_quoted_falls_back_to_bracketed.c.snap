@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/preprocessor/include/test_include_quoted_falls_back_to_bracketed.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/preprocessor/include/test_include_quoted_falls_back_to_bracketed.c"
+   (declaration external (__assert_fail~0 `fn(__assertion: ptr<char const>, __file: ptr<char const>, __line: unsigned int, __function: ptr<char const>) -> void` (static __assert_fail)) ∅)
+   (declaration external (__assert_perror_fail~1 `fn(__errnum: int, __file: ptr<char const>, __line: unsigned int, __function: ptr<char const>) -> void` (static __assert_perror_fail)) ∅)
+   (declaration external (__assert~2 `fn(__assertion: ptr<char const>, __file: ptr<char const>, __line: int) -> void` (static __assert)) ∅)
+   (typedef ptrdiff_t `long`)
+   (typedef size_t `unsigned long`)
+   (typedef max_align_t `long long`)
+   (typedef wchar_t `int`)
+   (typedef nullptr_t `nullptr_t`)
+   (function-definition external
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (definition (xs~4 `array<int; 2>` @0)
+            (braced
+               (subobject +0 (1 `int` @0))
+               (subobject +4 (2 `int` @4))))
+         (expression
+            (conditional `void` @void
+               (logical-or `int` @60
+                  (0 `int` @60)
+                  (1 `int` @64))
+               (void-cast `void` @void (0 `int` @8))
+               (call `void` @void
+                  (addressof `ptr<fn(__assertion: ptr<char const>, __file: ptr<char const>, __line: unsigned int, __function: ptr<char const>) -> void>` @16
+                     (__assert_fail~0 `fn(__assertion: ptr<char const>, __file: ptr<char const>, __line: unsigned int, __function: ptr<char const>) -> void` (static __assert_fail)))
+                  (noop-type-conversion `ptr<char const>` @24
+                     (noop-type-conversion `ptr<char>` @24
+                        (addressof `ptr<array<char; 74>>` @24
+                           (string `array<char; 74>` @void "_Generic(sizeof 42, size_t: 0) || _Generic(&xs[1] - &xs[0], ptrdiff_t: 1)\0"))))
+                  (noop-type-conversion `ptr<char const>` @32
+                     (noop-type-conversion `ptr<char>` @32
+                        (addressof `ptr<array<char; 22>>` @32
+                           (string `array<char; 22>` @void "/usr/include/assert.h\0"))))
+                  (noop-type-conversion `unsigned int` @40 (108 `int` @40))
+                  (sign-extend `ptr<char const>` @48 (0 `int` @56)))))
+         (return
+            (logical-or `int` @8
+               (0 `int` @8)
+               (1 `int` @12))))))
+
+----- stderr -----
