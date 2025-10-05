@@ -1,0 +1,68 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `x` redeclared as non-static but was originally declared as static
+   ╭─[panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c:2:5]
+   │
+ 1 │ static int x;
+   │            ┬  
+   │            ╰── previously declared here as static
+ 2 │ int x;
+   │     ┬  
+   │     ╰── non-static declaration here
+───╯
+
+Error: `y` redeclared as static but was originally declared as non-static
+   ╭─[panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c:5:12]
+   │
+ 4 │ int y();
+   │     ┬  
+   │     ╰── previously declared here as non-static
+ 5 │ static int y();
+   │            ┬  
+   │            ╰── static declaration here
+───╯
+
+Error: duplicate definition for `x`
+   ╭─[panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c:8:16]
+   │
+ 7 │ int f(int x) {
+   │           ┬  
+   │           ╰── previously defined here
+ 8 │     static int x;
+   │                ┬  
+   │                ╰── duplicate definition
+───╯
+
+Error: `z` redeclared as static but was originally declared as non-static
+    ╭─[panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c:14:16]
+    │
+ 13 │     extern int z;
+    │                ┬  
+    │                ╰── previously declared here as non-static
+ 14 │     static int z;
+    │                ┬  
+    │                ╰── static declaration here
+────╯
+
+Error: duplicate definition for `w`
+    ╭─[panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c:17:9]
+    │
+ 16 │     static int w;
+    │                ┬  
+    │                ╰── previously defined here
+ 17 │     int w;
+    │         ┬  
+    │         ╰── duplicate definition
+────╯

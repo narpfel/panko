@@ -549,6 +549,21 @@ enum Diagnostic<'a> {
     #[error("function declared at block scope cannot have a storage class other than `extern`")]
     #[diagnostics(at(colour = Red))]
     BlockScopeFunctionWithInvalidStorageClass { at: Loc<'a> },
+
+    #[error("`{name}` redeclared as {new_linkage} but was originally declared as {old_linkage}")]
+    #[diagnostics(
+        previous_definition(colour = Blue, label = "previously declared here as {old_linkage}"),
+        at(colour = Red, label = "{new_linkage} declaration here"),
+    )]
+    #[with(
+        name = previous_definition.name,
+        old_linkage = previous_definition.linkage_staticness_as_str(),
+        new_linkage = at.linkage_staticness_as_str(),
+    )]
+    RedeclaredWithDifferentLinkage {
+        at: Reference<'a>,
+        previous_definition: Reference<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -907,6 +922,13 @@ impl<'a> Reference<'a> {
     pub(crate) fn at_decl(&self) -> Self {
         self.at(self.loc)
     }
+
+    fn linkage_staticness_as_str(&self) -> &'static str {
+        match self.linkage {
+            Linkage::External => "non-static",
+            Linkage::Internal | Linkage::None => "static",
+        }
+    }
 }
 
 impl<'a> TypedExpression<'a> {
@@ -1227,8 +1249,9 @@ fn typeck_reference<'a>(
                 (None, _) => None,
                 (Some(Linkage::External | Linkage::Internal), Linkage::None) =>
                     error_todo!(reference),
-                (Some(Linkage::Internal | Linkage::None), Linkage::External) =>
-                    error_todo!(reference),
+                // cause a `RedeclaredWithDifferentLinkage` diagnostic to be emitted in
+                // `typeck_reference_declaration`
+                (Some(Linkage::Internal | Linkage::None), Linkage::External) => linkage,
                 (Some(Linkage::None), Linkage::Internal) =>
                     unreachable!("todo: really unreachable?"),
             };
@@ -1655,7 +1678,10 @@ fn typeck_reference_declaration<'a>(
         // TODO: this is quadratic in the number of previous decls for this name
         let previous_definition = typeck_reference(sess, *previous_definition, needs_initialiser);
         if previous_definition.linkage != reference.linkage {
-            error_todo!(reference, "redeclaration with different linkage");
+            sess.emit(Diagnostic::RedeclaredWithDifferentLinkage {
+                at: reference,
+                previous_definition,
+            })
         }
         if matches!(reference.kind, RefKind::Definition)
             && matches!(previous_definition.kind, RefKind::Definition)

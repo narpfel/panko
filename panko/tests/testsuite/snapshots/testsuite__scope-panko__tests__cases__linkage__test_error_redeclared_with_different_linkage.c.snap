@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c"
+   (declaration x~0 `int` ∅)
+   (declaration x~0 `int` ∅)
+   (declaration y~2 `fn() -> int` ∅)
+   (declaration y~2 `fn() -> int` ∅)
+   (function-definition
+      f~4 `fn(x: int) -> int`
+      (params
+         x~5 `int`)
+      (compound-statement
+         (declaration x~5 `int` ∅)
+         (return (name x~5 `int`))))
+   (function-definition
+      main~7 `fn() -> int`
+      (compound-statement
+         (declaration z~8 `int` ∅)
+         (declaration z~8 `int` ∅)
+         (declaration w~10 `int` ∅)
+         (declaration w~10 `int` ∅)
+         (expression (name x~0 `int`))
+         (expression (name y~2 `fn() -> int`))
+         (expression (name z~8 `int`))
+         (expression (name w~10 `int`)))))
+
+----- stderr -----
