@@ -69,6 +69,7 @@ mod tests;
 
 #[derive(Debug, Report)]
 #[exit_code(2)]
+#[expect(unused)]
 enum TodoError<'a> {
     #[error("TODO: {msg}")]
     #[diagnostics(at(colour = Red))]
@@ -76,6 +77,7 @@ enum TodoError<'a> {
     Error { at: Loc<'a>, msg: String },
 }
 
+#[expect(unused)]
 macro_rules! error_todo {
     ($at:expr) => {
         error_todo!($at, "")
@@ -924,9 +926,11 @@ impl<'a> Reference<'a> {
     }
 
     fn linkage_staticness_as_str(&self) -> &'static str {
-        match self.linkage {
-            Linkage::External => "non-static",
-            Linkage::Internal | Linkage::None => "static",
+        match (self.linkage, self.storage_duration) {
+            (Linkage::External, _) => "extern",
+            (Linkage::Internal | Linkage::None, StorageDuration::Static) => "static",
+            (Linkage::None, StorageDuration::Automatic) => "local",
+            (Linkage::Internal, StorageDuration::Automatic) => unreachable!(),
         }
     }
 }
@@ -1247,10 +1251,9 @@ fn typeck_reference<'a>(
                 (Some(Linkage::External), Linkage::Internal) => Some(Linkage::Internal),
                 (Some(Linkage::Internal), Linkage::Internal) => Some(Linkage::Internal),
                 (None, _) => None,
-                (Some(Linkage::External | Linkage::Internal), Linkage::None) =>
-                    error_todo!(reference),
                 // cause a `RedeclaredWithDifferentLinkage` diagnostic to be emitted in
                 // `typeck_reference_declaration`
+                (Some(Linkage::External | Linkage::Internal), Linkage::None) => linkage,
                 (Some(Linkage::Internal | Linkage::None), Linkage::External) => linkage,
                 (Some(Linkage::None), Linkage::Internal) =>
                     unreachable!("todo: really unreachable?"),

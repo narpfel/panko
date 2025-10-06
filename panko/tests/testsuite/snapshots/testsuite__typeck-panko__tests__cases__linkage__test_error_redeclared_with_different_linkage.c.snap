@@ -12,7 +12,7 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: `x` redeclared as non-static but was originally declared as static
+Error: `x` redeclared as extern but was originally declared as static
    ╭─[panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c:2:5]
    │
  1 │ static int x;
@@ -20,15 +20,15 @@ Error: `x` redeclared as non-static but was originally declared as static
    │            ╰── previously declared here as static
  2 │ int x;
    │     ┬  
-   │     ╰── non-static declaration here
+   │     ╰── extern declaration here
 ───╯
 
-Error: `y` redeclared as static but was originally declared as non-static
+Error: `y` redeclared as static but was originally declared as extern
    ╭─[panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c:5:12]
    │
  4 │ int y();
    │     ┬  
-   │     ╰── previously declared here as non-static
+   │     ╰── previously declared here as extern
  5 │ static int y();
    │            ┬  
    │            ╰── static declaration here
@@ -45,12 +45,12 @@ Error: duplicate definition for `x`
    │                ╰── duplicate definition
 ───╯
 
-Error: `z` redeclared as static but was originally declared as non-static
+Error: `z` redeclared as static but was originally declared as extern
     ╭─[panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c:14:16]
     │
  13 │     extern int z;
     │                ┬  
-    │                ╰── previously declared here as non-static
+    │                ╰── previously declared here as extern
  14 │     static int z;
     │                ┬  
     │                ╰── static declaration here
@@ -65,4 +65,26 @@ Error: duplicate definition for `w`
  17 │     int w;
     │         ┬  
     │         ╰── duplicate definition
+────╯
+
+Error: `v` redeclared as extern but was originally declared as local
+    ╭─[panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c:20:16]
+    │
+ 19 │     int v;
+    │         ┬  
+    │         ╰── previously declared here as local
+ 20 │     extern int v;
+    │                ┬  
+    │                ╰── extern declaration here
+────╯
+
+Error: `u` redeclared as static but was originally declared as extern
+    ╭─[panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c:23:16]
+    │
+ 22 │     extern int u;
+    │                ┬  
+    │                ╰── previously declared here as extern
+ 23 │     static int u;
+    │                ┬  
+    │                ╰── static declaration here
 ────╯

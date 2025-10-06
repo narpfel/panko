@@ -29,9 +29,15 @@ exit_code: 0
          (declaration z~8 `int` ∅)
          (declaration w~10 `int` ∅)
          (declaration w~10 `int` ∅)
+         (declaration v~12 `int` ∅)
+         (declaration v~12 `int` ∅)
+         (declaration u~14 `int` ∅)
+         (declaration u~14 `int` ∅)
          (expression (name x~0 `int`))
          (expression (name y~2 `fn() -> int`))
          (expression (name z~8 `int`))
-         (expression (name w~10 `int`)))))
+         (expression (name w~10 `int`))
+         (expression (name v~12 `int`))
+         (expression (name u~14 `int`)))))
 
 ----- stderr -----

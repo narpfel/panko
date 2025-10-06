@@ -16,6 +16,12 @@ int main() {
     static int w;
     int w;
 
+    int v;
+    extern int v;
+
+    extern int u;
+    static int u;
+
     // use once to test that using the name does not re-emit the diagnostic
-    x; y; z; w;
+    x; y; z; w; v; u;
 }
