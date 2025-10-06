@@ -68,33 +68,6 @@ mod as_sexpr;
 mod tests;
 
 #[derive(Debug, Report)]
-#[exit_code(2)]
-#[expect(unused)]
-enum TodoError<'a> {
-    #[error("TODO: {msg}")]
-    #[diagnostics(at(colour = Red))]
-    #[with(msg = yansi::Paint::bold(&msg.fg(Red)).to_string())]
-    Error { at: Loc<'a>, msg: String },
-}
-
-#[expect(unused)]
-macro_rules! error_todo {
-    ($at:expr) => {
-        error_todo!($at, "")
-    };
-    ($at:expr, $msg:expr) => {{
-        let at = $at.loc();
-        let msg = $msg;
-        let msg = format!(
-            "unimplemented error{}{msg}",
-            if msg.is_empty() { "" } else { ": " }
-        );
-        TodoError::Error { at, msg: msg.clone() }.print();
-        todo!("{msg}")
-    }};
-}
-
-#[derive(Debug, Report)]
 #[exit_code(1)]
 enum Diagnostic<'a> {
     #[error("redeclaration of `{at}` with different type: `{original_ty}` vs. `{new_ty}`")]

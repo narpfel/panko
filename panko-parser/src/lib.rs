@@ -149,6 +149,32 @@ pub enum IntegerLiteralDiagnostic<'a> {
     InvalidSuffix { at: Token<'a> },
 }
 
+#[derive(Debug, Report)]
+#[exit_code(2)]
+pub enum TodoError<'a> {
+    #[error("TODO: {msg}")]
+    #[diagnostics(at(colour = Red))]
+    #[with(msg = yansi::Paint::bold(&msg.fg(Red)).to_string())]
+    Error { at: Loc<'a>, msg: String },
+}
+
+#[macro_export]
+macro_rules! error_todo {
+    ($at:expr) => {
+        $crate::error_todo!($at, "")
+    };
+    ($at:expr, $msg:expr) => {{
+        let at = $at.loc();
+        let msg = $msg;
+        let msg = format!(
+            "unimplemented error{}{msg}",
+            if msg.is_empty() { "" } else { ": " }
+        );
+        $crate::TodoError::Error { at, msg: msg.clone() }.print();
+        todo!("{msg}")
+    }};
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
     filename: &'a Path,
