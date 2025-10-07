@@ -1,4 +1,3 @@
-use std::assert_matches::assert_matches;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 
@@ -94,7 +93,6 @@ impl<'a> Stack<'a> {
                     id,
                     usage_location: _,
                     kind,
-                    linkage,
                     storage_duration,
                 } = reference;
                 let ty = layout_ty(self, bump, ty);
@@ -107,10 +105,8 @@ impl<'a> Stack<'a> {
                             reference.id.0,
                         ))),
                     },
-                    StorageDuration::Automatic => {
-                        assert_matches!(linkage, Linkage::None);
-                        maybe_slot.unwrap_or_else(|| self.slots.add_slot(ty.ty))
-                    }
+                    StorageDuration::Automatic =>
+                        maybe_slot.unwrap_or_else(|| self.slots.add_slot(ty.ty)),
                 };
                 *self.ids.entry(reference.id).or_insert(Reference {
                     name,
@@ -118,7 +114,7 @@ impl<'a> Stack<'a> {
                     id,
                     kind,
                     slot,
-                    linkage,
+                    linkage: reference.linkage(),
                 })
             }
         }

@@ -335,8 +335,7 @@ pub struct Reference<'a> {
     pub(crate) ty: QualifiedType<'a>,
     pub(crate) id: Id,
     pub(crate) usage_location: Loc<'a>,
-    pub(crate) linkage: Option<Linkage>,
-    pub(crate) storage_duration: StorageDuration,
+    pub(crate) storage_duration: StorageDuration<Option<Linkage>>,
     pub(crate) previous_definition: Option<&'a Self>,
     pub(crate) is_parameter: IsParameter,
     pub(crate) is_in_global_scope: IsInGlobalScope,
@@ -363,7 +362,7 @@ pub(crate) enum IsInGlobalScope {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum StorageDuration {
+pub enum StorageDuration<Linkage> {
     Static(Linkage),
     Automatic,
     // TODO: thread local
@@ -567,6 +566,13 @@ impl<'a> Reference<'a> {
         assert_eq!(self.name, location.slice());
         Self { usage_location: location, ..*self }
     }
+
+    pub(crate) fn linkage(&self) -> Option<Linkage> {
+        match self.storage_duration {
+            StorageDuration::Static(linkage) => linkage,
+            StorageDuration::Automatic => None,
+        }
+    }
 }
 
 impl RefKind {
@@ -648,17 +654,12 @@ struct Scopes<'a> {
 }
 
 impl<'a> Scopes<'a> {
-    #[expect(
-        clippy::too_many_arguments,
-        reason = "TODO: consolidate some parameters"
-    )]
     fn add(
         &mut self,
         name: &'a str,
         loc: Loc<'a>,
         ty: QualifiedType<'a>,
-        linkage: Option<Linkage>,
-        storage_duration: StorageDuration,
+        storage_duration: StorageDuration<Option<Linkage>>,
         is_parameter: IsParameter,
         is_in_global_scope: IsInGlobalScope,
     ) -> Result<Reference<'a>, QualifiedType<'a>> {
@@ -674,7 +675,6 @@ impl<'a> Scopes<'a> {
             ty,
             id,
             usage_location: loc,
-            linkage,
             storage_duration,
             previous_definition: None,
             is_parameter,
@@ -728,7 +728,6 @@ impl<'a> Scopes<'a> {
             ty,
             id,
             usage_location: loc,
-            linkage: Some(Linkage::None),
             storage_duration: StorageDuration::Automatic,
             previous_definition: None,
             is_parameter: IsParameter::No,
@@ -911,8 +910,7 @@ fn resolve_function_definition<'a>(
         name.slice(),
         name.loc(),
         ty,
-        Some(linkage),
-        StorageDuration::Static(linkage),
+        StorageDuration::Static(Some(linkage)),
         IsParameter::No,
         IsInGlobalScope::Yes,
     );
@@ -971,7 +969,6 @@ fn resolve_function_definition<'a>(
                     name,
                     param.loc,
                     param.ty,
-                    Some(Linkage::None),
                     StorageDuration::Automatic,
                     IsParameter::Yes,
                     IsInGlobalScope::No,
@@ -1094,9 +1091,9 @@ fn resolve_declaration<'a>(
         None => None,
     };
     let storage_duration = match linkage {
-        Some(linkage) => StorageDuration::Static(linkage),
+        Some(linkage) => StorageDuration::Static(Some(linkage)),
         None => match scopes.is_in_global_scope() {
-            IsInGlobalScope::Yes => StorageDuration::Static(Linkage::External),
+            IsInGlobalScope::Yes => StorageDuration::Static(None),
             IsInGlobalScope::No => StorageDuration::Automatic,
         },
     };
@@ -1105,7 +1102,6 @@ fn resolve_declaration<'a>(
         name.slice(),
         name.loc(),
         ty,
-        linkage,
         storage_duration,
         IsParameter::No,
         scopes.is_in_global_scope(),
