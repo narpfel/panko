@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/linkage/test_redeclare_static_function_without_static.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_redeclare_static_function_without_static.c"
+   (declaration f~0 `fn() -> int` ∅)
+   (declaration f~0 `fn() -> int` ∅)
+   (declaration g~2 `fn() -> int` ∅)
+   (declaration g~2 `fn() -> int` ∅)
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (return (add (call (name f~0 `fn() -> int`)) (call (name g~2 `fn() -> int`))))))
+   (function-definition
+      f~0 `fn() -> int`
+      (compound-statement
+         (return 42)))
+   (function-definition
+      g~2 `fn() -> int`
+      (compound-statement
+         (return 7))))
+
+----- stderr -----
