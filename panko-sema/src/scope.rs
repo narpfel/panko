@@ -905,7 +905,7 @@ fn resolve_function_definition<'a>(
     let linkage = match try { storage_class.as_ref()?.kind } {
         Some(StorageClassSpecifierKind::Extern) | None => Some(Linkage::External),
         Some(StorageClassSpecifierKind::Static) => Some(Linkage::Internal),
-        kind => unreachable!("invalid or unimplemented StorageClassSpecifierKind {kind:?}"),
+        Some(kind) => unreachable!("invalid or unimplemented StorageClassSpecifierKind {kind:?}"),
     };
     let maybe_reference = scopes.add(
         name.slice(),
