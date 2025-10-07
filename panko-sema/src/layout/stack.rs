@@ -99,7 +99,7 @@ impl<'a> Stack<'a> {
                 } = reference;
                 let ty = layout_ty(self, bump, ty);
                 let slot = match storage_duration {
-                    StorageDuration::Static => match linkage {
+                    StorageDuration::Static(linkage) => match linkage {
                         Linkage::External | Linkage::Internal => Slot::Static(reference.name()),
                         Linkage::None => Slot::Static(bump.alloc_str(&format!(
                             "{}.{}",

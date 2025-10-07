@@ -899,11 +899,10 @@ impl<'a> Reference<'a> {
     }
 
     fn linkage_staticness_as_str(&self) -> &'static str {
-        match (self.linkage, self.storage_duration) {
-            (Linkage::External, _) => "extern",
-            (Linkage::Internal | Linkage::None, StorageDuration::Static) => "static",
-            (Linkage::None, StorageDuration::Automatic) => "local",
-            (Linkage::Internal, StorageDuration::Automatic) => unreachable!(),
+        match self.storage_duration {
+            StorageDuration::Automatic => "local",
+            StorageDuration::Static(Linkage::External) => "extern",
+            StorageDuration::Static(Linkage::Internal | Linkage::None) => "static",
         }
     }
 }
@@ -1263,10 +1262,10 @@ fn typeck_reference<'a>(
         },
     });
     let storage_duration = match ty.ty {
-        Type::Function(_) => StorageDuration::Static,
+        Type::Function(_) => StorageDuration::Static(linkage),
         _ => match linkage {
-            Linkage::External => StorageDuration::Static,
-            Linkage::Internal => StorageDuration::Static,
+            Linkage::External => StorageDuration::Static(linkage),
+            Linkage::Internal => StorageDuration::Static(linkage),
             Linkage::None => storage_duration,
         },
     };
