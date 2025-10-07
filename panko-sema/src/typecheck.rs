@@ -861,8 +861,7 @@ pub(crate) struct Reference<'a> {
     pub(crate) id: Id,
     pub(crate) usage_location: Loc<'a>,
     pub(crate) kind: RefKind,
-    pub(crate) linkage: Linkage,
-    pub(crate) storage_duration: StorageDuration,
+    pub(crate) storage_duration: StorageDuration<Linkage>,
 }
 
 impl<'a> Reference<'a> {
@@ -899,11 +898,17 @@ impl<'a> Reference<'a> {
     }
 
     fn linkage_staticness_as_str(&self) -> &'static str {
-        match (self.linkage, self.storage_duration) {
-            (Linkage::External, _) => "extern",
-            (Linkage::Internal | Linkage::None, StorageDuration::Static) => "static",
-            (Linkage::None, StorageDuration::Automatic) => "local",
-            (Linkage::Internal, StorageDuration::Automatic) => unreachable!(),
+        match self.storage_duration {
+            StorageDuration::Automatic => "local",
+            StorageDuration::Static(Linkage::External) => "extern",
+            StorageDuration::Static(Linkage::Internal | Linkage::None) => "static",
+        }
+    }
+
+    pub(crate) fn linkage(&self) -> Linkage {
+        match self.storage_duration {
+            StorageDuration::Static(linkage) => linkage,
+            StorageDuration::Automatic => Linkage::None,
         }
     }
 }
@@ -1192,7 +1197,6 @@ fn typeck_reference<'a>(
         ty,
         id,
         usage_location,
-        linkage,
         storage_duration,
         previous_definition,
         is_parameter,
@@ -1208,12 +1212,13 @@ fn typeck_reference<'a>(
         is_parameter,
         matches!(needs_initialiser, NeedsInitialiser::Yes).then_some(&reference),
     );
+    let linkage = reference.linkage();
     let (ty, linkage) = match previous_definition {
         Some(previous_definition) => {
             // TODO: this is quadratic in the number of previous decls for this name
             let previous_definition =
                 typeck_reference(sess, *previous_definition, needs_initialiser);
-            let previous_linkage = previous_definition.linkage;
+            let previous_linkage = previous_definition.linkage();
             let previous_ty = previous_definition.ty;
             let composite_ty = ty.composite_ty(sess.bump(), &previous_ty).unwrap_or(ty);
             let linkage = linkage
@@ -1263,11 +1268,15 @@ fn typeck_reference<'a>(
         },
     });
     let storage_duration = match ty.ty {
-        Type::Function(_) => StorageDuration::Static,
+        Type::Function(_) => StorageDuration::Static(linkage),
         _ => match linkage {
-            Linkage::External => StorageDuration::Static,
-            Linkage::Internal => StorageDuration::Static,
-            Linkage::None => storage_duration,
+            Linkage::External => StorageDuration::Static(linkage),
+            Linkage::Internal => StorageDuration::Static(linkage),
+            Linkage::None => match storage_duration {
+                StorageDuration::Static(Some(linkage)) => StorageDuration::Static(linkage),
+                StorageDuration::Static(None) => unreachable!(),
+                StorageDuration::Automatic => StorageDuration::Automatic,
+            },
         },
     };
 
@@ -1278,7 +1287,6 @@ fn typeck_reference<'a>(
         id,
         usage_location,
         kind,
-        linkage,
         storage_duration,
     }
 }
@@ -1643,7 +1651,7 @@ fn typeck_reference_declaration<'a>(
     let reference = typeck_reference(sess, reference, needs_initialiser);
 
     if let Type::Function(_) = reference.ty.ty
-        && reference.linkage != Linkage::External
+        && reference.linkage() != Linkage::External
         && is_in_global_scope == IsInGlobalScope::No
     {
         // TODO: use this error and/or adjust the linkage to `extern`
@@ -1653,13 +1661,13 @@ fn typeck_reference_declaration<'a>(
     if let Some(previous_definition) = previous_definition {
         // TODO: this is quadratic in the number of previous decls for this name
         let previous_definition = typeck_reference(sess, *previous_definition, needs_initialiser);
-        if previous_definition.linkage != reference.linkage {
+        if previous_definition.storage_duration != reference.storage_duration {
             sess.emit(Diagnostic::RedeclaredWithDifferentLinkage {
                 at: reference,
                 previous_definition,
             })
         }
-        if matches!(reference.kind, RefKind::Definition)
+        else if matches!(reference.kind, RefKind::Definition)
             && matches!(previous_definition.kind, RefKind::Definition)
         {
             sess.emit(scope::Diagnostic::AlreadyDefined {
@@ -1682,6 +1690,7 @@ fn typeck_reference_declaration<'a>(
             }
         }
     }
+
     reference
 }
 

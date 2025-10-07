@@ -34,15 +34,15 @@ Error: `y` redeclared as static but was originally declared as extern
    │            ╰── static declaration here
 ───╯
 
-Error: duplicate definition for `x`
+Error: `x` redeclared as static but was originally declared as local
    ╭─[panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c:8:16]
    │
  7 │ int f(int x) {
    │           ┬  
-   │           ╰── previously defined here
+   │           ╰── previously declared here as local
  8 │     static int x;
    │                ┬  
-   │                ╰── duplicate definition
+   │                ╰── static declaration here
 ───╯
 
 Error: `z` redeclared as static but was originally declared as extern
@@ -56,15 +56,15 @@ Error: `z` redeclared as static but was originally declared as extern
     │                ╰── static declaration here
 ────╯
 
-Error: duplicate definition for `w`
+Error: `w` redeclared as local but was originally declared as static
     ╭─[panko/tests/cases/linkage/test_error_redeclared_with_different_linkage.c:17:9]
     │
  16 │     static int w;
     │                ┬  
-    │                ╰── previously defined here
+    │                ╰── previously declared here as static
  17 │     int w;
     │         ┬  
-    │         ╰── duplicate definition
+    │         ╰── local declaration here
 ────╯
 
 Error: `v` redeclared as extern but was originally declared as local
