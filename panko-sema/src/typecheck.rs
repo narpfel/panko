@@ -1661,13 +1661,13 @@ fn typeck_reference_declaration<'a>(
     if let Some(previous_definition) = previous_definition {
         // TODO: this is quadratic in the number of previous decls for this name
         let previous_definition = typeck_reference(sess, *previous_definition, needs_initialiser);
-        if previous_definition.linkage() != reference.linkage() {
+        if previous_definition.storage_duration != reference.storage_duration {
             sess.emit(Diagnostic::RedeclaredWithDifferentLinkage {
                 at: reference,
                 previous_definition,
             })
         }
-        if matches!(reference.kind, RefKind::Definition)
+        else if matches!(reference.kind, RefKind::Definition)
             && matches!(previous_definition.kind, RefKind::Definition)
         {
             sess.emit(scope::Diagnostic::AlreadyDefined {

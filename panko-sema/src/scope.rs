@@ -361,7 +361,7 @@ pub(crate) enum IsInGlobalScope {
     No,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum StorageDuration<Linkage> {
     Static(Linkage),
     Automatic,
