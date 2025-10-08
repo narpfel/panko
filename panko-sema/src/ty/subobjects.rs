@@ -94,6 +94,7 @@ impl<'a> SubobjectIterator<'a> {
 enum Explicit {
     No,
     Yes,
+    Next,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -163,7 +164,12 @@ impl<'a> Subobjects<'a> {
                         Explicit::No,
                     ));
                 }
-                _ => return Ok(subobject),
+                _ => {
+                    if let Some((_, explicit @ Explicit::Next)) = self.stack.last_mut() {
+                        *explicit = Explicit::No;
+                    }
+                    return Ok(subobject);
+                }
             }
         }
     }
@@ -198,7 +204,7 @@ impl<'a> Subobjects<'a> {
     }
 
     pub(crate) fn enter_subobject_implicit(&mut self) -> Result<(), SubobjectIterator<'a>> {
-        self.enter_subobject_impl(Explicit::No)
+        self.enter_subobject_impl(Explicit::Next)
     }
 
     pub(crate) fn enter_subobject(&mut self) -> Result<(), SubobjectIterator<'a>> {

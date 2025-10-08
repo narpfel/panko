@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/initialisation/test_error_excess_designated_initialiser.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/initialisation/test_error_excess_designated_initialiser.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration xs~1 `array<array<int; 4>; 4>`
+            (braced
+               (designation ((index 2) (index 100)) 42)))
+         (declaration ys~2 `array<array<int; 7>; 5>`
+            (braced
+               (designation ((index 2) (index 0)) 1)
+               (designation ((index 2) (index 20)) 42)))
+         (declaration zs~3 `array<array<int; 2>; 5>`
+            (braced
+               (designation ((index 0) (index 0)) 42)
+               27
+               3)))))
+
+----- stderr -----

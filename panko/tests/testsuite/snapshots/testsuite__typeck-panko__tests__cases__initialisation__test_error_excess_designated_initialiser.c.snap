@@ -1,0 +1,33 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/initialisation/test_error_excess_designated_initialiser.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_error_excess_designated_initialiser.c:2:33]
+   │
+ 2 │     int xs[4][4] = { [2][100] = 42, };
+   │         ─┬                      ─┬  
+   │          │                       ╰── trying to initialise element at index 100 for `array<int; 4>`
+   │          │                          
+   │          ╰────────────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/initialisation/test_error_excess_designated_initialiser.c:3:44]
+   │
+ 3 │     int ys[5][7] = { [2][0] = 1, [2][20] = 42, };
+   │         ─┬                                 ─┬  
+   │          │                                  ╰── trying to initialise element at index 20 for `array<int; 7>`
+   │          │                                     
+   │          ╰───────────────────────────────────── while initialising this variable
+───╯
