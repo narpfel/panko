@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/generic/test_array_decay_in_selector.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/generic/test_array_decay_in_selector.c"
+   (function-definition external
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (xs~1 `array<int; 2>` @0) (braced ∅))
+         (return (0 `int` @8)))))
+
+----- stderr -----

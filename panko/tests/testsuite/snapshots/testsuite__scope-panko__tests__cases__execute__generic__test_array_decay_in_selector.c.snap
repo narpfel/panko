@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/generic/test_array_decay_in_selector.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/generic/test_array_decay_in_selector.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration xs~1 `array<int; 2>` (braced ∅))
+         (return
+            (generic
+               (name xs~1 `array<int; 2>`)
+               (assoc `ptr<int>` 0)
+               (assoc `array<int; 2>` 1))))))
+
+----- stderr -----

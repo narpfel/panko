@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/generic/test_error_duplicate_array_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/generic/test_error_duplicate_array_type.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration xs~1 `array<int; 2>` (braced ∅))
+         (expression
+            (generic
+               (name xs~1 `array<int; 2>`)
+               (assoc `ptr<int>` 0)
+               (assoc `array<int; 1>` 1)
+               (assoc `array<int; 2>` 2)
+               (assoc `array<int; 3>` 3)))
+         (expression
+            (generic
+               (name xs~1 `array<int; 2>`)
+               (assoc `array<int; 2>` 1)
+               (assoc `array<int; 2>` 2))))))
+
+----- stderr -----

@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/generic/test_error_duplicate_array_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: controlling expression does not match any type in this _Generic selection
+   ╭─[panko/tests/cases/generic/test_error_duplicate_array_type.c:5:14]
+   │
+ 5 │     _Generic(xs, int[2]: 1, int[2]: 2);
+   │     ──────────┬──────┬────────────────  
+   │               │      ╰────────────────── in this _Generic selection
+   │               │                         
+   │               ╰───────────────────────── controlling expression has type `ptr<int>`
+───╯
+
+Error: duplicate association for type `array<int; 2>` in _Generic selection
+   ╭─[panko/tests/cases/generic/test_error_duplicate_array_type.c:5:29]
+   │
+ 5 │     _Generic(xs, int[2]: 1, int[2]: 2);
+   │     ────┬───     ───┬──     ───┬──  
+   │         │           │          ╰──── this type is duplicated in this _Generic selection
+   │         │           │               
+   │         │           ╰─────────────── previous association for `array<int; 2>` here
+   │         │                           
+   │         ╰─────────────────────────── in this _Generic selection
+───╯
