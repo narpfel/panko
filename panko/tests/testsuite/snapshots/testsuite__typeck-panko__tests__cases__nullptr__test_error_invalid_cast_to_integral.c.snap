@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/nullptr/test_error_invalid_cast_to_integral.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid explicit conversion from `nullptr_t` to `int`
+   ╭─[panko/tests/cases/nullptr/test_error_invalid_cast_to_integral.c:2:10]
+   │
+ 2 │     (int)nullptr;
+   │          ───┬───  
+   │             ╰───── this is of type `nullptr_t`, which cannot be explicitly converted to `int`
+───╯
+
+Error: invalid explicit conversion from `nullptr_t` to `unsigned long`
+   ╭─[panko/tests/cases/nullptr/test_error_invalid_cast_to_integral.c:3:24]
+   │
+ 3 │     (typeof(sizeof 42))nullptr;
+   │                        ───┬───  
+   │                           ╰───── this is of type `nullptr_t`, which cannot be explicitly converted to `unsigned long`
+───╯

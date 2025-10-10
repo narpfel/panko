@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/nullptr/test_error_invalid_cast_to_integral.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/nullptr/test_error_invalid_cast_to_integral.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (expression (cast `int` nullptr))
+         (expression (cast `typeof((sizeof 42))` nullptr)))))
+
+----- stderr -----

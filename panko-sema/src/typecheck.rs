@@ -1346,7 +1346,7 @@ fn convert<'a>(
 
         (Type::Pointer(_), Type::Nullptr) => convert(),
 
-        // TODO: handle nullptr literals
+        // TODO: handle nullptr literals (but casting `nullptr` to integral is forbidden)
         (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(_))
         | (Type::Pointer(_), Type::Arithmetic(Arithmetic::Integral(_)))
             if kind == ConversionKind::Explicit =>
