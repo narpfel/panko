@@ -1233,8 +1233,10 @@ fn typeck_reference<'a>(
                 // `typeck_reference_declaration`
                 (Some(Linkage::External | Linkage::Internal), Linkage::None) => linkage,
                 (Some(Linkage::Internal | Linkage::None), Linkage::External) => linkage,
-                (Some(Linkage::None), Linkage::Internal) =>
-                    unreachable!("todo: really unreachable?"),
+                (Some(Linkage::None), Linkage::Internal) => unreachable!(
+                    "internal linkage implies file scope, no linkage implies block scope, \
+                    so this kind of redeclaration is impossible",
+                ),
             };
             (composite_ty, linkage)
         }
