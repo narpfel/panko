@@ -22,6 +22,7 @@ use std::panic::catch_unwind;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
+use std::process::ExitCode;
 use std::process::ExitStatus;
 use std::process::Output;
 use std::sync::Arc;
@@ -371,7 +372,8 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
     assert_eq!("", stderr, "no output on stderr is expected");
 }
 
-fn run_tests(cases: impl Iterator<Item = TestCase>) {
+#[must_use]
+fn run_tests(cases: impl Iterator<Item = TestCase>) -> ExitCode {
     let start = Instant::now();
 
     let cases = cases.collect_vec();
@@ -455,9 +457,15 @@ fn run_tests(cases: impl Iterator<Item = TestCase>) {
         xpassed = outcomes.get(TestResult::XPass).len(),
         skipped = outcomes.get(TestResult::Skip).len(),
     );
+
+    match is_failed {
+        true => ExitCode::FAILURE,
+        false => ExitCode::SUCCESS,
+    }
 }
 
-pub fn run(cases: impl Iterator<Item = TestCase>) {
+#[must_use]
+pub fn run(cases: impl Iterator<Item = TestCase>) -> ExitCode {
     color_eyre::install().unwrap();
 
     run_tests(cases)
