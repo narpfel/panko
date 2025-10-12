@@ -7,6 +7,7 @@ use std::ffi::OsStr;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
+use std::process::ExitCode;
 
 use insta_cmd::assert_cmd_snapshot;
 use insta_cmd::get_cargo_bin;
@@ -123,6 +124,6 @@ fn discover(pattern: &str) -> impl Iterator<Item = TestCase> {
     })
 }
 
-fn main() {
+fn main() -> ExitCode {
     panko_compiletest::run(discover("tests/cases/**/test_*"))
 }
