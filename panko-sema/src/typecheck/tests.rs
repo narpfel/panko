@@ -1,6 +1,5 @@
 use IntegralKind::*;
 use Signedness::*;
-use rstest::rstest;
 
 use super::*;
 
@@ -18,49 +17,63 @@ fn test_conversion_rank_comparison() {
     );
 }
 
-#[rstest]
-#[case(
+macro_rules! test_usual_arithmetic_conversions {
+    ($name:ident, $lhs_ty:expr, $rhs_ty:expr, $expected:expr $(,)?) => {
+        #[test]
+        fn $name() {
+            assert_eq!(
+                perform_usual_arithmetic_conversions($lhs_ty, $rhs_ty),
+                $expected,
+            );
+        }
+    };
+}
+
+test_usual_arithmetic_conversions!(
+    char_to_int,
     Arithmetic::Integral(Integral { signedness: Signed, kind: PlainChar }),
     Arithmetic::Integral(Integral { signedness: Signed, kind: PlainChar }),
     Arithmetic::Integral(Integral { signedness: Signed, kind: Int }),
-)]
-#[case(
+);
+
+test_usual_arithmetic_conversions!(
+    char_and_short_to_int,
     Arithmetic::Integral(Integral { signedness: Signed, kind: PlainChar }),
     Arithmetic::Integral(Integral { signedness: Signed, kind: Short }),
     Arithmetic::Integral(Integral { signedness: Signed, kind: Int }),
-)]
-#[case(
+);
+
+test_usual_arithmetic_conversions!(
+    unsigned_signed_to_unsigned,
     Arithmetic::Integral(Integral { signedness: Unsigned, kind: Int }),
     Arithmetic::Integral(Integral { signedness: Signed, kind: Int }),
     Arithmetic::Integral(Integral { signedness: Unsigned, kind: Int }),
-)]
-#[case(
+);
+
+test_usual_arithmetic_conversions!(
+    unsigned_short_signed_to_signed,
     Arithmetic::Integral(Integral { signedness: Unsigned, kind: Short }),
     Arithmetic::Integral(Integral { signedness: Signed, kind: Char }),
     Arithmetic::Integral(Integral { signedness: Signed, kind: Int }),
-)]
-#[case(
+);
+
+test_usual_arithmetic_conversions!(
+    unsigned_signed_long_to_unsigned,
     Arithmetic::Integral(Integral { signedness: Unsigned, kind: Long }),
     Arithmetic::Integral(Integral { signedness: Signed, kind: LongLong }),
     Arithmetic::Integral(Integral { signedness: Unsigned, kind: LongLong }),
-)]
-#[case(
+);
+
+test_usual_arithmetic_conversions!(
+    unsigned_long_and_int_to_unsigned_long,
     Arithmetic::Integral(Integral { signedness: Unsigned, kind: Long }),
     Arithmetic::Integral(Integral { signedness: Unsigned, kind: Int }),
     Arithmetic::Integral(Integral { signedness: Unsigned, kind: Long }),
-)]
-#[case(
+);
+
+test_usual_arithmetic_conversions!(
+    signed_long_and_unsigned_int_to_long,
     Arithmetic::Integral(Integral { signedness: Signed, kind: Long }),
     Arithmetic::Integral(Integral { signedness: Unsigned, kind: Int }),
     Arithmetic::Integral(Integral { signedness: Signed, kind: Long }),
-)]
-fn test_usual_arithmetic_conversions(
-    #[case] lhs_ty: Arithmetic,
-    #[case] rhs_ty: Arithmetic,
-    #[case] expected: Arithmetic,
-) {
-    assert_eq!(
-        perform_usual_arithmetic_conversions(lhs_ty, rhs_ty),
-        expected,
-    );
-}
+);

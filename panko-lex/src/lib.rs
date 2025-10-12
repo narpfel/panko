@@ -854,129 +854,136 @@ where
 
 #[cfg(test)]
 mod test {
-    use rstest::fixture;
-    use rstest::rstest;
-
     use super::*;
-
-    #[fixture]
-    fn bump() -> Bump {
-        Bump::new()
-    }
-
-    macro_rules! check {
-        ($body:expr) => {
-            for<'a> |result: TokenIter<'a>| -> () {
-                #[allow(clippy::redundant_closure_call)]
-                let () = $body(result.collect::<Vec<Token<'a>>>());
-            }
-        };
-    }
-
-    macro_rules! check_err {
-        ($pattern:pat $(,)?) => {
-            check!(|result: Vec<_>| pretty_assertions::assert_matches!(result[..], $pattern))
-        };
-    }
 
     const FULLWIDTH_NUMBER_4_LEN: usize = '４'.len_utf8();
     const FULLWIDTH_NUMBER_2_END: usize = '４'.len_utf8() + '２'.len_utf8();
 
-    #[rstest]
-    #[case::zero_b_literal("0b", &[
-        TokenKind::Integer(Integer {
-            suffix: IntegerSuffix::Invalid,
-            suffix_len: 1,
-            base: 8,
-            prefix_len: 0,
-        })
-    ])]
-    #[case::zero_x_literal("0x", &[
-        TokenKind::Integer(Integer {
-            suffix: IntegerSuffix::Invalid,
-            suffix_len: 1,
-            base: 8,
-            prefix_len: 0,
-        })
-    ])]
-    #[case::invalid_suffix("123abc", &[
-        TokenKind::Integer(Integer {
-            suffix: IntegerSuffix::Invalid,
-            suffix_len: 3,
-            base: 10,
-            prefix_len: 0,
-        })
-    ])]
-    #[case::invalid_suffix("0bcd123abc", &[
-        TokenKind::Integer(Integer {
-            suffix: IntegerSuffix::Invalid,
-            suffix_len: 9,
-            base: 8,
-            prefix_len: 0,
-        })
-    ])]
-    #[case::invalid_suffix("0xcd123xyz", &[
-        TokenKind::Integer(Integer {
-            suffix: IntegerSuffix::Invalid,
-            suffix_len: 3,
-            base: 16,
-            prefix_len: 2,
-        })
-    ])]
-    #[case::invalid_suffix("0xqd123abc", &[
-        TokenKind::Integer(Integer {
-            suffix: IntegerSuffix::Invalid,
-            suffix_len: 9,
-            base: 8,
-            prefix_len: 0,
-        })
-    ])]
-    fn test_lexer(bump: Bump, #[case] src: &str, #[case] expected: &[TokenKind]) {
-        let tokens = lex(&bump, Path::new("<src>"), src)
-            .map(|token| token.kind)
-            .collect::<Vec<_>>();
-        pretty_assertions::assert_eq!(tokens, expected);
+    mod test_lexer {
+        use super::*;
+
+        macro_rules! test_lexer {
+            ($name:ident, $src:expr, $expected:expr $(,)?) => {
+                #[test]
+                fn $name() {
+                    let bump = Bump::new();
+                    let tokens = lex(&bump, Path::new("<src>"), $src)
+                        .map(|token| token.kind)
+                        .collect::<Vec<_>>();
+                    pretty_assertions::assert_eq!(tokens, $expected);
+                }
+            };
+        }
+
+        test_lexer!(
+            zero_b_literal,
+            "0b",
+            &[TokenKind::Integer(Integer {
+                suffix: IntegerSuffix::Invalid,
+                suffix_len: 1,
+                base: 8,
+                prefix_len: 0,
+            })],
+        );
+        test_lexer!(
+            zero_x_literal,
+            "0x",
+            &[TokenKind::Integer(Integer {
+                suffix: IntegerSuffix::Invalid,
+                suffix_len: 1,
+                base: 8,
+                prefix_len: 0,
+            })],
+        );
+        test_lexer!(
+            invalid_suffix,
+            "123abc",
+            &[TokenKind::Integer(Integer {
+                suffix: IntegerSuffix::Invalid,
+                suffix_len: 3,
+                base: 10,
+                prefix_len: 0,
+            })],
+        );
+        test_lexer!(
+            invalid_suffix_bin,
+            "0bcd123abc",
+            &[TokenKind::Integer(Integer {
+                suffix: IntegerSuffix::Invalid,
+                suffix_len: 9,
+                base: 8,
+                prefix_len: 0,
+            })],
+        );
+        test_lexer!(
+            invalid_suffix_hex,
+            "0xcd123xyz",
+            &[TokenKind::Integer(Integer {
+                suffix: IntegerSuffix::Invalid,
+                suffix_len: 3,
+                base: 16,
+                prefix_len: 2,
+            })],
+        );
+        test_lexer!(
+            invalid_suffix_hex_2,
+            "0xqd123abc",
+            &[TokenKind::Integer(Integer {
+                suffix: IntegerSuffix::Invalid,
+                suffix_len: 9,
+                base: 8,
+                prefix_len: 0,
+            })],
+        );
     }
 
-    #[rstest]
-    #[case::unicode_number(
-        "４２",
-        check_err!([
-            Token {
-                loc: Loc {
-                    span: Span { start: 0, end: FULLWIDTH_NUMBER_4_LEN },
-                    source_file: _,
+    #[test]
+    fn test_lex_error_unicode_error() {
+        let bump = Bump::new();
+        let src = "４２";
+        pretty_assertions::assert_matches!(
+            lex(&bump, Path::new("<src>"), src).collect::<Vec<_>>()[..],
+            [
+                Token {
+                    loc: Loc {
+                        span: Span { start: 0, end: FULLWIDTH_NUMBER_4_LEN },
+                        source_file: _,
+                    },
+                    kind: TokenKind::Error(ErrorKind::Other),
                 },
-                kind: TokenKind::Error(ErrorKind::Other),
-            },
-            Token {
-                loc: Loc {
-                    span: Span { start: FULLWIDTH_NUMBER_4_LEN, end: FULLWIDTH_NUMBER_2_END },
-                    source_file: _,
+                Token {
+                    loc: Loc {
+                        span: Span {
+                            start: FULLWIDTH_NUMBER_4_LEN,
+                            end: FULLWIDTH_NUMBER_2_END
+                        },
+                        source_file: _,
+                    },
+                    kind: TokenKind::Error(ErrorKind::Other),
                 },
-                kind: TokenKind::Error(ErrorKind::Other),
-            },
-        ]),
-    )]
-    fn test_lex_error(
-        bump: Bump,
-        #[case] src: &str,
-        #[case] expected: impl for<'a> FnOnce(TokenIter<'a>),
-    ) {
-        expected(lex(&bump, Path::new("<src>"), src))
+            ],
+        )
     }
 
-    #[rstest]
-    #[case::no_suffix_at_end_of_input("", 0, IntegerSuffix::None)]
-    #[case::no_suffix("+ 42", 0, IntegerSuffix::None)]
-    #[case::no_suffix_then_unsigned(" u", 0, IntegerSuffix::None)]
-    #[case::unsigned("u)", 1, IntegerSuffix::Unsigned)]
-    #[case::ullong("uLL ", 3, IntegerSuffix::UnsignedLongLong)]
-    fn test_integer_suffix_lexer(
-        #[case] src: &str,
-        #[case] suffix_len: usize,
-        #[case] expected: IntegerSuffix,
-    ) {
-        pretty_assertions::assert_eq!(lex_integer_suffix(src), (suffix_len, expected));
+    mod test_integer_suffix_lexer {
+        use super::*;
+
+        macro_rules! test_integer_suffix_lexer {
+            ($name:ident, $src:expr, $suffix_len:expr, $expected:expr) => {
+                #[test]
+                fn $name() {
+                    pretty_assertions::assert_eq!(
+                        lex_integer_suffix($src),
+                        ($suffix_len, $expected),
+                    )
+                }
+            };
+        }
+
+        test_integer_suffix_lexer!(no_suffix_at_end_of_input, "", 0, IntegerSuffix::None);
+        test_integer_suffix_lexer!(no_suffix, "+ 42", 0, IntegerSuffix::None);
+        test_integer_suffix_lexer!(no_suffix_then_unsigned, " u", 0, IntegerSuffix::None);
+        test_integer_suffix_lexer!(unsigned, "u)", 1, IntegerSuffix::Unsigned);
+        test_integer_suffix_lexer!(ullong, "uLL ", 3, IntegerSuffix::UnsignedLongLong);
     }
 }
