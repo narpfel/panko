@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/linkage/test_redeclare_tentative_definition_of_static_variable.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/linkage/test_redeclare_tentative_definition_of_static_variable.c"
+   (tentative-definition internal (x~0 `int` (static x)) ∅)
+   (function-definition external
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (return (x~0 `int` (static x)))))
+   (definition internal (x~0 `int` (static x)) (42 `int` (static x))))
+
+----- stderr -----
