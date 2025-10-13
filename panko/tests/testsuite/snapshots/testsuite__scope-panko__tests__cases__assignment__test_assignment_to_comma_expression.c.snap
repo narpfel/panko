@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/assignment/test_assignment_to_comma_expression.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/assignment/test_assignment_to_comma_expression.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration x~1 `int` 0)
+         (declaration y~2 `int` 0)
+         (expression
+            (assign
+               (comma
+                  (name x~1 `int`)
+                  (name y~2 `int`))
+               42)))))
+
+----- stderr -----

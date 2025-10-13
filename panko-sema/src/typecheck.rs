@@ -953,9 +953,10 @@ impl<'a> TypedExpression<'a> {
             | Expression::Lengthof { .. }
             | Expression::SizeofTy { .. }
             | Expression::LengthofTy { .. }
-            | Expression::Alignof { .. } => false,
-            Expression::Combine { first: _, second } => second.is_lvalue(),
-            Expression::Logical { .. } | Expression::Conditional { .. } => false,
+            | Expression::Alignof { .. }
+            | Expression::Combine { .. }
+            | Expression::Logical { .. }
+            | Expression::Conditional { .. } => false,
         }
     }
 
