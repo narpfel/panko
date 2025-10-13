@@ -6,23 +6,21 @@ int f() {
 
 int g() {
     int const* b;
-    // FIXME: cannot initialise pointers yet
-    int const* c;
+    int const* c = nullptr;
     b = c;
     return 0;
 }
 
 int h() {
     int* const d;
-    // FIXME: cannot initialise pointers yet
-    int* e;
+    int* e = nullptr;
     d = e;
     return 0;
 }
 
 int i() {
     int* f;
-    int* const g;
+    int* const g = nullptr;
     f = g;
     return 0;
 }

@@ -24,13 +24,13 @@ Error: cannot assign to `const` value `a`
 ───╯
 
 Error: cannot assign to `const` value `d`
-    ╭─[panko/tests/cases/assignment/test_assignment_to_const.c:19:5]
+    ╭─[panko/tests/cases/assignment/test_assignment_to_const.c:17:5]
     │
- 16 │     int* const d;
+ 15 │     int* const d;
     │                ┬  
     │                ╰── note: `d` declared here
     │ 
- 19 │     d = e;
+ 17 │     d = e;
     │     ┬  
     │     ╰── this value is `const`
 ────╯
