@@ -182,6 +182,13 @@ pub struct TranslationUnit<'a> {
 pub enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
+    Error(&'a dyn Report),
+}
+
+impl<'a> FromError<'a> for ExternalDeclaration<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Error(error)
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -310,9 +317,9 @@ impl<'a> ExternalDeclaration<'a> {
                     FunctionDefinition::from_parse_tree(sess, def),
                 ))),
             cst::ExternalDeclaration::Declaration(decl) => Either::Right(
-                Declaration::from_parse_tree(sess, decl).map(|decl| match decl {
+                Declaration::from_parse_tree(sess, decl).map(|parsed| match parsed {
                     Ok(decl) => ExternalDeclaration::Declaration(decl),
-                    Err(ty) => todo!("declaration does not specify a name: `{ty}`"),
+                    Err(ty) => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl, ty }),
                 }),
             ),
         }

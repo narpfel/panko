@@ -1341,6 +1341,7 @@ pub fn resolve_names<'a>(
                     DeclarationOrTypedef::Redeclared(redeclared) =>
                         ExternalDeclaration::Redeclared(redeclared),
                 },
+            ast::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
         })),
     }
 }
