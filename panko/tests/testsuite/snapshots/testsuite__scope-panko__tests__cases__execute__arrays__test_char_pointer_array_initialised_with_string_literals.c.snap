@@ -1,0 +1,33 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arrays/test_char_pointer_array_initialised_with_string_literals.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/arrays/test_char_pointer_array_initialised_with_string_literals.c"
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (declaration hello_world~2 `array<ptr<char const>; ∅>`
+            (braced
+               (string "hello")
+               (string "world")
+               (string "or something")))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (subscript (name hello_world~2 `array<ptr<char const>; ∅>`) 0)))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (subscript (name hello_world~2 `array<ptr<char const>; ∅>`) 1)))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (subscript (name hello_world~2 `array<ptr<char const>; ∅>`) 2))))))
+
+----- stderr -----

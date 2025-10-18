@@ -1553,26 +1553,21 @@ fn typeck_initialiser_list<'a>(
                 let left = subobjects.try_leave_subobject(AllowExplicit::Yes);
                 assert!(left);
             }
-            scope::Initialiser::Expression(expr @ scope::Expression::String(_))
-                if let Ok(_) = subobjects.next_scalar()
-                    && let Some(subobject) = subobjects.parent()
-                    && let Type::Array(array_ty) = subobject.ty.ty
-                    && subobjects.try_leave_subobject(AllowExplicit::No) =>
-            {
-                subobject_initialisers.insert(
-                    subobject.offset,
-                    SubobjectInitialiser {
-                        subobject,
-                        initialiser: typeck_array_initialisation_with_string(
-                            sess, reference, &array_ty, expr,
-                        ),
-                    },
-                );
-            }
             scope::Initialiser::Expression(expr) => match subobjects.next_scalar() {
                 Ok(subobject) => {
-                    subobject_initialisers.insert(
-                        subobject.offset,
+                    let subobject_initialiser = if let scope::Expression::String(_) = expr
+                        && let Some(subobject) = subobjects.parent()
+                        && let Type::Array(array_ty) = subobject.ty.ty
+                        && subobjects.try_leave_subobject(AllowExplicit::No)
+                    {
+                        SubobjectInitialiser {
+                            subobject,
+                            initialiser: typeck_array_initialisation_with_string(
+                                sess, reference, &array_ty, expr,
+                            ),
+                        }
+                    }
+                    else {
                         SubobjectInitialiser {
                             subobject,
                             // TODO: this skips typechecking the initialiser in the `Err` case
@@ -1584,8 +1579,9 @@ fn typeck_initialiser_list<'a>(
                                 subobject.ty,
                                 typeck_expression(sess, expr, Context::Default),
                             ),
-                        },
-                    );
+                        }
+                    };
+                    subobject_initialisers.insert(subobject.offset, subobject_initialiser);
                 }
                 Err(iterator) =>
                     if emit_nested_excess_initialiser_errors {
