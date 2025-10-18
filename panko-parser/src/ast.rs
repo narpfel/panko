@@ -450,12 +450,8 @@ impl<'a> Declaration<'a> {
 }
 
 impl<'a> TypeQualifier<'a> {
-    fn parse(
-        self,
-        sess: &'a Session<'a>,
-        const_qualifier: &mut Option<Self>,
-        volatile_qualifier: &mut Option<Self>,
-    ) {
+    fn parse(self, sess: &'a Session<'a>, qualifiers: &mut Qualifiers<'a>) {
+        let Qualifiers { const_qualifier, volatile_qualifier } = qualifiers;
         match self.kind {
             TypeQualifierKind::Const =>
                 if let Some(first) = *const_qualifier {
@@ -673,12 +669,17 @@ impl<'a> ParsedSpecifiers<'a> {
     }
 }
 
+#[derive(Default)]
+struct Qualifiers<'a> {
+    const_qualifier: Option<TypeQualifier<'a>>,
+    volatile_qualifier: Option<TypeQualifier<'a>>,
+}
+
 pub(crate) fn parse_declaration_specifiers<'a>(
     sess: &'a Session<'a>,
     specifiers: cst::DeclarationSpecifiers<'a>,
 ) -> DeclarationSpecifiers<'a> {
-    let mut const_qualifier = None;
-    let mut volatile_qualifier = None;
+    let mut qualifiers = Qualifiers::default();
     let mut ty = ParsedSpecifiers::None;
     let mut storage_class = None;
     for (i, specifier) in specifiers.0.iter().enumerate() {
@@ -698,12 +699,13 @@ pub(crate) fn parse_declaration_specifiers<'a>(
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Specifier(specifier)) =>
                 ty = specifier.parse(sess, specifiers, i, ty),
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Qualifier(qualifier)) =>
-                qualifier.parse(sess, &mut const_qualifier, &mut volatile_qualifier),
+                qualifier.parse(sess, &mut qualifiers),
             cst::DeclarationSpecifier::FunctionSpecifier(function_specifier) =>
                 todo!("{function_specifier:#?}"),
         }
     }
 
+    let Qualifiers { const_qualifier, volatile_qualifier } = qualifiers;
     let ty = ty.into_type(|| {
         // TODO: implement `FromError` for `Type`
         let () = sess.emit(Diagnostic::DeclarationWithoutType { at: specifiers });
@@ -731,11 +733,11 @@ pub(crate) fn parse_declarator<'a>(
 ) -> (QualifiedType<'a>, Option<Token<'a>>) {
     let name = loop {
         for pointer in declarator.pointers.unwrap_or_default() {
-            let mut const_qualifier = None;
-            let mut volatile_qualifier = None;
+            let mut qualifiers = Qualifiers::default();
             for qualifier in pointer.qualifiers {
-                qualifier.parse(sess, &mut const_qualifier, &mut volatile_qualifier);
+                qualifier.parse(sess, &mut qualifiers)
             }
+            let Qualifiers { const_qualifier, volatile_qualifier } = qualifiers;
             ty = QualifiedType {
                 is_const: const_qualifier.is_some(),
                 is_volatile: volatile_qualifier.is_some(),
