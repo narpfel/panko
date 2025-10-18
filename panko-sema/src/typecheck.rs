@@ -1581,7 +1581,10 @@ fn typeck_initialiser_list<'a>(
                             ),
                         }
                     };
-                    subobject_initialisers.insert(subobject.offset, subobject_initialiser);
+                    subobject_initialisers.insert(
+                        subobject_initialiser.subobject.offset,
+                        subobject_initialiser,
+                    );
                 }
                 Err(iterator) =>
                     if emit_nested_excess_initialiser_errors {
