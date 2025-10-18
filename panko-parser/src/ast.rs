@@ -337,7 +337,7 @@ impl<'a> FunctionDefinition<'a> {
             Some(storage_class) => todo!("handle storage_class {storage_class:?}"),
             None => None,
         };
-        let (ty, name) = parse_declarator(sess, ty, declarator);
+        let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
         let name =
             name.unwrap_or_else(|| unreachable!("[parser] syntax error: declaration without name"));
         Self {
@@ -440,7 +440,7 @@ impl<'a> Declaration<'a> {
         decl.init_declarator_list
             .iter()
             .map(move |&InitDeclarator { declarator, initialiser }| {
-                let (ty, name) = parse_declarator(sess, ty, declarator);
+                let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
                 match name {
                     Some(name) => Ok(Self { ty, name, initialiser, storage_class }),
                     None => Err(ty),
@@ -675,6 +675,16 @@ struct Qualifiers<'a> {
     volatile_qualifier: Option<TypeQualifier<'a>>,
 }
 
+impl<'a> Qualifiers<'a> {
+    fn parse(sess: &'a Session<'a>, type_qualifiers: &[TypeQualifier<'a>]) -> Self {
+        let mut qualifiers = Self::default();
+        for qualifier in type_qualifiers {
+            qualifier.parse(sess, &mut qualifiers)
+        }
+        qualifiers
+    }
+}
+
 pub(crate) fn parse_declaration_specifiers<'a>(
     sess: &'a Session<'a>,
     specifiers: cst::DeclarationSpecifiers<'a>,
@@ -726,18 +736,22 @@ pub(crate) fn parse_declaration_specifiers<'a>(
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum IsParameter {
+    Yes,
+    No,
+}
+
 pub(crate) fn parse_declarator<'a>(
     sess: &'a Session<'a>,
     mut ty: QualifiedType<'a>,
     mut declarator: cst::Declarator<'a>,
+    is_parameter: IsParameter,
 ) -> (QualifiedType<'a>, Option<Token<'a>>) {
     let name = loop {
         for pointer in declarator.pointers.unwrap_or_default() {
-            let mut qualifiers = Qualifiers::default();
-            for qualifier in pointer.qualifiers {
-                qualifier.parse(sess, &mut qualifiers)
-            }
-            let Qualifiers { const_qualifier, volatile_qualifier } = qualifiers;
+            let Qualifiers { const_qualifier, volatile_qualifier } =
+                Qualifiers::parse(sess, pointer.qualifiers);
             ty = QualifiedType {
                 is_const: const_qualifier.is_some(),
                 is_volatile: volatile_qualifier.is_some(),
@@ -756,16 +770,25 @@ pub(crate) fn parse_declarator<'a>(
                 length,
                 close_bracket,
             }) => {
-                if !type_qualifiers.is_empty() {
-                    todo!("array in function parameter not implemented");
-                }
+                let Qualifiers { const_qualifier, volatile_qualifier } = match is_parameter {
+                    IsParameter::Yes => Qualifiers::parse(sess, type_qualifiers),
+                    IsParameter::No => {
+                        for qualifier in type_qualifiers {
+                            todo!(
+                                "error: cannot use type qualifier `{}` in non-parameter array declarator",
+                                qualifier.slice(),
+                            );
+                        }
+                        Qualifiers::default()
+                    }
+                };
                 declarator = cst::Declarator {
                     pointers: None,
                     direct_declarator: *direct_declarator,
                 };
                 ty = QualifiedType {
-                    is_const: false,
-                    is_volatile: false,
+                    is_const: const_qualifier.is_some(),
+                    is_volatile: volatile_qualifier.is_some(),
                     ty: Type::Array(ArrayType {
                         ty: sess.alloc(ty),
                         length: try { sess.alloc(length?) },
@@ -790,7 +813,7 @@ pub(crate) fn parse_declarator<'a>(
                         todo!("error: parameter declared with storage class {storage_class:?}");
                     }
                     let (ty, name) = param.declarator.map_or((ty, None), |declarator| {
-                        parse_declarator(sess, ty, declarator)
+                        parse_declarator(sess, ty, declarator, IsParameter::Yes)
                     });
                     let loc =
                         name.map_or_else(|| param.declaration_specifiers.loc(), |name| name.loc());

@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/arrays/test_array_as_function_parameter_with_qualifier.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/arrays/test_array_as_function_parameter_with_qualifier.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
+      print~1 `fn(xs: ptr<int>) -> void`
+      (params
+         xs~2 `ptr<int> const`)
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (deref `int` (ptr-add `ptr<int>` (xs~2 `ptr<int> const`) (sign-extend `unsigned long` (0 `int`))))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (deref `int` (ptr-add `ptr<int>` (xs~2 `ptr<int> const`) (sign-extend `unsigned long` (1 `int`))))))))
+   (function-definition external
+      main~3 `fn() -> int`
+      (compound-statement
+         (definition xs~4 `array<int; 2>`
+            (braced
+               (subobject +0 (42 `int`))
+               (subobject +4 (27 `int`))))
+         (expression
+            (call `void`
+               (addressof `ptr<fn(xs: ptr<int>) -> void>`
+                  (print~1 `fn(xs: ptr<int>) -> void`))
+               (noop-type-conversion `ptr<int>`
+                  (addressof `ptr<array<int; 2>>`
+                     (xs~4 `array<int; 2>`))))))))
+
+----- stderr -----

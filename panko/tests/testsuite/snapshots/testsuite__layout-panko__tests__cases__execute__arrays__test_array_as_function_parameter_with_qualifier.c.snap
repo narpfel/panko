@@ -1,0 +1,59 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/arrays/test_array_as_function_parameter_with_qualifier.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/arrays/test_array_as_function_parameter_with_qualifier.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external
+      (print~1 `fn(xs: ptr<int>) -> void` (static print))
+      (params
+         (xs~2 `ptr<int> const` @0))
+      (compound-statement
+         (expression
+            (call `int` @8
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 4>>` @24
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (deref `int` @32
+                  (ptr-add `ptr<int>` @40
+                     (xs~2 `ptr<int> const` @0)
+                     (sign-extend `unsigned long` @48 (0 `int` @56))))))
+         (expression
+            (call `int` @8
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 4>>` @24
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (deref `int` @32
+                  (ptr-add `ptr<int>` @40
+                     (xs~2 `ptr<int> const` @0)
+                     (sign-extend `unsigned long` @48 (1 `int` @56))))))))
+   (function-definition external
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (definition (xs~4 `array<int; 2>` @0)
+            (braced
+               (subobject +0 (42 `int` @0))
+               (subobject +4 (27 `int` @4))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn(xs: ptr<int>) -> void>` @8
+                  (print~1 `fn(xs: ptr<int>) -> void` (static print)))
+               (noop-type-conversion `ptr<int>` @16
+                  (addressof `ptr<array<int; 2>>` @16
+                     (xs~4 `array<int; 2>` @0))))))))
+
+----- stderr -----

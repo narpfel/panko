@@ -7,6 +7,7 @@ use panko_lex::TokenKind;
 use panko_lex::TypedefNames;
 
 use crate as ast;
+use crate::ast::IsParameter;
 use crate::ast::Session;
 
 grammar<'a, 'b>(
@@ -402,7 +403,7 @@ TypeName: crate::ast::QualifiedType<'a> = {
         match abstract_declarator {
             None => ty,
             Some(abstract_declarator) => {
-                let (ty, name) = crate::ast::parse_declarator(sess, ty, abstract_declarator);
+                let (ty, name) = crate::ast::parse_declarator(sess, ty, abstract_declarator, IsParameter::No);
                 assert!(name.is_none());
                 ty
             },

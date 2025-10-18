@@ -1111,7 +1111,6 @@ fn typeck_ty_with_initialiser<'a>(
             };
             match is_parameter {
                 IsParameter::Yes => {
-                    // TODO: use qualifiers specified in the array declarator
                     if matches!(length, ArrayLength::Variable(_)) {
                         todo!("unimplemented: variably-modified type as function parameter");
                     }
