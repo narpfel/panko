@@ -70,6 +70,10 @@ enum Diagnostic<'a> {
         at: cst::Declaration<'a>,
         ty: QualifiedType<'a>,
     },
+
+    #[error("cannot use type qualifier `{at}` in non-parameter array declarator")]
+    #[diagnostics(at(colour = Red, label = "help: remove this `{at}`"))]
+    InvalidTypeQualifierInArrayBrackets { at: TypeQualifier<'a> },
 }
 
 // TODO: could this be `From<&'a dyn Report>`?
@@ -774,10 +778,9 @@ pub(crate) fn parse_declarator<'a>(
                     IsParameter::Yes => Qualifiers::parse(sess, type_qualifiers),
                     IsParameter::No => {
                         for qualifier in type_qualifiers {
-                            todo!(
-                                "error: cannot use type qualifier `{}` in non-parameter array declarator",
-                                qualifier.slice(),
-                            );
+                            sess.emit(Diagnostic::InvalidTypeQualifierInArrayBrackets {
+                                at: *qualifier,
+                            })
                         }
                         Qualifiers::default()
                     }

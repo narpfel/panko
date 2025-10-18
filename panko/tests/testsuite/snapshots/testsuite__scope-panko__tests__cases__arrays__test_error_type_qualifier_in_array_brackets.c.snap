@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/arrays/test_error_type_qualifier_in_array_brackets.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot use type qualifier `const` in non-parameter array declarator
+   ╭─[panko/tests/cases/arrays/test_error_type_qualifier_in_array_brackets.c:2:12]
+   │
+ 2 │     int xs[const] = {1, 2, 3};
+   │            ──┬──  
+   │              ╰──── help: remove this `const`
+───╯
