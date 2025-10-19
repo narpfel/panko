@@ -446,7 +446,6 @@ FunctionAbstractDeclarator: ast::FunctionDeclarator<'a> = {
 }
 
 Initialiser: ast::Initialiser<'a> = {
-    // TODO: incomplete: `braced-initializer` can be nonempty
     <open_brace:"{"> <initialiser_list:CommaSepWithTrailingComma<DesignatedInitialiser>>
         <close_brace:"}"> => ast::Initialiser::Braced { <> },
     AssignmentExpression => ast::Initialiser::Expression(<>),
