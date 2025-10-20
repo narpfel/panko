@@ -14,7 +14,7 @@ int main(int, char** argv) {
     printf(argv[1], zeros[1]);
     // [[print: 0]]
     printf(argv[1], zeros[2]);
-    int long_zero = {};
+    long long_zero = {};
     // [[print: 0]]
     printf(argv[2], long_zero);
 }

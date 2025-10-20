@@ -75,16 +75,16 @@ exit_code: 0
                         (addressof `ptr<array<int; 3>>` @72
                            (zeros~5 `array<int; 3>` @20)))
                      (sign-extend `unsigned long` @80 (2 `int` @88))))))
-         (definition (long_zero~6 `int` @32) (braced ∅))
+         (definition (long_zero~6 `long` @32) (braced ∅))
          (expression
-            (call `int` @36
-               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+            (call `int` @40
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @48
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @48
-                  (deref `ptr<char>` @48
-                     (ptr-add `ptr<ptr<char>>` @56
+               (noop-type-conversion `ptr<char const>` @56
+                  (deref `ptr<char>` @56
+                     (ptr-add `ptr<ptr<char>>` @64
                         (argv~3 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @64 (2 `int` @72)))))
-               (long_zero~6 `int` @32))))))
+                        (sign-extend `unsigned long` @72 (2 `int` @80)))))
+               (long_zero~6 `long` @32))))))
 
 ----- stderr -----

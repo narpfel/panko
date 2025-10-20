@@ -36,10 +36,10 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 1)
                (subscript (name zeros~5 `array<int; 3>`) 2)))
-         (declaration long_zero~6 `int` (braced ∅))
+         (declaration long_zero~6 `long` (braced ∅))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (subscript (name argv~3 `ptr<ptr<char>>`) 2)
-               (name long_zero~6 `int`))))))
+               (name long_zero~6 `long`))))))
 
 ----- stderr -----
