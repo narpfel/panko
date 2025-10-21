@@ -398,7 +398,8 @@ SpecifierQualifierList: ast::DeclarationSpecifiers<'a> = {
 
 TypeName: crate::ast::QualifiedType<'a> = {
     <specifier_qualifier_list:SpecifierQualifierList> <abstract_declarator:AbstractDeclarator?> => {
-        let crate::ast::DeclarationSpecifiers { storage_class: _, ty }
+        // TODO: assert that `storage_class` and `function_specifiers` are `None`
+        let crate::ast::DeclarationSpecifiers { storage_class: _, function_specifiers: _, ty }
             = crate::ast::parse_declaration_specifiers(sess, specifier_qualifier_list);
         match abstract_declarator {
             None => ty,

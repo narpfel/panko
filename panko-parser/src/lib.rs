@@ -574,7 +574,6 @@ fn type_specifier_kind(token_kind: TokenKind) -> TypeSpecifierKind<'static> {
 #[derive(Debug, Clone, Copy)]
 pub struct FunctionSpecifier<'a> {
     token: Token<'a>,
-    #[expect(unused)]
     kind: FunctionSpecifierKind,
 }
 
@@ -586,7 +585,11 @@ impl<'a> FunctionSpecifier<'a> {
         }
     }
 
-    fn loc(&self) -> Loc<'a> {
+    pub fn slice(&self) -> &'a str {
+        self.token.slice()
+    }
+
+    pub fn loc(&self) -> Loc<'a> {
         self.token.loc()
     }
 }

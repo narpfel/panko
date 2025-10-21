@@ -16,6 +16,7 @@ use panko_parser::StorageClassSpecifierKind;
 use panko_parser::UnaryOp;
 use panko_parser::ast;
 use panko_parser::ast::FromError;
+use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::Session;
 use panko_parser::nonempty;
 use panko_parser::sexpr_builder::SExpr;
@@ -158,6 +159,7 @@ pub(crate) enum DeclarationOrTypedef<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Declaration<'a> {
+    pub(crate) function_specifiers: FunctionSpecifiers<'a>,
     pub(crate) reference: Reference<'a>,
     pub(crate) initialiser: Option<&'a Initialiser<'a>>,
 }
@@ -1062,7 +1064,13 @@ fn resolve_declaration<'a>(
     scopes: &mut Scopes<'a>,
     decl: &ast::Declaration<'a>,
 ) -> DeclarationOrTypedef<'a> {
-    let ast::Declaration { ty, name, initialiser, storage_class } = decl;
+    let ast::Declaration {
+        ty,
+        name,
+        initialiser,
+        storage_class,
+        function_specifiers,
+    } = decl;
     let ty = resolve_ty(scopes, ty);
 
     let linkage = match try { storage_class.as_ref()?.kind } {
@@ -1140,6 +1148,7 @@ fn resolve_declaration<'a>(
     let ref_initialiser = initialiser.map(RefInitialiser::Initialiser);
     scopes.add_initialiser(&reference, ref_initialiser);
     DeclarationOrTypedef::Declaration(Declaration {
+        function_specifiers: *function_specifiers,
         reference: Reference {
             initialiser: ref_initialiser,
             ..reference

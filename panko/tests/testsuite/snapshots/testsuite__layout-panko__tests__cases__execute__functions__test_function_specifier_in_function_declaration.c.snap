@@ -1,0 +1,49 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/functions/test_function_specifier_in_function_declaration.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/test_function_specifier_in_function_declaration.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration external (f~1 `fn() -> int` (static f)) ∅)
+   (declaration external (g~2 `fn() -> void` (static g)) ∅)
+   (declaration external (exit~3 `fn(∅: int) -> void` (static exit)) ∅)
+   (function-definition external
+      (main~4 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (call `int` @24
+                  (addressof `ptr<fn() -> int>` @32
+                     (f~1 `fn() -> int` (static f))))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (g~2 `fn() -> void` (static g)))))))
+   (function-definition external
+      (f~1 `fn() -> int` (static f))
+      (compound-statement
+         (return (42 `int` @0))))
+   (function-definition external
+      (g~2 `fn() -> void` (static g))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn(∅: int) -> void>` @0
+                  (exit~3 `fn(∅: int) -> void` (static exit)))
+               (27 `int` @8))))))
+
+----- stderr -----

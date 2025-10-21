@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/functions/test_function_specifier_in_function_declaration.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/test_function_specifier_in_function_declaration.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration f~1 `fn() -> int` ∅)
+   (declaration g~2 `fn() -> void` ∅)
+   (declaration exit~3 `fn(∅: int) -> void` ∅)
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (call (name f~1 `fn() -> int`))))
+         (expression (call (name g~2 `fn() -> void`)))))
+   (function-definition
+      f~1 `fn() -> int`
+      (compound-statement
+         (return 42)))
+   (function-definition
+      g~2 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name exit~3 `fn(∅: int) -> void`)
+               27)))))
+
+----- stderr -----

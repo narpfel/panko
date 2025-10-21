@@ -1,3 +1,4 @@
+use std::assert_matches::assert_matches;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::fmt;
@@ -201,6 +202,7 @@ pub struct Declaration<'a> {
     pub name: Token<'a>,
     pub initialiser: Option<Initialiser<'a>>,
     pub storage_class: Option<cst::StorageClassSpecifier<'a>>,
+    pub function_specifiers: FunctionSpecifiers<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -333,7 +335,7 @@ impl<'a> ExternalDeclaration<'a> {
 impl<'a> FunctionDefinition<'a> {
     fn from_parse_tree(sess: &'a Session<'a>, def: &cst::FunctionDefinition<'a>) -> Self {
         let cst::FunctionDefinition { declaration_specifiers, declarator, body } = *def;
-        let DeclarationSpecifiers { storage_class, ty } =
+        let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
             parse_declaration_specifiers(sess, declaration_specifiers);
         let storage_class = match try { storage_class?.kind } {
             Some(StorageClassSpecifierKind::Extern) => storage_class,
@@ -344,11 +346,16 @@ impl<'a> FunctionDefinition<'a> {
         let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
         let name =
             name.unwrap_or_else(|| unreachable!("[parser] syntax error: declaration without name"));
+        assert_matches!(
+            function_specifiers,
+            FunctionSpecifiers { inline: None, noreturn: None },
+            "todo: unimplemented: function definition with function specifiers",
+        );
         Self {
             name,
             storage_class,
-            inline: None,
-            noreturn: None,
+            inline: function_specifiers.inline,
+            noreturn: function_specifiers.noreturn,
             ty,
             body: CompoundStatement::from_parse_tree(sess, &body),
         }
@@ -439,14 +446,20 @@ impl<'a> Declaration<'a> {
         sess: &'a Session<'a>,
         decl: &'a cst::Declaration<'a>,
     ) -> impl Iterator<Item = Result<Self, QualifiedType<'a>>> + 'a {
-        let DeclarationSpecifiers { storage_class, ty } =
+        let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
             parse_declaration_specifiers(sess, decl.specifiers);
         decl.init_declarator_list
             .iter()
             .map(move |&InitDeclarator { declarator, initialiser }| {
                 let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
                 match name {
-                    Some(name) => Ok(Self { ty, name, initialiser, storage_class }),
+                    Some(name) => Ok(Self {
+                        ty,
+                        name,
+                        initialiser,
+                        storage_class,
+                        function_specifiers,
+                    }),
                     None => Err(ty),
                 }
             })
@@ -624,6 +637,7 @@ impl fmt::Display for Signedness {
 
 pub(crate) struct DeclarationSpecifiers<'a> {
     pub(crate) storage_class: Option<cst::StorageClassSpecifier<'a>>,
+    pub(crate) function_specifiers: FunctionSpecifiers<'a>,
     pub(crate) ty: QualifiedType<'a>,
 }
 
@@ -689,6 +703,12 @@ impl<'a> Qualifiers<'a> {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+pub struct FunctionSpecifiers<'a> {
+    pub inline: Option<cst::FunctionSpecifier<'a>>,
+    pub noreturn: Option<cst::FunctionSpecifier<'a>>,
+}
+
 pub(crate) fn parse_declaration_specifiers<'a>(
     sess: &'a Session<'a>,
     specifiers: cst::DeclarationSpecifiers<'a>,
@@ -696,6 +716,7 @@ pub(crate) fn parse_declaration_specifiers<'a>(
     let mut qualifiers = Qualifiers::default();
     let mut ty = ParsedSpecifiers::None;
     let mut storage_class = None;
+    let mut function_specifiers = FunctionSpecifiers::default();
     for (i, specifier) in specifiers.0.iter().enumerate() {
         match specifier {
             cst::DeclarationSpecifier::StorageClass(class)
@@ -715,7 +736,12 @@ pub(crate) fn parse_declaration_specifiers<'a>(
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Qualifier(qualifier)) =>
                 qualifier.parse(sess, &mut qualifiers),
             cst::DeclarationSpecifier::FunctionSpecifier(function_specifier) =>
-                todo!("{function_specifier:#?}"),
+                match function_specifier.kind {
+                    cst::FunctionSpecifierKind::Inline =>
+                        function_specifiers.inline = Some(*function_specifier),
+                    cst::FunctionSpecifierKind::Noreturn =>
+                        function_specifiers.noreturn = Some(*function_specifier),
+                },
         }
     }
 
@@ -731,6 +757,7 @@ pub(crate) fn parse_declaration_specifiers<'a>(
     });
     DeclarationSpecifiers {
         storage_class,
+        function_specifiers,
         ty: QualifiedType {
             is_const: const_qualifier.is_some(),
             is_volatile: volatile_qualifier.is_some(),
@@ -810,8 +837,14 @@ pub(crate) fn parse_declarator<'a>(
                 };
 
                 let params = parameter_type_list.parameter_list.iter().map(|param| {
-                    let DeclarationSpecifiers { storage_class, ty } =
+                    let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
                         parse_declaration_specifiers(sess, param.declaration_specifiers);
+                    let FunctionSpecifiers { inline, noreturn } = function_specifiers;
+                    if inline.is_some() || noreturn.is_some() {
+                        todo!(
+                            "error: function specifier given in declaration of function parameter"
+                        );
+                    }
                     if let Some(storage_class) = storage_class {
                         todo!("error: parameter declared with storage class {storage_class:?}");
                     }

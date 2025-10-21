@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/functions/test_error_nonfunction_with_function_specifier.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/functions/test_error_nonfunction_with_function_specifier.c"
+   (declaration variable~0 `int` ∅)
+   (declaration another_variable~1 `int` ∅)
+   (declaration two_errors~2 `char` ∅)
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement)))
+
+----- stderr -----

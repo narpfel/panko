@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/functions/test_error_nonfunction_with_function_specifier.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: non-function `variable` declared with function-specifier `inline`
+   ╭─[panko/tests/cases/functions/test_error_nonfunction_with_function_specifier.c:1:1]
+   │
+ 1 │ inline int variable;
+   │ ───┬──     ────┬───  
+   │    │           ╰───── in the declaration for `variable`
+   │    │                 
+   │    ╰───────────────── help: remove this `inline`
+───╯
+
+Error: non-function `another_variable` declared with function-specifier `_Noreturn`
+   ╭─[panko/tests/cases/functions/test_error_nonfunction_with_function_specifier.c:3:1]
+   │
+ 3 │ _Noreturn int another_variable;
+   │ ────┬────     ────────┬───────  
+   │     │                 ╰───────── in the declaration for `another_variable`
+   │     │                           
+   │     ╰─────────────────────────── help: remove this `_Noreturn`
+───╯
+
+Error: non-function `two_errors` declared with function-specifier `inline`
+   ╭─[panko/tests/cases/functions/test_error_nonfunction_with_function_specifier.c:5:1]
+   │
+ 5 │ inline _Noreturn char two_errors;
+   │ ───┬──                ─────┬────  
+   │    │                       ╰────── in the declaration for `two_errors`
+   │    │                              
+   │    ╰────────────────────────────── help: remove this `inline`
+───╯
+
+Error: non-function `two_errors` declared with function-specifier `_Noreturn`
+   ╭─[panko/tests/cases/functions/test_error_nonfunction_with_function_specifier.c:5:8]
+   │
+ 5 │ inline _Noreturn char two_errors;
+   │        ────┬────      ─────┬────  
+   │            │               ╰────── in the declaration for `two_errors`
+   │            │                      
+   │            ╰────────────────────── help: remove this `_Noreturn`
+───╯
