@@ -546,7 +546,7 @@ enum Diagnostic<'a> {
         at(colour = Red, label = "help: remove this `{at}`"),
         reference(colour = Blue, label = "in the declaration for `{reference}`"),
     )]
-    NonFunctionDeclaredWithFunction {
+    NonFunctionDeclaredWithFunctionSpecifier {
         at: cst::FunctionSpecifier<'a>,
         reference: Reference<'a>,
     },
@@ -1740,7 +1740,10 @@ fn typeck_declaration<'a>(
     if !matches!(reference.ty.ty, Type::Function(_)) {
         let FunctionSpecifiers { inline, noreturn } = function_specifiers;
         for specifier in [inline, noreturn].into_iter().flatten() {
-            sess.emit(Diagnostic::NonFunctionDeclaredWithFunction { at: specifier, reference })
+            sess.emit(Diagnostic::NonFunctionDeclaredWithFunctionSpecifier {
+                at: specifier,
+                reference,
+            })
         }
     }
 
