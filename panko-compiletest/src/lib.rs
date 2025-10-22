@@ -17,6 +17,7 @@ use std::io::set_output_capture;
 use std::io::stdout;
 use std::iter::repeat_n;
 use std::num::NonZero;
+use std::os::unix::process::ExitStatusExt;
 use std::panic::AssertUnwindSafe;
 use std::panic::catch_unwind;
 use std::path::Path;
@@ -260,6 +261,49 @@ impl TestCase {
     }
 }
 
+type AssertSignal<'a> = Box<dyn FnOnce(&Path, ExitStatus) + 'a>;
+
+fn make_exit_with_signal_assertion(source: &str) -> AssertSignal {
+    let signal_re = Regex::new(r"(?m)^// \[\[signal: SIG(?P<signal>.*?)\]\]$").unwrap();
+    let signals = signal_re
+        .captures_iter(source)
+        .map(|captures| captures.name("signal").unwrap().as_str())
+        .collect_vec();
+
+    match signals.into_iter().at_most_one() {
+        Ok(None) => Box::new(|executable_filename, status| {
+            panic!(
+                "process `{}` died with {status}",
+                executable_filename.display(),
+            )
+        }),
+        Ok(Some(expected_signal_name)) => {
+            let signal_names_table = Command::new("kill").arg("--table").output().unwrap().stdout;
+            let signal_names_table = str::from_utf8(&signal_names_table)
+                .unwrap()
+                .split_whitespace()
+                .collect_vec();
+            let signal_index = signal_names_table
+                .iter()
+                .position(|&name| name == expected_signal_name)
+                .unwrap();
+            let expected_signal: i32 = signal_names_table[signal_index - 1].parse().unwrap();
+
+            Box::new(move |_, status| {
+                let actual_signal = status.signal().unwrap();
+                assert_eq!(
+                    expected_signal, actual_signal,
+                    "test program did not exit with expected signal SIG{expected_signal_name} ({expected_signal})",
+                )
+            })
+        }
+        Err(signals) => panic!(
+            "test source invalid: more than one signal specified: {:?}",
+            signals.collect_vec(),
+        ),
+    }
+}
+
 pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathBuf>) {
     let source: String = filenames
         .iter()
@@ -297,6 +341,8 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
         "test source invalid: more than one return code set: {expected_return_codes:?}",
     );
     let expected_return_code = expected_return_codes.first().copied().unwrap_or(0);
+
+    let assert_exit_with_signal = make_exit_with_signal_assertion(&source);
 
     let expected_print_re = Regex::new(r"(?m)^\s*// \[\[print: (?P<output>.*?)\]\]$").unwrap();
     let expected_output: String = expected_print_re
@@ -347,22 +393,13 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
         .unwrap();
     let stdout = std::str::from_utf8(&stdout).unwrap();
     let stderr = std::str::from_utf8(&stderr).unwrap();
-    let actual_exit_code = status.code().unwrap_or_else(
-        #[cfg(unix)]
-        || {
-            panic!(
-                "process `{}` died with {status}",
-                executable_filename.display(),
-            )
-        },
-        #[cfg(not(unix))]
-        || unreachable!("`ExitStatus::code()` can only be `None` on Unix"),
-    );
-
-    assert_eq!(
-        expected_return_code, actual_exit_code,
-        "test program did not exit with expected return code {expected_return_code}",
-    );
+    match status.code() {
+        Some(actual_exit_code) => assert_eq!(
+            expected_return_code, actual_exit_code,
+            "test program did not exit with expected return code {expected_return_code}",
+        ),
+        None => assert_exit_with_signal(&executable_filename, status),
+    }
 
     pretty_assertions::assert_eq!(
         expected_output,
