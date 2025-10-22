@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_print_to_stderr.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/test_print_to_stderr.c"
+   (typedef ptrdiff_t `long`)
+   (typedef size_t `unsigned long`)
+   (typedef max_align_t `long long`)
+   (typedef wchar_t `int`)
+   (typedef nullptr_t `nullptr_t`)
+   (declaration external (write~0 `fn(∅: int, ∅: ptr<void const>, ∅: unsigned long) -> long` (static write)) ∅)
+   (function-definition external
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (return
+            (truncate `int` @0
+               (call `long` @8
+                  (addressof `ptr<fn(∅: int, ∅: ptr<void const>, ∅: unsigned long) -> long>` @16
+                     (write~0 `fn(∅: int, ∅: ptr<void const>, ∅: unsigned long) -> long` (static write)))
+                  (2 `int` @24)
+                  (noop-type-conversion `ptr<void const>` @32
+                     (noop-type-conversion `ptr<char>` @32
+                        (addressof `ptr<array<char; 8>>` @32
+                           (string `array<char; 8>` @void "aaabaaa\0"))))
+                  (sign-extend `unsigned long` @40 (7 `int` @48))))))))
+
+----- stderr -----

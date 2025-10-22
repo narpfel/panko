@@ -352,6 +352,13 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
         })
         .collect();
 
+    let expected_stderr_re_re =
+        Regex::new(r"(?m)^\s*// \[\[stderr-re: (?P<regex>.*?)\]\]$").unwrap();
+    let expected_stderr_res = expected_stderr_re_re
+        .captures_iter(&source)
+        .map(|captures| Regex::new(captures.name("regex").unwrap().as_str()).unwrap())
+        .collect_vec();
+
     let cmdline_arguments_re = Regex::new(r"(?m)^// \[\[arg: (?P<arg>.*?)\]\]$").unwrap();
 
     let cmdline_arguments = cmdline_arguments_re
@@ -406,7 +413,16 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
         stdout,
         "expected output (left) did not match output on stdout (right)",
     );
-    assert_eq!("", stderr, "no output on stderr is expected");
+    match expected_stderr_res[..] {
+        [] => assert_eq!("", stderr, "no output on stderr is expected"),
+        _ =>
+            for expected_stderr_re in expected_stderr_res {
+                assert!(
+                    expected_stderr_re.is_match(stderr),
+                    "{expected_stderr_re} does not match {stderr:?}",
+                );
+            },
+    }
 }
 
 #[must_use]
