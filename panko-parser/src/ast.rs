@@ -348,8 +348,8 @@ impl<'a> FunctionDefinition<'a> {
             name.unwrap_or_else(|| unreachable!("[parser] syntax error: declaration without name"));
         assert_matches!(
             function_specifiers,
-            FunctionSpecifiers { inline: None, noreturn: None },
-            "todo: unimplemented: function definition with function specifiers",
+            FunctionSpecifiers { inline: None, noreturn: _ },
+            "todo: unimplemented: function definition with `inline` function specifier",
         );
         Self {
             name,

@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/functions/test_return_from_noreturn_function.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/test_return_from_noreturn_function.c"
+   (function-definition external
+      (g~0 `fn() -> void` (static g))
+      (compound-statement
+         (expression (error `void` @void "Error: control flow returned from function `g` declared `_Noreturn`"))))
+   (function-definition external
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (g~0 `fn() -> void` (static g))))))))
+
+----- stderr -----

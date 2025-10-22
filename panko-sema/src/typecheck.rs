@@ -550,6 +550,18 @@ enum Diagnostic<'a> {
         at: cst::FunctionSpecifier<'a>,
         reference: Reference<'a>,
     },
+
+    #[error("control flow returned from function `{function}` declared `{noreturn}`")]
+    #[diagnostics(
+        at(colour = Red, label = "this `{at}` statement was executed"),
+        noreturn(colour = Magenta, label = "declared as `{noreturn}` here"),
+        function(colour = Blue, label = "in function `{function}`")
+    )]
+    ReturnFromNoreturnFunction {
+        at: Token<'a>,
+        noreturn: cst::FunctionSpecifier<'a>,
+        function: scope::Reference<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1777,7 +1789,7 @@ fn typeck_statement<'a>(
             Statement::Expression(try { typeck_expression(sess, expr.as_ref()?, Context::Default) }),
         scope::Statement::Compound(stmt) =>
             Statement::Compound(typeck_compound_statement(sess, stmt, function)),
-        scope::Statement::Return { return_: _, expr } => {
+        scope::Statement::Return { return_, expr } => {
             // TODO: why are we re-typechecking the return type for each return stmt?
             let return_ty = typeck_ty(sess, *function.return_ty(), IsParameter::No);
             let expr = expr
@@ -1796,7 +1808,15 @@ fn typeck_statement<'a>(
                         None
                     },
             };
-            Statement::Return(expr)
+            match function.noreturn {
+                Some(noreturn) =>
+                    Statement::from_error(sess.alloc(Diagnostic::ReturnFromNoreturnFunction {
+                        at: *return_,
+                        noreturn,
+                        function: function.reference,
+                    })),
+                None => Statement::Return(expr),
+            }
         }
         scope::Statement::Redeclared(redeclared) => typeck_redeclaration_error(sess, redeclared),
     }

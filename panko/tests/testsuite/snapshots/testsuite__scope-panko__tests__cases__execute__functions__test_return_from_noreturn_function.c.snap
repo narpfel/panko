@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/functions/test_return_from_noreturn_function.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/test_return_from_noreturn_function.c"
+   (function-definition
+      g~0 `fn() -> void`
+      (compound-statement
+         (return ∅)))
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (expression (call (name g~0 `fn() -> void`))))))
+
+----- stderr -----
