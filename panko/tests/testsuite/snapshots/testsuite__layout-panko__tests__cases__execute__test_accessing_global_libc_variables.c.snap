@@ -1,0 +1,40 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/test_accessing_global_libc_variables.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/test_accessing_global_libc_variables.c"
+   (typedef FILE `void`)
+   (declaration external (stdout~0 `ptr<void>` (static stdout)) ∅)
+   (declaration external (stderr~1 `ptr<void>` (static stderr)) ∅)
+   (declaration external (fprintf~2 `fn(∅: ptr<void>, ∅: ptr<char const>, ...) -> int` (static fprintf)) ∅)
+   (function-definition external
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<void>, ∅: ptr<char const>, ...) -> int>` @8
+                  (fprintf~2 `fn(∅: ptr<void>, ∅: ptr<char const>, ...) -> int` (static fprintf)))
+               (stdout~0 `ptr<void>` (static stdout))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 8>>` @16
+                        (string `array<char; 8>` @void "stdout\n\0"))))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<void>, ∅: ptr<char const>, ...) -> int>` @8
+                  (fprintf~2 `fn(∅: ptr<void>, ∅: ptr<char const>, ...) -> int` (static fprintf)))
+               (stderr~1 `ptr<void>` (static stderr))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 8>>` @16
+                        (string `array<char; 8>` @void "stderr\n\0")))))))))
+
+----- stderr -----

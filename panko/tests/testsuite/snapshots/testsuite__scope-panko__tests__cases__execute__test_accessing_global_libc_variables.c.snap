@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/test_accessing_global_libc_variables.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/test_accessing_global_libc_variables.c"
+   (typedef FILE `void`)
+   (declaration stdout~0 `ptr<void>` ∅)
+   (declaration stderr~1 `ptr<void>` ∅)
+   (declaration fprintf~2 `fn(∅: ptr<void>, ∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name fprintf~2 `fn(∅: ptr<void>, ∅: ptr<char const>, ...) -> int`)
+               (name stdout~0 `ptr<void>`)
+               (string "stdout\n")))
+         (expression
+            (call (name fprintf~2 `fn(∅: ptr<void>, ∅: ptr<char const>, ...) -> int`)
+               (name stderr~1 `ptr<void>`)
+               (string "stderr\n"))))))
+
+----- stderr -----
