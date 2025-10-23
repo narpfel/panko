@@ -85,8 +85,7 @@ pub struct FunctionDefinition<'a> {
     pub params: ParamRefs<'a>,
     #[expect(unused)]
     inline: Option<cst::FunctionSpecifier<'a>>,
-    #[expect(unused)]
-    noreturn: Option<cst::FunctionSpecifier<'a>>,
+    pub noreturn: Option<cst::FunctionSpecifier<'a>>,
     pub is_varargs: bool,
     pub stack_size: u64,
     pub argument_area_size: u64,

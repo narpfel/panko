@@ -398,11 +398,19 @@ impl<'a> Codegen<'a> {
             Some(std::ptr::from_ref(def)),
             "`current_function` is not changed",
         );
-        self.emit_args("add", &[&Rsp, &def.stack_size]);
-        if def.is_main() {
-            self.emit("xor eax, eax");
+        match def.noreturn {
+            Some(_) => {
+                // TODO: include error message like in explicit `return`
+                self.emit("ud2");
+            }
+            None => {
+                self.emit_args("add", &[&Rsp, &def.stack_size]);
+                if def.is_main() {
+                    self.emit("xor eax, eax");
+                }
+                self.emit("ret");
+            }
         }
-        self.emit("ret");
 
         self.block(1);
         self.label(format!(".L.{}.entry.sp_unaligned", def.name()));
