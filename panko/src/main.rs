@@ -88,27 +88,33 @@ fn main() -> Result<()> {
     };
     yansi::whenever(Condition::cached(enable_colours));
 
-    let args = Args::parse();
-
-    let stop_after = match args.filenames.len() == 1 {
-        true => args.stop_after,
-        false => args.stop_after.or(Some(Step::Assemble)),
-    };
-    let compile_args = CompileArgs {
+    let Args {
+        filenames,
         stop_after,
-        print: args.print,
-        debug: args.debug,
-        treat_error_as_bug: args.treat_error_as_bug,
-        include_paths: args.include_paths,
+        print,
+        output_filename,
+        debug,
+        treat_error_as_bug,
+        include_paths,
+    } = Args::parse();
+
+    let compile_args = CompileArgs {
+        stop_after: match filenames.len() == 1 {
+            true => stop_after,
+            false => stop_after.or(Some(Step::Assemble)),
+        },
+        print,
+        debug,
+        treat_error_as_bug,
+        include_paths,
     };
 
-    let object_filenames: Result<Vec<Result<_, ()>>> = args
-        .filenames
+    let object_filenames: Result<Vec<Result<_, ()>>> = filenames
         .iter()
         .map(|filename| {
             compile(
                 filename,
-                args.output_filename
+                output_filename
                     .as_ref()
                     .map_or(Path::new(""), |path| {
                         path.parent().expect("TODO: is this unreachable?")
@@ -120,7 +126,7 @@ fn main() -> Result<()> {
         })
         .collect();
 
-    if let Some(Step::Assemble) = args.stop_after {
+    if let Some(Step::Assemble) = stop_after {
         return Ok(());
     }
 
@@ -129,18 +135,16 @@ fn main() -> Result<()> {
         Err(()) => return Ok(()),
     };
 
-    let executable_filename = args
-        .output_filename
-        .unwrap_or_else(|| match &args.filenames[..] {
-            [] => unreachable!(),
-            [filename] => Path::new(filename.file_name().expect("TODO: is this unreachable?"))
-                .with_extension(""),
-            [_, _, ..] => PathBuf::from("a.out"),
-        });
+    let executable_filename = output_filename.unwrap_or_else(|| match &filenames[..] {
+        [] => unreachable!(),
+        [filename] =>
+            Path::new(filename.file_name().expect("TODO: is this unreachable?")).with_extension(""),
+        [_, _, ..] => PathBuf::from("a.out"),
+    });
 
     link(&executable_filename, &object_filenames, &compile_args.print)?;
 
-    if let Some(Step::Link) = args.stop_after {
+    if let Some(Step::Link) = stop_after {
         return Ok(());
     }
 
