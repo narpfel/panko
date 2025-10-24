@@ -99,10 +99,7 @@ fn main() -> Result<()> {
     } = Args::parse();
 
     let compile_args = CompileArgs {
-        stop_after: match filenames.len() == 1 {
-            true => stop_after,
-            false => stop_after.or(Some(Step::Assemble)),
-        },
+        stop_after,
         print,
         debug,
         treat_error_as_bug,
