@@ -24,6 +24,7 @@ exit_code: 0
          (expression (0 `int` @48))
          (expression (0 `int` @48))
          (expression (0 `int` @48))
+         (expression (0 `int` @48))
          (expression (0 `int` @48)))))
 
 ----- stderr -----
