@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/functions/test_static_inline_function.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/test_static_inline_function.c"
+   (definition internal x~0 `int` (42 `int`))
+   (function-definition internal
+      f~1 `fn() -> int`
+      (compound-statement
+         (return (x~0 `int`))))
+   (function-definition external
+      main~2 `fn() -> int`
+      (compound-statement
+         (return
+            (call `int`
+               (addressof `ptr<fn() -> int>`
+                  (f~1 `fn() -> int`)))))))
+
+----- stderr -----

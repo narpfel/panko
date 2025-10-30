@@ -346,11 +346,13 @@ impl<'a> FunctionDefinition<'a> {
         let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
         let name =
             name.unwrap_or_else(|| unreachable!("[parser] syntax error: declaration without name"));
-        assert_matches!(
-            function_specifiers,
-            FunctionSpecifiers { inline: None, noreturn: _ },
-            "todo: unimplemented: function definition with `inline` function specifier",
-        );
+        if Some(StorageClassSpecifierKind::Static) != try { storage_class?.kind } {
+            assert_matches!(
+                function_specifiers,
+                FunctionSpecifiers { inline: None, noreturn: _ },
+                "todo: unimplemented: non-static function definition with `inline` function specifier",
+            );
+        }
         Self {
             name,
             storage_class,

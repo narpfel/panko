@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/functions/test_static_inline_function.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/test_static_inline_function.c"
+   (definition internal (x~0 `int` (static x)) (42 `int` (static x)))
+   (function-definition internal
+      (f~1 `fn() -> int` (static f))
+      (compound-statement
+         (return (x~0 `int` (static x)))))
+   (function-definition external
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (return
+            (call `int` @0
+               (addressof `ptr<fn() -> int>` @8
+                  (f~1 `fn() -> int` (static f))))))))
+
+----- stderr -----

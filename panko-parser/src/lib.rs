@@ -276,7 +276,7 @@ impl<'a> StorageClassSpecifier<'a> {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StorageClassSpecifierKind {
     Auto,
     Constexpr,

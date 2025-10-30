@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/functions/test_static_inline_function.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/test_static_inline_function.c"
+   (declaration x~0 `int` 42)
+   (function-definition
+      f~1 `fn() -> int`
+      (compound-statement
+         (return (name x~0 `int`))))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (return (call (name f~1 `fn() -> int`))))))
+
+----- stderr -----
