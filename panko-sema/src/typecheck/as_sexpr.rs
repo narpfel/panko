@@ -48,6 +48,8 @@ impl AsSExpr for ExternalDeclaration<'_> {
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
             ExternalDeclaration::Typedef(typedef) => typedef.as_sexpr(),
+            ExternalDeclaration::ProvideExternalDefinitionForInlineFunction(name) =>
+                SExpr::new("provide-external-definition").inline_string(name.to_string()),
             ExternalDeclaration::Error(_error) => SExpr::new("error"),
         }
     }

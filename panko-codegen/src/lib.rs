@@ -350,6 +350,7 @@ impl<'a> Codegen<'a> {
             Linkage::External => "globl",
             Linkage::Internal => "local",
             Linkage::None => unreachable!("functions always have linkage"),
+            Linkage::Inline => "local",
         };
         self.directive(visibility, &[&def.name()]);
         self.directive("text", &[]);
@@ -435,6 +436,7 @@ impl<'a> Codegen<'a> {
             Linkage::External => "globl",
             Linkage::Internal => "local",
             Linkage::None => "local",
+            Linkage::Inline => unreachable!("only functions can be `inline`"),
         };
         self.block(2);
         self.directive(visibility, &[&name]);
@@ -1014,6 +1016,10 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
             ExternalDeclaration::Declaration(decl) => cg.external_declaration(decl),
             ExternalDeclaration::Typedef(_) => {
                 // TODO: check that the type is not a VMT
+            }
+            ExternalDeclaration::ProvideExternalDefinitionForInlineFunction(name) => {
+                cg.block(2);
+                cg.directive("globl", &[name]);
             }
             ExternalDeclaration::Error(error) => cg.global_errors.push(*error),
         }

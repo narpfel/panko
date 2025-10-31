@@ -40,6 +40,7 @@ pub enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
+    ProvideExternalDefinitionForInlineFunction(&'a str),
     Error(&'a dyn Report),
 }
 
@@ -617,6 +618,8 @@ pub fn layout<'a>(
                 )),
             typecheck::ExternalDeclaration::Typedef(typedef) =>
                 ExternalDeclaration::Typedef(*typedef),
+            typecheck::ExternalDeclaration::ProvideExternalDefinitionForInlineFunction(name) =>
+                ExternalDeclaration::ProvideExternalDefinitionForInlineFunction(name),
             typecheck::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
         })),
     }

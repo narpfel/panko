@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/functions/test_extern_inline_function.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/test_extern_inline_function.c"
+   (function-definition external
+      f~0 `fn() -> int`
+      (compound-statement
+         (return (42 `int`))))
+   (function-definition external
+      main~1 `fn() -> int`
+      (compound-statement
+         (return
+            (call `int`
+               (addressof `ptr<fn() -> int>`
+                  (f~0 `fn() -> int`)))))))
+
+----- stderr -----

@@ -628,6 +628,7 @@ pub(crate) enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
+    ProvideExternalDefinitionForInlineFunction(&'a str),
     Error(&'a dyn Report),
 }
 
@@ -925,6 +926,7 @@ impl<'a> Reference<'a> {
             StorageDuration::Automatic => "local",
             StorageDuration::Static(Linkage::External) => "extern",
             StorageDuration::Static(Linkage::Internal | Linkage::None) => "static",
+            StorageDuration::Static(Linkage::Inline) => "inline",
         }
     }
 
@@ -1247,6 +1249,8 @@ fn typeck_reference<'a>(
             let linkage = linkage
                 .or(matches!(composite_ty.ty, Type::Function(_)).then_some(Linkage::External));
             let linkage = match (linkage, previous_linkage) {
+                (Some(Linkage::Inline), previous_linkage) => Some(previous_linkage),
+                (linkage, Linkage::Inline) => linkage,
                 (Some(Linkage::None), Linkage::None) => Some(Linkage::None),
                 (Some(Linkage::External), Linkage::External) => Some(Linkage::External),
                 (Some(Linkage::External), Linkage::Internal) => Some(Linkage::Internal),
@@ -1282,6 +1286,8 @@ fn typeck_reference<'a>(
                     unreachable!("block-scope variables can’t have internal linkage"),
                 (IsInGlobalScope::No, Some(Linkage::External)) => RefKind::Declaration,
                 (IsInGlobalScope::No, None | Some(Linkage::None)) => RefKind::Definition,
+                (IsInGlobalScope::No | IsInGlobalScope::Yes, Some(Linkage::Inline)) =>
+                    unreachable!("only functions can be `inline`"),
             },
         }
     };
@@ -1302,6 +1308,7 @@ fn typeck_reference<'a>(
                 StorageDuration::Static(None) => unreachable!(),
                 StorageDuration::Automatic => StorageDuration::Automatic,
             },
+            Linkage::Inline => unreachable!("only functions can be `inline`"),
         },
     };
 
@@ -1685,7 +1692,9 @@ fn typeck_reference_declaration<'a>(
     if let Some(previous_definition) = previous_definition {
         // TODO: this is quadratic in the number of previous decls for this name
         let previous_definition = typeck_reference(sess, *previous_definition, needs_initialiser);
-        if previous_definition.storage_duration != reference.storage_duration {
+        if previous_definition.storage_duration != StorageDuration::Static(Linkage::Inline)
+            && previous_definition.storage_duration != reference.storage_duration
+        {
             sess.emit(Diagnostic::RedeclaredWithDifferentLinkage {
                 at: reference,
                 previous_definition,
@@ -3234,6 +3243,27 @@ fn typeck_typedef<'a>(sess: &'a Session<'a>, typedef: &scope::Typedef<'a>) -> Ty
     Typedef { ty, name }
 }
 
+fn typeck_declaration_in_global_scope<'a>(
+    sess: &'a Session<'a>,
+    declaration: &scope::Declaration<'a>,
+) -> ExternalDeclaration<'a> {
+    let decl = typeck_declaration(sess, declaration);
+    match decl.reference.ty.ty {
+        Type::Function(_)
+            if (matches!(
+                declaration.reference.storage_duration,
+                StorageDuration::Static(Some(Linkage::External)),
+            ) || declaration.function_specifiers.inline.is_none())
+                && let Some(previous_definition) = declaration.reference.previous_definition
+                && let previous_definition =
+                    typeck_reference(sess, *previous_definition, NeedsInitialiser::Yes)
+                && let StorageDuration::Static(Linkage::Inline) =
+                    previous_definition.storage_duration =>
+            ExternalDeclaration::ProvideExternalDefinitionForInlineFunction(decl.reference.name()),
+        _ => ExternalDeclaration::Declaration(decl),
+    }
+}
+
 pub fn resolve_types<'a>(
     sess: &'a Session<'a>,
     translation_unit: scope::TranslationUnit<'a>,
@@ -3247,7 +3277,7 @@ pub fn resolve_types<'a>(
             scope::ExternalDeclaration::Typedef(typedef) =>
                 ExternalDeclaration::Typedef(typeck_typedef(sess, typedef)),
             scope::ExternalDeclaration::Declaration(decl) =>
-                ExternalDeclaration::Declaration(typeck_declaration(sess, decl)),
+                typeck_declaration_in_global_scope(sess, decl),
             scope::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
             scope::ExternalDeclaration::Redeclared(redeclared) =>
                 typeck_redeclaration_error(sess, redeclared),

@@ -375,6 +375,7 @@ pub enum Linkage {
     External,
     Internal,
     None,
+    Inline,
 }
 
 impl Linkage {
@@ -383,6 +384,7 @@ impl Linkage {
             Self::External => sexpr.inline_string("external".to_string()),
             Self::Internal => sexpr.inline_string("internal".to_string()),
             Self::None => sexpr,
+            Self::Inline => sexpr.inline_string("inline".to_string()),
         }
     }
 }
@@ -904,7 +906,11 @@ fn resolve_function_definition<'a>(
     } = def;
     let ty = resolve_ty(scopes, ty);
     let linkage = match try { storage_class.as_ref()?.kind } {
-        Some(StorageClassSpecifierKind::Extern) | None => Linkage::External,
+        None => match inline {
+            Some(_) => Linkage::Inline,
+            None => Linkage::External,
+        },
+        Some(StorageClassSpecifierKind::Extern) => Linkage::External,
         Some(StorageClassSpecifierKind::Static) => Linkage::Internal,
         Some(kind) => unreachable!("invalid or unimplemented StorageClassSpecifierKind {kind:?}"),
     };
