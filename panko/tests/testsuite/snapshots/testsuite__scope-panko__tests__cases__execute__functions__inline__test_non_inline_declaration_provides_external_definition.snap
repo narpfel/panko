@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/functions/inline/test_non_inline_declaration_provides_external_definition/f.c
+    - panko/tests/cases/execute/functions/inline/test_non_inline_declaration_provides_external_definition/main.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/inline/test_non_inline_declaration_provides_external_definition/f.c"
+   (function-definition
+      f~0 `fn() -> int`
+      (compound-statement
+         (return 42)))
+   (declaration f~0 `fn() -> int` ∅))
+(translation-unit "panko/tests/cases/execute/functions/inline/test_non_inline_declaration_provides_external_definition/main.c"
+   (declaration f~0 `fn() -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (return (call (name f~0 `fn() -> int`))))))
+
+----- stderr -----

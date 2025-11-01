@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/functions/inline/test_non_inline_declaration_provides_external_definition_2/f.c
+    - panko/tests/cases/execute/functions/inline/test_non_inline_declaration_provides_external_definition_2/main.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/inline/test_non_inline_declaration_provides_external_definition_2/f.c"
+   (declaration external f~0 `fn() -> int` ∅)
+   (function-definition external
+      f~0 `fn() -> int`
+      (compound-statement
+         (return (42 `int`)))))
+(translation-unit "panko/tests/cases/execute/functions/inline/test_non_inline_declaration_provides_external_definition_2/main.c"
+   (declaration external f~0 `fn() -> int` ∅)
+   (function-definition external
+      main~1 `fn() -> int`
+      (compound-statement
+         (return
+            (call `int`
+               (addressof `ptr<fn() -> int>`
+                  (f~0 `fn() -> int`)))))))
+
+----- stderr -----
