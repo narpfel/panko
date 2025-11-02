@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/nullptr/test_return_nullptr_from_function.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/nullptr/test_return_nullptr_from_function.c"
+   (function-definition external
+      f~0 `fn() -> nullptr_t`
+      (compound-statement
+         (return (nullptr `nullptr_t`))))
+   (function-definition external
+      main~1 `fn() -> int`
+      (compound-statement
+         (return
+            (ptr-equal `int`
+               (call `nullptr_t`
+                  (addressof `ptr<fn() -> nullptr_t>`
+                     (f~0 `fn() -> nullptr_t`)))
+               (nullptr `nullptr_t`))))))
+
+----- stderr -----
