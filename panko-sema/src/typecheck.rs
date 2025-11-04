@@ -32,7 +32,6 @@ use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::FromError;
-use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
@@ -539,16 +538,6 @@ enum Diagnostic<'a> {
     RedeclaredWithDifferentLinkage {
         at: Reference<'a>,
         previous_definition: Reference<'a>,
-    },
-
-    #[error("non-function `{reference}` declared with function-specifier `{at}`")]
-    #[diagnostics(
-        at(colour = Red, label = "help: remove this `{at}`"),
-        reference(colour = Blue, label = "in the declaration for `{reference}`"),
-    )]
-    NonFunctionDeclaredWithFunctionSpecifier {
-        at: cst::FunctionSpecifier<'a>,
-        reference: Reference<'a>,
     },
 
     #[error("control flow returned from function `{function}` declared `{noreturn}`")]
@@ -1759,13 +1748,12 @@ fn typeck_declaration<'a>(
     }
 
     if !matches!(reference.ty.ty, Type::Function(_)) {
-        let FunctionSpecifiers { inline, noreturn } = function_specifiers;
-        for specifier in [inline, noreturn].into_iter().flatten() {
-            sess.emit(Diagnostic::NonFunctionDeclaredWithFunctionSpecifier {
-                at: specifier,
-                reference,
-            })
-        }
+        scope::reject_function_specifiers(
+            sess,
+            &function_specifiers,
+            reference.loc(),
+            "non-function",
+        );
     }
 
     Declaration { reference, initialiser }

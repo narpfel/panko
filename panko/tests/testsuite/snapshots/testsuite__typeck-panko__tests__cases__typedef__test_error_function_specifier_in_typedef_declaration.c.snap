@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/typedef/test_error_function_specifier_in_typedef_declaration.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: type alias `x` declared with function-specifier `inline`
+   ╭─[panko/tests/cases/typedef/test_error_function_specifier_in_typedef_declaration.c:1:9]
+   │
+ 1 │ typedef inline int x;
+   │         ───┬──     ┬  
+   │            │       ╰── in the declaration for `x`
+   │            │          
+   │            ╰────────── help: remove this `inline`
+───╯
+
+Error: type alias `c` declared with function-specifier `_Noreturn`
+   ╭─[panko/tests/cases/typedef/test_error_function_specifier_in_typedef_declaration.c:2:9]
+   │
+ 2 │ typedef _Noreturn char c;
+   │         ────┬────      ┬  
+   │             │          ╰── in the declaration for `c`
+   │             │             
+   │             ╰───────────── help: remove this `_Noreturn`
+───╯
+
+Error: type alias `l` declared with function-specifier `inline`
+   ╭─[panko/tests/cases/typedef/test_error_function_specifier_in_typedef_declaration.c:3:9]
+   │
+ 3 │ typedef inline _Noreturn long l;
+   │         ───┬──                ┬  
+   │            │                  ╰── in the declaration for `l`
+   │            │                     
+   │            ╰───────────────────── help: remove this `inline`
+───╯
+
+Error: type alias `l` declared with function-specifier `_Noreturn`
+   ╭─[panko/tests/cases/typedef/test_error_function_specifier_in_typedef_declaration.c:3:16]
+   │
+ 3 │ typedef inline _Noreturn long l;
+   │                ────┬────      ┬  
+   │                    │          ╰── in the declaration for `l`
+   │                    │             
+   │                    ╰───────────── help: remove this `_Noreturn`
+───╯

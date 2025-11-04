@@ -74,6 +74,17 @@ pub(crate) enum Diagnostic<'a> {
         reference: Reference<'a>,
         kind: &'a str,
     },
+
+    #[error("{kind} `{name}` declared with function-specifier `{at}`")]
+    #[diagnostics(
+        at(colour = Red, label = "help: remove this `{at}`"),
+        name(colour = Blue, label = "in the declaration for `{name}`"),
+    )]
+    NonFunctionDeclaredWithFunctionSpecifier {
+        at: cst::FunctionSpecifier<'a>,
+        name: Loc<'a>,
+        kind: &'a str,
+    },
 }
 
 type TypeofExpr<'a> = Typeof<'a>;
@@ -1066,6 +1077,22 @@ fn resolve_initialiser<'a>(
     }
 }
 
+pub(crate) fn reject_function_specifiers<'a>(
+    sess: &Session<'a>,
+    function_specifiers: &FunctionSpecifiers<'a>,
+    declaration_loc: Loc<'a>,
+    kind: &'a str,
+) {
+    let FunctionSpecifiers { inline, noreturn } = function_specifiers;
+    for specifier in [inline, noreturn].into_iter().flatten() {
+        sess.emit(Diagnostic::NonFunctionDeclaredWithFunctionSpecifier {
+            at: *specifier,
+            name: declaration_loc,
+            kind,
+        })
+    }
+}
+
 fn resolve_declaration<'a>(
     scopes: &mut Scopes<'a>,
     decl: &ast::Declaration<'a>,
@@ -1081,6 +1108,8 @@ fn resolve_declaration<'a>(
 
     let linkage = match try { storage_class.as_ref()?.kind } {
         Some(StorageClassSpecifierKind::Typedef) => {
+            reject_function_specifiers(scopes.sess, function_specifiers, name.loc(), "type alias");
+
             let previously_declared_as = scopes.add_ty(name.slice(), ty);
             match previously_declared_as {
                 Ok(previously_declared_as) =>
