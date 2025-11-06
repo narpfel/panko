@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/functions/inline/test_error_inline_function_contains_definition_of_static_object.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unexpected token `{` of kind `LBrace`
+   ╭─[panko/tests/cases/execute/functions/inline/test_error_inline_function_contains_definition_of_static_object.c:4:20]
+   │
+ 4 │ inline typeof((int){0}) g() {
+   │                    ┬  
+   │                    ╰── expected one of the following token kinds: ["*", "(", "_Generic", "sizeof", "_Lengthof", "alignof", "+", "-", "~", "!", "&", "++", "--", "true", "false", "nullptr", Identifier, Integer, MaybeUnterminatedCharConstant, MaybeUnterminatedString]
+───╯

@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/functions/inline/test_error_inline_function_refers_to_identifier_with_internal_linkage.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/inline/test_error_inline_function_refers_to_identifier_with_internal_linkage.c"
+   (declaration a~0 `int` ∅)
+   (function-definition
+      f~1 `fn() -> typeof((name a~0 `int`))`
+      (compound-statement
+         (return 0))))
+
+----- stderr -----
