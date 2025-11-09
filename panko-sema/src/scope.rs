@@ -957,7 +957,6 @@ fn resolve_function_definition<'a>(
         } => function_ty,
         QualifiedType { ty: Type::Function(_), .. } =>
             unreachable!("function types cannot be qualified"),
-        // TODO: what about `typeof`?
         non_function_ty => {
             // TODO: this should be `Type::Error`
             let () = scopes
