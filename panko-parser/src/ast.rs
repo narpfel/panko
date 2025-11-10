@@ -74,6 +74,17 @@ enum Diagnostic<'a> {
     #[error("cannot use type qualifier `{at}` in non-parameter array declarator")]
     #[diagnostics(at(colour = Red, label = "help: remove this `{at}`"))]
     InvalidTypeQualifierInArrayBrackets { at: TypeQualifier<'a> },
+
+    #[error("{kind} `{name}` declared with function-specifier `{at}`")]
+    #[diagnostics(
+        at(colour = Red, label = "help: remove this `{at}`"),
+        name(colour = Blue, label = "in the declaration for `{name}`"),
+    )]
+    NonFunctionDeclaredWithFunctionSpecifier {
+        at: cst::FunctionSpecifier<'a>,
+        name: Loc<'a>,
+        kind: &'a str,
+    },
 }
 
 // TODO: could this be `From<&'a dyn Report>`?
@@ -761,6 +772,22 @@ pub(crate) fn parse_declaration_specifiers<'a>(
     }
 }
 
+pub fn reject_function_specifiers<'a>(
+    sess: &Session<'a>,
+    function_specifiers: &FunctionSpecifiers<'a>,
+    declaration_loc: Loc<'a>,
+    kind: &'a str,
+) {
+    let FunctionSpecifiers { inline, noreturn } = function_specifiers;
+    for specifier in [inline, noreturn].into_iter().flatten() {
+        sess.emit(Diagnostic::NonFunctionDeclaredWithFunctionSpecifier {
+            at: *specifier,
+            name: declaration_loc,
+            kind,
+        })
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum IsParameter {
     Yes,
@@ -833,12 +860,6 @@ pub(crate) fn parse_declarator<'a>(
                 let params = parameter_type_list.parameter_list.iter().map(|param| {
                     let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
                         parse_declaration_specifiers(sess, param.declaration_specifiers);
-                    let FunctionSpecifiers { inline, noreturn } = function_specifiers;
-                    if inline.is_some() || noreturn.is_some() {
-                        todo!(
-                            "error: function specifier given in declaration of function parameter"
-                        );
-                    }
                     if let Some(storage_class) = storage_class {
                         todo!("error: parameter declared with storage class {storage_class:?}");
                     }
@@ -847,6 +868,12 @@ pub(crate) fn parse_declarator<'a>(
                     });
                     let loc =
                         name.map_or_else(|| param.declaration_specifiers.loc(), |name| name.loc());
+                    reject_function_specifiers(
+                        sess,
+                        &function_specifiers,
+                        loc,
+                        "function parameter",
+                    );
                     ParameterDeclaration { loc, ty, name }
                 });
 

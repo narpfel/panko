@@ -18,6 +18,7 @@ use panko_parser::ast;
 use panko_parser::ast::FromError;
 use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::Session;
+use panko_parser::ast::reject_function_specifiers;
 use panko_parser::nonempty;
 use panko_parser::sexpr_builder::SExpr;
 use panko_report::Report;
@@ -72,17 +73,6 @@ pub(crate) enum Diagnostic<'a> {
     ValueRedeclaredAsTypedef {
         at: QualifiedType<'a>,
         reference: Reference<'a>,
-        kind: &'a str,
-    },
-
-    #[error("{kind} `{name}` declared with function-specifier `{at}`")]
-    #[diagnostics(
-        at(colour = Red, label = "help: remove this `{at}`"),
-        name(colour = Blue, label = "in the declaration for `{name}`"),
-    )]
-    NonFunctionDeclaredWithFunctionSpecifier {
-        at: cst::FunctionSpecifier<'a>,
-        name: Loc<'a>,
         kind: &'a str,
     },
 }
@@ -1073,22 +1063,6 @@ fn resolve_initialiser<'a>(
     DesignatedInitialiser {
         designation,
         initialiser: scopes.sess.alloc(initialiser),
-    }
-}
-
-pub(crate) fn reject_function_specifiers<'a>(
-    sess: &Session<'a>,
-    function_specifiers: &FunctionSpecifiers<'a>,
-    declaration_loc: Loc<'a>,
-    kind: &'a str,
-) {
-    let FunctionSpecifiers { inline, noreturn } = function_specifiers;
-    for specifier in [inline, noreturn].into_iter().flatten() {
-        sess.emit(Diagnostic::NonFunctionDeclaredWithFunctionSpecifier {
-            at: *specifier,
-            name: declaration_loc,
-            kind,
-        })
     }
 }
 

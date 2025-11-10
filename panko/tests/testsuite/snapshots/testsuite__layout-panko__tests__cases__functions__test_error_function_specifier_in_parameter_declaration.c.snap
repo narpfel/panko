@@ -1,0 +1,33 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/functions/test_error_function_specifier_in_parameter_declaration.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: function parameter `parameter` declared with function-specifier `inline`
+   ╭─[panko/tests/cases/functions/test_error_function_specifier_in_parameter_declaration.c:1:14]
+   │
+ 1 │ int function(inline int parameter());
+   │              ───┬──     ────┬────  
+   │                 │           ╰────── in the declaration for `parameter`
+   │                 │                  
+   │                 ╰────────────────── help: remove this `inline`
+───╯
+
+Error: function parameter `parameter` declared with function-specifier `inline`
+   ╭─[panko/tests/cases/functions/test_error_function_specifier_in_parameter_declaration.c:3:14]
+   │
+ 3 │ int function(inline int parameter()) {
+   │              ───┬──     ────┬────  
+   │                 │           ╰────── in the declaration for `parameter`
+   │                 │                  
+   │                 ╰────────────────── help: remove this `inline`
+───╯

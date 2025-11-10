@@ -36,6 +36,7 @@ use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
+use panko_parser::ast::reject_function_specifiers;
 use panko_report::Report;
 use panko_report::Sliced as _;
 use variant_types::IntoVariant as _;
@@ -1748,12 +1749,7 @@ fn typeck_declaration<'a>(
     }
 
     if !matches!(reference.ty.ty, Type::Function(_)) {
-        scope::reject_function_specifiers(
-            sess,
-            &function_specifiers,
-            reference.loc(),
-            "non-function",
-        );
+        reject_function_specifiers(sess, &function_specifiers, reference.loc(), "non-function");
     }
 
     Declaration { reference, initialiser }
