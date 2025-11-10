@@ -861,7 +861,11 @@ pub(crate) fn parse_declarator<'a>(
                     let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
                         parse_declaration_specifiers(sess, param.declaration_specifiers);
                     if let Some(storage_class) = storage_class {
-                        todo!("error: parameter declared with storage class {storage_class:?}");
+                        crate::error_todo!(
+                            storage_class,
+                            "parameter declared with storage class {:#?}",
+                            storage_class,
+                        );
                     }
                     let (ty, name) = param.declarator.map_or((ty, None), |declarator| {
                         parse_declarator(sess, ty, declarator, IsParameter::Yes)
