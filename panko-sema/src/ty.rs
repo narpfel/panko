@@ -342,7 +342,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
     pub fn size(&self) -> u64 {
         match self {
             Type::Arithmetic(arithmetic) => arithmetic.size(),
-            Type::Pointer(_) => 8,
+            Type::Pointer(_) => Self::size_t().size(),
             Type::Array(ArrayType { ty, length, loc: _ }) => {
                 let elem_size = ty.ty.size();
                 let length = match length {
@@ -359,20 +359,20 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Function(_) => unreachable!("functions are not objects and don’t have a size"),
             Type::Void => unreachable!("void is not an object and doesn’t have a size"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
-            Type::Nullptr => 8,
+            Type::Nullptr => Self::size_t().size(),
         }
     }
 
     pub fn align(&self) -> u64 {
         match self {
             Type::Arithmetic(arithmetic) => arithmetic.size(),
-            Type::Pointer(_) => 8,
+            Type::Pointer(_) => Self::size_t().align(),
             Type::Array(array_type) => array_type.ty.ty.align(),
             Type::Function(_) =>
                 unreachable!("functions are not objects and don’t have an alignment"),
             Type::Void => unreachable!("void is not an object and doesn’t have an alignment"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
-            Type::Nullptr => 8,
+            Type::Nullptr => Self::size_t().align(),
         }
     }
 
