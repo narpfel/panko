@@ -249,6 +249,9 @@ pub enum Type<'a> {
         unqual: bool,
         ty: &'a QualifiedType<'a>,
     },
+    Struct {
+        name: Token<'a>,
+    },
     // TODO
 }
 
@@ -401,6 +404,7 @@ impl fmt::Display for Type<'_> {
                 if *unqual { "_unqual" } else { "" },
                 ty.as_sexpr(),
             ),
+            Type::Struct { name } => write!(f, "struct {}", name.slice()),
         }
     }
 }
@@ -664,6 +668,9 @@ pub(crate) enum ParsedSpecifiers<'a> {
         unqual: bool,
         ty: &'a QualifiedType<'a>,
     },
+    Struct {
+        name: Token<'a>,
+    },
 }
 
 impl<'a> ParsedSpecifiers<'a> {
@@ -688,6 +695,7 @@ impl<'a> ParsedSpecifiers<'a> {
             Self::Typedef(token) => Type::Typedef(token),
             Self::Typeof { unqual, expr } => Type::Typeof { unqual, expr },
             Self::TypeofTy { unqual, ty } => Type::TypeofTy { unqual, ty },
+            Self::Struct { name } => Type::Struct { name },
         }
     }
 }

@@ -173,6 +173,7 @@ impl fmt::Display for Operand<'_> {
                         },
                     Type::Void => unreachable!(),
                     Type::Typeof { expr, unqual: _ } => match expr {},
+                    Type::Struct { name: _ } => unreachable!("incomplete"),
                 };
                 let ptr_type = match size {
                     1 => "byte",

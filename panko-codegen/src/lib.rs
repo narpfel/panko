@@ -134,6 +134,7 @@ impl Display for TypedRegister<'_> {
             Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => self.ty.size(),
             Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
             Type::Typeof { expr, unqual: _ } => match *expr {},
+            Type::Struct { name: _ } => unreachable!("incomplete"),
         };
 
         let names = match self.register {
@@ -316,6 +317,7 @@ impl<'a> Codegen<'a> {
             }
             Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
             Type::Typeof { expr, unqual: _ } => match *expr {},
+            Type::Struct { name: _ } => unreachable!("incomplete"),
         }
     }
 

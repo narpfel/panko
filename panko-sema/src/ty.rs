@@ -171,6 +171,7 @@ pub enum Type<'a, TypeofExpr, LengthExpr> {
     Void,
     Typeof { expr: TypeofExpr, unqual: bool },
     Nullptr,
+    Struct { name: &'a str },
     // TODO
 }
 
@@ -360,6 +361,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Void => unreachable!("void is not an object and doesn’t have a size"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => Self::size_t().size(),
+            Type::Struct { name: _ } => unreachable!("incomplete"),
         }
     }
 
@@ -373,6 +375,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Void => unreachable!("void is not an object and doesn’t have an alignment"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => Self::size_t().align(),
+            Type::Struct { name: _ } => unreachable!("incomplete"),
         }
     }
 
@@ -388,6 +391,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Void => false,
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => true,
+            Type::Struct { name: _ } => false,
         }
     }
 
@@ -428,6 +432,7 @@ where
                 expr.as_sexpr(),
             ),
             Type::Nullptr => write!(f, "nullptr_t"),
+            Type::Struct { name } => write!(f, "struct {name}"),
         }
     }
 }

@@ -840,6 +840,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             expr: Typeof::Ty(scopes.sess.alloc(resolve_ty(scopes, ty))),
             unqual,
         },
+        ast::Type::Struct { name } => Type::Struct { name: name.slice() },
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }

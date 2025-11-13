@@ -1,0 +1,36 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_pointer_to_incomplete_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_pointer_to_incomplete_struct.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (typedef size_t `typeof((sizeof 0))`)
+   (function-definition
+      f~1 `fn(p: ptr<struct T>) -> typeof((sizeof 0))`
+      (params
+         p~2 `ptr<struct T>`)
+      (compound-statement
+         (return (sizeof (name p~2 `ptr<struct T>`)))))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (declaration p~4 `ptr<struct T>` (cast `ptr<struct T>` nullptr))
+         (declaration q~5 `ptr<struct T>` nullptr)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal (name p~4 `ptr<struct T>`) (name q~5 `ptr<struct T>`))))
+         (return
+            (cast `int`
+               (call (name f~1 `fn(p: ptr<struct T>) -> typeof((sizeof 0))`)
+                  (name p~4 `ptr<struct T>`)))))))
+
+----- stderr -----

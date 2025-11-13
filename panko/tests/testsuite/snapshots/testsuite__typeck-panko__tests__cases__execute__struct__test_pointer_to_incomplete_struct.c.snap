@@ -1,0 +1,43 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_pointer_to_incomplete_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_pointer_to_incomplete_struct.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (typedef size_t `unsigned long`)
+   (function-definition external
+      f~1 `fn(p: ptr<struct T>) -> unsigned long`
+      (params
+         p~2 `ptr<struct T>`)
+      (compound-statement
+         (return (sizeof `unsigned long` 8 (p~2 `ptr<struct T>`)))))
+   (function-definition external
+      main~3 `fn() -> int`
+      (compound-statement
+         (definition p~4 `ptr<struct T>` (noop-type-conversion `ptr<struct T>` (nullptr `nullptr_t`)))
+         (definition q~5 `ptr<struct T>` (noop-type-conversion `ptr<struct T>` (nullptr `nullptr_t`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (ptr-equal `int` (p~4 `ptr<struct T>`) (q~5 `ptr<struct T>`))))
+         (return
+            (truncate `int`
+               (call `unsigned long`
+                  (addressof `ptr<fn(p: ptr<struct T>) -> unsigned long>`
+                     (f~1 `fn(p: ptr<struct T>) -> unsigned long`))
+                  (p~4 `ptr<struct T>`)))))))
+
+----- stderr -----

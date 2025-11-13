@@ -25,5 +25,5 @@ Error: unexpected token `42` of kind `Integer(Integer { suffix: None, suffix_len
    │
  3 │ #define MACRO 42
    │               ─┬  
-   │                ╰── expected one of the following token kinds: ["auto", "constexpr", "extern", "register", "static", "thread_local", "typedef", "void", "char", "short", "int", "long", "float", "double", "signed", "unsigned", "bool", "_Complex", "_Decimal32", "_Decimal64", "_Decimal128", "typeof", "typeof_unqual", "const", "restrict", "volatile", "_Atomic", "inline", "_Noreturn", TypedefName]
+   │                ╰── expected one of the following token kinds: ["auto", "constexpr", "extern", "register", "static", "thread_local", "typedef", "struct", "void", "char", "short", "int", "long", "float", "double", "signed", "unsigned", "bool", "_Complex", "_Decimal32", "_Decimal64", "_Decimal128", "typeof", "typeof_unqual", "const", "restrict", "volatile", "_Atomic", "inline", "_Noreturn", TypedefName]
 ───╯

@@ -48,6 +48,8 @@ extern {
         "thread_local" => Token { kind: TokenKind::ThreadLocal, .. },
         "typedef" => Token { kind: TokenKind::Typedef, .. },
 
+        "struct" => Token { kind: TokenKind::Struct, .. },
+
         // TypeSpecifierToken
         "void" => Token { kind: TokenKind::Void, .. },
         "char" => Token { kind: TokenKind::Char, .. },
@@ -493,7 +495,7 @@ TypeSpecifier: ast::TypeSpecifier<'a> = {
     TypeSpecifierToken => ast::TypeSpecifier::new(<>),
     BitIntTypeSpecifier => todo!(),
     AtomicTypeSpecifier => todo!(),
-    StructOrUnionSpecifier => todo!(),
+    StructOrUnionSpecifier => <>,
     EnumSpecifier => todo!(),
     TypedefName => ast::TypeSpecifier::new(<>),
     TypeofSpecifier,
@@ -518,7 +520,11 @@ TypeSpecifierToken = {
 
 BitIntTypeSpecifier: () = {}
 AtomicTypeSpecifier: () = {}
-StructOrUnionSpecifier: () = {}
+
+StructOrUnionSpecifier: ast::TypeSpecifier<'a> = {
+    "struct" <AnyIdentifier> => ast::TypeSpecifier::r#struct(<>),
+}
+
 EnumSpecifier: () = {}
 TypeofSpecifier: ast::TypeSpecifier<'a> = {
     <r#typeof:TypeofAndIsUnqual> "(" <expr:Bump<Expression>> ")" =>

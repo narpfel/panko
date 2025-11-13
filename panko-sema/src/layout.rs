@@ -291,6 +291,7 @@ fn layout_ty<'a>(
             }),
         ty::Type::Void => Type::Void,
         ty::Type::Nullptr => Type::Nullptr,
+        ty::Type::Struct { name } => Type::Struct { name },
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }

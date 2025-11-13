@@ -368,6 +368,13 @@ impl<'a> TypeSpecifier<'a> {
         }
     }
 
+    fn r#struct(name: Token<'a>) -> Self {
+        Self {
+            token: name,
+            kind: TypeSpecifierKind::Struct,
+        }
+    }
+
     fn loc(&self) -> Loc<'a> {
         self.token.loc()
     }
@@ -507,6 +514,10 @@ impl<'a> TypeSpecifier<'a> {
                 Parsed::None => Parsed::TypeofTy { unqual, ty: typeof_ty },
                 _ => error(),
             },
+            Kind::Struct => match ty {
+                Parsed::None => Parsed::Struct { name: self.token },
+                _ => error(),
+            },
             _ => todo!("unimplemented type specifier: {self:#?}"),
         }
     }
@@ -536,6 +547,7 @@ enum TypeSpecifierKind<'a> {
     Decimal128,
     // atomic-type-specifier
     // struct-or-union-specifier
+    Struct,
     // enum-specifier
     TypedefName,
     Typeof {

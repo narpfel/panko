@@ -1144,6 +1144,7 @@ fn typeck_ty_with_initialiser<'a>(
                         ty: *return_type,
                     }),
                 Type::Typeof { expr, unqual: _ } => match expr {},
+                Type::Struct { name: _ } => unreachable!("incomplete"),
             }
             let function_ty = Type::Function(FunctionType {
                 params: sess.alloc_slice_fill_iter(params.iter().map(
@@ -1183,6 +1184,7 @@ fn typeck_ty_with_initialiser<'a>(
             };
         }
         ty::Type::Nullptr => Type::Nullptr,
+        ty::Type::Struct { name } => ty::Type::Struct { name },
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -3098,6 +3100,8 @@ fn typeck_expression<'a>(
                 }
                 (Type::Nullptr, ty @ (Type::Pointer(_) | Type::Nullptr))
                 | (ty @ Type::Pointer(_), Type::Nullptr) => ty,
+                (Type::Struct { name: _ }, _) | (_, Type::Struct { name: _ }) =>
+                    unreachable!("incomplete"),
             };
             let result_ty = result_ty.unqualified();
             TypedExpression {
