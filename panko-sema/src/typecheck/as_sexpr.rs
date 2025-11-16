@@ -172,8 +172,9 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new("ptr-sub").inherit(pointer).inherit(integral),
             Expression::PtrDiff { lhs, rhs, pointee_size: _ } =>
                 SExpr::new("ptr-diff").inherit(lhs).inherit(rhs),
-            Expression::PtrCmp { lhs, kind, rhs } =>
-                SExpr::new(kind.str()).inherit(lhs).inherit(rhs),
+            Expression::PtrCmp { lhs, kind, rhs } => SExpr::new(format!("ptr-{}", kind.str()))
+                .inherit(lhs)
+                .inherit(rhs),
             Expression::Addressof { ampersand: _, operand } =>
                 SExpr::new("addressof").lines([operand]),
             Expression::Deref { star: _, operand } => SExpr::new("deref").inherit(operand),

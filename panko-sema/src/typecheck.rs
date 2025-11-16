@@ -25,6 +25,7 @@ use panko_lex::TokenKind;
 use panko_parser as cst;
 use panko_parser::BinOp;
 use panko_parser::BinOpKind;
+use panko_parser::Comparison;
 use panko_parser::IncrementOpKind;
 use panko_parser::IntegerLiteralDiagnostic;
 use panko_parser::LogicalOp;
@@ -808,7 +809,7 @@ pub(crate) enum Expression<'a> {
     },
     PtrCmp {
         lhs: &'a TypedExpression<'a>,
-        kind: PtrCmpKind,
+        kind: Comparison,
         rhs: &'a TypedExpression<'a>,
     },
     Addressof {
@@ -1923,26 +1924,18 @@ fn typeck_binop<'a>(
         (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
             if matches!(op.kind, BinOpKind::Subtract) =>
             typeck_ptrsub(sess, op, lhs, pointee_ty, rhs),
-        (Type::Pointer(_), Type::Pointer(_))
-            if matches!(
-                op.kind,
-                BinOpKind::Equal
-                    | BinOpKind::NotEqual
-                    | BinOpKind::Less
-                    | BinOpKind::LessEqual
-                    | BinOpKind::Greater
-                    | BinOpKind::GreaterEqual
-            ) =>
-            typeck_ptrcmp(sess, lhs, *op, rhs),
+        (Type::Pointer(_), Type::Pointer(_)) if let BinOpKind::Comparison(cmp) = op.kind =>
+            typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
         (Type::Pointer(lhs_pointee_ty), Type::Pointer(rhs_pointee_ty))
             if matches!(op.kind, BinOpKind::Subtract) =>
             typeck_ptrdiff(sess, op, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
         // TODO: allow `nullptr <op> <null pointer constant>`
         (Type::Nullptr, Type::Nullptr | Type::Pointer(_)) | (Type::Pointer(_), Type::Nullptr)
-            if matches!(op.kind, BinOpKind::Equal | BinOpKind::NotEqual) =>
+            if let BinOpKind::Comparison(cmp @ (Comparison::Equal | Comparison::NotEqual)) =
+                op.kind =>
         // TODO: this will generate `PtrCmp` operations with different parameter types, maybe
         // insert some `NoopTypeConversion`s?
-            typeck_ptrcmp(sess, lhs, *op, rhs),
+            typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
         _ => sess.emit(Diagnostic::InvalidOperandsForBinaryOperator { at: *op, lhs, rhs }),
     }
 }
@@ -2011,12 +2004,7 @@ fn typeck_arithmetic_binop<'a>(
         | BinOpKind::BitOr => common_ty,
         BinOpKind::LeftShift | BinOpKind::RightShift =>
             return typeck_integral_shift(sess, op, lhs, rhs, lhs_ty, rhs_ty),
-        BinOpKind::Equal
-        | BinOpKind::NotEqual
-        | BinOpKind::Less
-        | BinOpKind::LessEqual
-        | BinOpKind::Greater
-        | BinOpKind::GreaterEqual => Type::int().unqualified(),
+        BinOpKind::Comparison(_) => Type::int().unqualified(),
     };
     let lhs = convert_as_if_by_assignment(sess, common_ty, lhs);
     let rhs = convert_as_if_by_assignment(sess, common_ty, rhs);
@@ -2134,59 +2122,19 @@ fn typeck_ptrsub<'a>(
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum PtrCmpKind {
-    Equal,
-    NotEqual,
-    Less,
-    LessEqual,
-    Greater,
-    GreaterEqual,
-}
-
-impl PtrCmpKind {
-    pub(crate) fn str(&self) -> &'static str {
-        match self {
-            PtrCmpKind::Equal => "ptr-equal",
-            PtrCmpKind::NotEqual => "ptr-not-equal",
-            PtrCmpKind::Less => "ptr-less",
-            PtrCmpKind::LessEqual => "ptr-less-equal",
-            PtrCmpKind::Greater => "ptr-greater",
-            PtrCmpKind::GreaterEqual => "ptr-greater-equal",
-        }
-    }
-}
-
 fn typeck_ptrcmp<'a>(
     sess: &'a Session<'a>,
     lhs: TypedExpression<'a>,
-    op: BinOp<'a>,
+    kind: Comparison,
+    op_token: &Token<'a>,
     rhs: TypedExpression<'a>,
 ) -> TypedExpression<'a> {
     // TODO: should check for type compatibility, not exact equality
     let expr = if lhs.ty.ty != Type::Nullptr && rhs.ty.ty != Type::Nullptr && lhs.ty.ty != rhs.ty.ty
     {
-        sess.emit(Diagnostic::IncompatibleTypesInPtrCmp { at: op.token, lhs, rhs })
+        sess.emit(Diagnostic::IncompatibleTypesInPtrCmp { at: *op_token, lhs, rhs })
     }
     else {
-        let kind = match op.kind {
-            BinOpKind::Multiply
-            | BinOpKind::Divide
-            | BinOpKind::Modulo
-            | BinOpKind::Add
-            | BinOpKind::Subtract
-            | BinOpKind::LeftShift
-            | BinOpKind::RightShift
-            | BinOpKind::BitAnd
-            | BinOpKind::BitXor
-            | BinOpKind::BitOr => unreachable!(),
-            BinOpKind::Equal => PtrCmpKind::Equal,
-            BinOpKind::NotEqual => PtrCmpKind::NotEqual,
-            BinOpKind::Less => PtrCmpKind::Less,
-            BinOpKind::LessEqual => PtrCmpKind::LessEqual,
-            BinOpKind::Greater => PtrCmpKind::Greater,
-            BinOpKind::GreaterEqual => PtrCmpKind::GreaterEqual,
-        };
         Expression::PtrCmp {
             lhs: sess.alloc(lhs),
             kind,

@@ -22,6 +22,7 @@ use panko_report::Sliced as _;
 
 use crate::BinOp;
 use crate::BinOpKind;
+use crate::Comparison;
 use crate::Expression;
 use crate::IntegerLiteralDiagnostic;
 use crate::LogicalOp;
@@ -362,17 +363,23 @@ fn eval_binop<'a>(
         BinOpKind::Modulo => ctx(lhs.rem(rhs, expr), expr),
         BinOpKind::Add => ctx(lhs + rhs, expr),
         BinOpKind::Subtract => ctx(lhs - rhs, expr),
-        BinOpKind::Equal => lhs.cmp(rhs).map(Ordering::is_eq).into(),
-        BinOpKind::NotEqual => lhs.cmp(rhs).map(Ordering::is_ne).into(),
-        BinOpKind::Less => lhs.cmp(rhs).map(Ordering::is_lt).into(),
-        BinOpKind::LessEqual => lhs.cmp(rhs).map(Ordering::is_le).into(),
-        BinOpKind::Greater => lhs.cmp(rhs).map(Ordering::is_gt).into(),
-        BinOpKind::GreaterEqual => lhs.cmp(rhs).map(Ordering::is_ge).into(),
         BinOpKind::LeftShift => ctx(lhs.shl(rhs, expr), expr),
         BinOpKind::RightShift => ctx(lhs.shr(rhs, expr), expr),
         BinOpKind::BitAnd => lhs & rhs,
         BinOpKind::BitXor => lhs ^ rhs,
         BinOpKind::BitOr => lhs | rhs,
+        BinOpKind::Comparison(cmp) => eval_cmp(cmp, lhs, rhs),
+    }
+}
+
+fn eval_cmp<'a>(cmp: Comparison, lhs: Value<'a>, rhs: Value<'a>) -> Value<'a> {
+    match cmp {
+        Comparison::Equal => lhs.cmp(rhs).map(Ordering::is_eq).into(),
+        Comparison::NotEqual => lhs.cmp(rhs).map(Ordering::is_ne).into(),
+        Comparison::Less => lhs.cmp(rhs).map(Ordering::is_lt).into(),
+        Comparison::LessEqual => lhs.cmp(rhs).map(Ordering::is_le).into(),
+        Comparison::Greater => lhs.cmp(rhs).map(Ordering::is_gt).into(),
+        Comparison::GreaterEqual => lhs.cmp(rhs).map(Ordering::is_ge).into(),
     }
 }
 

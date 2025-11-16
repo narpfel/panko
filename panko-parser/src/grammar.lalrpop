@@ -731,10 +731,10 @@ ShiftExpression: ast::Expression<'a> = {
 }
 
 RelationalOperator: ast::BinOp<'a> = {
-    "<" => ast::BinOp { kind: ast::BinOpKind::Less, token: <> },
-    "<=" => ast::BinOp { kind: ast::BinOpKind::LessEqual, token: <> },
-    ">" => ast::BinOp { kind: ast::BinOpKind::Greater, token: <> },
-    ">=" => ast::BinOp { kind: ast::BinOpKind::GreaterEqual, token: <> },
+    "<" => ast::BinOp { kind: ast::BinOpKind::Comparison(ast::Comparison::Less), token: <> },
+    "<=" => ast::BinOp { kind: ast::BinOpKind::Comparison(ast::Comparison::LessEqual), token: <> },
+    ">" => ast::BinOp { kind: ast::BinOpKind::Comparison(ast::Comparison::Greater), token: <> },
+    ">=" => ast::BinOp { kind: ast::BinOpKind::Comparison(ast::Comparison::GreaterEqual), token: <> },
 }
 
 RelationalExpression: ast::Expression<'a> = {
@@ -744,8 +744,8 @@ RelationalExpression: ast::Expression<'a> = {
 }
 
 EqualityOperator: ast::BinOp<'a> = {
-    "==" => ast::BinOp { kind: ast::BinOpKind::Equal, token: <> },
-    "!=" => ast::BinOp { kind: ast::BinOpKind::NotEqual, token: <> },
+    "==" => ast::BinOp { kind: ast::BinOpKind::Comparison(ast::Comparison::Equal), token: <> },
+    "!=" => ast::BinOp { kind: ast::BinOpKind::Comparison(ast::Comparison::NotEqual), token: <> },
 }
 
 EqualityExpression: ast::Expression<'a> = {

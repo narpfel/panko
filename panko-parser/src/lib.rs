@@ -1073,23 +1073,41 @@ impl<'a> FromError<'a> for Expression<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum BinOpKind {
-    Multiply,
-    Divide,
-    Modulo,
-    Add,
-    Subtract,
+pub enum Comparison {
     Equal,
     NotEqual,
     Less,
     LessEqual,
     Greater,
     GreaterEqual,
+}
+
+impl Comparison {
+    pub fn str(self) -> &'static str {
+        match self {
+            Self::Equal => "equal",
+            Self::NotEqual => "not-equal",
+            Self::Less => "less",
+            Self::LessEqual => "less-equal",
+            Self::Greater => "greater",
+            Self::GreaterEqual => "greater-equal",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum BinOpKind {
+    Multiply,
+    Divide,
+    Modulo,
+    Add,
+    Subtract,
     LeftShift,
     RightShift,
     BitAnd,
     BitXor,
     BitOr,
+    Comparison(Comparison),
 }
 
 impl BinOpKind {
@@ -1100,17 +1118,12 @@ impl BinOpKind {
             BinOpKind::Modulo => "modulo",
             BinOpKind::Add => "add",
             BinOpKind::Subtract => "subtract",
-            BinOpKind::Equal => "equal",
-            BinOpKind::NotEqual => "not-equal",
-            BinOpKind::Less => "less",
-            BinOpKind::LessEqual => "less-equal",
-            BinOpKind::Greater => "greater",
-            BinOpKind::GreaterEqual => "greater-equal",
             BinOpKind::LeftShift => "left-shift",
             BinOpKind::RightShift => "right-shift",
             BinOpKind::BitAnd => "bit-and",
             BinOpKind::BitXor => "bit-xor",
             BinOpKind::BitOr => "bit-or",
+            BinOpKind::Comparison(cmp) => cmp.str(),
         }
     }
 }

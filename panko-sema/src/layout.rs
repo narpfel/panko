@@ -5,6 +5,7 @@ use panko_lex::Bump;
 use panko_lex::Loc;
 use panko_parser as cst;
 use panko_parser::BinOp;
+use panko_parser::Comparison;
 use panko_parser::LogicalOp;
 use panko_parser::ast::Integral;
 use panko_report::Report;
@@ -19,7 +20,6 @@ use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
 use crate::typecheck;
 use crate::typecheck::PtrAddOrder;
-use crate::typecheck::PtrCmpKind;
 use crate::typecheck::Typedef;
 
 mod as_sexpr;
@@ -157,7 +157,7 @@ pub enum Expression<'a> {
     },
     PtrCmp {
         lhs: &'a LayoutedExpression<'a>,
-        kind: PtrCmpKind,
+        kind: Comparison,
         rhs: &'a LayoutedExpression<'a>,
     },
     Addressof(&'a LayoutedExpression<'a>),

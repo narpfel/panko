@@ -19,6 +19,7 @@ use itertools::EitherOrBoth;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_parser::BinOpKind;
+use panko_parser::Comparison;
 use panko_parser::LogicalOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Signedness;
@@ -41,7 +42,6 @@ use panko_sema::scope::Linkage;
 use panko_sema::scope::RefKind;
 use panko_sema::ty::ArrayType;
 use panko_sema::typecheck::ArrayLength;
-use panko_sema::typecheck::PtrCmpKind;
 
 use crate::Register::*;
 use crate::lineno::Linenos;
@@ -813,13 +813,16 @@ impl<'a> Codegen<'a> {
                     }
                     BinOpKind::Add => emit_arithmetic(self, "add"),
                     BinOpKind::Subtract => emit_arithmetic(self, "sub"),
-                    BinOpKind::Equal => emit_comparison(self, "sete"),
-                    BinOpKind::NotEqual => emit_comparison(self, "setne"),
-                    BinOpKind::Less => emit_sign_dependent_comparison(self, "setl", "setb"),
-                    BinOpKind::LessEqual => emit_sign_dependent_comparison(self, "setle", "setbe"),
-                    BinOpKind::Greater => emit_sign_dependent_comparison(self, "setg", "seta"),
-                    BinOpKind::GreaterEqual =>
-                        emit_sign_dependent_comparison(self, "setge", "setae"),
+                    BinOpKind::Comparison(cmp) => match cmp {
+                        Comparison::Equal => emit_comparison(self, "sete"),
+                        Comparison::NotEqual => emit_comparison(self, "setne"),
+                        Comparison::Less => emit_sign_dependent_comparison(self, "setl", "setb"),
+                        Comparison::LessEqual =>
+                            emit_sign_dependent_comparison(self, "setle", "setbe"),
+                        Comparison::Greater => emit_sign_dependent_comparison(self, "setg", "seta"),
+                        Comparison::GreaterEqual =>
+                            emit_sign_dependent_comparison(self, "setge", "setae"),
+                    },
                     BinOpKind::LeftShift => emit_shift(self, "shl", "shl"),
                     BinOpKind::RightShift => emit_shift(self, "sar", "shr"),
                     BinOpKind::BitAnd => emit_arithmetic(self, "and"),
@@ -877,12 +880,12 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[&Rax.typed(lhs), lhs]);
                 self.emit_args("cmp", &[&Rax.typed(lhs), rhs]);
                 let operation = match kind {
-                    PtrCmpKind::Equal => "sete",
-                    PtrCmpKind::NotEqual => "setne",
-                    PtrCmpKind::Less => "setb",
-                    PtrCmpKind::LessEqual => "setbe",
-                    PtrCmpKind::Greater => "seta",
-                    PtrCmpKind::GreaterEqual => "setae",
+                    Comparison::Equal => "sete",
+                    Comparison::NotEqual => "setne",
+                    Comparison::Less => "setb",
+                    Comparison::LessEqual => "setbe",
+                    Comparison::Greater => "seta",
+                    Comparison::GreaterEqual => "setae",
                 };
                 self.emit_args(operation, &[&Rax.byte()]);
                 self.emit_args("movzx", &[&Rax.typed(expr), &Rax.byte()]);
