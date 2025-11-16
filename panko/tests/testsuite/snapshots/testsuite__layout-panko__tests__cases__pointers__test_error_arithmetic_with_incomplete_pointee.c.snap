@@ -1,0 +1,63 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/pointers/test_error_arithmetic_with_incomplete_pointee.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid pointer arithmetic `+` on a pointer to incomplete type `struct T`
+   ╭─[panko/tests/cases/pointers/test_error_arithmetic_with_incomplete_pointee.c:4:7]
+   │
+ 4 │     p + 1;
+   │     ┬ ─ ┬  
+   │     │   ╰── this is of type `int`
+   │     │      
+   │     ╰────── this is of type `ptr<struct T>`
+───╯
+
+Error: invalid pointer arithmetic `+` on a pointer to incomplete type `struct T`
+   ╭─[panko/tests/cases/pointers/test_error_arithmetic_with_incomplete_pointee.c:5:7]
+   │
+ 5 │     1 + q;
+   │     ┬ ─ ┬  
+   │     │   ╰── this is of type `ptr<struct T>`
+   │     │      
+   │     ╰────── this is of type `int`
+───╯
+
+Error: invalid pointer arithmetic `-` on a pointer to incomplete type `struct T`
+   ╭─[panko/tests/cases/pointers/test_error_arithmetic_with_incomplete_pointee.c:6:7]
+   │
+ 6 │     p - 1;
+   │     ┬ ─ ┬  
+   │     │   ╰── this is of type `int`
+   │     │      
+   │     ╰────── this is of type `ptr<struct T>`
+───╯
+
+Error: invalid pointer arithmetic `-` on a pointer to incomplete type `struct T`
+   ╭─[panko/tests/cases/pointers/test_error_arithmetic_with_incomplete_pointee.c:7:7]
+   │
+ 7 │     p - q;
+   │     ┬ ─ ┬  
+   │     │   ╰── this is of type `ptr<struct T>`
+   │     │      
+   │     ╰────── this is of type `ptr<struct T>`
+───╯
+
+Error: invalid pointer arithmetic `+` on a pointer to incomplete type `void`
+   ╭─[panko/tests/cases/pointers/test_error_arithmetic_with_incomplete_pointee.c:9:8]
+   │
+ 9 │     vp + 1;
+   │     ─┬ ─ ┬  
+   │      │   ╰── this is of type `int`
+   │      │      
+   │      ╰────── this is of type `ptr<void>`
+───╯

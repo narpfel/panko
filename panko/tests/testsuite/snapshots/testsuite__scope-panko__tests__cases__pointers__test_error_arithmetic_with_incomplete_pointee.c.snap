@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/pointers/test_error_arithmetic_with_incomplete_pointee.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/pointers/test_error_arithmetic_with_incomplete_pointee.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration p~1 `ptr<struct T>` (cast `ptr<struct T>` nullptr))
+         (declaration q~2 `ptr<struct T>` nullptr)
+         (expression (add (name p~1 `ptr<struct T>`) 1))
+         (expression (add 1 (name q~2 `ptr<struct T>`)))
+         (expression (subtract (name p~1 `ptr<struct T>`) 1))
+         (expression (subtract (name p~1 `ptr<struct T>`) (name q~2 `ptr<struct T>`)))
+         (declaration vp~3 `ptr<void>` nullptr)
+         (expression (add (name vp~3 `ptr<void>`) 1)))))
+
+----- stderr -----
