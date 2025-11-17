@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/pointers/test_deref_pointer_to_array_of_unknown_size.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_deref_pointer_to_array_of_unknown_size.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (declaration xs~2 `array<int; 42>`
+            (braced
+               1
+               2
+               3
+               4
+               (designation ((index 27)) 5)))
+         (declaration p~3 `ptr<typeof(`array<int; ∅>`)>` (addressof (name xs~2 `array<int; 42>`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (subscript (deref (name p~3 `ptr<typeof(`array<int; ∅>`)>`)) 27)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (deref (deref (name p~3 `ptr<typeof(`array<int; ∅>`)>`)))))
+         (expression (assign (deref (deref (name p~3 `ptr<typeof(`array<int; ∅>`)>`))) 123))
+         (return (deref (deref (name p~3 `ptr<typeof(`array<int; ∅>`)>`)))))))
+
+----- stderr -----

@@ -12,7 +12,7 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: dereference of pointer to `void`
+Error: dereference of pointer to incomplete type `void`
    ╭─[panko/tests/cases/deref/test_deref_void_ptr.c:8:6]
    │
  8 │     *p;

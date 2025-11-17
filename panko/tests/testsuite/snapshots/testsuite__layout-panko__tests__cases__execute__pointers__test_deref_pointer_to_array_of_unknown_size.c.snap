@@ -1,0 +1,67 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/pointers/test_deref_pointer_to_array_of_unknown_size.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_deref_pointer_to_array_of_unknown_size.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (definition (xs~2 `array<int; 42>` @0)
+            (braced
+               (subobject +0 (1 `int` @0))
+               (subobject +4 (2 `int` @4))
+               (subobject +8 (3 `int` @8))
+               (subobject +12 (4 `int` @12))
+               (subobject +108 (5 `int` @108))))
+         (definition (p~3 `ptr<array<int; ∅>>` @168)
+            (addressof `ptr<array<int; 42>>` @168
+               (xs~2 `array<int; 42>` @0)))
+         (expression
+            (call `int` @176
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @184
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @192
+                  (noop-type-conversion `ptr<char>` @192
+                     (addressof `ptr<array<char; 4>>` @192
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (deref `int` @200
+                  (ptr-add `ptr<int>` @208
+                     (noop-type-conversion `ptr<int>` @208
+                        (addressof `ptr<array<int; ∅>>` @208
+                           (deref `array<int; ∅>` @208 (p~3 `ptr<array<int; ∅>>` @168))))
+                     (sign-extend `unsigned long` @216 (27 `int` @224))))))
+         (expression
+            (call `int` @176
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @184
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @192
+                  (noop-type-conversion `ptr<char>` @192
+                     (addressof `ptr<array<char; 4>>` @192
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (deref `int` @200
+                  (noop-type-conversion `ptr<int>` @208
+                     (addressof `ptr<array<int; ∅>>` @208
+                        (deref `array<int; ∅>` @208 (p~3 `ptr<array<int; ∅>>` @168)))))))
+         (expression
+            (assign `int` @176
+               (deref `int` @176
+                  (noop-type-conversion `ptr<int>` @184
+                     (addressof `ptr<array<int; ∅>>` @184
+                        (deref `array<int; ∅>` @184 (p~3 `ptr<array<int; ∅>>` @168)))))
+               (123 `int` @192)))
+         (return
+            (deref `int` @176
+               (noop-type-conversion `ptr<int>` @184
+                  (addressof `ptr<array<int; ∅>>` @184
+                     (deref `array<int; ∅>` @184 (p~3 `ptr<array<int; ∅>>` @168)))))))))
+
+----- stderr -----

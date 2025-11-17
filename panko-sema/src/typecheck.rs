@@ -155,10 +155,13 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "this expression is not an lvalue"))]
     AssignmentToNonLValue { at: &'a Expression<'a> },
 
-    #[error("dereference of pointer to `void`")]
+    #[error("dereference of pointer to incomplete type `{pointee_ty}`")]
     #[diagnostics(at(colour = Red, label = "this expression has type `{ty}`"))]
-    #[with(ty = at.ty.ty)]
-    DerefOfVoidPtr { at: TypedExpression<'a> },
+    #[with(ty = at.ty.ty, pointee_ty = pointee_ty.fg(Red))]
+    DerefOfPointerToIncompleteType {
+        at: TypedExpression<'a>,
+        pointee_ty: QualifiedType<'a>,
+    },
 
     #[error("invalid application of `{op}` to {kind} `{ty}`")]
     #[diagnostics(at(colour = Red, label = "in this expression"), op(colour = Red))]
@@ -2677,9 +2680,14 @@ fn typeck_expression<'a>(
                 }
                 UnaryOpKind::Deref => match operand.ty.ty {
                     Type::Pointer(pointee_ty) => {
-                        if matches!(pointee_ty.ty, Type::Void) {
-                            sess.emit(Diagnostic::DerefOfVoidPtr { at: operand })
-                        }
+                        let can_deref = pointee_ty.ty.is_complete() || pointee_ty.ty.is_array();
+                        let operand = match can_deref {
+                            true => operand,
+                            false => sess.emit(Diagnostic::DerefOfPointerToIncompleteType {
+                                at: operand,
+                                pointee_ty: *pointee_ty,
+                            }),
+                        };
                         TypedExpression {
                             ty: *pointee_ty,
                             expr: Expression::Deref {

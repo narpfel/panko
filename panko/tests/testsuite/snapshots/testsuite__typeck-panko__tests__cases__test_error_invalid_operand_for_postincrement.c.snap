@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/test_error_invalid_operand_for_postincrement.c
-snapshot_kind: text
 ---
 success: false
 exit_code: 1
@@ -37,7 +36,7 @@ Error: cannot assign to this expression because it is not an lvalue
    │      ╰─── this expression is not an lvalue
 ───╯
 
-Error: dereference of pointer to `void`
+Error: dereference of pointer to incomplete type `void`
    ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:9:5]
    │
  9 │     f()++;
@@ -45,7 +44,7 @@ Error: dereference of pointer to `void`
    │      ╰─── this expression has type `ptr<void>`
 ───╯
 
-Error: dereference of pointer to `void`
+Error: dereference of pointer to incomplete type `void`
    ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:9:5]
    │
  9 │     f()++;

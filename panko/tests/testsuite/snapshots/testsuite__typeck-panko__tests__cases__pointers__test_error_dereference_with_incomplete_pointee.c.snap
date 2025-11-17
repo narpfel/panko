@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/pointers/test_error_dereference_with_incomplete_pointee.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: dereference of pointer to incomplete type `struct T`
+   ╭─[panko/tests/cases/pointers/test_error_dereference_with_incomplete_pointee.c:3:6]
+   │
+ 3 │     *p;
+   │      ┬  
+   │      ╰── this expression has type `ptr<struct T>`
+───╯
+
+Error: dereference of pointer to incomplete type `struct T`
+   ╭─[panko/tests/cases/pointers/test_error_dereference_with_incomplete_pointee.c:4:6]
+   │
+ 4 │     *p = 123;
+   │      ┬  
+   │      ╰── this expression has type `ptr<struct T>`
+───╯
+
+Error: invalid implicit conversion from `int` to `struct T`
+   ╭─[panko/tests/cases/pointers/test_error_dereference_with_incomplete_pointee.c:4:10]
+   │
+ 4 │     *p = 123;
+   │          ─┬─  
+   │           ╰─── this is of type `int`, which cannot be implicitly converted to `struct T`
+───╯

@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/pointers/test_error_dereference_with_incomplete_pointee.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/pointers/test_error_dereference_with_incomplete_pointee.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration p~1 `ptr<struct T>` nullptr)
+         (expression (deref (name p~1 `ptr<struct T>`)))
+         (expression (assign (deref (name p~1 `ptr<struct T>`)) 123)))))
+
+----- stderr -----
