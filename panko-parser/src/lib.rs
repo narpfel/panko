@@ -406,11 +406,14 @@ impl<'a> TypeSpecifier<'a> {
         let error = #[track_caller]
         || error_full("invalid combination of type specifiers");
 
+        let exclusive = #[track_caller]
+        |value| match ty {
+            Parsed::None => value,
+            _ => error(),
+        };
+
         match self.kind {
-            Kind::Void => match ty {
-                Parsed::None => Parsed::Void,
-                _ => error(),
-            },
+            Kind::Void => exclusive(Parsed::Void),
             Kind::Char => match ty {
                 Parsed::None => Parsed::Char(None),
                 Parsed::Int { kind: None, signedness } => Parsed::Char(signedness),
@@ -498,29 +501,14 @@ impl<'a> TypeSpecifier<'a> {
                 },
                 _ => error(),
             },
-            Kind::TypedefName => match ty {
-                Parsed::None => Parsed::Typedef(self.token),
-                _ => error(),
-            },
-            Kind::Bool => match ty {
-                Parsed::None => Parsed::Int {
-                    signedness: Some(Signedness::Unsigned),
-                    kind: Some(IntegralKind::Bool),
-                },
-                _ => error(),
-            },
-            Kind::Typeof { unqual, expr } => match ty {
-                Parsed::None => Parsed::Typeof { unqual, expr },
-                _ => error(),
-            },
-            Kind::TypeofTy { unqual, ty: typeof_ty } => match ty {
-                Parsed::None => Parsed::TypeofTy { unqual, ty: typeof_ty },
-                _ => error(),
-            },
-            Kind::Struct { r#struct: _ } => match ty {
-                Parsed::None => Parsed::Struct { name: self.token },
-                _ => error(),
-            },
+            Kind::TypedefName => exclusive(Parsed::Typedef(self.token)),
+            Kind::Bool => exclusive(Parsed::Int {
+                signedness: Some(Signedness::Unsigned),
+                kind: Some(IntegralKind::Bool),
+            }),
+            Kind::Typeof { unqual, expr } => exclusive(Parsed::Typeof { unqual, expr }),
+            Kind::TypeofTy { unqual, ty } => exclusive(Parsed::TypeofTy { unqual, ty }),
+            Kind::Struct { r#struct: _ } => exclusive(Parsed::Struct { name: self.token }),
             _ => todo!("unimplemented type specifier: {self:#?}"),
         }
     }
