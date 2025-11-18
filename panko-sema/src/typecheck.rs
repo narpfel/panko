@@ -105,6 +105,7 @@ enum Diagnostic<'a> {
 
     #[error("invalid function return type `{ty}`")]
     #[diagnostics(at(colour = Red, label = "declaration here"))]
+    #[with(ty = ty.fg(Red))]
     InvalidFunctionReturnType { at: Loc<'a>, ty: QualifiedType<'a> },
 
     // TODO: types should be printed in C syntax, not in their SExpr debug repr
