@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/pointers/test_typeof_derefd_pointer_to_incomplete_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_typeof_derefd_pointer_to_incomplete_type.c"
+   (function-definition external
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition p~1 `ptr<struct T>` (noop-type-conversion `ptr<struct T>` (nullptr `nullptr_t`)))
+         (definition q~2 `ptr<struct T>` (p~1 `ptr<struct T>`))
+         (definition r~3 `ptr<struct T>` (p~1 `ptr<struct T>`))
+         (return
+            (logical-and `int`
+               (ptr-equal `int` (p~1 `ptr<struct T>`) (q~2 `ptr<struct T>`))
+               (ptr-equal `int` (p~1 `ptr<struct T>`) (r~3 `ptr<struct T>`)))))))
+
+----- stderr -----
