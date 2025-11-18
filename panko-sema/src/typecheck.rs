@@ -1257,8 +1257,7 @@ fn typeck_reference<'a>(
             let previous_linkage = previous_definition.linkage();
             let previous_ty = previous_definition.ty;
             let composite_ty = ty.composite_ty(sess.bump(), &previous_ty).unwrap_or(ty);
-            let linkage = linkage
-                .or(matches!(composite_ty.ty, Type::Function(_)).then_some(Linkage::External));
+            let linkage = linkage.or(composite_ty.ty.is_function().then_some(Linkage::External));
             let linkage = match (linkage, previous_linkage) {
                 (Some(Linkage::Inline), previous_linkage) => Some(previous_linkage),
                 (linkage, Linkage::Inline) => linkage,
@@ -1769,7 +1768,7 @@ fn typeck_declaration<'a>(
         sess.emit(Diagnostic::EmptyArray { at: reference })
     }
 
-    if !matches!(reference.ty.ty, Type::Function(_)) {
+    if !reference.ty.ty.is_function() {
         reject_function_specifiers(sess, &function_specifiers, reference.loc(), "non-function");
     }
 
