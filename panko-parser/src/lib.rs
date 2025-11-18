@@ -368,15 +368,18 @@ impl<'a> TypeSpecifier<'a> {
         }
     }
 
-    fn r#struct(name: Token<'a>) -> Self {
+    fn r#struct(r#struct: Token<'a>, name: Token<'a>) -> Self {
         Self {
             token: name,
-            kind: TypeSpecifierKind::Struct,
+            kind: TypeSpecifierKind::Struct { r#struct },
         }
     }
 
     fn loc(&self) -> Loc<'a> {
-        self.token.loc()
+        match self.kind {
+            TypeSpecifierKind::Struct { r#struct } => r#struct.loc().until(self.token.loc()),
+            _ => self.token.loc(),
+        }
     }
 
     fn parse(
@@ -514,7 +517,7 @@ impl<'a> TypeSpecifier<'a> {
                 Parsed::None => Parsed::TypeofTy { unqual, ty: typeof_ty },
                 _ => error(),
             },
-            Kind::Struct => match ty {
+            Kind::Struct { r#struct: _ } => match ty {
                 Parsed::None => Parsed::Struct { name: self.token },
                 _ => error(),
             },
@@ -547,7 +550,9 @@ enum TypeSpecifierKind<'a> {
     Decimal128,
     // atomic-type-specifier
     // struct-or-union-specifier
-    Struct,
+    Struct {
+        r#struct: Token<'a>,
+    },
     // enum-specifier
     TypedefName,
     Typeof {

@@ -522,7 +522,7 @@ BitIntTypeSpecifier: () = {}
 AtomicTypeSpecifier: () = {}
 
 StructOrUnionSpecifier: ast::TypeSpecifier<'a> = {
-    "struct" <AnyIdentifier> => ast::TypeSpecifier::r#struct(<>),
+    "struct" AnyIdentifier => ast::TypeSpecifier::r#struct(<>),
 }
 
 EnumSpecifier: () = {}
