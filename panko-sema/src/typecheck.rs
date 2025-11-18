@@ -2683,6 +2683,7 @@ fn typeck_expression<'a>(
                         let can_deref = pointee_ty.ty.is_complete() || pointee_ty.ty.is_array();
                         let operand = match can_deref {
                             true => operand,
+                            // TODO: this ICEs in `--defer-type-errors` mode
                             false => sess.emit(Diagnostic::DerefOfPointerToIncompleteType {
                                 at: operand,
                                 pointee_ty: *pointee_ty,
