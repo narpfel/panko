@@ -2513,6 +2513,17 @@ enum Context {
     ArrayInitialisationByString,
 }
 
+impl From<UnaryOpKind> for Context {
+    fn from(operator_kind: UnaryOpKind) -> Self {
+        match operator_kind {
+            UnaryOpKind::Addressof => Self::Addressof,
+            UnaryOpKind::Sizeof => Self::Sizeof,
+            UnaryOpKind::Lengthof => Self::Sizeof,
+            _ => Self::Default,
+        }
+    }
+}
+
 fn typeck_expression<'a>(
     sess: &'a Session<'a>,
     expr: &scope::Expression<'a>,
@@ -2645,13 +2656,7 @@ fn typeck_expression<'a>(
             typeck_binop(sess, lhs, op, rhs)
         }
         scope::Expression::UnaryOp { operator, operand } => {
-            let context = match operator.kind {
-                UnaryOpKind::Addressof => Context::Addressof,
-                UnaryOpKind::Sizeof => Context::Sizeof,
-                UnaryOpKind::Lengthof => Context::Sizeof,
-                _ => Context::Default,
-            };
-            let operand = typeck_expression(sess, operand, context);
+            let operand = typeck_expression(sess, operand, Context::from(operator.kind));
             match operator.kind {
                 UnaryOpKind::Addressof => {
                     let is_function_designator = operand.ty.ty.is_function();
