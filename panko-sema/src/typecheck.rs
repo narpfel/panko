@@ -1158,13 +1158,12 @@ fn typeck_ty_with_initialiser<'a>(
             let return_type = sess.alloc(typeck_ty(sess, *return_type, IsParameter::No));
             match return_type.ty {
                 Type::Arithmetic(_) | Type::Pointer(_) | Type::Void | Type::Nullptr => (),
-                Type::Array(_) | Type::Function(_) =>
+                Type::Array(_) | Type::Function(_) | Type::Struct { name: _ } =>
                     sess.emit(Diagnostic::InvalidFunctionReturnType {
                         at: return_type.loc,
                         ty: *return_type,
                     }),
                 Type::Typeof { expr, unqual: _ } => match expr {},
-                Type::Struct { name: _ } => unreachable!("incomplete"),
             }
             let function_ty = Type::Function(FunctionType {
                 params: sess.alloc_slice_fill_iter(params.iter().map(

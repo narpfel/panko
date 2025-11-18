@@ -1,0 +1,16 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/functions/test_error_incomplete_struct_return_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/functions/test_error_incomplete_struct_return_type.c"
+   (declaration f~0 `fn() -> struct Incomplete` ∅))
+
+----- stderr -----

@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/functions/test_error_incomplete_struct_return_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid function return type `struct Incomplete`
+   ╭─[panko/tests/cases/functions/test_error_incomplete_struct_return_type.c:1:8]
+   │
+ 1 │ struct Incomplete f();
+   │        ─────┬────  
+   │             ╰────── declaration here
+───╯
