@@ -2685,7 +2685,9 @@ fn typeck_expression<'a>(
                 }
                 UnaryOpKind::Deref => match operand.ty.ty {
                     Type::Pointer(pointee_ty) => {
-                        let can_deref = pointee_ty.ty.is_complete() || pointee_ty.ty.is_array();
+                        let can_deref = pointee_ty.ty.is_complete()
+                            || pointee_ty.ty.is_array()
+                            || matches!(context, Context::Addressof);
                         let operand = match can_deref {
                             true => operand,
                             // TODO: this ICEs in `--defer-type-errors` mode
