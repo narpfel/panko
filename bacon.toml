@@ -29,6 +29,7 @@ command = [
     "--quiet",
 ]
 need_stdout = true
+env.PANKO_COMPILETEST_USE_LINKER = "wild"
 
 [jobs.covtest]
 command = [
