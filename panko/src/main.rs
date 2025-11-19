@@ -14,7 +14,6 @@ use clap::Parser;
 use clap::ValueEnum;
 use color_eyre::Result;
 use color_eyre::eyre::Context;
-use color_eyre::eyre::OptionExt;
 use color_eyre::eyre::eyre;
 use panko_lex::Bump;
 use panko_lex::TokenKind;
@@ -284,17 +283,6 @@ fn compile(
     Ok(Ok(object_filename))
 }
 
-fn glob_gcc_crt_path() -> Result<PathBuf> {
-    glob::glob("/usr/lib/gcc/x86_64-pc-linux-gnu/*")?
-        .chain(glob::glob("/usr/lib/gcc/x86_64-linux-gnu/*")?)
-        .collect::<Vec<_>>()
-        .into_iter()
-        .rev()
-        .filter_map(Result::ok)
-        .next()
-        .ok_or_eyre("could not find a GCC installation containing the required crt object files")
-}
-
 fn find_crt_path(crt: &str) -> Result<PathBuf> {
     let search_paths = ["/usr/lib", "/usr/lib/x86_64-linux-gnu"];
     for path in search_paths {
@@ -312,7 +300,6 @@ fn link(
     object_filenames: &[PathBuf],
     print: &[Step],
 ) -> Result<()> {
-    let gcc_crt_path = glob_gcc_crt_path()?;
     Command::new(ld_path)
         .args([
             "-m",
@@ -323,15 +310,13 @@ fn link(
             "-L/usr/lib",
             "-L/lib",
         ])
-        .args([
+        .arg(
+            // for now we only need to link `Scrt1.o`, see https://stackoverflow.com/a/27786892
+            // (mirror of http://dev.gentoo.org/%7Evapier/crt.txt)
             find_crt_path("Scrt1.o")?,
-            find_crt_path("crti.o")?,
-            gcc_crt_path.join("crtbeginS.o"),
-        ])
+        )
         .args(object_filenames)
         .arg("-lc")
-        .arg(gcc_crt_path.join("crtendS.o"))
-        .arg(find_crt_path("crtn.o")?)
         .arg("-o")
         .arg(executable_filename)
         .status()
