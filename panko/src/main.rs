@@ -14,6 +14,8 @@ use clap::Parser;
 use clap::ValueEnum;
 use color_eyre::Result;
 use color_eyre::eyre::Context;
+use color_eyre::eyre::OptionExt;
+use color_eyre::eyre::eyre;
 use panko_lex::Bump;
 use panko_lex::TokenKind;
 use panko_parser::sexpr_builder::AsSExpr as _;
@@ -64,6 +66,8 @@ struct Args {
     treat_error_as_bug: bool,
     #[clap(flatten)]
     include_paths: IncludePaths,
+    #[arg(long, default_value = "ld")]
+    ld_path: PathBuf,
 }
 
 struct CompileArgs {
@@ -96,6 +100,7 @@ fn main() -> Result<()> {
         debug,
         treat_error_as_bug,
         include_paths,
+        ld_path,
     } = Args::parse();
 
     let compile_args = CompileArgs {
@@ -139,7 +144,12 @@ fn main() -> Result<()> {
         [_, _, ..] => PathBuf::from("a.out"),
     });
 
-    link(&executable_filename, &object_filenames, &compile_args.print)?;
+    link(
+        &ld_path,
+        &executable_filename,
+        &object_filenames,
+        &compile_args.print,
+    )?;
 
     if let Some(Step::Link) = stop_after {
         return Ok(());
@@ -274,15 +284,60 @@ fn compile(
     Ok(Ok(object_filename))
 }
 
-fn link(executable_filename: &Path, object_filenames: &[PathBuf], print: &[Step]) -> Result<()> {
-    Command::new("cc")
+fn glob_gcc_crt_path() -> Result<PathBuf> {
+    glob::glob("/usr/lib/gcc/x86_64-pc-linux-gnu/*")?
+        .chain(glob::glob("/usr/lib/gcc/x86_64-linux-gnu/*")?)
+        .collect::<Vec<_>>()
+        .into_iter()
+        .rev()
+        .filter_map(Result::ok)
+        .next()
+        .ok_or_eyre("could not find a GCC installation containing the required crt object files")
+}
+
+fn find_crt_path(crt: &str) -> Result<PathBuf> {
+    let search_paths = ["/usr/lib", "/usr/lib/x86_64-linux-gnu"];
+    for path in search_paths {
+        let path = Path::new(path).join(crt);
+        if let Ok(true) = path.try_exists() {
+            return Ok(path);
+        }
+    }
+    Err(eyre!("could not find path for `{crt}`"))
+}
+
+fn link(
+    ld_path: &Path,
+    executable_filename: &Path,
+    object_filenames: &[PathBuf],
+    print: &[Step],
+) -> Result<()> {
+    let gcc_crt_path = glob_gcc_crt_path()?;
+    Command::new(ld_path)
+        .args([
+            "-m",
+            "elf_x86_64",
+            "-pie",
+            "-dynamic-linker",
+            "/lib64/ld-linux-x86-64.so.2",
+            "-L/usr/lib",
+            "-L/lib",
+        ])
+        .args([
+            find_crt_path("Scrt1.o")?,
+            find_crt_path("crti.o")?,
+            gcc_crt_path.join("crtbeginS.o"),
+        ])
         .args(object_filenames)
+        .arg("-lc")
+        .arg(gcc_crt_path.join("crtendS.o"))
+        .arg(find_crt_path("crtn.o")?)
         .arg("-o")
         .arg(executable_filename)
         .status()
-        .wrap_err_with(|| "could not execute linker `cc`")?
+        .wrap_err_with(|| format!("could not execute linker `{}`", ld_path.display()))?
         .exit_ok()
-        .wrap_err_with(|| "linker `cc` failed")?;
+        .wrap_err_with(|| format!("linker `{}` failed", ld_path.display()))?;
     if print.contains(&Step::Link) {
         Command::new("objdump")
             .arg("-d")

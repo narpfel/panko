@@ -1,4 +1,4 @@
-// [[compile-error: linker `cc` failed]]
+// [[compile-error: linker `[^`]+` failed]]
 
 int f();
 
