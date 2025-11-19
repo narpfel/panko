@@ -61,6 +61,7 @@ command = [
     "--profile=clif",
     "--color", "always",
     "--",
+    "--ld-path=mold",
     "--print=layout",
     "--print=codegen",
     "-o/tmp/main",
