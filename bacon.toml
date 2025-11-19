@@ -29,6 +29,7 @@ command = [
     "--quiet",
 ]
 need_stdout = true
+env.PANKO_COMPILETEST_USE_LINKER = "wild"
 
 [jobs.covtest]
 command = [
@@ -61,6 +62,7 @@ command = [
     "--profile=clif",
     "--color", "always",
     "--",
+    "--ld-path=mold",
     "--print=layout",
     "--print=codegen",
     "-o/tmp/main",

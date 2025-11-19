@@ -14,6 +14,7 @@ use clap::Parser;
 use clap::ValueEnum;
 use color_eyre::Result;
 use color_eyre::eyre::Context;
+use color_eyre::eyre::eyre;
 use panko_lex::Bump;
 use panko_lex::TokenKind;
 use panko_parser::sexpr_builder::AsSExpr as _;
@@ -64,6 +65,8 @@ struct Args {
     treat_error_as_bug: bool,
     #[clap(flatten)]
     include_paths: IncludePaths,
+    #[arg(long, default_value = "ld")]
+    ld_path: PathBuf,
 }
 
 struct CompileArgs {
@@ -96,6 +99,7 @@ fn main() -> Result<()> {
         debug,
         treat_error_as_bug,
         include_paths,
+        ld_path,
     } = Args::parse();
 
     let compile_args = CompileArgs {
@@ -139,7 +143,12 @@ fn main() -> Result<()> {
         [_, _, ..] => PathBuf::from("a.out"),
     });
 
-    link(&executable_filename, &object_filenames, &compile_args.print)?;
+    link(
+        &ld_path,
+        &executable_filename,
+        &object_filenames,
+        &compile_args.print,
+    )?;
 
     if let Some(Step::Link) = stop_after {
         return Ok(());
@@ -274,15 +283,46 @@ fn compile(
     Ok(Ok(object_filename))
 }
 
-fn link(executable_filename: &Path, object_filenames: &[PathBuf], print: &[Step]) -> Result<()> {
-    Command::new("cc")
+fn find_crt_path(crt: &str) -> Result<PathBuf> {
+    let search_paths = ["/usr/lib", "/usr/lib/x86_64-linux-gnu"];
+    for path in search_paths {
+        let path = Path::new(path).join(crt);
+        if let Ok(true) = path.try_exists() {
+            return Ok(path);
+        }
+    }
+    Err(eyre!("could not find path for `{crt}`"))
+}
+
+fn link(
+    ld_path: &Path,
+    executable_filename: &Path,
+    object_filenames: &[PathBuf],
+    print: &[Step],
+) -> Result<()> {
+    Command::new(ld_path)
+        .args([
+            "-m",
+            "elf_x86_64",
+            "-pie",
+            "-dynamic-linker",
+            "/lib64/ld-linux-x86-64.so.2",
+            "-L/usr/lib",
+            "-L/lib",
+        ])
+        .arg(
+            // for now we only need to link `Scrt1.o`, see https://stackoverflow.com/a/27786892
+            // (mirror of http://dev.gentoo.org/%7Evapier/crt.txt)
+            find_crt_path("Scrt1.o")?,
+        )
         .args(object_filenames)
+        .arg("-lc")
         .arg("-o")
         .arg(executable_filename)
         .status()
-        .wrap_err_with(|| "could not execute linker `cc`")?
+        .wrap_err_with(|| format!("could not execute linker `{}`", ld_path.display()))?
         .exit_ok()
-        .wrap_err_with(|| "linker `cc` failed")?;
+        .wrap_err_with(|| format!("linker `{}` failed", ld_path.display()))?;
     if print.contains(&Step::Link) {
         Command::new("objdump")
             .arg("-d")

@@ -10,6 +10,7 @@ use std::borrow::Borrow;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::ffi::OsString;
 use std::fmt;
 use std::io;
 use std::io::Write;
@@ -383,9 +384,15 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
         .join(test_name.file_name().unwrap())
         .with_extension("");
 
+    let linker = match std::env::var_os("PANKO_COMPILETEST_USE_LINKER") {
+        Some(linker) if !linker.is_empty() => vec![OsString::from("--ld-path"), linker],
+        _ => vec![],
+    };
+
     Command::new(get_cargo_bin("panko"))
         .env("CLICOLOR_FORCE", "1")
         .current_dir("..")
+        .args(linker)
         .args(filenames)
         .arg("-o")
         .arg(&executable_filename)
