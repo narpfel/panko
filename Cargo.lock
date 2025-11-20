@@ -79,7 +79,7 @@ dependencies = [
 [[package]]
 name = "ariadne"
 version = "0.4.1"
-source = "git+https://github.com/narpfel/ariadne?branch=underlines-for-unlabeled#a9cb338f0bd59da9c4dfba39ddfb359169795cc6"
+source = "git+https://github.com/narpfel/ariadne?branch=panko#a9cb338f0bd59da9c4dfba39ddfb359169795cc6"
 dependencies = [
  "concolor",
  "unicode-width",

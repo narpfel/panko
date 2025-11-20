@@ -48,7 +48,7 @@ tempfile = "3.23.0"
 
 [workspace.dependencies.ariadne]
 git = "https://github.com/narpfel/ariadne"
-branch = "underlines-for-unlabeled"
+branch = "panko"
 features = ["auto-color"]
 
 [profile.perf]
