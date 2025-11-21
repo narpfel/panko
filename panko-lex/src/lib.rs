@@ -262,7 +262,7 @@ impl<'a> Loc<'a> {
             && !["<synthesised>".as_ref(), "<scratch area>".as_ref()].contains(&self.file())
         {
             // TODO: this assumes that `Loc`s are contiguous
-            assert_eq!(self.src(), other.src());
+            debug_assert_eq!(self.src(), other.src());
             let start = self.span.start.min(other.span.start);
             let end = self.span.end.max(other.span.end);
             assert!(start <= end);
