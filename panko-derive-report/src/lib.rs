@@ -179,9 +179,8 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
                 .iter()
                 .map(|Assign(_, name, value)| quote::quote!(let #name = (|| #value)();));
 
-            let length = diagnostics.0.len();
-            let (loc, msg, colour, order): (Vec<_>, Vec<_>, Vec<_>, Vec<_>) =
-                itertools::multiunzip(diagnostics.0.iter().enumerate().map(|(i, (name, args))| {
+            let (loc, msg, colour): (Vec<_>, Vec<_>, Vec<_>) =
+                itertools::multiunzip(diagnostics.0.iter().map(|(name, args)| {
                     let msg = args
                         .get("label")
                         .map(|msg| gen_format(&colours, parse_quote!(#msg)))
@@ -193,7 +192,6 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
                         quote!(#name.loc()),
                         msg,
                         colour,
-                        i32::try_from(length.checked_sub(i).unwrap()).unwrap(),
                     )
                 }));
 
@@ -205,14 +203,24 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
                     #(#extras)*
 
                     #[allow(clippy::useless_format)]
-                    let labels = [
+                    let mut labels = [
                         #(
-                            ::ariadne::Label::new(#loc)
-                                #msg
-                                #colour
-                                .with_order(#order),
+                            (
+                                #loc,
+                                ::ariadne::Label::new(#loc)
+                                    #msg
+                                    #colour
+                            ),
                         )*
                     ];
+
+                    labels.sort_by_key(|(loc, _)| ::std::cmp::Reverse(loc.line()));
+
+                    let len = labels.len();
+                    let labels = labels
+                        .into_iter()
+                        .enumerate()
+                        .map(|(i, (_, label))| label.with_order(i32::try_from(len - i).unwrap()));
 
                     #[allow(clippy::double_parens)]
                     #[allow(clippy::redundant_closure_call)]

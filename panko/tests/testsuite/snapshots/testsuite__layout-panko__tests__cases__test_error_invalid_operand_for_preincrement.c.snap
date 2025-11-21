@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/test_error_invalid_operand_for_preincrement.c
-snapshot_kind: text
 ---
 success: false
 exit_code: 1
@@ -26,7 +25,7 @@ Error: invalid operands to binary operator `++`
    │
  5 │     ++f();
    │     ─┬┬──  
-   │      ╰───── this is of type `int`
+   │      ╰│──── this is of type `int`
    │       │    
    │       ╰──── this is of type `void`
 ───╯

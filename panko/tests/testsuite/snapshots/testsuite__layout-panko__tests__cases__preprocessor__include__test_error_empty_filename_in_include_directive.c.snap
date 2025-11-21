@@ -48,6 +48,5 @@ Error: empty filename in `#include` directive
    ┆ ┆   
  8 │ ├─▶ #include <RANGLE
    │ │   ────────           
-   │ │                      
    │ ╰────────────────────── filename must be nonempty
 ───╯
