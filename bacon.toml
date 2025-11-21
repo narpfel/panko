@@ -87,6 +87,7 @@ command = [
 ]
 need_stdout = true
 on_success = "back"
+env.PANKO_COMPILETEST_USE_LINKER = "wild"
 
 [keybindings]
 shift-a = "job:accept-snapshots"
