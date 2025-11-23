@@ -187,7 +187,10 @@ pub(super) enum Diagnostic<'a> {
     IncludeDoesNotIncludeAnything { at: Loc<'a> },
 
     #[error("empty filename in `{include}` directive")]
-    #[diagnostics(at(colour = Red, label = "filename must be nonempty"), include(colour = Blue))]
+    #[diagnostics(
+        include(colour = Blue),
+        at(colour = Red, label = "filename must be nonempty"),
+    )]
     EmptyFilenameInInclude { at: Loc<'a>, include: Loc<'a> },
 
     #[error("invalid syntax in `{include}` directive")]

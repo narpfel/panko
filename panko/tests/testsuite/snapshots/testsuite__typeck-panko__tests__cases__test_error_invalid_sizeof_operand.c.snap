@@ -17,7 +17,6 @@ Error: invalid application of `sizeof` to function type `fn() -> int`
    │
  4 │     sizeof main;
    │     ─────┬─────  
-   │          │       
    │          ╰─────── in this expression
 ───╯
 
@@ -26,7 +25,6 @@ Error: invalid application of `sizeof` to incomplete type `void`
    │
  5 │     sizeof(void);
    │     ──────┬─────  
-   │           │       
    │           ╰─────── in this expression
 ───╯
 
@@ -35,7 +33,6 @@ Error: invalid application of `sizeof` to incomplete type `void`
    │
  6 │     sizeof f();
    │     ─────┬────  
-   │          │      
    │          ╰────── in this expression
 ───╯
 
@@ -44,7 +41,6 @@ Error: invalid application of `sizeof` to function type `fn() -> int`
    │
  7 │     sizeof(int());
    │     ──────┬──────  
-   │           │        
    │           ╰──────── in this expression
 ───╯
 
@@ -53,7 +49,6 @@ Error: invalid application of `alignof` to incomplete type `void`
    │
  9 │     alignof(void);
    │     ──────┬──────  
-   │           │        
    │           ╰──────── in this expression
 ───╯
 
@@ -62,6 +57,5 @@ Error: invalid application of `alignof` to function type `fn() -> int`
     │
  10 │     alignof(int());
     │     ───────┬──────  
-    │            │        
     │            ╰──────── in this expression
 ────╯

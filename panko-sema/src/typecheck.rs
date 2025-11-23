@@ -165,7 +165,10 @@ enum Diagnostic<'a> {
     },
 
     #[error("invalid application of `{op}` to {kind} `{ty}`")]
-    #[diagnostics(at(colour = Red, label = "in this expression"), op(colour = Red))]
+    #[diagnostics(
+        op(colour = Red),
+        at(colour = Red, label = "in this expression"),
+    )]
     #[with(ty = ty.fg(Blue))]
     InvalidSizeofOrAlignof {
         op: Token<'a>,

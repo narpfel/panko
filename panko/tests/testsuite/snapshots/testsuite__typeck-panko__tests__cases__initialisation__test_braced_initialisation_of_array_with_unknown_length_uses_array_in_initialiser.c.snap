@@ -17,7 +17,6 @@ Error: invalid application of `sizeof` to incomplete type `array<int; ∅>`
    │
  2 │     int error[] = {sizeof error, _Lengthof error};
    │                    ──────┬─────  
-   │                          │       
    │                          ╰─────── in this expression
 ───╯
 
@@ -26,7 +25,6 @@ Error: invalid application of `sizeof` to incomplete type `array<int; ∅>`
    │
  2 │     int error[] = {sizeof error, _Lengthof error};
    │                    ──────┬─────  
-   │                          │       
    │                          ╰─────── in this expression
 ───╯
 
