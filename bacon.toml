@@ -90,5 +90,6 @@ on_success = "back"
 env.PANKO_COMPILETEST_USE_LINKER = "wild"
 
 [keybindings]
+p = "toggle-pause"
 shift-a = "job:accept-snapshots"
 shift-t = "job:covtest"
