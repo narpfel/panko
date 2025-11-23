@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/decl_in_function/test_error_array_of_incomplete_type.c
-snapshot_kind: text
 ---
 success: false
 exit_code: 1
@@ -19,4 +18,12 @@ Error: array with incomplete element type `void`
  2 │     void array[42];
    │     ──┬─  
    │       ╰─── array element types must be complete
+───╯
+
+Error: cannot declare variable `array` with incomplete type `array<void; 42>`
+   ╭─[panko/tests/cases/decl_in_function/test_error_array_of_incomplete_type.c:2:10]
+   │
+ 2 │     void array[42];
+   │          ──┬──  
+   │            ╰──── declared here
 ───╯

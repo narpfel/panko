@@ -1,0 +1,98 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid application of `sizeof` to incomplete type `array<array<int; ∅>; 0>`
+   ╭─[panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c:2:5]
+   │
+ 2 │     sizeof(typeof(int[])[0]);
+   │     ────────────┬───────────  
+   │                 │             
+   │                 ╰───────────── in this expression
+───╯
+
+Error: array with incomplete element type `array<int; ∅>`
+   ╭─[panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c:2:19]
+   │
+ 2 │     sizeof(typeof(int[])[0]);
+   │                   ──┬──  
+   │                     ╰──── array element types must be complete
+───╯
+
+Error: invalid application of `sizeof` to incomplete type `array<array<int; ∅>; 1>`
+   ╭─[panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c:3:5]
+   │
+ 3 │     sizeof(int[1][]);
+   │     ────────┬───────  
+   │             │         
+   │             ╰───────── in this expression
+───╯
+
+Error: array with incomplete element type `array<int; ∅>`
+   ╭─[panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c:3:12]
+   │
+ 3 │     sizeof(int[1][]);
+   │            ────┬───  
+   │                ╰───── array element types must be complete
+───╯
+
+Error: invalid application of `sizeof` to incomplete type `array<struct T; 10>`
+   ╭─[panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c:4:5]
+   │
+ 4 │     sizeof(struct T[10]);
+   │     ──────────┬─────────  
+   │               │           
+   │               ╰─────────── in this expression
+───╯
+
+Error: array with incomplete element type `struct T`
+   ╭─[panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c:4:12]
+   │
+ 4 │     sizeof(struct T[10]);
+   │            ────┬───  
+   │                ╰───── array element types must be complete
+───╯
+
+Error: invalid application of `sizeof` to incomplete type `array<void; 42>`
+   ╭─[panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c:5:5]
+   │
+ 5 │     sizeof(typeof(void[42]));
+   │     ────────────┬───────────  
+   │                 │             
+   │                 ╰───────────── in this expression
+───╯
+
+Error: array with incomplete element type `void`
+   ╭─[panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c:5:19]
+   │
+ 5 │     sizeof(typeof(void[42]));
+   │                   ──┬─  
+   │                     ╰─── array element types must be complete
+───╯
+
+Error: invalid application of `sizeof` to incomplete type `array<void; 42>`
+   ╭─[panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c:6:5]
+   │
+ 6 │     sizeof(void[42]);
+   │     ────────┬───────  
+   │             │         
+   │             ╰───────── in this expression
+───╯
+
+Error: array with incomplete element type `void`
+   ╭─[panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c:6:12]
+   │
+ 6 │     sizeof(void[42]);
+   │            ──┬─  
+   │              ╰─── array element types must be complete
+───╯

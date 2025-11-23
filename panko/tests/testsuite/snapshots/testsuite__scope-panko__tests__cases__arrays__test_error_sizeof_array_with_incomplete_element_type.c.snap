@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (expression (sizeof `array<typeof(`array<int; ∅>`); 0>`))
+         (expression (sizeof `array<array<int; ∅>; 1>`))
+         (expression (sizeof `array<struct T; 10>`))
+         (expression (sizeof `typeof(`array<void; 42>`)`))
+         (expression (sizeof `array<void; 42>`)))))
+
+----- stderr -----

@@ -387,7 +387,8 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
     pub(crate) fn is_complete(&self) -> bool {
         match self {
             Type::Arithmetic(_) | Type::Pointer(_) | Type::Function(_) => true,
-            Type::Array(ArrayType { ty: _, length, loc: _ }) => length.is_known(),
+            Type::Array(ArrayType { ty, length, loc: _ }) =>
+                length.is_known() && ty.ty.is_complete(),
             Type::Void => false,
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => true,
