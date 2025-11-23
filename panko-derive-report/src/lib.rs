@@ -203,24 +203,13 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
                     #(#extras)*
 
                     #[allow(clippy::useless_format)]
-                    let mut labels = [
+                    let labels = [
                         #(
-                            (
-                                #loc,
-                                ::ariadne::Label::new(#loc)
-                                    #msg
-                                    #colour
-                            ),
+                            ::ariadne::Label::new(#loc)
+                                #msg
+                                #colour,
                         )*
                     ];
-
-                    labels.sort_by_key(|(loc, _)| ::std::cmp::Reverse(loc.line()));
-
-                    let len = labels.len();
-                    let labels = labels
-                        .into_iter()
-                        .enumerate()
-                        .map(|(i, (_, label))| label.with_order(i32::try_from(len - i).unwrap()));
 
                     #[allow(clippy::double_parens)]
                     #[allow(clippy::redundant_closure_call)]
@@ -232,6 +221,7 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
                         .with_config(
                             ::ariadne::Config::default()
                                 .with_index_type(::ariadne::IndexType::Byte)
+                                .with_minimise_crossings(true)
                         )
                         #(.with_help((#help_msg)()))*
                         .finish()

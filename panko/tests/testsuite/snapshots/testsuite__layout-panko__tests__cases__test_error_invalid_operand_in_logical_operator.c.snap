@@ -6,7 +6,6 @@ info:
     - "--print=layout"
     - "--stop-after=layout"
     - panko/tests/cases/test_error_invalid_operand_in_logical_operator.c
-snapshot_kind: text
 ---
 success: false
 exit_code: 1
@@ -18,7 +17,6 @@ Error: logical or operator expects a scalar value as operand
    │
  4 │     42 || f();
    │     ───────┬─  
-   │            │   
    │            ╰─── this is of type `void`
 ───╯
 
@@ -36,7 +34,6 @@ Error: logical and operator expects a scalar value as operand
    │
  5 │     f() && f();
    │     ────────┬─  
-   │             │   
    │             ╰─── this is of type `void`
 ───╯
 

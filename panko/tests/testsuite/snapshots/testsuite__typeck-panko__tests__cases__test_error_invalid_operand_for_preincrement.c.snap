@@ -25,9 +25,9 @@ Error: invalid operands to binary operator `++`
    │
  5 │     ++f();
    │     ─┬┬──  
-   │      ╰│──── this is of type `int`
-   │       │    
-   │       ╰──── this is of type `void`
+   │      │╰──── this is of type `void`
+   │      │     
+   │      ╰───── this is of type `int`
 ───╯
 
 Error: cannot assign to this expression because it is not an lvalue

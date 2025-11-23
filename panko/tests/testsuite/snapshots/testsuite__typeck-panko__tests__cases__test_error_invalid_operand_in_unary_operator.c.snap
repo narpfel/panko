@@ -6,7 +6,6 @@ info:
     - "--print=typeck"
     - "--stop-after=typeck"
     - panko/tests/cases/test_error_invalid_operand_in_unary_operator.c
-snapshot_kind: text
 ---
 success: false
 exit_code: 1
@@ -18,6 +17,5 @@ Error: unary not operator expects a scalar value as operand
    │
  4 │     !   f();
    │     ─────┬─  
-   │          │   
    │          ╰─── this is of type `void`
 ───╯

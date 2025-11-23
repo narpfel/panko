@@ -73,6 +73,7 @@ Error: invalid operands to binary operator `++`
    │
  9 │     f()++;
    │     ──┬─┬  
+   │       │ │  
    │       │ ╰── this is of type `int`
    │       │    
    │       ╰──── this is of type `void`
