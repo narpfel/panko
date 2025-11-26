@@ -891,13 +891,11 @@ pub(crate) enum Expression<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Reference<'a> {
-    // TODO: The location of `name` points to where this name was declared. This is unused for now,
-    // but should be used in error messages to print e. g. “note: [...] was declared here:”.
     pub(crate) name: &'a str,
-    pub(crate) loc: Loc<'a>,
+    pub(crate) decl_loc: Loc<'a>,
     pub(crate) ty: QualifiedType<'a>,
     pub(crate) id: Id,
-    pub(crate) usage_location: Loc<'a>,
+    pub(crate) usage_loc: Loc<'a>,
     pub(crate) kind: RefKind,
     pub(crate) storage_duration: StorageDuration<Linkage>,
 }
@@ -911,12 +909,8 @@ impl<'a> Reference<'a> {
         format!("{}~{}", self.name, self.id.0)
     }
 
-    #[expect(
-        clippy::misnamed_getters,
-        reason = "`loc` should actually return the `usage_location` and not the `loc` where this reference was declared"
-    )]
     pub(crate) fn loc(&self) -> Loc<'a> {
-        self.usage_location
+        self.usage_loc
     }
 
     pub(crate) fn slice(&self) -> &'a str {
@@ -928,11 +922,11 @@ impl<'a> Reference<'a> {
     }
 
     fn at(&self, location: Loc<'a>) -> Self {
-        Self { usage_location: location, ..*self }
+        Self { usage_loc: location, ..*self }
     }
 
     pub(crate) fn at_decl(&self) -> Self {
-        self.at(self.loc)
+        self.at(self.decl_loc)
     }
 
     fn linkage_staticness_as_str(&self) -> &'static str {
@@ -1328,10 +1322,10 @@ fn typeck_reference<'a>(
 
     Reference {
         name,
-        loc,
+        decl_loc: loc,
         ty,
         id,
-        usage_location,
+        usage_loc: usage_location,
         kind,
         storage_duration,
     }
@@ -1700,7 +1694,7 @@ fn typeck_reference_declaration<'a>(
         && is_in_global_scope == IsInGlobalScope::No
     {
         // TODO: use this error and/or adjust the linkage to `extern`
-        sess.emit(Diagnostic::BlockScopeFunctionWithInvalidStorageClass { at: reference.loc })
+        sess.emit(Diagnostic::BlockScopeFunctionWithInvalidStorageClass { at: reference.decl_loc })
     }
 
     if let Some(previous_definition) = previous_definition {
@@ -1719,7 +1713,7 @@ fn typeck_reference_declaration<'a>(
         {
             sess.emit(scope::Diagnostic::AlreadyDefined {
                 at: reference.loc(),
-                previous_definition: previous_definition.loc,
+                previous_definition: previous_definition.decl_loc,
             })
         }
         else {

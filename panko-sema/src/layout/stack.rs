@@ -88,10 +88,10 @@ impl<'a> Stack<'a> {
             Entry::Vacant(_) => {
                 let typecheck::Reference {
                     name,
-                    loc: _,
+                    decl_loc: _,
                     ty,
                     id,
-                    usage_location: _,
+                    usage_loc: _,
                     kind,
                     storage_duration,
                 } = reference;
