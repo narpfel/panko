@@ -79,8 +79,8 @@ pub(crate) enum Diagnostic<'a> {
 
 type TypeofExpr<'a> = Typeof<'a>;
 type LengthExpr<'a> = Option<&'a Expression<'a>>;
-type ArrayType<'a> = ty::ArrayType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
-type FunctionType<'a> = ty::FunctionType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
+pub(crate) type ArrayType<'a> = ty::ArrayType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
+pub(crate) type FunctionType<'a> = ty::FunctionType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
 type ParameterDeclaration<'a> = ty::ParameterDeclaration<'a, TypeofExpr<'a>, LengthExpr<'a>>;
 pub(crate) type Type<'a> = ty::Type<'a, TypeofExpr<'a>, LengthExpr<'a>>;
 pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, TypeofExpr<'a>, LengthExpr<'a>>;

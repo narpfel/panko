@@ -585,6 +585,86 @@ impl fmt::Display for ConversionKind {
     }
 }
 
+fn typeck_array_ty<'a>(
+    sess: &'a Session<'a>,
+    ty: scope::ArrayType<'a>,
+    is_parameter: IsParameter,
+    reference: Option<&scope::Reference<'a>>,
+) -> Type<'a> {
+    let ArrayType { ty, length, loc } = ty;
+    let ty = sess.alloc(typeck_ty(sess, *ty, IsParameter::No));
+    if !ty.ty.is_complete() {
+        // TODO: this should be `Type::Error`
+        // TODO: this generates a new error for each *usage* of this ty, including usages
+        // of variables with this ty.
+        sess.emit(Diagnostic::ArrayWithIncompleteType { at: *ty })
+    }
+    if ty.ty.is_function() {
+        // TODO: this should be `Type::Error`
+        sess.emit(Diagnostic::ArrayOfFunctions { at: *ty })
+    }
+    let length = length
+        .map(|length| {
+            ArrayLength::try_from(sess.alloc(typeck_expression(sess, length, Context::Default)))
+                .unwrap_or_else(|_| todo!("variable length array"))
+        })
+        .unwrap_or(ArrayLength::Unknown);
+    let length = if let Some(reference) = reference
+        && let Some(scope::RefInitialiser::Initialiser(initialiser)) = reference.initialiser
+        && let ArrayLength::Unknown = length
+        && let reference = typeck_reference(sess, *reference, NeedsInitialiser::No)
+        && let initialiser = typeck_initialiser(sess, initialiser, &reference)
+        && let Some(length) = initialiser.array_length(&ty.ty)
+    {
+        ArrayLength::Constant(length)
+    }
+    else {
+        length
+    };
+    match is_parameter {
+        IsParameter::Yes => {
+            if matches!(length, ArrayLength::Variable(_)) {
+                todo!("unimplemented: variably-modified type as function parameter");
+            }
+            Type::Pointer(ty)
+        }
+        IsParameter::No => Type::Array(ArrayType { ty, length, loc }),
+    }
+}
+
+fn typeck_function_ty<'a>(
+    sess: &'a Session<'a>,
+    ty: scope::FunctionType<'a>,
+    is_parameter: IsParameter,
+) -> Type<'a> {
+    let FunctionType { params, return_type, is_varargs } = ty;
+    let return_type = sess.alloc(typeck_ty(sess, *return_type, IsParameter::No));
+    match return_type.ty {
+        Type::Arithmetic(_) | Type::Pointer(_) | Type::Void | Type::Nullptr => (),
+        Type::Array(_) | Type::Function(_) | Type::Struct { name: _ } => sess
+            .emit(Diagnostic::InvalidFunctionReturnType { at: return_type.loc, ty: *return_type }),
+        Type::Typeof { expr, unqual: _ } => match expr {},
+    }
+    let function_ty = Type::Function(FunctionType {
+        params: sess.alloc_slice_fill_iter(params.iter().map(
+            |&ParameterDeclaration { loc, ty, name }| {
+                let ty = typeck_ty(sess, ty, IsParameter::Yes);
+                let param = ParameterDeclaration { loc, ty, name };
+                if !ty.ty.is_complete() {
+                    sess.emit(Diagnostic::ParameterWithIncompleteType { at: param })
+                }
+                param
+            },
+        )),
+        return_type,
+        is_varargs,
+    });
+    match is_parameter {
+        IsParameter::Yes => Type::Pointer(sess.alloc(function_ty.unqualified())),
+        IsParameter::No => function_ty,
+    }
+}
+
 fn typeck_ty_with_initialiser<'a>(
     sess: &'a Session<'a>,
     ty: scope::QualifiedType<'a>,
@@ -596,80 +676,8 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ty::Type::Pointer(pointee) =>
             Type::Pointer(sess.alloc(typeck_ty(sess, *pointee, IsParameter::No))),
-        ty::Type::Array(ArrayType { ty, length, loc }) => {
-            let ty = sess.alloc(typeck_ty(sess, *ty, IsParameter::No));
-            if !ty.ty.is_complete() {
-                // TODO: this should be `Type::Error`
-                // TODO: this generates a new error for each *usage* of this ty, including usages
-                // of variables with this ty.
-                sess.emit(Diagnostic::ArrayWithIncompleteType { at: *ty })
-            }
-            if ty.ty.is_function() {
-                // TODO: this should be `Type::Error`
-                sess.emit(Diagnostic::ArrayOfFunctions { at: *ty })
-            }
-            let length = length
-                .map(|length| {
-                    ArrayLength::try_from(sess.alloc(typeck_expression(
-                        sess,
-                        length,
-                        Context::Default,
-                    )))
-                    .unwrap_or_else(|_| todo!("variable length array"))
-                })
-                .unwrap_or(ArrayLength::Unknown);
-            let length = if let Some(reference) = reference
-                && let Some(scope::RefInitialiser::Initialiser(initialiser)) = reference.initialiser
-                && let ArrayLength::Unknown = length
-                && let reference = typeck_reference(sess, *reference, NeedsInitialiser::No)
-                && let initialiser = typeck_initialiser(sess, initialiser, &reference)
-                && let Some(length) = initialiser.array_length(&ty.ty)
-            {
-                ArrayLength::Constant(length)
-            }
-            else {
-                length
-            };
-            match is_parameter {
-                IsParameter::Yes => {
-                    if matches!(length, ArrayLength::Variable(_)) {
-                        todo!("unimplemented: variably-modified type as function parameter");
-                    }
-                    Type::Pointer(ty)
-                }
-                IsParameter::No => Type::Array(ArrayType { ty, length, loc }),
-            }
-        }
-        ty::Type::Function(FunctionType { params, return_type, is_varargs }) => {
-            let return_type = sess.alloc(typeck_ty(sess, *return_type, IsParameter::No));
-            match return_type.ty {
-                Type::Arithmetic(_) | Type::Pointer(_) | Type::Void | Type::Nullptr => (),
-                Type::Array(_) | Type::Function(_) | Type::Struct { name: _ } =>
-                    sess.emit(Diagnostic::InvalidFunctionReturnType {
-                        at: return_type.loc,
-                        ty: *return_type,
-                    }),
-                Type::Typeof { expr, unqual: _ } => match expr {},
-            }
-            let function_ty = Type::Function(FunctionType {
-                params: sess.alloc_slice_fill_iter(params.iter().map(
-                    |&ParameterDeclaration { loc, ty, name }| {
-                        let ty = typeck_ty(sess, ty, IsParameter::Yes);
-                        let param = ParameterDeclaration { loc, ty, name };
-                        if !ty.ty.is_complete() {
-                            sess.emit(Diagnostic::ParameterWithIncompleteType { at: param })
-                        }
-                        param
-                    },
-                )),
-                return_type,
-                is_varargs,
-            });
-            match is_parameter {
-                IsParameter::Yes => Type::Pointer(sess.alloc(function_ty.unqualified())),
-                IsParameter::No => function_ty,
-            }
-        }
+        ty::Type::Array(ty) => typeck_array_ty(sess, ty, is_parameter, reference),
+        ty::Type::Function(ty) => typeck_function_ty(sess, ty, is_parameter),
         ty::Type::Void => Type::Void,
         ty::Type::Typeof { expr, unqual } => {
             let ty = match expr {
