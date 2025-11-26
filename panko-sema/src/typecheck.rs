@@ -58,9 +58,11 @@ use crate::ty::subobjects::Subobject;
 use crate::ty::subobjects::SubobjectIterator;
 use crate::ty::subobjects::Subobjects;
 use crate::typecheck::diagnostics::Diagnostic;
+pub(crate) use crate::typecheck::ptr::PtrAddOrder;
 
 mod as_sexpr;
 mod diagnostics;
+mod ptr;
 #[cfg(test)]
 mod tests;
 
@@ -1402,25 +1404,25 @@ fn typeck_binop<'a>(
             typeck_arithmetic_binop(sess, *op, lhs, rhs, lhs_ty, rhs_ty),
         (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(pointee_ty))
             if matches!(op.kind, BinOpKind::Add) =>
-            typeck_ptradd(sess, op, rhs, pointee_ty, lhs, PtrAddOrder::IntegralFirst),
+            ptr::typeck_ptradd(sess, op, rhs, pointee_ty, lhs, PtrAddOrder::IntegralFirst),
         (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
             if matches!(op.kind, BinOpKind::Add) =>
-            typeck_ptradd(sess, op, lhs, pointee_ty, rhs, PtrAddOrder::PtrFirst),
+            ptr::typeck_ptradd(sess, op, lhs, pointee_ty, rhs, PtrAddOrder::PtrFirst),
         (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
             if matches!(op.kind, BinOpKind::Subtract) =>
-            typeck_ptrsub(sess, op, lhs, pointee_ty, rhs),
+            ptr::typeck_ptrsub(sess, op, lhs, pointee_ty, rhs),
         (Type::Pointer(_), Type::Pointer(_)) if let BinOpKind::Comparison(cmp) = op.kind =>
-            typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
+            ptr::typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
         (Type::Pointer(lhs_pointee_ty), Type::Pointer(rhs_pointee_ty))
             if matches!(op.kind, BinOpKind::Subtract) =>
-            typeck_ptrdiff(sess, op, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
+            ptr::typeck_ptrdiff(sess, op, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
         // TODO: allow `nullptr <op> <null pointer constant>`
         (Type::Nullptr, Type::Nullptr | Type::Pointer(_)) | (Type::Pointer(_), Type::Nullptr)
             if let BinOpKind::Comparison(cmp @ (Comparison::Equal | Comparison::NotEqual)) =
                 op.kind =>
         // TODO: this will generate `PtrCmp` operations with different parameter types, maybe
         // insert some `NoopTypeConversion`s?
-            typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
+            ptr::typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
         _ => sess.emit(Diagnostic::InvalidOperandsForBinaryOperator { at: *op, lhs, rhs }),
     }
 }
@@ -1526,142 +1528,6 @@ fn typeck_integral_shift<'a>(
             op,
             rhs: sess.alloc(rhs),
         },
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum PtrAddOrder {
-    PtrFirst,
-    IntegralFirst,
-}
-
-impl PtrAddOrder {
-    pub fn select<T>(self, pointer: T, integral: T) -> (T, T) {
-        match self {
-            Self::PtrFirst => (pointer, integral),
-            Self::IntegralFirst => (integral, pointer),
-        }
-    }
-}
-
-fn typeck_ptradd<'a>(
-    sess: &'a Session<'a>,
-    op: &BinOp<'a>,
-    pointer: TypedExpression<'a>,
-    pointee_ty: &QualifiedType<'a>,
-    integral: TypedExpression<'a>,
-    order: PtrAddOrder,
-) -> TypedExpression<'a> {
-    assert_matches!(pointer.ty.ty, Type::Pointer(_));
-    assert_matches!(integral.ty.ty, Type::Arithmetic(Arithmetic::Integral(_)));
-    if pointee_ty.ty.is_complete() {
-        let integral = convert_as_if_by_assignment(sess, Type::size_t().unqualified(), integral);
-        TypedExpression {
-            ty: pointer.ty.ty.unqualified(),
-            expr: Expression::PtrAdd {
-                pointer: sess.alloc(pointer),
-                integral: sess.alloc(integral),
-                pointee_size: pointee_ty.ty.size(),
-                order,
-            },
-        }
-    }
-    else {
-        let (lhs, rhs) = order.select(pointer, integral);
-        sess.emit(Diagnostic::PointerArithmeticWithIncompletePointee {
-            at: *op,
-            pointee_ty: *pointee_ty,
-            lhs,
-            rhs,
-        })
-    }
-}
-
-fn typeck_ptrsub<'a>(
-    sess: &'a Session<'a>,
-    op: &BinOp<'a>,
-    pointer: TypedExpression<'a>,
-    pointee_ty: &QualifiedType<'a>,
-    integral: TypedExpression<'a>,
-) -> TypedExpression<'a> {
-    assert_matches!(pointer.ty.ty, Type::Pointer(_));
-    assert_matches!(integral.ty.ty, Type::Arithmetic(Arithmetic::Integral(_)));
-    if pointee_ty.ty.is_complete() {
-        let integral = convert_as_if_by_assignment(sess, Type::size_t().unqualified(), integral);
-        TypedExpression {
-            ty: pointer.ty.ty.unqualified(),
-            expr: Expression::PtrSub {
-                pointer: sess.alloc(pointer),
-                integral: sess.alloc(integral),
-                pointee_size: pointee_ty.ty.size(),
-            },
-        }
-    }
-    else {
-        sess.emit(Diagnostic::PointerArithmeticWithIncompletePointee {
-            at: *op,
-            pointee_ty: *pointee_ty,
-            lhs: pointer,
-            rhs: integral,
-        })
-    }
-}
-
-fn typeck_ptrcmp<'a>(
-    sess: &'a Session<'a>,
-    lhs: TypedExpression<'a>,
-    kind: Comparison,
-    op_token: &Token<'a>,
-    rhs: TypedExpression<'a>,
-) -> TypedExpression<'a> {
-    // TODO: should check for type compatibility, not exact equality
-    let expr = if lhs.ty.ty != Type::Nullptr && rhs.ty.ty != Type::Nullptr && lhs.ty.ty != rhs.ty.ty
-    {
-        sess.emit(Diagnostic::IncompatibleTypesInPtrCmp { at: *op_token, lhs, rhs })
-    }
-    else {
-        Expression::PtrCmp {
-            lhs: sess.alloc(lhs),
-            kind,
-            rhs: sess.alloc(rhs),
-        }
-    };
-    TypedExpression { ty: Type::int().unqualified(), expr }
-}
-
-fn typeck_ptrdiff<'a>(
-    sess: &'a Session<'a>,
-    op: &BinOp<'a>,
-    lhs: TypedExpression<'a>,
-    lhs_pointee_ty: &QualifiedType<'a>,
-    rhs: TypedExpression<'a>,
-    rhs_pointee_ty: &QualifiedType<'a>,
-) -> TypedExpression<'a> {
-    // TODO: should check for type compatibility, not exact equality
-    let expr = if lhs_pointee_ty.ty != rhs_pointee_ty.ty {
-        sess.emit(Diagnostic::PtrDiffIncompatiblePointeeTypes { at: op.token, lhs, rhs })
-    }
-    else {
-        match lhs_pointee_ty.ty.is_complete() && rhs_pointee_ty.ty.is_complete() {
-            true => Expression::PtrDiff {
-                lhs: sess.alloc(lhs),
-                rhs: sess.alloc(rhs),
-                pointee_size: lhs_pointee_ty.ty.size(),
-            },
-            // TODO: this assumes that both pointee types are the same; pass the actual incomplete
-            // pointee ty here.
-            false => sess.emit(Diagnostic::PointerArithmeticWithIncompletePointee {
-                at: *op,
-                pointee_ty: *lhs_pointee_ty,
-                lhs,
-                rhs,
-            }),
-        }
-    };
-
-    TypedExpression {
-        ty: Type::ptrdiff_t().unqualified(),
-        expr,
     }
 }
 
