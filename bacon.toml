@@ -28,6 +28,7 @@ command = [
     "--", "--color", "always", # see https://github.com/Canop/bacon/issues/124
     "--quiet",
 ]
+background = false
 need_stdout = true
 env.PANKO_COMPILETEST_USE_LINKER = "wild"
 
