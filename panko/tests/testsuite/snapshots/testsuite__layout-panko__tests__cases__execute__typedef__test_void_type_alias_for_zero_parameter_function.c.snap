@@ -25,15 +25,15 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "f\0"))))))))
-   (declaration external (g~3 `fn(∅: ptr<fn() -> void>) -> void` (static g)) ∅)
+   (declaration external (g~4 `fn(∅: ptr<fn() -> void>) -> void` (static g)) ∅)
    (function-definition external
-      (g~3 `fn(v: ptr<fn() -> void>) -> void` (static g))
+      (g~4 `fn(v: ptr<fn() -> void>) -> void` (static g))
       (params
-         (v~5 `ptr<fn() -> void>` @0))
+         (v~6 `ptr<fn() -> void>` @0))
       (compound-statement
-         (expression (call `void` @void (v~5 `ptr<fn() -> void>` @0)))))
+         (expression (call `void` @void (v~6 `ptr<fn() -> void>` @0)))))
    (function-definition external
-      (print_g~6 `fn() -> void` (static print_g))
+      (print_g~7 `fn() -> void` (static print_g))
       (compound-statement
          (expression
             (call `int` @0
@@ -44,7 +44,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "g\0"))))))))
    (function-definition external
-      (main~7 `fn() -> int` (static main))
+      (main~9 `fn() -> int` (static main))
       (compound-statement
          (expression
             (call `void` @void
@@ -53,8 +53,8 @@ exit_code: 0
          (expression
             (call `void` @void
                (addressof `ptr<fn(v: ptr<fn() -> void>) -> void>` @0
-                  (g~3 `fn(v: ptr<fn() -> void>) -> void` (static g)))
+                  (g~4 `fn(v: ptr<fn() -> void>) -> void` (static g)))
                (addressof `ptr<fn() -> void>` @8
-                  (print_g~6 `fn() -> void` (static print_g))))))))
+                  (print_g~7 `fn() -> void` (static print_g))))))))
 
 ----- stderr -----

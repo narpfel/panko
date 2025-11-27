@@ -645,20 +645,32 @@ fn typeck_function_ty<'a>(
             .emit(Diagnostic::InvalidFunctionReturnType { at: return_type.loc, ty: *return_type }),
         Type::Typeof { expr, unqual: _ } => match expr {},
     }
-    let function_ty = Type::Function(FunctionType {
-        params: sess.alloc_slice_fill_iter(params.iter().map(
-            |&ParameterDeclaration { loc, ty, name }| {
-                let ty = typeck_ty(sess, ty, IsParameter::Yes);
-                let param = ParameterDeclaration { loc, ty, name };
-                if !ty.ty.is_complete() {
-                    sess.emit(Diagnostic::ParameterWithIncompleteType { at: param })
-                }
-                param
-            },
-        )),
-        return_type,
-        is_varargs,
-    });
+    let params = sess.alloc_slice_fill_iter(params.iter().map(
+        |&ParameterDeclaration { loc, ty, name }| {
+            let ty = typeck_ty(sess, ty, IsParameter::Yes);
+            ParameterDeclaration { loc, ty, name }
+        },
+    ));
+    let params = match params {
+        [ParameterDeclaration { loc: _, ty, name: None }]
+            if !is_varargs
+                && let QualifiedType {
+                    is_const: false,
+                    is_volatile: false,
+                    ty: Type::Void,
+                    loc: _,
+                } = ty =>
+            &[],
+        params => params,
+    };
+    for param in params {
+        if !param.ty.ty.is_complete() {
+            // TODO: use this error
+            sess.emit(Diagnostic::ParameterWithIncompleteType { at: *param })
+        }
+    }
+
+    let function_ty = Type::Function(FunctionType { params, return_type, is_varargs });
     match is_parameter {
         IsParameter::Yes => Type::Pointer(sess.alloc(function_ty.unqualified())),
         IsParameter::No => function_ty,
@@ -917,18 +929,26 @@ fn typeck_function_definition<'a>(
         body,
     } = *definition;
 
-    let params = ParamRefs(
-        sess.alloc_slice_fill_iter(
+    let reference = typeck_reference_declaration(sess, reference, NeedsInitialiser::No);
+
+    let Type::Function(ty) = reference.ty.ty
+    else {
+        unreachable!()
+    };
+
+    let params = match ty.params {
+        [] => &[],
+        _ => sess.alloc_slice_fill_iter(
             params
                 .0
                 .iter()
                 .map(|&param| typeck_reference(sess, param, NeedsInitialiser::No)),
         ),
-    );
+    };
 
     FunctionDefinition {
-        reference: typeck_reference_declaration(sess, reference, NeedsInitialiser::No),
-        params,
+        reference,
+        params: ParamRefs(params),
         inline,
         noreturn,
         is_varargs,

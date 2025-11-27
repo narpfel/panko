@@ -1,0 +1,52 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/functions/test_unnamed_void_in_parameter_list.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/test_unnamed_void_in_parameter_list.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (typedef T `void`)
+   (declaration p~1 `ptr<void const>` ∅)
+   (declaration v~2 `fn(∅: typeof_unqual((deref (name p~1 `ptr<void const>`)))) -> void` ∅)
+   (function-definition
+      f~3 `fn(∅: void) -> int`
+      (params
+         f.unnamed_parameter.0~4 `void`)
+      (compound-statement
+         (return 123)))
+   (function-definition
+      g~5 `fn(∅: typeof((call (name v~2 `fn(∅: typeof_unqual((deref (name p~1 `ptr<void const>`)))) -> void`)))) -> int`
+      (params
+         g.unnamed_parameter.0~6 `typeof((call (name v~2 `fn(∅: typeof_unqual((deref (name p~1 `ptr<void const>`)))) -> void`)))`)
+      (compound-statement
+         (return 42)))
+   (function-definition
+      h~7 `fn(∅: typeof_unqual((deref (name p~1 `ptr<void const>`)))) -> int`
+      (params
+         h.unnamed_parameter.0~8 `typeof_unqual((deref (name p~1 `ptr<void const>`)))`)
+      (compound-statement
+         (return 27)))
+   (function-definition
+      main~9 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (call (name f~3 `fn(∅: void) -> int`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (call (name g~5 `fn(∅: typeof((call (name v~2 `fn(∅: typeof_unqual((deref (name p~1 `ptr<void const>`)))) -> void`)))) -> int`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (call (name h~7 `fn(∅: typeof_unqual((deref (name p~1 `ptr<void const>`)))) -> int`)))))))
+
+----- stderr -----
