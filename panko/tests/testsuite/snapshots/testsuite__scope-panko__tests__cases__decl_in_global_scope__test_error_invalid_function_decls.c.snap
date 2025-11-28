@@ -13,9 +13,9 @@ exit_code: 0
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_error_invalid_function_decls.c"
    (declaration a~0 `fn() -> fn() -> int` ∅)
    (declaration b~1 `ptr<fn() -> int>` ∅)
-   (declaration c~2 `fn() -> ptr<fn() -> fn() -> int>` ∅)
+   (declaration c~2 `fn(∅: void) -> ptr<fn() -> fn() -> int>` ∅)
    (declaration d~3 `fn(param: void) -> int` ∅)
-   (declaration e~4 `fn() -> int` ∅)
+   (declaration e~4 `fn(∅: void) -> int` ∅)
    (declaration f~5 `fn() -> array<int; 42>` ∅))
 
 ----- stderr -----

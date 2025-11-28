@@ -1,0 +1,67 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/functions/test_unnamed_void_in_parameter_list.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/test_unnamed_void_in_parameter_list.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (typedef T `void`)
+   (tentative-definition external p~1 `ptr<void const>` ∅)
+   (declaration external v~2 `fn() -> void` ∅)
+   (function-definition external
+      f~3 `fn() -> int`
+      (compound-statement
+         (return (123 `int`))))
+   (function-definition external
+      g~5 `fn() -> int`
+      (compound-statement
+         (return (42 `int`))))
+   (function-definition external
+      h~7 `fn() -> int`
+      (compound-statement
+         (return (27 `int`))))
+   (function-definition external
+      main~9 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (call `int`
+                  (addressof `ptr<fn() -> int>`
+                     (f~3 `fn() -> int`)))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (call `int`
+                  (addressof `ptr<fn() -> int>`
+                     (g~5 `fn() -> int`)))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (call `int`
+                  (addressof `ptr<fn() -> int>`
+                     (h~7 `fn() -> int`))))))))
+
+----- stderr -----

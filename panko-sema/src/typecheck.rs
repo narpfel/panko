@@ -1,22 +1,12 @@
 use std::assert_matches::assert_matches;
-use std::bstr::ByteStr;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
-use std::num::IntErrorKind;
 use std::path::Path;
-use std::str::Chars;
 
-use ariadne::Color::Blue;
-use ariadne::Color::Green;
-use ariadne::Color::Magenta;
-use ariadne::Color::Red;
-use ariadne::Fmt as _;
 use indexmap::IndexMap;
-use itertools::Either;
 use itertools::EitherOrBoth;
 use itertools::Itertools as _;
-use panko_lex::EncodingPrefix;
 use panko_lex::Integer;
 use panko_lex::IntegerSuffix;
 use panko_lex::Loc;
@@ -27,7 +17,6 @@ use panko_parser::BinOp;
 use panko_parser::BinOpKind;
 use panko_parser::Comparison;
 use panko_parser::IncrementOpKind;
-use panko_parser::IntegerLiteralDiagnostic;
 use panko_parser::LogicalOp;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
@@ -39,10 +28,8 @@ use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::reject_function_specifiers;
 use panko_report::Report;
-use panko_report::Sliced as _;
 use variant_types::IntoVariant as _;
 
-use crate::ItertoolsExt as _;
 use crate::scope;
 use crate::scope::DesignatedInitialiser;
 use crate::scope::Designation;
@@ -64,519 +51,16 @@ use crate::ty::subobjects::AllowExplicit;
 use crate::ty::subobjects::Subobject;
 use crate::ty::subobjects::SubobjectIterator;
 use crate::ty::subobjects::Subobjects;
+use crate::typecheck::diagnostics::Diagnostic;
+use crate::typecheck::literal::StringLiteral;
+pub(crate) use crate::typecheck::ptr::PtrAddOrder;
 
 mod as_sexpr;
+mod diagnostics;
+mod literal;
+mod ptr;
 #[cfg(test)]
 mod tests;
-
-#[derive(Debug, Report)]
-#[exit_code(1)]
-enum Diagnostic<'a> {
-    #[error("redeclaration of `{at}` with different type: `{original_ty}` vs. `{new_ty}`")]
-    #[with(original_ty = previous_definition.ty, new_ty = at.ty)]
-    #[diagnostics(
-        previous_definition(colour = Blue, label = "previously declared here with type `{original_ty}`"),
-        at(colour = Red, label = "new declaration with different type `{new_ty}`"),
-    )]
-    AlreadyDefinedWithDifferentType {
-        at: Reference<'a>,
-        previous_definition: Reference<'a>,
-    },
-
-    #[error("cannot declare variable `{at}` with incomplete type `{ty}`")]
-    #[with(ty = at.ty)]
-    #[diagnostics(at(colour = Red, label = "declared here"))]
-    VariableWithIncompleteType { at: Reference<'a> },
-
-    #[error("cannot declare function parameter `{at}` with incomplete type `{ty}`")]
-    #[with(ty = at.ty)]
-    #[diagnostics(at(colour = Red, label = "parameter declared here"))]
-    ParameterWithIncompleteType {
-        at: ParameterDeclaration<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
-    },
-
-    #[error("array with incomplete element type `{at}`")]
-    #[diagnostics(at(colour = Red, label = "array element types must be complete"))]
-    ArrayWithIncompleteType { at: QualifiedType<'a> },
-
-    #[error("arrays of functions are not allowed")]
-    #[diagnostics(at(colour = Red, label = "element type is `{at}`"))]
-    ArrayOfFunctions { at: QualifiedType<'a> },
-
-    #[error("invalid function return type `{ty}`")]
-    #[diagnostics(at(colour = Red, label = "declaration here"))]
-    #[with(ty = ty.fg(Red))]
-    InvalidFunctionReturnType { at: Loc<'a>, ty: QualifiedType<'a> },
-
-    // TODO: types should be printed in C syntax, not in their SExpr debug repr
-    #[error("invalid {kind} conversion from `{from_ty}` to `{to_ty}`")]
-    #[diagnostics(at(colour = Red, label = "this is of type `{from_ty}`, which cannot be {kind}ly converted to `{to_ty}`"))]
-    #[with(from_ty = from_ty.fg(Blue), to_ty = to_ty.fg(Magenta))]
-    InvalidConversion {
-        at: TypedExpression<'a>,
-        from_ty: Type<'a>,
-        to_ty: Type<'a>,
-        kind: ConversionKind,
-    },
-
-    #[error(
-        "`{return_}` statement without value in non-`void` function `{name}` returning `{return_ty}`"
-    )]
-    #[diagnostics(
-        at(colour = Red, label = "`{return_}` statement here"),
-        function(colour = Blue, label = "function `{name}` declared here"),
-    )]
-    #[with(
-        return_ = at.return_,
-        name = function.reference,
-        return_ty = function.return_ty(),
-    )]
-    ReturnWithoutValueInNonVoidFunction {
-        at: scope::StatementTypes::Return<'a>,
-        function: scope::FunctionDefinition<'a>,
-    },
-
-    #[error("cannot assign to `const` value `{decl}`")]
-    #[diagnostics(
-        at(colour = Red, label = "this value is `const`"),
-        decl(colour = Blue, label = "note: `{decl}` declared here")
-    )]
-    AssignmentToConstName {
-        at: &'a Expression<'a>,
-        decl: Reference<'a>,
-    },
-
-    #[error("cannot assign to `const` expression")]
-    #[diagnostics(
-        at(colour = Red, label = "this value is `const`"),
-    )]
-    AssignmentToConst { at: Expression<'a> },
-
-    #[error("cannot assign to this expression because it is not an lvalue")]
-    #[diagnostics(at(colour = Red, label = "this expression is not an lvalue"))]
-    AssignmentToNonLValue { at: &'a Expression<'a> },
-
-    #[error("dereference of pointer to incomplete type `{pointee_ty}`")]
-    #[diagnostics(at(colour = Red, label = "this expression has type `{ty}`"))]
-    #[with(ty = at.ty.ty, pointee_ty = pointee_ty.fg(Red))]
-    DerefOfPointerToIncompleteType {
-        at: TypedExpression<'a>,
-        pointee_ty: QualifiedType<'a>,
-    },
-
-    #[error("invalid application of `{op}` to {kind} `{ty}`")]
-    #[diagnostics(
-        op(colour = Red),
-        at(colour = Red, label = "in this expression"),
-    )]
-    #[with(ty = ty.fg(Blue))]
-    InvalidSizeofOrAlignof {
-        op: Token<'a>,
-        at: scope::Expression<'a>,
-        kind: &'static str,
-        ty: QualifiedType<'a>,
-    },
-
-    #[error("cannot take address of this expression because it is {reason}")]
-    #[diagnostics(at(colour = Red, label = "this expression is {reason}"))]
-    #[with(reason = reason.fg(Red))]
-    CannotTakeAddress {
-        at: TypedExpression<'a>,
-        reason: &'a str,
-    },
-
-    #[error("cannot dereference this expression of type `{ty}` (pointer or array type required)")]
-    #[diagnostics(at(colour = Red, label = "in this expression"))]
-    #[with(ty = ty.fg(Red))]
-    CannotDeref {
-        at: scope::Expression<'a>,
-        ty: QualifiedType<'a>,
-    },
-
-    #[error(
-        "cannot apply {operator_name} operator to expression with type `{ty}` ({expected_ty} type required)"
-    )]
-    #[diagnostics(at(colour = Red, label = "in this expression"))]
-    #[with(
-        ty = ty.fg(Red),
-        operator_name = operator_name.fg(Red),
-        expected_ty = expected_ty.fg(Blue),
-    )]
-    InvalidOperandForUnaryOperator {
-        at: scope::Expression<'a>,
-        ty: QualifiedType<'a>,
-        operator_name: &'a str,
-        expected_ty: &'a str,
-    },
-
-    #[error("duplicate `{at}` association in {generic} selection")]
-    #[diagnostics(
-        generic(colour = Green, label = "in this {generic} selection"),
-        previous_default(colour = Blue, label = "first `{previous_default}` here"),
-        at(colour = Red, label = "duplicate `{at}`"),
-    )]
-    GenericWithDuplicateDefault {
-        at: Token<'a>,
-        previous_default: Token<'a>,
-        generic: Token<'a>,
-    },
-
-    #[error("duplicate association for type `{at}` in {generic} selection")]
-    #[diagnostics(
-        generic(colour = Green, label = "in this {generic} selection"),
-        previous(colour = Blue, label = "previous association for `{previous}` here"),
-        at(colour = Red, label = "this type is duplicated in this {generic} selection"),
-    )]
-    GenericWithDuplicateType {
-        at: QualifiedType<'a>,
-        previous: QualifiedType<'a>,
-        generic: Token<'a>,
-    },
-
-    #[error("controlling expression does not match any type in this {generic} selection")]
-    #[diagnostics(
-        at(colour = Red, label = "controlling expression has type `{ty}`"),
-        expr(colour = Blue, label = "in this {generic} selection"),
-    )]
-    #[with(ty = at.ty.ty, generic = "_Generic".fg(Blue))]
-    GenericWithoutMatch {
-        at: TypedExpression<'a>,
-        expr: scope::Expression<'a>,
-    },
-
-    #[error(
-        "the type of a {generic} association shall be a complete object type other than a variably modified type"
-    )]
-    #[diagnostics(
-        generic(colour = Green, label = "in this {generic} selection"),
-        at(colour = Red, label = "this type is not allowed in a {generic} association"),
-    )]
-    GenericWithInvalidType {
-        at: QualifiedType<'a>,
-        generic: Token<'a>,
-    },
-
-    #[error("subtraction between pointers of incompatible types `{lhs_ty}` and `{rhs_ty}`")]
-    #[diagnostics(
-        lhs(colour = Blue, label = "this is of type `{lhs_ty}`"),
-        at(colour = Red),
-        rhs(colour = Magenta, label = "this is of type `{rhs_ty}`"),
-    )]
-    #[with(lhs_ty = lhs.ty, rhs_ty = rhs.ty)]
-    PtrDiffIncompatiblePointeeTypes {
-        at: Token<'a>,
-        lhs: TypedExpression<'a>,
-        rhs: TypedExpression<'a>,
-    },
-
-    #[error("{kind} operator expects a scalar value as operand")]
-    #[diagnostics(at(colour = Red, label = "this is of type `{ty}`"), expr(colour = Blue))]
-    #[with(ty = at.ty, kind = kind.fg(Blue))]
-    ScalarExpected {
-        at: TypedExpression<'a>,
-        expr: scope::Expression<'a>,
-        kind: &'a str,
-    },
-
-    #[error("invalid operands to binary operator `{op_token}`")]
-    #[diagnostics(
-        lhs(colour = Blue, label = "this is of type `{lhs_ty}`"),
-        // TODO: include message showing what was expected
-        at(colour = Red),
-        rhs(colour = Magenta, label = "this is of type `{rhs_ty}`"),
-    )]
-    #[with(op_token = at.token, lhs_ty = lhs.ty, rhs_ty = rhs.ty)]
-    InvalidOperandsForBinaryOperator {
-        at: BinOp<'a>,
-        lhs: TypedExpression<'a>,
-        rhs: TypedExpression<'a>,
-    },
-
-    #[error(
-        "invalid pointer arithmetic `{op_token}` on a pointer to incomplete type `{pointee_ty}`"
-    )]
-    #[diagnostics(
-        lhs(colour = Blue, label = "this is of type `{lhs_ty}`"),
-        at(colour = Red),
-        rhs(colour = Magenta, label = "this is of type `{rhs_ty}`"),
-    )]
-    #[with(op_token = at.token, lhs_ty = lhs.ty, rhs_ty = rhs.ty, pointee_ty = pointee_ty.fg(Red))]
-    PointerArithmeticWithIncompletePointee {
-        at: BinOp<'a>,
-        pointee_ty: QualifiedType<'a>,
-        lhs: TypedExpression<'a>,
-        rhs: TypedExpression<'a>,
-    },
-
-    #[error("functions must have a body, not an initialiser")]
-    #[diagnostics(
-        ty(colour = Blue, label = "in this function definition"),
-        at(colour = Red, label = "functions must have a body (or remove this to declare the function)"),
-    )]
-    IllegalInitialiserForFunction {
-        at: TypedExpression<'a>,
-        ty: QualifiedType<'a>,
-    },
-
-    #[error("comparison of pointers to incompatible types")]
-    #[diagnostics(
-        lhs(colour = Blue, label = "this is of type `{lhs_ty}`"),
-        at(colour = Red, label = "pointer comparisons are only allowed between pointers to compatible types"),
-        rhs(colour = Magenta, label = "this is of type `{rhs_ty}`"),
-    )]
-    #[with(lhs_ty = lhs.ty.ty, rhs_ty = rhs.ty.ty)]
-    IncompatibleTypesInPtrCmp {
-        lhs: TypedExpression<'a>,
-        at: Token<'a>,
-        rhs: TypedExpression<'a>,
-    },
-
-    #[error("`{op}` can only be applied to arrays, not `{ty}`")]
-    #[diagnostics(
-        op(colour = Blue),
-        at(colour = Red, label = "this expression is of type `{ty}`"),
-    )]
-    #[with(ty = at.ty)]
-    InvalidLengthof {
-        op: Token<'a>,
-        at: TypedExpression<'a>,
-    },
-
-    #[error("`{op}` can only be applied to arrays, not `{at}`")]
-    #[diagnostics(
-        op(colour = Blue),
-        at(colour = Red, label = "this type is `{at}`"),
-    )]
-    InvalidLengthofTy {
-        op: Token<'a>,
-        at: QualifiedType<'a>,
-    },
-
-    #[error(
-        "`{op}` can only be applied to arrays of known length, but the operand has type `{ty}`"
-    )]
-    #[diagnostics(
-        op(colour = Blue),
-        at(colour = Red, label = "the type of this is `{ty}`, which has unknown length"),
-    )]
-    #[with(ty = at.ty)]
-    LengthofOfArrayOfUnknownLength {
-        op: Token<'a>,
-        at: TypedExpression<'a>,
-    },
-
-    #[error("`{op}` can only be applied to arrays of known length")]
-    #[diagnostics(
-        op(colour = Blue),
-        at(colour = Red, label = "`{at}` has unknown length"),
-    )]
-    LengthofOfArrayTyOfUnknownLength {
-        op: Token<'a>,
-        at: QualifiedType<'a>,
-    },
-
-    #[error(
-        "argument count mismatch: too {determiner} arguments to function call (expected {at_least}{expected} but got {actual})"
-    )]
-    #[diagnostics(
-        at(colour = Red, label = "this callee expects {at_least}{expected} argument{maybe_plural_s}"),
-    )]
-    #[with(
-        at_least = if *is_varargs { "at least " } else { "" },
-        determiner = if expected > actual { "few" } else { "many" },
-        maybe_plural_s = if *expected != 1 { "s" } else { "" },
-        expected = expected.fg(Blue),
-        actual = actual.fg(Red),
-    )]
-    ArityMismatch {
-        at: TypedExpression<'a>,
-        expected: usize,
-        actual: usize,
-        is_varargs: bool,
-    },
-
-    #[error(
-        "value of type `{ty}` is not callable because it is not a function or function pointer"
-    )]
-    #[diagnostics(at(colour = Red, label = "this is not callable because it is of type `{ty}`"))]
-    #[with(ty = at.ty)]
-    Uncallable { at: TypedExpression<'a> },
-
-    #[error("empty arrays are not allowed")]
-    #[diagnostics(
-        at(colour = Red, label = "this array is declared as empty"),
-    )]
-    EmptyArray { at: Reference<'a> },
-
-    #[error("excess element in {kind} initialiser")]
-    #[with(
-        name = reference.name.fg(Blue),
-        ty = reference.ty.fg(Blue),
-        kind = iterator.kind(),
-        help = match iterator {
-            SubobjectIterator::Scalar { .. } => format!("`{name}`’s type `{ty}` is scalar"),
-            SubobjectIterator::Array { ty, index, offset: _ } => {
-                let ty = ty.fg(Blue);
-                // trying to get the non-existing element increments the index, so we undo this
-                // here
-                let index = index.checked_sub(1).unwrap().fg(Red);
-                format!("trying to initialise element at index {index} for `{ty}`")
-            }
-        },
-    )]
-    #[diagnostics(
-        reference(colour = Blue, label = "while initialising this variable"),
-        at(colour = Red, label = "{help}"),
-    )]
-    ExcessInitialiser {
-        at: scope::Initialiser<'a>,
-        reference: Reference<'a>,
-        iterator: SubobjectIterator<'a>,
-    },
-
-    #[error("no such subobject while initialising object of type `{ty}`")]
-    #[diagnostics(
-        reference(colour = Blue, label = "while initialising this variable"),
-        at(colour = Red, label = "no such subobject"),
-    )]
-    #[with(
-        ty = match iterator {
-            SubobjectIterator::Scalar { ty, .. } => ty,
-            SubobjectIterator::Array { .. } => unreachable!(),
-        }.fg(Blue),
-    )]
-    NoSuchSubobject {
-        at: Designator<'a>,
-        reference: Reference<'a>,
-        iterator: SubobjectIterator<'a>,
-    },
-
-    #[error("empty character constant")]
-    #[diagnostics(at(colour = Red, label = "this character constant is empty"))]
-    EmptyCharConstant { at: Token<'a> },
-
-    #[error("{kind} character constant may not contain multiple characters")]
-    #[diagnostics(at(colour = Red, label = "this character constant contains {len} characters"))]
-    #[with(
-        kind = prefix.encoding(),
-        len = len.fg(Red),
-    )]
-    UnicodeCharConstantWithMoreThanOneCharacter {
-        at: Token<'a>,
-        prefix: EncodingPrefix,
-        len: usize,
-    },
-
-    #[error(
-        "{kind} character constant contains character that is not encodable in a single {kind} code unit"
-    )]
-    #[diagnostics(
-        at(
-            colour = Red,
-            label = "`{char}` (U+{codepoint:X}) is encoded as {len} code units in {kind}",
-        ),
-    )]
-    #[with(
-        kind = prefix.encoding(),
-        codepoint = u32::from(*char),
-        char = char.fg(Red),
-        len = len.fg(Red),
-    )]
-    UnicodeCharLiteralNotEncodableInSingleCodeUnit {
-        at: Token<'a>,
-        char: char,
-        len: usize,
-        prefix: EncodingPrefix,
-    },
-
-    #[error("array of inappropriate type `{actual_ty}` initialised by string literal")]
-    #[diagnostics(
-        actual_ty(colour = Red, label = "this is an array of `{element_ty}`"),
-        at(
-            colour = Red,
-            label = "this is a {kind} string literal, which can only initialise arrays of {expected_tys}",
-        ),
-    )]
-    #[with(
-        expected_tys = expected_tys.iter().map(|ty| format!("`{}`", ty.fg(Blue))).join_end(", ", " or "),
-        element_ty = actual_ty.ty.ty,
-    )]
-    ArrayInitialisationByStringLiteralTypeMismatch {
-        at: scope::Expression<'a>,
-        kind: &'a str,
-        expected_tys: &'a [Type<'a>],
-        actual_ty: ArrayType<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
-    },
-
-    #[error("incompatible operand types in conditional expression{note}")]
-    #[diagnostics(
-        at(colour = Blue),
-        then(colour = Red, label = "this is of type `{then_ty}`"),
-        or_else(colour = Magenta, label = "this is of type `{or_else_ty}`"),
-    )]
-    #[with(
-        then_ty = then.ty.ty,
-        or_else_ty = or_else.ty.ty,
-        note = match note {
-            Some(note) => format!(" {note}"),
-            None => String::from(""),
-        },
-    )]
-    ConditionalExprOperandTypesIncompatible {
-        at: Token<'a>,
-        note: Option<&'a str>,
-        then: TypedExpression<'a>,
-        or_else: TypedExpression<'a>,
-    },
-
-    #[error("redeclaration of type alias `{name}` with different type")]
-    #[with(
-        ty = at.ty,
-        name = at.name,
-    )]
-    #[diagnostics(
-        previously_declared_as(
-            colour = Blue,
-            label = "previously declared as `{previously_declared_as}` here",
-        ),
-        at(colour = Red, label = "redeclared as different type `{ty}` here"),
-    )]
-    TypedefRedeclared {
-        at: scope::Typedef<'a>,
-        previously_declared_as: scope::QualifiedType<'a>,
-    },
-
-    #[error("function declared at block scope cannot have a storage class other than `extern`")]
-    #[diagnostics(at(colour = Red))]
-    BlockScopeFunctionWithInvalidStorageClass { at: Loc<'a> },
-
-    #[error("`{name}` redeclared as {new_linkage} but was originally declared as {old_linkage}")]
-    #[diagnostics(
-        previous_definition(colour = Blue, label = "previously declared here as {old_linkage}"),
-        at(colour = Red, label = "{new_linkage} declaration here"),
-    )]
-    #[with(
-        name = previous_definition.name,
-        old_linkage = previous_definition.linkage_staticness_as_str(),
-        new_linkage = at.linkage_staticness_as_str(),
-    )]
-    RedeclaredWithDifferentLinkage {
-        at: Reference<'a>,
-        previous_definition: Reference<'a>,
-    },
-
-    #[error("control flow returned from function `{function}` declared `{noreturn}`")]
-    #[diagnostics(
-        at(colour = Red, label = "this `{at}` statement was executed"),
-        noreturn(colour = Magenta, label = "declared as `{noreturn}` here"),
-        function(colour = Blue, label = "in function `{function}`")
-    )]
-    ReturnFromNoreturnFunction {
-        at: Token<'a>,
-        noreturn: cst::FunctionSpecifier<'a>,
-        function: scope::Reference<'a>,
-    },
-}
 
 #[derive(Debug, Clone, Copy)]
 pub enum ArrayLength<Expression> {
@@ -742,26 +226,6 @@ impl<'a> FromError<'a> for Statement<'a> {
 pub(crate) struct TypedExpression<'a> {
     pub(crate) ty: QualifiedType<'a>,
     pub(crate) expr: Expression<'a>,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct StringLiteral<'a> {
-    value: &'a ByteStr,
-    loc: Loc<'a>,
-}
-
-impl<'a> StringLiteral<'a> {
-    pub(crate) fn value(&self) -> &'a ByteStr {
-        self.value
-    }
-
-    fn len(&self) -> u64 {
-        u64::try_from(self.value.len()).unwrap()
-    }
-
-    fn loc(&self) -> Loc<'a> {
-        self.loc
-    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1097,6 +561,98 @@ impl fmt::Display for ConversionKind {
     }
 }
 
+fn typeck_array_ty<'a>(
+    sess: &'a Session<'a>,
+    ty: scope::ArrayType<'a>,
+    is_parameter: IsParameter,
+    reference: Option<&scope::Reference<'a>>,
+) -> Type<'a> {
+    let ArrayType { ty, length, loc } = ty;
+    let ty = sess.alloc(typeck_ty(sess, *ty, IsParameter::No));
+    if !ty.ty.is_complete() {
+        // TODO: this should be `Type::Error`
+        // TODO: this generates a new error for each *usage* of this ty, including usages
+        // of variables with this ty.
+        sess.emit(Diagnostic::ArrayWithIncompleteType { at: *ty })
+    }
+    if ty.ty.is_function() {
+        // TODO: this should be `Type::Error`
+        sess.emit(Diagnostic::ArrayOfFunctions { at: *ty })
+    }
+    let length = length
+        .map(|length| {
+            ArrayLength::try_from(sess.alloc(typeck_expression(sess, length, Context::Default)))
+                .unwrap_or_else(|_| todo!("variable length array"))
+        })
+        .unwrap_or(ArrayLength::Unknown);
+    let length = if let Some(reference) = reference
+        && let Some(scope::RefInitialiser::Initialiser(initialiser)) = reference.initialiser
+        && let ArrayLength::Unknown = length
+        && let reference = typeck_reference(sess, *reference, NeedsInitialiser::No)
+        && let initialiser = typeck_initialiser(sess, initialiser, &reference)
+        && let Some(length) = initialiser.array_length(&ty.ty)
+    {
+        ArrayLength::Constant(length)
+    }
+    else {
+        length
+    };
+    match is_parameter {
+        IsParameter::Yes => {
+            if matches!(length, ArrayLength::Variable(_)) {
+                todo!("unimplemented: variably-modified type as function parameter");
+            }
+            Type::Pointer(ty)
+        }
+        IsParameter::No => Type::Array(ArrayType { ty, length, loc }),
+    }
+}
+
+fn typeck_function_ty<'a>(
+    sess: &'a Session<'a>,
+    ty: scope::FunctionType<'a>,
+    is_parameter: IsParameter,
+) -> Type<'a> {
+    let FunctionType { params, return_type, is_varargs } = ty;
+    let return_type = sess.alloc(typeck_ty(sess, *return_type, IsParameter::No));
+    match return_type.ty {
+        Type::Arithmetic(_) | Type::Pointer(_) | Type::Void | Type::Nullptr => (),
+        Type::Array(_) | Type::Function(_) | Type::Struct { name: _ } => sess
+            .emit(Diagnostic::InvalidFunctionReturnType { at: return_type.loc, ty: *return_type }),
+        Type::Typeof { expr, unqual: _ } => match expr {},
+    }
+    let params = sess.alloc_slice_fill_iter(params.iter().map(
+        |&ParameterDeclaration { loc, ty, name }| {
+            let ty = typeck_ty(sess, ty, IsParameter::Yes);
+            ParameterDeclaration { loc, ty, name }
+        },
+    ));
+    let params = match params {
+        [ParameterDeclaration { loc: _, ty, name: None }]
+            if !is_varargs
+                && let QualifiedType {
+                    is_const: false,
+                    is_volatile: false,
+                    ty: Type::Void,
+                    loc: _,
+                } = ty =>
+            &[],
+        params => params,
+    };
+    for param in params {
+        if !param.ty.ty.is_complete() {
+            // TODO: use this error
+            sess.emit(Diagnostic::ParameterWithIncompleteType { at: *param })
+        }
+    }
+
+    let function_ty = Type::Function(FunctionType { params, return_type, is_varargs });
+    match is_parameter {
+        IsParameter::Yes => Type::Pointer(sess.alloc(function_ty.unqualified())),
+        IsParameter::No => function_ty,
+    }
+}
+
 fn typeck_ty_with_initialiser<'a>(
     sess: &'a Session<'a>,
     ty: scope::QualifiedType<'a>,
@@ -1108,80 +664,8 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ty::Type::Pointer(pointee) =>
             Type::Pointer(sess.alloc(typeck_ty(sess, *pointee, IsParameter::No))),
-        ty::Type::Array(ArrayType { ty, length, loc }) => {
-            let ty = sess.alloc(typeck_ty(sess, *ty, IsParameter::No));
-            if !ty.ty.is_complete() {
-                // TODO: this should be `Type::Error`
-                // TODO: this generates a new error for each *usage* of this ty, including usages
-                // of variables with this ty.
-                sess.emit(Diagnostic::ArrayWithIncompleteType { at: *ty })
-            }
-            if ty.ty.is_function() {
-                // TODO: this should be `Type::Error`
-                sess.emit(Diagnostic::ArrayOfFunctions { at: *ty })
-            }
-            let length = length
-                .map(|length| {
-                    ArrayLength::try_from(sess.alloc(typeck_expression(
-                        sess,
-                        length,
-                        Context::Default,
-                    )))
-                    .unwrap_or_else(|_| todo!("variable length array"))
-                })
-                .unwrap_or(ArrayLength::Unknown);
-            let length = if let Some(reference) = reference
-                && let Some(scope::RefInitialiser::Initialiser(initialiser)) = reference.initialiser
-                && let ArrayLength::Unknown = length
-                && let reference = typeck_reference(sess, *reference, NeedsInitialiser::No)
-                && let initialiser = typeck_initialiser(sess, initialiser, &reference)
-                && let Some(length) = initialiser.array_length(&ty.ty)
-            {
-                ArrayLength::Constant(length)
-            }
-            else {
-                length
-            };
-            match is_parameter {
-                IsParameter::Yes => {
-                    if matches!(length, ArrayLength::Variable(_)) {
-                        todo!("unimplemented: variably-modified type as function parameter");
-                    }
-                    Type::Pointer(ty)
-                }
-                IsParameter::No => Type::Array(ArrayType { ty, length, loc }),
-            }
-        }
-        ty::Type::Function(FunctionType { params, return_type, is_varargs }) => {
-            let return_type = sess.alloc(typeck_ty(sess, *return_type, IsParameter::No));
-            match return_type.ty {
-                Type::Arithmetic(_) | Type::Pointer(_) | Type::Void | Type::Nullptr => (),
-                Type::Array(_) | Type::Function(_) | Type::Struct { name: _ } =>
-                    sess.emit(Diagnostic::InvalidFunctionReturnType {
-                        at: return_type.loc,
-                        ty: *return_type,
-                    }),
-                Type::Typeof { expr, unqual: _ } => match expr {},
-            }
-            let function_ty = Type::Function(FunctionType {
-                params: sess.alloc_slice_fill_iter(params.iter().map(
-                    |&ParameterDeclaration { loc, ty, name }| {
-                        let ty = typeck_ty(sess, ty, IsParameter::Yes);
-                        let param = ParameterDeclaration { loc, ty, name };
-                        if !ty.ty.is_complete() {
-                            sess.emit(Diagnostic::ParameterWithIncompleteType { at: param })
-                        }
-                        param
-                    },
-                )),
-                return_type,
-                is_varargs,
-            });
-            match is_parameter {
-                IsParameter::Yes => Type::Pointer(sess.alloc(function_ty.unqualified())),
-                IsParameter::No => function_ty,
-            }
-        }
+        ty::Type::Array(ty) => typeck_array_ty(sess, ty, is_parameter, reference),
+        ty::Type::Function(ty) => typeck_function_ty(sess, ty, is_parameter),
         ty::Type::Void => Type::Void,
         ty::Type::Typeof { expr, unqual } => {
             let ty = match expr {
@@ -1421,18 +905,26 @@ fn typeck_function_definition<'a>(
         body,
     } = *definition;
 
-    let params = ParamRefs(
-        sess.alloc_slice_fill_iter(
+    let reference = typeck_reference_declaration(sess, reference, NeedsInitialiser::No);
+
+    let Type::Function(ty) = reference.ty.ty
+    else {
+        unreachable!()
+    };
+
+    let params = match ty.params {
+        [] => &[],
+        _ => sess.alloc_slice_fill_iter(
             params
                 .0
                 .iter()
                 .map(|&param| typeck_reference(sess, param, NeedsInitialiser::No)),
         ),
-    );
+    };
 
     FunctionDefinition {
-        reference: typeck_reference_declaration(sess, reference, NeedsInitialiser::No),
-        params,
+        reference,
+        params: ParamRefs(params),
         inline,
         noreturn,
         is_varargs,
@@ -1916,25 +1408,25 @@ fn typeck_binop<'a>(
             typeck_arithmetic_binop(sess, *op, lhs, rhs, lhs_ty, rhs_ty),
         (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(pointee_ty))
             if matches!(op.kind, BinOpKind::Add) =>
-            typeck_ptradd(sess, op, rhs, pointee_ty, lhs, PtrAddOrder::IntegralFirst),
+            ptr::typeck_ptradd(sess, op, rhs, pointee_ty, lhs, PtrAddOrder::IntegralFirst),
         (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
             if matches!(op.kind, BinOpKind::Add) =>
-            typeck_ptradd(sess, op, lhs, pointee_ty, rhs, PtrAddOrder::PtrFirst),
+            ptr::typeck_ptradd(sess, op, lhs, pointee_ty, rhs, PtrAddOrder::PtrFirst),
         (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
             if matches!(op.kind, BinOpKind::Subtract) =>
-            typeck_ptrsub(sess, op, lhs, pointee_ty, rhs),
+            ptr::typeck_ptrsub(sess, op, lhs, pointee_ty, rhs),
         (Type::Pointer(_), Type::Pointer(_)) if let BinOpKind::Comparison(cmp) = op.kind =>
-            typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
+            ptr::typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
         (Type::Pointer(lhs_pointee_ty), Type::Pointer(rhs_pointee_ty))
             if matches!(op.kind, BinOpKind::Subtract) =>
-            typeck_ptrdiff(sess, op, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
+            ptr::typeck_ptrdiff(sess, op, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
         // TODO: allow `nullptr <op> <null pointer constant>`
         (Type::Nullptr, Type::Nullptr | Type::Pointer(_)) | (Type::Pointer(_), Type::Nullptr)
             if let BinOpKind::Comparison(cmp @ (Comparison::Equal | Comparison::NotEqual)) =
                 op.kind =>
         // TODO: this will generate `PtrCmp` operations with different parameter types, maybe
         // insert some `NoopTypeConversion`s?
-            typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
+            ptr::typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
         _ => sess.emit(Diagnostic::InvalidOperandsForBinaryOperator { at: *op, lhs, rhs }),
     }
 }
@@ -2043,142 +1535,6 @@ fn typeck_integral_shift<'a>(
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum PtrAddOrder {
-    PtrFirst,
-    IntegralFirst,
-}
-
-impl PtrAddOrder {
-    pub fn select<T>(self, pointer: T, integral: T) -> (T, T) {
-        match self {
-            Self::PtrFirst => (pointer, integral),
-            Self::IntegralFirst => (integral, pointer),
-        }
-    }
-}
-
-fn typeck_ptradd<'a>(
-    sess: &'a Session<'a>,
-    op: &BinOp<'a>,
-    pointer: TypedExpression<'a>,
-    pointee_ty: &QualifiedType<'a>,
-    integral: TypedExpression<'a>,
-    order: PtrAddOrder,
-) -> TypedExpression<'a> {
-    assert_matches!(pointer.ty.ty, Type::Pointer(_));
-    assert_matches!(integral.ty.ty, Type::Arithmetic(Arithmetic::Integral(_)));
-    if pointee_ty.ty.is_complete() {
-        let integral = convert_as_if_by_assignment(sess, Type::size_t().unqualified(), integral);
-        TypedExpression {
-            ty: pointer.ty.ty.unqualified(),
-            expr: Expression::PtrAdd {
-                pointer: sess.alloc(pointer),
-                integral: sess.alloc(integral),
-                pointee_size: pointee_ty.ty.size(),
-                order,
-            },
-        }
-    }
-    else {
-        let (lhs, rhs) = order.select(pointer, integral);
-        sess.emit(Diagnostic::PointerArithmeticWithIncompletePointee {
-            at: *op,
-            pointee_ty: *pointee_ty,
-            lhs,
-            rhs,
-        })
-    }
-}
-
-fn typeck_ptrsub<'a>(
-    sess: &'a Session<'a>,
-    op: &BinOp<'a>,
-    pointer: TypedExpression<'a>,
-    pointee_ty: &QualifiedType<'a>,
-    integral: TypedExpression<'a>,
-) -> TypedExpression<'a> {
-    assert_matches!(pointer.ty.ty, Type::Pointer(_));
-    assert_matches!(integral.ty.ty, Type::Arithmetic(Arithmetic::Integral(_)));
-    if pointee_ty.ty.is_complete() {
-        let integral = convert_as_if_by_assignment(sess, Type::size_t().unqualified(), integral);
-        TypedExpression {
-            ty: pointer.ty.ty.unqualified(),
-            expr: Expression::PtrSub {
-                pointer: sess.alloc(pointer),
-                integral: sess.alloc(integral),
-                pointee_size: pointee_ty.ty.size(),
-            },
-        }
-    }
-    else {
-        sess.emit(Diagnostic::PointerArithmeticWithIncompletePointee {
-            at: *op,
-            pointee_ty: *pointee_ty,
-            lhs: pointer,
-            rhs: integral,
-        })
-    }
-}
-
-fn typeck_ptrcmp<'a>(
-    sess: &'a Session<'a>,
-    lhs: TypedExpression<'a>,
-    kind: Comparison,
-    op_token: &Token<'a>,
-    rhs: TypedExpression<'a>,
-) -> TypedExpression<'a> {
-    // TODO: should check for type compatibility, not exact equality
-    let expr = if lhs.ty.ty != Type::Nullptr && rhs.ty.ty != Type::Nullptr && lhs.ty.ty != rhs.ty.ty
-    {
-        sess.emit(Diagnostic::IncompatibleTypesInPtrCmp { at: *op_token, lhs, rhs })
-    }
-    else {
-        Expression::PtrCmp {
-            lhs: sess.alloc(lhs),
-            kind,
-            rhs: sess.alloc(rhs),
-        }
-    };
-    TypedExpression { ty: Type::int().unqualified(), expr }
-}
-
-fn typeck_ptrdiff<'a>(
-    sess: &'a Session<'a>,
-    op: &BinOp<'a>,
-    lhs: TypedExpression<'a>,
-    lhs_pointee_ty: &QualifiedType<'a>,
-    rhs: TypedExpression<'a>,
-    rhs_pointee_ty: &QualifiedType<'a>,
-) -> TypedExpression<'a> {
-    // TODO: should check for type compatibility, not exact equality
-    let expr = if lhs_pointee_ty.ty != rhs_pointee_ty.ty {
-        sess.emit(Diagnostic::PtrDiffIncompatiblePointeeTypes { at: op.token, lhs, rhs })
-    }
-    else {
-        match lhs_pointee_ty.ty.is_complete() && rhs_pointee_ty.ty.is_complete() {
-            true => Expression::PtrDiff {
-                lhs: sess.alloc(lhs),
-                rhs: sess.alloc(rhs),
-                pointee_size: lhs_pointee_ty.ty.size(),
-            },
-            // TODO: this assumes that both pointee types are the same; pass the actual incomplete
-            // pointee ty here.
-            false => sess.emit(Diagnostic::PointerArithmeticWithIncompletePointee {
-                at: *op,
-                pointee_ty: *lhs_pointee_ty,
-                lhs,
-                rhs,
-            }),
-        }
-    };
-
-    TypedExpression {
-        ty: Type::ptrdiff_t().unqualified(),
-        expr,
-    }
-}
-
 fn check_ty_can_sizeof<'a>(
     sess: &'a Session<'a>,
     ty: &QualifiedType<'a>,
@@ -2275,232 +1631,6 @@ fn desugar_postfix_increment<'a>(
 }
 
 #[derive(Debug, Clone, Copy)]
-enum Char {
-    Codepoint(char),
-    // TODO: this hardcodes the assumption that `wchar_t` will be at most 32 bit long
-    EscapeSequence(u32),
-}
-
-impl Char {
-    fn unwrap_codepoint(self) -> char {
-        match self {
-            Char::Codepoint(c) => c,
-            Char::EscapeSequence(_) => panic!(),
-        }
-    }
-
-    fn len_utf8(self) -> usize {
-        match self {
-            Char::Codepoint(c) => c.len_utf8(),
-            Char::EscapeSequence(_) => 1,
-        }
-    }
-
-    fn len_utf16(self) -> usize {
-        match self {
-            Char::Codepoint(c) => c.len_utf16(),
-            Char::EscapeSequence(_) => 1,
-        }
-    }
-
-    fn encode_utf8(self) -> impl Iterator<Item = u8> {
-        match self {
-            Char::Codepoint(c) => {
-                let mut storage = [0; char::MAX_LEN_UTF8];
-                let encoded = c.encode_utf8(&mut storage);
-                let len = encoded.len();
-                Either::Left(storage.into_iter().take(len))
-            }
-            Char::EscapeSequence(value) =>
-                #[expect(
-                    clippy::as_conversions,
-                    reason = "\
-                        this should truncate; the value is checked to be in range for \
-                        non-prefixed string literals in `parse_escape_sequences`\
-                    "
-                )]
-                Either::Right(std::iter::once(value as u8)),
-        }
-    }
-}
-
-impl From<Char> for u64 {
-    fn from(value: Char) -> Self {
-        match value {
-            Char::Codepoint(c) => Self::from(c),
-            Char::EscapeSequence(value) => Self::from(value),
-        }
-    }
-}
-
-gen fn parse_escape_sequences(mut chars: Chars<'_>, encoding_prefix: EncodingPrefix) -> Char {
-    let char_from_escape_sequence = move |value| {
-        let escape_sequence_ty = Type::escape_sequence_ty(encoding_prefix);
-        let codepoint = if escape_sequence_ty.can_represent(value) {
-            match encoding_prefix {
-                EncodingPrefix::None => i32::from(
-                    u8::try_from(value)
-                        .unwrap_or_else(|_| unreachable!())
-                        .cast_signed(),
-                )
-                .cast_unsigned(),
-                EncodingPrefix::Utf8
-                | EncodingPrefix::Utf16
-                | EncodingPrefix::Utf32
-                | EncodingPrefix::Wchar => value,
-            }
-        }
-        else {
-            todo!(
-                "error message: escape sequence value {value} out of range for type `{escape_sequence_ty}` of {encoding_prefix:?}-prefixed literal",
-            );
-        };
-        Char::EscapeSequence(codepoint)
-    };
-
-    while let Some(c) = chars.next() {
-        match c {
-            '\\' =>
-                yield match chars.next() {
-                    None => unreachable!(),
-                    Some('\'') => Char::Codepoint('\''),
-                    Some('"') => Char::Codepoint('"'),
-                    Some('?') => Char::Codepoint('?'),
-                    Some('\\') => Char::Codepoint('\\'),
-                    Some('a') => Char::Codepoint('\x07'),
-                    Some('b') => Char::Codepoint('\x08'),
-                    Some('f') => Char::Codepoint('\x0c'),
-                    Some('n') => Char::Codepoint('\n'),
-                    Some('r') => Char::Codepoint('\r'),
-                    Some('t') => Char::Codepoint('\t'),
-                    Some('v') => Char::Codepoint('\x0b'),
-                    Some(oct_digit @ '0'..='7') => {
-                        let value = oct_digit.to_digit(8).unwrap();
-                        match chars.next() {
-                            None => char_from_escape_sequence(value),
-                            Some(oct_digit @ '0'..='7') => {
-                                let value = value * 8 + oct_digit.to_digit(8).unwrap();
-                                match chars.next() {
-                                    None => char_from_escape_sequence(value),
-                                    Some(oct_digit @ '0'..='7') => {
-                                        let value = value * 8 + oct_digit.to_digit(8).unwrap();
-                                        char_from_escape_sequence(value)
-                                    }
-                                    Some(c) => {
-                                        yield char_from_escape_sequence(value);
-                                        Char::Codepoint(c)
-                                    }
-                                }
-                            }
-                            Some(c) => {
-                                yield char_from_escape_sequence(value);
-                                Char::Codepoint(c)
-                            }
-                        }
-                    }
-                    Some('x') => {
-                        let s = chars.as_str();
-                        let split_point =
-                            s.find(|c: char| !c.is_ascii_hexdigit()).unwrap_or(s.len());
-                        let (digits, rest) = s.split_at(split_point);
-                        chars = rest.chars();
-                        match u32::from_str_radix(digits, 16) {
-                            Ok(codepoint) => char_from_escape_sequence(codepoint),
-                            Err(_) => unreachable!(),
-                        }
-                    }
-                    Some(_) => todo!("error: invalid escape sequence"),
-                },
-            c => yield Char::Codepoint(c),
-        }
-    }
-}
-
-fn parse_char_literal<'a>(sess: &'a Session<'a>, char: &Token<'a>) -> TypedExpression<'a> {
-    let TokenKind::CharConstant(encoding_prefix) = char.kind
-    else {
-        unreachable!()
-    };
-    let ty = Type::char_constant_ty(encoding_prefix);
-    // TODO: check that escape sequence values are in range
-    let values = parse_escape_sequences(
-        char.slice()[encoding_prefix.len() + 1..char.slice().len() - 1].chars(),
-        encoding_prefix,
-    )
-    .collect_vec();
-
-    let expr = if let EncodingPrefix::Utf8 | EncodingPrefix::Utf16 | EncodingPrefix::Utf32 =
-        encoding_prefix
-        && values.len() > 1
-    {
-        sess.emit(Diagnostic::UnicodeCharConstantWithMoreThanOneCharacter {
-            at: *char,
-            prefix: encoding_prefix,
-            len: values.len(),
-        })
-    }
-    else {
-        match values.first() {
-            Some(value) => match encoding_prefix {
-                EncodingPrefix::Utf8 if value.len_utf8() > 1 =>
-                    sess.emit(Diagnostic::UnicodeCharLiteralNotEncodableInSingleCodeUnit {
-                        at: *char,
-                        char: value.unwrap_codepoint(),
-                        len: value.len_utf8(),
-                        prefix: encoding_prefix,
-                    }),
-                EncodingPrefix::Utf16 if value.len_utf16() > 1 =>
-                    sess.emit(Diagnostic::UnicodeCharLiteralNotEncodableInSingleCodeUnit {
-                        at: *char,
-                        char: value.unwrap_codepoint(),
-                        len: value.len_utf16(),
-                        prefix: encoding_prefix,
-                    }),
-                // TODO: handle multichar character constants
-                _ => Expression::Integer { value: u64::from(*value), token: *char },
-            },
-            None => sess.emit(Diagnostic::EmptyCharConstant { at: *char }),
-        }
-    };
-
-    TypedExpression { ty: ty.unqualified(), expr }
-}
-
-fn parse_string_literal<'a>(sess: &'a Session<'a>, tokens: &[Token<'a>]) -> StringLiteral<'a> {
-    let value: Vec<u8> = tokens
-        .iter()
-        .flat_map(|token| {
-            parse_escape_sequences(
-                token.slice()[1..token.slice().len() - 1].chars(),
-                EncodingPrefix::None,
-            )
-        })
-        .chain(std::iter::once(Char::Codepoint('\0')))
-        .flat_map(|c| c.encode_utf8())
-        .collect();
-    StringLiteral {
-        value: ByteStr::new(sess.alloc_slice_copy(&value)),
-        loc: tokens
-            .first()
-            .unwrap()
-            .loc()
-            .until(tokens.last().unwrap().loc()),
-    }
-}
-
-fn typeck_bool_literal<'a>(token: &Token<'a>) -> TypedExpression<'a> {
-    let value = match token.kind {
-        TokenKind::False => 0,
-        TokenKind::True => 1,
-        _ => unreachable!(),
-    };
-    TypedExpression {
-        ty: Type::bool().unqualified(),
-        expr: Expression::Integer { value, token: *token },
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
 enum Context {
     Default,
     Addressof,
@@ -2534,57 +1664,13 @@ fn typeck_expression<'a>(
                 expr: Expression::Name(reference),
             }
         }
-        scope::Expression::Integer { value, token } => {
-            let Integer { suffix, suffix_len, base, prefix_len } = match token.kind {
-                TokenKind::Integer(int) => int,
-                TokenKind::True | TokenKind::False => return typeck_bool_literal(token),
-                _ => unreachable!(),
-            };
-            let number = &value[prefix_len..value.len() - suffix_len];
-            let number: String = number.chars().filter(|&c| c != '\'').collect();
-            let (signedness, kind) = match suffix {
-                IntegerSuffix::None => (Signedness::Signed, IntegralKind::Int),
-                IntegerSuffix::Unsigned => (Signedness::Unsigned, IntegralKind::Int),
-                IntegerSuffix::UnsignedLong => (Signedness::Unsigned, IntegralKind::Long),
-                IntegerSuffix::UnsignedLongLong => (Signedness::Unsigned, IntegralKind::LongLong),
-                IntegerSuffix::Long => (Signedness::Signed, IntegralKind::Long),
-                IntegerSuffix::LongLong => (Signedness::Signed, IntegralKind::LongLong),
-                IntegerSuffix::BitInt => todo!("unimplemented: `_BitInt`"),
-                IntegerSuffix::UnsignedBitInt => todo!("unimplemented: `unsigned _BitInt`"),
-                IntegerSuffix::Invalid => {
-                    // TODO: use the error
-                    let () = sess.emit(IntegerLiteralDiagnostic::InvalidSuffix { at: *token });
-                    (Signedness::Signed, IntegralKind::Int)
-                }
-            };
-            match u64::from_str_radix(&number, base) {
-                Ok(parsed_value) => {
-                    let integral_ty = grow_to_fit(signedness, kind, base, parsed_value);
-                    TypedExpression {
-                        ty: Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified(),
-                        expr: Expression::Integer { value: parsed_value, token: *token },
-                    }
-                }
-                Err(error) => match error.kind() {
-                    IntErrorKind::PosOverflow =>
-                        sess.emit(IntegerLiteralDiagnostic::TooLarge { at: *token }),
-                    _ => unreachable!(),
-                },
-            }
-        }
-        scope::Expression::CharConstant(char) => parse_char_literal(sess, char),
-        scope::Expression::String(tokens) => {
-            let string = parse_string_literal(sess, tokens);
-            TypedExpression {
-                ty: Type::Array(ArrayType {
-                    ty: sess.alloc(Type::char().unqualified()),
-                    length: ArrayLength::Constant(string.len()),
-                    loc: string.loc,
-                })
-                .unqualified(),
-                expr: Expression::String(string),
-            }
-        }
+        scope::Expression::Integer { value, token } => match token.kind {
+            TokenKind::Integer(int) => literal::typeck_integer_literal(sess, token, int, value),
+            TokenKind::True | TokenKind::False => literal::typeck_bool_literal(token),
+            _ => unreachable!(),
+        },
+        scope::Expression::CharConstant(char) => literal::parse_char_literal(sess, char),
+        scope::Expression::String(tokens) => literal::typeck_string_literal(sess, tokens),
         scope::Expression::Nullptr(nullptr) => TypedExpression {
             ty: Type::Nullptr.unqualified(),
             expr: Expression::Nullptr(*nullptr),
@@ -3188,41 +2274,6 @@ fn typeck_expression<'a>(
         },
         Context::Sizeof | Context::Addressof | Context::Typeof => expr,
     }
-}
-
-fn grow_to_fit(signedness: Signedness, kind: IntegralKind, base: u32, value: u64) -> Integral {
-    const POSSIBLE_TYS: [Integral; 6] = [
-        Integral {
-            signedness: Signedness::Signed,
-            kind: IntegralKind::Int,
-        },
-        Integral {
-            signedness: Signedness::Unsigned,
-            kind: IntegralKind::Int,
-        },
-        Integral {
-            signedness: Signedness::Signed,
-            kind: IntegralKind::Long,
-        },
-        Integral {
-            signedness: Signedness::Unsigned,
-            kind: IntegralKind::Long,
-        },
-        Integral {
-            signedness: Signedness::Signed,
-            kind: IntegralKind::LongLong,
-        },
-        Integral {
-            signedness: Signedness::Unsigned,
-            kind: IntegralKind::LongLong,
-        },
-    ];
-    POSSIBLE_TYS
-        .into_iter()
-        .filter(|ty| base != 10 || ty.signedness == signedness)
-        .filter(|ty| ty.kind >= kind)
-        .find(|ty| ty.can_represent(value))
-        .unwrap_or_else(|| todo!("emit error: integer constant cannot be represented"))
 }
 
 fn typeck_typedef<'a>(sess: &'a Session<'a>, typedef: &scope::Typedef<'a>) -> Typedef<'a> {

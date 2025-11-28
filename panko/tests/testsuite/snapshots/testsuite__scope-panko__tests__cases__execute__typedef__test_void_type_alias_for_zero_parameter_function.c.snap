@@ -13,32 +13,36 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/typedef/test_void_type_alias_for_zero_parameter_function.c"
    (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
    (typedef v `void`)
-   (declaration f~1 `fn() -> void` ∅)
+   (declaration f~1 `fn(∅: void) -> void` ∅)
    (function-definition
-      f~1 `fn() -> void`
+      f~1 `fn(∅: void) -> void`
+      (params
+         f.unnamed_parameter.0~3 `void`)
       (compound-statement
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (string "f")))))
-   (declaration g~3 `fn(∅: fn() -> void) -> void` ∅)
+   (declaration g~4 `fn(∅: fn(∅: void) -> void) -> void` ∅)
    (function-definition
-      g~3 `fn(v: fn() -> void) -> void`
+      g~4 `fn(v: fn(∅: void) -> void) -> void`
       (params
-         v~5 `fn() -> void`)
+         v~6 `fn(∅: void) -> void`)
       (compound-statement
-         (expression (call (name v~5 `fn() -> void`)))))
+         (expression (call (name v~6 `fn(∅: void) -> void`)))))
    (function-definition
-      print_g~6 `fn() -> void`
+      print_g~7 `fn(∅: void) -> void`
+      (params
+         print_g.unnamed_parameter.0~8 `void`)
       (compound-statement
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (string "g")))))
    (function-definition
-      main~7 `fn() -> int`
+      main~9 `fn() -> int`
       (compound-statement
-         (expression (call (name f~1 `fn() -> void`)))
+         (expression (call (name f~1 `fn(∅: void) -> void`)))
          (expression
-            (call (name g~3 `fn(v: fn() -> void) -> void`)
-               (name print_g~6 `fn() -> void`))))))
+            (call (name g~4 `fn(v: fn(∅: void) -> void) -> void`)
+               (name print_g~7 `fn(∅: void) -> void`))))))
 
 ----- stderr -----
