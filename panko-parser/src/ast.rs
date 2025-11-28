@@ -100,7 +100,7 @@ type Diagnostics<'a> = RefCell<Vec<&'a dyn Report>>;
 
 #[derive(Debug)]
 pub struct Session<'a> {
-    pub(crate) bump: &'a Bump,
+    bump: &'a Bump,
     diagnostics: Diagnostics<'a>,
     treat_error_as_bug: bool,
 }
