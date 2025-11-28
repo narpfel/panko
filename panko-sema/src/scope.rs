@@ -330,13 +330,11 @@ pub(crate) enum Expression<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Reference<'a> {
-    // TODO: The location of `name` points to where this name was declared. This is unused for now,
-    // but should be used in error messages to print e. g. “note: [...] was declared here:”.
     pub(crate) name: &'a str,
-    pub(crate) loc: Loc<'a>,
+    pub(crate) decl_loc: Loc<'a>,
     pub(crate) ty: QualifiedType<'a>,
     pub(crate) id: Id,
-    pub(crate) usage_location: Loc<'a>,
+    pub(crate) usage_loc: Loc<'a>,
     pub(crate) storage_duration: StorageDuration<Option<Linkage>>,
     pub(crate) previous_definition: Option<&'a Self>,
     pub(crate) is_parameter: IsParameter,
@@ -554,21 +552,17 @@ impl<'a> Reference<'a> {
         format!("{}~{}", self.name, self.id.0)
     }
 
-    #[expect(
-        clippy::misnamed_getters,
-        reason = "`loc` should actually return the `usage_location` and not the `loc` where this reference was declared"
-    )]
     pub fn loc(&self) -> Loc<'a> {
-        self.usage_location
+        self.usage_loc
     }
 
     pub(crate) fn slice(&self) -> &'a str {
         self.name
     }
 
-    fn at(&self, location: Loc<'a>) -> Self {
-        assert_eq!(self.name, location.slice());
-        Self { usage_location: location, ..*self }
+    fn at(&self, usage_loc: Loc<'a>) -> Self {
+        assert_eq!(self.name, usage_loc.slice());
+        Self { usage_loc, ..*self }
     }
 
     pub(crate) fn linkage(&self) -> Option<Linkage> {

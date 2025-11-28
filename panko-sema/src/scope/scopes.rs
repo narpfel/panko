@@ -90,10 +90,10 @@ impl<'a> Scopes<'a> {
         let id = self.id();
         let reference = Reference {
             name,
-            loc,
+            decl_loc: loc,
             ty,
             id,
-            usage_location: loc,
+            usage_loc: loc,
             storage_duration,
             previous_definition: None,
             is_parameter,
@@ -106,7 +106,7 @@ impl<'a> Scopes<'a> {
                 let reference = Reference {
                     id: previous_definition.id,
                     previous_definition: Some(
-                        sess.alloc(previous_definition.at(previous_definition.usage_location)),
+                        sess.alloc(previous_definition.at(previous_definition.usage_loc)),
                     ),
                     ..reference
                 };
@@ -143,10 +143,10 @@ impl<'a> Scopes<'a> {
         let id = self.id();
         Reference {
             name: "unnamed-temporary",
-            loc,
+            decl_loc: loc,
             ty,
             id,
-            usage_location: loc,
+            usage_loc: loc,
             storage_duration: StorageDuration::Automatic,
             previous_definition: None,
             is_parameter: IsParameter::No,

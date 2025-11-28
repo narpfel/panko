@@ -385,8 +385,8 @@ impl<'a> Reference<'a> {
         self.kind
     }
 
-    fn at(&self, location: Loc<'a>) -> Self {
-        Self { usage_loc: location, ..*self }
+    fn at(&self, usage_loc: Loc<'a>) -> Self {
+        Self { usage_loc, ..*self }
     }
 
     pub(crate) fn at_decl(&self) -> Self {
@@ -711,10 +711,10 @@ fn typeck_reference<'a>(
 ) -> Reference<'a> {
     let scope::Reference {
         name,
-        loc,
+        decl_loc,
         ty,
         id,
-        usage_location,
+        usage_loc,
         storage_duration,
         previous_definition,
         is_parameter,
@@ -806,10 +806,10 @@ fn typeck_reference<'a>(
 
     Reference {
         name,
-        decl_loc: loc,
+        decl_loc,
         ty,
         id,
-        usage_loc: usage_location,
+        usage_loc,
         kind,
         storage_duration,
     }
