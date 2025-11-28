@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-use std::collections::hash_map::Entry;
 use std::path::Path;
 
 use ariadne::Color::Blue;
@@ -19,14 +17,15 @@ use panko_parser::ast::FromError;
 use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::Session;
 use panko_parser::ast::reject_function_specifiers;
-use panko_parser::nonempty;
 use panko_parser::sexpr_builder::SExpr;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
+use crate::scope::scopes::Scopes;
 use crate::ty;
 
 mod as_sexpr;
+mod scopes;
 
 #[derive(Debug, Report)]
 #[exit_code(1)]
@@ -608,198 +607,6 @@ impl IncrementFixity<'_> {
     }
 }
 
-#[derive(Debug, Default)]
-struct Scope<'a> {
-    names: nonempty::Vec<HashMap<&'a str, Reference<'a>>>,
-    type_names: nonempty::Vec<HashMap<&'a str, QualifiedType<'a>>>,
-}
-
-impl<'a> Scope<'a> {
-    fn lookup(&self, name: &'a str) -> Option<Reference<'a>> {
-        self.names
-            .iter()
-            .rev()
-            .find_map(|names| names.get(name))
-            .copied()
-    }
-
-    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Reference<'a>> {
-        self.names.last_mut().entry(name)
-    }
-
-    fn lookup_ty(&self, name: &'a str) -> Option<QualifiedType<'a>> {
-        self.type_names
-            .iter()
-            .rev()
-            .find_map(|names| names.get(name))
-            .copied()
-    }
-
-    fn lookup_ty_innermost(&mut self, name: &'a str) -> Entry<&'a str, QualifiedType<'a>> {
-        self.type_names.last_mut().entry(name)
-    }
-
-    fn push(&mut self) {
-        self.names.push(HashMap::default());
-        self.type_names.push(HashMap::default());
-    }
-
-    fn pop(&mut self) {
-        self.names.pop();
-        self.type_names.pop();
-    }
-}
-
-#[derive(Debug)]
-struct Scopes<'a> {
-    sess: &'a Session<'a>,
-    /// at most two elements: the global scope and a function scope
-    scopes: nonempty::Vec<Scope<'a>>,
-    next_id: u64,
-}
-
-impl<'a> Scopes<'a> {
-    fn add(
-        &mut self,
-        name: &'a str,
-        loc: Loc<'a>,
-        ty: QualifiedType<'a>,
-        storage_duration: StorageDuration<Option<Linkage>>,
-        is_parameter: IsParameter,
-        is_in_global_scope: IsInGlobalScope,
-    ) -> Result<Reference<'a>, QualifiedType<'a>> {
-        if let Entry::Occupied(entry) = self.lookup_ty_innermost(name) {
-            return Err(*entry.get());
-        }
-
-        let sess = self.sess;
-        let id = self.id();
-        let reference = Reference {
-            name,
-            loc,
-            ty,
-            id,
-            usage_location: loc,
-            storage_duration,
-            previous_definition: None,
-            is_parameter,
-            is_in_global_scope,
-            initialiser: None,
-        };
-        match self.lookup_innermost(name) {
-            Entry::Occupied(mut entry) => {
-                let previous_definition = entry.get_mut();
-                let reference = Reference {
-                    id: previous_definition.id,
-                    previous_definition: Some(
-                        sess.alloc(previous_definition.at(previous_definition.usage_location)),
-                    ),
-                    ..reference
-                };
-                *previous_definition = reference;
-                Ok(reference)
-            }
-            Entry::Vacant(entry) => {
-                entry.insert(reference);
-                Ok(reference)
-            }
-        }
-    }
-
-    #[expect(clippy::result_large_err)]
-    fn add_ty(
-        &mut self,
-        name: &'a str,
-        ty: QualifiedType<'a>,
-    ) -> Result<Option<QualifiedType<'a>>, Reference<'a>> {
-        if let Entry::Occupied(entry) = self.lookup_innermost(name) {
-            return Err(*entry.get());
-        }
-
-        match self.lookup_ty_innermost(name) {
-            Entry::Occupied(entry) => Ok(Some(*entry.get())),
-            Entry::Vacant(entry) => {
-                entry.insert(ty);
-                Ok(None)
-            }
-        }
-    }
-
-    fn temporary(&mut self, loc: Loc<'a>, ty: QualifiedType<'a>) -> Reference<'a> {
-        let id = self.id();
-        Reference {
-            name: "unnamed-temporary",
-            loc,
-            ty,
-            id,
-            usage_location: loc,
-            storage_duration: StorageDuration::Automatic,
-            previous_definition: None,
-            is_parameter: IsParameter::No,
-            is_in_global_scope: IsInGlobalScope::No,
-            initialiser: None,
-        }
-    }
-
-    fn lookup(&self, name: &'a str, loc: Loc<'a>) -> Option<Reference<'a>> {
-        self.scopes
-            .iter()
-            .rev()
-            .find_map(|scope| scope.lookup(name))
-            .map(|reference| reference.at(loc))
-    }
-
-    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Reference<'a>> {
-        self.scopes.last_mut().lookup_innermost(name)
-    }
-
-    fn lookup_ty(&self, name: &'a str) -> Option<QualifiedType<'a>> {
-        self.scopes
-            .iter()
-            .rev()
-            .find_map(|scope| scope.lookup_ty(name))
-    }
-
-    fn lookup_ty_innermost(&mut self, name: &'a str) -> Entry<&'a str, QualifiedType<'a>> {
-        self.scopes.last_mut().lookup_ty_innermost(name)
-    }
-
-    fn push(&mut self) {
-        self.scopes.push(Scope::default());
-        assert!(self.scopes.len() <= 2);
-    }
-
-    fn pop(&mut self) {
-        self.scopes.pop().unwrap();
-    }
-
-    fn id(&mut self) -> Id {
-        let id = Id(self.next_id);
-        self.next_id += 1;
-        id
-    }
-
-    fn is_in_global_scope(&self) -> IsInGlobalScope {
-        if self.scopes.len() == 1 {
-            IsInGlobalScope::Yes
-        }
-        else {
-            IsInGlobalScope::No
-        }
-    }
-
-    fn add_initialiser(
-        &mut self,
-        reference: &Reference<'a>,
-        initialiser: Option<RefInitialiser<'a>>,
-    ) {
-        match self.lookup_innermost(reference.name) {
-            Entry::Occupied(mut entry) => entry.get_mut().initialiser = initialiser,
-            Entry::Vacant(_) => unreachable!(),
-        }
-    }
-}
-
 fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> QualifiedType<'a> {
     let ast::QualifiedType { is_const, is_volatile, ty, loc } = *ty;
     let ty = match ty {
@@ -995,7 +802,7 @@ fn resolve_compound_statement<'a>(
     open_new_scope: OpenNewScope,
 ) -> CompoundStatement<'a> {
     if let OpenNewScope::Yes = open_new_scope {
-        scopes.scopes.last_mut().push();
+        scopes.open_new_scope();
     }
     let stmts = CompoundStatement(
         scopes
@@ -1003,7 +810,7 @@ fn resolve_compound_statement<'a>(
             .alloc_slice_fill_iter(stmts.0.iter().map(|stmt| resolve_stmt(scopes, stmt))),
     );
     if let OpenNewScope::Yes = open_new_scope {
-        scopes.scopes.last_mut().pop();
+        scopes.exit_scope();
     }
     stmts
 }
@@ -1327,11 +1134,7 @@ pub fn resolve_names<'a>(
     sess: &'a Session<'a>,
     translation_unit: ast::TranslationUnit<'a>,
 ) -> TranslationUnit<'a> {
-    let scopes = &mut Scopes {
-        sess,
-        scopes: nonempty::Vec::default(),
-        next_id: 0,
-    };
+    let scopes = &mut Scopes::new(sess);
     let ast::TranslationUnit { filename, decls } = translation_unit;
     TranslationUnit {
         filename,
