@@ -2,7 +2,7 @@
 
 pending_snapshots="$(cargo insta pending-snapshots)"
 
-if [ -n "$pending_snapshots" ]; then
+if grep -vq "No pending snapshots" <<< "$pending_snapshots"; then
     echo "$pending_snapshots"
     exit 1
 fi
