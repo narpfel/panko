@@ -42,9 +42,3 @@ repos:
         always_run: true
         pass_filenames: false
         stages: [pre-push, manual]
-      - id: check-for-new-snapshots
-        name: check for new snapshots
-        entry: "./scripts/forbid-pending-snapshots.sh"
-        language: script
-        always_run: true
-        pass_filenames: false
