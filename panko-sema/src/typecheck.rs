@@ -1431,6 +1431,176 @@ fn typeck_binop<'a>(
     }
 }
 
+fn typeck_unary_op<'a>(
+    sess: &'a Session<'a>,
+    expr: &scope::Expression<'a>,
+    context: Context,
+    operator: &UnaryOp<'a>,
+    operand: &scope::Expression<'a>,
+) -> TypedExpression<'a> {
+    let operand = typeck_expression(sess, operand, Context::from(operator.kind));
+    match operator.kind {
+        UnaryOpKind::Addressof => {
+            let is_function_designator = operand.ty.ty.is_function();
+            // requirement “the result of a [] or unary * operator” is checked by
+            // `is_lvalue`.
+            let is_lvalue = operand.is_lvalue()
+                // TODO
+                /* && !operand.is_bitfield() && !operand.has_register_storage_class() */;
+            if !(is_function_designator || is_lvalue) {
+                // TODO: update error message for bitfields and `register` storage class
+                // TODO: this should be the correct type, not `Type::Error` or `void`
+                sess.emit(Diagnostic::CannotTakeAddress { at: operand, reason: "not an lvalue" })
+            }
+            else {
+                TypedExpression {
+                    ty: Type::Pointer(sess.alloc(operand.ty)).unqualified(),
+                    expr: Expression::Addressof {
+                        ampersand: operator.token,
+                        operand: sess.alloc(operand),
+                    },
+                }
+            }
+        }
+        UnaryOpKind::Deref => match operand.ty.ty {
+            Type::Pointer(pointee_ty) => {
+                let can_deref = pointee_ty.ty.is_complete()
+                    || pointee_ty.ty.is_array()
+                    || matches!(context, Context::Addressof | Context::Typeof);
+                let operand = match can_deref {
+                    true => operand,
+                    // TODO: this ICEs in `--defer-type-errors` mode
+                    false => sess.emit(Diagnostic::DerefOfPointerToIncompleteType {
+                        at: operand,
+                        pointee_ty: *pointee_ty,
+                    }),
+                };
+                TypedExpression {
+                    ty: *pointee_ty,
+                    expr: Expression::Deref {
+                        star: operator.token,
+                        operand: sess.alloc(operand),
+                    },
+                }
+            }
+            _ => {
+                let expr = sess.emit(Diagnostic::CannotDeref { at: *expr, ty: operand.ty });
+                // TODO: should be `Type::Error`
+                TypedExpression { ty: operand.ty, expr }
+            }
+        },
+        UnaryOpKind::Plus => match operand.ty.ty {
+            Type::Arithmetic(arithmetic) => {
+                let result_ty = Type::Arithmetic(integral_promote(arithmetic)).unqualified();
+                convert_as_if_by_assignment(sess, result_ty, operand)
+            }
+            _ => TypedExpression {
+                // TODO: should be `Type::Error`
+                ty: operand.ty,
+                expr: sess.emit(Diagnostic::InvalidOperandForUnaryOperator {
+                    at: *expr,
+                    ty: operand.ty,
+                    operator_name: "unary plus",
+                    expected_ty: "arithmetic",
+                }),
+            },
+        },
+        UnaryOpKind::Negate => match operand.ty.ty {
+            Type::Arithmetic(arithmetic) => {
+                let result_ty = Type::Arithmetic(integral_promote(arithmetic)).unqualified();
+                let operand = convert_as_if_by_assignment(sess, result_ty, operand);
+                TypedExpression {
+                    ty: result_ty,
+                    expr: Expression::Negate {
+                        minus: operator.token,
+                        operand: sess.alloc(operand),
+                    },
+                }
+            }
+            _ => TypedExpression {
+                // TODO: should be `Type::Error`
+                ty: operand.ty,
+                expr: sess.emit(Diagnostic::InvalidOperandForUnaryOperator {
+                    at: *expr,
+                    ty: operand.ty,
+                    operator_name: "unary minus",
+                    expected_ty: "arithmetic",
+                }),
+            },
+        },
+        UnaryOpKind::Compl => match operand.ty.ty {
+            Type::Arithmetic(Arithmetic::Integral(integral)) => {
+                let result_ty = Type::Arithmetic(integral_promote(Arithmetic::Integral(integral)))
+                    .unqualified();
+                let operand = convert_as_if_by_assignment(sess, result_ty, operand);
+                TypedExpression {
+                    ty: result_ty,
+                    expr: Expression::Compl {
+                        compl: operator.token,
+                        operand: sess.alloc(operand),
+                    },
+                }
+            }
+            _ => TypedExpression {
+                // TODO: should be `Type::Error`
+                ty: operand.ty,
+                expr: sess.emit(Diagnostic::InvalidOperandForUnaryOperator {
+                    at: *expr,
+                    ty: operand.ty,
+                    operator_name: "bitwise complement",
+                    expected_ty: "integral",
+                }),
+            },
+        },
+        UnaryOpKind::Not =>
+            if operand.ty.ty.is_scalar() {
+                TypedExpression {
+                    ty: Type::int().unqualified(),
+                    expr: Expression::Not {
+                        not: operator.token,
+                        operand: sess.alloc(operand),
+                    },
+                }
+            }
+            else {
+                sess.emit(Diagnostic::ScalarExpected {
+                    at: operand,
+                    expr: *expr,
+                    kind: "unary not",
+                })
+            },
+        UnaryOpKind::Sizeof => {
+            let ty = check_ty_can_sizeof(sess, &operand.ty, expr, &operator.token);
+            TypedExpression {
+                ty: Type::size_t().unqualified(),
+                expr: Expression::Sizeof {
+                    sizeof: operator.token,
+                    operand: sess.alloc(operand),
+                    size: ty.ty.size(),
+                },
+            }
+        }
+        UnaryOpKind::Lengthof => {
+            let expr = match operand.ty.ty {
+                Type::Array(ArrayType { ty: _, length, loc: _ }) => match length {
+                    ArrayLength::Constant(length) => Expression::Lengthof {
+                        lengthof: operator.token,
+                        operand: sess.alloc(operand),
+                        length,
+                    },
+                    ArrayLength::Variable(_) => todo!("`_Lengthof` of a variably-modified type"),
+                    ArrayLength::Unknown => sess.emit(Diagnostic::LengthofOfArrayOfUnknownLength {
+                        op: operator.token,
+                        at: operand,
+                    }),
+                },
+                _ => sess.emit(Diagnostic::InvalidLengthof { op: operator.token, at: operand }),
+            };
+            TypedExpression { ty: Type::size_t().unqualified(), expr }
+        }
+    }
+}
+
 fn check_assignable<'a>(
     target: &'a TypedExpression<'a>,
     sess: &'a Session<'a>,
@@ -1737,178 +1907,8 @@ fn typeck_expression<'a>(
             let rhs = typeck_expression(sess, rhs, Context::Default);
             typeck_binop(sess, lhs, op, rhs)
         }
-        scope::Expression::UnaryOp { operator, operand } => {
-            let operand = typeck_expression(sess, operand, Context::from(operator.kind));
-            match operator.kind {
-                UnaryOpKind::Addressof => {
-                    let is_function_designator = operand.ty.ty.is_function();
-                    // requirement “the result of a [] or unary * operator” is checked by
-                    // `is_lvalue`.
-                    let is_lvalue = operand.is_lvalue()
-                        // TODO
-                        /* && !operand.is_bitfield() && !operand.has_register_storage_class() */;
-                    if !(is_function_designator || is_lvalue) {
-                        // TODO: update error message for bitfields and `register` storage class
-                        // TODO: this should be the correct type, not `Type::Error` or `void`
-                        sess.emit(Diagnostic::CannotTakeAddress {
-                            at: operand,
-                            reason: "not an lvalue",
-                        })
-                    }
-                    else {
-                        TypedExpression {
-                            ty: Type::Pointer(sess.alloc(operand.ty)).unqualified(),
-                            expr: Expression::Addressof {
-                                ampersand: operator.token,
-                                operand: sess.alloc(operand),
-                            },
-                        }
-                    }
-                }
-                UnaryOpKind::Deref => match operand.ty.ty {
-                    Type::Pointer(pointee_ty) => {
-                        let can_deref = pointee_ty.ty.is_complete()
-                            || pointee_ty.ty.is_array()
-                            || matches!(context, Context::Addressof | Context::Typeof);
-                        let operand = match can_deref {
-                            true => operand,
-                            // TODO: this ICEs in `--defer-type-errors` mode
-                            false => sess.emit(Diagnostic::DerefOfPointerToIncompleteType {
-                                at: operand,
-                                pointee_ty: *pointee_ty,
-                            }),
-                        };
-                        TypedExpression {
-                            ty: *pointee_ty,
-                            expr: Expression::Deref {
-                                star: operator.token,
-                                operand: sess.alloc(operand),
-                            },
-                        }
-                    }
-                    _ => {
-                        let expr = sess.emit(Diagnostic::CannotDeref { at: *expr, ty: operand.ty });
-                        // TODO: should be `Type::Error`
-                        TypedExpression { ty: operand.ty, expr }
-                    }
-                },
-                UnaryOpKind::Plus => match operand.ty.ty {
-                    Type::Arithmetic(arithmetic) => {
-                        let result_ty =
-                            Type::Arithmetic(integral_promote(arithmetic)).unqualified();
-                        convert_as_if_by_assignment(sess, result_ty, operand)
-                    }
-                    _ => TypedExpression {
-                        // TODO: should be `Type::Error`
-                        ty: operand.ty,
-                        expr: sess.emit(Diagnostic::InvalidOperandForUnaryOperator {
-                            at: *expr,
-                            ty: operand.ty,
-                            operator_name: "unary plus",
-                            expected_ty: "arithmetic",
-                        }),
-                    },
-                },
-                UnaryOpKind::Negate => match operand.ty.ty {
-                    Type::Arithmetic(arithmetic) => {
-                        let result_ty =
-                            Type::Arithmetic(integral_promote(arithmetic)).unqualified();
-                        let operand = convert_as_if_by_assignment(sess, result_ty, operand);
-                        TypedExpression {
-                            ty: result_ty,
-                            expr: Expression::Negate {
-                                minus: operator.token,
-                                operand: sess.alloc(operand),
-                            },
-                        }
-                    }
-                    _ => TypedExpression {
-                        // TODO: should be `Type::Error`
-                        ty: operand.ty,
-                        expr: sess.emit(Diagnostic::InvalidOperandForUnaryOperator {
-                            at: *expr,
-                            ty: operand.ty,
-                            operator_name: "unary minus",
-                            expected_ty: "arithmetic",
-                        }),
-                    },
-                },
-                UnaryOpKind::Compl => match operand.ty.ty {
-                    Type::Arithmetic(Arithmetic::Integral(integral)) => {
-                        let result_ty =
-                            Type::Arithmetic(integral_promote(Arithmetic::Integral(integral)))
-                                .unqualified();
-                        let operand = convert_as_if_by_assignment(sess, result_ty, operand);
-                        TypedExpression {
-                            ty: result_ty,
-                            expr: Expression::Compl {
-                                compl: operator.token,
-                                operand: sess.alloc(operand),
-                            },
-                        }
-                    }
-                    _ => TypedExpression {
-                        // TODO: should be `Type::Error`
-                        ty: operand.ty,
-                        expr: sess.emit(Diagnostic::InvalidOperandForUnaryOperator {
-                            at: *expr,
-                            ty: operand.ty,
-                            operator_name: "bitwise complement",
-                            expected_ty: "integral",
-                        }),
-                    },
-                },
-                UnaryOpKind::Not =>
-                    if operand.ty.ty.is_scalar() {
-                        TypedExpression {
-                            ty: Type::int().unqualified(),
-                            expr: Expression::Not {
-                                not: operator.token,
-                                operand: sess.alloc(operand),
-                            },
-                        }
-                    }
-                    else {
-                        sess.emit(Diagnostic::ScalarExpected {
-                            at: operand,
-                            expr: *expr,
-                            kind: "unary not",
-                        })
-                    },
-                UnaryOpKind::Sizeof => {
-                    let ty = check_ty_can_sizeof(sess, &operand.ty, expr, &operator.token);
-                    TypedExpression {
-                        ty: Type::size_t().unqualified(),
-                        expr: Expression::Sizeof {
-                            sizeof: operator.token,
-                            operand: sess.alloc(operand),
-                            size: ty.ty.size(),
-                        },
-                    }
-                }
-                UnaryOpKind::Lengthof => {
-                    let expr = match operand.ty.ty {
-                        Type::Array(ArrayType { ty: _, length, loc: _ }) => match length {
-                            ArrayLength::Constant(length) => Expression::Lengthof {
-                                lengthof: operator.token,
-                                operand: sess.alloc(operand),
-                                length,
-                            },
-                            ArrayLength::Variable(_) =>
-                                todo!("`_Lengthof` of a variably-modified type"),
-                            ArrayLength::Unknown =>
-                                sess.emit(Diagnostic::LengthofOfArrayOfUnknownLength {
-                                    op: operator.token,
-                                    at: operand,
-                                }),
-                        },
-                        _ => sess
-                            .emit(Diagnostic::InvalidLengthof { op: operator.token, at: operand }),
-                    };
-                    TypedExpression { ty: Type::size_t().unqualified(), expr }
-                }
-            }
-        }
+        scope::Expression::UnaryOp { operator, operand } =>
+            typeck_unary_op(sess, expr, context, operator, operand),
         scope::Expression::Call { callee, args, close_paren } => {
             let callee = typeck_expression(sess, callee, Context::Default);
 
