@@ -852,11 +852,9 @@ fn convert<'a>(
         (Type::Arithmetic(_), Type::Arithmetic(_))
         | (Type::Pointer(_), Type::Pointer(_))
         | (Type::Nullptr, Type::Nullptr) =>
-            if kind == ConversionKind::Implicit && target_ty == expr_ty {
-                return expr;
-            }
-            else {
-                convert()
+            match kind == ConversionKind::Implicit && target_ty == expr_ty {
+                true => return expr,
+                false => convert(),
             },
 
         // TODO: clang (but not gcc) allows implicitly converting `Type::Function(_)` to
@@ -1300,16 +1298,13 @@ fn typeck_statement<'a>(
                 .map(|expr| typeck_expression(sess, expr, Context::Default));
             let expr = match expr {
                 Some(expr) => Some(convert_as_if_by_assignment(sess, return_ty, expr)),
-                None =>
-                    if !matches!(return_ty.ty, Type::Void) {
-                        Some(sess.emit(Diagnostic::ReturnWithoutValueInNonVoidFunction {
-                            at: stmt.into_variant(),
-                            function: *function,
-                        }))
-                    }
-                    else {
-                        None
-                    },
+                None => match return_ty.ty {
+                    Type::Void => None,
+                    _ => Some(sess.emit(Diagnostic::ReturnWithoutValueInNonVoidFunction {
+                        at: stmt.into_variant(),
+                        function: *function,
+                    })),
+                },
             };
             match function.noreturn {
                 Some(noreturn) =>
@@ -1923,11 +1918,9 @@ fn typeck_expression<'a>(
                 return sess.emit(Diagnostic::Uncallable { at: callee });
             };
 
-            let has_arity_mismatch = if is_varargs {
-                params.len() > args.len()
-            }
-            else {
-                params.len() != args.len()
+            let has_arity_mismatch = match is_varargs {
+                true => params.len() > args.len(),
+                false => params.len() != args.len(),
             };
             if has_arity_mismatch {
                 // TODO: this has the wrong location (the argument list is missing)
@@ -2136,15 +2129,13 @@ fn typeck_expression<'a>(
         }
         scope::Expression::Conditional { condition, question_mark, then, or_else } => {
             let condition = typeck_expression(sess, condition, Context::Default);
-            let condition = if condition.ty.ty.is_scalar() {
-                condition
-            }
-            else {
-                sess.emit(Diagnostic::ScalarExpected {
+            let condition = match condition.ty.ty.is_scalar() {
+                true => condition,
+                false => sess.emit(Diagnostic::ScalarExpected {
                     at: condition,
                     expr: *expr,
                     kind: "ternary",
-                })
+                }),
             };
             let then = typeck_expression(sess, then, Context::Default);
             let or_else = typeck_expression(sess, or_else, Context::Default);
@@ -2160,11 +2151,9 @@ fn typeck_expression<'a>(
                     Type::Pointer(sess.alloc(QualifiedType {
                         is_const: then_pointee.is_const | or_else_pointee.is_const,
                         is_volatile: then_pointee.is_volatile | or_else_pointee.is_volatile,
-                        ty: if then_pointee.ty == Type::Void || or_else_pointee.ty == Type::Void {
-                            Type::Void
-                        }
-                        else {
-                            then_pointee.ty
+                        ty: match (then_pointee.ty, or_else_pointee.ty) {
+                            (Type::Void, _) | (_, Type::Void) => Type::Void,
+                            _ => then_pointee.ty,
                         },
                         loc: Loc::synthesised(),
                     })),
