@@ -25,19 +25,19 @@ as_conversions = "warn"
 large_enum_variant = "allow"
 
 [workspace.dependencies]
-bumpalo = "3.19.0"
-clap = { version = "4.5.51", features = ["derive"] }
+bumpalo = "3.19.1"
+clap = { version = "4.5.53", features = ["derive"] }
 color-eyre = "0.6.5"
-indexmap = "2.12.0"
+indexmap = "2.12.1"
 itertools = "0.14.0"
 lalrpop = "0.22.2"
 lalrpop-util = { version = "0.22.2", features = ["unicode"] }
-logos = { version = "0.15.1", features = ["forbid_unsafe"] }
+logos = { version = "0.16.0", features = ["forbid_unsafe"] }
 memchr = "2.7.6"
 proc-macro2 = "1.0.103"
 quote = "1.0.42"
 regex = "1.12.2"
-syn = { version = "2.0.110", features = ["fold", "visit"] }
+syn = { version = "2.0.111", features = ["fold", "visit"] }
 variant-types = { git = "https://github.com/narpfel/crabbing-interpreters" }
 yansi = { version = "1.0.1", features = ["detect-tty"] }
 
