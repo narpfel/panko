@@ -657,11 +657,13 @@ dependencies = [
  "color-eyre",
  "glob",
  "insta-cmd",
+ "itertools",
  "panko-codegen",
  "panko-compiletest",
  "panko-lex",
  "panko-parser",
  "panko-sema",
+ "regex",
  "yansi",
 ]
 

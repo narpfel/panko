@@ -1,3 +1,4 @@
+// [[nosnapshot]]
 // [[signal: SIGILL]]
 
 // TODO: use proper includes (`<signal.h>` and `<unistd.h>`)

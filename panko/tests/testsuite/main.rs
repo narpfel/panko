@@ -4,18 +4,25 @@
 
 use std::collections::HashSet;
 use std::ffi::OsStr;
+use std::fs::read_to_string;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use std::process::ExitCode;
+use std::sync::LazyLock;
 
 use insta_cmd::assert_cmd_snapshot;
 use insta_cmd::get_cargo_bin;
+use itertools::Itertools as _;
 use panko_compiletest::Context;
 use panko_compiletest::ExpectedResult;
 use panko_compiletest::TestCase;
 use panko_compiletest::execute_runtest;
 use panko_compiletest::relative_to;
+use regex::Regex;
+
+static NOSNAPSHOT_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?m)^// \[\[nosnapshot\]\]$").unwrap());
 
 fn execute_step_test(
     test_name: &Path,
@@ -72,6 +79,11 @@ fn test_cases_from_filename(path: PathBuf) -> impl Iterator<Item = TestCase> {
 
         assert!(!filenames.is_empty());
 
+        let file_contents = filenames
+            .iter()
+            .map(|filename| read_to_string(filename).unwrap())
+            .collect_vec();
+
         if components.contains("execute") {
             let path = path.clone();
             let filenames = filenames.clone();
@@ -83,6 +95,11 @@ fn test_cases_from_filename(path: PathBuf) -> impl Iterator<Item = TestCase> {
                 expected_result: ExpectedResult::Success,
             };
         }
+
+        if file_contents.iter().any(|src| NOSNAPSHOT_RE.is_match(src)) {
+            return;
+        }
+
         if components.contains("preprocessor") {
             let path = path.clone();
             let filenames = filenames.clone();
@@ -101,7 +118,7 @@ fn test_cases_from_filename(path: PathBuf) -> impl Iterator<Item = TestCase> {
         ] {
             if let Some(name) = path.file_name()
                 && let Some(name) = name.to_str()
-                && !(name.starts_with("test_nosnapshot_") || name.starts_with("test_only_expand_"))
+                && !name.starts_with("test_only_expand_")
             {
                 let path = path.clone();
                 let filenames = filenames.clone();

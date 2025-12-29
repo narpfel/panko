@@ -23,3 +23,5 @@ yansi = { workspace = true }
 [dev-dependencies]
 glob = { workspace = true }
 insta-cmd = { workspace = true }
+itertools = { workspace = true }
+regex = { workspace = true }

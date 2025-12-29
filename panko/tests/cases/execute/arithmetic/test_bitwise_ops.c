@@ -1,3 +1,5 @@
+// [[nosnapshot]]
+
 // i8
 // [[arg: %hhd\n]]
 // i16
