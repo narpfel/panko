@@ -58,6 +58,23 @@ fn execute_step_test(
     );
 }
 
+fn make_snapshot_test_case(
+    path: &Path,
+    filenames: &[PathBuf],
+    snapshot_name_prefix: &'static str,
+    step: &'static str,
+) -> TestCase {
+    let path = path.to_owned();
+    let filenames = filenames.to_owned();
+    TestCase {
+        name: format!("{step}::{}", path.display()),
+        test_fn: Box::new(move |_context: &Context| {
+            execute_step_test(&path, filenames, snapshot_name_prefix, step)
+        }),
+        expected_result: ExpectedResult::Success,
+    }
+}
+
 fn test_cases_from_filename(path: PathBuf) -> impl Iterator<Item = TestCase> {
     let components: HashSet<_> = path
         .iter()
@@ -107,15 +124,7 @@ fn test_cases_from_filename(path: PathBuf) -> impl Iterator<Item = TestCase> {
         }
 
         if components.contains("preprocessor") {
-            let path = path.clone();
-            let filenames = filenames.clone();
-            yield TestCase {
-                name: format!("preprocessor::{}", path.display()),
-                test_fn: Box::new(move |_context: &Context| {
-                    execute_step_test(&path, filenames, "preprocess", "preprocess")
-                }),
-                expected_result: ExpectedResult::Success,
-            };
+            yield make_snapshot_test_case(&path, &filenames, "preprocess", "preprocess");
         }
 
         if any_is_match(&PREPROCESSOR_ONLY_RE, &file_contents) {
@@ -127,15 +136,7 @@ fn test_cases_from_filename(path: PathBuf) -> impl Iterator<Item = TestCase> {
             ("typeck", "typeck"),
             ("layout", "layout"),
         ] {
-            let path = path.clone();
-            let filenames = filenames.clone();
-            yield TestCase {
-                name: format!("{step}::{}", path.display()),
-                test_fn: Box::new(move |_context: &Context| {
-                    execute_step_test(&path, filenames, snapshot_name_prefix, step)
-                }),
-                expected_result: ExpectedResult::Success,
-            }
+            yield make_snapshot_test_case(&path, &filenames, snapshot_name_prefix, step);
         }
     }
 }
