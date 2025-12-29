@@ -23,6 +23,12 @@ use regex::Regex;
 
 static NOSNAPSHOT_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?m)^// \[\[nosnapshot\]\]$").unwrap());
+static PREPROCESSOR_ONLY_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?m)^// \[\[preprocessor-only\]\]$").unwrap());
+
+fn any_is_match(re: &Regex, sources: &[String]) -> bool {
+    sources.iter().any(|source| re.is_match(source))
+}
 
 fn execute_step_test(
     test_name: &Path,
@@ -96,7 +102,7 @@ fn test_cases_from_filename(path: PathBuf) -> impl Iterator<Item = TestCase> {
             };
         }
 
-        if file_contents.iter().any(|src| NOSNAPSHOT_RE.is_match(src)) {
+        if any_is_match(&NOSNAPSHOT_RE, &file_contents) {
             return;
         }
 
@@ -111,24 +117,24 @@ fn test_cases_from_filename(path: PathBuf) -> impl Iterator<Item = TestCase> {
                 expected_result: ExpectedResult::Success,
             };
         }
+
+        if any_is_match(&PREPROCESSOR_ONLY_RE, &file_contents) {
+            return;
+        }
+
         for (snapshot_name_prefix, step) in [
             ("scope", "scopes"),
             ("typeck", "typeck"),
             ("layout", "layout"),
         ] {
-            if let Some(name) = path.file_name()
-                && let Some(name) = name.to_str()
-                && !name.starts_with("test_only_expand_")
-            {
-                let path = path.clone();
-                let filenames = filenames.clone();
-                yield TestCase {
-                    name: format!("{step}::{}", path.display()),
-                    test_fn: Box::new(move |_context: &Context| {
-                        execute_step_test(&path, filenames, snapshot_name_prefix, step)
-                    }),
-                    expected_result: ExpectedResult::Success,
-                }
+            let path = path.clone();
+            let filenames = filenames.clone();
+            yield TestCase {
+                name: format!("{step}::{}", path.display()),
+                test_fn: Box::new(move |_context: &Context| {
+                    execute_step_test(&path, filenames, snapshot_name_prefix, step)
+                }),
+                expected_result: ExpectedResult::Success,
             }
         }
     }

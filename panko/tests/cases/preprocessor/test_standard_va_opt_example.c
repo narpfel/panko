@@ -1,3 +1,5 @@
+// [[preprocessor-only]]
+
 #define F(...)              f(0 __VA_OPT__(,) __VA_ARGS__)
 #define G(X, ...)           f(0, X __VA_OPT__(,) __VA_ARGS__)
 #define SDEF(sname, ...)    S sname __VA_OPT__(= { __VA_ARGS__ })

@@ -1,3 +1,5 @@
+// [[preprocessor-only]]
+
 #define MACRO(x, y, ...) x __VA_OPT__(- MACRO(10, 20, 30))
 
 int main() {

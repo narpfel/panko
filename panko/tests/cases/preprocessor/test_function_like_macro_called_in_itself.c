@@ -1,3 +1,5 @@
+// [[preprocessor-only]]
+
 #define ALSO_LONG(t) LONG(t)
 #define LONG(type) ALSO_LONG(long) LONG(type)
 #define ADD_1(expr) expr + 1

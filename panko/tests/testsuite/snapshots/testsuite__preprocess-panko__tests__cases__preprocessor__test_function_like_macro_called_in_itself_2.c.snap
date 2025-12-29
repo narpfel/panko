@@ -5,7 +5,7 @@ info:
   args:
     - "--print=preprocess"
     - "--stop-after=preprocess"
-    - panko/tests/cases/preprocessor/test_only_expand_function_like_macro_called_in_itself.c
+    - panko/tests/cases/preprocessor/test_function_like_macro_called_in_itself_2.c
 ---
 success: true
 exit_code: 0
@@ -14,9 +14,10 @@ exit_code: 0
 
 
 
+
+
 int main() {
-    LONG( long ) LONG( LONG( long ) LONG( int ) ) x = 42;
-    return _Generic(x, long long: 27 + 1 );
+    LONG( long ) LONG( another(long) LONG( int ) ) x = 42;
 }
 
 ----- stderr -----
