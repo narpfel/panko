@@ -163,10 +163,13 @@ FunctionDefinition: ast::FunctionDefinition<'a> = {
 }
 
 FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = {
-    AttributeSpecifierSequence? <head:DeclarationHead<AbstractDeclaratorDisallowed>> => {
+    AttributeSpecifierSequence? <head:DeclarationHead<
+        AbstractDeclaratorDisallowed,
+        NonAbstractInitDeclarator
+    >> => {
         let (declaration_specifiers, declarator) = head;
         let ast::InitDeclarator { declarator, initialiser }
-            = declarator.unwrap_or_else(|| todo!("error message; e. g. `int {{}}`"));
+            = declarator.expect("`NonAbstractInitDeclarator` always returns `Some(init_declarator)`");
         assert!(
             initialiser.is_none(),
             "TODO: generate a good error message; e. g. `int a() = 42 {{}}`",
@@ -183,10 +186,14 @@ FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = 
     },
 }
 
+NonAbstractInitDeclarator: Option<ast::InitDeclarator<'a>> = {
+    InitDeclarator<MaybeAbstractDeclarator> => Some(<>),
+}
+
 FunctionBody = { CompoundStatement<DontPushTypedefScope> }
 
 Declaration: ast::Declaration<'a> = {
-    <head:DeclarationHead<AbstractDeclaratorDisallowed>>
+    <head:DeclarationHead<AbstractDeclaratorDisallowed, InitDeclarator<MaybeAbstractDeclarator>?>>
     <init_declarator_list:("," <InitDeclaratorList>)?> <semi:";"> => {
         let (specifiers, declarator) = head;
         let init_declarator_list = match init_declarator_list {
@@ -214,9 +221,12 @@ AbstractDeclaratorDisallowed: ast::AbstractDeclaratorAllowed = {
     () => ast::AbstractDeclaratorAllowed::No,
 }
 
-DeclarationHead<IsAbstractDeclaratorAllowed>: (ast::DeclarationSpecifiers<'a>, Option<ast::InitDeclarator<'a>>) = {
+DeclarationHead<IsAbstractDeclaratorAllowed, MaybeInitDeclarator>: (
+    ast::DeclarationSpecifiers<'a>,
+    Option<ast::InitDeclarator<'a>>,
+) = {
     <is_abstract_declarator_allowed:IsAbstractDeclaratorAllowed>
-    <specifiers:DeclarationSpecifiers> <declarator:InitDeclarator<MaybeAbstractDeclarator>?> => {
+    <specifiers:DeclarationSpecifiers> <declarator:MaybeInitDeclarator> => {
         let add_typedef_name = |name: Token<'a>| {
             let kind = if is_in_typedef.get() {
                 TokenKind::TypeIdentifier
@@ -368,7 +378,10 @@ ParameterTypeList: ast::ParameterTypeList<'a> = {
 }
 
 ParameterDeclaration: ast::ParameterDeclaration<'a> = {
-    AttributeSpecifierSequence? <declarator:DeclarationHead<AbstractDeclaratorAllowed>> => {
+    AttributeSpecifierSequence? <declarator:DeclarationHead<
+        AbstractDeclaratorAllowed,
+        InitDeclarator<MaybeAbstractDeclarator>?
+    >> => {
         let (declaration_specifiers, declarator) = declarator;
         let declarator = try {
             let ast::InitDeclarator { declarator, initialiser } = declarator?;
