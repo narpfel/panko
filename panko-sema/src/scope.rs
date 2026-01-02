@@ -16,6 +16,7 @@ use panko_parser::ast;
 use panko_parser::ast::FromError;
 use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::Session;
+use panko_parser::ast::Struct;
 use panko_parser::ast::reject_function_specifiers;
 use panko_parser::sexpr_builder::SExpr;
 use panko_report::Report;
@@ -641,7 +642,9 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             expr: Typeof::Ty(scopes.sess.alloc(resolve_ty(scopes, ty))),
             unqual,
         },
-        ast::Type::Struct { name } => Type::Struct { name: name.slice() },
+        ast::Type::Struct(Struct::Incomplete { name }) => Type::Struct { name: name.slice() },
+        ast::Type::Struct(Struct::Complete { name: _, members: _ }) =>
+            todo!("complete `struct`s are not implemented"),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }

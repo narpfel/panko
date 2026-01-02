@@ -368,16 +368,29 @@ impl<'a> TypeSpecifier<'a> {
         }
     }
 
-    fn r#struct(r#struct: Token<'a>, name: Token<'a>) -> Self {
+    fn incomplete_struct(r#struct: Token<'a>, name: Token<'a>) -> Self {
         Self {
-            token: name,
-            kind: TypeSpecifierKind::Struct { r#struct },
+            token: r#struct,
+            kind: TypeSpecifierKind::Struct(Struct::Incomplete { name }),
+        }
+    }
+
+    fn r#struct(
+        r#struct: Token<'a>,
+        name: Option<Token<'a>>,
+        members: &'a [Declaration<'a>],
+    ) -> Self {
+        Self {
+            token: r#struct,
+            kind: TypeSpecifierKind::Struct(Struct::Complete { name, members }),
         }
     }
 
     fn loc(&self) -> Loc<'a> {
         match self.kind {
-            TypeSpecifierKind::Struct { r#struct } => r#struct.loc().until(self.token.loc()),
+            TypeSpecifierKind::Struct(
+                Struct::Incomplete { name } | Struct::Complete { name: Some(name), members: _ },
+            ) => self.token.loc().until(name.loc()),
             _ => self.token.loc(),
         }
     }
@@ -508,10 +521,24 @@ impl<'a> TypeSpecifier<'a> {
             }),
             Kind::Typeof { unqual, expr } => exclusive(Parsed::Typeof { unqual, expr }),
             Kind::TypeofTy { unqual, ty } => exclusive(Parsed::TypeofTy { unqual, ty }),
-            Kind::Struct { r#struct: _ } => exclusive(Parsed::Struct { name: self.token }),
+            Kind::Struct(Struct::Incomplete { name }) =>
+                exclusive(Parsed::IncompleteStruct { name }),
+            Kind::Struct(Struct::Complete { name, members }) =>
+                exclusive(Parsed::CompleteStruct { name, members }),
             _ => todo!("unimplemented type specifier: {self:#?}"),
         }
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Struct<'a> {
+    Incomplete {
+        name: Token<'a>,
+    },
+    Complete {
+        name: Option<Token<'a>>,
+        members: &'a [Declaration<'a>],
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -538,9 +565,7 @@ enum TypeSpecifierKind<'a> {
     Decimal128,
     // atomic-type-specifier
     // struct-or-union-specifier
-    Struct {
-        r#struct: Token<'a>,
-    },
+    Struct(Struct<'a>),
     // enum-specifier
     TypedefName,
     Typeof {

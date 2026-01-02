@@ -249,9 +249,7 @@ pub enum Type<'a> {
         unqual: bool,
         ty: &'a QualifiedType<'a>,
     },
-    Struct {
-        name: Token<'a>,
-    },
+    Struct(Struct<'a>),
     // TODO
 }
 
@@ -302,6 +300,18 @@ pub struct ParameterDeclaration<'a> {
     pub loc: Loc<'a>,
     pub ty: QualifiedType<'a>,
     pub name: Option<Token<'a>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Struct<'a> {
+    Incomplete {
+        name: Token<'a>,
+    },
+    Complete {
+        name: Option<Token<'a>>,
+        // TODO: reject invalid member decls here
+        members: &'a [cst::Declaration<'a>],
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -404,7 +414,9 @@ impl fmt::Display for Type<'_> {
                 if *unqual { "_unqual" } else { "" },
                 ty.as_sexpr(),
             ),
-            Type::Struct { name } => write!(f, "struct {}", name.slice()),
+            Type::Struct(Struct::Incomplete { name }) => write!(f, "struct {}", name.slice()),
+            Type::Struct(Struct::Complete { name, members: _ }) =>
+                write!(f, "struct {} complete", name.as_sexpr()),
         }
     }
 }
@@ -668,8 +680,12 @@ pub(crate) enum ParsedSpecifiers<'a> {
         unqual: bool,
         ty: &'a QualifiedType<'a>,
     },
-    Struct {
+    IncompleteStruct {
         name: Token<'a>,
+    },
+    CompleteStruct {
+        name: Option<Token<'a>>,
+        members: &'a [cst::Declaration<'a>],
     },
 }
 
@@ -695,7 +711,9 @@ impl<'a> ParsedSpecifiers<'a> {
             Self::Typedef(token) => Type::Typedef(token),
             Self::Typeof { unqual, expr } => Type::Typeof { unqual, expr },
             Self::TypeofTy { unqual, ty } => Type::TypeofTy { unqual, ty },
-            Self::Struct { name } => Type::Struct { name },
+            Self::IncompleteStruct { name } => Type::Struct(Struct::Incomplete { name }),
+            Self::CompleteStruct { name, members } =>
+                Type::Struct(Struct::Complete { name, members }),
         }
     }
 }
