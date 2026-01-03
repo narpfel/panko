@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/struct/test_struct_types_forward_declared_in_different_scopes_are_distinct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/struct/test_struct_types_forward_declared_in_different_scopes_are_distinct.c"
+   (function-definition
+      f1~0 `fn() -> void`
+      (compound-statement
+         (declaration p1~2 `ptr<struct T~1>` ∅)
+         (declaration p2~3 `ptr<struct T~1>` ∅)))
+   (function-definition
+      f2~4 `fn() -> void`
+      (compound-statement
+         (declaration p1~6 `ptr<struct T~5>` ∅)
+         (declaration p2~7 `ptr<struct T~5>` ∅))))
+
+----- stderr -----
