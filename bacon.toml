@@ -8,7 +8,7 @@ need_stdout = false
 command = ["cargo", "check", "--profile=clif", "--all-targets", "--color", "always"]
 need_stdout = false
 
-[jobs.clippy]
+[jobs.clippy-all]
 command = [
     "cargo", "clippy",
     "--profile=clif",
