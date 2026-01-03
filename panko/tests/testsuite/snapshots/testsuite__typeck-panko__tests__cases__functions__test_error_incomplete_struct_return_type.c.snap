@@ -12,7 +12,7 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: invalid function return type `struct Incomplete`
+Error: invalid function return type `struct Incomplete~0`
    ╭─[panko/tests/cases/functions/test_error_incomplete_struct_return_type.c:1:1]
    │
  1 │ struct Incomplete f();

@@ -14,16 +14,16 @@ exit_code: 0
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (typedef size_t `unsigned long`)
    (function-definition external
-      (f~1 `fn(p: ptr<struct T>) -> unsigned long` (static f))
+      (f~2 `fn(p: ptr<struct T~1>) -> unsigned long` (static f))
       (params
-         (p~2 `ptr<struct T>` @0))
+         (p~3 `ptr<struct T~1>` @0))
       (compound-statement
          (return (8 `unsigned long` @8))))
    (function-definition external
-      (main~3 `fn() -> int` (static main))
+      (main~4 `fn() -> int` (static main))
       (compound-statement
-         (definition (p~4 `ptr<struct T>` @0) (noop-type-conversion `ptr<struct T>` @0 (nullptr `nullptr_t` @0)))
-         (definition (q~5 `ptr<struct T>` @8) (noop-type-conversion `ptr<struct T>` @8 (nullptr `nullptr_t` @8)))
+         (definition (p~5 `ptr<struct T~1>` @0) (noop-type-conversion `ptr<struct T~1>` @0 (nullptr `nullptr_t` @0)))
+         (definition (q~6 `ptr<struct T~1>` @8) (noop-type-conversion `ptr<struct T~1>` @8 (nullptr `nullptr_t` @8)))
          (expression
             (call `int` @16
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
@@ -33,13 +33,13 @@ exit_code: 0
                      (addressof `ptr<array<char; 4>>` @32
                         (string `array<char; 4>` @void "%d\n\0"))))
                (ptr-equal `int` @40
-                  (p~4 `ptr<struct T>` @0)
-                  (q~5 `ptr<struct T>` @8))))
+                  (p~5 `ptr<struct T~1>` @0)
+                  (q~6 `ptr<struct T~1>` @8))))
          (return
             (truncate `int` @16
                (call `unsigned long` @24
-                  (addressof `ptr<fn(p: ptr<struct T>) -> unsigned long>` @32
-                     (f~1 `fn(p: ptr<struct T>) -> unsigned long` (static f)))
-                  (p~4 `ptr<struct T>` @0)))))))
+                  (addressof `ptr<fn(p: ptr<struct T~1>) -> unsigned long>` @32
+                     (f~2 `fn(p: ptr<struct T~1>) -> unsigned long` (static f)))
+                  (p~5 `ptr<struct T~1>` @0)))))))
 
 ----- stderr -----

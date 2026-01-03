@@ -16,7 +16,7 @@ exit_code: 0
       (compound-statement
          (expression (sizeof `array<typeof(`array<int; ∅>`); 0>`))
          (expression (sizeof `array<array<int; ∅>; 1>`))
-         (expression (sizeof `array<struct T; 10>`))
+         (expression (sizeof `array<struct T~1; 10>`))
          (expression (sizeof `typeof(`array<void; 42>`)`))
          (expression (sizeof `array<void; 42>`)))))
 

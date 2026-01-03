@@ -14,12 +14,12 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration p~1 `ptr<struct T>` nullptr)
-         (declaration q~2 `ptr<typeof((deref (name p~1 `ptr<struct T>`)))>` (name p~1 `ptr<struct T>`))
-         (declaration r~3 `ptr<typeof_unqual((deref (name p~1 `ptr<struct T>`)))>` (name p~1 `ptr<struct T>`))
+         (declaration p~2 `ptr<struct T~1>` nullptr)
+         (declaration q~3 `ptr<typeof((deref (name p~2 `ptr<struct T~1>`)))>` (name p~2 `ptr<struct T~1>`))
+         (declaration r~4 `ptr<typeof_unqual((deref (name p~2 `ptr<struct T~1>`)))>` (name p~2 `ptr<struct T~1>`))
          (return
             (logical-and
-               (equal (name p~1 `ptr<struct T>`) (name q~2 `ptr<typeof((deref (name p~1 `ptr<struct T>`)))>`))
-               (equal (name p~1 `ptr<struct T>`) (name r~3 `ptr<typeof_unqual((deref (name p~1 `ptr<struct T>`)))>`)))))))
+               (equal (name p~2 `ptr<struct T~1>`) (name q~3 `ptr<typeof((deref (name p~2 `ptr<struct T~1>`)))>`))
+               (equal (name p~2 `ptr<struct T~1>`) (name r~4 `ptr<typeof_unqual((deref (name p~2 `ptr<struct T~1>`)))>`)))))))
 
 ----- stderr -----

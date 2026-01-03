@@ -41,6 +41,7 @@ use panko_sema::layout::Type;
 use panko_sema::scope::Linkage;
 use panko_sema::scope::RefKind;
 use panko_sema::ty::ArrayType;
+use panko_sema::ty::Struct;
 use panko_sema::typecheck::ArrayLength;
 
 use crate::Register::*;
@@ -134,7 +135,7 @@ impl Display for TypedRegister<'_> {
             Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => self.ty.size(),
             Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
             Type::Typeof { expr, unqual: _ } => match *expr {},
-            Type::Struct { name: _ } => unreachable!("incomplete"),
+            Type::Struct(Struct { name: _, id: _ }) => unreachable!("incomplete"),
         };
 
         let names = match self.register {
@@ -317,7 +318,7 @@ impl<'a> Codegen<'a> {
             }
             Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
             Type::Typeof { expr, unqual: _ } => match *expr {},
-            Type::Struct { name: _ } => unreachable!("incomplete"),
+            Type::Struct(Struct { name: _, id: _ }) => unreachable!("incomplete"),
         }
     }
 

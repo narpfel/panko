@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration p~1 `ptr<struct T>` nullptr)
-         (declaration q~2 `ptr<struct T>` (addressof (deref (name p~1 `ptr<struct T>`))))
-         (return (equal (name p~1 `ptr<struct T>`) (name q~2 `ptr<struct T>`))))))
+         (declaration p~2 `ptr<struct T~1>` nullptr)
+         (declaration q~3 `ptr<struct T~1>` (addressof (deref (name p~2 `ptr<struct T~1>`))))
+         (return (equal (name p~2 `ptr<struct T~1>`) (name q~3 `ptr<struct T~1>`))))))
 
 ----- stderr -----

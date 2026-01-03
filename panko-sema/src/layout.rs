@@ -18,6 +18,7 @@ use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
+use crate::ty::Struct;
 use crate::typecheck;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::Typedef;
@@ -291,7 +292,7 @@ fn layout_ty<'a>(
             }),
         ty::Type::Void => Type::Void,
         ty::Type::Nullptr => Type::Nullptr,
-        ty::Type::Struct { name } => Type::Struct { name },
+        ty::Type::Struct(Struct { name, id }) => Type::Struct(Struct { name, id }),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }

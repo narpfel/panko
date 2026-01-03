@@ -47,6 +47,7 @@ use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
+use crate::ty::Struct;
 use crate::ty::subobjects::AllowExplicit;
 use crate::ty::subobjects::Subobject;
 use crate::ty::subobjects::SubobjectIterator;
@@ -617,7 +618,7 @@ fn typeck_function_ty<'a>(
     let return_type = sess.alloc(typeck_ty(sess, *return_type, IsParameter::No));
     match return_type.ty {
         Type::Arithmetic(_) | Type::Pointer(_) | Type::Void | Type::Nullptr => (),
-        Type::Array(_) | Type::Function(_) | Type::Struct { name: _ } => sess
+        Type::Array(_) | Type::Function(_) | Type::Struct(Struct { name: _, id: _ }) => sess
             .emit(Diagnostic::InvalidFunctionReturnType { at: return_type.loc, ty: *return_type }),
         Type::Typeof { expr, unqual: _ } => match expr {},
     }
@@ -685,7 +686,7 @@ fn typeck_ty_with_initialiser<'a>(
             };
         }
         ty::Type::Nullptr => Type::Nullptr,
-        ty::Type::Struct { name } => ty::Type::Struct { name },
+        ty::Type::Struct(Struct { name, id }) => Type::Struct(Struct { name, id }),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -2184,8 +2185,8 @@ fn typeck_expression<'a>(
                 }
                 (Type::Nullptr, ty @ (Type::Pointer(_) | Type::Nullptr))
                 | (ty @ Type::Pointer(_), Type::Nullptr) => ty,
-                (Type::Struct { name: _ }, _) | (_, Type::Struct { name: _ }) =>
-                    unreachable!("incomplete"),
+                (Type::Struct(Struct { name: _, id: _ }), _)
+                | (_, Type::Struct(Struct { name: _, id: _ })) => unreachable!("incomplete"),
             };
             let result_ty = result_ty.unqualified();
             TypedExpression {

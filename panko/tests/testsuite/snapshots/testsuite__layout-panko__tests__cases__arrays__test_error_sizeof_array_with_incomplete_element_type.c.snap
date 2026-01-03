@@ -44,7 +44,7 @@ Error: array with incomplete element type `array<int; ∅>`
    │                ╰───── array element types must be complete
 ───╯
 
-Error: invalid application of `sizeof` to incomplete type `array<struct T; 10>`
+Error: invalid application of `sizeof` to incomplete type `array<struct T~1; 10>`
    ╭─[panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c:4:5]
    │
  4 │     sizeof(struct T[10]);
@@ -52,7 +52,7 @@ Error: invalid application of `sizeof` to incomplete type `array<struct T; 10>`
    │               ╰─────────── in this expression
 ───╯
 
-Error: array with incomplete element type `struct T`
+Error: array with incomplete element type `struct T~1`
    ╭─[panko/tests/cases/arrays/test_error_sizeof_array_with_incomplete_element_type.c:4:12]
    │
  4 │     sizeof(struct T[10]);

@@ -14,16 +14,16 @@ exit_code: 0
    (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (typedef size_t `unsigned long`)
    (function-definition external
-      f~1 `fn(p: ptr<struct T>) -> unsigned long`
+      f~2 `fn(p: ptr<struct T~1>) -> unsigned long`
       (params
-         p~2 `ptr<struct T>`)
+         p~3 `ptr<struct T~1>`)
       (compound-statement
-         (return (sizeof `unsigned long` 8 (p~2 `ptr<struct T>`)))))
+         (return (sizeof `unsigned long` 8 (p~3 `ptr<struct T~1>`)))))
    (function-definition external
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
-         (definition p~4 `ptr<struct T>` (noop-type-conversion `ptr<struct T>` (nullptr `nullptr_t`)))
-         (definition q~5 `ptr<struct T>` (noop-type-conversion `ptr<struct T>` (nullptr `nullptr_t`)))
+         (definition p~5 `ptr<struct T~1>` (noop-type-conversion `ptr<struct T~1>` (nullptr `nullptr_t`)))
+         (definition q~6 `ptr<struct T~1>` (noop-type-conversion `ptr<struct T~1>` (nullptr `nullptr_t`)))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -32,12 +32,12 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (ptr-equal `int` (p~4 `ptr<struct T>`) (q~5 `ptr<struct T>`))))
+               (ptr-equal `int` (p~5 `ptr<struct T~1>`) (q~6 `ptr<struct T~1>`))))
          (return
             (truncate `int`
                (call `unsigned long`
-                  (addressof `ptr<fn(p: ptr<struct T>) -> unsigned long>`
-                     (f~1 `fn(p: ptr<struct T>) -> unsigned long`))
-                  (p~4 `ptr<struct T>`)))))))
+                  (addressof `ptr<fn(p: ptr<struct T~1>) -> unsigned long>`
+                     (f~2 `fn(p: ptr<struct T~1>) -> unsigned long`))
+                  (p~5 `ptr<struct T~1>`)))))))
 
 ----- stderr -----

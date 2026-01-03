@@ -92,7 +92,7 @@ enum OpenNewScope {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub(crate) struct Id(pub(crate) u64);
+pub struct Id(pub(crate) u64);
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
@@ -642,7 +642,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             expr: Typeof::Ty(scopes.sess.alloc(resolve_ty(scopes, ty))),
             unqual,
         },
-        ast::Type::Struct(Struct::Incomplete { name }) => Type::Struct { name: name.slice() },
+        ast::Type::Struct(Struct::Incomplete { name }) => scopes.lookup_or_add_struct(name.slice()),
         ast::Type::Struct(Struct::Complete { name: _, members: _ }) =>
             todo!("complete `struct`s are not implemented"),
     };

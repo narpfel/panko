@@ -13,11 +13,14 @@ use super::QualifiedType;
 use super::RefInitialiser;
 use super::Reference;
 use super::StorageDuration;
+use super::Type;
+use crate::ty::Struct;
 
 #[derive(Debug, Default)]
 struct Scope<'a> {
     names: nonempty::Vec<HashMap<&'a str, Reference<'a>>>,
     type_names: nonempty::Vec<HashMap<&'a str, QualifiedType<'a>>>,
+    structs: nonempty::Vec<HashMap<&'a str, Type<'a>>>,
 }
 
 impl<'a> Scope<'a> {
@@ -45,14 +48,30 @@ impl<'a> Scope<'a> {
         self.type_names.last_mut().entry(name)
     }
 
+    fn lookup_struct(&self, name: &'a str) -> Option<Type<'a>> {
+        self.structs
+            .iter()
+            .rev()
+            .find_map(|structs| structs.get(name))
+            .copied()
+    }
+
+    fn lookup_struct_innermost(&mut self, name: &'a str) -> Entry<&'a str, Type<'a>> {
+        self.structs.last_mut().entry(name)
+    }
+
     fn push(&mut self) {
-        self.names.push(HashMap::default());
-        self.type_names.push(HashMap::default());
+        let Self { names, type_names, structs } = self;
+        names.push(HashMap::default());
+        type_names.push(HashMap::default());
+        structs.push(HashMap::default());
     }
 
     fn pop(&mut self) {
-        self.names.pop();
-        self.type_names.pop();
+        let Self { names, type_names, structs } = self;
+        names.pop();
+        type_names.pop();
+        structs.pop();
     }
 }
 
@@ -176,6 +195,24 @@ impl<'a> Scopes<'a> {
 
     fn lookup_ty_innermost(&mut self, name: &'a str) -> Entry<&'a str, QualifiedType<'a>> {
         self.scopes.last_mut().lookup_ty_innermost(name)
+    }
+
+    fn lookup_struct_innermost(&mut self, name: &'a str) -> Entry<&'a str, Type<'a>> {
+        self.scopes.last_mut().lookup_struct_innermost(name)
+    }
+
+    pub(super) fn lookup_or_add_struct(&mut self, name: &'a str) -> Type<'a> {
+        self.scopes
+            .iter()
+            .rev()
+            .find_map(|scope| scope.lookup_struct(name))
+            .unwrap_or_else(|| {
+                let id = self.id();
+                *self
+                    .lookup_struct_innermost(name)
+                    .insert_entry(Type::Struct(Struct { name, id }))
+                    .get()
+            })
     }
 
     pub(super) fn push(&mut self) {

@@ -12,26 +12,26 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: dereference of pointer to incomplete type `struct T`
+Error: dereference of pointer to incomplete type `struct T~1`
    ╭─[panko/tests/cases/pointers/test_error_dereference_with_incomplete_pointee.c:3:6]
    │
  3 │     *p;
    │      ┬  
-   │      ╰── this expression has type `ptr<struct T>`
+   │      ╰── this expression has type `ptr<struct T~1>`
 ───╯
 
-Error: dereference of pointer to incomplete type `struct T`
+Error: dereference of pointer to incomplete type `struct T~1`
    ╭─[panko/tests/cases/pointers/test_error_dereference_with_incomplete_pointee.c:4:6]
    │
  4 │     *p = 123;
    │      ┬  
-   │      ╰── this expression has type `ptr<struct T>`
+   │      ╰── this expression has type `ptr<struct T~1>`
 ───╯
 
-Error: invalid implicit conversion from `int` to `struct T`
+Error: invalid implicit conversion from `int` to `struct T~1`
    ╭─[panko/tests/cases/pointers/test_error_dereference_with_incomplete_pointee.c:4:10]
    │
  4 │     *p = 123;
    │          ─┬─  
-   │           ╰─── this is of type `int`, which cannot be implicitly converted to `struct T`
+   │           ╰─── this is of type `int`, which cannot be implicitly converted to `struct T~1`
 ───╯

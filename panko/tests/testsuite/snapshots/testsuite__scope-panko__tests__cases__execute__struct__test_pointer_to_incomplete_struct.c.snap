@@ -14,23 +14,23 @@ exit_code: 0
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (typedef size_t `typeof((sizeof 0))`)
    (function-definition
-      f~1 `fn(p: ptr<struct T>) -> typeof((sizeof 0))`
+      f~2 `fn(p: ptr<struct T~1>) -> typeof((sizeof 0))`
       (params
-         p~2 `ptr<struct T>`)
+         p~3 `ptr<struct T~1>`)
       (compound-statement
-         (return (sizeof (name p~2 `ptr<struct T>`)))))
+         (return (sizeof (name p~3 `ptr<struct T~1>`)))))
    (function-definition
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
-         (declaration p~4 `ptr<struct T>` (cast `ptr<struct T>` nullptr))
-         (declaration q~5 `ptr<struct T>` nullptr)
+         (declaration p~5 `ptr<struct T~1>` (cast `ptr<struct T~1>` nullptr))
+         (declaration q~6 `ptr<struct T~1>` nullptr)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (equal (name p~4 `ptr<struct T>`) (name q~5 `ptr<struct T>`))))
+               (equal (name p~5 `ptr<struct T~1>`) (name q~6 `ptr<struct T~1>`))))
          (return
             (cast `int`
-               (call (name f~1 `fn(p: ptr<struct T>) -> typeof((sizeof 0))`)
-                  (name p~4 `ptr<struct T>`)))))))
+               (call (name f~2 `fn(p: ptr<struct T~1>) -> typeof((sizeof 0))`)
+                  (name p~5 `ptr<struct T~1>`)))))))
 
 ----- stderr -----

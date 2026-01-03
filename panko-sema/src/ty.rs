@@ -17,6 +17,7 @@ use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
 use yansi::Paint as _;
 
+use crate::scope::Id;
 use crate::typecheck::ArrayLength;
 
 pub(crate) mod subobjects;
@@ -163,6 +164,12 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Struct<'a> {
+    pub name: &'a str,
+    pub id: Id,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Type<'a, TypeofExpr, LengthExpr> {
     Arithmetic(Arithmetic),
     Pointer(&'a QualifiedType<'a, TypeofExpr, LengthExpr>),
@@ -171,7 +178,7 @@ pub enum Type<'a, TypeofExpr, LengthExpr> {
     Void,
     Typeof { expr: TypeofExpr, unqual: bool },
     Nullptr,
-    Struct { name: &'a str },
+    Struct(Struct<'a>),
     // TODO
 }
 
@@ -361,7 +368,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Void => unreachable!("void is not an object and doesn’t have a size"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => Self::size_t().size(),
-            Type::Struct { name: _ } => unreachable!("incomplete"),
+            Type::Struct(Struct { name: _, id: _ }) => unreachable!("incomplete"),
         }
     }
 
@@ -375,7 +382,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Void => unreachable!("void is not an object and doesn’t have an alignment"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => Self::size_t().align(),
-            Type::Struct { name: _ } => unreachable!("incomplete"),
+            Type::Struct(Struct { name: _, id: _ }) => unreachable!("incomplete"),
         }
     }
 
@@ -392,7 +399,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Void => false,
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => true,
-            Type::Struct { name: _ } => false,
+            Type::Struct(Struct { name: _, id: _ }) => false,
         }
     }
 
@@ -433,7 +440,7 @@ where
                 expr.as_sexpr(),
             ),
             Type::Nullptr => write!(f, "nullptr_t"),
-            Type::Struct { name } => write!(f, "struct {name}"),
+            Type::Struct(Struct { name, id }) => write!(f, "struct {name}~{id}", id = id.0),
         }
     }
 }
