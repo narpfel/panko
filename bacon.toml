@@ -14,6 +14,9 @@ command = [
     "--profile=clif",
     "--all-targets",
     "--color", "always",
+    "--",
+    "-D", "warnings",
+    "-D", "clippy::dbg_macro",
 ]
 need_stdout = false
 
