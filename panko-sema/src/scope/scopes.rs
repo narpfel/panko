@@ -239,11 +239,10 @@ impl<'a> Scopes<'a> {
     }
 
     pub(super) fn is_in_global_scope(&self) -> IsInGlobalScope {
-        if self.scopes.len() == 1 {
-            IsInGlobalScope::Yes
-        }
-        else {
-            IsInGlobalScope::No
+        match self.scopes.len() {
+            0 => unreachable!("self.scopes is non-empty"),
+            1 => IsInGlobalScope::Yes,
+            2.. => IsInGlobalScope::No,
         }
     }
 
