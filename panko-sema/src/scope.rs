@@ -467,11 +467,9 @@ impl<'a> Statement<'a> {
             Statement::Compound(_) => todo!(),
             Statement::Return { return_, expr } => {
                 let loc = return_.loc();
-                if let Some(expr) = expr {
-                    loc.until(expr.loc())
-                }
-                else {
-                    loc
+                match expr {
+                    Some(expr) => loc.until(expr.loc()),
+                    None => loc,
                 }
             }
             Statement::Redeclared(redeclared) => redeclared.loc(),
