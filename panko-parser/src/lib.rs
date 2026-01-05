@@ -160,11 +160,11 @@ pub enum TodoError<'a> {
 
 #[macro_export]
 macro_rules! error_todo {
-    ($at:expr $(,)?) => {
+    ($at:expr $(,)?) => {{
         let msg = String::from("unimplemented error");
         $crate::TodoError::Error { at: $at.loc(), msg: msg.clone() }.print();
         todo!("{msg}")
-    };
+    }};
     ($at:expr, $msg:literal $(, $param:expr)* $(,)?) => {{
         let at = $at.loc();
         let msg = format!(concat!("unimplemented error: ", $msg), $($param,)*);
