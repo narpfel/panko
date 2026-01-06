@@ -491,20 +491,16 @@ impl<'a> TypeQualifier<'a> {
     fn parse(self, sess: &'a Session<'a>, qualifiers: &mut Qualifiers<'a>) {
         let Qualifiers { const_qualifier, volatile_qualifier } = qualifiers;
         match self.kind {
-            TypeQualifierKind::Const =>
-                if let Some(first) = *const_qualifier {
-                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier { at: self, first })
-                }
-                else {
-                    *const_qualifier = Some(self);
-                },
-            TypeQualifierKind::Volatile =>
-                if let Some(first) = *volatile_qualifier {
-                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier { at: self, first })
-                }
-                else {
-                    *volatile_qualifier = Some(self);
-                },
+            TypeQualifierKind::Const => match *const_qualifier {
+                Some(first) =>
+                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier { at: self, first }),
+                None => *const_qualifier = Some(self),
+            },
+            TypeQualifierKind::Volatile => match *volatile_qualifier {
+                Some(first) =>
+                    sess.emit(Diagnostic::DuplicateDeclarationSpecifier { at: self, first }),
+                None => *volatile_qualifier = Some(self),
+            },
             _ => todo!("{self:#?}"),
         }
     }
