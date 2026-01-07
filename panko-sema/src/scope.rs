@@ -17,7 +17,9 @@ use panko_parser::ast::FromError;
 use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::Session;
 use panko_parser::ast::Struct;
+use panko_parser::ast::TypeDeclaration;
 use panko_parser::ast::reject_function_specifiers;
+use panko_parser::sexpr_builder::AsSExpr as _;
 use panko_parser::sexpr_builder::SExpr;
 use panko_report::Report;
 use panko_report::Sliced as _;
@@ -685,7 +687,7 @@ fn resolve_function_ty<'a>(
 
 fn resolve_function_definition<'a>(
     scopes: &mut Scopes<'a>,
-    def: &'a ast::FunctionDefinition<'a>,
+    def: &ast::FunctionDefinition<'a>,
 ) -> ExternalDeclaration<'a> {
     let ast::FunctionDefinition {
         name,
@@ -800,9 +802,13 @@ fn resolve_compound_statement<'a>(
         scopes.open_new_scope();
     }
     let stmts = CompoundStatement(
-        scopes
-            .sess
-            .alloc_slice_fill_iter(stmts.0.iter().map(|stmt| resolve_stmt(scopes, stmt))),
+        scopes.sess.alloc_slice_copy(
+            &stmts
+                .0
+                .iter()
+                .filter_map(|stmt| resolve_stmt(scopes, stmt))
+                .collect_vec(),
+        ),
     );
     if let OpenNewScope::Yes = open_new_scope {
         scopes.exit_scope();
@@ -955,8 +961,16 @@ fn resolve_declaration<'a>(
     })
 }
 
-fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Statement<'a> {
-    match stmt {
+fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Option<Statement<'a>> {
+    let stmt = match stmt {
+        ast::Statement::TypeDeclaration(TypeDeclaration::Struct(r#struct)) => match r#struct {
+            Struct::Incomplete { name } => {
+                scopes.lookup_or_add_struct(name.slice());
+                return None;
+            }
+            Struct::Complete { name: _, members: _ } =>
+                todo!("declare complete struct {}", r#struct.as_sexpr()),
+        },
         ast::Statement::Declaration(decl) => match resolve_declaration(scopes, decl) {
             DeclarationOrTypedef::Declaration(declaration) => Statement::Declaration(declaration),
             DeclarationOrTypedef::Typedef(typedef) => Statement::Typedef(typedef),
@@ -970,7 +984,8 @@ fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> State
             return_: *return_,
             expr: try { resolve_expr(scopes, expr.as_ref()?) },
         },
-    }
+    };
+    Some(stmt)
 }
 
 fn resolve_assoc<'a>(
@@ -1125,6 +1140,36 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
     }
 }
 
+fn resolve_external_declaration<'a>(
+    scopes: &mut Scopes<'a>,
+    decl: &ast::ExternalDeclaration<'a>,
+) -> Option<ExternalDeclaration<'a>> {
+    let decl = match decl {
+        ast::ExternalDeclaration::TypeDeclaration(TypeDeclaration::Struct(r#struct)) =>
+            match r#struct {
+                Struct::Incomplete { name } => {
+                    scopes.lookup_or_add_struct(name.slice());
+                    return None;
+                }
+                Struct::Complete { name: _, members: _ } => todo!(
+                    "declare complete struct in global scope: {}",
+                    r#struct.as_sexpr(),
+                ),
+            },
+        ast::ExternalDeclaration::FunctionDefinition(def) =>
+            resolve_function_definition(scopes, def),
+        ast::ExternalDeclaration::Declaration(decl) => match resolve_declaration(scopes, decl) {
+            DeclarationOrTypedef::Declaration(declaration) =>
+                ExternalDeclaration::Declaration(declaration),
+            DeclarationOrTypedef::Typedef(typedef) => ExternalDeclaration::Typedef(typedef),
+            DeclarationOrTypedef::Redeclared(redeclared) =>
+                ExternalDeclaration::Redeclared(redeclared),
+        },
+        ast::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
+    };
+    Some(decl)
+}
+
 pub fn resolve_names<'a>(
     sess: &'a Session<'a>,
     translation_unit: ast::TranslationUnit<'a>,
@@ -1133,18 +1178,11 @@ pub fn resolve_names<'a>(
     let ast::TranslationUnit { filename, decls } = translation_unit;
     TranslationUnit {
         filename,
-        decls: sess.alloc_slice_fill_iter(decls.iter().map(|decl| match decl {
-            ast::ExternalDeclaration::FunctionDefinition(def) =>
-                resolve_function_definition(scopes, def),
-            ast::ExternalDeclaration::Declaration(decl) =>
-                match resolve_declaration(scopes, decl) {
-                    DeclarationOrTypedef::Declaration(declaration) =>
-                        ExternalDeclaration::Declaration(declaration),
-                    DeclarationOrTypedef::Typedef(typedef) => ExternalDeclaration::Typedef(typedef),
-                    DeclarationOrTypedef::Redeclared(redeclared) =>
-                        ExternalDeclaration::Redeclared(redeclared),
-                },
-            ast::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
-        })),
+        decls: sess.alloc_slice_copy(
+            &decls
+                .iter()
+                .filter_map(|decl| resolve_external_declaration(scopes, decl))
+                .collect_vec(),
+        ),
     }
 }

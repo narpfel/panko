@@ -195,6 +195,7 @@ pub struct TranslationUnit<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub enum ExternalDeclaration<'a> {
+    TypeDeclaration(TypeDeclaration<'a>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Error(&'a dyn Report),
@@ -213,6 +214,11 @@ pub struct Declaration<'a> {
     pub initialiser: Option<Initialiser<'a>>,
     pub storage_class: Option<cst::StorageClassSpecifier<'a>>,
     pub function_specifiers: FunctionSpecifiers<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum TypeDeclaration<'a> {
+    Struct(Struct<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -251,6 +257,22 @@ pub enum Type<'a> {
     },
     Struct(Struct<'a>),
     // TODO
+}
+
+impl<'a> Type<'a> {
+    fn as_type_decl(&self) -> Option<TypeDeclaration<'a>> {
+        match self {
+            Self::Arithmetic(_)
+            | Self::Pointer(_)
+            | Self::Array(_)
+            | Self::Function(_)
+            | Self::Void
+            | Self::Typedef(_)
+            | Self::Typeof { unqual: _, expr: _ }
+            | Self::TypeofTy { unqual: _, ty: _ } => None,
+            Type::Struct(r#struct) => Some(TypeDeclaration::Struct(*r#struct)),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -319,6 +341,7 @@ pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
 
 #[derive(Debug, Clone, Copy)]
 pub enum Statement<'a> {
+    TypeDeclaration(TypeDeclaration<'a>),
     // TODO: restrict the kinds of decls that are allowed in function scope?
     Declaration(Declaration<'a>),
     Expression(Option<Expression<'a>>),
@@ -345,12 +368,16 @@ impl<'a> ExternalDeclaration<'a> {
                 Either::Left(once(ExternalDeclaration::FunctionDefinition(
                     FunctionDefinition::from_parse_tree(sess, def),
                 ))),
-            cst::ExternalDeclaration::Declaration(decl) => Either::Right(
-                Declaration::from_parse_tree(sess, decl).map(|parsed| match parsed {
-                    Ok(decl) => ExternalDeclaration::Declaration(decl),
-                    Err(ty) => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl, ty }),
-                }),
-            ),
+            cst::ExternalDeclaration::Declaration(decl) => Either::Right({
+                let (type_decl, value_decls) = Declaration::from_parse_tree(sess, decl);
+                type_decl
+                    .map(ExternalDeclaration::TypeDeclaration)
+                    .into_iter()
+                    .chain(value_decls.map(|parsed| match parsed {
+                        Ok(decl) => ExternalDeclaration::Declaration(decl),
+                        Err(ty) => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl, ty }),
+                    }))
+            }),
         }
     }
 }
@@ -466,12 +493,16 @@ impl<'a> Declaration<'a> {
     fn from_parse_tree(
         sess: &'a Session<'a>,
         decl: &'a cst::Declaration<'a>,
-    ) -> impl Iterator<Item = Result<Self, QualifiedType<'a>>> + 'a {
+    ) -> (
+        Option<TypeDeclaration<'a>>,
+        impl Iterator<Item = Result<Self, QualifiedType<'a>>> + 'a,
+    ) {
         let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
             parse_declaration_specifiers(sess, decl.specifiers);
-        decl.init_declarator_list
-            .iter()
-            .map(move |&InitDeclarator { declarator, initialiser }| {
+
+        let type_decl = ty.ty.as_type_decl();
+        let value_decls = decl.init_declarator_list.iter().map(
+            move |&InitDeclarator { declarator, initialiser }| {
                 let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
                 match name {
                     Some(name) => Ok(Self {
@@ -483,7 +514,10 @@ impl<'a> Declaration<'a> {
                     }),
                     None => Err(ty),
                 }
-            })
+            },
+        );
+
+        (type_decl, value_decls)
     }
 }
 
@@ -526,13 +560,16 @@ impl<'a> Statement<'a> {
         item: &'a BlockItem<'a>,
     ) -> impl Iterator<Item = Self> + 'a {
         match item {
-            BlockItem::Declaration(decl) =>
-                Either::Left(Declaration::from_parse_tree(sess, decl).map(|maybe_decl| {
-                    match maybe_decl {
+            BlockItem::Declaration(decl) => Either::Left({
+                let (type_decl, value_decls) = Declaration::from_parse_tree(sess, decl);
+                type_decl
+                    .map(Self::TypeDeclaration)
+                    .into_iter()
+                    .chain(value_decls.map(|maybe_decl| match maybe_decl {
                         Ok(decl) => Self::Declaration(decl),
                         Err(ty) => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl, ty }),
-                    }
-                })),
+                    }))
+            }),
             BlockItem::UnlabeledStatement(stmt) =>
                 Either::Right(once(Self::from_unlabeled_statement(sess, stmt))),
         }
