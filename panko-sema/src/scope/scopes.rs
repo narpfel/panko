@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 
 use panko_lex::Loc;
+use panko_parser::ast;
 use panko_parser::ast::Session;
 use panko_parser::nonempty;
 
@@ -201,18 +202,71 @@ impl<'a> Scopes<'a> {
         self.scopes.last_mut().lookup_struct_innermost(name)
     }
 
-    pub(super) fn lookup_or_add_struct(&mut self, name: &'a str) -> Type<'a> {
+    fn lookup_struct(&self, name: &'a str) -> Option<Type<'a>> {
         self.scopes
             .iter()
             .rev()
             .find_map(|scope| scope.lookup_struct(name))
-            .unwrap_or_else(|| {
-                let id = self.id();
-                *self
-                    .lookup_struct_innermost(name)
-                    .insert_entry(Type::Struct(Struct { name, id }))
-                    .get()
-            })
+    }
+
+    fn struct_entry(&mut self, name: &'a str) -> Option<Entry<&'a str, Type<'a>>> {
+        self.scopes.iter_mut().rev().find_map(|scope| {
+            scope
+                .structs
+                .iter_mut()
+                .rev()
+                .find_map(|scope| match scope.entry(name) {
+                    entry @ Entry::Occupied(_) => Some(entry),
+                    Entry::Vacant(_) => None,
+                })
+        })
+    }
+
+    pub(super) fn lookup_or_add_struct(&mut self, name: &'a str) -> Type<'a> {
+        self.lookup_struct(name).unwrap_or_else(|| {
+            let id = self.id();
+            *self
+                .lookup_struct_innermost(name)
+                .insert_entry(Type::Struct(Struct::Incomplete { name, id }))
+                .get()
+        })
+    }
+
+    fn add_or_update_struct(&mut self, name: &'a str, ty: Type<'a>) {
+        match self.struct_entry(name) {
+            Some(entry) => entry.insert_entry(ty),
+            None => self.lookup_struct_innermost(name).insert_entry(ty),
+        };
+    }
+
+    pub(super) fn lookup_or_add_complete_struct(
+        &mut self,
+        name: Option<&'a str>,
+        members: &[ast::Member<'a>],
+    ) -> (Type<'a>, Option<Type<'a>>) {
+        let previous_definition = try { self.lookup_struct(name?)? };
+
+        // forward declare so that `name` is available in the body
+        let forward_decl = try { self.lookup_or_add_struct(name?) };
+
+        self.open_new_scope();
+        let members = super::resolve_struct_members(self, members);
+        self.exit_scope();
+
+        let id = match forward_decl {
+            Some(Type::Struct(
+                Struct::Incomplete { name: _, id } | Struct::Complete { name: _, id, members: _ },
+            )) => id,
+            Some(_) => unreachable!(),
+            None => self.id(),
+        };
+        let ty = Type::Struct(Struct::Complete { name, id, members });
+
+        if let Some(name) = name {
+            self.add_or_update_struct(name, ty);
+        }
+
+        (ty, previous_definition)
     }
 
     pub(super) fn push(&mut self) {

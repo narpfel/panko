@@ -43,6 +43,10 @@ impl<T> Vec<T> {
         self.0.iter()
     }
 
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, T> {
+        self.0.iter_mut()
+    }
+
     pub fn last_mut(&mut self) -> &mut T {
         self.0.last_mut().unwrap()
     }

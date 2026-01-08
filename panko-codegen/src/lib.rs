@@ -135,7 +135,9 @@ impl Display for TypedRegister<'_> {
             Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => self.ty.size(),
             Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
             Type::Typeof { expr, unqual: _ } => match *expr {},
-            Type::Struct(Struct { name: _, id: _ }) => unreachable!("incomplete"),
+            Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
+            Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+                todo!("register for complete struct (is this unreachable?)"),
         };
 
         let names = match self.register {
@@ -318,7 +320,9 @@ impl<'a> Codegen<'a> {
             }
             Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
             Type::Typeof { expr, unqual: _ } => match *expr {},
-            Type::Struct(Struct { name: _, id: _ }) => unreachable!("incomplete"),
+            Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
+            Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+                todo!("copy complete struct"),
         }
     }
 

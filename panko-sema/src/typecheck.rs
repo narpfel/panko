@@ -618,8 +618,12 @@ fn typeck_function_ty<'a>(
     let return_type = sess.alloc(typeck_ty(sess, *return_type, IsParameter::No));
     match return_type.ty {
         Type::Arithmetic(_) | Type::Pointer(_) | Type::Void | Type::Nullptr => (),
-        Type::Array(_) | Type::Function(_) | Type::Struct(Struct { name: _, id: _ }) => sess
+        Type::Array(_)
+        | Type::Function(_)
+        | Type::Struct(Struct::Incomplete { name: _, id: _ }) => sess
             .emit(Diagnostic::InvalidFunctionReturnType { at: return_type.loc, ty: *return_type }),
+        Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+            todo!("check if complete struct is valid as return type"),
         Type::Typeof { expr, unqual: _ } => match expr {},
     }
     let params = sess.alloc_slice_fill_iter(params.iter().map(
@@ -686,7 +690,10 @@ fn typeck_ty_with_initialiser<'a>(
             };
         }
         ty::Type::Nullptr => Type::Nullptr,
-        ty::Type::Struct(Struct { name, id }) => Type::Struct(Struct { name, id }),
+        ty::Type::Struct(Struct::Incomplete { name, id }) =>
+            Type::Struct(Struct::Incomplete { name, id }),
+        ty::Type::Struct(Struct::Complete { name, id, members }) =>
+            Type::Struct(Struct::Complete { name, id, members }),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -2185,8 +2192,12 @@ fn typeck_expression<'a>(
                 }
                 (Type::Nullptr, ty @ (Type::Pointer(_) | Type::Nullptr))
                 | (ty @ Type::Pointer(_), Type::Nullptr) => ty,
-                (Type::Struct(Struct { name: _, id: _ }), _)
-                | (_, Type::Struct(Struct { name: _, id: _ })) => unreachable!("incomplete"),
+                (Type::Struct(Struct::Incomplete { name: _, id: _ }), _)
+                | (_, Type::Struct(Struct::Incomplete { name: _, id: _ })) =>
+                    unreachable!("incomplete"),
+                (Type::Struct(Struct::Complete { name: _, id: _, members: _ }), _)
+                | (_, Type::Struct(Struct::Complete { name: _, id: _, members: _ })) =>
+                    todo!("check complete struct in ternary"),
             };
             let result_ty = result_ty.unqualified();
             TypedExpression {

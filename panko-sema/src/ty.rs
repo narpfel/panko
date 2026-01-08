@@ -164,9 +164,23 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Struct<'a> {
-    pub name: &'a str,
-    pub id: Id,
+pub enum Struct<'a> {
+    Incomplete {
+        name: &'a str,
+        id: Id,
+    },
+    Complete {
+        name: Option<&'a str>,
+        id: Id,
+        members: &'a [Member<'a>],
+    },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Member<'a> {
+    pub(crate) name: &'a str,
+    // TODO:
+    // ty: QualifiedType<'a, TypeofExpr, LengthExpr>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -368,7 +382,9 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Void => unreachable!("void is not an object and doesn’t have a size"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => Self::size_t().size(),
-            Type::Struct(Struct { name: _, id: _ }) => unreachable!("incomplete"),
+            Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
+            Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+                todo!("sizeof complete struct"),
         }
     }
 
@@ -382,7 +398,9 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Void => unreachable!("void is not an object and doesn’t have an alignment"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => Self::size_t().align(),
-            Type::Struct(Struct { name: _, id: _ }) => unreachable!("incomplete"),
+            Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
+            Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+                todo!("alignof complete struct"),
         }
     }
 
@@ -399,7 +417,9 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
             Type::Void => false,
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => true,
-            Type::Struct(Struct { name: _, id: _ }) => false,
+            Type::Struct(Struct::Incomplete { name: _, id: _ }) => false,
+            Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+                todo!("is_complete for complete struct"),
         }
     }
 
@@ -440,7 +460,10 @@ where
                 expr.as_sexpr(),
             ),
             Type::Nullptr => write!(f, "nullptr_t"),
-            Type::Struct(Struct { name, id }) => write!(f, "struct {name}~{id}", id = id.0),
+            Type::Struct(Struct::Incomplete { name, id }) =>
+                write!(f, "struct {name}~{id}", id = id.0),
+            Type::Struct(Struct::Complete { name, id, members: _ }) =>
+                write!(f, "struct {}~{} complete", name.as_sexpr(), id.0),
         }
     }
 }

@@ -174,7 +174,10 @@ impl fmt::Display for Operand<'_> {
                         },
                     Type::Void => unreachable!(),
                     Type::Typeof { expr, unqual: _ } => match expr {},
-                    Type::Struct(Struct { name: _, id: _ }) => unreachable!("incomplete"),
+                    Type::Struct(Struct::Incomplete { name: _, id: _ }) =>
+                        unreachable!("incomplete"),
+                    Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+                        todo!("complete struct as operand"),
                 };
                 let ptr_type = match size {
                     1 => "byte",

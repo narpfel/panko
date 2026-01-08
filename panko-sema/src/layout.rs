@@ -292,7 +292,10 @@ fn layout_ty<'a>(
             }),
         ty::Type::Void => Type::Void,
         ty::Type::Nullptr => Type::Nullptr,
-        ty::Type::Struct(Struct { name, id }) => Type::Struct(Struct { name, id }),
+        ty::Type::Struct(Struct::Incomplete { name, id }) =>
+            Type::Struct(Struct::Incomplete { name, id }),
+        ty::Type::Struct(Struct::Complete { name, id, members }) =>
+            Type::Struct(Struct::Complete { name, id, members }),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }

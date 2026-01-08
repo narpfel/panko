@@ -19,13 +19,13 @@ use panko_parser::ast::Session;
 use panko_parser::ast::Struct;
 use panko_parser::ast::TypeDeclaration;
 use panko_parser::ast::reject_function_specifiers;
-use panko_parser::sexpr_builder::AsSExpr as _;
 use panko_parser::sexpr_builder::SExpr;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
 use crate::scope::scopes::Scopes;
 use crate::ty;
+use crate::ty::Member;
 
 mod as_sexpr;
 mod scopes;
@@ -642,9 +642,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             expr: Typeof::Ty(scopes.sess.alloc(resolve_ty(scopes, ty))),
             unqual,
         },
-        ast::Type::Struct(Struct::Incomplete { name }) => scopes.lookup_or_add_struct(name.slice()),
-        ast::Type::Struct(Struct::Complete { name: _, members: _ }) =>
-            todo!("complete `struct`s are not implemented"),
+        ast::Type::Struct(r#struct) => resolve_struct(scopes, &r#struct),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -683,6 +681,30 @@ fn resolve_function_ty<'a>(
     }
 
     FunctionType { params, return_type, is_varargs }
+}
+
+fn resolve_struct<'a>(scopes: &mut Scopes<'a>, r#struct: &Struct<'a>) -> Type<'a> {
+    match r#struct {
+        Struct::Incomplete { name } => scopes.lookup_or_add_struct(name.slice()),
+        Struct::Complete { name, members } => {
+            let (ty, _previous_definition) =
+                scopes.lookup_or_add_complete_struct(try { name.as_ref()?.slice() }, members);
+            // TODO: implement check that `ty` is a valid redeclaration of `_previous_definition`
+            ty
+        }
+    }
+}
+
+fn resolve_struct_members<'a>(
+    scopes: &mut Scopes<'a>,
+    members: &[ast::Member<'a>],
+) -> &'a [Member<'a>] {
+    let sess = scopes.sess;
+
+    sess.alloc_slice_fill_iter(members.iter().map(|member| {
+        let ast::Member { name, ty: _ } = member;
+        Member { name: name.unwrap().slice() }
+    }))
 }
 
 fn resolve_function_definition<'a>(
@@ -963,14 +985,10 @@ fn resolve_declaration<'a>(
 
 fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Option<Statement<'a>> {
     let stmt = match stmt {
-        ast::Statement::TypeDeclaration(TypeDeclaration::Struct(r#struct)) => match r#struct {
-            Struct::Incomplete { name } => {
-                scopes.lookup_or_add_struct(name.slice());
-                return None;
-            }
-            Struct::Complete { name: _, members: _ } =>
-                todo!("declare complete struct {}", r#struct.as_sexpr()),
-        },
+        ast::Statement::TypeDeclaration(TypeDeclaration::Struct(r#struct)) => {
+            resolve_struct(scopes, r#struct);
+            return None;
+        }
         ast::Statement::Declaration(decl) => match resolve_declaration(scopes, decl) {
             DeclarationOrTypedef::Declaration(declaration) => Statement::Declaration(declaration),
             DeclarationOrTypedef::Typedef(typedef) => Statement::Typedef(typedef),
@@ -1145,17 +1163,10 @@ fn resolve_external_declaration<'a>(
     decl: &ast::ExternalDeclaration<'a>,
 ) -> Option<ExternalDeclaration<'a>> {
     let decl = match decl {
-        ast::ExternalDeclaration::TypeDeclaration(TypeDeclaration::Struct(r#struct)) =>
-            match r#struct {
-                Struct::Incomplete { name } => {
-                    scopes.lookup_or_add_struct(name.slice());
-                    return None;
-                }
-                Struct::Complete { name: _, members: _ } => todo!(
-                    "declare complete struct in global scope: {}",
-                    r#struct.as_sexpr(),
-                ),
-            },
+        ast::ExternalDeclaration::TypeDeclaration(TypeDeclaration::Struct(r#struct)) => {
+            resolve_struct(scopes, r#struct);
+            return None;
+        }
         ast::ExternalDeclaration::FunctionDefinition(def) =>
             resolve_function_definition(scopes, def),
         ast::ExternalDeclaration::Declaration(decl) => match resolve_declaration(scopes, decl) {
