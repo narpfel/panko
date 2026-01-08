@@ -1,0 +1,49 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/struct/test_unnamed_structs_are_distinct_types.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: comparison of pointers to incompatible types
+    ╭─[panko/tests/cases/struct/test_unnamed_structs_are_distinct_types.c:15:8]
+    │
+ 15 │     p1 == p4;
+    │     ─┬ ─┬ ─┬  
+    │      │  │  ╰── this is of type `ptr<struct ∅~7 complete>`
+    │      │  │     
+    │      │  ╰───── pointer comparisons are only allowed between pointers to compatible types
+    │      │        
+    │      ╰──────── this is of type `ptr<struct ∅~1 complete>`
+────╯
+
+Error: comparison of pointers to incompatible types
+    ╭─[panko/tests/cases/struct/test_unnamed_structs_are_distinct_types.c:17:8]
+    │
+ 17 │     p1 == p5;
+    │     ─┬ ─┬ ─┬  
+    │      │  │  ╰── this is of type `ptr<struct ∅~11 complete>`
+    │      │  │     
+    │      │  ╰───── pointer comparisons are only allowed between pointers to compatible types
+    │      │        
+    │      ╰──────── this is of type `ptr<struct ∅~1 complete>`
+────╯
+
+Error: comparison of pointers to incompatible types
+    ╭─[panko/tests/cases/struct/test_unnamed_structs_are_distinct_types.c:18:8]
+    │
+ 18 │     p4 == p5;
+    │     ─┬ ─┬ ─┬  
+    │      │  │  ╰── this is of type `ptr<struct ∅~11 complete>`
+    │      │  │     
+    │      │  ╰───── pointer comparisons are only allowed between pointers to compatible types
+    │      │        
+    │      ╰──────── this is of type `ptr<struct ∅~7 complete>`
+────╯
