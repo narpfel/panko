@@ -110,13 +110,13 @@ enum Diagnostic<'a> {
     )]
     #[with(
         token = at.token,
-        ty = ty.into_type(|| unreachable!()).fg(Blue),
+        ty = ty.fg(Blue),
     )]
     InvalidTypeSpecifierCombination {
         message: &'a str,
         at: TypeSpecifier<'a>,
         specifiers: DeclarationSpecifiers<'a>,
-        ty: ParsedSpecifiers<'a>,
+        ty: ast::Type<'a>,
     },
 
     #[error("default parameters are not allowed")]
@@ -397,7 +397,7 @@ impl<'a> TypeSpecifier<'a> {
 
     fn parse(
         &self,
-        sess: &ast::Session<'a>,
+        sess: &'a ast::Session<'a>,
         specifiers: DeclarationSpecifiers<'a>,
         position: usize,
         ty: ParsedSpecifiers<'a>,
@@ -411,7 +411,7 @@ impl<'a> TypeSpecifier<'a> {
                 message,
                 at: *self,
                 specifiers: specifiers.until(position),
-                ty,
+                ty: ty.into_type(sess, || unreachable!()),
             });
             ty
         };

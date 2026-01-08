@@ -5,6 +5,7 @@ use crate::ast::CompoundStatement;
 use crate::ast::Declaration;
 use crate::ast::ExternalDeclaration;
 use crate::ast::FunctionDefinition;
+use crate::ast::Member;
 use crate::ast::ParameterDeclaration;
 use crate::ast::QualifiedType;
 use crate::ast::Statement;
@@ -86,6 +87,13 @@ impl AsSExpr for Struct<'_> {
                 .inherit(name)
                 .lines_explicit_empty(*members),
         }
+    }
+}
+
+impl AsSExpr for Member<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { name, ty } = self;
+        SExpr::new("member").inherit(name).inherit(ty)
     }
 }
 

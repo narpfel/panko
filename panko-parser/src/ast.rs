@@ -1,3 +1,4 @@
+use std::assert_matches::assert_matches;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::fmt;
@@ -32,6 +33,7 @@ use crate::TypeQualifierKind;
 use crate::TypeSpecifierQualifier::Qualifier;
 use crate::TypeSpecifierQualifier::Specifier;
 use crate::UnlabeledStatement;
+use crate::error_todo;
 use crate::sexpr_builder::AsSExpr as _;
 
 mod as_sexpr;
@@ -331,9 +333,51 @@ pub enum Struct<'a> {
     },
     Complete {
         name: Option<Token<'a>>,
-        // TODO: reject invalid member decls here
-        members: &'a [cst::Declaration<'a>],
+        members: &'a [Member<'a>],
     },
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Member<'a> {
+    pub name: Option<Token<'a>>,
+    pub ty: QualifiedType<'a>,
+}
+
+impl<'a> Member<'a> {
+    fn parse(
+        sess: &'a Session<'a>,
+        member: &'a cst::Declaration<'a>,
+    ) -> impl Iterator<Item = Self> {
+        let (type_decl, member_decls) = Declaration::from_parse_tree(sess, member);
+        assert_matches!(
+            type_decl,
+            None | Some(TypeDeclaration::Struct(Struct::Incomplete { name: _ })),
+            "TODO: structs in structs (also special-case unnamed structs here)",
+        );
+        member_decls.map(|member| {
+            let Declaration {
+                ty,
+                name,
+                initialiser,
+                storage_class,
+                function_specifiers,
+            } = member.unwrap_or_else(|ty| {
+                error_todo!(ty, "struct member declared with an abstract declarator")
+            });
+            assert_matches!(
+                initialiser,
+                None,
+                "TODO: error message for initialiser in struct member",
+            );
+            assert_matches!(
+                storage_class,
+                None,
+                "TODO: error message for storage_class in struct member",
+            );
+            reject_function_specifiers(sess, &function_specifiers, name.loc(), "struct member");
+            Member { name: Some(name), ty }
+        })
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -404,6 +448,12 @@ impl<'a> FunctionDefinition<'a> {
             ty,
             body: CompoundStatement::from_parse_tree(sess, &body),
         }
+    }
+}
+
+impl<'a> QualifiedType<'a> {
+    fn loc(&self) -> Loc<'a> {
+        self.loc
     }
 }
 
@@ -723,7 +773,11 @@ pub(crate) enum ParsedSpecifiers<'a> {
 }
 
 impl<'a> ParsedSpecifiers<'a> {
-    pub(crate) fn into_type(self, if_none: impl FnOnce() -> Type<'a>) -> Type<'a> {
+    pub(crate) fn into_type(
+        self,
+        sess: &'a Session<'a>,
+        if_none: impl FnOnce() -> Type<'a>,
+    ) -> Type<'a> {
         match self {
             Self::None => if_none(),
             Self::Void => Type::Void,
@@ -745,8 +799,15 @@ impl<'a> ParsedSpecifiers<'a> {
             Self::Typeof { unqual, expr } => Type::Typeof { unqual, expr },
             Self::TypeofTy { unqual, ty } => Type::TypeofTy { unqual, ty },
             Self::IncompleteStruct { name } => Type::Struct(Struct::Incomplete { name }),
-            Self::CompleteStruct { name, members } =>
-                Type::Struct(Struct::Complete { name, members }),
+            Self::CompleteStruct { name, members } => Type::Struct(Struct::Complete {
+                name,
+                members: sess.alloc_slice_copy(
+                    &members
+                        .iter()
+                        .flat_map(|member| Member::parse(sess, member))
+                        .collect_vec(),
+                ),
+            }),
         }
     }
 }
@@ -810,7 +871,7 @@ pub(crate) fn parse_declaration_specifiers<'a>(
     }
 
     let Qualifiers { const_qualifier, volatile_qualifier } = qualifiers;
-    let ty = ty.into_type(|| {
+    let ty = ty.into_type(sess, || {
         // TODO: implement `FromError` for `Type`
         let () = sess.emit(Diagnostic::DeclarationWithoutType { at: specifiers });
         // FIXME: don’t use implicit int here, an explicit “type error” type will be better
