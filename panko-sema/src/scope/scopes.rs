@@ -226,17 +226,6 @@ impl<'a> Scopes<'a> {
         })
     }
 
-    fn add_or_update_struct(&mut self, name: &'a str, ty: Type<'a>) {
-        match self.struct_entry(name) {
-            Some(mut entry) => {
-                entry.insert(ty);
-            }
-            None => {
-                self.lookup_struct_innermost(name).insert_entry(ty);
-            }
-        }
-    }
-
     pub(super) fn lookup_or_add_complete_struct(
         &mut self,
         name: Option<&'a str>,
@@ -261,7 +250,8 @@ impl<'a> Scopes<'a> {
         let ty = Type::Struct(Struct::Complete { name, id, members });
 
         if let Some(name) = name {
-            self.add_or_update_struct(name, ty);
+            // complete the forward declaration
+            self.struct_entry(name).unwrap().insert(ty);
         }
 
         (ty, previous_definition)
