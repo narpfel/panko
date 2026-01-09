@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
+use std::collections::hash_map::OccupiedEntry;
 
 use panko_lex::Loc;
 use panko_parser::ast;
@@ -49,12 +50,14 @@ impl<'a> Scope<'a> {
         self.type_names.last_mut().entry(name)
     }
 
-    fn lookup_struct(&self, name: &'a str) -> Option<Type<'a>> {
+    fn struct_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<&'a str, Type<'a>>> {
         self.structs
-            .iter()
+            .iter_mut()
             .rev()
-            .find_map(|structs| structs.get(name))
-            .copied()
+            .find_map(|scope| match scope.entry(name) {
+                Entry::Occupied(entry) => Some(entry),
+                Entry::Vacant(_) => None,
+            })
     }
 
     fn lookup_struct_innermost(&mut self, name: &'a str) -> Entry<&'a str, Type<'a>> {
@@ -202,24 +205,15 @@ impl<'a> Scopes<'a> {
         self.scopes.last_mut().lookup_struct_innermost(name)
     }
 
-    fn lookup_struct(&self, name: &'a str) -> Option<Type<'a>> {
+    fn struct_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<&'a str, Type<'a>>> {
         self.scopes
-            .iter()
+            .iter_mut()
             .rev()
-            .find_map(|scope| scope.lookup_struct(name))
+            .find_map(|scope| scope.struct_entry(name))
     }
 
-    fn struct_entry(&mut self, name: &'a str) -> Option<Entry<&'a str, Type<'a>>> {
-        self.scopes.iter_mut().rev().find_map(|scope| {
-            scope
-                .structs
-                .iter_mut()
-                .rev()
-                .find_map(|scope| match scope.entry(name) {
-                    entry @ Entry::Occupied(_) => Some(entry),
-                    Entry::Vacant(_) => None,
-                })
-        })
+    fn lookup_struct(&mut self, name: &'a str) -> Option<Type<'a>> {
+        self.struct_entry(name).map(|entry| *entry.get())
     }
 
     pub(super) fn lookup_or_add_struct(&mut self, name: &'a str) -> Type<'a> {
@@ -234,9 +228,13 @@ impl<'a> Scopes<'a> {
 
     fn add_or_update_struct(&mut self, name: &'a str, ty: Type<'a>) {
         match self.struct_entry(name) {
-            Some(entry) => entry.insert_entry(ty),
-            None => self.lookup_struct_innermost(name).insert_entry(ty),
-        };
+            Some(mut entry) => {
+                entry.insert(ty);
+            }
+            None => {
+                self.lookup_struct_innermost(name).insert_entry(ty);
+            }
+        }
     }
 
     pub(super) fn lookup_or_add_complete_struct(
