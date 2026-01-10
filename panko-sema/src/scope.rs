@@ -25,7 +25,6 @@ use panko_report::Sliced as _;
 
 use crate::scope::scopes::Scopes;
 use crate::ty;
-use crate::ty::Member;
 
 mod as_sexpr;
 mod scopes;
@@ -86,6 +85,7 @@ pub(crate) type FunctionType<'a> = ty::FunctionType<'a, TypeofExpr<'a>, LengthEx
 type ParameterDeclaration<'a> = ty::ParameterDeclaration<'a, TypeofExpr<'a>, LengthExpr<'a>>;
 pub(crate) type Type<'a> = ty::Type<'a, TypeofExpr<'a>, LengthExpr<'a>>;
 pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
+pub(crate) type Member<'a> = ty::Member<'a, TypeofExpr<'a>, LengthExpr<'a>>;
 
 #[derive(Debug)]
 enum OpenNewScope {
@@ -702,8 +702,11 @@ fn resolve_struct_members<'a>(
     let sess = scopes.sess;
 
     sess.alloc_slice_fill_iter(members.iter().map(|member| {
-        let ast::Member { name, ty: _ } = member;
-        Member { name: name.unwrap().slice() }
+        let ast::Member { name, ty } = member;
+        Member {
+            name: name.unwrap().slice(),
+            ty: resolve_ty(scopes, ty),
+        }
     }))
 }
 

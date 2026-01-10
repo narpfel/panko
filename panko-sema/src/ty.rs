@@ -164,7 +164,7 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Struct<'a> {
+pub enum Struct<'a, TypeofExpr, LengthExpr> {
     Incomplete {
         name: &'a str,
         id: Id,
@@ -172,15 +172,14 @@ pub enum Struct<'a> {
     Complete {
         name: Option<&'a str>,
         id: Id,
-        members: &'a [Member<'a>],
+        members: &'a [Member<'a, TypeofExpr, LengthExpr>],
     },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Member<'a> {
+pub struct Member<'a, TypeofExpr, LengthExpr> {
     pub(crate) name: &'a str,
-    // TODO:
-    // ty: QualifiedType<'a, TypeofExpr, LengthExpr>,
+    pub(crate) ty: QualifiedType<'a, TypeofExpr, LengthExpr>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -192,7 +191,7 @@ pub enum Type<'a, TypeofExpr, LengthExpr> {
     Void,
     Typeof { expr: TypeofExpr, unqual: bool },
     Nullptr,
-    Struct(Struct<'a>),
+    Struct(Struct<'a, TypeofExpr, LengthExpr>),
     // TODO
 }
 

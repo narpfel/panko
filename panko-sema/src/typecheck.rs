@@ -46,6 +46,7 @@ use crate::scope::StorageDuration;
 use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::FunctionType;
+use crate::ty::Member;
 use crate::ty::ParameterDeclaration;
 use crate::ty::Struct;
 use crate::ty::subobjects::AllowExplicit;
@@ -692,8 +693,14 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Nullptr => Type::Nullptr,
         ty::Type::Struct(Struct::Incomplete { name, id }) =>
             Type::Struct(Struct::Incomplete { name, id }),
-        ty::Type::Struct(Struct::Complete { name, id, members }) =>
-            Type::Struct(Struct::Complete { name, id, members }),
+        ty::Type::Struct(Struct::Complete { name, id, members }) => {
+            let members = sess.alloc_slice_fill_iter(members.iter().map(|member| {
+                let Member { name, ty } = *member;
+                let ty = typeck_ty(sess, ty, IsParameter::No);
+                Member { name, ty }
+            }));
+            Type::Struct(Struct::Complete { name, id, members })
+        }
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
