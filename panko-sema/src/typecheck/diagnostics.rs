@@ -59,10 +59,9 @@ pub(super) enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "element type is `{at}`"))]
     ArrayOfFunctions { at: QualifiedType<'a> },
 
-    #[error("invalid function return type `{ty}`")]
+    #[error("invalid function return type `{at}`")]
     #[diagnostics(at(colour = Red, label = "declaration here"))]
-    #[with(ty = ty.fg(Red))]
-    InvalidFunctionReturnType { at: Loc<'a>, ty: QualifiedType<'a> },
+    InvalidFunctionReturnType { at: QualifiedType<'a> },
 
     // TODO: types should be printed in C syntax, not in their SExpr debug repr
     #[error("invalid {kind} conversion from `{from_ty}` to `{to_ty}`")]

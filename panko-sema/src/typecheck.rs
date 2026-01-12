@@ -623,10 +623,7 @@ fn typeck_function_ty<'a>(
         Type::Array(_)
         | Type::Function(_)
         | Type::Struct(Struct::Incomplete { name: _, id: _ }) =>
-            sess.emit(Diagnostic::InvalidFunctionReturnType {
-                at: return_type.loc(),
-                ty: *return_type,
-            }),
+            sess.emit(Diagnostic::InvalidFunctionReturnType { at: *return_type }),
         Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
             todo!("check if complete struct is valid as return type"),
         Type::Typeof { expr, unqual: _ } => match expr {},
