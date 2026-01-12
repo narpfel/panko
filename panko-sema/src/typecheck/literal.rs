@@ -23,6 +23,7 @@ use super::Diagnostic;
 use super::Expression;
 use super::Type;
 use super::TypedExpression;
+use crate::fake_trait_impls::HashEqIgnored;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct StringLiteral<'a> {
@@ -270,7 +271,7 @@ pub(super) fn typeck_string_literal<'a>(
         ty: Type::Array(ArrayType {
             ty: sess.alloc(Type::char().unqualified()),
             length: ArrayLength::Constant(string.len()),
-            loc: string.loc(),
+            loc: HashEqIgnored(string.loc()),
         })
         .unqualified(),
         expr: Expression::String(string),

@@ -23,6 +23,7 @@ use panko_parser::sexpr_builder::SExpr;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
+use crate::fake_trait_impls::HashEqIgnored;
 use crate::scope::scopes::Scopes;
 use crate::ty;
 
@@ -611,7 +612,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
         ast::Type::Array(ast::ArrayType { ty, length }) => Type::Array(ArrayType {
             ty: scopes.sess.alloc(resolve_ty(scopes, ty)),
             length: try { scopes.sess.alloc(resolve_expr(scopes, length?)) },
-            loc,
+            loc: HashEqIgnored(loc),
         }),
         ast::Type::Function(function_type) =>
             Type::Function(resolve_function_ty(scopes, &function_type)),

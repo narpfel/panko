@@ -18,6 +18,7 @@ pub use crate::layout::layout;
 pub use crate::scope::resolve_names;
 pub use crate::typecheck::resolve_types;
 
+mod fake_trait_impls;
 pub mod layout;
 pub mod scope;
 pub mod ty;

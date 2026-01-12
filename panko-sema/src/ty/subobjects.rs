@@ -233,6 +233,7 @@ mod tests {
     use panko_lex::Loc;
 
     use super::*;
+    use crate::fake_trait_impls::HashEqIgnored;
     use crate::ty::ArrayType;
     use crate::ty::Type;
     use crate::typecheck::ArrayLength;
@@ -254,7 +255,7 @@ mod tests {
         let ty = Type::Array(ArrayType {
             ty: &size_t,
             length: ArrayLength::Constant(3),
-            loc: Loc::synthesised(),
+            loc: HashEqIgnored(Loc::synthesised()),
         })
         .unqualified();
 
@@ -271,13 +272,13 @@ mod tests {
         let array_ty = Type::Array(ArrayType {
             ty: &size_t,
             length: ArrayLength::Constant(4),
-            loc: Loc::synthesised(),
+            loc: HashEqIgnored(Loc::synthesised()),
         })
         .unqualified();
         let ty = Type::Array(ArrayType {
             ty: &array_ty,
             length: ArrayLength::Constant(3),
-            loc: Loc::synthesised(),
+            loc: HashEqIgnored(Loc::synthesised()),
         })
         .unqualified();
 
@@ -299,13 +300,13 @@ mod tests {
         let array_ty = Type::Array(ArrayType {
             ty: &size_t,
             length: ArrayLength::Constant(4),
-            loc: Loc::synthesised(),
+            loc: HashEqIgnored(Loc::synthesised()),
         })
         .unqualified();
         let ty = Type::Array(ArrayType {
             ty: &array_ty,
             length: ArrayLength::Constant(3),
-            loc: Loc::synthesised(),
+            loc: HashEqIgnored(Loc::synthesised()),
         })
         .unqualified();
 

@@ -17,6 +17,7 @@ use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
 use yansi::Paint as _;
 
+use crate::fake_trait_impls::HashEqIgnored;
 use crate::scope::Id;
 use crate::typecheck::ArrayLength;
 
@@ -72,50 +73,16 @@ where
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ArrayType<'a, TypeofExpr, LengthExpr> {
     pub ty: &'a QualifiedType<'a, TypeofExpr, LengthExpr>,
     pub length: LengthExpr,
-    pub loc: Loc<'a>,
+    pub loc: HashEqIgnored<Loc<'a>>,
 }
 
 impl<'a, TypeofExpr, LengthExpr> ArrayType<'a, TypeofExpr, LengthExpr> {
     pub(crate) fn loc(&self) -> Loc<'a> {
-        self.loc
-    }
-}
-
-impl<'a, TypeofExpr, LengthExpr> PartialEq for ArrayType<'a, TypeofExpr, LengthExpr>
-where
-    TypeofExpr: PartialEq,
-    LengthExpr: PartialEq,
-{
-    fn eq(&self, other: &Self) -> bool {
-        let Self { ty, length, loc: _ } = self;
-        let Self {
-            ty: other_ty,
-            length: other_length,
-            loc: _,
-        } = other;
-        (ty, length) == (other_ty, other_length)
-    }
-}
-
-impl<'a, TypeofExpr, LengthExpr> Eq for ArrayType<'a, TypeofExpr, LengthExpr>
-where
-    TypeofExpr: Eq,
-    LengthExpr: Eq,
-{
-}
-
-impl<'a, TypeofExpr, LengthExpr> Hash for ArrayType<'a, TypeofExpr, LengthExpr>
-where
-    TypeofExpr: Hash,
-    LengthExpr: Hash,
-{
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        let Self { ty, length, loc: _ } = self;
-        (ty, length).hash(state)
+        self.loc.0
     }
 }
 
