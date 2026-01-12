@@ -517,7 +517,7 @@ where
                     loc: _,
                 }),
             ) => {
-                let ty = bump.alloc(ty.composite_ty(bump, *other_ty)?);
+                let ty = bump.alloc(ty.composite_ty(bump, other_ty)?);
                 let length = match (length, other_length) {
                     (ArrayLength::Constant(length), ArrayLength::Constant(other_length))
                         if length != other_length =>
