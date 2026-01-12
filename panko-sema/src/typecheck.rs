@@ -30,6 +30,7 @@ use panko_parser::ast::reject_function_specifiers;
 use panko_report::Report;
 use variant_types::IntoVariant as _;
 
+use crate::fake_trait_impls::HashEqIgnored;
 use crate::scope;
 use crate::scope::DesignatedInitialiser;
 use crate::scope::Designation;
@@ -621,8 +622,11 @@ fn typeck_function_ty<'a>(
         Type::Arithmetic(_) | Type::Pointer(_) | Type::Void | Type::Nullptr => (),
         Type::Array(_)
         | Type::Function(_)
-        | Type::Struct(Struct::Incomplete { name: _, id: _ }) => sess
-            .emit(Diagnostic::InvalidFunctionReturnType { at: return_type.loc, ty: *return_type }),
+        | Type::Struct(Struct::Incomplete { name: _, id: _ }) =>
+            sess.emit(Diagnostic::InvalidFunctionReturnType {
+                at: return_type.loc(),
+                ty: *return_type,
+            }),
         Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
             todo!("check if complete struct is valid as return type"),
         Type::Typeof { expr, unqual: _ } => match expr {},
@@ -2170,7 +2174,7 @@ fn typeck_expression<'a>(
                             (Type::Void, _) | (_, Type::Void) => Type::Void,
                             _ => then_pointee.ty,
                         },
-                        loc: Loc::synthesised(),
+                        loc: HashEqIgnored(Loc::synthesised()),
                     })),
                 (Type::Pointer(_), Type::Pointer(_)) => {
                     // TODO: use this error

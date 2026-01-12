@@ -645,6 +645,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
         },
         ast::Type::Struct(r#struct) => resolve_struct(scopes, &r#struct),
     };
+    let loc = HashEqIgnored(loc);
     QualifiedType { is_const, is_volatile, ty, loc }
 }
 

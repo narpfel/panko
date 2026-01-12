@@ -295,7 +295,7 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
             is_const: false,
             is_volatile: false,
             ty: *self,
-            loc: Loc::synthesised(),
+            loc: HashEqIgnored(Loc::synthesised()),
         }
     }
 
@@ -434,12 +434,12 @@ where
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct QualifiedType<'a, TypeofExpr, LengthExpr> {
     pub(crate) is_const: bool,
     pub(crate) is_volatile: bool,
     pub ty: Type<'a, TypeofExpr, LengthExpr>,
-    pub(crate) loc: Loc<'a>,
+    pub(crate) loc: HashEqIgnored<Loc<'a>>,
 }
 
 impl<'a, TypeofExpr, LengthExpr> QualifiedType<'a, TypeofExpr, LengthExpr> {
@@ -454,7 +454,7 @@ impl<'a, TypeofExpr, LengthExpr> QualifiedType<'a, TypeofExpr, LengthExpr> {
     }
 
     pub fn loc(&self) -> Loc<'a> {
-        self.loc
+        self.loc.0
     }
 }
 
@@ -507,41 +507,6 @@ where
             ty,
             loc: *loc,
         })
-    }
-}
-
-impl<TypeofExpr, LengthExpr> PartialEq for QualifiedType<'_, TypeofExpr, LengthExpr>
-where
-    TypeofExpr: PartialEq,
-    LengthExpr: PartialEq,
-{
-    fn eq(&self, other: &Self) -> bool {
-        let Self { is_const, is_volatile, ty, loc: _ } = self;
-        let Self {
-            is_const: other_is_const,
-            is_volatile: other_is_volatile,
-            ty: other_ty,
-            loc: _,
-        } = other;
-        (is_const, is_volatile, ty) == (other_is_const, other_is_volatile, other_ty)
-    }
-}
-
-impl<TypeofExpr, LengthExpr> Eq for QualifiedType<'_, TypeofExpr, LengthExpr>
-where
-    TypeofExpr: Eq,
-    LengthExpr: Eq,
-{
-}
-
-impl<TypeofExpr, LengthExpr> Hash for QualifiedType<'_, TypeofExpr, LengthExpr>
-where
-    TypeofExpr: Hash,
-    LengthExpr: Hash,
-{
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        let Self { is_const, is_volatile, ty, loc: _ } = self;
-        (is_const, is_volatile, ty).hash(state)
     }
 }
 
