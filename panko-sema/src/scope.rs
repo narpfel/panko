@@ -24,8 +24,10 @@ use panko_report::Report;
 use panko_report::Sliced as _;
 
 use crate::fake_trait_impls::HashEqIgnored;
+use crate::fake_trait_impls::NoHashEq;
 use crate::scope::scopes::Scopes;
 use crate::ty;
+use crate::ty::ParameterDeclaration;
 
 mod as_sexpr;
 mod scopes;
@@ -79,14 +81,19 @@ pub(crate) enum Diagnostic<'a> {
     },
 }
 
-type TypeofExpr<'a> = Typeof<'a>;
-type LengthExpr<'a> = Option<&'a Expression<'a>>;
-pub(crate) type ArrayType<'a> = ty::ArrayType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
-pub(crate) type FunctionType<'a> = ty::FunctionType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
-type ParameterDeclaration<'a> = ty::ParameterDeclaration<'a, TypeofExpr<'a>, LengthExpr<'a>>;
-pub(crate) type Type<'a> = ty::Type<'a, TypeofExpr<'a>, LengthExpr<'a>>;
-pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, TypeofExpr<'a>, LengthExpr<'a>>;
-pub(crate) type Member<'a> = ty::Member<'a, TypeofExpr<'a>, LengthExpr<'a>>;
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum Scope {}
+
+impl<'a> ty::Step<'a> for Scope {
+    type LengthExpr = NoHashEq<Option<&'a Expression<'a>>>;
+    type TypeofExpr = NoHashEq<Typeof<'a>>;
+}
+
+pub(crate) type ArrayType<'a> = ty::ArrayType<'a, Scope>;
+pub(crate) type FunctionType<'a> = ty::FunctionType<'a, Scope>;
+pub(crate) type Type<'a> = ty::Type<'a, Scope>;
+pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, Scope>;
+pub(crate) type Member<'a> = ty::Member<'a, Scope>;
 
 #[derive(Debug)]
 enum OpenNewScope {
@@ -611,7 +618,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             Type::Pointer(scopes.sess.alloc(resolve_ty(scopes, pointee))),
         ast::Type::Array(ast::ArrayType { ty, length }) => Type::Array(ArrayType {
             ty: scopes.sess.alloc(resolve_ty(scopes, ty)),
-            length: try { scopes.sess.alloc(resolve_expr(scopes, length?)) },
+            length: NoHashEq(try { scopes.sess.alloc(resolve_expr(scopes, length?)) }),
             loc: HashEqIgnored(loc),
         }),
         ast::Type::Function(function_type) =>
@@ -636,11 +643,11 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             };
         }
         ast::Type::Typeof { unqual, expr } => Type::Typeof {
-            expr: Typeof::Expr(scopes.sess.alloc(resolve_expr(scopes, expr))),
+            expr: NoHashEq(Typeof::Expr(scopes.sess.alloc(resolve_expr(scopes, expr)))),
             unqual,
         },
         ast::Type::TypeofTy { unqual, ty } => Type::Typeof {
-            expr: Typeof::Ty(scopes.sess.alloc(resolve_ty(scopes, ty))),
+            expr: NoHashEq(Typeof::Ty(scopes.sess.alloc(resolve_ty(scopes, ty)))),
             unqual,
         },
         ast::Type::Struct(r#struct) => resolve_struct(scopes, &r#struct),
@@ -1056,7 +1063,7 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
                 Type::Pointer(
                     scopes.sess.alloc(
                         Type::Typeof {
-                            expr: Typeof::Expr(target),
+                            expr: NoHashEq(Typeof::Expr(target)),
                             unqual: false,
                         }
                         .unqualified(),
@@ -1140,7 +1147,7 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::Increment { operator, operand, fixity } => {
             let operand = scopes.sess.alloc(resolve_expr(scopes, operand));
             let reference = scopes.temporary(operand.loc(), Type::Void.unqualified());
-            let expr = Typeof::Expr(operand);
+            let expr = NoHashEq(Typeof::Expr(operand));
             let typeof_operand_unqual = Type::Typeof { expr, unqual: true };
             let typeof_operand = Type::Typeof { expr, unqual: false };
             Expression::Increment {

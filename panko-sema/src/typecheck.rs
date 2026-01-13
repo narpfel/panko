@@ -31,6 +31,7 @@ use panko_report::Report;
 use variant_types::IntoVariant as _;
 
 use crate::fake_trait_impls::HashEqIgnored;
+use crate::fake_trait_impls::NoHashEq;
 use crate::scope;
 use crate::scope::DesignatedInitialiser;
 use crate::scope::Designation;
@@ -115,8 +116,16 @@ impl<Expression> Hash for ArrayLength<Expression> {
     }
 }
 
-pub(crate) type Type<'a> = ty::Type<'a, !, ArrayLength<&'a TypedExpression<'a>>>;
-pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, !, ArrayLength<&'a TypedExpression<'a>>>;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub(crate) enum Typeck {}
+
+impl<'a> ty::Step<'a> for Typeck {
+    type LengthExpr = ArrayLength<&'a TypedExpression<'a>>;
+    type TypeofExpr = !;
+}
+
+pub(crate) type Type<'a> = ty::Type<'a, Typeck>;
+pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, Typeck>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {
@@ -570,7 +579,7 @@ fn typeck_array_ty<'a>(
     is_parameter: IsParameter,
     reference: Option<&scope::Reference<'a>>,
 ) -> Type<'a> {
-    let ArrayType { ty, length, loc } = ty;
+    let ArrayType { ty, length: NoHashEq(length), loc } = ty;
     let ty = sess.alloc(typeck_ty(sess, *ty, IsParameter::No));
     if !ty.ty.is_complete() {
         // TODO: this should be `Type::Error`
@@ -674,7 +683,7 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Array(ty) => typeck_array_ty(sess, ty, is_parameter, reference),
         ty::Type::Function(ty) => typeck_function_ty(sess, ty, is_parameter),
         ty::Type::Void => Type::Void,
-        ty::Type::Typeof { expr, unqual } => {
+        ty::Type::Typeof { expr: NoHashEq(expr), unqual } => {
             let ty = match expr {
                 scope::Typeof::Expr(expr) => typeck_expression(sess, expr, Context::Typeof).ty,
                 scope::Typeof::Ty(ty) => typeck_ty(sess, *ty, is_parameter),
@@ -949,7 +958,7 @@ fn typeck_function_definition<'a>(
 fn typeck_array_initialisation_with_string<'a>(
     sess: &'a Session<'a>,
     reference: &Reference<'a>,
-    array_ty: &ArrayType<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
+    array_ty: &ArrayType<'a, Typeck>,
     initialiser: &scope::Expression<'a>,
 ) -> TypedExpression<'a> {
     // TODO: adjust this check for prefixed string literals
