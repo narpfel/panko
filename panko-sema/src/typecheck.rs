@@ -119,9 +119,9 @@ impl<Expression> Hash for ArrayLength<Expression> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum Typeck {}
 
-impl<'a> ty::Step<'a> for Typeck {
-    type LengthExpr = ArrayLength<&'a TypedExpression<'a>>;
-    type TypeofExpr = !;
+impl ty::Step for Typeck {
+    type LengthExpr<'a> = ArrayLength<&'a TypedExpression<'a>>;
+    type TypeofExpr<'a> = !;
 }
 
 pub(crate) type Type<'a> = ty::Type<'a, Typeck>;

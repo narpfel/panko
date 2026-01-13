@@ -84,9 +84,9 @@ pub(crate) enum Diagnostic<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Scope {}
 
-impl<'a> ty::Step<'a> for Scope {
-    type LengthExpr = NoHashEq<Option<&'a Expression<'a>>>;
-    type TypeofExpr = NoHashEq<Typeof<'a>>;
+impl ty::Step for Scope {
+    type LengthExpr<'a> = NoHashEq<Option<&'a Expression<'a>>>;
+    type TypeofExpr<'a> = NoHashEq<Typeof<'a>>;
 }
 
 pub(crate) type ArrayType<'a> = ty::ArrayType<'a, Scope>;

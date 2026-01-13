@@ -30,9 +30,9 @@ mod stack;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Layout;
 
-impl<'a> ty::Step<'a> for Layout {
-    type LengthExpr = ArrayLength<'a>;
-    type TypeofExpr = !;
+impl ty::Step for Layout {
+    type LengthExpr<'a> = ArrayLength<'a>;
+    type TypeofExpr<'a> = !;
 }
 
 type ArrayLength<'a> = typecheck::ArrayLength<&'a LayoutedExpression<'a>>;

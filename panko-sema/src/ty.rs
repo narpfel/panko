@@ -24,19 +24,19 @@ use crate::typecheck::Typeck;
 
 pub(crate) mod subobjects;
 
-pub trait Step<'a> {
-    type TypeofExpr: Copy + Eq + Hash + fmt::Debug + AsSExpr + 'a;
-    type LengthExpr: Copy + Eq + Hash + fmt::Debug + AsSExpr + 'a;
+pub trait Step {
+    type TypeofExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr + 'a;
+    type LengthExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr + 'a;
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct ParameterDeclaration<'a, T: Step<'a>> {
+pub struct ParameterDeclaration<'a, T: Step> {
     pub loc: Loc<'a>,
     pub ty: QualifiedType<'a, T>,
     pub name: Option<Token<'a>>,
 }
 
-impl<'a, T: Step<'a>> ParameterDeclaration<'a, T> {
+impl<'a, T: Step> ParameterDeclaration<'a, T> {
     pub(crate) fn loc(&self) -> Loc<'a> {
         self.loc
     }
@@ -48,7 +48,7 @@ impl<'a, T: Step<'a>> ParameterDeclaration<'a, T> {
     }
 }
 
-impl<'a, T: Step<'a>> PartialEq for ParameterDeclaration<'a, T>
+impl<'a, T: Step> PartialEq for ParameterDeclaration<'a, T>
 where
     T: PartialEq,
 {
@@ -57,9 +57,9 @@ where
     }
 }
 
-impl<'a, T: Step<'a>> Eq for ParameterDeclaration<'a, T> where T: Eq {}
+impl<'a, T: Step> Eq for ParameterDeclaration<'a, T> where T: Eq {}
 
-impl<'a, T: Step<'a>> Hash for ParameterDeclaration<'a, T>
+impl<'a, T: Step> Hash for ParameterDeclaration<'a, T>
 where
     T: Hash,
 {
@@ -69,19 +69,19 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct ArrayType<'a, T: Step<'a>> {
+pub struct ArrayType<'a, T: Step> {
     pub ty: &'a QualifiedType<'a, T>,
-    pub length: T::LengthExpr,
+    pub length: T::LengthExpr<'a>,
     pub loc: HashEqIgnored<Loc<'a>>,
 }
 
-impl<'a, T: Step<'a>> ArrayType<'a, T> {
+impl<'a, T: Step> ArrayType<'a, T> {
     pub(crate) fn loc(&self) -> Loc<'a> {
         self.loc.0
     }
 }
 
-impl<'a, T: Step<'a>> fmt::Display for ArrayType<'a, T> {
+impl<'a, T: Step> fmt::Display for ArrayType<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { ty, length, loc: _ } = self;
         write!(f, "array<{ty}; {length}>", length = length.as_sexpr())
@@ -89,13 +89,13 @@ impl<'a, T: Step<'a>> fmt::Display for ArrayType<'a, T> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct FunctionType<'a, T: Step<'a>> {
+pub struct FunctionType<'a, T: Step> {
     pub params: &'a [ParameterDeclaration<'a, T>],
     pub return_type: &'a QualifiedType<'a, T>,
     pub is_varargs: bool,
 }
 
-impl<'a, T: Step<'a>> fmt::Display for FunctionType<'a, T> {
+impl<'a, T: Step> fmt::Display for FunctionType<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { params, return_type, is_varargs } = *self;
         let maybe_ellipsis = match (is_varargs, params.is_empty()) {
@@ -118,7 +118,7 @@ impl<'a, T: Step<'a>> fmt::Display for FunctionType<'a, T> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Struct<'a, T: Step<'a>> {
+pub enum Struct<'a, T: Step> {
     Incomplete {
         name: &'a str,
         id: Id,
@@ -131,25 +131,28 @@ pub enum Struct<'a, T: Step<'a>> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Member<'a, T: Step<'a>> {
+pub struct Member<'a, T: Step> {
     pub(crate) name: &'a str,
     pub(crate) ty: QualifiedType<'a, T>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Type<'a, T: Step<'a>> {
+pub enum Type<'a, T: Step> {
     Arithmetic(Arithmetic),
     Pointer(&'a QualifiedType<'a, T>),
     Array(ArrayType<'a, T>),
     Function(FunctionType<'a, T>),
     Void,
-    Typeof { expr: T::TypeofExpr, unqual: bool },
+    Typeof {
+        expr: T::TypeofExpr<'a>,
+        unqual: bool,
+    },
     Nullptr,
     Struct(Struct<'a, T>),
     // TODO
 }
 
-impl<'a, T: Step<'a>> Type<'a, T> {
+impl<'a, T: Step> Type<'a, T> {
     pub(crate) const BOOL: Self = Self::bool();
 
     pub(crate) const fn bool() -> Self {
@@ -294,7 +297,7 @@ impl<'a, T: Step<'a>> Type<'a, T> {
 
 impl<'a, S, E> Type<'a, S>
 where
-    S: Step<'a, TypeofExpr = !, LengthExpr = ArrayLength<E>>,
+    S: Step<TypeofExpr<'a> = !, LengthExpr<'a> = ArrayLength<E>>,
 {
     pub fn is_object(&self) -> bool {
         !self.is_function()
@@ -357,7 +360,7 @@ where
 
     pub(crate) fn is_slot_compatible<'b, S2, E2>(&self, ty: &Type<'b, S2>) -> bool
     where
-        S2: Step<'b, TypeofExpr = !, LengthExpr = ArrayLength<E2>>,
+        S2: Step<TypeofExpr<'b> = !, LengthExpr<'b> = ArrayLength<E2>>,
     {
         // TODO: This is more restrictive than necessary.
         self.size() == ty.size() && self.align() == ty.align()
@@ -395,7 +398,7 @@ where
     }
 }
 
-impl<'a, T: Step<'a>> fmt::Display for Type<'a, T> {
+impl<'a, T: Step> fmt::Display for Type<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Type::Arithmetic(Arithmetic::Integral(integral)) => write!(f, "{integral}"),
@@ -419,14 +422,14 @@ impl<'a, T: Step<'a>> fmt::Display for Type<'a, T> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct QualifiedType<'a, T: Step<'a>> {
+pub struct QualifiedType<'a, T: Step> {
     pub(crate) is_const: bool,
     pub(crate) is_volatile: bool,
     pub ty: Type<'a, T>,
     pub(crate) loc: HashEqIgnored<Loc<'a>>,
 }
 
-impl<'a, T: Step<'a>> QualifiedType<'a, T> {
+impl<'a, T: Step> QualifiedType<'a, T> {
     // TODO: this is a temporary hack until the `Report` derive macro handles stringification
     // better
     pub(crate) fn slice(&self) -> String {
@@ -487,7 +490,7 @@ impl<'a> QualifiedType<'a, Typeck> {
     }
 }
 
-impl<'a, T: Step<'a>> fmt::Display for QualifiedType<'a, T> {
+impl<'a, T: Step> fmt::Display for QualifiedType<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.ty.fmt(f)?;
         if self.is_const {
@@ -500,7 +503,7 @@ impl<'a, T: Step<'a>> fmt::Display for QualifiedType<'a, T> {
     }
 }
 
-impl<'a, T: Step<'a>> AsSExpr for QualifiedType<'a, T> {
+impl<'a, T: Step> AsSExpr for QualifiedType<'a, T> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::display(&self.italic())
     }
