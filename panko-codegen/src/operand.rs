@@ -237,12 +237,6 @@ impl<'a> AsOperand<'a> for Operand<'a> {
     }
 }
 
-impl<'a> AsOperand<'a> for &Operand<'a> {
-    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand<'a> {
-        **self
-    }
-}
-
 impl<'a> AsOperand<'a> for LayoutedExpression<'a> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
         slot_as_operand(self.slot, self.ty.ty, argument_area_size.unwrap(), false)
