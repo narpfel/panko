@@ -20,53 +20,48 @@ use yansi::Paint as _;
 use crate::fake_trait_impls::HashEqIgnored;
 use crate::scope::Id;
 use crate::typecheck::ArrayLength;
+use crate::typecheck::Typeck;
 
 pub(crate) mod subobjects;
 
+pub trait Step {
+    type TypeofExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
+    type LengthExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
+}
+
 #[derive(Debug, Clone, Copy)]
-pub struct ParameterDeclaration<'a, TypeofExpr, LengthExpr> {
+pub struct ParameterDeclaration<'a, T: Step> {
     pub loc: Loc<'a>,
-    pub ty: QualifiedType<'a, TypeofExpr, LengthExpr>,
+    pub ty: QualifiedType<'a, T>,
     pub name: Option<Token<'a>>,
 }
 
-impl<'a, TypeofExpr, LengthExpr> ParameterDeclaration<'a, TypeofExpr, LengthExpr> {
+impl<'a, T: Step> ParameterDeclaration<'a, T> {
     pub(crate) fn loc(&self) -> Loc<'a> {
         self.loc
     }
 
-    pub(crate) fn slice(&self) -> Cow<'a, str>
-    where
-        TypeofExpr: AsSExpr,
-        LengthExpr: AsSExpr,
-    {
+    pub(crate) fn slice(&self) -> Cow<'a, str> {
         self.name
             .map(|name| Cow::Borrowed(name.slice()))
             .unwrap_or_else(|| Cow::Owned(format!("<unnamed parameter of type `{}`>", self.ty)))
     }
 }
 
-impl<TypeofExpr, LengthExpr> PartialEq for ParameterDeclaration<'_, TypeofExpr, LengthExpr>
+impl<'a, T: Step> PartialEq for ParameterDeclaration<'a, T>
 where
-    TypeofExpr: PartialEq,
-    LengthExpr: PartialEq,
+    T: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         self.ty.ty == other.ty.ty
     }
 }
 
-impl<TypeofExpr, LengthExpr> Eq for ParameterDeclaration<'_, TypeofExpr, LengthExpr>
-where
-    TypeofExpr: Eq,
-    LengthExpr: Eq,
-{
-}
+impl<'a, T: Step> Eq for ParameterDeclaration<'a, T> where T: Eq {}
 
-impl<TypeofExpr, LengthExpr> Hash for ParameterDeclaration<'_, TypeofExpr, LengthExpr>
+impl<'a, T: Step> Hash for ParameterDeclaration<'a, T>
 where
-    TypeofExpr: Hash,
-    LengthExpr: Hash,
+    T: Hash,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.ty.ty.hash(state)
@@ -74,23 +69,19 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct ArrayType<'a, TypeofExpr, LengthExpr> {
-    pub ty: &'a QualifiedType<'a, TypeofExpr, LengthExpr>,
-    pub length: LengthExpr,
+pub struct ArrayType<'a, T: Step> {
+    pub ty: &'a QualifiedType<'a, T>,
+    pub length: T::LengthExpr<'a>,
     pub loc: HashEqIgnored<Loc<'a>>,
 }
 
-impl<'a, TypeofExpr, LengthExpr> ArrayType<'a, TypeofExpr, LengthExpr> {
+impl<'a, T: Step> ArrayType<'a, T> {
     pub(crate) fn loc(&self) -> Loc<'a> {
         self.loc.0
     }
 }
 
-impl<TypeofExpr, LengthExpr> fmt::Display for ArrayType<'_, TypeofExpr, LengthExpr>
-where
-    TypeofExpr: AsSExpr,
-    LengthExpr: AsSExpr,
-{
+impl<'a, T: Step> fmt::Display for ArrayType<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { ty, length, loc: _ } = self;
         write!(f, "array<{ty}; {length}>", length = length.as_sexpr())
@@ -98,17 +89,13 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct FunctionType<'a, TypeofExpr, LengthExpr> {
-    pub params: &'a [ParameterDeclaration<'a, TypeofExpr, LengthExpr>],
-    pub return_type: &'a QualifiedType<'a, TypeofExpr, LengthExpr>,
+pub struct FunctionType<'a, T: Step> {
+    pub params: &'a [ParameterDeclaration<'a, T>],
+    pub return_type: &'a QualifiedType<'a, T>,
     pub is_varargs: bool,
 }
 
-impl<TypeofExpr, LengthExpr> fmt::Display for FunctionType<'_, TypeofExpr, LengthExpr>
-where
-    TypeofExpr: AsSExpr,
-    LengthExpr: AsSExpr,
-{
+impl<'a, T: Step> fmt::Display for FunctionType<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { params, return_type, is_varargs } = *self;
         let maybe_ellipsis = match (is_varargs, params.is_empty()) {
@@ -131,7 +118,7 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Struct<'a, TypeofExpr, LengthExpr> {
+pub enum Struct<'a, T: Step> {
     Incomplete {
         name: &'a str,
         id: Id,
@@ -139,30 +126,33 @@ pub enum Struct<'a, TypeofExpr, LengthExpr> {
     Complete {
         name: Option<&'a str>,
         id: Id,
-        members: &'a [Member<'a, TypeofExpr, LengthExpr>],
+        members: &'a [Member<'a, T>],
     },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Member<'a, TypeofExpr, LengthExpr> {
+pub struct Member<'a, T: Step> {
     pub(crate) name: &'a str,
-    pub(crate) ty: QualifiedType<'a, TypeofExpr, LengthExpr>,
+    pub(crate) ty: QualifiedType<'a, T>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Type<'a, TypeofExpr, LengthExpr> {
+pub enum Type<'a, T: Step> {
     Arithmetic(Arithmetic),
-    Pointer(&'a QualifiedType<'a, TypeofExpr, LengthExpr>),
-    Array(ArrayType<'a, TypeofExpr, LengthExpr>),
-    Function(FunctionType<'a, TypeofExpr, LengthExpr>),
+    Pointer(&'a QualifiedType<'a, T>),
+    Array(ArrayType<'a, T>),
+    Function(FunctionType<'a, T>),
     Void,
-    Typeof { expr: TypeofExpr, unqual: bool },
+    Typeof {
+        expr: T::TypeofExpr<'a>,
+        unqual: bool,
+    },
     Nullptr,
-    Struct(Struct<'a, TypeofExpr, LengthExpr>),
+    Struct(Struct<'a, T>),
     // TODO
 }
 
-impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
+impl<'a, T: Step> Type<'a, T> {
     pub(crate) const BOOL: Self = Self::bool();
 
     pub(crate) const fn bool() -> Self {
@@ -286,10 +276,9 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
         }
     }
 
-    pub fn unqualified(&self) -> QualifiedType<'a, TypeofExpr, LengthExpr>
+    pub fn unqualified(&self) -> QualifiedType<'a, T>
     where
-        TypeofExpr: Copy,
-        LengthExpr: Copy,
+        T: Copy,
     {
         QualifiedType {
             is_const: false,
@@ -301,16 +290,15 @@ impl<'a, TypeofExpr, LengthExpr> Type<'a, TypeofExpr, LengthExpr> {
 
     // TODO: this is a temporary hack until the `Report` derive macro handles stringification
     // better
-    pub fn slice(&self) -> String
-    where
-        TypeofExpr: AsSExpr,
-        LengthExpr: AsSExpr,
-    {
+    pub fn slice(&self) -> String {
         self.to_string()
     }
 }
 
-impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
+impl<'a, S, E> Type<'a, S>
+where
+    S: Step<TypeofExpr<'a> = !, LengthExpr<'a> = ArrayLength<E>>,
+{
     pub fn is_object(&self) -> bool {
         !self.is_function()
     }
@@ -370,7 +358,10 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
         }
     }
 
-    pub(crate) fn is_slot_compatible<E>(&self, ty: &Type<'_, !, ArrayLength<E>>) -> bool {
+    pub(crate) fn is_slot_compatible<'b, S2, E2>(&self, ty: &Type<'b, S2>) -> bool
+    where
+        S2: Step<TypeofExpr<'b> = !, LengthExpr<'b> = ArrayLength<E2>>,
+    {
         // TODO: This is more restrictive than necessary.
         self.size() == ty.size() && self.align() == ty.align()
     }
@@ -407,11 +398,7 @@ impl<LengthExpr> Type<'_, !, ArrayLength<LengthExpr>> {
     }
 }
 
-impl<TypeofExpr, LengthExpr> fmt::Display for Type<'_, TypeofExpr, LengthExpr>
-where
-    TypeofExpr: AsSExpr,
-    LengthExpr: AsSExpr,
-{
+impl<'a, T: Step> fmt::Display for Type<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Type::Arithmetic(Arithmetic::Integral(integral)) => write!(f, "{integral}"),
@@ -435,21 +422,17 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct QualifiedType<'a, TypeofExpr, LengthExpr> {
+pub struct QualifiedType<'a, T: Step> {
     pub(crate) is_const: bool,
     pub(crate) is_volatile: bool,
-    pub ty: Type<'a, TypeofExpr, LengthExpr>,
+    pub ty: Type<'a, T>,
     pub(crate) loc: HashEqIgnored<Loc<'a>>,
 }
 
-impl<'a, TypeofExpr, LengthExpr> QualifiedType<'a, TypeofExpr, LengthExpr> {
+impl<'a, T: Step> QualifiedType<'a, T> {
     // TODO: this is a temporary hack until the `Report` derive macro handles stringification
     // better
-    pub(crate) fn slice(&self) -> String
-    where
-        TypeofExpr: AsSExpr,
-        LengthExpr: AsSExpr,
-    {
+    pub(crate) fn slice(&self) -> String {
         self.to_string()
     }
 
@@ -458,10 +441,7 @@ impl<'a, TypeofExpr, LengthExpr> QualifiedType<'a, TypeofExpr, LengthExpr> {
     }
 }
 
-impl<'a, LengthExpr> QualifiedType<'a, !, ArrayLength<LengthExpr>>
-where
-    LengthExpr: Copy,
-{
+impl<'a> QualifiedType<'a, Typeck> {
     pub(crate) fn composite_ty(&self, bump: &'a Bump, other: &Self) -> Option<Self> {
         let Self { is_const, is_volatile, ty, loc } = self;
         let Self {
@@ -510,11 +490,7 @@ where
     }
 }
 
-impl<TypeofExpr, LengthExpr> fmt::Display for QualifiedType<'_, TypeofExpr, LengthExpr>
-where
-    TypeofExpr: AsSExpr,
-    LengthExpr: AsSExpr,
-{
+impl<'a, T: Step> fmt::Display for QualifiedType<'a, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.ty.fmt(f)?;
         if self.is_const {
@@ -527,11 +503,7 @@ where
     }
 }
 
-impl<TypeofExpr, LengthExpr> AsSExpr for QualifiedType<'_, TypeofExpr, LengthExpr>
-where
-    TypeofExpr: AsSExpr,
-    LengthExpr: AsSExpr,
-{
+impl<'a, T: Step> AsSExpr for QualifiedType<'a, T> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::display(&self.italic())
     }

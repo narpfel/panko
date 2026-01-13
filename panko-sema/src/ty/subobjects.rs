@@ -4,7 +4,7 @@ use crate::ty::ArrayType;
 use crate::typecheck::ArrayLength;
 use crate::typecheck::QualifiedType;
 use crate::typecheck::Type;
-use crate::typecheck::TypedExpression;
+use crate::typecheck::Typeck;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Subobject<'a> {
@@ -20,7 +20,7 @@ pub(crate) enum SubobjectIterator<'a> {
         offset: u64,
     },
     Array {
-        ty: ArrayType<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
+        ty: ArrayType<'a, Typeck>,
         index: u64,
         offset: u64,
     },

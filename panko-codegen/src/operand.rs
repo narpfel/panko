@@ -223,28 +223,22 @@ fn slot_as_operand<'a>(
     }
 }
 
-pub(super) trait AsOperand {
-    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand;
+pub(super) trait AsOperand<'a> {
+    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a>;
 
     fn size(&self) -> u64 {
         self.as_operand(None).ty.size()
     }
 }
 
-impl AsOperand for Operand<'_> {
-    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
+impl<'a> AsOperand<'a> for Operand<'a> {
+    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand<'a> {
         *self
     }
 }
 
-impl AsOperand for &Operand<'_> {
-    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
-        **self
-    }
-}
-
-impl AsOperand for LayoutedExpression<'_> {
-    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
+impl<'a> AsOperand<'a> for LayoutedExpression<'a> {
+    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
         slot_as_operand(self.slot, self.ty.ty, argument_area_size.unwrap(), false)
     }
 
@@ -253,8 +247,8 @@ impl AsOperand for LayoutedExpression<'_> {
     }
 }
 
-impl AsOperand for Reference<'_> {
-    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
+impl<'a> AsOperand<'a> for Reference<'a> {
+    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
         slot_as_operand(self.slot(), self.ty.ty, argument_area_size.unwrap(), false)
     }
 
@@ -263,23 +257,8 @@ impl AsOperand for Reference<'_> {
     }
 }
 
-impl AsOperand for ByValue<&Reference<'_>> {
-    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
-        slot_as_operand(
-            self.0.slot(),
-            self.0.ty.ty,
-            argument_area_size.unwrap(),
-            true,
-        )
-    }
-
-    fn size(&self) -> u64 {
-        self.0.ty.ty.size()
-    }
-}
-
-impl AsOperand for ByValue<&dyn AsOperand> {
-    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
+impl<'a> AsOperand<'a> for ByValue<&dyn AsOperand<'a>> {
+    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
         let Operand { kind, ty } = self.0.as_operand(argument_area_size);
 
         let kind = match kind {
@@ -296,8 +275,8 @@ impl AsOperand for ByValue<&dyn AsOperand> {
     }
 }
 
-impl AsOperand for SubobjectAtReference<'_> {
-    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand {
+impl<'a> AsOperand<'a> for SubobjectAtReference<'a> {
+    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
         slot_as_operand(
             self.slot(),
             self.subobject.ty().ty,
@@ -311,8 +290,8 @@ impl AsOperand for SubobjectAtReference<'_> {
     }
 }
 
-impl AsOperand for TypedRegister<'_> {
-    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
+impl<'a> AsOperand<'a> for TypedRegister<'a, '_> {
+    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand<'a> {
         let Self { register, ty } = *self;
         Operand {
             kind: OperandKind::Register(register),
@@ -321,8 +300,8 @@ impl AsOperand for TypedRegister<'_> {
     }
 }
 
-impl AsOperand for Register {
-    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
+impl<'a> AsOperand<'a> for Register {
+    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand<'a> {
         Operand {
             kind: OperandKind::Register(*self),
             ty: Type::size_t(),
@@ -330,8 +309,8 @@ impl AsOperand for Register {
     }
 }
 
-impl AsOperand for u64 {
-    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
+impl<'a> AsOperand<'a> for u64 {
+    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand<'a> {
         Operand {
             kind: OperandKind::Immediate(*self),
             ty: Type::size_t(),
@@ -339,8 +318,8 @@ impl AsOperand for u64 {
     }
 }
 
-impl AsOperand for Memory<'_> {
-    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
+impl<'a> AsOperand<'a> for Memory<'a> {
+    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand<'a> {
         assert!(
             !matches!(self.pointer, Register::Rsp),
             "this would need an offset adjustment of `argument_area_size`",
@@ -352,8 +331,8 @@ impl AsOperand for Memory<'_> {
     }
 }
 
-impl AsOperand for StaticId {
-    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
+impl<'a> AsOperand<'a> for StaticId {
+    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand<'a> {
         Operand {
             kind: OperandKind::Pointer {
                 address: Memory {
@@ -368,8 +347,8 @@ impl AsOperand for StaticId {
     }
 }
 
-impl AsOperand for LabelId {
-    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand {
+impl<'a> AsOperand<'a> for LabelId {
+    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand<'a> {
         Operand {
             kind: OperandKind::Label(*self),
             ty: Type::Void,

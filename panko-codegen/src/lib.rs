@@ -99,25 +99,25 @@ impl Display for Register {
 }
 
 #[derive(Debug, Copy, Clone)]
-struct TypedRegister<'a> {
-    ty: &'a Type<'a>,
+struct TypedRegister<'a, 'b> {
+    ty: &'b Type<'a>,
     register: Register,
 }
 
 impl Register {
-    const fn byte(self) -> TypedRegister<'static> {
+    const fn byte<'a, 'b>(self) -> TypedRegister<'a, 'b> {
         self.with_size(1)
     }
 
-    fn with_ty<'a>(self, ty: &'a Type<'a>) -> TypedRegister<'a> {
+    fn with_ty<'a, 'b>(self, ty: &'b Type<'a>) -> TypedRegister<'a, 'b> {
         TypedRegister { ty, register: self }
     }
 
-    fn typed<'a>(self, expr: &'a LayoutedExpression<'a>) -> TypedRegister<'a> {
+    fn typed<'a, 'b>(self, expr: &'b LayoutedExpression<'a>) -> TypedRegister<'a, 'b> {
         TypedRegister { ty: &expr.ty.ty, register: self }
     }
 
-    const fn with_size(self, size: u64) -> TypedRegister<'static> {
+    const fn with_size<'a, 'b>(self, size: u64) -> TypedRegister<'a, 'b> {
         let ty = match size {
             1 => const { &Type::uchar() },
             2 => const { &Type::ushort() },
@@ -129,7 +129,7 @@ impl Register {
     }
 }
 
-impl Display for TypedRegister<'_> {
+impl Display for TypedRegister<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let size = match self.ty {
             Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => self.ty.size(),
@@ -308,7 +308,7 @@ impl<'a> Codegen<'a> {
         .unwrap();
     }
 
-    fn copy(&mut self, tgt: &impl AsOperand, src: &impl AsOperand) {
+    fn copy<'b>(&mut self, tgt: &dyn AsOperand<'b>, src: &dyn AsOperand<'b>) {
         let tgt = tgt.as_operand(try { self.current_function?.argument_area_size });
         let src = src.as_operand(try { self.current_function?.argument_area_size });
         let ty = tgt.ty();
@@ -531,7 +531,7 @@ impl<'a> Codegen<'a> {
         self.code.push_str("\"\n");
     }
 
-    fn external_declaration(&mut self, decl: &Declaration<'a>) {
+    fn external_declaration(&mut self, decl: &'a Declaration<'a>) {
         let name = decl.reference.name();
         let linkage = decl.reference.linkage();
         let ty = decl.reference.ty.ty;
@@ -609,7 +609,7 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    fn initialise(&mut self, reference: &Reference, initialiser: Option<&Initialiser<'a>>) {
+    fn initialise(&mut self, reference: &Reference<'a>, initialiser: Option<&Initialiser<'a>>) {
         match initialiser {
             Some(Initialiser::Expression(LayoutedExpression {
                 expr: Expression::String(string),

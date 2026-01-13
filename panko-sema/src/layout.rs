@@ -27,9 +27,17 @@ use crate::typecheck::Typedef;
 mod as_sexpr;
 mod stack;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Layout;
+
+impl ty::Step for Layout {
+    type LengthExpr<'a> = ArrayLength<'a>;
+    type TypeofExpr<'a> = !;
+}
+
 type ArrayLength<'a> = typecheck::ArrayLength<&'a LayoutedExpression<'a>>;
-pub type Type<'a> = ty::Type<'a, !, ArrayLength<'a>>;
-type QualifiedType<'a> = ty::QualifiedType<'a, !, ArrayLength<'a>>;
+pub type Type<'a> = ty::Type<'a, Layout>;
+type QualifiedType<'a> = ty::QualifiedType<'a, Layout>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TranslationUnit<'a> {

@@ -11,12 +11,12 @@ use panko_parser::BinOp;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
-use super::ArrayLength;
 use super::ConversionKind;
 use super::Expression;
 use super::QualifiedType;
 use super::Reference;
 use super::Type;
+use super::Typeck;
 use super::TypedExpression;
 use crate::ItertoolsExt as _;
 use crate::scope;
@@ -48,7 +48,7 @@ pub(super) enum Diagnostic<'a> {
     #[with(ty = at.ty)]
     #[diagnostics(at(colour = Red, label = "parameter declared here"))]
     ParameterWithIncompleteType {
-        at: ParameterDeclaration<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
+        at: ParameterDeclaration<'a, Typeck>,
     },
 
     #[error("array with incomplete element type `{at}`")]
@@ -460,7 +460,7 @@ pub(super) enum Diagnostic<'a> {
         at: scope::Expression<'a>,
         kind: &'a str,
         expected_tys: &'a [Type<'a>],
-        actual_ty: ArrayType<'a, !, ArrayLength<&'a TypedExpression<'a>>>,
+        actual_ty: ArrayType<'a, Typeck>,
     },
 
     #[error("incompatible operand types in conditional expression{note}")]
