@@ -25,8 +25,8 @@ use crate::typecheck::Typeck;
 pub(crate) mod subobjects;
 
 pub trait Step {
-    type TypeofExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr + 'a;
-    type LengthExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr + 'a;
+    type TypeofExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
+    type LengthExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
 }
 
 #[derive(Debug, Clone, Copy)]
