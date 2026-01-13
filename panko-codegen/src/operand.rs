@@ -305,7 +305,7 @@ impl<'a> AsOperand<'a> for SubobjectAtReference<'a> {
     }
 }
 
-impl<'a, 'b> AsOperand<'a> for TypedRegister<'a, 'b> {
+impl<'a> AsOperand<'a> for TypedRegister<'a, '_> {
     fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand<'a> {
         let Self { register, ty } = *self;
         Operand {
