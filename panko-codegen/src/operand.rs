@@ -257,21 +257,6 @@ impl<'a> AsOperand<'a> for Reference<'a> {
     }
 }
 
-impl<'a> AsOperand<'a> for ByValue<&Reference<'a>> {
-    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
-        slot_as_operand(
-            self.0.slot(),
-            self.0.ty.ty,
-            argument_area_size.unwrap(),
-            true,
-        )
-    }
-
-    fn size(&self) -> u64 {
-        self.0.ty.ty.size()
-    }
-}
-
 impl<'a> AsOperand<'a> for ByValue<&dyn AsOperand<'a>> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
         let Operand { kind, ty } = self.0.as_operand(argument_area_size);
