@@ -14,12 +14,16 @@ exit_code: 0
    (function-definition external
       (f1~0 `fn() -> void` (static f1))
       (compound-statement
+         (struct T~1)
          (definition (p1~2 `ptr<struct T~1>` @0) ∅)
+         (struct T~1)
          (definition (p2~3 `ptr<struct T~1>` @8) ∅)))
    (function-definition external
       (f2~4 `fn() -> void` (static f2))
       (compound-statement
+         (struct T~5)
          (definition (p1~6 `ptr<struct T~5>` @0) ∅)
+         (struct T~5)
          (definition (p2~7 `ptr<struct T~5>` @8) ∅))))
 
 ----- stderr -----

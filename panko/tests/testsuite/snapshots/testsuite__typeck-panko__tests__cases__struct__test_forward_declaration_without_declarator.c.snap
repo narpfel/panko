@@ -14,21 +14,31 @@ exit_code: 0
    (function-definition external
       f1~1 `fn() -> void`
       (compound-statement
+         (struct T~0)
          (definition p1~2 `ptr<struct T~0>` ∅)
+         (struct T~0)
          (definition p2~3 `ptr<struct T~0>` ∅)))
    (function-definition external
       f2~4 `fn() -> void`
       (compound-statement
+         (struct T~0)
+         (struct T~0)
          (definition p1~5 `ptr<struct T~0>` ∅)
+         (struct T~0)
          (definition p2~6 `ptr<struct T~0>` ∅)))
    (function-definition external
       forward_decl_in_local_scope~7 `fn() -> void`
       (compound-statement
+         (struct U~8)
          (compound-statement
+            (struct U~8)
             (definition p1~9 `ptr<struct U~8>` ∅)
+            (struct U~8)
             (definition p2~10 `ptr<struct U~8>` ∅))
          (compound-statement
+            (struct U~8)
             (definition p1~11 `ptr<struct U~8>` ∅)
+            (struct U~8)
             (definition p2~12 `ptr<struct U~8>` ∅)))))
 
 ----- stderr -----

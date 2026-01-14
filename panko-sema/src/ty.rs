@@ -130,10 +130,29 @@ pub enum Struct<'a, T: Step> {
     },
 }
 
+impl<T: Step> AsSExpr for Struct<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Incomplete { name, id } =>
+                SExpr::new("struct").inline_string(format!("{name}~{id}", id = id.0)),
+            Self::Complete { name, id, members } => SExpr::new("struct")
+                .inline_string(format!("{name}~{id}", name = name.as_sexpr(), id = id.0))
+                .lines_explicit_empty(*members),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Member<'a, T: Step> {
     pub(crate) name: &'a str,
     pub(crate) ty: QualifiedType<'a, T>,
+}
+
+impl<T: Step> AsSExpr for Member<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { name, ty } = self;
+        SExpr::new("member").inherit(name).inherit(ty)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -507,4 +526,12 @@ impl<'a, T: Step> AsSExpr for QualifiedType<'a, T> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::display(&self.italic())
     }
+}
+
+pub(crate) fn struct_decl_as_sexpr<'a, T: Step>(decl: &'a Type<'_, T>) -> SExpr<'a> {
+    let Type::Struct(r#struct) = decl
+    else {
+        unreachable!()
+    };
+    r#struct.as_sexpr()
 }

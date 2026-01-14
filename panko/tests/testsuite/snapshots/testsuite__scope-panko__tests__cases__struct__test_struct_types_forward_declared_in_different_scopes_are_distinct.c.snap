@@ -14,12 +14,16 @@ exit_code: 0
    (function-definition
       f1~0 `fn() -> void`
       (compound-statement
+         (struct T~1)
          (declaration p1~2 `ptr<struct T~1>` ∅)
+         (struct T~1)
          (declaration p2~3 `ptr<struct T~1>` ∅)))
    (function-definition
       f2~4 `fn() -> void`
       (compound-statement
+         (struct T~5)
          (declaration p1~6 `ptr<struct T~5>` ∅)
+         (struct T~5)
          (declaration p2~7 `ptr<struct T~5>` ∅))))
 
 ----- stderr -----

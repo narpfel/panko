@@ -25,6 +25,8 @@ exit_code: 0
       should_error~9 `fn() -> void`
       (compound-statement
          (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p4~8 `ptr<struct ∅~7 complete>`)))
+         (struct ∅~10
+            (member x `int`))
          (declaration p5~12 `ptr<struct ∅~11 complete>` ∅)
          (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p5~12 `ptr<struct ∅~11 complete>`)))
          (expression (equal (name p4~8 `ptr<struct ∅~7 complete>`) (name p5~12 `ptr<struct ∅~11 complete>`))))))

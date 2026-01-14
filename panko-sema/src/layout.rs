@@ -111,6 +111,7 @@ pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
 
 #[derive(Debug, Clone, Copy)]
 pub enum Statement<'a> {
+    StructDecl(Type<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<LayoutedExpression<'a>>),
@@ -409,6 +410,8 @@ fn layout_statement<'a>(
     stmt: &typecheck::Statement<'a>,
 ) -> Statement<'a> {
     match stmt {
+        typecheck::Statement::StructDecl(ty) =>
+            Statement::StructDecl(layout_ty(stack, bump, ty.unqualified()).ty),
         typecheck::Statement::Declaration(decl) =>
             Statement::Declaration(layout_declaration(stack, bump, decl)),
         typecheck::Statement::Typedef(typedef) => Statement::Typedef(*typedef),

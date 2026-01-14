@@ -22,7 +22,9 @@ exit_code: 0
    (function-definition external
       (main~4 `fn() -> int` (static main))
       (compound-statement
+         (struct T~1)
          (definition (p~5 `ptr<struct T~1>` @0) (noop-type-conversion `ptr<struct T~1>` @0 (nullptr `nullptr_t` @0)))
+         (struct T~1)
          (definition (q~6 `ptr<struct T~1>` @8) (noop-type-conversion `ptr<struct T~1>` @8 (nullptr `nullptr_t` @8)))
          (expression
             (call `int` @16

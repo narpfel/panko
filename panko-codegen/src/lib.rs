@@ -558,6 +558,9 @@ impl<'a> Codegen<'a> {
 
     fn stmt(&mut self, stmt: &'a Statement<'a>) {
         match stmt {
+            Statement::StructDecl(_) => {
+                // struct decls don’t generate code (they don’t contain VMT refs)
+            }
             Statement::Declaration(Declaration { reference, initialiser }) =>
                 match reference.slot() {
                     Slot::Automatic(_) => self.initialise(reference, initialiser.as_ref()),

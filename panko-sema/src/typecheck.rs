@@ -221,6 +221,7 @@ pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
+    StructDecl(Type<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<TypedExpression<'a>>),
@@ -1308,6 +1309,8 @@ fn typeck_statement<'a>(
     function: &scope::FunctionDefinition<'a>,
 ) -> Statement<'a> {
     match stmt {
+        scope::Statement::StructDecl(ty) =>
+            Statement::StructDecl(typeck_ty(sess, ty.unqualified(), IsParameter::No).ty),
         scope::Statement::Declaration(decl) =>
             Statement::Declaration(typeck_declaration(sess, decl)),
         scope::Statement::Typedef(typedef) => Statement::Typedef(typeck_typedef(sess, typedef)),
