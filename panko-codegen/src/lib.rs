@@ -1025,6 +1025,9 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
 
     for decl in translation_unit.decls {
         match decl {
+            ExternalDeclaration::StructDecl(_) => {
+                // struct decls don’t generate code (they don’t contain VMT refs)
+            }
             ExternalDeclaration::FunctionDefinition(def) => cg.function_definition(def),
             ExternalDeclaration::Declaration(decl) => cg.external_declaration(decl),
             ExternalDeclaration::Typedef(_) => {

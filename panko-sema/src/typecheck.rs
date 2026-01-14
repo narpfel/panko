@@ -135,6 +135,7 @@ pub struct TranslationUnit<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum ExternalDeclaration<'a> {
+    StructDecl(Type<'a>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -2341,6 +2342,9 @@ pub fn resolve_types<'a>(
     TranslationUnit {
         filename,
         decls: sess.alloc_slice_fill_iter(decls.iter().map(|decl| match decl {
+            scope::ExternalDeclaration::StructDecl(ty) => ExternalDeclaration::StructDecl(
+                typeck_ty(sess, ty.unqualified(), IsParameter::No).ty,
+            ),
             scope::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(typeck_function_definition(sess, def)),
             scope::ExternalDeclaration::Typedef(typedef) =>

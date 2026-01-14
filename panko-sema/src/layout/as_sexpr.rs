@@ -32,6 +32,7 @@ impl AsSExpr for TranslationUnit<'_> {
 impl AsSExpr for ExternalDeclaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
+            ExternalDeclaration::StructDecl(decl) => struct_decl_as_sexpr(decl),
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
             ExternalDeclaration::Typedef(typedef) => typedef.as_sexpr(),

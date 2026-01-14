@@ -11,6 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/struct/test_forward_declaration_without_declarator.c"
+   (struct T~0)
    (function-definition external
       (f1~1 `fn() -> void` (static f1))
       (compound-statement

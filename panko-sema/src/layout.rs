@@ -47,6 +47,7 @@ pub struct TranslationUnit<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub enum ExternalDeclaration<'a> {
+    StructDecl(Type<'a>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -629,6 +630,10 @@ pub fn layout<'a>(
     TranslationUnit {
         filename,
         decls: bump.alloc_slice_fill_iter(decls.iter().map(|decl| match decl {
+            // TODO: declarations in the global scope should not get a stack
+            typecheck::ExternalDeclaration::StructDecl(ty) => ExternalDeclaration::StructDecl(
+                layout_ty(&mut Stack::default(), bump, ty.unqualified()).ty,
+            ),
             typecheck::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(layout_function_definition(bump, def)),
             typecheck::ExternalDeclaration::Declaration(decl) =>

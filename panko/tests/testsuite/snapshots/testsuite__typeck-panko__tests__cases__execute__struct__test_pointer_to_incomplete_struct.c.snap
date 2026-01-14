@@ -13,6 +13,7 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/struct/test_pointer_to_incomplete_struct.c"
    (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (typedef size_t `unsigned long`)
+   (struct T~1)
    (function-definition external
       f~2 `fn(p: ptr<struct T~1>) -> unsigned long`
       (params
