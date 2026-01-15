@@ -14,6 +14,7 @@ use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Signedness;
 use panko_parser::sexpr_builder::AsSExpr;
+use panko_parser::sexpr_builder::Discard;
 use panko_parser::sexpr_builder::SExpr;
 use yansi::Paint as _;
 
@@ -133,8 +134,7 @@ pub enum Struct<'a, T: Step> {
 impl<T: Step> AsSExpr for Struct<'_, T> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            Self::Incomplete { name, id } =>
-                SExpr::new("struct").inline_string(format!("{name}~{id}", id = id.0)),
+            Self::Incomplete { name: _, id: _ } => Discard.as_sexpr(),
             Self::Complete { name, id, members } => SExpr::new("struct")
                 .inline_string(format!("{name}~{id}", name = name.as_sexpr(), id = id.0))
                 .lines_explicit_empty(*members),

@@ -44,6 +44,14 @@ impl<'a> SExpr<'a> {
         }
     }
 
+    fn empty() -> Self {
+        Self {
+            name: "".into(),
+            params: vec![],
+            parenthesise_if_empty: false,
+        }
+    }
+
     pub fn display(value: &dyn fmt::Display) -> Self {
         Self {
             name: format!("`{value}`").into(),
@@ -154,6 +162,7 @@ impl<'a> SExpr<'a> {
         for (param, was_preceded) in self
             .params
             .iter()
+            .filter(|param| !param.is_empty())
             .zip(once(first_was_preceded).chain(repeat(true)))
         {
             match param {
@@ -212,6 +221,15 @@ impl Param<'_> {
             Param::String(_) => true,
         }
     }
+
+    fn is_empty(&self) -> bool {
+        match self {
+            Param::Line(line) => line.is_empty(),
+            Param::Inherit(param) => param.is_empty(),
+            Param::InlineString(_) => false,
+            Param::String(_) => false,
+        }
+    }
 }
 
 pub trait AsSExpr {
@@ -219,6 +237,11 @@ pub trait AsSExpr {
 
     fn is_multiline(&self) -> bool {
         self.as_sexpr().params.iter().any(Param::is_multiline)
+    }
+
+    fn is_empty(&self) -> bool {
+        let SExpr { name, params, parenthesise_if_empty } = self.as_sexpr();
+        name.is_empty() && params.is_empty() && !parenthesise_if_empty
     }
 }
 
@@ -292,5 +315,17 @@ impl AsSExpr for ! {
 impl AsSExpr for &Path {
     fn as_sexpr(&self) -> SExpr {
         SExpr::string(format!("{self:?}").cyan().bold().to_string())
+    }
+}
+
+pub struct Discard;
+
+impl AsSExpr for Discard {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::empty()
+    }
+
+    fn is_empty(&self) -> bool {
+        true
     }
 }

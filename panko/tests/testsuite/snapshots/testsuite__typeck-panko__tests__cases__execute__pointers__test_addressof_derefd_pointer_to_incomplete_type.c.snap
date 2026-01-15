@@ -14,9 +14,7 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (struct T~1)
          (definition p~2 `ptr<struct T~1>` (noop-type-conversion `ptr<struct T~1>` (nullptr `nullptr_t`)))
-         (struct T~1)
          (definition q~3 `ptr<struct T~1>`
             (addressof `ptr<struct T~1>`
                (deref `struct T~1` (p~2 `ptr<struct T~1>`))))

@@ -13,7 +13,6 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/struct/test_pointer_to_incomplete_struct.c"
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (typedef size_t `typeof((sizeof 0))`)
-   (struct T~1)
    (function-definition
       f~2 `fn(p: ptr<struct T~1>) -> typeof((sizeof 0))`
       (params
@@ -23,9 +22,7 @@ exit_code: 0
    (function-definition
       main~4 `fn() -> int`
       (compound-statement
-         (struct T~1)
          (declaration p~5 `ptr<struct T~1>` (cast `ptr<struct T~1>` nullptr))
-         (struct T~1)
          (declaration q~6 `ptr<struct T~1>` nullptr)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)

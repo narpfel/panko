@@ -14,7 +14,6 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (struct T~1)
          (declaration p~2 `ptr<struct T~1>` nullptr)
          (declaration q~3 `ptr<typeof((deref (name p~2 `ptr<struct T~1>`)))>` (name p~2 `ptr<struct T~1>`))
          (declaration r~4 `ptr<typeof_unqual((deref (name p~2 `ptr<struct T~1>`)))>` (name p~2 `ptr<struct T~1>`))

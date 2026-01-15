@@ -11,7 +11,6 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/functions/test_error_incomplete_struct_return_type.c"
-   (struct Incomplete~0)
    (declaration f~1 `fn() -> struct Incomplete~0` ∅))
 
 ----- stderr -----
