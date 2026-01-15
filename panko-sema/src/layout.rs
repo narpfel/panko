@@ -47,6 +47,7 @@ pub struct TranslationUnit<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub enum ExternalDeclaration<'a> {
+    StructDecl(Type<'a>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -111,6 +112,7 @@ pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
 
 #[derive(Debug, Clone, Copy)]
 pub enum Statement<'a> {
+    StructDecl(Type<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<LayoutedExpression<'a>>),
@@ -409,6 +411,8 @@ fn layout_statement<'a>(
     stmt: &typecheck::Statement<'a>,
 ) -> Statement<'a> {
     match stmt {
+        typecheck::Statement::StructDecl(ty) =>
+            Statement::StructDecl(layout_ty(stack, bump, ty.unqualified()).ty),
         typecheck::Statement::Declaration(decl) =>
             Statement::Declaration(layout_declaration(stack, bump, decl)),
         typecheck::Statement::Typedef(typedef) => Statement::Typedef(*typedef),
@@ -626,6 +630,10 @@ pub fn layout<'a>(
     TranslationUnit {
         filename,
         decls: bump.alloc_slice_fill_iter(decls.iter().map(|decl| match decl {
+            // TODO: declarations in the global scope should not get a stack
+            typecheck::ExternalDeclaration::StructDecl(ty) => ExternalDeclaration::StructDecl(
+                layout_ty(&mut Stack::default(), bump, ty.unqualified()).ty,
+            ),
             typecheck::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(layout_function_definition(bump, def)),
             typecheck::ExternalDeclaration::Declaration(decl) =>

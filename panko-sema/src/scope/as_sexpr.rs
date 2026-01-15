@@ -22,6 +22,7 @@ use super::Statement;
 use super::TranslationUnit;
 use super::Typedef;
 use super::Typeof;
+use crate::ty::struct_decl_as_sexpr;
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {
@@ -35,6 +36,7 @@ impl AsSExpr for TranslationUnit<'_> {
 impl AsSExpr for ExternalDeclaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
+            ExternalDeclaration::StructDecl(decl) => struct_decl_as_sexpr(decl),
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
             ExternalDeclaration::Typedef(typedef) => typedef.as_sexpr(),
@@ -136,6 +138,7 @@ impl AsSExpr for CompoundStatement<'_> {
 impl AsSExpr for Statement<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
+            Statement::StructDecl(decl) => struct_decl_as_sexpr(decl),
             Statement::Declaration(decl) => decl.as_sexpr(),
             Statement::Typedef(typedef) => typedef.as_sexpr(),
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),

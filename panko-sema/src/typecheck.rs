@@ -135,6 +135,7 @@ pub struct TranslationUnit<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum ExternalDeclaration<'a> {
+    StructDecl(Type<'a>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -221,6 +222,7 @@ pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
+    StructDecl(Type<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<TypedExpression<'a>>),
@@ -1308,6 +1310,8 @@ fn typeck_statement<'a>(
     function: &scope::FunctionDefinition<'a>,
 ) -> Statement<'a> {
     match stmt {
+        scope::Statement::StructDecl(ty) =>
+            Statement::StructDecl(typeck_ty(sess, ty.unqualified(), IsParameter::No).ty),
         scope::Statement::Declaration(decl) =>
             Statement::Declaration(typeck_declaration(sess, decl)),
         scope::Statement::Typedef(typedef) => Statement::Typedef(typeck_typedef(sess, typedef)),
@@ -2338,6 +2342,9 @@ pub fn resolve_types<'a>(
     TranslationUnit {
         filename,
         decls: sess.alloc_slice_fill_iter(decls.iter().map(|decl| match decl {
+            scope::ExternalDeclaration::StructDecl(ty) => ExternalDeclaration::StructDecl(
+                typeck_ty(sess, ty.unqualified(), IsParameter::No).ty,
+            ),
             scope::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(typeck_function_definition(sess, def)),
             scope::ExternalDeclaration::Typedef(typedef) =>

@@ -112,6 +112,7 @@ pub struct TranslationUnit<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum ExternalDeclaration<'a> {
+    StructDecl(Type<'a>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -234,6 +235,7 @@ type MaybeExpr<'a> = Option<Expression<'a>>;
 #[variant_types::derive_variant_types]
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
+    StructDecl(Type<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(MaybeExpr<'a>),
@@ -471,6 +473,7 @@ impl<'a> FunctionDefinition<'a> {
 impl<'a> Statement<'a> {
     pub(crate) fn loc(&self) -> Loc<'a> {
         match self {
+            Statement::StructDecl(_) => todo!("location of struct decl"),
             Statement::Declaration(decl) => decl.reference.loc(),
             Statement::Typedef(typedef) => typedef.loc(),
             Statement::Expression(expr) => expr.as_ref().unwrap().loc(),
@@ -836,13 +839,9 @@ fn resolve_compound_statement<'a>(
         scopes.open_new_scope();
     }
     let stmts = CompoundStatement(
-        scopes.sess.alloc_slice_copy(
-            &stmts
-                .0
-                .iter()
-                .filter_map(|stmt| resolve_stmt(scopes, stmt))
-                .collect_vec(),
-        ),
+        scopes
+            .sess
+            .alloc_slice_fill_iter(stmts.0.iter().map(|stmt| resolve_stmt(scopes, stmt))),
     );
     if let OpenNewScope::Yes = open_new_scope {
         scopes.exit_scope();
@@ -995,12 +994,10 @@ fn resolve_declaration<'a>(
     })
 }
 
-fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Option<Statement<'a>> {
-    let stmt = match stmt {
-        ast::Statement::TypeDeclaration(TypeDeclaration::Struct(r#struct)) => {
-            resolve_struct(scopes, r#struct);
-            return None;
-        }
+fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Statement<'a> {
+    match stmt {
+        ast::Statement::TypeDeclaration(TypeDeclaration::Struct(r#struct)) =>
+            Statement::StructDecl(resolve_struct(scopes, r#struct)),
         ast::Statement::Declaration(decl) => match resolve_declaration(scopes, decl) {
             DeclarationOrTypedef::Declaration(declaration) => Statement::Declaration(declaration),
             DeclarationOrTypedef::Typedef(typedef) => Statement::Typedef(typedef),
@@ -1014,8 +1011,7 @@ fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Optio
             return_: *return_,
             expr: try { resolve_expr(scopes, expr.as_ref()?) },
         },
-    };
-    Some(stmt)
+    }
 }
 
 fn resolve_assoc<'a>(
@@ -1173,12 +1169,10 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
 fn resolve_external_declaration<'a>(
     scopes: &mut Scopes<'a>,
     decl: &ast::ExternalDeclaration<'a>,
-) -> Option<ExternalDeclaration<'a>> {
-    let decl = match decl {
-        ast::ExternalDeclaration::TypeDeclaration(TypeDeclaration::Struct(r#struct)) => {
-            resolve_struct(scopes, r#struct);
-            return None;
-        }
+) -> ExternalDeclaration<'a> {
+    match decl {
+        ast::ExternalDeclaration::TypeDeclaration(TypeDeclaration::Struct(r#struct)) =>
+            ExternalDeclaration::StructDecl(resolve_struct(scopes, r#struct)),
         ast::ExternalDeclaration::FunctionDefinition(def) =>
             resolve_function_definition(scopes, def),
         ast::ExternalDeclaration::Declaration(decl) => match resolve_declaration(scopes, decl) {
@@ -1189,8 +1183,7 @@ fn resolve_external_declaration<'a>(
                 ExternalDeclaration::Redeclared(redeclared),
         },
         ast::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
-    };
-    Some(decl)
+    }
 }
 
 pub fn resolve_names<'a>(
@@ -1201,11 +1194,10 @@ pub fn resolve_names<'a>(
     let ast::TranslationUnit { filename, decls } = translation_unit;
     TranslationUnit {
         filename,
-        decls: sess.alloc_slice_copy(
-            &decls
+        decls: sess.alloc_slice_fill_iter(
+            decls
                 .iter()
-                .filter_map(|decl| resolve_external_declaration(scopes, decl))
-                .collect_vec(),
+                .map(|decl| resolve_external_declaration(scopes, decl)),
         ),
     }
 }

@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_multiple_declarators_of_unnamed_struct_have_same_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: comparison of pointers to incompatible types
+   ╭─[panko/tests/cases/execute/struct/test_multiple_declarators_of_unnamed_struct_have_same_type.c:8:15]
+   │
+ 8 │     return p1 == p2;
+   │            ─┬ ─┬ ─┬  
+   │             │  │  ╰── this is of type `ptr<struct ∅~4 complete>`
+   │             │  │     
+   │             │  ╰───── pointer comparisons are only allowed between pointers to compatible types
+   │             │        
+   │             ╰──────── this is of type `ptr<struct ∅~2 complete>`
+───╯
