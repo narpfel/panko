@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_multiple_declarators_of_unnamed_struct_have_same_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_multiple_declarators_of_unnamed_struct_have_same_type.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (struct ∅~1
+            (member x `int`))
+         (declaration p1~3 `ptr<struct ∅~2 complete>` nullptr)
+         (declaration p2~5 `ptr<struct ∅~4 complete>` nullptr)
+         (return (equal (name p1~3 `ptr<struct ∅~2 complete>`) (name p2~5 `ptr<struct ∅~4 complete>`))))))
+
+----- stderr -----
