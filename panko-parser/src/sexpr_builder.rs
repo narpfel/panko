@@ -141,6 +141,17 @@ impl<'a> SExpr<'a> {
         self
     }
 
+    fn is_multiline(&self) -> bool {
+        self.params
+            .iter()
+            .any(|param| param.run_as_sexpr().is_multiline())
+    }
+
+    fn is_empty(&self) -> bool {
+        let Self { name, params, parenthesise_if_empty } = self;
+        name.is_empty() && params.is_empty() && !parenthesise_if_empty
+    }
+
     fn fmt(&self, f: &mut fmt::Formatter, indent: usize) -> fmt::Result {
         let should_parenthesise = self.params.is_empty() && !self.parenthesise_if_empty;
         let (open_paren, close_paren) = if should_parenthesise {
@@ -162,30 +173,31 @@ impl<'a> SExpr<'a> {
         for (param, was_preceded) in self
             .params
             .iter()
+            .map(Param::run_as_sexpr)
             .filter(|param| !param.is_empty())
             .zip(once(first_was_preceded).chain(repeat(true)))
         {
             match param {
-                Param::Inherit(param) if !param.is_multiline() && !has_line_break => {
+                ParamSExpr::Inherit(param) if !param.is_multiline() && !has_line_break => {
                     if was_preceded {
                         write!(f, " ")?;
                     }
-                    param.as_sexpr().fmt(f, 0)?;
+                    param.fmt(f, 0)?;
                 }
-                Param::Inherit(param) | Param::Line(param) => {
+                ParamSExpr::Inherit(param) | ParamSExpr::Line(param) => {
                     if was_preceded {
                         writeln!(f)?;
                     }
-                    param.as_sexpr().fmt(f, indent + SEXPR_INDENT)?;
+                    param.fmt(f, indent + SEXPR_INDENT)?;
                     has_line_break = true;
                 }
-                Param::InlineString(s) if !has_line_break => {
+                ParamSExpr::InlineString(s) if !has_line_break => {
                     if was_preceded {
                         write!(f, " ")?;
                     }
                     write!(f, "{s}")?;
                 }
-                Param::InlineString(s) | Param::String(s) => {
+                ParamSExpr::InlineString(s) | ParamSExpr::String(s) => {
                     if was_preceded {
                         writeln!(f)?;
                     }
@@ -212,37 +224,46 @@ enum Param<'a> {
     String(String),
 }
 
-impl Param<'_> {
+impl<'a> Param<'a> {
+    fn run_as_sexpr(&'a self) -> ParamSExpr<'a> {
+        match self {
+            Self::Line(param) => ParamSExpr::Line(param.as_sexpr()),
+            Self::Inherit(param) => ParamSExpr::Inherit(param.as_sexpr()),
+            Self::InlineString(s) => ParamSExpr::InlineString(s),
+            Self::String(s) => ParamSExpr::String(s),
+        }
+    }
+}
+
+enum ParamSExpr<'a> {
+    Line(SExpr<'a>),
+    Inherit(SExpr<'a>),
+    InlineString(&'a str),
+    String(&'a str),
+}
+
+impl ParamSExpr<'_> {
     fn is_multiline(&self) -> bool {
         match self {
-            Param::Line(_) => true,
-            Param::Inherit(param) => param.is_multiline(),
-            Param::InlineString(_) => false,
-            Param::String(_) => true,
+            Self::Line(_) => true,
+            Self::Inherit(param) => param.is_multiline(),
+            Self::InlineString(_) => false,
+            Self::String(_) => true,
         }
     }
 
     fn is_empty(&self) -> bool {
         match self {
-            Param::Line(line) => line.is_empty(),
-            Param::Inherit(param) => param.is_empty(),
-            Param::InlineString(_) => false,
-            Param::String(_) => false,
+            Self::Line(line) => line.is_empty(),
+            Self::Inherit(param) => param.is_empty(),
+            Self::InlineString(_) => false,
+            Self::String(_) => false,
         }
     }
 }
 
 pub trait AsSExpr {
     fn as_sexpr(&self) -> SExpr;
-
-    fn is_multiline(&self) -> bool {
-        self.as_sexpr().params.iter().any(Param::is_multiline)
-    }
-
-    fn is_empty(&self) -> bool {
-        let SExpr { name, params, parenthesise_if_empty } = self.as_sexpr();
-        name.is_empty() && params.is_empty() && !parenthesise_if_empty
-    }
 }
 
 impl<T> AsSExpr for &T
@@ -323,9 +344,5 @@ pub struct Discard;
 impl AsSExpr for Discard {
     fn as_sexpr(&self) -> SExpr {
         SExpr::empty()
-    }
-
-    fn is_empty(&self) -> bool {
-        true
     }
 }
