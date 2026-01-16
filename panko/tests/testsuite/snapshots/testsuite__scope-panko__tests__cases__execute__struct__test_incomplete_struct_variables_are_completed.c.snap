@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_incomplete_struct_variables_are_completed.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_incomplete_struct_variables_are_completed.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration ptrs~2 `array<ptr<struct T~1>; 10>` ∅)
+   (struct T~1
+      (member x `int`))
+   (struct T~1
+      (member x `int`))
+   (declaration ptr~3 `ptr<struct T~1 complete>` ∅)
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal (subscript (name ptrs~2 `array<ptr<struct T~1>; 10>`) 0) (name ptr~3 `ptr<struct T~1 complete>`))))
+         (return (sizeof (deref (subscript (name ptrs~2 `array<ptr<struct T~1>; 10>`) 0)))))))
+
+----- stderr -----

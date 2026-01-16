@@ -1,0 +1,41 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_incomplete_struct_variables_are_completed.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: comparison of pointers to incompatible types
+    ╭─[panko/tests/cases/execute/struct/test_incomplete_struct_variables_are_completed.c:16:28]
+    │
+ 16 │     printf("%d\n", ptrs[0] == ptr);
+    │                    ───┬─── ─┬ ─┬─  
+    │                       │     │  ╰─── this is of type `ptr<struct T~1 complete>`
+    │                       │     │      
+    │                       │     ╰────── pointer comparisons are only allowed between pointers to compatible types
+    │                       │            
+    │                       ╰──────────── this is of type `ptr<struct T~1>`
+────╯
+
+Error: invalid application of `sizeof` to incomplete type `struct T~1`
+    ╭─[panko/tests/cases/execute/struct/test_incomplete_struct_variables_are_completed.c:17:12]
+    │
+ 17 │     return sizeof *ptrs[0];
+    │            ───────┬───────  
+    │                   ╰───────── in this expression
+────╯
+
+Error: dereference of pointer to incomplete type `struct T~1`
+    ╭─[panko/tests/cases/execute/struct/test_incomplete_struct_variables_are_completed.c:17:20]
+    │
+ 17 │     return sizeof *ptrs[0];
+    │                    ───┬───  
+    │                       ╰───── this expression has type `ptr<struct T~1>`
+────╯
