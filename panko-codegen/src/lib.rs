@@ -4,7 +4,6 @@
 #![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
 
-use std::assert_matches::assert_matches;
 use std::borrow::Cow;
 use std::bstr::ByteStr;
 use std::bstr::ByteString;
@@ -771,7 +770,6 @@ impl<'a> Codegen<'a> {
                     cg.emit_args(operation, &[&Rax.typed(lhs), &Rcx.byte()]);
                 };
                 let emit_comparison = |cg: &mut Self, operation| {
-                    assert_matches!(lhs.ty.ty, Type::Arithmetic(_) | Type::Pointer(_));
                     emit_arithmetic(cg, "cmp");
                     cg.emit_args(operation, &[&Rax.byte()]);
                     cg.emit_args("movzx", &[&Rax.typed(expr), &Rax.byte()]);
