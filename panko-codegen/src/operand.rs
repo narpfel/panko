@@ -157,21 +157,15 @@ impl fmt::Display for Operand<'_> {
                     // scalars are always dereferenced
                     Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => self.ty.size(),
                     // Using a function results in a pointer to that function, so we need 8 bytes.
-                    Type::Function(_) =>
-                        if is_dereferenced {
-                            unreachable!()
-                        }
-                        else {
-                            8
-                        },
+                    Type::Function(_) => match is_dereferenced {
+                        true => unreachable!(),
+                        false => 8,
+                    },
                     // Same for arrays.
-                    Type::Array(_) =>
-                        if is_dereferenced {
-                            self.ty.size()
-                        }
-                        else {
-                            8
-                        },
+                    Type::Array(_) => match is_dereferenced {
+                        true => self.ty.size(),
+                        false => 8,
+                    },
                     Type::Void => unreachable!(),
                     Type::Typeof { expr, unqual: _ } => match expr {},
                     Type::Struct(Struct::Incomplete { name: _, id: _ }) =>
