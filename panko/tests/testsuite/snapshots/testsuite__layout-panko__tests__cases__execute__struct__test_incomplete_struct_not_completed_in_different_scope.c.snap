@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_incomplete_struct_not_completed_in_different_scope.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid application of `sizeof` to incomplete type `struct T~0`
+   ╭─[panko/tests/cases/execute/struct/test_incomplete_struct_not_completed_in_different_scope.c:9:5]
+   │
+ 9 │     sizeof *ptr;
+   │     ─────┬─────  
+   │          ╰─────── in this expression
+───╯
+
+Error: dereference of pointer to incomplete type `struct T~0`
+   ╭─[panko/tests/cases/execute/struct/test_incomplete_struct_not_completed_in_different_scope.c:9:13]
+   │
+ 9 │     sizeof *ptr;
+   │             ─┬─  
+   │              ╰─── this expression has type `ptr<struct T~0>`
+───╯

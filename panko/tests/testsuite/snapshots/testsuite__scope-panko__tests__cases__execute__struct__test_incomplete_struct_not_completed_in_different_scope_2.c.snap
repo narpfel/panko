@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_incomplete_struct_not_completed_in_different_scope_2.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_incomplete_struct_not_completed_in_different_scope_2.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration ptr~2 `ptr<struct T~1>` ∅)
+   (struct T~1
+      (member xs `array<int; 10>`))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (struct T~1
+            (member x `int`))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof (deref (name ptr~2 `ptr<struct T~1>`))))))))
+
+----- stderr -----
