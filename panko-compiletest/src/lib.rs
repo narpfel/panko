@@ -206,8 +206,10 @@ impl Drop for OutputCapture {
 }
 
 fn check_should_panic(name: &str, output: &[u8], expecteds: &[bytes::Regex]) -> TestResult {
+    let sgr_escape_sequence_re = bytes::Regex::new("\x1B\\[[0-9;]+m").unwrap();
+    let output = sgr_escape_sequence_re.replace_all(output, b"");
     for expected in expecteds {
-        if !expected.is_match(output) {
+        if !expected.is_match(&output) {
             eprintln!("{FG_BOLD}`{name}`{RESET}: output did not match `{expected:?}`");
             return TestResult::Failure;
         }
