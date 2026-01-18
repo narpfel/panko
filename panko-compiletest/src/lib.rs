@@ -322,7 +322,7 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
     }
 
     let compile_error_re =
-        Regex::new(r"(?m)^// \[\[compile-error: (?P<error_message>.*?)\]\]$").unwrap();
+        Regex::new(r"(?m)^\s*// \[\[compile-error: (?P<error_message>.*?)\]\]$").unwrap();
     let compile_error_messages = compile_error_re
         .captures_iter(&source)
         .map(|captures| captures.name("error_message").unwrap().as_str());
