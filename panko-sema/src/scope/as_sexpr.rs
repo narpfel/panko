@@ -22,7 +22,15 @@ use super::Statement;
 use super::TranslationUnit;
 use super::Typedef;
 use super::Typeof;
+use crate::scope::Member;
 use crate::ty::struct_decl_as_sexpr;
+
+impl AsSExpr for Member<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { name, ty } = self;
+        SExpr::new("member").inherit(name).inherit(ty)
+    }
+}
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {

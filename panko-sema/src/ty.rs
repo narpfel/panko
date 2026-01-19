@@ -20,6 +20,7 @@ use yansi::Paint as _;
 
 use crate::fake_trait_impls::HashEqIgnored;
 use crate::scope::Id;
+use crate::typecheck;
 use crate::typecheck::ArrayLength;
 use crate::typecheck::Typeck;
 
@@ -28,6 +29,7 @@ pub(crate) mod subobjects;
 pub trait Step {
     type TypeofExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
     type LengthExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
+    type Member<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -122,7 +124,7 @@ impl<'a, T: Step> fmt::Display for FunctionType<'a, T> {
 pub struct Complete<'a, T: Step> {
     pub name: Option<&'a str>,
     pub id: Id,
-    pub members: &'a [Member<'a, T>],
+    pub members: &'a [T::Member<'a>],
 }
 
 impl<T: Step> AsSExpr for Complete<'_, T> {
@@ -146,19 +148,6 @@ impl<T: Step> AsSExpr for Struct<'_, T> {
             Self::Incomplete { name: _, id: _ } => Discard.as_sexpr(),
             Self::Complete(complete) => complete.as_sexpr(),
         }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Member<'a, T: Step> {
-    pub(crate) name: &'a str,
-    pub(crate) ty: QualifiedType<'a, T>,
-}
-
-impl<T: Step> AsSExpr for Member<'_, T> {
-    fn as_sexpr(&self) -> SExpr {
-        let Self { name, ty } = self;
-        SExpr::new("member").inherit(name).inherit(ty)
     }
 }
 
@@ -323,7 +312,11 @@ impl<'a, T: Step> Type<'a, T> {
 
 impl<'a, S, E> Type<'a, S>
 where
-    S: Step<TypeofExpr<'a> = !, LengthExpr<'a> = ArrayLength<E>>,
+    S: Step<
+            TypeofExpr<'a> = !,
+            LengthExpr<'a> = ArrayLength<E>,
+            Member<'a> = typecheck::Member<'a, S>,
+        >,
 {
     pub fn is_object(&self) -> bool {
         !self.is_function()
@@ -386,7 +379,11 @@ where
 
     pub(crate) fn is_slot_compatible<'b, S2, E2>(&self, ty: &Type<'b, S2>) -> bool
     where
-        S2: Step<TypeofExpr<'b> = !, LengthExpr<'b> = ArrayLength<E2>>,
+        S2: Step<
+                TypeofExpr<'b> = !,
+                LengthExpr<'b> = ArrayLength<E2>,
+                Member<'b> = typecheck::Member<'b, S2>,
+            >,
     {
         // TODO: This is more restrictive than necessary.
         self.size() == ty.size() && self.align() == ty.align()

@@ -49,7 +49,6 @@ use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::Complete;
 use crate::ty::FunctionType;
-use crate::ty::Member;
 use crate::ty::ParameterDeclaration;
 use crate::ty::Struct;
 use crate::ty::subobjects::AllowExplicit;
@@ -118,10 +117,17 @@ impl<Expression> Hash for ArrayLength<Expression> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Member<'a, T: ty::Step> {
+    pub(crate) name: &'a str,
+    pub(crate) ty: ty::QualifiedType<'a, T>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum Typeck {}
 
 impl ty::Step for Typeck {
     type LengthExpr<'a> = ArrayLength<&'a TypedExpression<'a>>;
+    type Member<'a> = Member<'a, Self>;
     type TypeofExpr<'a> = !;
 }
 
@@ -708,7 +714,7 @@ fn typeck_ty_with_initialiser<'a>(
             Type::Struct(Struct::Incomplete { name, id }),
         ty::Type::Struct(Struct::Complete(Complete { name, id, members })) => {
             let members = sess.alloc_slice_fill_iter(members.iter().map(|member| {
-                let Member { name, ty } = *member;
+                let NoHashEq(scope::Member { name, ty }) = *member;
                 let ty = typeck_ty(sess, ty, IsParameter::No);
                 Member { name, ty }
             }));

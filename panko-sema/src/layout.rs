@@ -18,21 +18,22 @@ use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::Complete;
 use crate::ty::FunctionType;
-use crate::ty::Member;
 use crate::ty::ParameterDeclaration;
 use crate::ty::Struct;
 use crate::typecheck;
+use crate::typecheck::Member;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::Typedef;
 
 mod as_sexpr;
 mod stack;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Layout;
 
 impl ty::Step for Layout {
     type LengthExpr<'a> = ArrayLength<'a>;
+    type Member<'a> = Member<'a, Self>;
     type TypeofExpr<'a> = !;
 }
 
@@ -309,7 +310,8 @@ fn layout_ty<'a>(
         ty::Type::Struct(Struct::Complete(Complete { name, id, members })) => {
             let members = bump.alloc_slice_fill_iter(members.iter().map(|member| {
                 let Member { name, ty } = *member;
-                Member { name, ty: layout_ty(stack, bump, ty) }
+                let ty = layout_ty(stack, bump, ty);
+                Member { name, ty }
             }));
             Type::Struct(Struct::Complete(Complete { name, id, members }))
         }

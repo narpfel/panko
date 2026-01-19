@@ -19,7 +19,9 @@ use super::SubobjectInitialiser;
 use super::TranslationUnit;
 use super::TypedExpression;
 use super::Typedef;
+use crate::ty::Step;
 use crate::ty::struct_decl_as_sexpr;
+use crate::typecheck::Member;
 
 impl<Expression> AsSExpr for ArrayLength<Expression>
 where
@@ -31,6 +33,13 @@ where
             ArrayLength::Variable(length) => SExpr::new("variable").inherit(length),
             ArrayLength::Unknown => SExpr::string(NO_VALUE),
         }
+    }
+}
+
+impl<T: Step> AsSExpr for Member<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { name, ty } = self;
+        SExpr::new("member").inherit(name).inherit(ty)
     }
 }
 

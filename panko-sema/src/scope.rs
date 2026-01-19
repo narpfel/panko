@@ -82,10 +82,17 @@ pub(crate) enum Diagnostic<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) struct Member<'a> {
+    pub(crate) name: &'a str,
+    pub(crate) ty: QualifiedType<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum Scope {}
 
 impl ty::Step for Scope {
     type LengthExpr<'a> = NoHashEq<Option<&'a Expression<'a>>>;
+    type Member<'a> = NoHashEq<Member<'a>>;
     type TypeofExpr<'a> = NoHashEq<Typeof<'a>>;
 }
 
@@ -93,7 +100,6 @@ pub(crate) type ArrayType<'a> = ty::ArrayType<'a, Scope>;
 pub(crate) type FunctionType<'a> = ty::FunctionType<'a, Scope>;
 pub(crate) type Type<'a> = ty::Type<'a, Scope>;
 pub(crate) type QualifiedType<'a> = ty::QualifiedType<'a, Scope>;
-pub(crate) type Member<'a> = ty::Member<'a, Scope>;
 
 #[derive(Debug)]
 enum OpenNewScope {
@@ -710,15 +716,16 @@ fn resolve_struct<'a>(scopes: &mut Scopes<'a>, r#struct: &Struct<'a>) -> Type<'a
 fn resolve_struct_members<'a>(
     scopes: &mut Scopes<'a>,
     members: &[ast::Member<'a>],
-) -> &'a [Member<'a>] {
+) -> &'a [NoHashEq<Member<'a>>] {
     let sess = scopes.sess;
 
     sess.alloc_slice_fill_iter(members.iter().map(|member| {
         let ast::Member { name, ty } = member;
-        Member {
+        let member = Member {
             name: name.unwrap().slice(),
             ty: resolve_ty(scopes, ty),
-        }
+        };
+        NoHashEq(member)
     }))
 }
 
