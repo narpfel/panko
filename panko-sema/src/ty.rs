@@ -119,25 +119,32 @@ impl<'a, T: Step> fmt::Display for FunctionType<'a, T> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Complete<'a, T: Step> {
+    pub name: Option<&'a str>,
+    pub id: Id,
+    pub members: &'a [Member<'a, T>],
+}
+
+impl<T: Step> AsSExpr for Complete<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { name, id, members } = self;
+        SExpr::new("struct")
+            .inline_string(format!("{name}~{id}", name = name.as_sexpr(), id = id.0))
+            .lines_explicit_empty(*members)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Struct<'a, T: Step> {
-    Incomplete {
-        name: &'a str,
-        id: Id,
-    },
-    Complete {
-        name: Option<&'a str>,
-        id: Id,
-        members: &'a [Member<'a, T>],
-    },
+    Incomplete { name: &'a str, id: Id },
+    Complete(Complete<'a, T>),
 }
 
 impl<T: Step> AsSExpr for Struct<'_, T> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Self::Incomplete { name: _, id: _ } => Discard.as_sexpr(),
-            Self::Complete { name, id, members } => SExpr::new("struct")
-                .inline_string(format!("{name}~{id}", name = name.as_sexpr(), id = id.0))
-                .lines_explicit_empty(*members),
+            Self::Complete(complete) => complete.as_sexpr(),
         }
     }
 }
@@ -356,7 +363,7 @@ where
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => Self::size_t().size(),
             Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+            Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
                 todo!("sizeof complete struct"),
         }
     }
@@ -372,7 +379,7 @@ where
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => Self::size_t().align(),
             Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+            Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
                 todo!("alignof complete struct"),
         }
     }
@@ -394,7 +401,7 @@ where
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => true,
             Type::Struct(Struct::Incomplete { name: _, id: _ }) => false,
-            Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+            Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
                 todo!("is_complete for complete struct"),
         }
     }
@@ -434,7 +441,7 @@ impl<'a, T: Step> fmt::Display for Type<'a, T> {
             Type::Nullptr => write!(f, "nullptr_t"),
             Type::Struct(Struct::Incomplete { name, id }) =>
                 write!(f, "struct {name}~{id}", id = id.0),
-            Type::Struct(Struct::Complete { name, id, members: _ }) =>
+            Type::Struct(Struct::Complete(Complete { name, id, members: _ })) =>
                 write!(f, "struct {}~{} complete", name.as_sexpr(), id.0),
         }
     }

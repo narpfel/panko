@@ -16,6 +16,7 @@ use crate::scope::Linkage;
 use crate::scope::RefKind;
 use crate::ty;
 use crate::ty::ArrayType;
+use crate::ty::Complete;
 use crate::ty::FunctionType;
 use crate::ty::Member;
 use crate::ty::ParameterDeclaration;
@@ -305,12 +306,12 @@ fn layout_ty<'a>(
         ty::Type::Nullptr => Type::Nullptr,
         ty::Type::Struct(Struct::Incomplete { name, id }) =>
             Type::Struct(Struct::Incomplete { name, id }),
-        ty::Type::Struct(Struct::Complete { name, id, members }) => {
+        ty::Type::Struct(Struct::Complete(Complete { name, id, members })) => {
             let members = bump.alloc_slice_fill_iter(members.iter().map(|member| {
                 let Member { name, ty } = *member;
                 Member { name, ty: layout_ty(stack, bump, ty) }
             }));
-            Type::Struct(Struct::Complete { name, id, members })
+            Type::Struct(Struct::Complete(Complete { name, id, members }))
         }
     };
     QualifiedType { is_const, is_volatile, ty, loc }

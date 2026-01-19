@@ -16,6 +16,7 @@ use super::RefInitialiser;
 use super::Reference;
 use super::StorageDuration;
 use super::Type;
+use crate::ty::Complete;
 use crate::ty::Struct;
 
 #[derive(Debug, Default)]
@@ -242,12 +243,13 @@ impl<'a> Scopes<'a> {
 
         let id = match forward_decl {
             Some(Type::Struct(
-                Struct::Incomplete { name: _, id } | Struct::Complete { name: _, id, members: _ },
+                Struct::Incomplete { name: _, id }
+                | Struct::Complete(Complete { name: _, id, members: _ }),
             )) => id,
             Some(_) => unreachable!(),
             None => self.id(),
         };
-        let ty = Type::Struct(Struct::Complete { name, id, members });
+        let ty = Type::Struct(Struct::Complete(Complete { name, id, members }));
 
         if let Some(name) = name {
             // complete the forward declaration

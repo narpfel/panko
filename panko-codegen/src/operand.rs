@@ -5,6 +5,7 @@ use panko_sema::layout::LayoutedExpression;
 use panko_sema::layout::Reference;
 use panko_sema::layout::Slot;
 use panko_sema::layout::Type;
+use panko_sema::ty::Complete;
 use panko_sema::ty::Struct;
 
 use crate::ByValue;
@@ -170,7 +171,7 @@ impl fmt::Display for Operand<'_> {
                     Type::Typeof { expr, unqual: _ } => match expr {},
                     Type::Struct(Struct::Incomplete { name: _, id: _ }) =>
                         unreachable!("incomplete"),
-                    Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+                    Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
                         todo!("complete struct as operand"),
                 };
                 let ptr_type = match size {

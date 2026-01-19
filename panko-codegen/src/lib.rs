@@ -40,6 +40,7 @@ use panko_sema::layout::Type;
 use panko_sema::scope::Linkage;
 use panko_sema::scope::RefKind;
 use panko_sema::ty::ArrayType;
+use panko_sema::ty::Complete;
 use panko_sema::ty::Struct;
 use panko_sema::typecheck::ArrayLength;
 
@@ -135,7 +136,7 @@ impl Display for TypedRegister<'_, '_> {
             Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+            Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
                 todo!("register for complete struct (is this unreachable?)"),
         };
 
@@ -320,7 +321,7 @@ impl<'a> Codegen<'a> {
             Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Struct(Struct::Complete { name: _, id: _, members: _ }) =>
+            Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
                 todo!("copy complete struct"),
         }
     }
