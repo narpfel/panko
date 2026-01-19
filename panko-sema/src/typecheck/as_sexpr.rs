@@ -38,8 +38,11 @@ where
 
 impl<T: Step> AsSExpr for Member<'_, T> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name, ty } = self;
-        SExpr::new("member").inherit(name).inherit(ty)
+        let Self { name, ty, offset } = self;
+        SExpr::new("member")
+            .inherit(name)
+            .inline_string(format!("@{offset}"))
+            .inherit(ty)
     }
 }
 

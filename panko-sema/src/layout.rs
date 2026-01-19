@@ -309,9 +309,9 @@ fn layout_ty<'a>(
             Type::Struct(Struct::Incomplete { name, id }),
         ty::Type::Struct(Struct::Complete(Complete { name, id, members })) => {
             let members = bump.alloc_slice_fill_iter(members.iter().map(|member| {
-                let Member { name, ty } = *member;
+                let Member { name, ty, offset } = *member;
                 let ty = layout_ty(stack, bump, ty);
-                Member { name, ty }
+                Member { name, ty, offset }
             }));
             Type::Struct(Struct::Complete(Complete { name, id, members }))
         }

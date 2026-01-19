@@ -120,6 +120,7 @@ impl<Expression> Hash for ArrayLength<Expression> {
 pub struct Member<'a, T: ty::Step> {
     pub(crate) name: &'a str,
     pub(crate) ty: ty::QualifiedType<'a, T>,
+    pub(crate) offset: u64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -713,10 +714,14 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Struct(Struct::Incomplete { name, id }) =>
             Type::Struct(Struct::Incomplete { name, id }),
         ty::Type::Struct(Struct::Complete(Complete { name, id, members })) => {
+            let size = &mut 0_u64;
             let members = sess.alloc_slice_fill_iter(members.iter().map(|member| {
                 let NoHashEq(scope::Member { name, ty }) = *member;
                 let ty = typeck_ty(sess, ty, IsParameter::No);
-                Member { name, ty }
+                *size = size.next_multiple_of(ty.ty.align());
+                let offset = *size;
+                *size += ty.ty.size();
+                Member { name, ty, offset }
             }));
             Type::Struct(Struct::Complete(Complete { name, id, members }))
         }
