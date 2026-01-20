@@ -26,25 +26,25 @@ large_enum_variant = "allow"
 
 [workspace.dependencies]
 bumpalo = "3.19.1"
-clap = { version = "4.5.53", features = ["derive"] }
+clap = { version = "4.5.54", features = ["derive"] }
 color-eyre = "0.6.5"
-indexmap = "2.12.1"
+indexmap = "2.13.0"
 itertools = "0.14.0"
 lalrpop = "0.22.2"
 lalrpop-util = { version = "0.22.2", features = ["unicode"] }
 logos = { version = "0.16.0", features = ["forbid_unsafe"] }
 memchr = "2.7.6"
-proc-macro2 = "1.0.103"
-quote = "1.0.42"
+proc-macro2 = "1.0.105"
+quote = "1.0.43"
 regex = "1.12.2"
-syn = { version = "2.0.111", features = ["fold", "visit"] }
+syn = { version = "2.0.114", features = ["fold", "visit"] }
 variant-types = { git = "https://github.com/narpfel/crabbing-interpreters" }
 yansi = { version = "1.0.1", features = ["detect-tty"] }
 
 glob = "0.3.3"
 insta-cmd = "0.6.0"
 pretty_assertions = { version = "1.4.1", features = ["unstable"] }
-tempfile = "3.23.0"
+tempfile = "3.24.0"
 
 [workspace.dependencies.ariadne]
 git = "https://github.com/narpfel/ariadne"
