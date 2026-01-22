@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/cast/test_error_nonscalar_cast.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/cast/test_error_nonscalar_cast.c"
+   (struct T~0
+      (member x `int`))
+   (struct U~1
+      (member x `int`)
+      (member c `char`))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (expression (cast `fn() -> int` 42))
+         (struct T~0
+            (member x `int`))
+         (declaration t~3 `struct T~0 complete` ∅)
+         (struct T~0
+            (member x `int`))
+         (declaration t2~4 `struct T~0 complete` ∅)
+         (expression (cast `struct T~0 complete` (name t~3 `struct T~0 complete`)))
+         (expression (cast `struct T~0 complete const` (name t~3 `struct T~0 complete`)))
+         (expression (cast `typeof((name t2~4 `struct T~0 complete`))` (name t~3 `struct T~0 complete`)))
+         (expression (cast `struct U~1 complete` (name t~3 `struct T~0 complete`)))
+         (expression (cast `int` (name t~3 `struct T~0 complete`))))))
+
+----- stderr -----

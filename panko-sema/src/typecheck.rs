@@ -862,7 +862,6 @@ fn convert<'a>(
 ) -> TypedExpression<'a> {
     // TODO: forbid ptr <=> float
     // TODO: if target is nullptr_t, expr must be nullptr or a null pointer constant
-    // TODO: check that target is a scalar type or void
     // TODO: check that expr_ty is a scalar type when target_ty != void
     let target_ty = target.ty;
     let expr_ty = expr.ty.ty;
@@ -882,6 +881,14 @@ fn convert<'a>(
         };
         cast(sess.alloc(expr))
     };
+
+    if kind == ConversionKind::Explicit && !(target_ty == Type::Void || target_ty.is_scalar()) {
+        return sess.emit(Diagnostic::NonScalarCast {
+            at: expr,
+            from_ty: expr_ty,
+            target_ty: target,
+        });
+    }
 
     let expr = match (target_ty, expr_ty) {
         (Type::Void, Type::Void) => return expr,

@@ -1,0 +1,73 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/cast/test_error_nonscalar_cast.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid non-scalar cast from `int` to `fn() -> int`
+    ╭─[panko/tests/cases/cast/test_error_nonscalar_cast.c:11:12]
+    │
+ 11 │     (int())42;
+    │      ──┬── ─┬  
+    │        │    ╰── this is of type `int`
+    │        │       
+    │        ╰─────── type `fn() -> int` is not a scalar or `void`
+────╯
+
+Error: invalid non-scalar cast from `struct T~0 complete` to `struct T~0 complete`
+    ╭─[panko/tests/cases/cast/test_error_nonscalar_cast.c:16:15]
+    │
+ 16 │     (struct T)t;
+    │      ────┬─── ┬  
+    │          │    ╰── this is of type `struct T~0 complete`
+    │          │       
+    │          ╰─────── type `struct T~0 complete` is not a scalar or `void`
+────╯
+
+Error: invalid non-scalar cast from `struct T~0 complete` to `struct T~0 complete`
+    ╭─[panko/tests/cases/cast/test_error_nonscalar_cast.c:17:21]
+    │
+ 17 │     (struct T const)t;
+    │      ───────┬────── ┬  
+    │             │       ╰── this is of type `struct T~0 complete`
+    │             │          
+    │             ╰────────── type `struct T~0 complete` is not a scalar or `void`
+────╯
+
+Error: invalid non-scalar cast from `struct T~0 complete` to `struct T~0 complete`
+    ╭─[panko/tests/cases/cast/test_error_nonscalar_cast.c:18:17]
+    │
+ 14 │     struct T t2;
+    │     ────┬───  
+    │         ╰───── type `struct T~0 complete` is not a scalar or `void`
+    │ 
+ 18 │     (typeof(t2))t;
+    │                 ┬  
+    │                 ╰── this is of type `struct T~0 complete`
+────╯
+
+Error: invalid non-scalar cast from `struct T~0 complete` to `struct U~1 complete`
+    ╭─[panko/tests/cases/cast/test_error_nonscalar_cast.c:19:15]
+    │
+ 19 │     (struct U)t;
+    │      ────┬─── ┬  
+    │          │    ╰── this is of type `struct T~0 complete`
+    │          │       
+    │          ╰─────── type `struct U~1 complete` is not a scalar or `void`
+────╯
+
+Error: invalid explicit conversion from `struct T~0 complete` to `int`
+    ╭─[panko/tests/cases/cast/test_error_nonscalar_cast.c:20:10]
+    │
+ 20 │     (int)t;
+    │          ┬  
+    │          ╰── this is of type `struct T~0 complete`, which cannot be explicitly converted to `int`
+────╯

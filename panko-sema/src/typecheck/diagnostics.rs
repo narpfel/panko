@@ -74,6 +74,18 @@ pub(super) enum Diagnostic<'a> {
         kind: ConversionKind,
     },
 
+    #[error("invalid non-scalar cast from `{from_ty}` to `{target_ty}`")]
+    #[diagnostics(
+        at(colour = Blue, label = "this is of type `{from_ty}`"),
+        target_ty(colour = Red, label = "type `{target_ty}` is not a scalar or `void`"),
+    )]
+    #[with(from_ty = from_ty.fg(Blue))]
+    NonScalarCast {
+        at: TypedExpression<'a>,
+        from_ty: Type<'a>,
+        target_ty: QualifiedType<'a>,
+    },
+
     #[error(
         "`{return_}` statement without value in non-`void` function `{name}` returning `{return_ty}`"
     )]
