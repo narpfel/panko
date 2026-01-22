@@ -466,6 +466,18 @@ pub struct QualifiedType<'a, T: Step> {
 }
 
 impl<'a, T: Step> QualifiedType<'a, T> {
+    pub fn make_unqualified(&self) -> Self
+    where
+        T: Copy,
+    {
+        QualifiedType {
+            is_const: false,
+            is_volatile: false,
+            ty: self.ty,
+            loc: self.loc,
+        }
+    }
+
     // TODO: this is a temporary hack until the `Report` derive macro handles stringification
     // better
     pub(crate) fn slice(&self) -> String {

@@ -61,7 +61,7 @@ impl<'a> SubobjectIterator<'a> {
                 Self::Scalar { ty, is_exhausted: _, offset } =>
                     Some(Subobject { ty: ty.unqualified(), offset: *offset }),
                 Self::Array { ty, index, offset } => Some(Subobject {
-                    ty: ty.ty.ty.unqualified(),
+                    ty: ty.ty.make_unqualified(),
                     offset: offset
                         .checked_add(index.checked_mul(ty.ty.ty.size()).unwrap())
                         .unwrap(),

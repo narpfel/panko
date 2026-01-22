@@ -699,7 +699,7 @@ fn typeck_ty_with_initialiser<'a>(
                 scope::Typeof::Ty(ty) => typeck_ty(sess, *ty, is_parameter),
             };
             return if unqual {
-                ty.ty.unqualified()
+                ty.make_unqualified()
             }
             else {
                 QualifiedType {
@@ -2056,7 +2056,7 @@ fn typeck_expression<'a>(
         }
         scope::Expression::Cast { open_paren: _, ty, expr } => {
             let expr = typeck_expression(sess, expr, Context::Default);
-            let ty = typeck_ty(sess, ty.ty.unqualified(), IsParameter::No);
+            let ty = typeck_ty(sess, ty.make_unqualified(), IsParameter::No);
             convert(sess, ty, expr, ConversionKind::Explicit)
         }
         scope::Expression::Subscript { lhs, rhs, close_bracket } => typeck_expression(
@@ -2086,7 +2086,7 @@ fn typeck_expression<'a>(
             close_paren: _,
         } => {
             let selector = typeck_expression(sess, selector, Context::Default);
-            let selector_ty = selector.ty.ty.unqualified();
+            let selector_ty = selector.ty.make_unqualified();
             let default = assocs
                 .0
                 .iter()

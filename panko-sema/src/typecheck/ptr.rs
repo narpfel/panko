@@ -41,7 +41,7 @@ pub(crate) fn typeck_ptradd<'a>(
     if pointee_ty.ty.is_complete() {
         let integral = convert_as_if_by_assignment(sess, Type::size_t().unqualified(), integral);
         TypedExpression {
-            ty: pointer.ty.ty.unqualified(),
+            ty: pointer.ty.make_unqualified(),
             expr: Expression::PtrAdd {
                 pointer: sess.alloc(pointer),
                 integral: sess.alloc(integral),
@@ -73,7 +73,7 @@ pub(crate) fn typeck_ptrsub<'a>(
     if pointee_ty.ty.is_complete() {
         let integral = convert_as_if_by_assignment(sess, Type::size_t().unqualified(), integral);
         TypedExpression {
-            ty: pointer.ty.ty.unqualified(),
+            ty: pointer.ty.make_unqualified(),
             expr: Expression::PtrSub {
                 pointer: sess.alloc(pointer),
                 integral: sess.alloc(integral),
