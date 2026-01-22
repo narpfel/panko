@@ -1,0 +1,62 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_complete_struct_size_align.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_complete_struct_size_align.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct T~1
+      (member c1 `char`)
+      (member x `int`)
+      (member c2 `char`))
+   (struct Nested~2
+      (member c1 `char`)
+      (member t `struct T~1 complete`))
+   (struct U~3
+      (member t `struct T~1 complete`)
+      (member p `ptr<struct U~3>`))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal (alignof `struct T~1 complete`) (alignof `int`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal (alignof `struct Nested~2 complete`) (alignof `int`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal (alignof `struct U~3 complete`) (alignof `ptr<void>`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof `struct T~1 complete`)))
+         (struct T~1
+            (member c1 `char`)
+            (member x `int`)
+            (member c2 `char`))
+         (declaration value~5 `struct T~1 complete` ∅)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof (name value~5 `struct T~1 complete`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof `struct Nested~2 complete`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof `struct U~3 complete`))))))
+
+----- stderr -----

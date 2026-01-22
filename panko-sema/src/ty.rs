@@ -356,8 +356,10 @@ where
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => Self::size_t().size(),
             Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
-                todo!("sizeof complete struct"),
+            Type::Struct(Struct::Complete(Complete { name: _, id: _, members })) => {
+                let last_member = members.last().expect("empty structs are not allowed");
+                (last_member.offset + last_member.ty.ty.size()).next_multiple_of(self.align())
+            }
         }
     }
 
@@ -372,8 +374,11 @@ where
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => Self::size_t().align(),
             Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
-                todo!("alignof complete struct"),
+            Type::Struct(Struct::Complete(Complete { name: _, id: _, members })) => members
+                .iter()
+                .map(|member| member.ty.ty.align())
+                .max()
+                .expect("empty structs are not allowed"),
         }
     }
 
@@ -398,8 +403,7 @@ where
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => true,
             Type::Struct(Struct::Incomplete { name: _, id: _ }) => false,
-            Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
-                todo!("is_complete for complete struct"),
+            Type::Struct(Struct::Complete(_)) => true,
         }
     }
 
