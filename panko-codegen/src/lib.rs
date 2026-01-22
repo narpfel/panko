@@ -322,7 +322,7 @@ impl<'a> Codegen<'a> {
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
             Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
-                todo!("copy complete struct"),
+                self.memcpy(&tgt, &src, ty.size()),
         }
     }
 
@@ -612,6 +612,13 @@ impl<'a> Codegen<'a> {
         }
     }
 
+    fn memcpy<'b>(&mut self, target: &dyn AsOperand<'b>, src: &dyn AsOperand<'b>, byte_count: u64) {
+        self.emit_args("lea", &[&Rdi, target]);
+        self.emit_args("lea", &[&Rsi, src]);
+        self.emit_args("movabs", &[&Rcx, &byte_count]);
+        self.emit("rep movsb");
+    }
+
     fn initialise(&mut self, reference: &Reference<'a>, initialiser: Option<&Initialiser<'a>>) {
         match initialiser {
             Some(Initialiser::Expression(LayoutedExpression {
@@ -667,10 +674,7 @@ impl<'a> Codegen<'a> {
         {
             self.memset_zero(target);
         }
-        self.emit_args("lea", &[&Rsi, &id]);
-        self.emit_args("lea", &[&Rdi, target]);
-        self.emit_args("movabs", &[&Rcx, &target_size.min(string_len)]);
-        self.emit("rep movsb");
+        self.memcpy(target, &id, target_size.min(string_len));
     }
 
     fn expr(&mut self, expr: &LayoutedExpression<'a>) {

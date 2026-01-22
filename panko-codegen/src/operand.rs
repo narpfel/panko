@@ -172,7 +172,10 @@ impl fmt::Display for Operand<'_> {
                     Type::Struct(Struct::Incomplete { name: _, id: _ }) =>
                         unreachable!("incomplete"),
                     Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
-                        todo!("complete struct as operand"),
+                        match is_dereferenced {
+                            true => unreachable!(),
+                            false => 8,
+                        },
                 };
                 let ptr_type = match size {
                     1 => "byte",

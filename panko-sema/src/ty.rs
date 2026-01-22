@@ -142,6 +142,15 @@ pub enum Struct<'a, T: Step> {
     Complete(Complete<'a, T>),
 }
 
+impl<T: Step> Struct<'_, T> {
+    pub(crate) fn id(&self) -> Id {
+        match self {
+            Self::Incomplete { name: _, id }
+            | Self::Complete(Complete { name: _, id, members: _ }) => *id,
+        }
+    }
+}
+
 impl<T: Step> AsSExpr for Struct<'_, T> {
     fn as_sexpr(&self) -> SExpr {
         match self {

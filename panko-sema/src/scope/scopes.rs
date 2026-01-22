@@ -242,10 +242,7 @@ impl<'a> Scopes<'a> {
         self.exit_scope();
 
         let id = match forward_decl {
-            Some(Type::Struct(
-                Struct::Incomplete { name: _, id }
-                | Struct::Complete(Complete { name: _, id, members: _ }),
-            )) => id,
+            Some(Type::Struct(r#struct)) => r#struct.id(),
             Some(_) => unreachable!(),
             None => self.id(),
         };

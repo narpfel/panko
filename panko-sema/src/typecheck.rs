@@ -911,6 +911,8 @@ fn convert<'a>(
             if kind == ConversionKind::Explicit =>
             convert(),
 
+        (Type::Struct(lhs), Type::Struct(rhs)) if lhs.id() == rhs.id() => return expr,
+
         _ => sess.emit(Diagnostic::InvalidConversion {
             at: expr,
             from_ty: expr_ty,

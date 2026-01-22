@@ -1,0 +1,54 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_complete_struct_copy.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_complete_struct_copy.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct T~1
+      (member xs `array<int; 3>`)
+      (member x `long`))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (struct T~1
+            (member xs `array<int; 3>`)
+            (member x `long`))
+         (declaration t~3 `struct T~1 complete` ∅)
+         (declaration xs~4 `ptr<typeof(`array<int; 3>`)>` (cast `ptr<typeof(`array<int; 3>`)>` (addressof (name t~3 `struct T~1 complete`))))
+         (expression (assign (subscript (deref (name xs~4 `ptr<typeof(`array<int; 3>`)>`)) 0) 42))
+         (expression (assign (subscript (deref (name xs~4 `ptr<typeof(`array<int; 3>`)>`)) 1) 27))
+         (expression (assign (subscript (deref (name xs~4 `ptr<typeof(`array<int; 3>`)>`)) 2) 123))
+         (struct T~1
+            (member xs `array<int; 3>`)
+            (member x `long`))
+         (declaration copy~5 `struct T~1 complete` (name t~3 `struct T~1 complete`))
+         (expression (assign (name xs~4 `ptr<typeof(`array<int; 3>`)>`) (cast `ptr<typeof(`array<int; 3>`)>` (addressof (name copy~5 `struct T~1 complete`)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (subscript (deref (name xs~4 `ptr<typeof(`array<int; 3>`)>`)) 0)
+               (subscript (deref (name xs~4 `ptr<typeof(`array<int; 3>`)>`)) 1)
+               (subscript (deref (name xs~4 `ptr<typeof(`array<int; 3>`)>`)) 2)))
+         (expression (assign (subscript (deref (name xs~4 `ptr<typeof(`array<int; 3>`)>`)) 1) 5))
+         (struct T~1
+            (member xs `array<int; 3>`)
+            (member x `long`))
+         (declaration another_copy~6 `struct T~1 complete` ∅)
+         (expression (assign (name another_copy~6 `struct T~1 complete`) (name copy~5 `struct T~1 complete`)))
+         (expression (assign (name xs~4 `ptr<typeof(`array<int; 3>`)>`) (cast `ptr<typeof(`array<int; 3>`)>` (addressof (name another_copy~6 `struct T~1 complete`)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (subscript (deref (name xs~4 `ptr<typeof(`array<int; 3>`)>`)) 0)
+               (subscript (deref (name xs~4 `ptr<typeof(`array<int; 3>`)>`)) 1)
+               (subscript (deref (name xs~4 `ptr<typeof(`array<int; 3>`)>`)) 2))))))
+
+----- stderr -----

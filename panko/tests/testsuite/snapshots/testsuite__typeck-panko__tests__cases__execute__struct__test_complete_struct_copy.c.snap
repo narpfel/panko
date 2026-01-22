@@ -1,0 +1,137 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_complete_struct_copy.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_complete_struct_copy.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct T~1
+      (member xs @0 `array<int; 3>`)
+      (member x @16 `long`))
+   (function-definition external
+      main~2 `fn() -> int`
+      (compound-statement
+         (struct T~1
+            (member xs @0 `array<int; 3>`)
+            (member x @16 `long`))
+         (definition t~3 `struct T~1 complete` ∅)
+         (definition xs~4 `ptr<array<int; 3>>`
+            (noop-type-conversion `ptr<array<int; 3>>`
+               (addressof `ptr<struct T~1 complete>`
+                  (t~3 `struct T~1 complete`))))
+         (expression
+            (assign `int`
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                        (addressof `ptr<array<int; 3>>`
+                           (deref `array<int; 3>` (xs~4 `ptr<array<int; 3>>`))))
+                     (sign-extend `unsigned long` (0 `int`))))
+               (42 `int`)))
+         (expression
+            (assign `int`
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                        (addressof `ptr<array<int; 3>>`
+                           (deref `array<int; 3>` (xs~4 `ptr<array<int; 3>>`))))
+                     (sign-extend `unsigned long` (1 `int`))))
+               (27 `int`)))
+         (expression
+            (assign `int`
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                        (addressof `ptr<array<int; 3>>`
+                           (deref `array<int; 3>` (xs~4 `ptr<array<int; 3>>`))))
+                     (sign-extend `unsigned long` (2 `int`))))
+               (123 `int`)))
+         (struct T~1
+            (member xs @0 `array<int; 3>`)
+            (member x @16 `long`))
+         (definition copy~5 `struct T~1 complete` (t~3 `struct T~1 complete`))
+         (expression
+            (assign `ptr<array<int; 3>>` (xs~4 `ptr<array<int; 3>>`)
+               (noop-type-conversion `ptr<array<int; 3>>`
+                  (addressof `ptr<struct T~1 complete>`
+                     (copy~5 `struct T~1 complete`)))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "%d %d %d\n\0"))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                        (addressof `ptr<array<int; 3>>`
+                           (deref `array<int; 3>` (xs~4 `ptr<array<int; 3>>`))))
+                     (sign-extend `unsigned long` (0 `int`))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                        (addressof `ptr<array<int; 3>>`
+                           (deref `array<int; 3>` (xs~4 `ptr<array<int; 3>>`))))
+                     (sign-extend `unsigned long` (1 `int`))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                        (addressof `ptr<array<int; 3>>`
+                           (deref `array<int; 3>` (xs~4 `ptr<array<int; 3>>`))))
+                     (sign-extend `unsigned long` (2 `int`))))))
+         (expression
+            (assign `int`
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                        (addressof `ptr<array<int; 3>>`
+                           (deref `array<int; 3>` (xs~4 `ptr<array<int; 3>>`))))
+                     (sign-extend `unsigned long` (1 `int`))))
+               (5 `int`)))
+         (struct T~1
+            (member xs @0 `array<int; 3>`)
+            (member x @16 `long`))
+         (definition another_copy~6 `struct T~1 complete` ∅)
+         (expression (assign `struct T~1 complete` (another_copy~6 `struct T~1 complete`) (copy~5 `struct T~1 complete`)))
+         (expression
+            (assign `ptr<array<int; 3>>` (xs~4 `ptr<array<int; 3>>`)
+               (noop-type-conversion `ptr<array<int; 3>>`
+                  (addressof `ptr<struct T~1 complete>`
+                     (another_copy~6 `struct T~1 complete`)))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "%d %d %d\n\0"))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                        (addressof `ptr<array<int; 3>>`
+                           (deref `array<int; 3>` (xs~4 `ptr<array<int; 3>>`))))
+                     (sign-extend `unsigned long` (0 `int`))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                        (addressof `ptr<array<int; 3>>`
+                           (deref `array<int; 3>` (xs~4 `ptr<array<int; 3>>`))))
+                     (sign-extend `unsigned long` (1 `int`))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                        (addressof `ptr<array<int; 3>>`
+                           (deref `array<int; 3>` (xs~4 `ptr<array<int; 3>>`))))
+                     (sign-extend `unsigned long` (2 `int`)))))))))
+
+----- stderr -----
