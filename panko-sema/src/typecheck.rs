@@ -927,7 +927,7 @@ fn convert<'a>(
             kind,
         }),
     };
-    TypedExpression { ty: target_ty.unqualified(), expr }
+    TypedExpression { ty: target.make_unqualified(), expr }
 }
 
 fn convert_as_if_by_assignment<'a>(
