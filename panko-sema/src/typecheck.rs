@@ -881,15 +881,15 @@ fn convert<'a>(
         cast(sess.alloc(expr))
     };
 
-    if kind == ConversionKind::Explicit && !(target_ty == Type::Void || target_ty.is_scalar()) {
-        return sess.emit(Diagnostic::NonScalarCast {
-            at: expr,
-            from_ty: expr_ty,
-            target_ty: target,
-        });
-    }
-
     let expr = match (target_ty, expr_ty) {
+        _ if kind == ConversionKind::Explicit
+            && !(target_ty == Type::Void || target_ty.is_scalar()) =>
+            sess.emit(Diagnostic::NonScalarCast {
+                at: expr,
+                from_ty: expr_ty,
+                target_ty: target,
+            }),
+
         (Type::Void, Type::Void) => return expr,
         (Type::Void, _) if kind == ConversionKind::Explicit =>
             Expression::VoidCast(sess.alloc(expr)),
