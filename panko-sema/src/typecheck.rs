@@ -862,7 +862,6 @@ fn convert<'a>(
 ) -> TypedExpression<'a> {
     // TODO: forbid ptr <=> float
     // TODO: if target is nullptr_t, expr must be nullptr or a null pointer constant
-    // TODO: check that expr_ty is a scalar type when target_ty != void
     let target_ty = target.ty;
     let expr_ty = expr.ty.ty;
     let extend_kind = match expr_ty {
