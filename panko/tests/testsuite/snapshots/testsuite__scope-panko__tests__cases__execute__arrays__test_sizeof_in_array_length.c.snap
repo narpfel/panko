@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arrays/test_sizeof_in_array_length.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/arrays/test_sizeof_in_array_length.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (declaration cs~2 `array<char; (sizeof 0)>` ∅)
+         (declaration xs~3 `array<int; (sizeof `array<int; 2>`)>` ∅)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu %zu\n")
+               (lengthof (name cs~2 `array<char; (sizeof 0)>`))
+               (lengthof (name xs~3 `array<int; (sizeof `array<int; 2>`)>`)))))))
+
+----- stderr -----

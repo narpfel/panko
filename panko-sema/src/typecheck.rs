@@ -86,6 +86,9 @@ impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a
         // TODO: constexpr evaluate `value` here
         match value.expr {
             Expression::Integer { value, token: _ } => Ok(Self::Constant(value)),
+            Expression::Sizeof { sizeof: _, operand: _, size }
+            | Expression::SizeofTy { sizeof: _, ty: _, size, close_paren: _ } =>
+                Ok(Self::Constant(size)),
             _ => Err(value),
         }
     }

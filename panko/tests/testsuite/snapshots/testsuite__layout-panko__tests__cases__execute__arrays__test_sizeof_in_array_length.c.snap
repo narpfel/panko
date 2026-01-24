@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/arrays/test_sizeof_in_array_length.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/arrays/test_sizeof_in_array_length.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (definition (cs~2 `array<char; 4>` @0) ∅)
+         (definition (xs~3 `array<int; 8>` @4) ∅)
+         (expression
+            (call `int` @36
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 9>>` @48
+                        (string `array<char; 9>` @void "%zu %zu\n\0"))))
+               (4 `unsigned long` @56)
+               (8 `unsigned long` @64))))))
+
+----- stderr -----
