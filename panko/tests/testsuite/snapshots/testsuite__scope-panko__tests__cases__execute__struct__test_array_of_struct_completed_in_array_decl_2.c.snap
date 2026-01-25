@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      f~1 `fn() -> void`
+      (compound-statement
+         (declaration funcs~3 `array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~2>`)`)>`); (sizeof `struct X~2 complete`)>` (braced ∅))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (lengthof (name funcs~3 `array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~2>`)`)>`); (sizeof `struct X~2 complete`)>`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof (deref (call (subscript (name funcs~3 `array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~2>`)`)>`); (sizeof `struct X~2 complete`)>`) 0))))))))
+   (function-definition
+      g~4 `fn() -> void`
+      (compound-statement
+         (declaration funcs~6 `typeof(`array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~5>`)`)>`); (sizeof `struct X~5 complete`)>`)` (braced ∅))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (lengthof (name funcs~6 `typeof(`array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~5>`)`)>`); (sizeof `struct X~5 complete`)>`)`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof (deref (call (subscript (name funcs~6 `typeof(`array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~5>`)`)>`); (sizeof `struct X~5 complete`)>`)`) 0))))))))
+   (function-definition
+      main~7 `fn() -> int`
+      (compound-statement
+         (expression (call (name f~1 `fn() -> void`)))
+         (expression (call (name g~4 `fn() -> void`))))))
+
+----- stderr -----

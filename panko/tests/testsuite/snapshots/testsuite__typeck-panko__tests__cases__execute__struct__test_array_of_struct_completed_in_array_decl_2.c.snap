@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid application of `sizeof` to incomplete type `struct X~2`
+    ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c:10:21]
+    │
+ 10 │     printf("%zu\n", sizeof *funcs[0]());
+    │                     ─────────┬────────  
+    │                              ╰────────── in this expression
+────╯
+
+Error: dereference of pointer to incomplete type `struct X~2`
+    ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c:10:29]
+    │
+ 10 │     printf("%zu\n", sizeof *funcs[0]());
+    │                             ─────┬────  
+    │                                  ╰────── this expression has type `ptr<struct X~2>`
+────╯
+
+Error: invalid application of `sizeof` to incomplete type `struct X~5`
+    ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c:18:21]
+    │
+ 18 │     printf("%zu\n", sizeof *funcs[0]());
+    │                     ─────────┬────────  
+    │                              ╰────────── in this expression
+────╯
+
+Error: dereference of pointer to incomplete type `struct X~5`
+    ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c:18:29]
+    │
+ 18 │     printf("%zu\n", sizeof *funcs[0]());
+    │                             ─────┬────  
+    │                                  ╰────── this expression has type `ptr<struct X~5>`
+────╯

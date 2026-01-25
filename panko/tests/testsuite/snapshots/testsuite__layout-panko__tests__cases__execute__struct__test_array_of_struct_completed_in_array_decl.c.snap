@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: array with incomplete element type `struct X~2`
+   ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c:6:5]
+   │
+ 6 │     struct X xs[sizeof(struct X { int x; })];
+   │     ────┬───  
+   │         ╰───── array element types must be complete
+───╯
+
+Error: array with incomplete element type `struct X~2`
+   ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c:6:5]
+   │
+ 6 │     struct X xs[sizeof(struct X { int x; })];
+   │     ────┬───  
+   │         ╰───── array element types must be complete
+───╯
+
+Error: cannot declare variable `xs` with incomplete type `array<struct X~2; 4>`
+   ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c:6:14]
+   │
+ 6 │     struct X xs[sizeof(struct X { int x; })];
+   │              ─┬  
+   │               ╰── declared here
+───╯
+
+Error: invalid application of `sizeof` to incomplete type `array<struct X~2; 4>`
+   ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c:8:43]
+   │
+ 8 │     printf("%zu %zu\n", sizeof(struct X), sizeof xs);
+   │                                           ────┬────  
+   │                                               ╰────── in this expression
+───╯

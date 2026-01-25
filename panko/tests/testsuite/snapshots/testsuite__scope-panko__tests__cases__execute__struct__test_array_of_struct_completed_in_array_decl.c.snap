@@ -1,0 +1,42 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      f~1 `fn() -> void`
+      (compound-statement
+         (declaration xs~3 `array<struct X~2; (sizeof `struct X~2 complete`)>` ∅)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu %zu\n")
+               (sizeof `struct X~2 complete`)
+               (sizeof (name xs~3 `array<struct X~2; (sizeof `struct X~2 complete`)>`))))))
+   (function-definition
+      g~4 `fn() -> void`
+      (compound-statement
+         (struct X~5
+            (member c `char`)
+            (member x `int`))
+         (declaration xs~6 `array<struct X~5 complete; (sizeof `struct X~5 complete`)>` ∅)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu %zu\n")
+               (sizeof `struct X~5 complete`)
+               (sizeof (name xs~6 `array<struct X~5 complete; (sizeof `struct X~5 complete`)>`))))))
+   (function-definition
+      main~7 `fn() -> int`
+      (compound-statement
+         (expression (call (name f~1 `fn() -> void`)))
+         (expression (call (name g~4 `fn() -> void`))))))
+
+----- stderr -----
