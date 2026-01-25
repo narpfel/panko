@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_struct_completed_in_parameter_list_decl.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_struct_completed_in_parameter_list_decl.c"
+   (function-definition external
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration external f~2 `fn(p: ptr<struct X~1 complete>) -> ptr<struct X~1 complete>` ∅)
+         (expression
+            (sizeof `unsigned long` 4
+               (deref `struct X~1 complete`
+                  (call `ptr<struct X~1 complete>`
+                     (addressof `ptr<fn(p: ptr<struct X~1 complete>) -> ptr<struct X~1 complete>>`
+                        (f~2 `fn(p: ptr<struct X~1 complete>) -> ptr<struct X~1 complete>`))
+                     (noop-type-conversion `ptr<struct X~1 complete>` (nullptr `nullptr_t`)))))))))
+
+----- stderr -----

@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_struct_completed_in_parameter_list_decl.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_struct_completed_in_parameter_list_decl.c"
+   (function-definition external
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (declaration external (f~2 `fn(p: ptr<struct X~1 complete>) -> ptr<struct X~1 complete>` (static f)) ∅)
+         (expression (4 `unsigned long` @0)))))
+
+----- stderr -----
