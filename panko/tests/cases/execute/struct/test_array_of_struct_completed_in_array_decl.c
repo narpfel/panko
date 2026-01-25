@@ -1,5 +1,3 @@
-// [[known-bug]]
-
 int printf(char const*, ...);
 
 void f() {

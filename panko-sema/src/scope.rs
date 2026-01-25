@@ -626,8 +626,10 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
         ast::Type::Pointer(pointee) =>
             Type::Pointer(scopes.sess.alloc(resolve_ty(scopes, pointee))),
         ast::Type::Array(ast::ArrayType { ty, length }) => Type::Array(ArrayType {
-            ty: scopes.sess.alloc(resolve_ty(scopes, ty)),
+            // process `length` before `ty` so that `ty`s completed in the `length` expr are
+            // complete when checking `ty`
             length: NoHashEq(try { scopes.sess.alloc(resolve_expr(scopes, length?)) }),
+            ty: scopes.sess.alloc(resolve_ty(scopes, ty)),
             loc: HashEqIgnored(loc),
         }),
         ast::Type::Function(function_type) =>

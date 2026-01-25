@@ -7,39 +7,52 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
+      f~1 `fn() -> void`
+      (compound-statement
+         (definition xs~3 `array<struct X~2 complete; 4>` ∅)
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 9>>`
+                        (string `array<char; 9>` "%zu %zu\n\0"))))
+               (sizeof `unsigned long` 4 `struct X~2 complete`)
+               (sizeof `unsigned long` 16 (xs~3 `array<struct X~2 complete; 4>`))))))
+   (function-definition external
+      g~4 `fn() -> void`
+      (compound-statement
+         (struct X~5
+            (member c @0 `char`)
+            (member x @4 `int`))
+         (definition xs~6 `array<struct X~5 complete; 8>` ∅)
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 9>>`
+                        (string `array<char; 9>` "%zu %zu\n\0"))))
+               (sizeof `unsigned long` 8 `struct X~5 complete`)
+               (sizeof `unsigned long` 64 (xs~6 `array<struct X~5 complete; 8>`))))))
+   (function-definition external
+      main~7 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (f~1 `fn() -> void`))))
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (g~4 `fn() -> void`)))))))
 
 ----- stderr -----
-Error: array with incomplete element type `struct X~2`
-   ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c:6:5]
-   │
- 6 │     struct X xs[sizeof(struct X { int x; })];
-   │     ────┬───  
-   │         ╰───── array element types must be complete
-───╯
-
-Error: array with incomplete element type `struct X~2`
-   ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c:6:5]
-   │
- 6 │     struct X xs[sizeof(struct X { int x; })];
-   │     ────┬───  
-   │         ╰───── array element types must be complete
-───╯
-
-Error: cannot declare variable `xs` with incomplete type `array<struct X~2; 4>`
-   ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c:6:14]
-   │
- 6 │     struct X xs[sizeof(struct X { int x; })];
-   │              ─┬  
-   │               ╰── declared here
-───╯
-
-Error: invalid application of `sizeof` to incomplete type `array<struct X~2; 4>`
-   ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl.c:8:43]
-   │
- 8 │     printf("%zu %zu\n", sizeof(struct X), sizeof xs);
-   │                                           ────┬────  
-   │                                               ╰────── in this expression
-───╯

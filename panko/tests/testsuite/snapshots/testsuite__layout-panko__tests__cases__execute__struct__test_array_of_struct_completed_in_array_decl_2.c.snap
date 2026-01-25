@@ -7,39 +7,65 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external
+      (f~1 `fn() -> void` (static f))
+      (compound-statement
+         (definition (funcs~3 `array<ptr<fn() -> ptr<struct X~2 complete>>; 8>` @0) (braced ∅))
+         (expression
+            (call `int` @64
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @72
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @80
+                  (noop-type-conversion `ptr<char>` @80
+                     (addressof `ptr<array<char; 5>>` @80
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (8 `unsigned long` @88)))
+         (expression
+            (call `int` @64
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @72
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @80
+                  (noop-type-conversion `ptr<char>` @80
+                     (addressof `ptr<array<char; 5>>` @80
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (8 `unsigned long` @88)))))
+   (function-definition external
+      (g~4 `fn() -> void` (static g))
+      (compound-statement
+         (definition (funcs~6 `array<ptr<fn() -> ptr<struct X~5 complete>>; 4>` @0) (braced ∅))
+         (expression
+            (call `int` @32
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 5>>` @48
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (4 `unsigned long` @56)))
+         (expression
+            (call `int` @32
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 5>>` @48
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (4 `unsigned long` @56)))))
+   (function-definition external
+      (main~7 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (f~1 `fn() -> void` (static f)))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (g~4 `fn() -> void` (static g))))))))
 
 ----- stderr -----
-Error: invalid application of `sizeof` to incomplete type `struct X~2`
-    ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c:10:21]
-    │
- 10 │     printf("%zu\n", sizeof *funcs[0]());
-    │                     ─────────┬────────  
-    │                              ╰────────── in this expression
-────╯
-
-Error: dereference of pointer to incomplete type `struct X~2`
-    ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c:10:29]
-    │
- 10 │     printf("%zu\n", sizeof *funcs[0]());
-    │                             ─────┬────  
-    │                                  ╰────── this expression has type `ptr<struct X~2>`
-────╯
-
-Error: invalid application of `sizeof` to incomplete type `struct X~5`
-    ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c:18:21]
-    │
- 18 │     printf("%zu\n", sizeof *funcs[0]());
-    │                     ─────────┬────────  
-    │                              ╰────────── in this expression
-────╯
-
-Error: dereference of pointer to incomplete type `struct X~5`
-    ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c:18:29]
-    │
- 18 │     printf("%zu\n", sizeof *funcs[0]());
-    │                             ─────┬────  
-    │                                  ╰────── this expression has type `ptr<struct X~5>`
-────╯

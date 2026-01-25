@@ -7,39 +7,81 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
+      f~1 `fn() -> void`
+      (compound-statement
+         (definition funcs~3 `array<ptr<fn() -> ptr<struct X~2 complete>>; 8>` (braced ∅))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "%zu\n\0"))))
+               (lengthof `unsigned long` 8 (funcs~3 `array<ptr<fn() -> ptr<struct X~2 complete>>; 8>`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "%zu\n\0"))))
+               (sizeof `unsigned long` 8
+                  (deref `struct X~2 complete`
+                     (call `ptr<struct X~2 complete>`
+                        (deref `ptr<fn() -> ptr<struct X~2 complete>>`
+                           (ptr-add `ptr<ptr<fn() -> ptr<struct X~2 complete>>>`
+                              (noop-type-conversion `ptr<ptr<fn() -> ptr<struct X~2 complete>>>`
+                                 (addressof `ptr<array<ptr<fn() -> ptr<struct X~2 complete>>; 8>>`
+                                    (funcs~3 `array<ptr<fn() -> ptr<struct X~2 complete>>; 8>`)))
+                              (sign-extend `unsigned long` (0 `int`)))))))))))
+   (function-definition external
+      g~4 `fn() -> void`
+      (compound-statement
+         (definition funcs~6 `array<ptr<fn() -> ptr<struct X~5 complete>>; 4>` (braced ∅))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "%zu\n\0"))))
+               (lengthof `unsigned long` 4 (funcs~6 `array<ptr<fn() -> ptr<struct X~5 complete>>; 4>`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "%zu\n\0"))))
+               (sizeof `unsigned long` 4
+                  (deref `struct X~5 complete`
+                     (call `ptr<struct X~5 complete>`
+                        (deref `ptr<fn() -> ptr<struct X~5 complete>>`
+                           (ptr-add `ptr<ptr<fn() -> ptr<struct X~5 complete>>>`
+                              (noop-type-conversion `ptr<ptr<fn() -> ptr<struct X~5 complete>>>`
+                                 (addressof `ptr<array<ptr<fn() -> ptr<struct X~5 complete>>; 4>>`
+                                    (funcs~6 `array<ptr<fn() -> ptr<struct X~5 complete>>; 4>`)))
+                              (sign-extend `unsigned long` (0 `int`)))))))))))
+   (function-definition external
+      main~7 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (f~1 `fn() -> void`))))
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (g~4 `fn() -> void`)))))))
 
 ----- stderr -----
-Error: invalid application of `sizeof` to incomplete type `struct X~2`
-    ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c:10:21]
-    │
- 10 │     printf("%zu\n", sizeof *funcs[0]());
-    │                     ─────────┬────────  
-    │                              ╰────────── in this expression
-────╯
-
-Error: dereference of pointer to incomplete type `struct X~2`
-    ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c:10:29]
-    │
- 10 │     printf("%zu\n", sizeof *funcs[0]());
-    │                             ─────┬────  
-    │                                  ╰────── this expression has type `ptr<struct X~2>`
-────╯
-
-Error: invalid application of `sizeof` to incomplete type `struct X~5`
-    ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c:18:21]
-    │
- 18 │     printf("%zu\n", sizeof *funcs[0]());
-    │                     ─────────┬────────  
-    │                              ╰────────── in this expression
-────╯
-
-Error: dereference of pointer to incomplete type `struct X~5`
-    ╭─[panko/tests/cases/execute/struct/test_array_of_struct_completed_in_array_decl_2.c:18:29]
-    │
- 18 │     printf("%zu\n", sizeof *funcs[0]());
-    │                             ─────┬────  
-    │                                  ╰────── this expression has type `ptr<struct X~5>`
-────╯
