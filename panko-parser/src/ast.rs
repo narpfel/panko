@@ -1,4 +1,4 @@
-use std::assert_matches::assert_matches;
+use std::assert_matches;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::fmt;

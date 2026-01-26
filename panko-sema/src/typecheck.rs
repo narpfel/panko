@@ -1,4 +1,4 @@
-use std::assert_matches::assert_matches;
+use std::assert_matches;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
