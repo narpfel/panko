@@ -23,6 +23,7 @@ use crate::scope;
 use crate::scope::Designator;
 use crate::ty::ArrayType;
 use crate::ty::ParameterDeclaration;
+use crate::ty::Struct;
 use crate::ty::subobjects::SubobjectIterator;
 
 #[derive(Debug, Report)]
@@ -389,6 +390,13 @@ pub(super) enum Diagnostic<'a> {
                 let index = index.checked_sub(1).unwrap().fg(Red);
                 format!("trying to initialise element at index {index} for `{ty}`")
             }
+            SubobjectIterator::Struct { ty, index, offset: _ } => {
+                let ty = Type::Struct(Struct::Complete(*ty)).fg(Blue);
+                // trying to get the non-existing element increments the index, so we undo this
+                // here
+                let index = index.checked_sub(1).unwrap().fg(Red);
+                format!("trying to initialise element at index {index} for `{ty}`")
+            }
         },
     )]
     #[diagnostics(
@@ -408,8 +416,9 @@ pub(super) enum Diagnostic<'a> {
     )]
     #[with(
         ty = match iterator {
-            SubobjectIterator::Scalar { ty, .. } => ty,
+            SubobjectIterator::Scalar { ty, .. } => *ty,
             SubobjectIterator::Array { .. } => unreachable!(),
+            SubobjectIterator::Struct { ty, .. } => Type::Struct(Struct::Complete(*ty)),
         }.fg(Blue),
     )]
     NoSuchSubobject {

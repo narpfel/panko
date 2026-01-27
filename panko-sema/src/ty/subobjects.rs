@@ -1,7 +1,10 @@
 use std::mem;
 
 use crate::ty::ArrayType;
+use crate::ty::Complete;
+use crate::ty::Struct;
 use crate::typecheck::ArrayLength;
+use crate::typecheck::Member;
 use crate::typecheck::QualifiedType;
 use crate::typecheck::Type;
 use crate::typecheck::Typeck;
@@ -24,6 +27,11 @@ pub(crate) enum SubobjectIterator<'a> {
         index: u64,
         offset: u64,
     },
+    Struct {
+        ty: Complete<'a, Typeck>,
+        index: usize,
+        offset: u64,
+    },
 }
 
 impl<'a> SubobjectIterator<'a> {
@@ -34,6 +42,9 @@ impl<'a> SubobjectIterator<'a> {
                 *is_exhausted = true;
             }
             Self::Array { ty: _, index, offset: _ } => {
+                *index = index.checked_add(1).unwrap();
+            }
+            Self::Struct { ty: _, index, offset: _ } => {
                 *index = index.checked_add(1).unwrap();
             }
         }
@@ -47,6 +58,7 @@ impl<'a> SubobjectIterator<'a> {
                 ty: Type::Array(*ty).unqualified(),
                 offset: *offset,
             }),
+            Self::Struct { ty: _, index: _, offset: _ } => todo!(),
         }
     }
 
@@ -66,6 +78,13 @@ impl<'a> SubobjectIterator<'a> {
                         .checked_add(index.checked_mul(ty.ty.ty.size()).unwrap())
                         .unwrap(),
                 }),
+                Self::Struct { ty, index, offset } => {
+                    let Member { name: _, ty, offset: member_offset } = ty.members[*index];
+                    Some(Subobject {
+                        ty,
+                        offset: offset.strict_add(member_offset),
+                    })
+                }
             }
         }
     }
@@ -79,6 +98,7 @@ impl<'a> SubobjectIterator<'a> {
                     todo!("VLAs cannot be initialised by braced initialisation"),
                 ArrayLength::Unknown => false,
             },
+            Self::Struct { ty, index, offset: _ } => *index >= ty.members.len(),
         }
     }
 
@@ -86,6 +106,7 @@ impl<'a> SubobjectIterator<'a> {
         match self {
             Self::Scalar { .. } => "scalar",
             Self::Array { .. } => "array",
+            Self::Struct { .. } => "struct",
         }
     }
 }
@@ -113,6 +134,9 @@ impl<'a> Subobjects<'a> {
     pub(crate) fn new(ty: QualifiedType<'a>) -> Self {
         let subobject_iterator = match ty.ty {
             Type::Array(ty) => SubobjectIterator::Array { ty, index: 0, offset: 0 },
+            Type::Struct(Struct::Incomplete { name: _, id: _ }) => todo!(),
+            Type::Struct(Struct::Complete(ty)) =>
+                SubobjectIterator::Struct { ty, index: 0, offset: 0 },
             ty if ty.is_scalar() =>
                 SubobjectIterator::Scalar { ty, is_exhausted: false, offset: 0 },
             // TODO: this is reachable for e. g. a braced initialisation of a variable of type
@@ -132,7 +156,8 @@ impl<'a> Subobjects<'a> {
 
     pub(crate) fn goto_index(&mut self, target_index: u64) -> Result<(), SubobjectIterator<'a>> {
         match &mut self.current {
-            SubobjectIterator::Scalar { .. } => Err(self.current.clone()),
+            SubobjectIterator::Scalar { .. } | SubobjectIterator::Struct { .. } =>
+                Err(self.current.clone()),
             SubobjectIterator::Array { ty: _, index, offset: _ } => {
                 *index = target_index;
                 Ok(())
@@ -160,6 +185,15 @@ impl<'a> Subobjects<'a> {
                         mem::replace(
                             &mut self.current,
                             SubobjectIterator::Array { ty, index: 0, offset: subobject.offset },
+                        ),
+                        Explicit::No,
+                    ));
+                }
+                Type::Struct(Struct::Complete(ty)) => {
+                    self.stack.push((
+                        mem::replace(
+                            &mut self.current,
+                            SubobjectIterator::Struct { ty, index: 0, offset: subobject.offset },
                         ),
                         Explicit::No,
                     ));
