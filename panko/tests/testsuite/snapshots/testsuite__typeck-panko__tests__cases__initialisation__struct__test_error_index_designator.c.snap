@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/initialisation/struct/test_error_index_designator.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: no such subobject while initialising object of type `struct T~0 complete`
+   ╭─[panko/tests/cases/initialisation/struct/test_error_index_designator.c:7:20]
+   │
+ 7 │     struct T t = { [1] = 42 };
+   │              ┬     ─┬─  
+   │              │      ╰─── no such subobject
+   │              │          
+   │              ╰────────── while initialising this variable
+───╯

@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/initialisation/struct/test_error_too_many_subobjects.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/initialisation/struct/test_error_too_many_subobjects.c"
+   (struct T~0
+      (member x `int`)
+      (member y `int`))
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (struct T~0
+            (member x `int`)
+            (member y `int`))
+         (declaration t~2 `struct T~0 complete`
+            (braced
+               1
+               2
+               3)))))
+
+----- stderr -----
