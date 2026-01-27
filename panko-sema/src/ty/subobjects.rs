@@ -38,15 +38,9 @@ impl<'a> SubobjectIterator<'a> {
     fn next(&mut self) -> Option<Subobject<'a>> {
         let result = self.current();
         match self {
-            Self::Scalar { ty: _, is_exhausted, offset: _ } => {
-                *is_exhausted = true;
-            }
-            Self::Array { ty: _, index, offset: _ } => {
-                *index = index.checked_add(1).unwrap();
-            }
-            Self::Struct { ty: _, index, offset: _ } => {
-                *index = index.checked_add(1).unwrap();
-            }
+            Self::Scalar { ty: _, is_exhausted, offset: _ } => *is_exhausted = true,
+            Self::Array { ty: _, index, offset: _ } => *index = index.strict_add(1),
+            Self::Struct { ty: _, index, offset: _ } => *index = index.strict_add(1),
         }
         result
     }
