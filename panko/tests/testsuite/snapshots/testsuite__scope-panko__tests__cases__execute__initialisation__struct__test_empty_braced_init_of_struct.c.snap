@@ -1,0 +1,34 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/struct/test_empty_braced_init_of_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_empty_braced_init_of_struct.c"
+   (declaration memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int` ∅)
+   (struct T~1
+      (member x `int`)
+      (member cs `array<char; 4>`)
+      (member y `int`))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (struct T~1
+            (member x `int`)
+            (member cs `array<char; 4>`)
+            (member y `int`))
+         (declaration zeroed_t~3 `struct T~1 complete` (braced ∅))
+         (declaration zeros~4 `array<char; (sizeof (name zeroed_t~3 `struct T~1 complete`))>` (braced ∅))
+         (return
+            (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
+               (addressof (name zeroed_t~3 `struct T~1 complete`))
+               (name zeros~4 `array<char; (sizeof (name zeroed_t~3 `struct T~1 complete`))>`)
+               (sizeof (name zeroed_t~3 `struct T~1 complete`)))))))
+
+----- stderr -----

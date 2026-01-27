@@ -1,0 +1,41 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/initialisation/struct/test_empty_braced_init_of_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_empty_braced_init_of_struct.c"
+   (declaration external (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)) ∅)
+   (struct T~1
+      (member x @0 `int`)
+      (member cs @4 `array<char; 4>`)
+      (member y @8 `int`))
+   (function-definition external
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (struct T~1
+            (member x @0 `int`)
+            (member cs @4 `array<char; 4>`)
+            (member y @8 `int`))
+         (definition (zeroed_t~3 `struct T~1 complete` @0) (braced ∅))
+         (definition (zeros~4 `array<char; 12>` @12) (braced ∅))
+         (return
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int>` @32
+                  (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)))
+               (noop-type-conversion `ptr<void const>` @40
+                  (addressof `ptr<struct T~1 complete>` @40
+                     (zeroed_t~3 `struct T~1 complete` @0)))
+               (noop-type-conversion `ptr<void const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 12>>` @48
+                        (zeros~4 `array<char; 12>` @12))))
+               (12 `unsigned long` @56))))))
+
+----- stderr -----

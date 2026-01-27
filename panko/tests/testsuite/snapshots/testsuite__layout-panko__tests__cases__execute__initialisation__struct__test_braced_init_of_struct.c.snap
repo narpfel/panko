@@ -1,0 +1,67 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct.c"
+   (declaration external (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)) ∅)
+   (struct T~1
+      (member x @0 `int`)
+      (member cs @4 `array<char; 4>`)
+      (member y @8 `int`)
+      (member z @12 `int`))
+   (function-definition external
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (struct T~1
+            (member x @0 `int`)
+            (member cs @4 `array<char; 4>`)
+            (member y @8 `int`)
+            (member z @12 `int`))
+         (definition (zeroed_t~3 `struct T~1 complete` @0)
+            (braced
+               (subobject +0 (305419896 `int` @0))
+               (subobject +4 (truncate `char` @4 (1 `int` @16)))
+               (subobject +5 (truncate `char` @5 (2 `int` @16)))
+               (subobject +6 (truncate `char` @6 (3 `int` @16)))
+               (subobject +7 (truncate `char` @7 (4 `int` @16)))
+               (subobject +8 (noop-type-conversion `int` @8 (2882400066 `unsigned int` @8)))))
+         (definition (bytes~4 `array<char; 16>` @16)
+            (braced
+               (subobject +0 (truncate `char` @16 (120 `int` @32)))
+               (subobject +1 (truncate `char` @17 (86 `int` @32)))
+               (subobject +2 (truncate `char` @18 (52 `int` @32)))
+               (subobject +3 (truncate `char` @19 (18 `int` @32)))
+               (subobject +4 (truncate `char` @20 (1 `int` @32)))
+               (subobject +5 (truncate `char` @21 (2 `int` @32)))
+               (subobject +6 (truncate `char` @22 (3 `int` @32)))
+               (subobject +7 (truncate `char` @23 (4 `int` @32)))
+               (subobject +8 (truncate `char` @24 (66 `int` @32)))
+               (subobject +9 (truncate `char` @25 (239 `int` @32)))
+               (subobject +10 (truncate `char` @26 (205 `int` @32)))
+               (subobject +11 (truncate `char` @27 (171 `int` @32)))
+               (subobject +12 (truncate `char` @28 (0 `int` @32)))
+               (subobject +13 (truncate `char` @29 (0 `int` @32)))
+               (subobject +14 (truncate `char` @30 (0 `int` @32)))
+               (subobject +15 (truncate `char` @31 (0 `int` @32)))))
+         (return
+            (call `int` @32
+               (addressof `ptr<fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int>` @40
+                  (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)))
+               (noop-type-conversion `ptr<void const>` @48
+                  (addressof `ptr<struct T~1 complete>` @48
+                     (zeroed_t~3 `struct T~1 complete` @0)))
+               (noop-type-conversion `ptr<void const>` @56
+                  (noop-type-conversion `ptr<char>` @56
+                     (addressof `ptr<array<char; 16>>` @56
+                        (bytes~4 `array<char; 16>` @16))))
+               (16 `unsigned long` @64))))))
+
+----- stderr -----
