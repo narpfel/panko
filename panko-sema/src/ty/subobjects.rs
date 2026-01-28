@@ -35,6 +35,20 @@ pub(crate) enum SubobjectIterator<'a> {
 }
 
 impl<'a> SubobjectIterator<'a> {
+    fn new(ty: &Type<'a>, offset: u64) -> Self {
+        match *ty {
+            Type::Array(ty) => SubobjectIterator::Array { ty, index: 0, offset },
+            Type::Struct(Struct::Incomplete { name: _, id: _ }) => todo!(),
+            Type::Struct(Struct::Complete(ty)) =>
+                SubobjectIterator::Struct { ty, index: 0, offset },
+            ty if ty.is_scalar() => SubobjectIterator::Scalar { ty, is_exhausted: false, offset },
+            // TODO: this is reachable for e. g. a braced initialisation of a variable of type
+            // `void`:
+            //     void v = {1, 2, 3};
+            _ => unreachable!(),
+        }
+    }
+
     fn next(&mut self) -> Option<Subobject<'a>> {
         let result = self.current();
         match self {
@@ -126,21 +140,9 @@ pub(crate) struct Subobjects<'a> {
 
 impl<'a> Subobjects<'a> {
     pub(crate) fn new(ty: QualifiedType<'a>) -> Self {
-        let subobject_iterator = match ty.ty {
-            Type::Array(ty) => SubobjectIterator::Array { ty, index: 0, offset: 0 },
-            Type::Struct(Struct::Incomplete { name: _, id: _ }) => todo!(),
-            Type::Struct(Struct::Complete(ty)) =>
-                SubobjectIterator::Struct { ty, index: 0, offset: 0 },
-            ty if ty.is_scalar() =>
-                SubobjectIterator::Scalar { ty, is_exhausted: false, offset: 0 },
-            // TODO: this is reachable for e. g. a braced initialisation of a variable of type
-            // `void`:
-            //     void v = {1, 2, 3};
-            _ => unreachable!(),
-        };
         Self {
             stack: vec![],
-            current: subobject_iterator,
+            current: SubobjectIterator::new(&ty.ty, 0),
         }
     }
 
@@ -200,22 +202,7 @@ impl<'a> Subobjects<'a> {
         self.leave_empty_subobjects();
 
         let (iterator, result) = match self.current.next() {
-            Some(subobject) => {
-                let iterator = match subobject.ty.ty {
-                    Type::Array(ty) =>
-                        SubobjectIterator::Array { ty, index: 0, offset: subobject.offset },
-                    Type::Struct(Struct::Incomplete { name: _, id: _ }) => todo!(),
-                    Type::Struct(Struct::Complete(ty)) =>
-                        SubobjectIterator::Struct { ty, index: 0, offset: subobject.offset },
-                    ty if ty.is_scalar() => SubobjectIterator::Scalar {
-                        ty,
-                        is_exhausted: false,
-                        offset: subobject.offset,
-                    },
-                    _ => unreachable!(),
-                };
-                (iterator, Ok(()))
-            }
+            Some(Subobject { ty, offset }) => (SubobjectIterator::new(&ty.ty, offset), Ok(())),
             // Example for this case:
             //     int x = {1, {}};
             None => (self.current.clone(), Err(self.current.clone())),
