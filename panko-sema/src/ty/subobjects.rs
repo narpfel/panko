@@ -168,30 +168,21 @@ impl<'a> Subobjects<'a> {
         }
     }
 
+    fn push(&mut self, iterator: SubobjectIterator<'a>) {
+        let iterator = mem::replace(&mut self.current, iterator);
+        self.stack.push((iterator, Explicit::No))
+    }
+
     pub(crate) fn next_scalar(&mut self) -> Result<Subobject<'a>, SubobjectIterator<'a>> {
         loop {
             self.leave_empty_subobjects();
 
             let subobject = self.current.next().ok_or_else(|| self.current.clone())?;
             match subobject.ty.ty {
-                Type::Array(ty) => {
-                    self.stack.push((
-                        mem::replace(
-                            &mut self.current,
-                            SubobjectIterator::Array { ty, index: 0, offset: subobject.offset },
-                        ),
-                        Explicit::No,
-                    ));
-                }
-                Type::Struct(Struct::Complete(ty)) => {
-                    self.stack.push((
-                        mem::replace(
-                            &mut self.current,
-                            SubobjectIterator::Struct { ty, index: 0, offset: subobject.offset },
-                        ),
-                        Explicit::No,
-                    ));
-                }
+                Type::Array(ty) =>
+                    self.push(SubobjectIterator::Array { ty, index: 0, offset: subobject.offset }),
+                Type::Struct(Struct::Complete(ty)) =>
+                    self.push(SubobjectIterator::Struct { ty, index: 0, offset: subobject.offset }),
                 _ => {
                     if let Some((_, explicit @ Explicit::Next)) = self.stack.last_mut() {
                         *explicit = Explicit::No;
