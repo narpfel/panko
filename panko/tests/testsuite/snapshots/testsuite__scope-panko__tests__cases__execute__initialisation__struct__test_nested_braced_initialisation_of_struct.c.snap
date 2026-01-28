@@ -1,0 +1,76 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/struct/test_nested_braced_initialisation_of_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_nested_braced_initialisation_of_struct.c"
+   (declaration memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int` ∅)
+   (declaration printf~1 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct T~2
+      (member x `int`)
+      (member y `int`))
+   (struct U~3
+      (member x `int`)
+      (member t `struct T~2 complete`)
+      (member y `int`)
+      (member z `int`))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (struct U~3
+            (member x `int`)
+            (member t `struct T~2 complete`)
+            (member y `int`)
+            (member z `int`))
+         (declaration u~5 `struct U~3 complete`
+            (braced
+               1
+               (braced
+                  2
+                  3)
+               0
+               4))
+         (declaration ints~6 `array<int; ∅>`
+            (braced
+               1
+               2
+               3
+               0
+               4
+               5))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
+                  (addressof (name u~5 `struct U~3 complete`))
+                  (name ints~6 `array<int; ∅>`)
+                  (sizeof (name u~5 `struct U~3 complete`)))))
+         (struct T~2
+            (member x `int`)
+            (member y `int`))
+         (declaration ts~7 `array<struct T~2 complete; ∅>`
+            (braced
+               (braced
+                  1
+                  2)
+               (braced
+                  3)
+               (braced
+                  4
+                  5)))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
+                  (name ts~7 `array<struct T~2 complete; ∅>`)
+                  (name ints~6 `array<int; ∅>`)
+                  (sizeof (name ts~7 `array<struct T~2 complete; ∅>`))))))))
+
+----- stderr -----

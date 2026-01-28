@@ -204,6 +204,9 @@ impl<'a> Subobjects<'a> {
                 let iterator = match subobject.ty.ty {
                     Type::Array(ty) =>
                         SubobjectIterator::Array { ty, index: 0, offset: subobject.offset },
+                    Type::Struct(Struct::Incomplete { name: _, id: _ }) => todo!(),
+                    Type::Struct(Struct::Complete(ty)) =>
+                        SubobjectIterator::Struct { ty, index: 0, offset: subobject.offset },
                     ty if ty.is_scalar() => SubobjectIterator::Scalar {
                         ty,
                         is_exhausted: false,
