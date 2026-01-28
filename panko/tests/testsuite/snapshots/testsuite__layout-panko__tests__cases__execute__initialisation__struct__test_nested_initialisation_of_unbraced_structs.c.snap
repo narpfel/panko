@@ -1,0 +1,94 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/initialisation/struct/test_nested_initialisation_of_unbraced_structs.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_nested_initialisation_of_unbraced_structs.c"
+   (declaration external (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)) ∅)
+   (declaration external (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (struct T~2
+      (member x @0 `int`)
+      (member y @4 `int`))
+   (struct U~3
+      (member x @0 `int`)
+      (member t @4 `struct T~2 complete`)
+      (member y @12 `int`))
+   (function-definition external
+      (main~4 `fn() -> int` (static main))
+      (compound-statement
+         (struct U~3
+            (member x @0 `int`)
+            (member t @4 `struct T~2 complete`)
+            (member y @12 `int`))
+         (definition (u~5 `struct U~3 complete` @0)
+            (braced
+               (subobject +0 (1 `int` @0))
+               (subobject +4 (2 `int` @4))
+               (subobject +8 (3 `int` @8))
+               (subobject +12 (4 `int` @12))))
+         (definition (ints~6 `array<int; 6>` @16)
+            (braced
+               (subobject +0 (1 `int` @16))
+               (subobject +4 (2 `int` @20))
+               (subobject +8 (3 `int` @24))
+               (subobject +12 (4 `int` @28))
+               (subobject +16 (5 `int` @32))
+               (subobject +20 (0 `int` @36))))
+         (expression
+            (call `int` @40
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @48
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @56
+                  (noop-type-conversion `ptr<char>` @56
+                     (addressof `ptr<array<char; 4>>` @56
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (call `int` @64
+                  (addressof `ptr<fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int>` @72
+                     (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)))
+                  (noop-type-conversion `ptr<void const>` @80
+                     (addressof `ptr<struct U~3 complete>` @80
+                        (u~5 `struct U~3 complete` @0)))
+                  (noop-type-conversion `ptr<void const>` @88
+                     (noop-type-conversion `ptr<int>` @88
+                        (addressof `ptr<array<int; 6>>` @88
+                           (ints~6 `array<int; 6>` @16))))
+                  (16 `unsigned long` @96))))
+         (struct T~2
+            (member x @0 `int`)
+            (member y @4 `int`))
+         (definition (ts~7 `array<struct T~2 complete; 3>` @40)
+            (braced
+               (subobject +0 (1 `int` @40))
+               (subobject +4 (2 `int` @44))
+               (subobject +8 (3 `int` @48))
+               (subobject +12 (4 `int` @52))
+               (subobject +16 (5 `int` @56))))
+         (expression
+            (call `int` @64
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @72
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @80
+                  (noop-type-conversion `ptr<char>` @80
+                     (addressof `ptr<array<char; 4>>` @80
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (call `int` @88
+                  (addressof `ptr<fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int>` @96
+                     (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)))
+                  (noop-type-conversion `ptr<void const>` @104
+                     (noop-type-conversion `ptr<struct T~2 complete>` @104
+                        (addressof `ptr<array<struct T~2 complete; 3>>` @104
+                           (ts~7 `array<struct T~2 complete; 3>` @40))))
+                  (noop-type-conversion `ptr<void const>` @112
+                     (noop-type-conversion `ptr<int>` @112
+                        (addressof `ptr<array<int; 6>>` @112
+                           (ints~6 `array<int; 6>` @16))))
+                  (24 `unsigned long` @120)))))))
+
+----- stderr -----
