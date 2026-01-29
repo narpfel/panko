@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/initialisation/test_braced_initialisation_of_char_ptr_with_string_literal.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: excess element in scalar initialiser
+   ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_char_ptr_with_string_literal.c:7:22]
+   │
+ 7 │     char const* s = {"abc"};
+   │                 ┬    ──┬──  
+   │                 │      ╰──── `s`’s type `ptr<char const>` is scalar
+   │                 │           
+   │                 ╰─────────── while initialising this variable
+───╯
