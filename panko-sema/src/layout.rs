@@ -79,12 +79,12 @@ pub struct SubobjectInitialiser<'a, Expression> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Subobject<'a> {
-    pub(crate) ty: QualifiedType<'a>,
+    pub(crate) ty: Type<'a>,
     pub(crate) offset: u64,
 }
 
 impl<'a> Subobject<'a> {
-    pub fn ty(&self) -> &QualifiedType<'a> {
+    pub fn ty(&self) -> &Type<'a> {
         &self.ty
     }
 
@@ -277,13 +277,12 @@ fn layout_array_length<'a>(
     }
 }
 
-fn layout_ty<'a>(
+fn layout_ty_unqual<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
-    ty: typecheck::QualifiedType<'a>,
-) -> QualifiedType<'a> {
-    let typecheck::QualifiedType { is_const, is_volatile, ty, loc } = ty;
-    let ty = match ty {
+    ty: typecheck::Type<'a>,
+) -> Type<'a> {
+    match ty {
         ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
         ty::Type::Pointer(pointee) => Type::Pointer(bump.alloc(layout_ty(stack, bump, *pointee))),
         ty::Type::Array(ArrayType { ty, length, loc }) => Type::Array(ArrayType {
@@ -315,7 +314,16 @@ fn layout_ty<'a>(
             }));
             Type::Struct(Struct::Complete(Complete { name, id, members }))
         }
-    };
+    }
+}
+
+fn layout_ty<'a>(
+    stack: &mut Stack<'a>,
+    bump: &'a Bump,
+    ty: typecheck::QualifiedType<'a>,
+) -> QualifiedType<'a> {
+    let typecheck::QualifiedType { is_const, is_volatile, ty, loc } = ty;
+    let ty = layout_ty_unqual(stack, bump, ty);
     QualifiedType { is_const, is_volatile, ty, loc }
 }
 
@@ -370,7 +378,10 @@ fn layout_declaration<'a>(
                             initialiser,
                         } = *subobject_initialiser;
                         SubobjectInitialiser {
-                            subobject: Subobject { ty: layout_ty(stack, bump, ty), offset },
+                            subobject: Subobject {
+                                ty: layout_ty_unqual(stack, bump, ty),
+                                offset,
+                            },
                             initialiser: stack.with_block(|stack| {
                                 layout_expression_in_slot(
                                     stack,

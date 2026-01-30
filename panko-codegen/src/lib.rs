@@ -492,7 +492,7 @@ impl<'a> Codegen<'a> {
                     // TODO: this can be made a lot more efficient for sparse initialisers
                     let mut bytes = vec![0; usize::try_from(size).unwrap()];
                     for SubobjectInitialiser { subobject, initialiser } in subobject_initialisers {
-                        let subobject_size = usize::try_from(subobject.ty().ty.size()).unwrap();
+                        let subobject_size = usize::try_from(subobject.ty().size()).unwrap();
                         match initialiser {
                             Expression::Integer(value) => bytes
                                 [usize::try_from(subobject.offset()).unwrap()..][..subobject_size]
