@@ -1,0 +1,36 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/struct/test_braced_init_of_register_sized_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_braced_init_of_register_sized_struct.c"
+   (declaration memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int` ∅)
+   (struct T~1
+      (member c1 `char`)
+      (member c2 `char`))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (struct T~1
+            (member c1 `char`)
+            (member c2 `char`))
+         (declaration t~3 `struct T~1 complete`
+            (braced
+               'a'))
+         (declaration bytes~4 `array<char; (sizeof (name t~3 `struct T~1 complete`))>`
+            (braced
+               'a'))
+         (return
+            (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
+               (addressof (name t~3 `struct T~1 complete`))
+               (name bytes~4 `array<char; (sizeof (name t~3 `struct T~1 complete`))>`)
+               (sizeof (name t~3 `struct T~1 complete`)))))))
+
+----- stderr -----

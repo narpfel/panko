@@ -173,7 +173,7 @@ impl fmt::Display for Operand<'_> {
                         unreachable!("incomplete"),
                     Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
                         match is_dereferenced {
-                            true => unreachable!(),
+                            true => self.ty.size(),
                             false => 8,
                         },
                 };

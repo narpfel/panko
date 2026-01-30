@@ -1,0 +1,43 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/initialisation/struct/test_braced_init_of_register_sized_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_braced_init_of_register_sized_struct.c"
+   (declaration external memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` ∅)
+   (struct T~1
+      (member c1 @0 `char`)
+      (member c2 @1 `char`))
+   (function-definition external
+      main~2 `fn() -> int`
+      (compound-statement
+         (struct T~1
+            (member c1 @0 `char`)
+            (member c2 @1 `char`))
+         (definition t~3 `struct T~1 complete`
+            (braced
+               (subobject +0 (truncate `char` ('a' `int`)))))
+         (definition bytes~4 `array<char; 2>`
+            (braced
+               (subobject +0 (truncate `char` ('a' `int`)))))
+         (return
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int>`
+                  (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int`))
+               (noop-type-conversion `ptr<void const>`
+                  (addressof `ptr<struct T~1 complete>`
+                     (t~3 `struct T~1 complete`)))
+               (noop-type-conversion `ptr<void const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 2>>`
+                        (bytes~4 `array<char; 2>`))))
+               (sizeof `unsigned long` 2 (t~3 `struct T~1 complete`)))))))
+
+----- stderr -----

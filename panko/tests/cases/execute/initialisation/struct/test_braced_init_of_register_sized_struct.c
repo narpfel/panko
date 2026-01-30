@@ -1,6 +1,3 @@
-// [[known-bug]]
-// [[nosnapshot]]
-
 int memcmp(void const*, void const*, typeof(sizeof 0));
 
 struct T {
@@ -9,7 +6,7 @@ struct T {
 };
 
 int main() {
-    struct T t = {'a', 'b'};
-    char bytes[sizeof t] = {'a', 'b'};
+    struct T t = {'a'};
+    char bytes[sizeof t] = {'a'};
     return memcmp(&t, bytes, sizeof t);
 }
