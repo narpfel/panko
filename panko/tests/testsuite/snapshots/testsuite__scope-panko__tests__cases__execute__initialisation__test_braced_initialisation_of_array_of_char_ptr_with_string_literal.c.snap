@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_char_ptr_with_string_literal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_char_ptr_with_string_literal.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (declaration s~2 `array<typeof(`ptr<char const>`); ∅>`
+            (braced
+               (string "hello world")))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%s\n")
+               (subscript (name s~2 `array<typeof(`ptr<char const>`); ∅>`) 0)))
+         (return (lengthof (name s~2 `array<typeof(`ptr<char const>`); ∅>`))))))
+
+----- stderr -----
