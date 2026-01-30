@@ -277,14 +277,14 @@ impl<'a> AsOperand<'a> for SubobjectAtReference<'a> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
         slot_as_operand(
             self.slot(),
-            self.subobject.ty().ty,
+            *self.subobject.ty(),
             argument_area_size.unwrap(),
             false,
         )
     }
 
     fn size(&self) -> u64 {
-        self.subobject.ty().ty.size()
+        self.subobject.ty().size()
     }
 }
 

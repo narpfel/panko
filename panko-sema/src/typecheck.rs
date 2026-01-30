@@ -1040,7 +1040,7 @@ fn typeck_initialiser_list<'a>(
     ] = initialiser_list
         && let Ok(_) = subobjects.next_scalar()
         && let Some(subobject) = subobjects.parent()
-        && let Type::Array(array_ty) = subobject.ty.ty
+        && let Type::Array(array_ty) = subobject.ty
     {
         subobject_initialisers.insert(
             subobject.offset,
@@ -1135,7 +1135,7 @@ fn typeck_initialiser_list<'a>(
                 Ok(subobject) => {
                     let subobject_initialiser = if let scope::Expression::String(_) = expr
                         && let Some(subobject) = subobjects.parent()
-                        && let Type::Array(array_ty) = subobject.ty.ty
+                        && let Type::Array(array_ty) = subobject.ty
                         && subobjects.try_leave_subobject(AllowExplicit::No)
                     {
                         SubobjectInitialiser {
@@ -1154,7 +1154,7 @@ fn typeck_initialiser_list<'a>(
                             // this should emit an excess initialiser error *and* a type error
                             initialiser: convert_as_if_by_assignment(
                                 sess,
-                                subobject.ty,
+                                subobject.ty.unqualified(),
                                 typeck_expression(sess, expr, Context::Default),
                             ),
                         }
