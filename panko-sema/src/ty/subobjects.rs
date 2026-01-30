@@ -13,7 +13,7 @@ use crate::typecheck::Typeck;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Subobject<'a> {
-    pub(crate) ty: QualifiedType<'a>,
+    pub(crate) ty: Type<'a>,
     pub(crate) offset: u64,
 }
 
@@ -59,12 +59,10 @@ impl<'a> SubobjectIterator<'a> {
     fn parent(&self) -> Option<Subobject<'a>> {
         match self {
             Self::Scalar { .. } => None,
-            Self::Array { ty, index: _, offset } => Some(Subobject {
-                ty: Type::Array(*ty).unqualified(),
-                offset: *offset,
-            }),
+            Self::Array { ty, index: _, offset } =>
+                Some(Subobject { ty: Type::Array(*ty), offset: *offset }),
             Self::Struct { ty, index: _, offset } => Some(Subobject {
-                ty: Type::Struct(Struct::Complete(*ty)).unqualified(),
+                ty: Type::Struct(Struct::Complete(*ty)),
                 offset: *offset,
             }),
         }
@@ -76,18 +74,16 @@ impl<'a> SubobjectIterator<'a> {
         }
         else {
             match self {
-                // TODO: is it correct to return the unqualified type here or should the qualifiers
-                // be retained?
                 Self::Scalar { ty, is_exhausted: _, offset } =>
-                    Some(Subobject { ty: ty.unqualified(), offset: *offset }),
+                    Some(Subobject { ty: *ty, offset: *offset }),
                 Self::Array { ty, index, offset } => Some(Subobject {
-                    ty: ty.ty.make_unqualified(),
+                    ty: ty.ty.ty,
                     offset: offset.strict_add(index.strict_mul(ty.ty.ty.size())),
                 }),
                 Self::Struct { ty, index, offset } => {
                     let Member { name: _, ty, offset: member_offset } = ty.members[*index];
                     Some(Subobject {
-                        ty,
+                        ty: ty.ty,
                         offset: offset.strict_add(member_offset),
                     })
                 }
@@ -189,7 +185,7 @@ impl<'a> Subobjects<'a> {
                 .current_mut()
                 .next()
                 .ok_or_else(|| self.current().clone())?;
-            match subobject.ty.ty {
+            match subobject.ty {
                 Type::Array(ty) =>
                     self.push(SubobjectIterator::Array { ty, index: 0, offset: subobject.offset }),
                 struct_ty @ Type::Struct(Struct::Complete(ty)) if initialiser_ty != &struct_ty =>
@@ -212,10 +208,8 @@ impl<'a> Subobjects<'a> {
         let depth = self.depth();
 
         let (iterator, result) = match self.current_mut().next() {
-            Some(Subobject { ty, offset }) => (
-                SubobjectIterator::new(&ty.ty, offset).expect("todo"),
-                Ok(()),
-            ),
+            Some(Subobject { ty, offset }) =>
+                (SubobjectIterator::new(&ty, offset).expect("todo"), Ok(())),
             // Example for this case:
             //     int x = {1, {}};
             None => (self.current().clone(), Err(self.current().clone())),

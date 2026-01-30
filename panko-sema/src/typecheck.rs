@@ -1087,7 +1087,7 @@ fn typeck_initialiser_list<'a>(
         let subobjects_clone = subobjects.clone();
         if let Ok(_) = subobjects.next(&typed_initialiser.ty.ty)
             && let Some(subobject) = subobjects.parent()
-            && let Type::Array(array_ty) = subobject.ty.ty
+            && let Type::Array(array_ty) = subobject.ty
             && let Some(initialiser) =
                 typeck_array_initialisation_with_string(sess, reference, &array_ty, initialiser)
         {
@@ -1181,7 +1181,7 @@ fn typeck_initialiser_list<'a>(
                     Ok(subobject) => {
                         let subobject_initialiser = if let scope::Expression::String(_) = expr
                             && let Some(subobject) = subobjects.parent()
-                            && let Type::Array(array_ty) = subobject.ty.ty
+                            && let Type::Array(array_ty) = subobject.ty
                             && subobjects.try_leave_subobject(AllowExplicit::No)
                             // TODO: this duplicates typechecking `expr`: disentangle
                             // `typeck_expression` so that the `Constext` can be applied
@@ -1196,7 +1196,7 @@ fn typeck_initialiser_list<'a>(
                                 subobject,
                                 initialiser: convert_as_if_by_assignment(
                                     sess,
-                                    subobject.ty,
+                                    subobject.ty.unqualified(),
                                     typed_expr,
                                 ),
                             }
