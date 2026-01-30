@@ -1,5 +1,4 @@
 // [[known-bug]]
-// [[nosnapshot]]
 
 int printf(char const*, ...);
 

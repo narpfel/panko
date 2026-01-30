@@ -66,7 +66,10 @@ impl<'a> SubobjectIterator<'a> {
                 ty: Type::Array(*ty).unqualified(),
                 offset: *offset,
             }),
-            Self::Struct { ty: _, index: _, offset: _ } => todo!(),
+            Self::Struct { ty, index: _, offset } => Some(Subobject {
+                ty: Type::Struct(Struct::Complete(*ty)).unqualified(),
+                offset: *offset,
+            }),
         }
     }
 

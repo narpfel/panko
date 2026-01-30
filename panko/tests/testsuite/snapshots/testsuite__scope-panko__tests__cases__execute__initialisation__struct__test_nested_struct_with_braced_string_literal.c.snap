@@ -1,0 +1,36 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/struct/test_nested_struct_with_braced_string_literal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_nested_struct_with_braced_string_literal.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct String~1
+      (member ptr `ptr<char const>`))
+   (struct T~2
+      (member string `struct String~1 complete`)
+      (member x `int`))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (struct T~2
+            (member string `struct String~1 complete`)
+            (member x `int`))
+         (declaration t~4 `struct T~2 complete`
+            (braced
+               (braced
+                  (string "hello world"))
+               42))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%s\n")
+               (deref (cast `ptr<ptr<char const>>` (addressof (name t~4 `struct T~2 complete`)))))))))
+
+----- stderr -----

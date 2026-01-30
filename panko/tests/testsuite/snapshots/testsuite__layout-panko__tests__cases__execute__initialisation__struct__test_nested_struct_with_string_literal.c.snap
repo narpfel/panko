@@ -1,0 +1,47 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/initialisation/struct/test_nested_struct_with_string_literal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_nested_struct_with_string_literal.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (struct String~1
+      (member ptr @0 `ptr<char const>`))
+   (struct T~2
+      (member string @0 `struct String~1 complete`)
+      (member x @8 `int`))
+   (function-definition external
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (struct T~2
+            (member string @0 `struct String~1 complete`)
+            (member x @8 `int`))
+         (definition (t~4 `struct T~2 complete` @0)
+            (braced
+               (subobject +0
+                  (noop-type-conversion `ptr<char const>` @0
+                     (noop-type-conversion `ptr<char>` @0
+                        (addressof `ptr<array<char; 12>>` @0
+                           (string `array<char; 12>` @void "hello world\0")))))
+               (subobject +8 (42 `int` @8))))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 4>>` @32
+                        (string `array<char; 4>` @void "%s\n\0"))))
+               (deref `ptr<char const>` @40
+                  (noop-type-conversion `ptr<ptr<char const>>` @48
+                     (addressof `ptr<struct T~2 complete>` @48
+                        (t~4 `struct T~2 complete` @0)))))))))
+
+----- stderr -----

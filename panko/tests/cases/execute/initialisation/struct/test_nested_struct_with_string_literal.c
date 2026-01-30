@@ -1,6 +1,3 @@
-// [[known-bug]]
-// [[nosnapshot]]
-
 int printf(char const*, ...);
 
 struct String {
