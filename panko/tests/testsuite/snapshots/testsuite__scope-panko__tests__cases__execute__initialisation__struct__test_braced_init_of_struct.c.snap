@@ -25,7 +25,7 @@ exit_code: 0
             (member cs `array<char; 4>`)
             (member y `int`)
             (member z `int`))
-         (declaration zeroed_t~3 `struct T~1 complete`
+         (declaration t~3 `struct T~1 complete`
             (braced
                0x1234'5678
                1
@@ -33,7 +33,7 @@ exit_code: 0
                3
                4
                0xabcd'ef42))
-         (declaration bytes~4 `array<char; (sizeof (name zeroed_t~3 `struct T~1 complete`))>`
+         (declaration bytes~4 `array<char; (sizeof (name t~3 `struct T~1 complete`))>`
             (braced
                0x78
                0x56
@@ -53,8 +53,8 @@ exit_code: 0
                0))
          (return
             (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
-               (addressof (name zeroed_t~3 `struct T~1 complete`))
-               (name bytes~4 `array<char; (sizeof (name zeroed_t~3 `struct T~1 complete`))>`)
-               (sizeof (name zeroed_t~3 `struct T~1 complete`)))))))
+               (addressof (name t~3 `struct T~1 complete`))
+               (name bytes~4 `array<char; (sizeof (name t~3 `struct T~1 complete`))>`)
+               (sizeof (name t~3 `struct T~1 complete`)))))))
 
 ----- stderr -----

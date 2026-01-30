@@ -25,7 +25,7 @@ exit_code: 0
             (member cs @4 `array<char; 4>`)
             (member y @8 `int`)
             (member z @12 `int`))
-         (definition (zeroed_t~3 `struct T~1 complete` @0)
+         (definition (t~3 `struct T~1 complete` @0)
             (braced
                (subobject +0 (305419896 `int` @0))
                (subobject +4 (truncate `char` @4 (1 `int` @16)))
@@ -57,7 +57,7 @@ exit_code: 0
                   (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)))
                (noop-type-conversion `ptr<void const>` @48
                   (addressof `ptr<struct T~1 complete>` @48
-                     (zeroed_t~3 `struct T~1 complete` @0)))
+                     (t~3 `struct T~1 complete` @0)))
                (noop-type-conversion `ptr<void const>` @56
                   (noop-type-conversion `ptr<char>` @56
                      (addressof `ptr<array<char; 16>>` @56
