@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_of_array_of_char_pointer.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_of_array_of_char_pointer.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (struct T~2
+            (member s `array<typeof(`ptr<char const>`); 1>`))
+         (declaration t~3 `struct T~2 complete`
+            (braced
+               (string "hello world")))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%s\n")
+               (deref (cast `ptr<ptr<char const>>` (addressof (name t~3 `struct T~2 complete`)))))))))
+
+----- stderr -----

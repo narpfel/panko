@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_of_array_of_char_pointer.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: array of inappropriate type `array<ptr<char const>; 1>` initialised by string literal
+   ╭─[panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_of_array_of_char_pointer.c:8:12]
+   │
+ 7 │         typeof(char const*) s[1];
+   │         ────────────┬───────────  
+   │                     ╰───────────── this is an array of `ptr<char const>`
+ 8 │     } t = {"hello world"};
+   │            ──────┬──────  
+   │                  ╰──────── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+───╯
