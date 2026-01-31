@@ -68,110 +68,84 @@ Error: array of inappropriate type `array<int; ∅>` initialised by string liter
     │         ╰───────────── this is an array of `int`
 ────╯
 
-Error: array of inappropriate type `array<int; ∅>` initialised by string literal
+Error: invalid implicit conversion from `ptr<char>` to `int`
     ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c:12:17]
     │
  12 │     int ys[] = {"abc"};
-    │     ────┬───    ──┬──  
-    │         │         ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-    │         │              
-    │         ╰────────────── this is an array of `int`
+    │                 ──┬──  
+    │                   ╰──── this is of type `ptr<char>`, which cannot be implicitly converted to `int`
 ────╯
 
-Error: array of inappropriate type `array<int; 1>` initialised by string literal
+Error: invalid implicit conversion from `ptr<char>` to `int`
     ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c:12:17]
     │
  12 │     int ys[] = {"abc"};
-    │     ────┬───    ──┬──  
-    │         │         ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-    │         │              
-    │         ╰────────────── this is an array of `int`
+    │                 ──┬──  
+    │                   ╰──── this is of type `ptr<char>`, which cannot be implicitly converted to `int`
 ────╯
 
-Error: array of inappropriate type `array<int; 100>` initialised by string literal
+Error: invalid implicit conversion from `ptr<char>` to `int`
     ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c:13:22]
     │
  13 │     int zs[][100] = {"abc", {"d"}};
-    │     ──────┬──────    ──┬──  
-    │           │            ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-    │           │                 
-    │           ╰───────────────── this is an array of `int`
+    │                      ──┬──  
+    │                        ╰──── this is of type `ptr<char>`, which cannot be implicitly converted to `int`
 ────╯
 
-Error: array of inappropriate type `array<int; 100>` initialised by string literal
+Error: invalid implicit conversion from `ptr<char>` to `int`
     ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c:13:22]
     │
  13 │     int zs[][100] = {"abc", {"d"}};
-    │     ──────┬──────    ──┬──  
-    │           │            ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-    │           │                 
-    │           ╰───────────────── this is an array of `int`
+    │                      ──┬──  
+    │                        ╰──── this is of type `ptr<char>`, which cannot be implicitly converted to `int`
 ────╯
 
-Error: array of inappropriate type `array<int; 100>` initialised by string literal
+Error: invalid implicit conversion from `ptr<char>` to `int`
     ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c:13:30]
     │
  13 │     int zs[][100] = {"abc", {"d"}};
-    │     ──────┬──────            ─┬─  
-    │           │                   ╰─── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-    │           │                       
-    │           ╰─────────────────────── this is an array of `int`
+    │                              ─┬─  
+    │                               ╰─── this is of type `ptr<char>`, which cannot be implicitly converted to `int`
 ────╯
 
-Error: array of inappropriate type `array<int; 100>` initialised by string literal
+Error: invalid implicit conversion from `ptr<char>` to `int`
     ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c:13:30]
     │
  13 │     int zs[][100] = {"abc", {"d"}};
-    │     ──────┬──────            ─┬─  
-    │           │                   ╰─── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-    │           │                       
-    │           ╰─────────────────────── this is an array of `int`
+    │                              ─┬─  
+    │                               ╰─── this is of type `ptr<char>`, which cannot be implicitly converted to `int`
 ────╯
 
-Error: array of inappropriate type `array<int; 100>` initialised by string literal
+Error: invalid implicit conversion from `ptr<char>` to `int`
     ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c:15:10]
     │
- 14 │     int ws[][100] = {
-    │     ──────┬──────  
-    │           ╰──────── this is an array of `int`
  15 │         {"abc"},
     │          ──┬──  
-    │            ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+    │            ╰──── this is of type `ptr<char>`, which cannot be implicitly converted to `int`
 ────╯
 
-Error: array of inappropriate type `array<int; 100>` initialised by string literal
+Error: invalid implicit conversion from `ptr<char>` to `int`
     ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c:15:10]
     │
- 14 │     int ws[][100] = {
-    │     ──────┬──────  
-    │           ╰──────── this is an array of `int`
  15 │         {"abc"},
     │          ──┬──  
-    │            ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+    │            ╰──── this is of type `ptr<char>`, which cannot be implicitly converted to `int`
 ────╯
 
-Error: array of inappropriate type `array<int; 100>` initialised by string literal
+Error: invalid implicit conversion from `ptr<char>` to `int`
     ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c:16:10]
     │
- 14 │     int ws[][100] = {
-    │     ──────┬──────  
-    │           ╰──────── this is an array of `int`
-    │ 
  16 │         {"d"},
     │          ─┬─  
-    │           ╰─── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+    │           ╰─── this is of type `ptr<char>`, which cannot be implicitly converted to `int`
 ────╯
 
-Error: array of inappropriate type `array<int; 100>` initialised by string literal
+Error: invalid implicit conversion from `ptr<char>` to `int`
     ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c:16:10]
     │
- 14 │     int ws[][100] = {
-    │     ──────┬──────  
-    │           ╰──────── this is an array of `int`
-    │ 
  16 │         {"d"},
     │          ─┬─  
-    │           ╰─── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
+    │           ╰─── this is of type `ptr<char>`, which cannot be implicitly converted to `int`
 ────╯
 
 Error: cannot declare variable `multidimensional` with incomplete type `array<array<int; 4>; ∅>`
@@ -202,22 +176,18 @@ Error: array of inappropriate type `array<array<int; 4>; ∅>` initialised by st
     │                 ╰────────────────────── this is an array of `array<int; 4>`
 ────╯
 
-Error: array of inappropriate type `array<int; 5>` initialised by string literal
+Error: invalid implicit conversion from `ptr<char>` to `int`
     ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c:19:42]
     │
  19 │     int another_multidimensional[][5] = {"def"};
-    │     ────────────────┬────────────────    ──┬──  
-    │                     │                      ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-    │                     │                           
-    │                     ╰─────────────────────────── this is an array of `int`
+    │                                          ──┬──  
+    │                                            ╰──── this is of type `ptr<char>`, which cannot be implicitly converted to `int`
 ────╯
 
-Error: array of inappropriate type `array<int; 5>` initialised by string literal
+Error: invalid implicit conversion from `ptr<char>` to `int`
     ╭─[panko/tests/cases/initialisation/test_initialise_ineligible_array_with_unknown_length_with_string_literal.c:19:42]
     │
  19 │     int another_multidimensional[][5] = {"def"};
-    │     ────────────────┬────────────────    ──┬──  
-    │                     │                      ╰──── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-    │                     │                           
-    │                     ╰─────────────────────────── this is an array of `int`
+    │                                          ──┬──  
+    │                                            ╰──── this is of type `ptr<char>`, which cannot be implicitly converted to `int`
 ────╯

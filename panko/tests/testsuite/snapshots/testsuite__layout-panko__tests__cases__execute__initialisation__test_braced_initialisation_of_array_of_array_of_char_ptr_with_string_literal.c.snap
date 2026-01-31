@@ -7,47 +7,40 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_array_of_char_ptr_with_string_literal.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_array_of_char_ptr_with_string_literal.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (definition (s~2 `array<array<ptr<char const>; 1>; 2>` @0)
+            (braced
+               (subobject +8
+                  (noop-type-conversion `ptr<char const>` @8
+                     (noop-type-conversion `ptr<char>` @8
+                        (addressof `ptr<array<char; 12>>` @8
+                           (string `array<char; 12>` @void "hello world\0")))))))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 4>>` @32
+                        (string `array<char; 4>` @void "%s\n\0"))))
+               (deref `ptr<char const>` @40
+                  (ptr-add `ptr<ptr<char const>>` @48
+                     (noop-type-conversion `ptr<ptr<char const>>` @48
+                        (addressof `ptr<array<ptr<char const>; 1>>` @48
+                           (deref `array<ptr<char const>; 1>` @48
+                              (ptr-add `ptr<array<ptr<char const>; 1>>` @56
+                                 (noop-type-conversion `ptr<array<ptr<char const>; 1>>` @56
+                                    (addressof `ptr<array<array<ptr<char const>; 1>; 2>>` @56
+                                       (s~2 `array<array<ptr<char const>; 1>; 2>` @0)))
+                                 (sign-extend `unsigned long` @64 (0 `int` @72))))))
+                     (sign-extend `unsigned long` @64 (0 `int` @72))))))
+         (return (truncate `int` @16 (2 `unsigned long` @24))))))
 
 ----- stderr -----
-Error: array of inappropriate type `array<ptr<char const>; 1>` initialised by string literal
-   ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_array_of_char_ptr_with_string_literal.c:7:43]
-   │
- 7 │     typeof(typeof(char const*)[1]) s[] = {"hello world"};
-   │            ───────────┬──────────         ──────┬──────  
-   │                       │                         ╰──────── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-   │                       │                                  
-   │                       ╰────────────────────────────────── this is an array of `ptr<char const>`
-───╯
-
-Error: array of inappropriate type `array<ptr<char const>; 1>` initialised by string literal
-   ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_array_of_char_ptr_with_string_literal.c:7:43]
-   │
- 7 │     typeof(typeof(char const*)[1]) s[] = {"hello world"};
-   │            ───────────┬──────────         ──────┬──────  
-   │                       │                         ╰──────── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-   │                       │                                  
-   │                       ╰────────────────────────────────── this is an array of `ptr<char const>`
-───╯
-
-Error: array of inappropriate type `array<ptr<char const>; 1>` initialised by string literal
-   ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_array_of_char_ptr_with_string_literal.c:7:43]
-   │
- 7 │     typeof(typeof(char const*)[1]) s[] = {"hello world"};
-   │            ───────────┬──────────         ──────┬──────  
-   │                       │                         ╰──────── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-   │                       │                                  
-   │                       ╰────────────────────────────────── this is an array of `ptr<char const>`
-───╯
-
-Error: array of inappropriate type `array<ptr<char const>; 1>` initialised by string literal
-   ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_array_of_char_ptr_with_string_literal.c:7:43]
-   │
- 7 │     typeof(typeof(char const*)[1]) s[] = {"hello world"};
-   │            ───────────┬──────────         ──────┬──────  
-   │                       │                         ╰──────── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-   │                       │                                  
-   │                       ╰────────────────────────────────── this is an array of `ptr<char const>`
-───╯

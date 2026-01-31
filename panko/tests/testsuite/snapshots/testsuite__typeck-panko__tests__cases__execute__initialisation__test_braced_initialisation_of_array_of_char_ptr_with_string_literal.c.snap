@@ -7,47 +7,35 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_char_ptr_with_string_literal.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_char_ptr_with_string_literal.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition s~2 `array<ptr<char const>; 2>`
+            (braced
+               (subobject +8
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 12>>`
+                           (string `array<char; 12>` "hello world\0")))))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%s\n\0"))))
+               (deref `ptr<char const>`
+                  (ptr-add `ptr<ptr<char const>>`
+                     (noop-type-conversion `ptr<ptr<char const>>`
+                        (addressof `ptr<array<ptr<char const>; 2>>`
+                           (s~2 `array<ptr<char const>; 2>`)))
+                     (sign-extend `unsigned long` (0 `int`))))))
+         (return (truncate `int` (lengthof `unsigned long` 2 (s~2 `array<ptr<char const>; 2>` `array<ptr<char const>; 2>`)))))))
 
 ----- stderr -----
-Error: array of inappropriate type `array<ptr<char const>; ∅>` initialised by string literal
-   ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_char_ptr_with_string_literal.c:7:32]
-   │
- 7 │     typeof(char const*) s[] = {"hello world"};
-   │     ───────────┬───────────    ──────┬──────  
-   │                │                     ╰──────── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-   │                │                              
-   │                ╰────────────────────────────── this is an array of `ptr<char const>`
-───╯
-
-Error: array of inappropriate type `array<ptr<char const>; 1>` initialised by string literal
-   ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_char_ptr_with_string_literal.c:7:32]
-   │
- 7 │     typeof(char const*) s[] = {"hello world"};
-   │     ───────────┬───────────    ──────┬──────  
-   │                │                     ╰──────── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-   │                │                              
-   │                ╰────────────────────────────── this is an array of `ptr<char const>`
-───╯
-
-Error: array of inappropriate type `array<ptr<char const>; ∅>` initialised by string literal
-   ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_char_ptr_with_string_literal.c:7:32]
-   │
- 7 │     typeof(char const*) s[] = {"hello world"};
-   │     ───────────┬───────────    ──────┬──────  
-   │                │                     ╰──────── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-   │                │                              
-   │                ╰────────────────────────────── this is an array of `ptr<char const>`
-───╯
-
-Error: array of inappropriate type `array<ptr<char const>; ∅>` initialised by string literal
-   ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_array_of_char_ptr_with_string_literal.c:7:32]
-   │
- 7 │     typeof(char const*) s[] = {"hello world"};
-   │     ───────────┬───────────    ──────┬──────  
-   │                │                     ╰──────── this is a character string literal, which can only initialise arrays of `char`, `unsigned char` or `signed char`
-   │                │                              
-   │                ╰────────────────────────────── this is an array of `ptr<char const>`
-───╯

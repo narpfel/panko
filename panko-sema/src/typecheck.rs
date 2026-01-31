@@ -985,7 +985,7 @@ fn typeck_array_initialisation_with_string<'a>(
     reference: &Reference<'a>,
     array_ty: &ArrayType<'a, Typeck>,
     initialiser: &scope::Expression<'a>,
-) -> TypedExpression<'a> {
+) -> Option<TypedExpression<'a>> {
     // TODO: adjust this check for prefixed string literals
     if let Type::Arithmetic(Arithmetic::Integral(integral)) = array_ty.ty.ty
         && let IntegralKind::Char | IntegralKind::PlainChar = integral.kind
@@ -1002,7 +1002,7 @@ fn typeck_array_initialisation_with_string<'a>(
                 unreachable!("VLAs cannot be initialised with string literals"),
             (ArrayLength::Constant(space), ArrayLength::Constant(literal_length))
                 if space < literal_length =>
-                sess.emit(Diagnostic::ExcessInitialiser {
+                Some(sess.emit(Diagnostic::ExcessInitialiser {
                     at: scope::Initialiser::Expression(*initialiser),
                     reference: *reference,
                     iterator: SubobjectIterator::Array {
@@ -1010,17 +1010,13 @@ fn typeck_array_initialisation_with_string<'a>(
                         index: literal_length,
                         offset: 0,
                     },
-                }),
-            (ArrayLength::Constant(_) | ArrayLength::Unknown, ArrayLength::Constant(_)) => expr,
+                })),
+            (ArrayLength::Constant(_) | ArrayLength::Unknown, ArrayLength::Constant(_)) =>
+                Some(expr),
         }
     }
     else {
-        sess.emit(Diagnostic::ArrayInitialisationByStringLiteralTypeMismatch {
-            at: *initialiser,
-            expected_tys: const { &[Type::char(), Type::uchar(), Type::schar()] },
-            actual_ty: *array_ty,
-            kind: "character",
-        })
+        None
     }
 }
 
@@ -1041,18 +1037,12 @@ fn typeck_initialiser_list<'a>(
         && let Ok(_) = subobjects.next_scalar()
         && let Some(subobject) = subobjects.parent()
         && let Type::Array(array_ty) = subobject.ty.ty
+        && let Some(initialiser) =
+            typeck_array_initialisation_with_string(sess, reference, &array_ty, initialiser)
     {
         subobject_initialisers.insert(
             subobject.offset,
-            SubobjectInitialiser {
-                subobject,
-                initialiser: typeck_array_initialisation_with_string(
-                    sess,
-                    reference,
-                    &array_ty,
-                    initialiser,
-                ),
-            },
+            SubobjectInitialiser { subobject, initialiser },
         );
         let _ = subobjects.try_leave_subobject(AllowExplicit::No);
         return;
@@ -1137,13 +1127,10 @@ fn typeck_initialiser_list<'a>(
                         && let Some(subobject) = subobjects.parent()
                         && let Type::Array(array_ty) = subobject.ty.ty
                         && subobjects.try_leave_subobject(AllowExplicit::No)
-                    {
-                        SubobjectInitialiser {
-                            subobject,
-                            initialiser: typeck_array_initialisation_with_string(
-                                sess, reference, &array_ty, expr,
-                            ),
-                        }
+                        && let Some(initialiser) = typeck_array_initialisation_with_string(
+                            sess, reference, &array_ty, expr,
+                        ) {
+                        SubobjectInitialiser { subobject, initialiser }
                     }
                     else {
                         SubobjectInitialiser {
@@ -1205,15 +1192,34 @@ fn typeck_initialiser<'a>(
             }
         }
         scope::Initialiser::Expression(initialiser) => {
-            let initialiser = match initialiser {
-                scope::Expression::String(_) if let Type::Array(array_ty) = reference.ty.ty =>
-                    typeck_array_initialisation_with_string(sess, reference, &array_ty, initialiser),
-                _ => convert_as_if_by_assignment(
-                    sess,
-                    reference.ty,
-                    typeck_expression(sess, initialiser, Context::Default),
-                ),
-            };
+            let initialiser =
+                match initialiser {
+                    scope::Expression::String(_) if let Type::Array(array_ty) = reference.ty.ty =>
+                        match typeck_array_initialisation_with_string(
+                            sess,
+                            reference,
+                            &array_ty,
+                            initialiser,
+                        ) {
+                            Some(initialiser) => initialiser,
+                            None =>
+                                sess.emit(
+                                    Diagnostic::ArrayInitialisationByStringLiteralTypeMismatch {
+                                        at: *initialiser,
+                                        expected_tys: const {
+                                            &[Type::char(), Type::uchar(), Type::schar()]
+                                        },
+                                        actual_ty: array_ty,
+                                        kind: "character",
+                                    },
+                                ),
+                        },
+                    _ => convert_as_if_by_assignment(
+                        sess,
+                        reference.ty,
+                        typeck_expression(sess, initialiser, Context::Default),
+                    ),
+                };
             Initialiser::Expression(initialiser)
         }
     }
