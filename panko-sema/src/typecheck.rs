@@ -1028,12 +1028,18 @@ fn typeck_initialiser_list<'a>(
     initialiser_list: &[DesignatedInitialiser<'a>],
     emit_nested_excess_initialiser_errors: bool,
 ) {
+    // workaround for `char const* s = {"abc"};` and similarly: we have to compute the
+    // `next_scalar` to check whether we are initialising an array, and reset to the initial state
+    // when it’s not an array
+    let mut subobjects_clone = None;
+
     if let [
         DesignatedInitialiser {
             designation: None,
             initialiser: scope::Initialiser::Expression(initialiser @ scope::Expression::String(_)),
         },
     ] = initialiser_list
+        && let _ = subobjects_clone.insert(subobjects.clone())
         && let Ok(_) = subobjects.next_scalar()
         && let Some(subobject) = subobjects.parent()
         && let Type::Array(array_ty) = subobject.ty.ty
@@ -1046,6 +1052,10 @@ fn typeck_initialiser_list<'a>(
         );
         let _ = subobjects.try_leave_subobject(AllowExplicit::No);
         return;
+    }
+
+    if let Some(subobjects_clone) = subobjects_clone {
+        *subobjects = subobjects_clone;
     }
 
     for DesignatedInitialiser { designation, initialiser } in initialiser_list {

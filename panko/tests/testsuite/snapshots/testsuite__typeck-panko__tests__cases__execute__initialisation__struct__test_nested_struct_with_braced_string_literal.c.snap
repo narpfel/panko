@@ -7,17 +7,41 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/initialisation/struct/test_nested_struct_with_braced_string_literal.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_nested_struct_with_braced_string_literal.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct String~1
+      (member ptr @0 `ptr<char const>`))
+   (struct T~2
+      (member string @0 `struct String~1 complete`)
+      (member x @8 `int`))
+   (function-definition external
+      main~3 `fn() -> int`
+      (compound-statement
+         (struct T~2
+            (member string @0 `struct String~1 complete`)
+            (member x @8 `int`))
+         (definition t~4 `struct T~2 complete`
+            (braced
+               (subobject +0
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 12>>`
+                           (string `array<char; 12>` "hello world\0")))))
+               (subobject +8 (42 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%s\n\0"))))
+               (deref `ptr<char const>`
+                  (noop-type-conversion `ptr<ptr<char const>>`
+                     (addressof `ptr<struct T~2 complete>`
+                        (t~4 `struct T~2 complete`)))))))))
 
 ----- stderr -----
-Error: excess element in struct initialiser
-    ╭─[panko/tests/cases/execute/initialisation/struct/test_nested_struct_with_braced_string_literal.c:15:20]
-    │
- 15 │     struct T t = {{"hello world"}, 42};
-    │              ┬     ──────┬──────  
-    │              │           ╰──────── trying to initialise element at index 1 for `struct String~1 complete`
-    │              │                    
-    │              ╰──────────────────── while initialising this variable
-────╯

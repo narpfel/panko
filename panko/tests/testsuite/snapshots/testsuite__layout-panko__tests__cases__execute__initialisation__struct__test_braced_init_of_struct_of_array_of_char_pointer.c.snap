@@ -7,17 +7,34 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_of_array_of_char_pointer.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_of_array_of_char_pointer.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (struct T~2
+            (member s @0 `array<ptr<char const>; 1>`))
+         (definition (t~3 `struct T~2 complete` @0)
+            (braced
+               (subobject +0
+                  (noop-type-conversion `ptr<char const>` @0
+                     (noop-type-conversion `ptr<char>` @0
+                        (addressof `ptr<array<char; 12>>` @0
+                           (string `array<char; 12>` @void "hello world\0")))))))
+         (expression
+            (call `int` @8
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 4>>` @24
+                        (string `array<char; 4>` @void "%s\n\0"))))
+               (deref `ptr<char const>` @32
+                  (noop-type-conversion `ptr<ptr<char const>>` @40
+                     (addressof `ptr<struct T~2 complete>` @40
+                        (t~3 `struct T~2 complete` @0)))))))))
 
 ----- stderr -----
-Error: excess element in struct initialiser
-   ╭─[panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_of_array_of_char_pointer.c:8:12]
-   │
- 8 │     } t = {"hello world"};
-   │       ┬    ──────┬──────  
-   │       │          ╰──────── trying to initialise element at index 1 for `struct T~2 complete`
-   │       │                   
-   │       ╰─────────────────── while initialising this variable
-───╯

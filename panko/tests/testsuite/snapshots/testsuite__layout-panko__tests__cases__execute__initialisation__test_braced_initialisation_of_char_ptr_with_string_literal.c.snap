@@ -7,17 +7,26 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/initialisation/test_braced_initialisation_of_char_ptr_with_string_literal.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/test_braced_initialisation_of_char_ptr_with_string_literal.c"
+   (declaration external (strlen~0 `fn(∅: ptr<char const>) -> unsigned long` (static strlen)) ∅)
+   (function-definition external
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (definition (s~2 `ptr<char const>` @0)
+            (braced
+               (subobject +0
+                  (noop-type-conversion `ptr<char const>` @0
+                     (noop-type-conversion `ptr<char>` @0
+                        (addressof `ptr<array<char; 4>>` @0
+                           (string `array<char; 4>` @void "abc\0")))))))
+         (return
+            (truncate `int` @8
+               (call `unsigned long` @16
+                  (addressof `ptr<fn(∅: ptr<char const>) -> unsigned long>` @24
+                     (strlen~0 `fn(∅: ptr<char const>) -> unsigned long` (static strlen)))
+                  (s~2 `ptr<char const>` @0)))))))
 
 ----- stderr -----
-Error: excess element in scalar initialiser
-   ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_char_ptr_with_string_literal.c:7:22]
-   │
- 7 │     char const* s = {"abc"};
-   │                 ┬    ──┬──  
-   │                 │      ╰──── `s`’s type `ptr<char const>` is scalar
-   │                 │           
-   │                 ╰─────────── while initialising this variable
-───╯

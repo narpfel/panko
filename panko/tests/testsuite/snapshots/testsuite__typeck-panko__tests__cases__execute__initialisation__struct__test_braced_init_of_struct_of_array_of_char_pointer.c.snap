@@ -7,17 +7,34 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_of_array_of_char_pointer.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_of_array_of_char_pointer.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
+      main~1 `fn() -> int`
+      (compound-statement
+         (struct T~2
+            (member s @0 `array<ptr<char const>; 1>`))
+         (definition t~3 `struct T~2 complete`
+            (braced
+               (subobject +0
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 12>>`
+                           (string `array<char; 12>` "hello world\0")))))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%s\n\0"))))
+               (deref `ptr<char const>`
+                  (noop-type-conversion `ptr<ptr<char const>>`
+                     (addressof `ptr<struct T~2 complete>`
+                        (t~3 `struct T~2 complete`)))))))))
 
 ----- stderr -----
-Error: excess element in struct initialiser
-   ╭─[panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_of_array_of_char_pointer.c:8:12]
-   │
- 8 │     } t = {"hello world"};
-   │       ┬    ──────┬──────  
-   │       │          ╰──────── trying to initialise element at index 1 for `struct T~2 complete`
-   │       │                   
-   │       ╰─────────────────── while initialising this variable
-───╯

@@ -1,4 +1,3 @@
-// [[known-bug]]
 // [[return: 3]]
 
 typeof(sizeof 0) strlen(char const*);
