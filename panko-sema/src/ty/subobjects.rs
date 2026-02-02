@@ -35,17 +35,12 @@ pub(crate) enum SubobjectIterator<'a> {
 }
 
 impl<'a> SubobjectIterator<'a> {
-    fn new(ty: &Type<'a>, offset: u64) -> Self {
+    fn new(ty: &Type<'a>, offset: u64) -> Result<Self, ()> {
         match *ty {
-            Type::Array(ty) => SubobjectIterator::Array { ty, index: 0, offset },
-            Type::Struct(Struct::Incomplete { name: _, id: _ }) => todo!(),
-            Type::Struct(Struct::Complete(ty)) =>
-                SubobjectIterator::Struct { ty, index: 0, offset },
-            ty if ty.is_scalar() => SubobjectIterator::Scalar { ty, is_exhausted: false, offset },
-            // TODO: this is reachable for e. g. a braced initialisation of a variable of type
-            // `void`:
-            //     void v = {1, 2, 3};
-            _ => unreachable!(),
+            Type::Array(ty) => Ok(Self::Array { ty, index: 0, offset }),
+            Type::Struct(Struct::Complete(ty)) => Ok(Self::Struct { ty, index: 0, offset }),
+            ty if ty.is_scalar() => Ok(Self::Scalar { ty, is_exhausted: false, offset }),
+            _ => Err(()),
         }
     }
 
@@ -142,11 +137,11 @@ pub(crate) struct Subobjects<'a> {
 }
 
 impl<'a> Subobjects<'a> {
-    pub(crate) fn new(ty: QualifiedType<'a>) -> Self {
-        Self {
+    pub(crate) fn new(ty: QualifiedType<'a>) -> Result<Self, ()> {
+        Ok(Self {
             stack: vec![],
-            current: SubobjectIterator::new(&ty.ty, 0),
-        }
+            current: SubobjectIterator::new(&ty.ty, 0)?,
+        })
     }
 
     pub(crate) fn parent(&self) -> Option<Subobject<'a>> {
@@ -205,7 +200,10 @@ impl<'a> Subobjects<'a> {
         self.leave_empty_subobjects();
 
         let (iterator, result) = match self.current.next() {
-            Some(Subobject { ty, offset }) => (SubobjectIterator::new(&ty.ty, offset), Ok(())),
+            Some(Subobject { ty, offset }) => (
+                SubobjectIterator::new(&ty.ty, offset).expect("todo"),
+                Ok(()),
+            ),
             // Example for this case:
             //     int x = {1, {}};
             None => (self.current.clone(), Err(self.current.clone())),
@@ -254,7 +252,7 @@ mod tests {
     fn test_scalar_subobjects() {
         let ty = Type::size_t().unqualified();
 
-        let mut subobjects = Subobjects::new(ty);
+        let mut subobjects = Subobjects::new(ty).unwrap();
         let subobject_offsets = from_fn(|| subobjects.next_scalar().ok())
             .map(|subobject| subobject.offset)
             .collect_vec();
@@ -271,7 +269,7 @@ mod tests {
         })
         .unqualified();
 
-        let mut subobjects = Subobjects::new(ty);
+        let mut subobjects = Subobjects::new(ty).unwrap();
         let subobject_offsets = from_fn(|| subobjects.next_scalar().ok())
             .map(|subobject| subobject.offset)
             .collect_vec();
@@ -294,7 +292,7 @@ mod tests {
         })
         .unqualified();
 
-        let mut subobjects = Subobjects::new(ty);
+        let mut subobjects = Subobjects::new(ty).unwrap();
         let subobject_offsets = from_fn(|| subobjects.next_scalar().ok())
             .map(|subobject| subobject.offset)
             .collect_vec();
@@ -322,7 +320,7 @@ mod tests {
         })
         .unqualified();
 
-        let mut subobjects = Subobjects::new(ty);
+        let mut subobjects = Subobjects::new(ty).unwrap();
         assert_eq!(subobjects.next_scalar().unwrap().offset, 0);
         assert!(subobjects.try_leave_subobject(AllowExplicit::No));
         let size = size_t.ty.size();

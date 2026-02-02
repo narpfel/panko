@@ -484,6 +484,25 @@ pub(super) enum Diagnostic<'a> {
         actual_ty: ArrayType<'a, Typeck>,
     },
 
+    #[error("cannot initialise variable of {kind} type `{ty}`")]
+    #[diagnostics(
+        ty(colour = Blue, label = "`{ty}` is {article}{kind}{specifier}"),
+        at(colour = Red, label = "cannot initialise variable of {kind} type"),
+        reference(colour = Magenta, label = "while defining this variable"),
+    )]
+    #[with(
+        ty = reference.ty,
+        (article, kind, specifier) = match ty.ty {
+            ty if !ty.is_complete() => ("", "incomplete", ""),
+            Type::Function(_) => ("a ", "function", " type"),
+            _ => unreachable!(),
+        },
+    )]
+    BracedInitOfInvalidType {
+        at: scope::Initialiser<'a>,
+        reference: Reference<'a>,
+    },
+
     #[error("incompatible operand types in conditional expression{note}")]
     #[diagnostics(
         at(colour = Blue),

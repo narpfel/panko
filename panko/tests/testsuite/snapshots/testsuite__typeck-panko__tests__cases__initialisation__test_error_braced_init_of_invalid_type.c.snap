@@ -1,0 +1,65 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/initialisation/test_error_braced_init_of_invalid_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot declare variable `t` with incomplete type `struct T~1`
+   ╭─[panko/tests/cases/initialisation/test_error_braced_init_of_invalid_type.c:2:14]
+   │
+ 2 │     struct T t = {};
+   │              ┬  
+   │              ╰── declared here
+───╯
+
+Error: cannot initialise variable of incomplete type `struct T~1`
+   ╭─[panko/tests/cases/initialisation/test_error_braced_init_of_invalid_type.c:2:18]
+   │
+ 2 │     struct T t = {};
+   │     ────┬─── ┬   ─┬  
+   │         │    │    ╰── cannot initialise variable of incomplete type
+   │         │    │       
+   │         │    ╰─────── while defining this variable
+   │         │            
+   │         ╰──────────── `struct T~1` is incomplete
+───╯
+
+Error: cannot declare variable `v` with incomplete type `void`
+   ╭─[panko/tests/cases/initialisation/test_error_braced_init_of_invalid_type.c:3:10]
+   │
+ 3 │     void v = {1, 2, 3};
+   │          ┬  
+   │          ╰── declared here
+───╯
+
+Error: cannot initialise variable of incomplete type `void`
+   ╭─[panko/tests/cases/initialisation/test_error_braced_init_of_invalid_type.c:3:14]
+   │
+ 3 │     void v = {1, 2, 3};
+   │     ──┬─ ┬   ────┬────  
+   │       │  │       ╰────── cannot initialise variable of incomplete type
+   │       │  │              
+   │       │  ╰────────────── while defining this variable
+   │       │                 
+   │       ╰───────────────── `void` is incomplete
+───╯
+
+Error: cannot initialise variable of function type `fn() -> int`
+   ╭─[panko/tests/cases/initialisation/test_error_braced_init_of_invalid_type.c:4:15]
+   │
+ 4 │     int f() = {42};
+   │     ───┬┬──   ──┬─  
+   │        ││       ╰─── cannot initialise variable of function type
+   │        ││           
+   │        │╰─────────── while defining this variable
+   │        │            
+   │        ╰──────────── `fn() -> int` is a function type
+───╯

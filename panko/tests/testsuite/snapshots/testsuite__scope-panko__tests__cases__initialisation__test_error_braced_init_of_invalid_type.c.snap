@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/initialisation/test_error_braced_init_of_invalid_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/initialisation/test_error_braced_init_of_invalid_type.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration t~2 `struct T~1` (braced ∅))
+         (declaration v~3 `void`
+            (braced
+               1
+               2
+               3))
+         (declaration f~4 `fn() -> int`
+            (braced
+               42)))))
+
+----- stderr -----

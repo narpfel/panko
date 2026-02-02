@@ -209,6 +209,12 @@ impl Initialiser<'_> {
     }
 }
 
+impl<'a> FromError<'a> for Initialiser<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Expression(FromError::from_error(error))
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct SubobjectInitialiser<'a> {
     pub(crate) subobject: Subobject<'a>,
@@ -1186,12 +1192,21 @@ fn typeck_initialiser<'a>(
             initialiser_list,
             close_brace: _,
         } => {
+            let subobjects = &mut match Subobjects::new(reference.ty) {
+                Ok(subobjects) => subobjects,
+                Err(()) => {
+                    return sess.emit(Diagnostic::BracedInitOfInvalidType {
+                        at: *initialiser,
+                        reference: *reference,
+                    });
+                }
+            };
             let subobject_initialisers = &mut IndexMap::new();
             typeck_initialiser_list(
                 sess,
                 reference,
                 subobject_initialisers,
-                &mut Subobjects::new(reference.ty),
+                subobjects,
                 initialiser_list,
                 true,
             );
