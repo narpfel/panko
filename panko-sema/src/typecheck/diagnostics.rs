@@ -387,14 +387,14 @@ pub(super) enum Diagnostic<'a> {
                 let ty = ty.fg(Blue);
                 // trying to get the non-existing element increments the index, so we undo this
                 // here
-                let index = index.checked_sub(1).unwrap().fg(Red);
+                let index = index.strict_sub(1).fg(Red);
                 format!("trying to initialise element at index {index} for `{ty}`")
             }
             SubobjectIterator::Struct { ty, index, offset: _ } => {
                 let ty = Type::Struct(Struct::Complete(*ty)).fg(Blue);
                 // trying to get the non-existing element increments the index, so we undo this
                 // here
-                let index = index.checked_sub(1).unwrap().fg(Red);
+                let index = index.strict_sub(1).fg(Red);
                 format!("trying to initialise element at index {index} for `{ty}`")
             }
         },

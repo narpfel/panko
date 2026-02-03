@@ -198,8 +198,7 @@ impl Initialiser<'_> {
                     .map(|initialiser| initialiser.subobject.offset)
                     .max()
                     .map_or(0, |max_offset| {
-                        let element_size = element_ty.size();
-                        (max_offset / element_size).checked_add(1).unwrap()
+                        (max_offset / element_ty.size()).strict_add(1)
                     }),
             ),
             Self::Expression(TypedExpression { ty: _, expr: Expression::String(value) }) =>

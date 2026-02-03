@@ -80,9 +80,7 @@ impl<'a> SubobjectIterator<'a> {
                     Some(Subobject { ty: ty.unqualified(), offset: *offset }),
                 Self::Array { ty, index, offset } => Some(Subobject {
                     ty: ty.ty.make_unqualified(),
-                    offset: offset
-                        .checked_add(index.checked_mul(ty.ty.ty.size()).unwrap())
-                        .unwrap(),
+                    offset: offset.strict_add(index.strict_mul(ty.ty.ty.size())),
                 }),
                 Self::Struct { ty, index, offset } => {
                     let Member { name: _, ty, offset: member_offset } = ty.members[*index];
