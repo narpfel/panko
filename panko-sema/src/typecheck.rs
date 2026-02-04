@@ -725,6 +725,9 @@ fn typeck_ty_with_initialiser<'a>(
             let size = &mut 0_u64;
             let members = sess.alloc_slice_fill_iter(members.iter().map(|member| {
                 let NoHashEq(scope::Member { name, ty }) = *member;
+                // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
+                // better error recovery due to trying to compute the size and align of incomplete
+                // types when using this struct)
                 let ty = typeck_ty(sess, ty, IsParameter::No);
                 let (ty_size, align) = match ty.ty.is_complete() && ty.ty.is_object() {
                     true => (ty.ty.size(), ty.ty.align()),
