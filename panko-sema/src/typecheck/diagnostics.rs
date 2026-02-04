@@ -491,12 +491,8 @@ pub(super) enum Diagnostic<'a> {
         reference(colour = Magenta, label = "while defining this variable"),
     )]
     #[with(
-        ty = reference.ty,
-        (article, kind, specifier) = match ty.ty {
-            ty if !ty.is_complete() => ("", "incomplete", ""),
-            Type::Function(_) => ("a ", "function", " type"),
-            _ => unreachable!(),
-        },
+        ty = &reference.ty,
+        (article, kind, specifier) = describe_ty_completeness(ty),
     )]
     BracedInitOfInvalidType {
         at: scope::Initialiser<'a>,
@@ -578,15 +574,19 @@ pub(super) enum Diagnostic<'a> {
         at(colour = Blue, label = "in this member declaration"),
     )]
     #[with(
-        (article, kind) = match ty.ty {
-            ty if !ty.is_complete() => ("", "incomplete"),
-            Type::Function(_) => ("a ", "function"),
-            _ => unreachable!(),
-        },
+        (article, kind, _) = describe_ty_completeness(ty),
         kind = kind.fg(Red),
     )]
     IncompleteOrNonObjectStructMember {
         at: Token<'a>,
         ty: QualifiedType<'a>,
     },
+}
+
+fn describe_ty_completeness(ty: &QualifiedType) -> (&'static str, &'static str, &'static str) {
+    match ty.ty {
+        ty if !ty.is_complete() => ("", "incomplete", ""),
+        Type::Function(_) => ("a ", "function", " type"),
+        _ => unreachable!(),
+    }
 }
