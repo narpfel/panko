@@ -83,7 +83,7 @@ pub(crate) enum Diagnostic<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Member<'a> {
-    pub(crate) name: &'a str,
+    pub(crate) name: &'a Token<'a>,
     pub(crate) ty: QualifiedType<'a>,
 }
 
@@ -717,14 +717,14 @@ fn resolve_struct<'a>(scopes: &mut Scopes<'a>, r#struct: &Struct<'a>) -> Type<'a
 
 fn resolve_struct_members<'a>(
     scopes: &mut Scopes<'a>,
-    members: &[ast::Member<'a>],
+    members: &'a [ast::Member<'a>],
 ) -> &'a [NoHashEq<Member<'a>>] {
     let sess = scopes.sess;
 
     sess.alloc_slice_fill_iter(members.iter().map(|member| {
         let ast::Member { name, ty } = member;
         let member = Member {
-            name: name.unwrap().slice(),
+            name: name.as_ref().unwrap(),
             ty: resolve_ty(scopes, ty),
         };
         NoHashEq(member)

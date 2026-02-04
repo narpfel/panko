@@ -571,4 +571,22 @@ pub(super) enum Diagnostic<'a> {
         noreturn: cst::FunctionSpecifier<'a>,
         function: scope::Reference<'a>,
     },
+
+    #[error("{kind} struct member `{at}` of type `{ty}`")]
+    #[diagnostics(
+        ty(colour = Red, label = "`{ty}` is {article}{kind}, but members must be of complete object type"),
+        at(colour = Blue, label = "in this member declaration"),
+    )]
+    #[with(
+        (article, kind) = match ty.ty {
+            ty if !ty.is_complete() => ("", "incomplete"),
+            Type::Function(_) => ("a ", "function"),
+            _ => unreachable!(),
+        },
+        kind = kind.fg(Red),
+    )]
+    IncompleteOrNonObjectStructMember {
+        at: Token<'a>,
+        ty: QualifiedType<'a>,
+    },
 }

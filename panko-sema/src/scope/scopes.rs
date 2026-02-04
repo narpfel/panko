@@ -230,7 +230,7 @@ impl<'a> Scopes<'a> {
     pub(super) fn lookup_or_add_complete_struct(
         &mut self,
         name: Option<&'a str>,
-        members: &[ast::Member<'a>],
+        members: &'a [ast::Member<'a>],
     ) -> (Type<'a>, Option<Type<'a>>) {
         let previous_definition = try { self.lookup_struct(name?)? };
 

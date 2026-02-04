@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/struct/test_error_invalid_member_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/struct/test_error_invalid_member_type.c"
+   (struct IncompleteMember~0
+      (member x `int`)
+      (member void_member `void`)
+      (member y `int`))
+   (struct FunctionMember~1
+      (member x `int`)
+      (member function `fn() -> int`)
+      (member y `int`))
+   (struct Recursive~2
+      (member recursive `struct Recursive~2`)))
+
+----- stderr -----

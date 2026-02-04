@@ -1,0 +1,43 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/struct/test_error_invalid_member_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: incomplete struct member `void_member` of type `void`
+   ╭─[panko/tests/cases/struct/test_error_invalid_member_type.c:3:10]
+   │
+ 3 │     void void_member;
+   │     ──┬─ ─────┬─────  
+   │       │       ╰─────── in this member declaration
+   │       │               
+   │       ╰─────────────── `void` is incomplete, but members must be of complete object type
+───╯
+
+Error: function struct member `function` of type `fn() -> int`
+   ╭─[panko/tests/cases/struct/test_error_invalid_member_type.c:9:9]
+   │
+ 9 │     int function();
+   │     ───────┬┬─────  
+   │            │╰─────── in this member declaration
+   │            │        
+   │            ╰──────── `fn() -> int` is a function, but members must be of complete object type
+───╯
+
+Error: incomplete struct member `recursive` of type `struct Recursive~2`
+    ╭─[panko/tests/cases/struct/test_error_invalid_member_type.c:14:22]
+    │
+ 14 │     struct Recursive recursive;
+    │     ────────┬─────── ────┬────  
+    │             │            ╰────── in this member declaration
+    │             │                   
+    │             ╰─────────────────── `struct Recursive~2` is incomplete, but members must be of complete object type
+────╯

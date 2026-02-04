@@ -726,10 +726,18 @@ fn typeck_ty_with_initialiser<'a>(
             let members = sess.alloc_slice_fill_iter(members.iter().map(|member| {
                 let NoHashEq(scope::Member { name, ty }) = *member;
                 let ty = typeck_ty(sess, ty, IsParameter::No);
-                *size = size.next_multiple_of(ty.ty.align());
+                let (ty_size, align) = match ty.ty.is_complete() && ty.ty.is_object() {
+                    true => (ty.ty.size(), ty.ty.align()),
+                    false => {
+                        let () = sess
+                            .emit(Diagnostic::IncompleteOrNonObjectStructMember { at: *name, ty });
+                        (1, 1)
+                    }
+                };
+                *size = size.next_multiple_of(align);
                 let offset = *size;
-                *size += ty.ty.size();
-                Member { name, ty, offset }
+                *size += ty_size;
+                Member { name: name.slice(), ty, offset }
             }));
             Type::Struct(Struct::Complete(Complete { name, id, members }))
         }
