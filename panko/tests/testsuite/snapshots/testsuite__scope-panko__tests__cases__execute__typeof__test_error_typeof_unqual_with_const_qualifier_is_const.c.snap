@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/typeof/test_error_typeof_unqual_with_const_qualifier_is_const.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/typeof/test_error_typeof_unqual_with_const_qualifier_is_const.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration this_is_const~1 `typeof_unqual(42) const` ∅)
+         (expression (assign (name this_is_const~1 `typeof_unqual(42) const`) 42))
+         (return (name this_is_const~1 `typeof_unqual(42) const`)))))
+
+----- stderr -----
