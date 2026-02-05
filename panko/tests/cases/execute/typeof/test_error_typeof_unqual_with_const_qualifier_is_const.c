@@ -1,4 +1,3 @@
-// [[known-bug]]
 // [[compile-error: cannot assign to `const` value `this_is_const`]]
 
 int main() {

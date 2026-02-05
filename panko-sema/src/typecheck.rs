@@ -706,17 +706,16 @@ fn typeck_ty_with_initialiser<'a>(
                 scope::Typeof::Expr(expr) => typeck_expression(sess, expr, Context::Typeof).ty,
                 scope::Typeof::Ty(ty) => typeck_ty(sess, *ty, is_parameter),
             };
-            return if unqual {
-                ty.make_unqualified()
+            match unqual {
+                true => ty.ty,
+                false =>
+                    return QualifiedType {
+                        is_const: is_const | ty.is_const,
+                        is_volatile: is_volatile | ty.is_volatile,
+                        ty: ty.ty,
+                        loc: ty.loc,
+                    },
             }
-            else {
-                QualifiedType {
-                    is_const: is_const | ty.is_const,
-                    is_volatile: is_volatile | ty.is_volatile,
-                    ty: ty.ty,
-                    loc: ty.loc,
-                }
-            };
         }
         ty::Type::Nullptr => Type::Nullptr,
         ty::Type::Struct(Struct::Incomplete { name, id }) =>

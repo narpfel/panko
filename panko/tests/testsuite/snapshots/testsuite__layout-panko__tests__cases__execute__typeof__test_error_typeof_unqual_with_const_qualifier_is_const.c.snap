@@ -7,18 +7,18 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/typeof/test_error_typeof_unqual_with_const_qualifier_is_const.c
 ---
-success: true
-exit_code: 0
+success: false
+exit_code: 1
 ----- stdout -----
-(translation-unit "panko/tests/cases/execute/typeof/test_error_typeof_unqual_with_const_qualifier_is_const.c"
-   (function-definition external
-      (main~0 `fn() -> int` (static main))
-      (compound-statement
-         (definition (this_is_const~1 `int` @0) ∅)
-         (expression
-            (assign `int` @0
-               (this_is_const~1 `int` @0)
-               (42 `int` @0)))
-         (return (this_is_const~1 `int` @0)))))
 
 ----- stderr -----
+Error: cannot assign to `const` value `this_is_const`
+   ╭─[panko/tests/cases/execute/typeof/test_error_typeof_unqual_with_const_qualifier_is_const.c:5:5]
+   │
+ 4 │     typeof_unqual(42) const this_is_const;
+   │                             ──────┬──────  
+   │                                   ╰──────── note: `this_is_const` declared here
+ 5 │     this_is_const = 42;
+   │     ──────┬──────  
+   │           ╰──────── this value is `const`
+───╯
