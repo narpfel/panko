@@ -2120,7 +2120,8 @@ fn typeck_expression<'a>(
                     lhs,
                     op: BinOp {
                         kind: BinOpKind::Add,
-                        // TODO: Also cheating?
+                        // TODO: Also cheating? (Also, this produces a weird “invalid operands to
+                        // binary operator `]`” error message when the `Add` has a type error.)
                         token: *close_bracket,
                     },
                     rhs,
