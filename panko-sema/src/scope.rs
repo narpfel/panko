@@ -720,14 +720,9 @@ fn resolve_struct_members<'a>(
     members: &'a [ast::Member<'a>],
 ) -> &'a [NoHashEq<Member<'a>>] {
     let sess = scopes.sess;
-
     sess.alloc_slice_fill_iter(members.iter().map(|member| {
         let ast::Member { name, ty } = member;
-        let member = Member {
-            name: name.as_ref().unwrap(),
-            ty: resolve_ty(scopes, ty),
-        };
-        NoHashEq(member)
+        NoHashEq(Member { name, ty: resolve_ty(scopes, ty) })
     }))
 }
 

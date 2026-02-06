@@ -339,7 +339,7 @@ pub enum Struct<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Member<'a> {
-    pub name: Option<Token<'a>>,
+    pub name: Token<'a>,
     pub ty: QualifiedType<'a>,
 }
 
@@ -375,7 +375,7 @@ impl<'a> Member<'a> {
                 "TODO: error message for storage_class in struct member",
             );
             reject_function_specifiers(sess, &function_specifiers, name.loc(), "struct member");
-            Member { name: Some(name), ty }
+            Member { name, ty }
         })
     }
 }
