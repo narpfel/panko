@@ -32,16 +32,17 @@ Error: cannot dereference this expression of type `int` (pointer or array type r
    ╭─[panko/tests/cases/deref/test_deref_of_non_pointer.c:4:5]
    │
  4 │     *42;
-   │     ─┬─  
-   │      ╰─── in this expression
+   │     ──┬  
+   │       ╰── in this expression
 ───╯
 
 Error: cannot dereference this expression of type `int` (pointer or array type required)
    ╭─[panko/tests/cases/deref/test_deref_of_non_pointer.c:5:5]
    │
  5 │     42[27];
-   │     ───┬──  
-   │        ╰──── in this expression
+   │     ──┬───  
+   │       │     
+   │       ╰───── in this expression
 ───╯
 
 Error: cannot dereference this expression of type `int` (pointer or array type required)

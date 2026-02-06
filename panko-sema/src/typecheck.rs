@@ -1571,7 +1571,7 @@ fn typeck_unary_op<'a>(
                 }
             }
             _ => {
-                let expr = sess.emit(Diagnostic::CannotDeref { at: *expr, ty: operand.ty });
+                let expr = sess.emit(Diagnostic::CannotDeref { at: *expr, operand });
                 // TODO: should be `Type::Error`
                 TypedExpression { ty: operand.ty, expr }
             }

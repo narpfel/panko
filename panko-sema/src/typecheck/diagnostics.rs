@@ -154,11 +154,11 @@ pub(super) enum Diagnostic<'a> {
     },
 
     #[error("cannot dereference this expression of type `{ty}` (pointer or array type required)")]
-    #[diagnostics(at(colour = Red, label = "in this expression"))]
-    #[with(ty = ty.fg(Red))]
+    #[diagnostics(operand(colour = Red, label = "in this expression"), at(colour = Blue))]
+    #[with(ty = operand.ty)]
     CannotDeref {
         at: scope::Expression<'a>,
-        ty: QualifiedType<'a>,
+        operand: TypedExpression<'a>,
     },
 
     #[error(
