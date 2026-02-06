@@ -265,7 +265,7 @@ impl<'a> StorageClassSpecifier<'a> {
         }
     }
 
-    fn loc(&self) -> Loc<'a> {
+    pub fn loc(&self) -> Loc<'a> {
         self.token.loc()
     }
 

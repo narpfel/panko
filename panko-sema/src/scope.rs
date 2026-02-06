@@ -19,6 +19,7 @@ use panko_parser::ast::Session;
 use panko_parser::ast::Struct;
 use panko_parser::ast::TypeDeclaration;
 use panko_parser::ast::reject_function_specifiers;
+use panko_parser::error_todo;
 use panko_parser::sexpr_builder::SExpr;
 use panko_report::Report;
 use panko_report::Sliced as _;
@@ -746,7 +747,11 @@ fn resolve_function_definition<'a>(
         },
         Some(StorageClassSpecifierKind::Extern) => Linkage::External,
         Some(StorageClassSpecifierKind::Static) => Linkage::Internal,
-        Some(kind) => unreachable!("invalid or unimplemented StorageClassSpecifierKind {kind:?}"),
+        Some(kind) => error_todo!(
+            storage_class.unwrap(),
+            "invalid or unimplemented StorageClassSpecifierKind {:?}",
+            kind,
+        ),
     };
     let maybe_reference = scopes.add(
         name.slice(),
