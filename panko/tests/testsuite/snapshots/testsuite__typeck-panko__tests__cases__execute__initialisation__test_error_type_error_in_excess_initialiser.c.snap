@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/initialisation/test_error_type_error_in_excess_initialiser.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: excess element in scalar initialiser
+   ╭─[panko/tests/cases/execute/initialisation/test_error_type_error_in_excess_initialiser.c:7:17]
+   │
+ 7 │     int x = {1, function(42)};
+   │         ┬       ──────┬─────  
+   │         │             ╰─────── `x`’s type `int` is scalar
+   │         │                     
+   │         ╰───────────────────── while initialising this variable
+───╯

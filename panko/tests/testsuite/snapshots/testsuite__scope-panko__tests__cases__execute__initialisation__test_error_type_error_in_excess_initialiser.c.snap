@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/test_error_type_error_in_excess_initialiser.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/test_error_type_error_in_excess_initialiser.c"
+   (declaration function~0 `fn() -> void` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (declaration x~2 `int`
+            (braced
+               1
+               (call (name function~0 `fn() -> void`)
+                  42))))))
+
+----- stderr -----
