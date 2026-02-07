@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/initialisation/struct/test_error_braced_init_of_struct_containing_struct_with_braced_struct_expr_in_type_error_position.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid implicit conversion from `struct Inner~0 complete` to `int`
+    ╭─[panko/tests/cases/execute/initialisation/struct/test_error_braced_init_of_struct_containing_struct_with_braced_struct_expr_in_type_error_position.c:28:10]
+    │
+ 28 │         {inner_1, 5},
+    │          ───┬───  
+    │             ╰───── this is of type `struct Inner~0 complete`, which cannot be implicitly converted to `int`
+────╯
+
+Error: invalid implicit conversion from `struct Inner2~2 complete` to `char`
+    ╭─[panko/tests/cases/execute/initialisation/struct/test_error_braced_init_of_struct_containing_struct_with_braced_struct_expr_in_type_error_position.c:36:11]
+    │
+ 36 │         {{inner_2}},
+    │           ───┬───  
+    │              ╰───── this is of type `struct Inner2~2 complete`, which cannot be implicitly converted to `char`
+────╯

@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_containing_struct_with_struct_expr.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid implicit conversion from `struct Inner~1 complete` to `int`
+    ╭─[panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_containing_struct_with_struct_expr.c:19:31]
+    │
+ 19 │     struct Outer outer = {42, inner, 27};
+    │                               ──┬──  
+    │                                 ╰──── this is of type `struct Inner~1 complete`, which cannot be implicitly converted to `int`
+────╯

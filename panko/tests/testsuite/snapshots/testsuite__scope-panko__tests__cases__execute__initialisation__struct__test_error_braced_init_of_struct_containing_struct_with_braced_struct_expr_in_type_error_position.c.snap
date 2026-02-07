@@ -1,0 +1,68 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/struct/test_error_braced_init_of_struct_containing_struct_with_braced_struct_expr_in_type_error_position.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_error_braced_init_of_struct_containing_struct_with_braced_struct_expr_in_type_error_position.c"
+   (struct Inner~0
+      (member x `int`)
+      (member y `int`)
+      (member z `int`))
+   (struct Outer~1
+      (member x `int`)
+      (member inner `struct Inner~0 complete`)
+      (member y `int`))
+   (struct Inner2~2
+      (member c `char`))
+   (struct Outer2~3
+      (member x `int`)
+      (member inner `struct Inner2~2 complete`)
+      (member y `int`))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (struct Inner~0
+            (member x `int`)
+            (member y `int`)
+            (member z `int`))
+         (declaration inner_1~5 `struct Inner~0 complete`
+            (braced
+               1
+               2
+               3))
+         (struct Outer~1
+            (member x `int`)
+            (member inner `struct Inner~0 complete`)
+            (member y `int`))
+         (declaration outer_1~6 `struct Outer~1 complete`
+            (braced
+               42
+               (braced
+                  (name inner_1~5 `struct Inner~0 complete`)
+                  5)
+               27))
+         (struct Inner2~2
+            (member c `char`))
+         (declaration inner_2~7 `struct Inner2~2 complete`
+            (braced
+               'a'))
+         (struct Outer2~3
+            (member x `int`)
+            (member inner `struct Inner2~2 complete`)
+            (member y `int`))
+         (declaration outer_2~8 `struct Outer2~3 complete`
+            (braced
+               42
+               (braced
+                  (braced
+                     (name inner_2~7 `struct Inner2~2 complete`)))
+               27)))))
+
+----- stderr -----

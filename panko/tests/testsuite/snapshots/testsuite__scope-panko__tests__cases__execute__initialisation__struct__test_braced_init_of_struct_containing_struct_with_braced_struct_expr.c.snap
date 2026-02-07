@@ -1,0 +1,58 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_containing_struct_with_braced_struct_expr.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_containing_struct_with_braced_struct_expr.c"
+   (declaration memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int` ∅)
+   (struct Inner~1
+      (member x `int`)
+      (member y `int`)
+      (member z `int`))
+   (struct Outer~2
+      (member x `int`)
+      (member inner `struct Inner~1 complete`)
+      (member y `int`))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (struct Inner~1
+            (member x `int`)
+            (member y `int`)
+            (member z `int`))
+         (declaration inner~4 `struct Inner~1 complete`
+            (braced
+               1
+               2
+               3))
+         (struct Outer~2
+            (member x `int`)
+            (member inner `struct Inner~1 complete`)
+            (member y `int`))
+         (declaration outer~5 `struct Outer~2 complete`
+            (braced
+               42
+               (braced
+                  (name inner~4 `struct Inner~1 complete`))
+               27))
+         (declaration expected~6 `array<int; ∅>`
+            (braced
+               42
+               1
+               2
+               3
+               27))
+         (return
+            (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
+               (addressof (name outer~5 `struct Outer~2 complete`))
+               (name expected~6 `array<int; ∅>`)
+               (sizeof (name outer~5 `struct Outer~2 complete`)))))))
+
+----- stderr -----
