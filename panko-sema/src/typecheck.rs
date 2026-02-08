@@ -1054,8 +1054,9 @@ fn typeck_initialiser_list<'a>(
             initialiser: scope::Initialiser::Expression(initialiser @ scope::Expression::String(_)),
         },
     ] = initialiser_list
+        && let typed_initialiser = typeck_expression(sess, initialiser, Context::Default)
         && let _ = subobjects_clone.insert(subobjects.clone())
-        && let Ok(_) = subobjects.next_scalar()
+        && let Ok(_) = subobjects.next(&typed_initialiser.ty.ty)
         && let Some(subobject) = subobjects.parent()
         && let Type::Array(array_ty) = subobject.ty.ty
         && let Some(initialiser) =
@@ -1146,46 +1147,48 @@ fn typeck_initialiser_list<'a>(
                 let left = subobjects.try_leave_subobject(AllowExplicit::Yes);
                 assert!(left);
             }
-            scope::Initialiser::Expression(expr) => match subobjects.next_scalar() {
-                Ok(subobject) => {
-                    let subobject_initialiser = if let scope::Expression::String(_) = expr
-                        && let Some(subobject) = subobjects.parent()
-                        && let Type::Array(array_ty) = subobject.ty.ty
-                        && subobjects.try_leave_subobject(AllowExplicit::No)
-                        && let Some(initialiser) = typeck_array_initialisation_with_string(
-                            sess, reference, &array_ty, expr,
-                        ) {
-                        SubobjectInitialiser { subobject, initialiser }
-                    }
-                    else {
-                        SubobjectInitialiser {
-                            subobject,
-                            // TODO: this skips typechecking the initialiser in the `Err` case
-                            // example:
-                            //     int x = {1, (void)42};
-                            // this should emit an excess initialiser error *and* a type error
-                            initialiser: convert_as_if_by_assignment(
-                                sess,
-                                subobject.ty,
-                                typeck_expression(sess, expr, Context::Default),
-                            ),
+            scope::Initialiser::Expression(expr) => {
+                let typed_expr = typeck_expression(sess, expr, Context::Default);
+                match subobjects.next(&typed_expr.ty.ty) {
+                    Ok(subobject) => {
+                        let subobject_initialiser = if let scope::Expression::String(_) = expr
+                            && let Some(subobject) = subobjects.parent()
+                            && let Type::Array(array_ty) = subobject.ty.ty
+                            && subobjects.try_leave_subobject(AllowExplicit::No)
+                            // TODO: this duplicates typechecking `expr`: disentangle
+                            // `typeck_expression` so that the `Constext` can be applied
+                            // independently from typechecking
+                            && let Some(initialiser) = typeck_array_initialisation_with_string(
+                                sess, reference, &array_ty, expr,
+                            ) {
+                            SubobjectInitialiser { subobject, initialiser }
                         }
-                    };
-                    subobject_initialisers.insert(
-                        subobject_initialiser.subobject.offset,
-                        subobject_initialiser,
-                    );
+                        else {
+                            SubobjectInitialiser {
+                                subobject,
+                                initialiser: convert_as_if_by_assignment(
+                                    sess,
+                                    subobject.ty,
+                                    typed_expr,
+                                ),
+                            }
+                        };
+                        subobject_initialisers.insert(
+                            subobject_initialiser.subobject.offset,
+                            subobject_initialiser,
+                        );
+                    }
+                    Err(iterator) =>
+                        if emit_nested_excess_initialiser_errors {
+                            // TODO: use this error (implement `FromError` for `SubobjectInitialiser`)
+                            sess.emit(Diagnostic::ExcessInitialiser {
+                                at: **initialiser,
+                                reference: *reference,
+                                iterator,
+                            })
+                        },
                 }
-                Err(iterator) =>
-                    if emit_nested_excess_initialiser_errors {
-                        // TODO: use this error (implement `FromError` for `SubobjectInitialiser`)
-                        sess.emit(Diagnostic::ExcessInitialiser {
-                            at: **initialiser,
-                            reference: *reference,
-                            iterator,
-                        })
-                    },
-            },
+            }
         }
     }
 }

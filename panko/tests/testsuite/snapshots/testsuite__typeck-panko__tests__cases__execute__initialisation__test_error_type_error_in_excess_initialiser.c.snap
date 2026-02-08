@@ -12,10 +12,18 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: excess element in scalar initialiser
-   ╭─[panko/tests/cases/execute/initialisation/test_error_type_error_in_excess_initialiser.c:7:17]
+Error: argument count mismatch: too many arguments to function call (expected 0 but got 1)
+   ╭─[panko/tests/cases/execute/initialisation/test_error_type_error_in_excess_initialiser.c:6:17]
    │
- 7 │     int x = {1, function(42)};
+ 6 │     int x = {1, function(42)};
+   │                 ────┬───  
+   │                     ╰───── this callee expects 0 arguments
+───╯
+
+Error: excess element in scalar initialiser
+   ╭─[panko/tests/cases/execute/initialisation/test_error_type_error_in_excess_initialiser.c:6:17]
+   │
+ 6 │     int x = {1, function(42)};
    │         ┬       ──────┬─────  
    │         │             ╰─────── `x`’s type `int` is scalar
    │         │                     

@@ -1,5 +1,4 @@
-// [[known-bug]]
-// [[compile-error: argument count mismatch: too many arguments to function call (expected 0 but got 1)]]
+// [[compile-error: argument count mismatch: too many arguments to function call \(expected 0 but got 1\)]]
 
 void function();
 

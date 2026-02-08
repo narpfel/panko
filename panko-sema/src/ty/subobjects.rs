@@ -171,7 +171,10 @@ impl<'a> Subobjects<'a> {
         self.stack.push((iterator, Explicit::No))
     }
 
-    pub(crate) fn next_scalar(&mut self) -> Result<Subobject<'a>, SubobjectIterator<'a>> {
+    pub(crate) fn next(
+        &mut self,
+        initialiser_ty: &Type<'a>,
+    ) -> Result<Subobject<'a>, SubobjectIterator<'a>> {
         loop {
             self.leave_empty_subobjects();
 
@@ -179,7 +182,7 @@ impl<'a> Subobjects<'a> {
             match subobject.ty.ty {
                 Type::Array(ty) =>
                     self.push(SubobjectIterator::Array { ty, index: 0, offset: subobject.offset }),
-                Type::Struct(Struct::Complete(ty)) =>
+                struct_ty @ Type::Struct(Struct::Complete(ty)) if initialiser_ty != &struct_ty =>
                     self.push(SubobjectIterator::Struct { ty, index: 0, offset: subobject.offset }),
                 _ => {
                     if let Some((_, explicit @ Explicit::Next)) = self.stack.last_mut() {
@@ -251,7 +254,7 @@ mod tests {
         let ty = Type::size_t().unqualified();
 
         let mut subobjects = Subobjects::new(ty).unwrap();
-        let subobject_offsets = from_fn(|| subobjects.next_scalar().ok())
+        let subobject_offsets = from_fn(|| subobjects.next(&ty.ty).ok())
             .map(|subobject| subobject.offset)
             .collect_vec();
         assert_eq!(subobject_offsets, vec![0]);
@@ -268,7 +271,7 @@ mod tests {
         .unqualified();
 
         let mut subobjects = Subobjects::new(ty).unwrap();
-        let subobject_offsets = from_fn(|| subobjects.next_scalar().ok())
+        let subobject_offsets = from_fn(|| subobjects.next(&size_t.ty).ok())
             .map(|subobject| subobject.offset)
             .collect_vec();
         assert_eq!(subobject_offsets, vec![0, 8, 16]);
@@ -291,7 +294,7 @@ mod tests {
         .unqualified();
 
         let mut subobjects = Subobjects::new(ty).unwrap();
-        let subobject_offsets = from_fn(|| subobjects.next_scalar().ok())
+        let subobject_offsets = from_fn(|| subobjects.next(&size_t.ty).ok())
             .map(|subobject| subobject.offset)
             .collect_vec();
         assert_eq!(
@@ -319,12 +322,12 @@ mod tests {
         .unqualified();
 
         let mut subobjects = Subobjects::new(ty).unwrap();
-        assert_eq!(subobjects.next_scalar().unwrap().offset, 0);
+        assert_eq!(subobjects.next(&size_t.ty).unwrap().offset, 0);
         assert!(subobjects.try_leave_subobject(AllowExplicit::No));
         let size = size_t.ty.size();
-        assert_eq!(subobjects.next_scalar().unwrap().offset, size * 4);
-        assert_eq!(subobjects.next_scalar().unwrap().offset, size * 4 + size);
+        assert_eq!(subobjects.next(&size_t.ty).unwrap().offset, size * 4);
+        assert_eq!(subobjects.next(&size_t.ty).unwrap().offset, size * 4 + size);
         assert!(subobjects.try_leave_subobject(AllowExplicit::No));
-        assert_eq!(subobjects.next_scalar().unwrap().offset, size * 8);
+        assert_eq!(subobjects.next(&size_t.ty).unwrap().offset, size * 8);
     }
 }

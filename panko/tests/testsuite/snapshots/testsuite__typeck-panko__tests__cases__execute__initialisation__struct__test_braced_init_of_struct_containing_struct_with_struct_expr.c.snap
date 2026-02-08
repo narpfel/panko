@@ -7,15 +7,58 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_containing_struct_with_struct_expr.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_containing_struct_with_struct_expr.c"
+   (declaration external memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` ∅)
+   (struct Inner~1
+      (member x @0 `int`)
+      (member y @4 `int`)
+      (member z @8 `int`))
+   (struct Outer~2
+      (member x @0 `int`)
+      (member inner @4 `struct Inner~1 complete`)
+      (member y @16 `int`))
+   (function-definition external
+      main~3 `fn() -> int`
+      (compound-statement
+         (struct Inner~1
+            (member x @0 `int`)
+            (member y @4 `int`)
+            (member z @8 `int`))
+         (definition inner~4 `struct Inner~1 complete`
+            (braced
+               (subobject +0 (1 `int`))
+               (subobject +4 (2 `int`))
+               (subobject +8 (3 `int`))))
+         (struct Outer~2
+            (member x @0 `int`)
+            (member inner @4 `struct Inner~1 complete`)
+            (member y @16 `int`))
+         (definition outer~5 `struct Outer~2 complete`
+            (braced
+               (subobject +0 (42 `int`))
+               (subobject +4 (inner~4 `struct Inner~1 complete`))
+               (subobject +16 (27 `int`))))
+         (definition expected~6 `array<int; 5>`
+            (braced
+               (subobject +0 (42 `int`))
+               (subobject +4 (1 `int`))
+               (subobject +8 (2 `int`))
+               (subobject +12 (3 `int`))
+               (subobject +16 (27 `int`))))
+         (return
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int>`
+                  (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int`))
+               (noop-type-conversion `ptr<void const>`
+                  (addressof `ptr<struct Outer~2 complete>`
+                     (outer~5 `struct Outer~2 complete`)))
+               (noop-type-conversion `ptr<void const>`
+                  (noop-type-conversion `ptr<int>`
+                     (addressof `ptr<array<int; 5>>`
+                        (expected~6 `array<int; 5>`))))
+               (sizeof `unsigned long` 20 (outer~5 `struct Outer~2 complete`)))))))
 
 ----- stderr -----
-Error: invalid implicit conversion from `struct Inner~1 complete` to `int`
-    ╭─[panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_containing_struct_with_struct_expr.c:19:31]
-    │
- 19 │     struct Outer outer = {42, inner, 27};
-    │                               ──┬──  
-    │                                 ╰──── this is of type `struct Inner~1 complete`, which cannot be implicitly converted to `int`
-────╯
