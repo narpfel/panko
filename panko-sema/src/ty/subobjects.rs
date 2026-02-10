@@ -1,4 +1,4 @@
-use std::mem;
+use panko_parser::nonempty;
 
 use crate::ty::ArrayType;
 use crate::ty::Complete;
@@ -130,26 +130,32 @@ pub(crate) enum AllowExplicit {
 
 #[derive(Debug, Clone)]
 pub(crate) struct Subobjects<'a> {
-    stack: Vec<(SubobjectIterator<'a>, Explicit)>,
-    current: SubobjectIterator<'a>,
+    stack: nonempty::Vec<(SubobjectIterator<'a>, Explicit)>,
 }
 
 impl<'a> Subobjects<'a> {
     pub(crate) fn new(ty: QualifiedType<'a>) -> Result<Self, ()> {
         Ok(Self {
-            stack: vec![],
-            current: SubobjectIterator::new(&ty.ty, 0)?,
+            stack: nonempty::Vec::new((SubobjectIterator::new(&ty.ty, 0)?, Explicit::Yes)),
         })
     }
 
+    fn current(&self) -> &SubobjectIterator<'a> {
+        &self.stack.last().0
+    }
+
+    fn current_mut(&mut self) -> &mut SubobjectIterator<'a> {
+        &mut self.stack.last_mut().0
+    }
+
     pub(crate) fn parent(&self) -> Option<Subobject<'a>> {
-        self.current.parent()
+        self.current().parent()
     }
 
     pub(crate) fn goto_index(&mut self, target_index: u64) -> Result<(), SubobjectIterator<'a>> {
-        match &mut self.current {
+        match self.current_mut() {
             SubobjectIterator::Scalar { .. } | SubobjectIterator::Struct { .. } =>
-                Err(self.current.clone()),
+                Err(self.current().clone()),
             SubobjectIterator::Array { ty: _, index, offset: _ } => {
                 *index = target_index;
                 Ok(())
@@ -158,7 +164,7 @@ impl<'a> Subobjects<'a> {
     }
 
     fn leave_empty_subobjects(&mut self) {
-        while self.current.is_empty() && !self.stack.is_empty() {
+        while self.current().is_empty() {
             let left = self.try_leave_subobject(AllowExplicit::No);
             if !left {
                 break;
@@ -167,7 +173,6 @@ impl<'a> Subobjects<'a> {
     }
 
     fn push(&mut self, iterator: SubobjectIterator<'a>) {
-        let iterator = mem::replace(&mut self.current, iterator);
         self.stack.push((iterator, Explicit::No))
     }
 
@@ -178,14 +183,17 @@ impl<'a> Subobjects<'a> {
         loop {
             self.leave_empty_subobjects();
 
-            let subobject = self.current.next().ok_or_else(|| self.current.clone())?;
+            let subobject = self
+                .current_mut()
+                .next()
+                .ok_or_else(|| self.current().clone())?;
             match subobject.ty.ty {
                 Type::Array(ty) =>
                     self.push(SubobjectIterator::Array { ty, index: 0, offset: subobject.offset }),
                 struct_ty @ Type::Struct(Struct::Complete(ty)) if initialiser_ty != &struct_ty =>
                     self.push(SubobjectIterator::Struct { ty, index: 0, offset: subobject.offset }),
                 _ => {
-                    if let Some((_, explicit @ Explicit::Next)) = self.stack.last_mut() {
+                    if let (_, explicit @ Explicit::Next) = self.stack.last_mut() {
                         *explicit = Explicit::No;
                     }
                     return Ok(subobject);
@@ -200,17 +208,16 @@ impl<'a> Subobjects<'a> {
     ) -> Result<(), SubobjectIterator<'a>> {
         self.leave_empty_subobjects();
 
-        let (iterator, result) = match self.current.next() {
+        let (iterator, result) = match self.current_mut().next() {
             Some(Subobject { ty, offset }) => (
                 SubobjectIterator::new(&ty.ty, offset).expect("todo"),
                 Ok(()),
             ),
             // Example for this case:
             //     int x = {1, {}};
-            None => (self.current.clone(), Err(self.current.clone())),
+            None => (self.current().clone(), Err(self.current().clone())),
         };
-        self.stack
-            .push((mem::replace(&mut self.current, iterator), explicitness));
+        self.stack.push((iterator, explicitness));
         result
     }
 
@@ -224,15 +231,11 @@ impl<'a> Subobjects<'a> {
 
     #[must_use]
     pub(crate) fn try_leave_subobject(&mut self, allow_explicit: AllowExplicit) -> bool {
-        if let Some((iterator, _)) = self.stack.pop_if(|(_, explicit)| {
-            matches!(allow_explicit, AllowExplicit::Yes) || matches!(explicit, Explicit::No)
-        }) {
-            self.current = iterator;
-            true
-        }
-        else {
-            false
-        }
+        self.stack
+            .pop_if(|(_, explicit)| {
+                matches!(allow_explicit, AllowExplicit::Yes) || matches!(explicit, Explicit::No)
+            })
+            .is_some()
     }
 }
 

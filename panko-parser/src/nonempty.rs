@@ -39,12 +39,21 @@ impl<T> Vec<T> {
         }
     }
 
+    pub fn pop_if(&mut self, mut pred: impl FnMut(&T) -> bool) -> Option<T> {
+        let len = self.len();
+        self.0.pop_if(|value| len > 1 && pred(value))
+    }
+
     pub fn iter(&self) -> std::slice::Iter<'_, T> {
         self.0.iter()
     }
 
     pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, T> {
         self.0.iter_mut()
+    }
+
+    pub fn last(&self) -> &T {
+        self.0.last().unwrap()
     }
 
     pub fn last_mut(&mut self) -> &mut T {
