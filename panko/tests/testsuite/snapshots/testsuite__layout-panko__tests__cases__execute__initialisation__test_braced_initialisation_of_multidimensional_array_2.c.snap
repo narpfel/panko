@@ -1,0 +1,73 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: excess element in array initialiser
+    ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c:10:9]
+    │
+  7 │     int actual[][1][2] = {
+    │         ───┬──  
+    │            ╰──── while initialising this variable
+    │ 
+ 10 │         4,
+    │         ┬  
+    │         ╰── trying to initialise element at index 1 for `array<array<int; 2>; 1>`
+────╯
+
+Error: excess element in array initialiser
+    ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c:10:9]
+    │
+  7 │     int actual[][1][2] = {
+    │         ───┬──  
+    │            ╰──── while initialising this variable
+    │ 
+ 10 │         4,
+    │         ┬  
+    │         ╰── trying to initialise element at index 1 for `array<array<int; 2>; 1>`
+────╯
+
+Error: excess element in array initialiser
+    ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c:10:9]
+    │
+ 10 │         4,
+    │         ┬  
+    │         ╰── trying to initialise element at index 1 for `array<array<int; 2>; 1>`
+    │ 
+ 19 │     printf("%zu %zu\n", sizeof actual, sizeof expected);
+    │                                ───┬──  
+    │                                   ╰──── while initialising this variable
+────╯
+
+Error: excess element in array initialiser
+    ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c:10:9]
+    │
+ 10 │         4,
+    │         ┬  
+    │         ╰── trying to initialise element at index 1 for `array<array<int; 2>; 1>`
+    │ 
+ 21 │     return memcmp(actual, expected, sizeof actual);
+    │                   ───┬──  
+    │                      ╰──── while initialising this variable
+────╯
+
+Error: excess element in array initialiser
+    ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c:10:9]
+    │
+ 10 │         4,
+    │         ┬  
+    │         ╰── trying to initialise element at index 1 for `array<array<int; 2>; 1>`
+    │ 
+ 21 │     return memcmp(actual, expected, sizeof actual);
+    │                                            ───┬──  
+    │                                               ╰──── while initialising this variable
+────╯

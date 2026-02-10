@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c"
+   (declaration memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int` ∅)
+   (declaration printf~1 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (declaration actual~3 `array<array<array<int; 2>; 1>; ∅>`
+            (braced
+               1
+               2
+               (braced
+                  3)
+               4))
+         (declaration expected~4 `array<int; ∅>`
+            (braced
+               1
+               2
+               3
+               0
+               4
+               0))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu %zu\n")
+               (sizeof (name actual~3 `array<array<array<int; 2>; 1>; ∅>`))
+               (sizeof (name expected~4 `array<int; ∅>`))))
+         (return
+            (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
+               (name actual~3 `array<array<array<int; 2>; 1>; ∅>`)
+               (name expected~4 `array<int; ∅>`)
+               (sizeof (name actual~3 `array<array<array<int; 2>; 1>; ∅>`)))))))
+
+----- stderr -----
