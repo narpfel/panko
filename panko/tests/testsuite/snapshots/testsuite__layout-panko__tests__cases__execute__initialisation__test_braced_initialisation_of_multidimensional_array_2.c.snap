@@ -7,67 +7,51 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c"
+   (declaration external (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)) ∅)
+   (declaration external (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (definition (actual~3 `array<array<array<int; 2>; 1>; 3>` @0)
+            (braced
+               (subobject +0 (1 `int` @0))
+               (subobject +4 (2 `int` @4))
+               (subobject +8 (3 `int` @8))
+               (subobject +16 (4 `int` @16))))
+         (definition (expected~4 `array<int; 6>` @24)
+            (braced
+               (subobject +0 (1 `int` @24))
+               (subobject +4 (2 `int` @28))
+               (subobject +8 (3 `int` @32))
+               (subobject +12 (0 `int` @36))
+               (subobject +16 (4 `int` @40))
+               (subobject +20 (0 `int` @44))))
+         (expression
+            (call `int` @48
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @64
+                  (noop-type-conversion `ptr<char>` @64
+                     (addressof `ptr<array<char; 9>>` @64
+                        (string `array<char; 9>` @void "%zu %zu\n\0"))))
+               (24 `unsigned long` @72)
+               (24 `unsigned long` @80)))
+         (return
+            (call `int` @48
+               (addressof `ptr<fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int>` @56
+                  (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)))
+               (noop-type-conversion `ptr<void const>` @64
+                  (noop-type-conversion `ptr<array<array<int; 2>; 1>>` @64
+                     (addressof `ptr<array<array<array<int; 2>; 1>; 3>>` @64
+                        (actual~3 `array<array<array<int; 2>; 1>; 3>` @0))))
+               (noop-type-conversion `ptr<void const>` @72
+                  (noop-type-conversion `ptr<int>` @72
+                     (addressof `ptr<array<int; 6>>` @72
+                        (expected~4 `array<int; 6>` @24))))
+               (24 `unsigned long` @80))))))
 
 ----- stderr -----
-Error: excess element in array initialiser
-    ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c:10:9]
-    │
-  7 │     int actual[][1][2] = {
-    │         ───┬──  
-    │            ╰──── while initialising this variable
-    │ 
- 10 │         4,
-    │         ┬  
-    │         ╰── trying to initialise element at index 1 for `array<array<int; 2>; 1>`
-────╯
-
-Error: excess element in array initialiser
-    ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c:10:9]
-    │
-  7 │     int actual[][1][2] = {
-    │         ───┬──  
-    │            ╰──── while initialising this variable
-    │ 
- 10 │         4,
-    │         ┬  
-    │         ╰── trying to initialise element at index 1 for `array<array<int; 2>; 1>`
-────╯
-
-Error: excess element in array initialiser
-    ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c:10:9]
-    │
- 10 │         4,
-    │         ┬  
-    │         ╰── trying to initialise element at index 1 for `array<array<int; 2>; 1>`
-    │ 
- 19 │     printf("%zu %zu\n", sizeof actual, sizeof expected);
-    │                                ───┬──  
-    │                                   ╰──── while initialising this variable
-────╯
-
-Error: excess element in array initialiser
-    ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c:10:9]
-    │
- 10 │         4,
-    │         ┬  
-    │         ╰── trying to initialise element at index 1 for `array<array<int; 2>; 1>`
-    │ 
- 21 │     return memcmp(actual, expected, sizeof actual);
-    │                   ───┬──  
-    │                      ╰──── while initialising this variable
-────╯
-
-Error: excess element in array initialiser
-    ╭─[panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array_2.c:10:9]
-    │
- 10 │         4,
-    │         ┬  
-    │         ╰── trying to initialise element at index 1 for `array<array<int; 2>; 1>`
-    │ 
- 21 │     return memcmp(actual, expected, sizeof actual);
-    │                                            ───┬──  
-    │                                               ╰──── while initialising this variable
-────╯

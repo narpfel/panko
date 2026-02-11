@@ -1122,7 +1122,7 @@ fn typeck_initialiser_list<'a>(
                 while subobjects.try_leave_subobject(AllowExplicit::No) {}
                 apply_designator(sess, reference, subobjects, designator);
                 for designator in rest {
-                    subobjects.enter_subobject_implicit().unwrap_or_else(|_| {
+                    subobjects.enter_subobject_implicit().1.unwrap_or_else(|_| {
                         unreachable!("only reachable for nested braced initialisation")
                     });
                     apply_designator(sess, reference, subobjects, designator);
@@ -1136,7 +1136,8 @@ fn typeck_initialiser_list<'a>(
                 initialiser_list,
                 close_brace: _,
             } => {
-                let emit_nested_errors = match subobjects.enter_subobject() {
+                let (depth, enter_result) = subobjects.enter_subobject();
+                let emit_nested_errors = match enter_result {
                     Ok(()) => true,
                     Err(iterator) => {
                         if emit_nested_excess_initialiser_errors {
@@ -1158,7 +1159,7 @@ fn typeck_initialiser_list<'a>(
                     initialiser_list,
                     emit_nested_errors,
                 );
-                let left = subobjects.try_leave_subobject(AllowExplicit::Yes);
+                let left = subobjects.try_leave_subobject(AllowExplicit::Yes(depth));
                 assert!(left);
             }
             scope::Initialiser::Expression(expr) => {

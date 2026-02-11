@@ -1,3 +1,4 @@
+use std::num::NonZero;
 use std::ops::Index;
 use std::slice::SliceIndex;
 
@@ -58,6 +59,10 @@ impl<T> Vec<T> {
 
     pub fn last_mut(&mut self) -> &mut T {
         self.0.last_mut().unwrap()
+    }
+
+    pub fn truncate(&mut self, len: NonZero<usize>) {
+        self.0.truncate(len.get());
     }
 }
 

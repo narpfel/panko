@@ -1,3 +1,5 @@
+use std::num::NonZero;
+
 use panko_parser::nonempty;
 
 use crate::ty::ArrayType;
@@ -125,7 +127,7 @@ enum Explicit {
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum AllowExplicit {
     No,
-    Yes,
+    Yes(NonZero<usize>),
 }
 
 #[derive(Debug, Clone)]
@@ -205,8 +207,9 @@ impl<'a> Subobjects<'a> {
     fn enter_subobject_impl(
         &mut self,
         explicitness: Explicit,
-    ) -> Result<(), SubobjectIterator<'a>> {
+    ) -> (NonZero<usize>, Result<(), SubobjectIterator<'a>>) {
         self.leave_empty_subobjects();
+        let depth = self.depth();
 
         let (iterator, result) = match self.current_mut().next() {
             Some(Subobject { ty, offset }) => (
@@ -218,24 +221,37 @@ impl<'a> Subobjects<'a> {
             None => (self.current().clone(), Err(self.current().clone())),
         };
         self.stack.push((iterator, explicitness));
-        result
+        (depth, result)
     }
 
-    pub(crate) fn enter_subobject_implicit(&mut self) -> Result<(), SubobjectIterator<'a>> {
+    pub(crate) fn enter_subobject_implicit(
+        &mut self,
+    ) -> (NonZero<usize>, Result<(), SubobjectIterator<'a>>) {
         self.enter_subobject_impl(Explicit::Next)
     }
 
-    pub(crate) fn enter_subobject(&mut self) -> Result<(), SubobjectIterator<'a>> {
+    pub(crate) fn enter_subobject(
+        &mut self,
+    ) -> (NonZero<usize>, Result<(), SubobjectIterator<'a>>) {
         self.enter_subobject_impl(Explicit::Yes)
     }
 
     #[must_use]
     pub(crate) fn try_leave_subobject(&mut self, allow_explicit: AllowExplicit) -> bool {
-        self.stack
-            .pop_if(|(_, explicit)| {
-                matches!(allow_explicit, AllowExplicit::Yes) || matches!(explicit, Explicit::No)
-            })
-            .is_some()
+        match allow_explicit {
+            AllowExplicit::No => self
+                .stack
+                .pop_if(|(_, explicit)| matches!(explicit, Explicit::No))
+                .is_some(),
+            AllowExplicit::Yes(depth) => {
+                self.stack.truncate(depth);
+                depth <= self.depth()
+            }
+        }
+    }
+
+    pub(crate) fn depth(&self) -> NonZero<usize> {
+        NonZero::new(self.stack.len()).unwrap()
     }
 }
 
