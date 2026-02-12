@@ -51,7 +51,7 @@ impl<'a, T: Step> ParameterDeclaration<'a, T> {
     }
 }
 
-impl<'a, T: Step> PartialEq for ParameterDeclaration<'a, T>
+impl<T: Step> PartialEq for ParameterDeclaration<'_, T>
 where
     T: PartialEq,
 {
@@ -60,9 +60,9 @@ where
     }
 }
 
-impl<'a, T: Step> Eq for ParameterDeclaration<'a, T> where T: Eq {}
+impl<T: Step> Eq for ParameterDeclaration<'_, T> where T: Eq {}
 
-impl<'a, T: Step> Hash for ParameterDeclaration<'a, T>
+impl<T: Step> Hash for ParameterDeclaration<'_, T>
 where
     T: Hash,
 {
@@ -84,7 +84,7 @@ impl<'a, T: Step> ArrayType<'a, T> {
     }
 }
 
-impl<'a, T: Step> fmt::Display for ArrayType<'a, T> {
+impl<T: Step> fmt::Display for ArrayType<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { ty, length, loc: _ } = self;
         write!(f, "array<{ty}; {length}>", length = length.as_sexpr())
@@ -98,7 +98,7 @@ pub struct FunctionType<'a, T: Step> {
     pub is_varargs: bool,
 }
 
-impl<'a, T: Step> fmt::Display for FunctionType<'a, T> {
+impl<T: Step> fmt::Display for FunctionType<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { params, return_type, is_varargs } = *self;
         let maybe_ellipsis = match (is_varargs, params.is_empty()) {
@@ -434,7 +434,7 @@ where
     }
 }
 
-impl<'a, T: Step> fmt::Display for Type<'a, T> {
+impl<T: Step> fmt::Display for Type<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Type::Arithmetic(Arithmetic::Integral(integral)) => write!(f, "{integral}"),
@@ -538,7 +538,7 @@ impl<'a> QualifiedType<'a, Typeck> {
     }
 }
 
-impl<'a, T: Step> fmt::Display for QualifiedType<'a, T> {
+impl<T: Step> fmt::Display for QualifiedType<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.ty.fmt(f)?;
         if self.is_const {
@@ -551,7 +551,7 @@ impl<'a, T: Step> fmt::Display for QualifiedType<'a, T> {
     }
 }
 
-impl<'a, T: Step> AsSExpr for QualifiedType<'a, T> {
+impl<T: Step> AsSExpr for QualifiedType<'_, T> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::display(&self.italic())
     }
