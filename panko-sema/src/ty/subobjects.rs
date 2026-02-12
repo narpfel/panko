@@ -1,6 +1,9 @@
+use std::fmt;
 use std::num::NonZero;
 
 use panko_parser::nonempty;
+use panko_parser::sexpr_builder::AsSExpr;
+use panko_parser::sexpr_builder::SExpr;
 
 use crate::ty::ArrayType;
 use crate::ty::Complete;
@@ -17,7 +20,7 @@ pub(crate) struct Subobject<'a> {
     pub(crate) offset: u64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub(crate) enum SubobjectIterator<'a> {
     Scalar {
         ty: Type<'a>,
@@ -34,6 +37,28 @@ pub(crate) enum SubobjectIterator<'a> {
         index: usize,
         offset: u64,
     },
+}
+
+impl AsSExpr for SubobjectIterator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Scalar { ty, is_exhausted, offset } => SExpr::new(format!(
+                "scalar-subobject @{offset} is_exhausted={is_exhausted}"
+            ))
+            .inherit(ty),
+            Self::Array { ty, index, offset } =>
+                SExpr::new(format!("array-subobject @{offset} index={index}")).inherit(ty),
+            Self::Struct { ty, index, offset } =>
+                SExpr::new(format!("struct-subobject @{offset} index={index}"))
+                    .inline_string(Type::Struct(Struct::Complete(*ty)).as_sexpr().to_string()),
+        }
+    }
+}
+
+impl fmt::Debug for SubobjectIterator<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_sexpr())
+    }
 }
 
 impl<'a> SubobjectIterator<'a> {

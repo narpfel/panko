@@ -91,6 +91,12 @@ impl<T: Step> fmt::Display for ArrayType<'_, T> {
     }
 }
 
+impl<T: Step> AsSExpr for ArrayType<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::display(self)
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct FunctionType<'a, T: Step> {
     pub params: &'a [ParameterDeclaration<'a, T>],
@@ -454,6 +460,12 @@ impl<T: Step> fmt::Display for Type<'_, T> {
             Type::Struct(Struct::Complete(Complete { name, id, members: _ })) =>
                 write!(f, "struct {}~{} complete", name.as_sexpr(), id.0),
         }
+    }
+}
+
+impl<T: Step> AsSExpr for Type<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::display(&self.italic())
     }
 }
 
