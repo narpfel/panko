@@ -10,6 +10,7 @@ use panko_parser as cst;
 use panko_parser::BinOp;
 use panko_parser::IncrementOp;
 use panko_parser::LogicalOp;
+use panko_parser::MemberAccessOp;
 use panko_parser::StorageClassSpecifierKind;
 use panko_parser::UnaryOp;
 use panko_parser::ast;
@@ -346,6 +347,11 @@ pub(crate) enum Expression<'a> {
         fixity: IncrementFixity<'a>,
         reference: Reference<'a>,
     },
+    MemberAccess {
+        lhs: &'a Expression<'a>,
+        op: MemberAccessOp<'a>,
+        member: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -556,6 +562,7 @@ impl<'a> Expression<'a> {
                 fixity: _,
                 reference: _,
             } => operator.loc().until(operand.loc()),
+            Expression::MemberAccess { lhs, op: _, member } => lhs.loc().until(member.loc()),
         }
     }
 }
@@ -1172,6 +1179,11 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
                 reference,
             }
         }
+        ast::Expression::MemberAccess { lhs, op, member } => Expression::MemberAccess {
+            lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
+            op: *op,
+            member: *member,
+        },
     }
 }
 

@@ -23,6 +23,7 @@ use crate::ty::Struct;
 use crate::typecheck;
 use crate::typecheck::Member;
 use crate::typecheck::PtrAddOrder;
+use crate::typecheck::Typeck;
 use crate::typecheck::Typedef;
 
 mod as_sexpr;
@@ -198,6 +199,10 @@ pub enum Expression<'a> {
         then: &'a LayoutedExpression<'a>,
         or_else: &'a LayoutedExpression<'a>,
     },
+    MemberAccess {
+        lhs: &'a LayoutedExpression<'a>,
+        member: Member<'a, Layout>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -277,6 +282,16 @@ fn layout_array_length<'a>(
     }
 }
 
+fn layout_member<'a>(
+    stack: &mut Stack<'a>,
+    bump: &'a Bump,
+    member: &Member<'a, Typeck>,
+) -> Member<'a, Layout> {
+    let Member { name, ty, offset } = *member;
+    let ty = layout_ty(stack, bump, ty);
+    Member { name, ty, offset }
+}
+
 fn layout_ty<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
@@ -308,11 +323,11 @@ fn layout_ty<'a>(
         ty::Type::Struct(Struct::Incomplete { name, id }) =>
             Type::Struct(Struct::Incomplete { name, id }),
         ty::Type::Struct(Struct::Complete(Complete { name, id, members })) => {
-            let members = bump.alloc_slice_fill_iter(members.iter().map(|member| {
-                let Member { name, ty, offset } = *member;
-                let ty = layout_ty(stack, bump, ty);
-                Member { name, ty, offset }
-            }));
+            let members = bump.alloc_slice_fill_iter(
+                members
+                    .iter()
+                    .map(|member| layout_member(stack, bump, member)),
+            );
             Type::Struct(Struct::Complete(Complete { name, id, members }))
         }
     };
@@ -495,6 +510,7 @@ fn layout_expression_in_slot<'a>(
                 Expression::Deref(operand) => Some(stack.temporary(operand.ty.ty)),
                 // For `Name` exprs, we can assign directly into the name’s slot.
                 Expression::Name(_) => Some(target.slot),
+                Expression::MemberAccess { lhs, member } => Some(lhs.slot.offset(member.offset)),
                 _ => unreachable!("not assignable because this expr is not an lvalue"),
             };
             let value = layout_expression_in_slot(stack, bump, value, value_slot);
@@ -620,6 +636,14 @@ fn layout_expression_in_slot<'a>(
             let condition =
                 bump.alloc(stack.with_block(|stack| layout_expression(stack, bump, condition)));
             (slot, Expression::Conditional { condition, then, or_else })
+        }
+        typecheck::Expression::MemberAccess { lhs, member, member_loc: _ } => {
+            let lhs = bump.alloc(layout_expression(stack, bump, lhs));
+            let member = layout_member(stack, bump, &member);
+            (
+                lhs.slot.offset(member.offset),
+                Expression::MemberAccess { lhs, member },
+            )
         }
     };
     LayoutedExpression { ty, slot, expr, loc }

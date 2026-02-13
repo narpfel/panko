@@ -182,6 +182,9 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new(format!("logical-{}", op.str())).lines([lhs, rhs]),
             Expression::Conditional { condition, then, or_else } =>
                 SExpr::new("conditional").lines([condition, then, or_else]),
+            Expression::MemberAccess { lhs, member } => SExpr::new("member")
+                .inline_string(member.name.to_owned())
+                .inherit(lhs),
         }
     }
 }

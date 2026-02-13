@@ -128,6 +128,7 @@ extern {
         "--" => Token { kind: TokenKind::MinusMinus, ..},
 
         "." => Token { kind: TokenKind::Dot, .. },
+        "->" => Token { kind: TokenKind::Arrow, .. },
         "..." => Token { kind: TokenKind::Ellipsis, .. },
 
         "true" => Token { kind: TokenKind::True, .. },
@@ -665,12 +666,19 @@ IncrementOperator: ast::IncrementOp<'a> = {
     "--" => ast::IncrementOp { kind: ast::IncrementOpKind::Decrement, token: <> },
 }
 
+MemberAccessOp: ast::MemberAccessOp<'a> = {
+    "." => ast::MemberAccessOp { kind: ast::MemberAccessOpKind::Dot, token: <> },
+    "->" => ast::MemberAccessOp { kind: ast::MemberAccessOpKind::Arrow, token: <> },
+}
+
 PostfixExpression: ast::Expression<'a> = {
     PrimaryExpression,
     <callee:Bump<PostfixExpression>> "(" <args:ArgumentExpressionList> <close_paren:")"> =>
         ast::Expression::Call { <> },
     <lhs:Bump<PostfixExpression>> "[" <rhs:Bump<Expression>> <close_bracket:"]"> =>
         ast::Expression::Subscript { <> },
+    <lhs:Bump<PostfixExpression>> <op:MemberAccessOp> <member:AnyIdentifier> =>
+        ast::Expression::MemberAccess { <> },
     <operand:Bump<PostfixExpression>> <operator:IncrementOperator> =>
         ast::Expression::Increment { <>, fixity: ast::IncrementFixity::Postfix },
 }

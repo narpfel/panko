@@ -487,6 +487,25 @@ impl<'a, T: Step> QualifiedType<'a, T> {
     pub fn loc(&self) -> Loc<'a> {
         self.loc.0
     }
+
+    pub(crate) fn merge_qualifiers(&self, other: &Self) -> Self
+    where
+        T: Copy,
+    {
+        let Self { is_const, is_volatile, ty, loc } = *self;
+        let Self {
+            is_const: other_is_const,
+            is_volatile: other_is_volatile,
+            ty: _,
+            loc: _,
+        } = other;
+        Self {
+            is_const: is_const | other_is_const,
+            is_volatile: is_volatile | other_is_volatile,
+            ty,
+            loc,
+        }
+    }
 }
 
 impl<'a> QualifiedType<'a, Typeck> {

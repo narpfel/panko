@@ -501,5 +501,7 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
                     operator.str(),
                 )),
             }),
+        Expression::MemberAccess { lhs: _, op: _, member: _ } =>
+            sess.emit(Diagnostic::InvalidExpression { at: *expr, kind: "member access" }),
     }
 }

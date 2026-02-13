@@ -18,6 +18,8 @@ use panko_parser::BinOpKind;
 use panko_parser::Comparison;
 use panko_parser::IncrementOpKind;
 use panko_parser::LogicalOp;
+use panko_parser::MemberAccessOp;
+use panko_parser::MemberAccessOpKind;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast::Arithmetic;
@@ -27,6 +29,7 @@ use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::reject_function_specifiers;
+use panko_parser::error_todo;
 use panko_report::Report;
 use variant_types::IntoVariant as _;
 
@@ -381,6 +384,11 @@ pub(crate) enum Expression<'a> {
         then: &'a TypedExpression<'a>,
         or_else: &'a TypedExpression<'a>,
     },
+    MemberAccess {
+        lhs: &'a TypedExpression<'a>,
+        member: Member<'a, Typeck>,
+        member_loc: Loc<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -457,6 +465,7 @@ impl<'a> TypedExpression<'a> {
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.is_lvalue(),
             Expression::Deref { .. } => self.ty.ty.is_object() && !matches!(self.ty.ty, Type::Void),
             Expression::String(_) => true,
+            Expression::MemberAccess { .. } => true,
             Expression::Nullptr(_)
             | Expression::Integer { .. }
             | Expression::NoopTypeConversion(_)
@@ -547,6 +556,7 @@ impl<'a> Expression<'a> {
             Expression::Logical { lhs, op: _, rhs } => lhs.loc().until(rhs.loc()),
             Expression::Conditional { condition, then: _, or_else } =>
                 condition.loc().until(or_else.loc()),
+            Expression::MemberAccess { lhs, member: _, member_loc } => lhs.loc().until(*member_loc),
         }
     }
 
@@ -2351,6 +2361,36 @@ fn typeck_expression<'a>(
                     desugar_postfix_increment(sess, op, operand, reference, pointer, copy),
             };
             typeck_expression(sess, &expr, Context::Default)
+        }
+        scope::Expression::MemberAccess { lhs, op, member: member_tok } => {
+            let MemberAccessOp { kind, token } = *op;
+            let lhs = match kind {
+                MemberAccessOpKind::Dot => lhs,
+                MemberAccessOpKind::Arrow => &scope::Expression::UnaryOp {
+                    operator: UnaryOp { kind: UnaryOpKind::Deref, token },
+                    operand: lhs,
+                },
+            };
+            let lhs = sess.alloc(typeck_expression(sess, lhs, Context::Default));
+            let name = member_tok.slice();
+            let member = match lhs.ty.ty {
+                Type::Struct(Struct::Incomplete { name: _, id: _ }) =>
+                    error_todo!(lhs, "member access on incomplete struct type"),
+                Type::Struct(Struct::Complete(Complete { name: _, id: _, members })) => members
+                    .iter()
+                    .find(|member| member.name == name)
+                    .copied()
+                    .unwrap_or_else(|| error_todo!(lhs, "no such member {}", name)),
+                _ => error_todo!(lhs, "member access on non-struct or -union type"),
+            };
+            TypedExpression {
+                ty: member.ty.merge_qualifiers(&lhs.ty),
+                expr: Expression::MemberAccess {
+                    lhs,
+                    member,
+                    member_loc: member_tok.loc(),
+                },
+            }
         }
     };
 

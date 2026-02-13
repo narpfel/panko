@@ -21,6 +21,8 @@ use crate::GenericAssociation;
 use crate::InitDeclarator;
 use crate::Initialiser;
 use crate::JumpStatement;
+use crate::MemberAccessOp;
+use crate::MemberAccessOpKind;
 use crate::ParameterDeclaration;
 use crate::Pointer;
 use crate::PrimaryBlock;
@@ -319,6 +321,10 @@ impl AsSExpr for Expression<'_> {
             Expression::Comma { lhs, rhs } => SExpr::new("comma").lines([lhs, rhs]),
             Expression::Increment { operator, operand, fixity } =>
                 SExpr::new(format!("{}-{}", fixity.str(), operator.str())).inherit(operand),
+            Expression::MemberAccess { lhs, op, member } => op
+                .as_sexpr()
+                .inline_string(member.slice().to_owned())
+                .inherit(lhs),
         }
     }
 }
@@ -330,5 +336,15 @@ impl AsSExpr for GenericAssociation<'_> {
             Self::Default { default, expr } => (default, expr),
         };
         SExpr::new("assoc").inherit(ty).inherit(expr)
+    }
+}
+
+impl AsSExpr for MemberAccessOp<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let s = match self.kind {
+            MemberAccessOpKind::Dot => "dot",
+            MemberAccessOpKind::Arrow => "arrow",
+        };
+        SExpr::new(s)
     }
 }

@@ -1,5 +1,6 @@
 #![feature(assert_matches)]
 #![feature(bstr)]
+#![feature(if_let_guard)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
@@ -483,6 +484,7 @@ impl<'a> Codegen<'a> {
                 Expression::Combine { .. } => todo!(),
                 Expression::Logical { .. } => todo!(),
                 Expression::Conditional { .. } => todo!(),
+                Expression::MemberAccess { .. } => todo!(),
             },
             Some(StaticInitialiser::Braced { subobject_initialisers }) => {
                 if subobject_initialisers.is_empty() {
@@ -744,6 +746,15 @@ impl<'a> Codegen<'a> {
                         self.copy(expr, value);
                     }
                 }
+                Expression::MemberAccess { lhs, member } if let Expression::Deref(_) = lhs.expr =>
+                    todo!("assign to `->` expression"),
+                Expression::MemberAccess { lhs, member: _ } => {
+                    self.expr(lhs);
+                    self.expr(value);
+                    if expr.slot != value.slot {
+                        self.copy(expr, value);
+                    }
+                }
                 _ => unreachable!(),
             },
             Expression::IntegralBinOp { ty, lhs, op, rhs } => {
@@ -916,6 +927,13 @@ impl<'a> Codegen<'a> {
                         let id = self.string(Cow::Borrowed(string));
                         self.emit_args("lea", &[&Rax, &id]);
                     }
+                    Expression::MemberAccess { lhs, member: _ }
+                        if let Expression::Deref(_) = lhs.expr =>
+                        todo!("addressof `->` expression"),
+                    Expression::MemberAccess { lhs, member: _ } => {
+                        self.expr(lhs);
+                        self.emit_args("lea", &[&Rax, operand]);
+                    }
                     _ => unreachable!(),
                 }
                 self.emit_args("mov", &[expr, &Rax]);
@@ -1015,6 +1033,9 @@ impl<'a> Codegen<'a> {
                     self.copy(expr, or_else);
                 }
                 self.label(merge);
+            }
+            Expression::MemberAccess { lhs, member: _ } => {
+                self.expr(lhs);
             }
         }
     }

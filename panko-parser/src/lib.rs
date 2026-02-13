@@ -1041,6 +1041,11 @@ pub enum Expression<'a> {
         operand: &'a Expression<'a>,
         fixity: IncrementFixity,
     },
+    MemberAccess {
+        lhs: &'a Expression<'a>,
+        op: MemberAccessOp<'a>,
+        member: Token<'a>,
+    },
 }
 
 impl<'a> Expression<'a> {
@@ -1080,6 +1085,7 @@ impl<'a> Expression<'a> {
             } => condition.loc().until(or_else.loc()),
             Self::Comma { lhs, rhs } => lhs.loc().until(rhs.loc()),
             Self::Increment { operator, operand, fixity: _ } => operator.loc().until(operand.loc()),
+            Self::MemberAccess { lhs, op: _, member } => lhs.loc().until(member.loc()),
         }
     }
 }
@@ -1289,6 +1295,18 @@ impl IncrementFixity {
             IncrementFixity::Postfix => "post",
         }
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum MemberAccessOpKind {
+    Dot,
+    Arrow,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct MemberAccessOp<'a> {
+    pub kind: MemberAccessOpKind,
+    pub token: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]

@@ -205,6 +205,10 @@ impl AsSExpr for Expression<'_> {
             Expression::Comma { lhs, rhs } => SExpr::new("comma").lines([lhs, rhs]),
             Expression::Increment { operator, operand, fixity, reference: _ } =>
                 SExpr::new(format!("{}-{}", fixity.str(), operator.str())).inherit(operand),
+            Expression::MemberAccess { lhs, op, member } => op
+                .as_sexpr()
+                .inline_string(member.slice().to_owned())
+                .inherit(lhs),
         }
     }
 }
