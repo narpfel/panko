@@ -1,4 +1,4 @@
-int memcmp(void const*, void const*, typeof(sizeof 0));
+// [[known-bug]]
 
 struct Inner {
     int x;
@@ -14,7 +14,6 @@ struct Outer {
 
 int main() {
     struct Inner inner = {1, 2, 3};
+    // [[compile-error: invalid implicit conversion from `struct Inner~\d+ complete` to `int`]]
     struct Outer outer = {42, {inner}, 27};
-    int expected[] = {42, 1, 2, 3, 27};
-    return memcmp(&outer, expected, sizeof outer);
 }

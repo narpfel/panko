@@ -1,0 +1,45 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/struct/test_error_braced_init_of_struct_containing_struct_with_braced_struct_expr.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/struct/test_error_braced_init_of_struct_containing_struct_with_braced_struct_expr.c"
+   (struct Inner~0
+      (member x `int`)
+      (member y `int`)
+      (member z `int`))
+   (struct Outer~1
+      (member x `int`)
+      (member inner `struct Inner~0 complete`)
+      (member y `int`))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (struct Inner~0
+            (member x `int`)
+            (member y `int`)
+            (member z `int`))
+         (declaration inner~3 `struct Inner~0 complete`
+            (braced
+               1
+               2
+               3))
+         (struct Outer~1
+            (member x `int`)
+            (member inner `struct Inner~0 complete`)
+            (member y `int`))
+         (declaration outer~4 `struct Outer~1 complete`
+            (braced
+               42
+               (braced
+                  (name inner~3 `struct Inner~0 complete`))
+               27)))))
+
+----- stderr -----
