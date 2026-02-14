@@ -1,5 +1,4 @@
 use std::borrow::Cow;
-use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -879,7 +878,7 @@ impl<'a> Preprocessor<'a> {
             false => token,
         });
         let typedef_names = RefCell::default();
-        let is_in_typedef = Cell::default();
+        let is_in_typedef = RefCell::default();
         let parser = crate::grammar::ConstantExpressionParser::new();
         let expr = parser
             .parse(sess, &typedef_names, &is_in_typedef, Path::new(""), tokens)

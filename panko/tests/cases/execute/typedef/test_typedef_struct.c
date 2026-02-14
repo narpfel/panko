@@ -1,4 +1,3 @@
-// [[known-bug]]
 // [[return: 42]]
 
 typedef struct T { int x; } Name;

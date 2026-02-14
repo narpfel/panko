@@ -7,15 +7,19 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/typedef/test_typedef_struct.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/typedef/test_typedef_struct.c"
+   (struct T~0
+      (member x @0 `int`))
+   (typedef Name `struct T~0 complete`)
+   (function-definition external
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition value~2 `struct T~0 complete`
+            (braced
+               (subobject +0 (42 `int`))))
+         (return (member `int` x (value~2 `struct T~0 complete`))))))
 
 ----- stderr -----
-Error: unexpected token `value` of kind `Identifier`
-   ╭─[panko/tests/cases/execute/typedef/test_typedef_struct.c:7:10]
-   │
- 7 │     Name value = {42};
-   │          ──┬──  
-   │            ╰──── expected one of the following token kinds: [";", ",", "=", "*", "(", "[", "+", "-", "/", "%", "==", "!=", "<", "<=", ">", ">=", "&", "^", "|", "<<", ">>", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|=", "&&", "||", "?", "++", "--", ".", "->"]
-───╯

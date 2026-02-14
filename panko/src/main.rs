@@ -1,7 +1,6 @@
 #![feature(exit_status_error)]
 #![feature(unqualified_local_imports)]
 
-use std::cell::Cell;
 use std::cell::RefCell;
 use std::env;
 use std::fs::File;
@@ -164,7 +163,7 @@ fn compile(
 ) -> Result<Result<PathBuf, ()>> {
     let bump = &Bump::new();
     let typedef_names = RefCell::default();
-    let is_in_typedef = Cell::new(false);
+    let is_in_typedef = RefCell::default();
     let tokens = panko_lex::lex(
         bump,
         filename,

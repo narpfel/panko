@@ -9,7 +9,6 @@
 #![feature(type_alias_impl_trait)]
 #![feature(unqualified_local_imports)]
 
-use std::cell::Cell;
 use std::cell::RefCell;
 use std::iter::empty;
 use std::path::Path;
@@ -1341,7 +1340,7 @@ pub fn parse<'a>(
     sess: &'a ast::Session<'a>,
     filename: &'a Path,
     typedef_names: &'a RefCell<TypedefNames<'a>>,
-    is_in_typedef: &'a Cell<bool>,
+    is_in_typedef: &'a RefCell<nonempty::Vec<bool>>,
     tokens: LexerHacked<'a, impl Iterator<Item = Token<'a>>>,
 ) -> Option<ast::TranslationUnit<'a>> {
     let parser = grammar::TranslationUnitParser::new();
