@@ -2366,6 +2366,7 @@ fn typeck_expression<'a>(
             let MemberAccessOp { kind, token } = *op;
             let lhs = match kind {
                 MemberAccessOpKind::Dot => lhs,
+                // TODO: this leads to a weird `loc` for `lhs`
                 MemberAccessOpKind::Arrow => &scope::Expression::UnaryOp {
                     operator: UnaryOp { kind: UnaryOpKind::Deref, token },
                     operand: lhs,
