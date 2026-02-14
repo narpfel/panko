@@ -1056,10 +1056,9 @@ fn typeck_initialiser_list<'a>(
     if let [
         DesignatedInitialiser {
             designation: None,
-            initialiser: scope::Initialiser::Expression(initialiser),
+            initialiser: scope::Initialiser::Expression(initialiser @ scope::Expression::String(_)),
         },
     ] = initialiser_list
-        && let scope::Expression::String(_) = initialiser
     {
         let typed_initialiser = typeck_expression(sess, initialiser, Context::Default);
         // workaround for `char const* s = {"abc"};` and similarly: we have to compute `next`
