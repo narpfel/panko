@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/typedef/test_typedef_struct.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unexpected token `value` of kind `Identifier`
+   ╭─[panko/tests/cases/execute/typedef/test_typedef_struct.c:7:10]
+   │
+ 7 │     Name value = {42};
+   │          ──┬──  
+   │            ╰──── expected one of the following token kinds: [";", ",", "=", "*", "(", "[", "+", "-", "/", "%", "==", "!=", "<", "<=", ">", ">=", "&", "^", "|", "<<", ">>", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|=", "&&", "||", "?", "++", "--", ".", "->"]
+───╯
