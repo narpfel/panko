@@ -1,0 +1,133 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_assign_to_member.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_assign_to_member.c"
+   (declaration memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int` ∅)
+   (declaration printf~1 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct Inner~2
+      (member x `int`)
+      (member y `int`)
+      (member z `int`))
+   (struct Middle~3
+      (member y `int`)
+      (member inner `struct Inner~2 complete`)
+      (member inner2 `struct Inner~2 complete`))
+   (struct Outer~4
+      (member x `int`)
+      (member middle `struct Middle~3 complete`)
+      (member inner `struct Inner~2 complete`)
+      (member y `int`))
+   (function-definition
+      main~5 `fn() -> int`
+      (compound-statement
+         (struct Inner~2
+            (member x `int`)
+            (member y `int`)
+            (member z `int`))
+         (declaration inner~6 `struct Inner~2 complete`
+            (braced
+               1
+               2
+               3))
+         (declaration inner2~7 `struct Inner~2 complete`
+            (braced
+               4
+               5
+               6))
+         (declaration inner3~8 `struct Inner~2 complete`
+            (braced
+               (add (dot x (name inner~6 `struct Inner~2 complete`)) 10)
+               (add (dot y (name inner2~7 `struct Inner~2 complete`)) 20)
+               (add (dot z (name inner2~7 `struct Inner~2 complete`)) 30)))
+         (struct Middle~3
+            (member y `int`)
+            (member inner `struct Inner~2 complete`)
+            (member inner2 `struct Inner~2 complete`))
+         (declaration middle~9 `struct Middle~3 complete`
+            (braced
+               2742
+               (braced
+                  (name inner~6 `struct Inner~2 complete`))
+               (name inner2~7 `struct Inner~2 complete`)))
+         (struct Outer~4
+            (member x `int`)
+            (member middle `struct Middle~3 complete`)
+            (member inner `struct Inner~2 complete`)
+            (member y `int`))
+         (declaration outer~10 `struct Outer~4 complete`
+            (braced
+               42
+               (name middle~9 `struct Middle~3 complete`)
+               (name inner3~8 `struct Inner~2 complete`)
+               27))
+         (declaration expected~11 `array<int; ∅>`
+            (braced
+               42
+               2742
+               1
+               2
+               3
+               4
+               5
+               6
+               11
+               25
+               36
+               27))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu %zu\n")
+               (sizeof (name outer~10 `struct Outer~4 complete`))
+               (sizeof (name expected~11 `array<int; ∅>`))))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
+                  (addressof (name outer~10 `struct Outer~4 complete`))
+                  (name expected~11 `array<int; ∅>`)
+                  (sizeof (name outer~10 `struct Outer~4 complete`)))))
+         (expression (assign (dot x (name outer~10 `struct Outer~4 complete`)) 0x1234))
+         (struct Middle~3
+            (member y `int`)
+            (member inner `struct Inner~2 complete`)
+            (member inner2 `struct Inner~2 complete`))
+         (declaration new_middle~12 `struct Middle~3 complete`
+            (braced
+               (dot x (dot inner (name outer~10 `struct Outer~4 complete`)))
+               (dot inner (name outer~10 `struct Outer~4 complete`))))
+         (expression (assign (dot middle (name outer~10 `struct Outer~4 complete`)) (name new_middle~12 `struct Middle~3 complete`)))
+         (expression (assign (dot x (dot inner2 (dot middle (name outer~10 `struct Outer~4 complete`)))) 0x2345))
+         (expression (assign (dot y (dot inner2 (dot middle (name outer~10 `struct Outer~4 complete`)))) 0x2346))
+         (expression (assign (dot z (dot inner2 (dot middle (name outer~10 `struct Outer~4 complete`)))) 0x2347))
+         (declaration new_expected~13 `array<int; ∅>`
+            (braced
+               0x1234
+               11
+               11
+               25
+               36
+               0x2345
+               0x2346
+               0x2347
+               11
+               25
+               36
+               27))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
+                  (addressof (name outer~10 `struct Outer~4 complete`))
+                  (name new_expected~13 `array<int; ∅>`)
+                  (sizeof (name outer~10 `struct Outer~4 complete`))))))))
+
+----- stderr -----

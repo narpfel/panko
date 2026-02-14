@@ -1,0 +1,185 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_assign_to_member.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_assign_to_member.c"
+   (declaration external (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)) ∅)
+   (declaration external (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (struct Inner~2
+      (member x @0 `int`)
+      (member y @4 `int`)
+      (member z @8 `int`))
+   (struct Middle~3
+      (member y @0 `int`)
+      (member inner @4 `struct Inner~2 complete`)
+      (member inner2 @16 `struct Inner~2 complete`))
+   (struct Outer~4
+      (member x @0 `int`)
+      (member middle @4 `struct Middle~3 complete`)
+      (member inner @32 `struct Inner~2 complete`)
+      (member y @44 `int`))
+   (function-definition external
+      (main~5 `fn() -> int` (static main))
+      (compound-statement
+         (struct Inner~2
+            (member x @0 `int`)
+            (member y @4 `int`)
+            (member z @8 `int`))
+         (definition (inner~6 `struct Inner~2 complete` @0)
+            (braced
+               (subobject +0 (1 `int` @0))
+               (subobject +4 (2 `int` @4))
+               (subobject +8 (3 `int` @8))))
+         (definition (inner2~7 `struct Inner~2 complete` @12)
+            (braced
+               (subobject +0 (4 `int` @12))
+               (subobject +4 (5 `int` @16))
+               (subobject +8 (6 `int` @20))))
+         (definition (inner3~8 `struct Inner~2 complete` @24)
+            (braced
+               (subobject +0
+                  (add `int` @24
+                     (member `int` @0 x (inner~6 `struct Inner~2 complete` @0))
+                     (10 `int` @36)))
+               (subobject +4
+                  (add `int` @28
+                     (member `int` @16 y (inner2~7 `struct Inner~2 complete` @12))
+                     (20 `int` @36)))
+               (subobject +8
+                  (add `int` @32
+                     (member `int` @20 z (inner2~7 `struct Inner~2 complete` @12))
+                     (30 `int` @36)))))
+         (struct Middle~3
+            (member y @0 `int`)
+            (member inner @4 `struct Inner~2 complete`)
+            (member inner2 @16 `struct Inner~2 complete`))
+         (definition (middle~9 `struct Middle~3 complete` @36)
+            (braced
+               (subobject +0 (2742 `int` @36))
+               (subobject +4 (inner~6 `struct Inner~2 complete` @0))
+               (subobject +16 (inner2~7 `struct Inner~2 complete` @12))))
+         (struct Outer~4
+            (member x @0 `int`)
+            (member middle @4 `struct Middle~3 complete`)
+            (member inner @32 `struct Inner~2 complete`)
+            (member y @44 `int`))
+         (definition (outer~10 `struct Outer~4 complete` @64)
+            (braced
+               (subobject +0 (42 `int` @64))
+               (subobject +4 (middle~9 `struct Middle~3 complete` @36))
+               (subobject +32 (inner3~8 `struct Inner~2 complete` @24))
+               (subobject +44 (27 `int` @108))))
+         (definition (expected~11 `array<int; 12>` @112)
+            (braced
+               (subobject +0 (42 `int` @112))
+               (subobject +4 (2742 `int` @116))
+               (subobject +8 (1 `int` @120))
+               (subobject +12 (2 `int` @124))
+               (subobject +16 (3 `int` @128))
+               (subobject +20 (4 `int` @132))
+               (subobject +24 (5 `int` @136))
+               (subobject +28 (6 `int` @140))
+               (subobject +32 (11 `int` @144))
+               (subobject +36 (25 `int` @148))
+               (subobject +40 (36 `int` @152))
+               (subobject +44 (27 `int` @156))))
+         (expression
+            (call `int` @160
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @168
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @176
+                  (noop-type-conversion `ptr<char>` @176
+                     (addressof `ptr<array<char; 9>>` @176
+                        (string `array<char; 9>` @void "%zu %zu\n\0"))))
+               (48 `unsigned long` @184)
+               (48 `unsigned long` @192)))
+         (expression
+            (call `int` @160
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @168
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @176
+                  (noop-type-conversion `ptr<char>` @176
+                     (addressof `ptr<array<char; 4>>` @176
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (call `int` @184
+                  (addressof `ptr<fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int>` @192
+                     (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)))
+                  (noop-type-conversion `ptr<void const>` @200
+                     (addressof `ptr<struct Outer~4 complete>` @200
+                        (outer~10 `struct Outer~4 complete` @64)))
+                  (noop-type-conversion `ptr<void const>` @208
+                     (noop-type-conversion `ptr<int>` @208
+                        (addressof `ptr<array<int; 12>>` @208
+                           (expected~11 `array<int; 12>` @112))))
+                  (48 `unsigned long` @216))))
+         (expression
+            (assign `int` @64
+               (member `int` @64 x (outer~10 `struct Outer~4 complete` @64))
+               (4660 `int` @64)))
+         (struct Middle~3
+            (member y @0 `int`)
+            (member inner @4 `struct Inner~2 complete`)
+            (member inner2 @16 `struct Inner~2 complete`))
+         (definition (new_middle~12 `struct Middle~3 complete` @160)
+            (braced
+               (subobject +0 (member `int` @96 x (member `struct Inner~2 complete` @96 inner (outer~10 `struct Outer~4 complete` @64))))
+               (subobject +4 (member `struct Inner~2 complete` @96 inner (outer~10 `struct Outer~4 complete` @64)))))
+         (expression
+            (assign `struct Middle~3 complete` @68
+               (member `struct Middle~3 complete` @68 middle (outer~10 `struct Outer~4 complete` @64))
+               (new_middle~12 `struct Middle~3 complete` @160)))
+         (expression
+            (assign `int` @84
+               (member `int` @84 x (member `struct Inner~2 complete` @84 inner2 (member `struct Middle~3 complete` @68 middle (outer~10 `struct Outer~4 complete` @64))))
+               (9029 `int` @84)))
+         (expression
+            (assign `int` @88
+               (member `int` @88 y (member `struct Inner~2 complete` @84 inner2 (member `struct Middle~3 complete` @68 middle (outer~10 `struct Outer~4 complete` @64))))
+               (9030 `int` @88)))
+         (expression
+            (assign `int` @92
+               (member `int` @92 z (member `struct Inner~2 complete` @84 inner2 (member `struct Middle~3 complete` @68 middle (outer~10 `struct Outer~4 complete` @64))))
+               (9031 `int` @92)))
+         (definition (new_expected~13 `array<int; 12>` @188)
+            (braced
+               (subobject +0 (4660 `int` @188))
+               (subobject +4 (11 `int` @192))
+               (subobject +8 (11 `int` @196))
+               (subobject +12 (25 `int` @200))
+               (subobject +16 (36 `int` @204))
+               (subobject +20 (9029 `int` @208))
+               (subobject +24 (9030 `int` @212))
+               (subobject +28 (9031 `int` @216))
+               (subobject +32 (11 `int` @220))
+               (subobject +36 (25 `int` @224))
+               (subobject +40 (36 `int` @228))
+               (subobject +44 (27 `int` @232))))
+         (expression
+            (call `int` @236
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @240
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @248
+                  (noop-type-conversion `ptr<char>` @248
+                     (addressof `ptr<array<char; 4>>` @248
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (call `int` @256
+                  (addressof `ptr<fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int>` @264
+                     (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)))
+                  (noop-type-conversion `ptr<void const>` @272
+                     (addressof `ptr<struct Outer~4 complete>` @272
+                        (outer~10 `struct Outer~4 complete` @64)))
+                  (noop-type-conversion `ptr<void const>` @280
+                     (noop-type-conversion `ptr<int>` @280
+                        (addressof `ptr<array<int; 12>>` @280
+                           (new_expected~13 `array<int; 12>` @188))))
+                  (48 `unsigned long` @288)))))))
+
+----- stderr -----
