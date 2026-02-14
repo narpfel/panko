@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/initialisation/struct/test_error_braced_init_of_struct_with_struct.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid implicit conversion from `struct Struct~0 complete` to `int`
+   ╭─[panko/tests/cases/initialisation/struct/test_error_braced_init_of_struct_with_struct.c:9:27]
+   │
+ 9 │     struct Struct copy = {value};
+   │                           ──┬──  
+   │                             ╰──── this is of type `struct Struct~0 complete`, which cannot be implicitly converted to `int`
+───╯

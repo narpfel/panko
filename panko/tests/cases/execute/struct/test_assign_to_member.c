@@ -25,7 +25,7 @@ int main() {
         inner = {1, 2, 3},
         inner2 = {4, 5, 6},
         inner3 = {inner.x + 10, inner2.y + 20, inner2.z + 30};
-    struct Middle middle = {2742, {inner}, inner2};
+    struct Middle middle = {2742, inner, inner2};
     struct Outer outer = {
         42,
         middle,

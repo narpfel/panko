@@ -7,38 +7,15 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/initialisation/struct/test_error_braced_init_of_struct_containing_struct_with_braced_struct_expr.c
 ---
-success: true
-exit_code: 0
+success: false
+exit_code: 1
 ----- stdout -----
-(translation-unit "panko/tests/cases/execute/initialisation/struct/test_error_braced_init_of_struct_containing_struct_with_braced_struct_expr.c"
-   (struct Inner~0
-      (member x @0 `int`)
-      (member y @4 `int`)
-      (member z @8 `int`))
-   (struct Outer~1
-      (member x @0 `int`)
-      (member inner @4 `struct Inner~0 complete`)
-      (member y @16 `int`))
-   (function-definition external
-      main~2 `fn() -> int`
-      (compound-statement
-         (struct Inner~0
-            (member x @0 `int`)
-            (member y @4 `int`)
-            (member z @8 `int`))
-         (definition inner~3 `struct Inner~0 complete`
-            (braced
-               (subobject +0 (1 `int`))
-               (subobject +4 (2 `int`))
-               (subobject +8 (3 `int`))))
-         (struct Outer~1
-            (member x @0 `int`)
-            (member inner @4 `struct Inner~0 complete`)
-            (member y @16 `int`))
-         (definition outer~4 `struct Outer~1 complete`
-            (braced
-               (subobject +0 (42 `int`))
-               (subobject +4 (inner~3 `struct Inner~0 complete`))
-               (subobject +16 (27 `int`)))))))
 
 ----- stderr -----
+Error: invalid implicit conversion from `struct Inner~0 complete` to `int`
+    ╭─[panko/tests/cases/execute/initialisation/struct/test_error_braced_init_of_struct_containing_struct_with_braced_struct_expr.c:16:32]
+    │
+ 16 │     struct Outer outer = {42, {inner}, 27};
+    │                                ──┬──  
+    │                                  ╰──── this is of type `struct Inner~0 complete`, which cannot be implicitly converted to `int`
+────╯

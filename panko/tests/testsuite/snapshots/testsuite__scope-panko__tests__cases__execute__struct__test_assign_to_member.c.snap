@@ -55,8 +55,7 @@ exit_code: 0
          (declaration middle~9 `struct Middle~3 complete`
             (braced
                2742
-               (braced
-                  (name inner~6 `struct Inner~2 complete`))
+               (name inner~6 `struct Inner~2 complete`)
                (name inner2~7 `struct Inner~2 complete`)))
          (struct Outer~4
             (member x `int`)

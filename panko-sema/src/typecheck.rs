@@ -1059,43 +1059,27 @@ fn typeck_initialiser_list<'a>(
             initialiser: scope::Initialiser::Expression(initialiser),
         },
     ] = initialiser_list
+        && let scope::Expression::String(_) = initialiser
     {
         let typed_initialiser = typeck_expression(sess, initialiser, Context::Default);
-
-        if let Some(subobject) = subobjects.parent()
-            && let struct_ty @ Type::Struct(Struct::Complete(_)) = subobject.ty.ty
-            && typed_initialiser.ty.ty == struct_ty
+        // workaround for `char const* s = {"abc"};` and similarly: we have to compute `next`
+        // to check whether we are initialising an array, and reset to the initial state when
+        // it’s not an array
+        let subobjects_clone = subobjects.clone();
+        if let Ok(_) = subobjects.next(&typed_initialiser.ty.ty)
+            && let Some(subobject) = subobjects.parent()
+            && let Type::Array(array_ty) = subobject.ty.ty
+            && let Some(initialiser) =
+                typeck_array_initialisation_with_string(sess, reference, &array_ty, initialiser)
         {
             subobject_initialisers.insert(
                 subobject.offset,
-                SubobjectInitialiser {
-                    subobject,
-                    initialiser: typed_initialiser,
-                },
+                SubobjectInitialiser { subobject, initialiser },
             );
+            let _ = subobjects.try_leave_subobject(AllowExplicit::No);
             return;
         }
-
-        if let scope::Expression::String(_) = initialiser {
-            // workaround for `char const* s = {"abc"};` and similarly: we have to compute `next`
-            // to check whether we are initialising an array, and reset to the initial state when
-            // it’s not an array
-            let subobjects_clone = subobjects.clone();
-            if let Ok(_) = subobjects.next(&typed_initialiser.ty.ty)
-                && let Some(subobject) = subobjects.parent()
-                && let Type::Array(array_ty) = subobject.ty.ty
-                && let Some(initialiser) =
-                    typeck_array_initialisation_with_string(sess, reference, &array_ty, initialiser)
-            {
-                subobject_initialisers.insert(
-                    subobject.offset,
-                    SubobjectInitialiser { subobject, initialiser },
-                );
-                let _ = subobjects.try_leave_subobject(AllowExplicit::No);
-                return;
-            }
-            *subobjects = subobjects_clone;
-        }
+        *subobjects = subobjects_clone;
     }
 
     for DesignatedInitialiser { designation, initialiser } in initialiser_list {

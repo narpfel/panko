@@ -1,5 +1,3 @@
-// [[known-bug]]
-
 struct Inner {
     int x;
     int y;
