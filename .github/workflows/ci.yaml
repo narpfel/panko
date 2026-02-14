@@ -15,8 +15,8 @@ jobs:
   ci:
     runs-on: ubuntu-24.04
     env:
-      WILD_VERSION: "0.7.0"
-      WILD_SHA256SUM: "53c1c087bb8ccb9de653dc962f3118a51e51d4ea16fb449f25f7940eadfbec1e"
+      WILD_VERSION: "0.8.0"
+      WILD_SHA256SUM: "44ed25fff3657ca62c25a441e60861d4a4061b44c096b998699cc86fa596490b"
     steps:
       - name: checkout
         uses: actions/checkout@v5
