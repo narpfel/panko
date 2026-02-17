@@ -104,37 +104,48 @@ exit_code: 0
                   (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void` (static print_inner)))
                (addressof `ptr<struct Inner~1 complete>` @120
                   (member `struct Inner~1 complete` @84 inner2 (member `struct Middle~2 complete` @68 middle (outer~11 `struct Outer~3 complete` @64))))))
+         (struct Inner~1
+            (member x @0 `int`)
+            (member y @4 `int`)
+            (member z @8 `int`))
+         (definition (inner_read_from_struct~12 `struct Inner~1 complete` @112) (member `struct Inner~1 complete` @84 inner2 (member `struct Middle~2 complete` @68 middle (outer~11 `struct Outer~3 complete` @64))))
          (expression
             (call `void` @void
-               (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>` @112
+               (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>` @128
                   (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void` (static print_inner)))
-               (addressof `ptr<struct Inner~1 complete>` @120
+               (addressof `ptr<struct Inner~1 complete>` @136
+                  (inner_read_from_struct~12 `struct Inner~1 complete` @112))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>` @128
+                  (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void` (static print_inner)))
+               (addressof `ptr<struct Inner~1 complete>` @136
                   (member `struct Inner~1 complete` @96 inner (outer~11 `struct Outer~3 complete` @64)))))
          (expression
-            (call `int` @112
-               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @120
+            (call `int` @124
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @128
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @128
-                  (noop-type-conversion `ptr<char>` @128
-                     (addressof `ptr<array<char; 10>>` @128
+               (noop-type-conversion `ptr<char const>` @136
+                  (noop-type-conversion `ptr<char>` @136
+                     (addressof `ptr<array<char; 10>>` @136
                         (string `array<char; 10>` @void "%d %d %d\n\0"))))
                (member `int` @108 y (outer~11 `struct Outer~3 complete` @64))
                (member `int` @68 y (member `struct Middle~2 complete` @68 middle (outer~11 `struct Outer~3 complete` @64)))
                (member `int` @92 z (member `struct Inner~1 complete` @84 inner2 (member `struct Middle~2 complete` @68 middle (outer~11 `struct Outer~3 complete` @64))))))
          (expression
-            (call `int` @112
-               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @120
+            (call `int` @124
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @128
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @128
-                  (noop-type-conversion `ptr<char>` @128
-                     (addressof `ptr<array<char; 5>>` @128
-                        (string `array<char; 5>` @void "%td\n\0"))))
-               (ptr-diff `long` @136
+               (noop-type-conversion `ptr<char const>` @136
                   (noop-type-conversion `ptr<char>` @136
-                     (addressof `ptr<int>` @136
-                        (member `int` @88 y (member `struct Inner~1 complete` @84 inner2 (member `struct Middle~2 complete` @68 middle (outer~11 `struct Outer~3 complete` @64))))))
+                     (addressof `ptr<array<char; 5>>` @136
+                        (string `array<char; 5>` @void "%td\n\0"))))
+               (ptr-diff `long` @144
                   (noop-type-conversion `ptr<char>` @144
-                     (addressof `ptr<struct Inner~1 complete>` @144
+                     (addressof `ptr<int>` @144
+                        (member `int` @88 y (member `struct Inner~1 complete` @84 inner2 (member `struct Middle~2 complete` @68 middle (outer~11 `struct Outer~3 complete` @64))))))
+                  (noop-type-conversion `ptr<char>` @152
+                     (addressof `ptr<struct Inner~1 complete>` @152
                         (member `struct Inner~1 complete` @72 inner (member `struct Middle~2 complete` @68 middle (outer~11 `struct Outer~3 complete` @64)))))))))))
 
 ----- stderr -----

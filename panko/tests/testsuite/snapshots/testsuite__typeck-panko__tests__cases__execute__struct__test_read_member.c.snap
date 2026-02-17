@@ -95,6 +95,17 @@ exit_code: 0
                   (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`))
                (addressof `ptr<struct Inner~1 complete>`
                   (member `struct Inner~1 complete` inner2 (member `struct Middle~2 complete` middle (outer~11 `struct Outer~3 complete`))))))
+         (struct Inner~1
+            (member x @0 `int`)
+            (member y @4 `int`)
+            (member z @8 `int`))
+         (definition inner_read_from_struct~12 `struct Inner~1 complete` (member `struct Inner~1 complete` inner2 (member `struct Middle~2 complete` middle (outer~11 `struct Outer~3 complete`))))
+         (expression
+            (call `void`
+               (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>`
+                  (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`))
+               (addressof `ptr<struct Inner~1 complete>`
+                  (inner_read_from_struct~12 `struct Inner~1 complete`))))
          (expression
             (call `void`
                (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>`

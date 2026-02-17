@@ -84,6 +84,14 @@ exit_code: 0
          (expression
             (call (name print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`)
                (addressof (dot inner2 (dot middle (name outer~11 `struct Outer~3 complete`))))))
+         (struct Inner~1
+            (member x `int`)
+            (member y `int`)
+            (member z `int`))
+         (declaration inner_read_from_struct~12 `struct Inner~1 complete` (dot inner2 (dot middle (name outer~11 `struct Outer~3 complete`))))
+         (expression
+            (call (name print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`)
+               (addressof (name inner_read_from_struct~12 `struct Inner~1 complete`))))
          (expression
             (call (name print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`)
                (addressof (dot inner (name outer~11 `struct Outer~3 complete`)))))

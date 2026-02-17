@@ -40,6 +40,11 @@ int main() {
     print_inner(&inner);
     // [[print: Inner { .x = 4, .y = 5, .z = 6 }]]
     print_inner(&outer.middle.inner2);
+
+    struct Inner inner_read_from_struct = outer.middle.inner2;
+    // [[print: Inner { .x = 4, .y = 5, .z = 6 }]]
+    print_inner(&inner_read_from_struct);
+
     // [[print: Inner { .x = 11, .y = 25, .z = 36 }]]
     print_inner(&outer.inner);
 
