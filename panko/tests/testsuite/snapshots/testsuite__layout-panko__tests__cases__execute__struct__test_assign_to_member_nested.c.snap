@@ -1,0 +1,39 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_assign_to_member_nested.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_assign_to_member_nested.c"
+   (function-definition external
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (struct T~1
+            (member x @0 `int`))
+         (definition (t~2 `struct T~1 complete` @0)
+            (braced
+               (subobject +0 (42 `int` @0))))
+         (expression
+            (assign `int` @0
+               (member `int` @0 x (t~2 `struct T~1 complete` @0))
+               (27 `int` @0)))
+         (struct ∅~3
+            (member x @0 `int`)
+            (member t @4 `struct T~1 complete`))
+         (definition (a~5 `struct ∅~4 complete` @4)
+            (braced
+               (subobject +0 (123 `int` @4))
+               (subobject +4 (t~2 `struct T~1 complete` @0))))
+         (expression
+            (assign `int` @8
+               (member `int` @8 x (member `struct T~1 complete` @8 t (a~5 `struct ∅~4 complete` @4)))
+               (5 `int` @8)))
+         (return (member `int` @8 x (member `struct T~1 complete` @8 t (a~5 `struct ∅~4 complete` @4)))))))
+
+----- stderr -----
