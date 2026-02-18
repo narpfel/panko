@@ -103,11 +103,7 @@ impl<'a> Operand<'a> {
         }
     }
 
-    pub(super) fn pointer(register: Register, expr: &LayoutedExpression<'a>) -> Self {
-        let Type::Pointer(ty) = expr.ty.ty
-        else {
-            unreachable!()
-        };
+    pub(super) fn lvalue(register: Register, ty: Type<'a>) -> Operand<'a> {
         Self {
             kind: OperandKind::Pointer {
                 address: Memory {
@@ -117,8 +113,16 @@ impl<'a> Operand<'a> {
                 },
                 is_dereferenced: false,
             },
-            ty: ty.ty,
+            ty,
         }
+    }
+
+    pub(super) fn pointer(register: Register, expr: &LayoutedExpression<'a>) -> Self {
+        let Type::Pointer(ty) = expr.ty.ty
+        else {
+            unreachable!()
+        };
+        Self::lvalue(register, ty.ty)
     }
 
     pub(super) fn stack_parameter_eightbyte(ty: Type<'a>, index: usize, stack_size: u64) -> Self {

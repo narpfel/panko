@@ -30,6 +30,7 @@ use panko_sema::layout::Expression;
 use panko_sema::layout::ExternalDeclaration;
 use panko_sema::layout::FunctionDefinition;
 use panko_sema::layout::Initialiser;
+use panko_sema::layout::Layout;
 use panko_sema::layout::LayoutedExpression;
 use panko_sema::layout::Reference;
 use panko_sema::layout::Slot;
@@ -44,6 +45,7 @@ use panko_sema::ty::ArrayType;
 use panko_sema::ty::Complete;
 use panko_sema::ty::Struct;
 use panko_sema::typecheck::ArrayLength;
+use panko_sema::typecheck::Member;
 
 use crate::Register::*;
 use crate::lineno::Linenos;
@@ -746,11 +748,10 @@ impl<'a> Codegen<'a> {
                         self.copy(expr, value);
                     }
                 }
-                Expression::MemberAccess { lhs, member } if let Expression::Deref(_) = lhs.expr =>
-                    todo!("assign to `->` expression"),
-                Expression::MemberAccess { lhs, member: _ } => {
-                    self.expr(lhs);
+                Expression::MemberAccess { lhs, member } => {
+                    self.member_access_lvalue(lhs, member);
                     self.expr(value);
+                    self.copy(&Operand::lvalue(R10, member.ty.ty), value);
                     if expr.slot != value.slot {
                         self.copy(expr, value);
                     }
@@ -927,12 +928,9 @@ impl<'a> Codegen<'a> {
                         let id = self.string(Cow::Borrowed(string));
                         self.emit_args("lea", &[&Rax, &id]);
                     }
-                    Expression::MemberAccess { lhs, member: _ }
-                        if let Expression::Deref(_) = lhs.expr =>
-                        todo!("addressof `->` expression"),
-                    Expression::MemberAccess { lhs, member: _ } => {
-                        self.expr(lhs);
-                        self.emit_args("lea", &[&Rax, operand]);
+                    Expression::MemberAccess { lhs, member } => {
+                        self.member_access_lvalue(lhs, member);
+                        self.emit_args("mov", &[&Rax, &R10]);
                     }
                     _ => unreachable!(),
                 }
@@ -1038,6 +1036,23 @@ impl<'a> Codegen<'a> {
                 self.expr(lhs);
             }
         }
+    }
+
+    fn member_access_lvalue(&mut self, lhs: &LayoutedExpression<'a>, member: Member<'a, Layout>) {
+        // FIXME: this does not handle nesting at all; we’d need a stack slot to save the pointer
+        // in `r10`
+        match lhs.expr {
+            Expression::MemberAccess { lhs, member } => self.member_access_lvalue(lhs, member),
+            Expression::Deref(operand) => {
+                self.expr(operand);
+                self.emit_args("mov", &[&R10, operand]);
+            }
+            _ => {
+                self.expr(lhs);
+                self.emit_args("lea", &[&R10, lhs]);
+            }
+        }
+        self.emit_args("add", &[&R10, &member.offset]);
     }
 }
 

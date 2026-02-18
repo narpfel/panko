@@ -125,8 +125,8 @@ impl<Expression> Hash for ArrayLength<Expression> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Member<'a, T: ty::Step> {
     pub(crate) name: &'a str,
-    pub(crate) ty: ty::QualifiedType<'a, T>,
-    pub(crate) offset: u64,
+    pub ty: ty::QualifiedType<'a, T>,
+    pub offset: u64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
