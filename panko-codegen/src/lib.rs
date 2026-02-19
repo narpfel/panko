@@ -749,9 +749,10 @@ impl<'a> Codegen<'a> {
                     }
                 }
                 Expression::MemberAccess { lhs, member } => {
-                    self.member_access_lvalue(lhs, member);
+                    let member = self.member_access_lvalue(lhs, member);
                     self.expr(value);
-                    self.copy(&Operand::lvalue(R10, member.ty.ty), value);
+                    let member = self.member_pointer(member);
+                    self.copy(&*member, value);
                     if expr.slot != value.slot {
                         self.copy(expr, value);
                     }
@@ -929,8 +930,9 @@ impl<'a> Codegen<'a> {
                         self.emit_args("lea", &[&Rax, &id]);
                     }
                     Expression::MemberAccess { lhs, member } => {
-                        self.member_access_lvalue(lhs, member);
-                        self.emit_args("mov", &[&Rax, &R10]);
+                        let member = self.member_access_lvalue(lhs, member);
+                        let member = self.member_pointer(member);
+                        self.emit_args("lea", &[&Rax, &*member]);
                     }
                     _ => unreachable!(),
                 }
@@ -1038,21 +1040,70 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    fn member_access_lvalue(&mut self, lhs: &LayoutedExpression<'a>, member: Member<'a, Layout>) {
-        // FIXME: this does not handle nesting at all; we’d need a stack slot to save the pointer
-        // in `r10`
-        match lhs.expr {
+    fn member_access_lvalue(
+        &mut self,
+        lhs: &'a LayoutedExpression<'a>,
+        member: Member<'a, Layout>,
+    ) -> MemberPointer<'a> {
+        let ty = lhs.ty.ty;
+        let pointer = match lhs.expr {
             Expression::MemberAccess { lhs, member } => self.member_access_lvalue(lhs, member),
             Expression::Deref(operand) => {
                 self.expr(operand);
-                self.emit_args("mov", &[&R10, operand]);
+                MemberPointer::Pointer { pointer: operand, offset: 0, ty }
             }
             _ => {
                 self.expr(lhs);
-                self.emit_args("lea", &[&R10, lhs]);
+                MemberPointer::Stack(PointerIntoStackWithOffset { object: lhs, offset: 0, ty })
+            }
+        };
+        pointer.member(member)
+    }
+
+    fn member_pointer(&mut self, member: MemberPointer<'a>) -> Box<dyn AsOperand<'a> + 'a> {
+        match member {
+            MemberPointer::Stack(pointer) => Box::new(pointer),
+            MemberPointer::Pointer { pointer, offset, ty } => {
+                self.emit_args("mov", &[&R10, pointer]);
+                self.emit_args("add", &[&R10, &offset]);
+                Box::new(Operand::lvalue(R10, ty))
             }
         }
-        self.emit_args("add", &[&R10, &member.offset]);
+    }
+}
+
+struct PointerIntoStackWithOffset<'a> {
+    object: &'a LayoutedExpression<'a>,
+    offset: u64,
+    ty: Type<'a>,
+}
+
+enum MemberPointer<'a> {
+    Stack(PointerIntoStackWithOffset<'a>),
+    Pointer {
+        pointer: &'a LayoutedExpression<'a>,
+        offset: u64,
+        ty: Type<'a>,
+    },
+}
+
+impl<'a> MemberPointer<'a> {
+    fn member(&self, member: Member<'a, Layout>) -> Self {
+        let Member { ty, offset: additional_offset, .. } = member;
+        let ty = ty.ty;
+        match *self {
+            Self::Stack(PointerIntoStackWithOffset { object, offset, ty: _ }) =>
+                Self::Stack(PointerIntoStackWithOffset {
+                    object,
+                    offset: offset.strict_add(additional_offset),
+                    ty,
+                }),
+            Self::Pointer { pointer, offset, ty: _ } => Self::Pointer {
+                pointer,
+                offset: offset.strict_add(additional_offset),
+                ty,
+            },
+        }
     }
 }
 

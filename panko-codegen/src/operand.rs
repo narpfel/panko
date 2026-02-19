@@ -11,6 +11,7 @@ use panko_sema::ty::Struct;
 use crate::ByValue;
 use crate::LabelId;
 use crate::MAX_ADDRESS_OFFSET;
+use crate::PointerIntoStackWithOffset;
 use crate::Register;
 use crate::StaticId;
 use crate::SubobjectAtReference;
@@ -246,6 +247,18 @@ impl<'a> AsOperand<'a> for LayoutedExpression<'a> {
 
     fn size(&self) -> u64 {
         self.ty.ty.size()
+    }
+}
+
+impl<'a> AsOperand<'a> for PointerIntoStackWithOffset<'a> {
+    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
+        let Self { object, offset, ty } = self;
+        slot_as_operand(
+            object.slot.offset(*offset),
+            *ty,
+            argument_area_size.unwrap(),
+            false,
+        )
     }
 }
 
