@@ -261,6 +261,7 @@ impl<'a> Codegen<'a> {
     }
 
     fn directive_with_sep(&mut self, name: &str, sep: &str, args: &[&dyn Display]) {
+        // TODO: this leaves trailing spaces when the directive does not have args
         writeln!(
             self.code,
             ".{name:7}{}{}",
