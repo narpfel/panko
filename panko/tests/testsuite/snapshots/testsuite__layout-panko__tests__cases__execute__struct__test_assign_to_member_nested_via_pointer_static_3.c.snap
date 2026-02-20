@@ -1,0 +1,46 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_assign_to_member_nested_via_pointer_static_3.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_assign_to_member_nested_via_pointer_static_3.c"
+   (struct T~0
+      (member x @0 `int`))
+   (definition external (t~1 `struct T~0 complete` (static t))
+      (braced
+         (subobject +0 (42 `int` (static t +0)))))
+   (struct U~2
+      (member x @0 `int`)
+      (member t @4 `struct T~0 complete`))
+   (definition external (a~3 `struct U~2 complete` (static a))
+      (braced
+         (subobject +0 (123 `int` (static a +0)))
+         (subobject +4 (42 `int` (static a +4)))))
+   (function-definition external
+      (main~4 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (assign `int` (static t +0)
+               (member `int` (static t +0) x (t~1 `struct T~0 complete` (static t)))
+               (27 `int` (static t +0))))
+         (struct T~0
+            (member x @0 `int`))
+         (definition (p~5 `ptr<struct T~0 complete>` @0)
+            (addressof `ptr<struct T~0 complete>` @0
+               (member `struct T~0 complete` (static a +4) t (a~3 `struct U~2 complete` (static a)))))
+         (expression
+            (assign `int` @8
+               (member `int` @8 x (deref `struct T~0 complete` @8 (p~5 `ptr<struct T~0 complete>` @0)))
+               (add `int` @8
+                  (member `int` @12 x (deref `struct T~0 complete` @12 (p~5 `ptr<struct T~0 complete>` @0)))
+                  (1 `int` @16))))
+         (return (member `int` (static a +4) x (member `struct T~0 complete` (static a +4) t (a~3 `struct U~2 complete` (static a))))))))
+
+----- stderr -----

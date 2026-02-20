@@ -1,0 +1,39 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_assign_to_member_nested_static.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_assign_to_member_nested_static.c"
+   (struct T~0
+      (member x @0 `int`))
+   (definition external (t~1 `struct T~0 complete` (static t))
+      (braced
+         (subobject +0 (42 `int` (static t +0)))))
+   (struct ∅~2
+      (member x @0 `int`)
+      (member t @4 `struct T~0 complete`))
+   (definition external (a~4 `struct ∅~3 complete` (static a))
+      (braced
+         (subobject +0 (123 `int` (static a +0)))
+         (subobject +4 (42 `int` (static a +4)))))
+   (function-definition external
+      (main~5 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (assign `int` (static t +0)
+               (member `int` (static t +0) x (t~1 `struct T~0 complete` (static t)))
+               (27 `int` (static t +0))))
+         (expression
+            (assign `int` (static a +4)
+               (member `int` (static a +4) x (member `struct T~0 complete` (static a +4) t (a~4 `struct ∅~3 complete` (static a))))
+               (5 `int` (static a +4))))
+         (return (member `int` (static a +4) x (member `struct T~0 complete` (static a +4) t (a~4 `struct ∅~3 complete` (static a))))))))
+
+----- stderr -----

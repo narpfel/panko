@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_assign_to_member_nested_via_pointer_static_3.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_assign_to_member_nested_via_pointer_static_3.c"
+   (struct T~0
+      (member x `int`))
+   (declaration t~1 `struct T~0 complete`
+      (braced
+         42))
+   (struct U~2
+      (member x `int`)
+      (member t `struct T~0 complete`))
+   (declaration a~3 `struct U~2 complete`
+      (braced
+         123
+         (braced
+            42)))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (expression (assign (dot x (name t~1 `struct T~0 complete`)) 27))
+         (struct T~0
+            (member x `int`))
+         (declaration p~5 `ptr<struct T~0 complete>` (addressof (dot t (name a~3 `struct U~2 complete`))))
+         (expression (assign (arrow x (name p~5 `ptr<struct T~0 complete>`)) (add (arrow x (name p~5 `ptr<struct T~0 complete>`)) 1)))
+         (return (dot x (dot t (name a~3 `struct U~2 complete`)))))))
+
+----- stderr -----

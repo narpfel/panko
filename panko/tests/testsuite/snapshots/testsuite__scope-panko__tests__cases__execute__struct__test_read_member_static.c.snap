@@ -1,0 +1,102 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_read_member_static.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_read_member_static.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct Inner~1
+      (member x `int`)
+      (member y `int`)
+      (member z `int`))
+   (struct Middle~2
+      (member y `int`)
+      (member inner `struct Inner~1 complete`)
+      (member inner2 `struct Inner~1 complete`))
+   (struct Outer~3
+      (member x `int`)
+      (member middle `struct Middle~2 complete`)
+      (member inner `struct Inner~1 complete`)
+      (member y `int`))
+   (function-definition
+      print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`
+      (params
+         p~5 `ptr<struct Inner~1 complete>`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "Inner { .x = %d, .y = %d, .z = %d }\n")
+               (arrow x (name p~5 `ptr<struct Inner~1 complete>`))
+               (arrow y (name p~5 `ptr<struct Inner~1 complete>`))
+               (arrow z (name p~5 `ptr<struct Inner~1 complete>`))))))
+   (struct Inner~1
+      (member x `int`)
+      (member y `int`)
+      (member z `int`))
+   (declaration inner~6 `struct Inner~1 complete`
+      (braced
+         1
+         2
+         3))
+   (struct Outer~3
+      (member x `int`)
+      (member middle `struct Middle~2 complete`)
+      (member inner `struct Inner~1 complete`)
+      (member y `int`))
+   (declaration outer~7 `struct Outer~3 complete`
+      (braced
+         42
+         (braced
+            2742
+            (braced
+               1
+               2
+               3)
+            (braced
+               4
+               5
+               6))
+         (braced
+            11
+            25
+            36)
+         27))
+   (function-definition
+      main~8 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`)
+               (addressof (name inner~6 `struct Inner~1 complete`))))
+         (expression
+            (call (name print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`)
+               (addressof (dot inner2 (dot middle (name outer~7 `struct Outer~3 complete`))))))
+         (struct Inner~1
+            (member x `int`)
+            (member y `int`)
+            (member z `int`))
+         (declaration inner_read_from_struct~9 `struct Inner~1 complete` (dot inner2 (dot middle (name outer~7 `struct Outer~3 complete`))))
+         (expression
+            (call (name print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`)
+               (addressof (name inner_read_from_struct~9 `struct Inner~1 complete`))))
+         (expression
+            (call (name print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`)
+               (addressof (dot inner (name outer~7 `struct Outer~3 complete`)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (dot y (name outer~7 `struct Outer~3 complete`))
+               (dot y (dot middle (name outer~7 `struct Outer~3 complete`)))
+               (dot z (dot inner2 (dot middle (name outer~7 `struct Outer~3 complete`))))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%td\n")
+               (subtract (cast `ptr<char>` (addressof (dot y (dot inner2 (dot middle (name outer~7 `struct Outer~3 complete`)))))) (cast `ptr<char>` (addressof (dot inner (dot middle (name outer~7 `struct Outer~3 complete`)))))))))))
+
+----- stderr -----
