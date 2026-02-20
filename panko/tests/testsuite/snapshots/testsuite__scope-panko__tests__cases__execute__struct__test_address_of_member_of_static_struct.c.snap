@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_address_of_member_of_static_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_address_of_member_of_static_struct.c"
+   (struct T~0
+      (member x `int`)
+      (member y `int`))
+   (struct T~0
+      (member x `int`)
+      (member y `int`))
+   (declaration static_struct~1 `struct T~0 complete`
+      (braced
+         42
+         27))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (declaration p~3 `ptr<int>` (addressof (dot y (name static_struct~1 `struct T~0 complete`))))
+         (return (deref (name p~3 `ptr<int>`))))))
+
+----- stderr -----
