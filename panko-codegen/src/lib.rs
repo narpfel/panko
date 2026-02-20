@@ -1051,11 +1051,28 @@ impl<'a> Codegen<'a> {
             Expression::MemberAccess { lhs, member } => self.member_access_lvalue(lhs, member),
             Expression::Deref(operand) => {
                 self.expr(operand);
-                MemberPointer::Pointer { pointer: operand, offset: 0, ty }
+                MemberPointer::Pointer {
+                    pointer: PointerBase::Pointer(operand),
+                    offset: 0,
+                    ty,
+                }
             }
             _ => {
                 self.expr(lhs);
-                MemberPointer::Stack(PointerIntoStackWithOffset { object: lhs, offset: 0, ty })
+                match lhs.slot {
+                    Slot::Static(_) => MemberPointer::Pointer {
+                        pointer: PointerBase::Static(lhs),
+                        offset: 0,
+                        ty,
+                    },
+                    Slot::Automatic(_) => MemberPointer::Stack(PointerIntoStackWithOffset {
+                        object: lhs,
+                        offset: 0,
+                        ty,
+                    }),
+                    Slot::Void => unreachable!("structs don’t have `void` slots"),
+                    Slot::StaticWithOffset { name: _, offset: _ } => todo!(),
+                }
             }
         };
         pointer.member(member)
@@ -1065,7 +1082,11 @@ impl<'a> Codegen<'a> {
         match member {
             MemberPointer::Stack(pointer) => Box::new(pointer),
             MemberPointer::Pointer { pointer, offset, ty } => {
-                self.emit_args("mov", &[&R10, pointer]);
+                let (op, pointer) = match pointer {
+                    PointerBase::Pointer(expr) => ("mov", expr),
+                    PointerBase::Static(expr) => ("lea", expr),
+                };
+                self.emit_args(op, &[&R10, pointer]);
                 self.emit_args("add", &[&R10, &offset]);
                 Box::new(Operand::lvalue(R10, ty))
             }
@@ -1079,10 +1100,16 @@ struct PointerIntoStackWithOffset<'a> {
     ty: Type<'a>,
 }
 
+#[derive(Clone, Copy)]
+enum PointerBase<'a> {
+    Pointer(&'a LayoutedExpression<'a>),
+    Static(&'a LayoutedExpression<'a>),
+}
+
 enum MemberPointer<'a> {
     Stack(PointerIntoStackWithOffset<'a>),
     Pointer {
-        pointer: &'a LayoutedExpression<'a>,
+        pointer: PointerBase<'a>,
         offset: u64,
         ty: Type<'a>,
     },
