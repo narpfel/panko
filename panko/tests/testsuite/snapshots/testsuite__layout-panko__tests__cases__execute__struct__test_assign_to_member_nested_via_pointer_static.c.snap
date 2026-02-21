@@ -28,7 +28,7 @@ exit_code: 0
       (compound-statement
          (expression
             (assign `int` (static t +0)
-               (member `int` (static t +0) x
+               (member `int` (static t +0) x +0
                   (t~1 `struct T~0 complete` (static t)))
                (27 `int` (static t +0))))
          (struct U~2
@@ -39,13 +39,13 @@ exit_code: 0
                (a~3 `struct U~2 complete` (static a))))
          (expression
             (assign `int` @12
-               (member `int` @12 x
-                  (member `struct T~0 complete` @12 t
+               (member `int` @12 x +0
+                  (member `struct T~0 complete` @12 t +4
                      (deref `struct U~2 complete` @8 (p~5 `ptr<struct U~2 complete>` @0))))
                (5 `int` @12)))
          (return
-            (member `int` (static a +4) x
-               (member `struct T~0 complete` (static a +4) t
+            (member `int` (static a +4) x +0
+               (member `struct T~0 complete` (static a +4) t +4
                   (a~3 `struct U~2 complete` (static a))))))))
 
 ----- stderr -----

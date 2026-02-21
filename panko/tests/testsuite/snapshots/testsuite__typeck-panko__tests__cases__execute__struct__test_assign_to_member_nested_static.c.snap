@@ -28,18 +28,18 @@ exit_code: 0
       (compound-statement
          (expression
             (assign `int`
-               (member `int` x
+               (member `int` x +0
                   (t~1 `struct T~0 complete`))
                (27 `int`)))
          (expression
             (assign `int`
-               (member `int` x
-                  (member `struct T~0 complete` t
+               (member `int` x +0
+                  (member `struct T~0 complete` t +4
                      (a~4 `struct ∅~3 complete`)))
                (5 `int`)))
          (return
-            (member `int` x
-               (member `struct T~0 complete` t
+            (member `int` x +0
+               (member `struct T~0 complete` t +4
                   (a~4 `struct ∅~3 complete`)))))))
 
 ----- stderr -----

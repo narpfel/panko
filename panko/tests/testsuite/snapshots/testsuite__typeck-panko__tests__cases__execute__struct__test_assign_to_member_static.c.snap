@@ -102,7 +102,7 @@ exit_code: 0
                   (sizeof `unsigned long` 48 (outer~6 `struct Outer~4 complete`)))))
          (expression
             (assign `int`
-               (member `int` x
+               (member `int` x +0
                   (outer~6 `struct Outer~4 complete`))
                (0x1234 `int`)))
          (struct Middle~3
@@ -112,36 +112,36 @@ exit_code: 0
          (definition new_middle~9 `struct Middle~3 complete`
             (braced
                (subobject +0
-                  (member `int` x
-                     (member `struct Inner~2 complete` inner
+                  (member `int` x +0
+                     (member `struct Inner~2 complete` inner +32
                         (outer~6 `struct Outer~4 complete`))))
                (subobject +4
-                  (member `struct Inner~2 complete` inner
+                  (member `struct Inner~2 complete` inner +32
                      (outer~6 `struct Outer~4 complete`)))))
          (expression
             (assign `struct Middle~3 complete`
-               (member `struct Middle~3 complete` middle
+               (member `struct Middle~3 complete` middle +4
                   (outer~6 `struct Outer~4 complete`))
                (new_middle~9 `struct Middle~3 complete`)))
          (expression
             (assign `int`
-               (member `int` x
-                  (member `struct Inner~2 complete` inner2
-                     (member `struct Middle~3 complete` middle
+               (member `int` x +0
+                  (member `struct Inner~2 complete` inner2 +16
+                     (member `struct Middle~3 complete` middle +4
                         (outer~6 `struct Outer~4 complete`))))
                (0x2345 `int`)))
          (expression
             (assign `int`
-               (member `int` y
-                  (member `struct Inner~2 complete` inner2
-                     (member `struct Middle~3 complete` middle
+               (member `int` y +4
+                  (member `struct Inner~2 complete` inner2 +16
+                     (member `struct Middle~3 complete` middle +4
                         (outer~6 `struct Outer~4 complete`))))
                (0x2346 `int`)))
          (expression
             (assign `int`
-               (member `int` z
-                  (member `struct Inner~2 complete` inner2
-                     (member `struct Middle~3 complete` middle
+               (member `int` z +8
+                  (member `struct Inner~2 complete` inner2 +16
+                     (member `struct Middle~3 complete` middle +4
                         (outer~6 `struct Outer~4 complete`))))
                (0x2347 `int`)))
          (definition new_expected~10 `array<int; 12>`
@@ -185,30 +185,30 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "%d %d %d\n\0"))))
-               (member `int` y
-                  (member `struct Inner~2 complete` inner
-                     (member `struct Middle~3 complete` middle
+               (member `int` y +4
+                  (member `struct Inner~2 complete` inner +4
+                     (member `struct Middle~3 complete` middle +4
                         (outer~6 `struct Outer~4 complete`))))
-               (member `int` z
-                  (member `struct Inner~2 complete` inner
+               (member `int` z +8
+                  (member `struct Inner~2 complete` inner +32
                      (outer~6 `struct Outer~4 complete`)))
-               (member `int` y
-                  (member `struct Middle~3 complete` middle
+               (member `int` y +0
+                  (member `struct Middle~3 complete` middle +4
                      (outer~6 `struct Outer~4 complete`)))))
          (expression
             (assign `int`
-               (member `int` y
-                  (member `struct Inner~2 complete` inner
-                     (member `struct Middle~3 complete` middle
+               (member `int` y +4
+                  (member `struct Inner~2 complete` inner +4
+                     (member `struct Middle~3 complete` middle +4
                         (outer~6 `struct Outer~4 complete`))))
                (add `int`
                   (assign `int` `int`
-                     (member `int` z
-                        (member `struct Inner~2 complete` inner
+                     (member `int` z +8
+                        (member `struct Inner~2 complete` inner +32
                            (outer~6 `struct Outer~4 complete`)))
                      (add `int`
-                        (member `int` y
-                           (member `struct Middle~3 complete` middle
+                        (member `int` y +0
+                           (member `struct Middle~3 complete` middle +4
                               (outer~6 `struct Outer~4 complete`)))
                         (3 `int`)))
                   (1 `int`))))
@@ -220,15 +220,15 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "%d %d %d\n\0"))))
-               (member `int` y
-                  (member `struct Inner~2 complete` inner
-                     (member `struct Middle~3 complete` middle
+               (member `int` y +4
+                  (member `struct Inner~2 complete` inner +4
+                     (member `struct Middle~3 complete` middle +4
                         (outer~6 `struct Outer~4 complete`))))
-               (member `int` z
-                  (member `struct Inner~2 complete` inner
+               (member `int` z +8
+                  (member `struct Inner~2 complete` inner +32
                      (outer~6 `struct Outer~4 complete`)))
-               (member `int` y
-                  (member `struct Middle~3 complete` middle
+               (member `int` y +0
+                  (member `struct Middle~3 complete` middle +4
                      (outer~6 `struct Outer~4 complete`)))))
          (struct Middle~3
             (member y @0 `int`)
@@ -236,7 +236,7 @@ exit_code: 0
             (member inner2 @16 `struct Inner~2 complete`))
          (definition p~11 `ptr<struct Middle~3 complete>`
             (addressof `ptr<struct Middle~3 complete>`
-               (member `struct Middle~3 complete` middle
+               (member `struct Middle~3 complete` middle +4
                   (outer~6 `struct Outer~4 complete`))))
          (expression
             (call `int`
@@ -246,28 +246,28 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 12>>`
                         (string `array<char; 12>` "%d 0x%x %d\n\0"))))
-               (member `int` x
-                  (member `struct Inner~2 complete` inner
+               (member `int` x +0
+                  (member `struct Inner~2 complete` inner +4
                      (deref `struct Middle~3 complete` (p~11 `ptr<struct Middle~3 complete>`))))
-               (member `int` y
-                  (member `struct Inner~2 complete` inner2
+               (member `int` y +4
+                  (member `struct Inner~2 complete` inner2 +16
                      (deref `struct Middle~3 complete` (p~11 `ptr<struct Middle~3 complete>`))))
-               (member `int` z
-                  (member `struct Inner~2 complete` inner
+               (member `int` z +8
+                  (member `struct Inner~2 complete` inner +4
                      (deref `struct Middle~3 complete` (p~11 `ptr<struct Middle~3 complete>`))))))
          (expression
             (assign `int`
-               (member `int` x
-                  (member `struct Inner~2 complete` inner
+               (member `int` x +0
+                  (member `struct Inner~2 complete` inner +4
                      (deref `struct Middle~3 complete` (p~11 `ptr<struct Middle~3 complete>`))))
                (add `int`
                   (assign `int` `int`
-                     (member `int` y
-                        (member `struct Inner~2 complete` inner2
+                     (member `int` y +4
+                        (member `struct Inner~2 complete` inner2 +16
                            (deref `struct Middle~3 complete` (p~11 `ptr<struct Middle~3 complete>`))))
                      (add `int`
-                        (member `int` z
-                           (member `struct Inner~2 complete` inner
+                        (member `int` z +8
+                           (member `struct Inner~2 complete` inner +4
                               (deref `struct Middle~3 complete` (p~11 `ptr<struct Middle~3 complete>`))))
                         (4 `int`)))
                   (2 `int`))))
@@ -279,14 +279,14 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "%d %d %d\n\0"))))
-               (member `int` x
-                  (member `struct Inner~2 complete` inner
+               (member `int` x +0
+                  (member `struct Inner~2 complete` inner +4
                      (deref `struct Middle~3 complete` (p~11 `ptr<struct Middle~3 complete>`))))
-               (member `int` y
-                  (member `struct Inner~2 complete` inner2
+               (member `int` y +4
+                  (member `struct Inner~2 complete` inner2 +16
                      (deref `struct Middle~3 complete` (p~11 `ptr<struct Middle~3 complete>`))))
-               (member `int` z
-                  (member `struct Inner~2 complete` inner
+               (member `int` z +8
+                  (member `struct Inner~2 complete` inner +4
                      (deref `struct Middle~3 complete` (p~11 `ptr<struct Middle~3 complete>`)))))))))
 
 ----- stderr -----

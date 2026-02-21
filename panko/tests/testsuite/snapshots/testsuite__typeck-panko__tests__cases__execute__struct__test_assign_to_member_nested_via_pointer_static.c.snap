@@ -28,7 +28,7 @@ exit_code: 0
       (compound-statement
          (expression
             (assign `int`
-               (member `int` x
+               (member `int` x +0
                   (t~1 `struct T~0 complete`))
                (27 `int`)))
          (struct U~2
@@ -39,13 +39,13 @@ exit_code: 0
                (a~3 `struct U~2 complete`)))
          (expression
             (assign `int`
-               (member `int` x
-                  (member `struct T~0 complete` t
+               (member `int` x +0
+                  (member `struct T~0 complete` t +4
                      (deref `struct U~2 complete` (p~5 `ptr<struct U~2 complete>`))))
                (5 `int`)))
          (return
-            (member `int` x
-               (member `struct T~0 complete` t
+            (member `int` x +0
+               (member `struct T~0 complete` t +4
                   (a~3 `struct U~2 complete`)))))))
 
 ----- stderr -----
