@@ -63,4 +63,17 @@ int main() {
     };
     // [[print: 0]]
     printf("%d\n", memcmp(&outer, new_expected, sizeof outer));
+
+    // [[print: 25 36 11]]
+    printf("%d %d %d\n", outer.middle.inner.y, outer.inner.z, outer.middle.y);
+    outer.middle.inner.y = (outer.inner.z = outer.middle.y + 3) + 1;
+    // [[print: 15 14 11]]
+    printf("%d %d %d\n", outer.middle.inner.y, outer.inner.z, outer.middle.y);
+
+    struct Middle* p = &outer.middle;
+    // [[print: 11 0x2346 36]]
+    printf("%d 0x%x %d\n", p->inner.x, p->inner2.y, p->inner.z);
+    p->inner.x = (p->inner2.y = p->inner.z + 4) + 2;
+    // [[print: 42 40 36]]
+    printf("%d %d %d\n", p->inner.x, p->inner2.y, p->inner.z);
 }

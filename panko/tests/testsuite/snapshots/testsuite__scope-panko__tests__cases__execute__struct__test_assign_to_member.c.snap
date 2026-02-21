@@ -127,6 +127,37 @@ exit_code: 0
                (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
                   (addressof (name outer~10 `struct Outer~4 complete`))
                   (name new_expected~13 `array<int; ∅>`)
-                  (sizeof (name outer~10 `struct Outer~4 complete`))))))))
+                  (sizeof (name outer~10 `struct Outer~4 complete`)))))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (dot y (dot inner (dot middle (name outer~10 `struct Outer~4 complete`))))
+               (dot z (dot inner (name outer~10 `struct Outer~4 complete`)))
+               (dot y (dot middle (name outer~10 `struct Outer~4 complete`)))))
+         (expression (assign (dot y (dot inner (dot middle (name outer~10 `struct Outer~4 complete`)))) (add (assign (dot z (dot inner (name outer~10 `struct Outer~4 complete`))) (add (dot y (dot middle (name outer~10 `struct Outer~4 complete`))) 3)) 1)))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (dot y (dot inner (dot middle (name outer~10 `struct Outer~4 complete`))))
+               (dot z (dot inner (name outer~10 `struct Outer~4 complete`)))
+               (dot y (dot middle (name outer~10 `struct Outer~4 complete`)))))
+         (struct Middle~3
+            (member y `int`)
+            (member inner `struct Inner~2 complete`)
+            (member inner2 `struct Inner~2 complete`))
+         (declaration p~14 `ptr<struct Middle~3 complete>` (addressof (dot middle (name outer~10 `struct Outer~4 complete`))))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d 0x%x %d\n")
+               (dot x (arrow inner (name p~14 `ptr<struct Middle~3 complete>`)))
+               (dot y (arrow inner2 (name p~14 `ptr<struct Middle~3 complete>`)))
+               (dot z (arrow inner (name p~14 `ptr<struct Middle~3 complete>`)))))
+         (expression (assign (dot x (arrow inner (name p~14 `ptr<struct Middle~3 complete>`))) (add (assign (dot y (arrow inner2 (name p~14 `ptr<struct Middle~3 complete>`))) (add (dot z (arrow inner (name p~14 `ptr<struct Middle~3 complete>`))) 4)) 2)))
+         (expression
+            (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (dot x (arrow inner (name p~14 `ptr<struct Middle~3 complete>`)))
+               (dot y (arrow inner2 (name p~14 `ptr<struct Middle~3 complete>`)))
+               (dot z (arrow inner (name p~14 `ptr<struct Middle~3 complete>`))))))))
 
 ----- stderr -----

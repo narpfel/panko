@@ -180,6 +180,77 @@ exit_code: 0
                      (noop-type-conversion `ptr<int>` @280
                         (addressof `ptr<array<int; 12>>` @280
                            (new_expected~13 `array<int; 12>` @188))))
-                  (48 `unsigned long` @288)))))))
+                  (48 `unsigned long` @288))))
+         (expression
+            (call `int` @236
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @240
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @248
+                  (noop-type-conversion `ptr<char>` @248
+                     (addressof `ptr<array<char; 10>>` @248
+                        (string `array<char; 10>` @void "%d %d %d\n\0"))))
+               (member `int` @76 y (member `struct Inner~2 complete` @72 inner (member `struct Middle~3 complete` @68 middle (outer~10 `struct Outer~4 complete` @64))))
+               (member `int` @104 z (member `struct Inner~2 complete` @96 inner (outer~10 `struct Outer~4 complete` @64)))
+               (member `int` @68 y (member `struct Middle~3 complete` @68 middle (outer~10 `struct Outer~4 complete` @64)))))
+         (expression
+            (assign `int` @76
+               (member `int` @76 y (member `struct Inner~2 complete` @72 inner (member `struct Middle~3 complete` @68 middle (outer~10 `struct Outer~4 complete` @64))))
+               (add `int` @76
+                  (assign `int` @104
+                     (member `int` @104 z (member `struct Inner~2 complete` @96 inner (outer~10 `struct Outer~4 complete` @64)))
+                     (add `int` @104
+                        (member `int` @68 y (member `struct Middle~3 complete` @68 middle (outer~10 `struct Outer~4 complete` @64)))
+                        (3 `int` @236)))
+                  (1 `int` @236))))
+         (expression
+            (call `int` @236
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @240
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @248
+                  (noop-type-conversion `ptr<char>` @248
+                     (addressof `ptr<array<char; 10>>` @248
+                        (string `array<char; 10>` @void "%d %d %d\n\0"))))
+               (member `int` @76 y (member `struct Inner~2 complete` @72 inner (member `struct Middle~3 complete` @68 middle (outer~10 `struct Outer~4 complete` @64))))
+               (member `int` @104 z (member `struct Inner~2 complete` @96 inner (outer~10 `struct Outer~4 complete` @64)))
+               (member `int` @68 y (member `struct Middle~3 complete` @68 middle (outer~10 `struct Outer~4 complete` @64)))))
+         (struct Middle~3
+            (member y @0 `int`)
+            (member inner @4 `struct Inner~2 complete`)
+            (member inner2 @16 `struct Inner~2 complete`))
+         (definition (p~14 `ptr<struct Middle~3 complete>` @240)
+            (addressof `ptr<struct Middle~3 complete>` @240
+               (member `struct Middle~3 complete` @68 middle (outer~10 `struct Outer~4 complete` @64))))
+         (expression
+            (call `int` @248
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @256
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @264
+                  (noop-type-conversion `ptr<char>` @264
+                     (addressof `ptr<array<char; 12>>` @264
+                        (string `array<char; 12>` @void "%d 0x%x %d\n\0"))))
+               (member `int` @276 x (member `struct Inner~2 complete` @276 inner (deref `struct Middle~3 complete` @272 (p~14 `ptr<struct Middle~3 complete>` @240))))
+               (member `int` @320 y (member `struct Inner~2 complete` @316 inner2 (deref `struct Middle~3 complete` @300 (p~14 `ptr<struct Middle~3 complete>` @240))))
+               (member `int` @340 z (member `struct Inner~2 complete` @332 inner (deref `struct Middle~3 complete` @328 (p~14 `ptr<struct Middle~3 complete>` @240))))))
+         (expression
+            (assign `int` @252
+               (member `int` @252 x (member `struct Inner~2 complete` @252 inner (deref `struct Middle~3 complete` @248 (p~14 `ptr<struct Middle~3 complete>` @240))))
+               (add `int` @252
+                  (assign `int` @296
+                     (member `int` @296 y (member `struct Inner~2 complete` @292 inner2 (deref `struct Middle~3 complete` @276 (p~14 `ptr<struct Middle~3 complete>` @240))))
+                     (add `int` @296
+                        (member `int` @316 z (member `struct Inner~2 complete` @308 inner (deref `struct Middle~3 complete` @304 (p~14 `ptr<struct Middle~3 complete>` @240))))
+                        (4 `int` @332)))
+                  (2 `int` @332))))
+         (expression
+            (call `int` @248
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @256
+                  (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @264
+                  (noop-type-conversion `ptr<char>` @264
+                     (addressof `ptr<array<char; 10>>` @264
+                        (string `array<char; 10>` @void "%d %d %d\n\0"))))
+               (member `int` @276 x (member `struct Inner~2 complete` @276 inner (deref `struct Middle~3 complete` @272 (p~14 `ptr<struct Middle~3 complete>` @240))))
+               (member `int` @320 y (member `struct Inner~2 complete` @316 inner2 (deref `struct Middle~3 complete` @300 (p~14 `ptr<struct Middle~3 complete>` @240))))
+               (member `int` @340 z (member `struct Inner~2 complete` @332 inner (deref `struct Middle~3 complete` @328 (p~14 `ptr<struct Middle~3 complete>` @240)))))))))
 
 ----- stderr -----
