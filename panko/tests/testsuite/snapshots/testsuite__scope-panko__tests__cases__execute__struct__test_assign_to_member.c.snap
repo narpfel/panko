@@ -45,9 +45,18 @@ exit_code: 0
                6))
          (declaration inner3~8 `struct Inner~2 complete`
             (braced
-               (add (dot x (name inner~6 `struct Inner~2 complete`)) 10)
-               (add (dot y (name inner2~7 `struct Inner~2 complete`)) 20)
-               (add (dot z (name inner2~7 `struct Inner~2 complete`)) 30)))
+               (add
+                  (dot x
+                     (name inner~6 `struct Inner~2 complete`))
+                  10)
+               (add
+                  (dot y
+                     (name inner2~7 `struct Inner~2 complete`))
+                  20)
+               (add
+                  (dot z
+                     (name inner2~7 `struct Inner~2 complete`))
+                  30)))
          (struct Middle~3
             (member y `int`)
             (member inner `struct Inner~2 complete`)
@@ -94,19 +103,48 @@ exit_code: 0
                   (addressof (name outer~10 `struct Outer~4 complete`))
                   (name expected~11 `array<int; ∅>`)
                   (sizeof (name outer~10 `struct Outer~4 complete`)))))
-         (expression (assign (dot x (name outer~10 `struct Outer~4 complete`)) 0x1234))
+         (expression
+            (assign
+               (dot x
+                  (name outer~10 `struct Outer~4 complete`))
+               0x1234))
          (struct Middle~3
             (member y `int`)
             (member inner `struct Inner~2 complete`)
             (member inner2 `struct Inner~2 complete`))
          (declaration new_middle~12 `struct Middle~3 complete`
             (braced
-               (dot x (dot inner (name outer~10 `struct Outer~4 complete`)))
-               (dot inner (name outer~10 `struct Outer~4 complete`))))
-         (expression (assign (dot middle (name outer~10 `struct Outer~4 complete`)) (name new_middle~12 `struct Middle~3 complete`)))
-         (expression (assign (dot x (dot inner2 (dot middle (name outer~10 `struct Outer~4 complete`)))) 0x2345))
-         (expression (assign (dot y (dot inner2 (dot middle (name outer~10 `struct Outer~4 complete`)))) 0x2346))
-         (expression (assign (dot z (dot inner2 (dot middle (name outer~10 `struct Outer~4 complete`)))) 0x2347))
+               (dot x
+                  (dot inner
+                     (name outer~10 `struct Outer~4 complete`)))
+               (dot inner
+                  (name outer~10 `struct Outer~4 complete`))))
+         (expression
+            (assign
+               (dot middle
+                  (name outer~10 `struct Outer~4 complete`))
+               (name new_middle~12 `struct Middle~3 complete`)))
+         (expression
+            (assign
+               (dot x
+                  (dot inner2
+                     (dot middle
+                        (name outer~10 `struct Outer~4 complete`))))
+               0x2345))
+         (expression
+            (assign
+               (dot y
+                  (dot inner2
+                     (dot middle
+                        (name outer~10 `struct Outer~4 complete`))))
+               0x2346))
+         (expression
+            (assign
+               (dot z
+                  (dot inner2
+                     (dot middle
+                        (name outer~10 `struct Outer~4 complete`))))
+               0x2347))
          (declaration new_expected~13 `array<int; ∅>`
             (braced
                0x1234
@@ -131,33 +169,93 @@ exit_code: 0
          (expression
             (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d %d\n")
-               (dot y (dot inner (dot middle (name outer~10 `struct Outer~4 complete`))))
-               (dot z (dot inner (name outer~10 `struct Outer~4 complete`)))
-               (dot y (dot middle (name outer~10 `struct Outer~4 complete`)))))
-         (expression (assign (dot y (dot inner (dot middle (name outer~10 `struct Outer~4 complete`)))) (add (assign (dot z (dot inner (name outer~10 `struct Outer~4 complete`))) (add (dot y (dot middle (name outer~10 `struct Outer~4 complete`))) 3)) 1)))
+               (dot y
+                  (dot inner
+                     (dot middle
+                        (name outer~10 `struct Outer~4 complete`))))
+               (dot z
+                  (dot inner
+                     (name outer~10 `struct Outer~4 complete`)))
+               (dot y
+                  (dot middle
+                     (name outer~10 `struct Outer~4 complete`)))))
+         (expression
+            (assign
+               (dot y
+                  (dot inner
+                     (dot middle
+                        (name outer~10 `struct Outer~4 complete`))))
+               (add
+                  (assign
+                     (dot z
+                        (dot inner
+                           (name outer~10 `struct Outer~4 complete`)))
+                     (add
+                        (dot y
+                           (dot middle
+                              (name outer~10 `struct Outer~4 complete`)))
+                        3))
+                  1)))
          (expression
             (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d %d\n")
-               (dot y (dot inner (dot middle (name outer~10 `struct Outer~4 complete`))))
-               (dot z (dot inner (name outer~10 `struct Outer~4 complete`)))
-               (dot y (dot middle (name outer~10 `struct Outer~4 complete`)))))
+               (dot y
+                  (dot inner
+                     (dot middle
+                        (name outer~10 `struct Outer~4 complete`))))
+               (dot z
+                  (dot inner
+                     (name outer~10 `struct Outer~4 complete`)))
+               (dot y
+                  (dot middle
+                     (name outer~10 `struct Outer~4 complete`)))))
          (struct Middle~3
             (member y `int`)
             (member inner `struct Inner~2 complete`)
             (member inner2 `struct Inner~2 complete`))
-         (declaration p~14 `ptr<struct Middle~3 complete>` (addressof (dot middle (name outer~10 `struct Outer~4 complete`))))
+         (declaration p~14 `ptr<struct Middle~3 complete>`
+            (addressof
+               (dot middle
+                  (name outer~10 `struct Outer~4 complete`))))
          (expression
             (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d 0x%x %d\n")
-               (dot x (arrow inner (name p~14 `ptr<struct Middle~3 complete>`)))
-               (dot y (arrow inner2 (name p~14 `ptr<struct Middle~3 complete>`)))
-               (dot z (arrow inner (name p~14 `ptr<struct Middle~3 complete>`)))))
-         (expression (assign (dot x (arrow inner (name p~14 `ptr<struct Middle~3 complete>`))) (add (assign (dot y (arrow inner2 (name p~14 `ptr<struct Middle~3 complete>`))) (add (dot z (arrow inner (name p~14 `ptr<struct Middle~3 complete>`))) 4)) 2)))
+               (dot x
+                  (arrow inner
+                     (name p~14 `ptr<struct Middle~3 complete>`)))
+               (dot y
+                  (arrow inner2
+                     (name p~14 `ptr<struct Middle~3 complete>`)))
+               (dot z
+                  (arrow inner
+                     (name p~14 `ptr<struct Middle~3 complete>`)))))
+         (expression
+            (assign
+               (dot x
+                  (arrow inner
+                     (name p~14 `ptr<struct Middle~3 complete>`)))
+               (add
+                  (assign
+                     (dot y
+                        (arrow inner2
+                           (name p~14 `ptr<struct Middle~3 complete>`)))
+                     (add
+                        (dot z
+                           (arrow inner
+                              (name p~14 `ptr<struct Middle~3 complete>`)))
+                        4))
+                  2)))
          (expression
             (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d %d\n")
-               (dot x (arrow inner (name p~14 `ptr<struct Middle~3 complete>`)))
-               (dot y (arrow inner2 (name p~14 `ptr<struct Middle~3 complete>`)))
-               (dot z (arrow inner (name p~14 `ptr<struct Middle~3 complete>`))))))))
+               (dot x
+                  (arrow inner
+                     (name p~14 `ptr<struct Middle~3 complete>`)))
+               (dot y
+                  (arrow inner2
+                     (name p~14 `ptr<struct Middle~3 complete>`)))
+               (dot z
+                  (arrow inner
+                     (name p~14 `ptr<struct Middle~3 complete>`))))))))
 
 ----- stderr -----

@@ -26,7 +26,8 @@ exit_code: 0
       (compound-statement
          (definition (p~3 `ptr<int>` @0)
             (addressof `ptr<int>` @0
-               (member `int` (static static_struct +4) y (static_struct~1 `struct T~0 complete` (static static_struct)))))
+               (member `int` (static static_struct +4) y
+                  (static_struct~1 `struct T~0 complete` (static static_struct)))))
          (return (deref `int` @8 (p~3 `ptr<int>` @0))))))
 
 ----- stderr -----

@@ -19,7 +19,11 @@ exit_code: 0
          (definition t~2 `struct T~1 complete`
             (braced
                (subobject +0 (42 `int`))))
-         (expression (assign `int` (member `int` x (t~2 `struct T~1 complete`)) (27 `int`)))
+         (expression
+            (assign `int`
+               (member `int` x
+                  (t~2 `struct T~1 complete`))
+               (27 `int`)))
          (struct ∅~3
             (member x @0 `int`)
             (member t @4 `struct T~1 complete`))
@@ -27,7 +31,15 @@ exit_code: 0
             (braced
                (subobject +0 (123 `int`))
                (subobject +4 (t~2 `struct T~1 complete`))))
-         (expression (assign `int` (member `int` x (member `struct T~1 complete` t (a~5 `struct ∅~4 complete`))) (5 `int`)))
-         (return (member `int` x (member `struct T~1 complete` t (a~5 `struct ∅~4 complete`)))))))
+         (expression
+            (assign `int`
+               (member `int` x
+                  (member `struct T~1 complete` t
+                     (a~5 `struct ∅~4 complete`)))
+               (5 `int`)))
+         (return
+            (member `int` x
+               (member `struct T~1 complete` t
+                  (a~5 `struct ∅~4 complete`)))))))
 
 ----- stderr -----

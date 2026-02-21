@@ -38,9 +38,12 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @24
                      (addressof `ptr<array<char; 37>>` @24
                         (string `array<char; 37>` @void "Inner { .x = %d, .y = %d, .z = %d }\n\0"))))
-               (member `int` @32 x (deref `struct Inner~1 complete` @32 (p~5 `ptr<struct Inner~1 complete>` @0)))
-               (member `int` @48 y (deref `struct Inner~1 complete` @44 (p~5 `ptr<struct Inner~1 complete>` @0)))
-               (member `int` @64 z (deref `struct Inner~1 complete` @56 (p~5 `ptr<struct Inner~1 complete>` @0)))))))
+               (member `int` @32 x
+                  (deref `struct Inner~1 complete` @32 (p~5 `ptr<struct Inner~1 complete>` @0)))
+               (member `int` @48 y
+                  (deref `struct Inner~1 complete` @44 (p~5 `ptr<struct Inner~1 complete>` @0)))
+               (member `int` @64 z
+                  (deref `struct Inner~1 complete` @56 (p~5 `ptr<struct Inner~1 complete>` @0)))))))
    (struct Inner~1
       (member x @0 `int`)
       (member y @4 `int`)
@@ -83,12 +86,17 @@ exit_code: 0
                (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>` @0
                   (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void` (static print_inner)))
                (addressof `ptr<struct Inner~1 complete>` @8
-                  (member `struct Inner~1 complete` (static outer +20) inner2 (member `struct Middle~2 complete` (static outer +4) middle (outer~7 `struct Outer~3 complete` (static outer)))))))
+                  (member `struct Inner~1 complete` (static outer +20) inner2
+                     (member `struct Middle~2 complete` (static outer +4) middle
+                        (outer~7 `struct Outer~3 complete` (static outer)))))))
          (struct Inner~1
             (member x @0 `int`)
             (member y @4 `int`)
             (member z @8 `int`))
-         (definition (inner_read_from_struct~9 `struct Inner~1 complete` @0) (member `struct Inner~1 complete` (static outer +20) inner2 (member `struct Middle~2 complete` (static outer +4) middle (outer~7 `struct Outer~3 complete` (static outer)))))
+         (definition (inner_read_from_struct~9 `struct Inner~1 complete` @0)
+            (member `struct Inner~1 complete` (static outer +20) inner2
+               (member `struct Middle~2 complete` (static outer +4) middle
+                  (outer~7 `struct Outer~3 complete` (static outer)))))
          (expression
             (call `void` @void
                (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>` @16
@@ -100,7 +108,8 @@ exit_code: 0
                (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>` @16
                   (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void` (static print_inner)))
                (addressof `ptr<struct Inner~1 complete>` @24
-                  (member `struct Inner~1 complete` (static outer +32) inner (outer~7 `struct Outer~3 complete` (static outer))))))
+                  (member `struct Inner~1 complete` (static outer +32) inner
+                     (outer~7 `struct Outer~3 complete` (static outer))))))
          (expression
             (call `int` @12
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
@@ -109,9 +118,15 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @24
                      (addressof `ptr<array<char; 10>>` @24
                         (string `array<char; 10>` @void "%d %d %d\n\0"))))
-               (member `int` (static outer +44) y (outer~7 `struct Outer~3 complete` (static outer)))
-               (member `int` (static outer +4) y (member `struct Middle~2 complete` (static outer +4) middle (outer~7 `struct Outer~3 complete` (static outer))))
-               (member `int` (static outer +28) z (member `struct Inner~1 complete` (static outer +20) inner2 (member `struct Middle~2 complete` (static outer +4) middle (outer~7 `struct Outer~3 complete` (static outer)))))))
+               (member `int` (static outer +44) y
+                  (outer~7 `struct Outer~3 complete` (static outer)))
+               (member `int` (static outer +4) y
+                  (member `struct Middle~2 complete` (static outer +4) middle
+                     (outer~7 `struct Outer~3 complete` (static outer))))
+               (member `int` (static outer +28) z
+                  (member `struct Inner~1 complete` (static outer +20) inner2
+                     (member `struct Middle~2 complete` (static outer +4) middle
+                        (outer~7 `struct Outer~3 complete` (static outer)))))))
          (expression
             (call `int` @12
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
@@ -123,9 +138,14 @@ exit_code: 0
                (ptr-diff `long` @32
                   (noop-type-conversion `ptr<char>` @32
                      (addressof `ptr<int>` @32
-                        (member `int` (static outer +24) y (member `struct Inner~1 complete` (static outer +20) inner2 (member `struct Middle~2 complete` (static outer +4) middle (outer~7 `struct Outer~3 complete` (static outer)))))))
+                        (member `int` (static outer +24) y
+                           (member `struct Inner~1 complete` (static outer +20) inner2
+                              (member `struct Middle~2 complete` (static outer +4) middle
+                                 (outer~7 `struct Outer~3 complete` (static outer)))))))
                   (noop-type-conversion `ptr<char>` @40
                      (addressof `ptr<struct Inner~1 complete>` @40
-                        (member `struct Inner~1 complete` (static outer +8) inner (member `struct Middle~2 complete` (static outer +4) middle (outer~7 `struct Outer~3 complete` (static outer))))))))))))
+                        (member `struct Inner~1 complete` (static outer +8) inner
+                           (member `struct Middle~2 complete` (static outer +4) middle
+                              (outer~7 `struct Outer~3 complete` (static outer))))))))))))
 
 ----- stderr -----

@@ -27,11 +27,28 @@ exit_code: 0
    (function-definition
       main~4 `fn() -> int`
       (compound-statement
-         (expression (assign (dot x (name t~1 `struct T~0 complete`)) 27))
+         (expression
+            (assign
+               (dot x
+                  (name t~1 `struct T~0 complete`))
+               27))
          (struct T~0
             (member x `int`))
-         (declaration p~5 `ptr<struct T~0 complete>` (addressof (dot t (name a~3 `struct U~2 complete`))))
-         (expression (assign (arrow x (name p~5 `ptr<struct T~0 complete>`)) (add (arrow x (name p~5 `ptr<struct T~0 complete>`)) 1)))
-         (return (dot x (dot t (name a~3 `struct U~2 complete`)))))))
+         (declaration p~5 `ptr<struct T~0 complete>`
+            (addressof
+               (dot t
+                  (name a~3 `struct U~2 complete`))))
+         (expression
+            (assign
+               (arrow x
+                  (name p~5 `ptr<struct T~0 complete>`))
+               (add
+                  (arrow x
+                     (name p~5 `ptr<struct T~0 complete>`))
+                  1)))
+         (return
+            (dot x
+               (dot t
+                  (name a~3 `struct U~2 complete`)))))))
 
 ----- stderr -----

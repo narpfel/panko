@@ -208,7 +208,7 @@ impl AsSExpr for Expression<'_> {
             Expression::MemberAccess { lhs, op, member } => op
                 .as_sexpr()
                 .inline_string(member.slice().to_owned())
-                .inherit(lhs),
+                .lines([lhs]),
         }
     }
 }

@@ -26,8 +26,20 @@ exit_code: 0
    (function-definition external
       main~5 `fn() -> int`
       (compound-statement
-         (expression (assign `int` (member `int` x (t~1 `struct T~0 complete`)) (27 `int`)))
-         (expression (assign `int` (member `int` x (member `struct T~0 complete` t (a~4 `struct ∅~3 complete`))) (5 `int`)))
-         (return (member `int` x (member `struct T~0 complete` t (a~4 `struct ∅~3 complete`)))))))
+         (expression
+            (assign `int`
+               (member `int` x
+                  (t~1 `struct T~0 complete`))
+               (27 `int`)))
+         (expression
+            (assign `int`
+               (member `int` x
+                  (member `struct T~0 complete` t
+                     (a~4 `struct ∅~3 complete`)))
+               (5 `int`)))
+         (return
+            (member `int` x
+               (member `struct T~0 complete` t
+                  (a~4 `struct ∅~3 complete`)))))))
 
 ----- stderr -----

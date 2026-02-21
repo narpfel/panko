@@ -33,9 +33,12 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "Inner { .x = %d, .y = %d, .z = %d }\n")
-               (arrow x (name p~5 `ptr<struct Inner~1 complete>`))
-               (arrow y (name p~5 `ptr<struct Inner~1 complete>`))
-               (arrow z (name p~5 `ptr<struct Inner~1 complete>`))))))
+               (arrow x
+                  (name p~5 `ptr<struct Inner~1 complete>`))
+               (arrow y
+                  (name p~5 `ptr<struct Inner~1 complete>`))
+               (arrow z
+                  (name p~5 `ptr<struct Inner~1 complete>`))))))
    (struct Inner~1
       (member x `int`)
       (member y `int`)
@@ -76,27 +79,52 @@ exit_code: 0
                (addressof (name inner~6 `struct Inner~1 complete`))))
          (expression
             (call (name print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`)
-               (addressof (dot inner2 (dot middle (name outer~7 `struct Outer~3 complete`))))))
+               (addressof
+                  (dot inner2
+                     (dot middle
+                        (name outer~7 `struct Outer~3 complete`))))))
          (struct Inner~1
             (member x `int`)
             (member y `int`)
             (member z `int`))
-         (declaration inner_read_from_struct~9 `struct Inner~1 complete` (dot inner2 (dot middle (name outer~7 `struct Outer~3 complete`))))
+         (declaration inner_read_from_struct~9 `struct Inner~1 complete`
+            (dot inner2
+               (dot middle
+                  (name outer~7 `struct Outer~3 complete`))))
          (expression
             (call (name print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`)
                (addressof (name inner_read_from_struct~9 `struct Inner~1 complete`))))
          (expression
             (call (name print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`)
-               (addressof (dot inner (name outer~7 `struct Outer~3 complete`)))))
+               (addressof
+                  (dot inner
+                     (name outer~7 `struct Outer~3 complete`)))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d %d\n")
-               (dot y (name outer~7 `struct Outer~3 complete`))
-               (dot y (dot middle (name outer~7 `struct Outer~3 complete`)))
-               (dot z (dot inner2 (dot middle (name outer~7 `struct Outer~3 complete`))))))
+               (dot y
+                  (name outer~7 `struct Outer~3 complete`))
+               (dot y
+                  (dot middle
+                     (name outer~7 `struct Outer~3 complete`)))
+               (dot z
+                  (dot inner2
+                     (dot middle
+                        (name outer~7 `struct Outer~3 complete`))))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%td\n")
-               (subtract (cast `ptr<char>` (addressof (dot y (dot inner2 (dot middle (name outer~7 `struct Outer~3 complete`)))))) (cast `ptr<char>` (addressof (dot inner (dot middle (name outer~7 `struct Outer~3 complete`)))))))))))
+               (subtract
+                  (cast `ptr<char>`
+                     (addressof
+                        (dot y
+                           (dot inner2
+                              (dot middle
+                                 (name outer~7 `struct Outer~3 complete`))))))
+                  (cast `ptr<char>`
+                     (addressof
+                        (dot inner
+                           (dot middle
+                              (name outer~7 `struct Outer~3 complete`)))))))))))
 
 ----- stderr -----

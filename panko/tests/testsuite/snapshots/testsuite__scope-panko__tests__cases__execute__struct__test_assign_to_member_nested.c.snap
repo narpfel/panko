@@ -19,7 +19,11 @@ exit_code: 0
          (declaration t~2 `struct T~1 complete`
             (braced
                42))
-         (expression (assign (dot x (name t~2 `struct T~1 complete`)) 27))
+         (expression
+            (assign
+               (dot x
+                  (name t~2 `struct T~1 complete`))
+               27))
          (struct ∅~3
             (member x `int`)
             (member t `struct T~1 complete`))
@@ -27,7 +31,15 @@ exit_code: 0
             (braced
                123
                (name t~2 `struct T~1 complete`)))
-         (expression (assign (dot x (dot t (name a~5 `struct ∅~4 complete`))) 5))
-         (return (dot x (dot t (name a~5 `struct ∅~4 complete`)))))))
+         (expression
+            (assign
+               (dot x
+                  (dot t
+                     (name a~5 `struct ∅~4 complete`)))
+               5))
+         (return
+            (dot x
+               (dot t
+                  (name a~5 `struct ∅~4 complete`)))))))
 
 ----- stderr -----

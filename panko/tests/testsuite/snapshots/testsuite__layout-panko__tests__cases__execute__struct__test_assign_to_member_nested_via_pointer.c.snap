@@ -21,7 +21,8 @@ exit_code: 0
                (subobject +0 (42 `int` @0))))
          (expression
             (assign `int` @0
-               (member `int` @0 x (t~2 `struct T~1 complete` @0))
+               (member `int` @0 x
+                  (t~2 `struct T~1 complete` @0))
                (27 `int` @0)))
          (struct U~3
             (member x @0 `int`)
@@ -38,8 +39,13 @@ exit_code: 0
                (a~4 `struct U~3 complete` @4)))
          (expression
             (assign `int` @28
-               (member `int` @28 x (member `struct T~1 complete` @28 t (deref `struct U~3 complete` @24 (p~5 `ptr<struct U~3 complete>` @16))))
+               (member `int` @28 x
+                  (member `struct T~1 complete` @28 t
+                     (deref `struct U~3 complete` @24 (p~5 `ptr<struct U~3 complete>` @16))))
                (5 `int` @28)))
-         (return (member `int` @8 x (member `struct T~1 complete` @8 t (a~4 `struct U~3 complete` @4)))))))
+         (return
+            (member `int` @8 x
+               (member `struct T~1 complete` @8 t
+                  (a~4 `struct U~3 complete` @4)))))))
 
 ----- stderr -----

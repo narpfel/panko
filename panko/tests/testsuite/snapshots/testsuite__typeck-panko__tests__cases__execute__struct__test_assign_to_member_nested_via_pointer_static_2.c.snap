@@ -26,14 +26,30 @@ exit_code: 0
    (function-definition external
       main~4 `fn() -> int`
       (compound-statement
-         (expression (assign `int` (member `int` x (t~1 `struct T~0 complete`)) (27 `int`)))
+         (expression
+            (assign `int`
+               (member `int` x
+                  (t~1 `struct T~0 complete`))
+               (27 `int`)))
          (struct U~2
             (member x @0 `int`)
             (member t @4 `struct T~0 complete`))
          (definition p~5 `ptr<struct U~2 complete>`
             (addressof `ptr<struct U~2 complete>`
                (a~3 `struct U~2 complete`)))
-         (expression (assign `int` (member `int` x (member `struct T~0 complete` t (deref `struct U~2 complete` (p~5 `ptr<struct U~2 complete>`)))) (add `int` (member `int` x (member `struct T~0 complete` t (deref `struct U~2 complete` (p~5 `ptr<struct U~2 complete>`)))) (1 `int`))))
-         (return (member `int` x (member `struct T~0 complete` t (a~3 `struct U~2 complete`)))))))
+         (expression
+            (assign `int`
+               (member `int` x
+                  (member `struct T~0 complete` t
+                     (deref `struct U~2 complete` (p~5 `ptr<struct U~2 complete>`))))
+               (add `int`
+                  (member `int` x
+                     (member `struct T~0 complete` t
+                        (deref `struct U~2 complete` (p~5 `ptr<struct U~2 complete>`))))
+                  (1 `int`))))
+         (return
+            (member `int` x
+               (member `struct T~0 complete` t
+                  (a~3 `struct U~2 complete`)))))))
 
 ----- stderr -----

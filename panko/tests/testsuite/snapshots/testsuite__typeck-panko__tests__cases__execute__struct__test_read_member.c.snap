@@ -38,9 +38,12 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 37>>`
                         (string `array<char; 37>` "Inner { .x = %d, .y = %d, .z = %d }\n\0"))))
-               (member `int` x (deref `struct Inner~1 complete` (p~5 `ptr<struct Inner~1 complete>`)))
-               (member `int` y (deref `struct Inner~1 complete` (p~5 `ptr<struct Inner~1 complete>`)))
-               (member `int` z (deref `struct Inner~1 complete` (p~5 `ptr<struct Inner~1 complete>`)))))))
+               (member `int` x
+                  (deref `struct Inner~1 complete` (p~5 `ptr<struct Inner~1 complete>`)))
+               (member `int` y
+                  (deref `struct Inner~1 complete` (p~5 `ptr<struct Inner~1 complete>`)))
+               (member `int` z
+                  (deref `struct Inner~1 complete` (p~5 `ptr<struct Inner~1 complete>`)))))))
    (function-definition external
       main~6 `fn() -> int`
       (compound-statement
@@ -60,9 +63,21 @@ exit_code: 0
                (subobject +8 (6 `int`))))
          (definition inner3~9 `struct Inner~1 complete`
             (braced
-               (subobject +0 (add `int` (member `int` x (inner~7 `struct Inner~1 complete`)) (10 `int`)))
-               (subobject +4 (add `int` (member `int` y (inner2~8 `struct Inner~1 complete`)) (20 `int`)))
-               (subobject +8 (add `int` (member `int` z (inner2~8 `struct Inner~1 complete`)) (30 `int`)))))
+               (subobject +0
+                  (add `int`
+                     (member `int` x
+                        (inner~7 `struct Inner~1 complete`))
+                     (10 `int`)))
+               (subobject +4
+                  (add `int`
+                     (member `int` y
+                        (inner2~8 `struct Inner~1 complete`))
+                     (20 `int`)))
+               (subobject +8
+                  (add `int`
+                     (member `int` z
+                        (inner2~8 `struct Inner~1 complete`))
+                     (30 `int`)))))
          (struct Middle~2
             (member y @0 `int`)
             (member inner @4 `struct Inner~1 complete`)
@@ -94,12 +109,17 @@ exit_code: 0
                (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>`
                   (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`))
                (addressof `ptr<struct Inner~1 complete>`
-                  (member `struct Inner~1 complete` inner2 (member `struct Middle~2 complete` middle (outer~11 `struct Outer~3 complete`))))))
+                  (member `struct Inner~1 complete` inner2
+                     (member `struct Middle~2 complete` middle
+                        (outer~11 `struct Outer~3 complete`))))))
          (struct Inner~1
             (member x @0 `int`)
             (member y @4 `int`)
             (member z @8 `int`))
-         (definition inner_read_from_struct~12 `struct Inner~1 complete` (member `struct Inner~1 complete` inner2 (member `struct Middle~2 complete` middle (outer~11 `struct Outer~3 complete`))))
+         (definition inner_read_from_struct~12 `struct Inner~1 complete`
+            (member `struct Inner~1 complete` inner2
+               (member `struct Middle~2 complete` middle
+                  (outer~11 `struct Outer~3 complete`))))
          (expression
             (call `void`
                (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>`
@@ -111,7 +131,8 @@ exit_code: 0
                (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>`
                   (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`))
                (addressof `ptr<struct Inner~1 complete>`
-                  (member `struct Inner~1 complete` inner (outer~11 `struct Outer~3 complete`)))))
+                  (member `struct Inner~1 complete` inner
+                     (outer~11 `struct Outer~3 complete`)))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -120,9 +141,15 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "%d %d %d\n\0"))))
-               (member `int` y (outer~11 `struct Outer~3 complete`))
-               (member `int` y (member `struct Middle~2 complete` middle (outer~11 `struct Outer~3 complete`)))
-               (member `int` z (member `struct Inner~1 complete` inner2 (member `struct Middle~2 complete` middle (outer~11 `struct Outer~3 complete`))))))
+               (member `int` y
+                  (outer~11 `struct Outer~3 complete`))
+               (member `int` y
+                  (member `struct Middle~2 complete` middle
+                     (outer~11 `struct Outer~3 complete`)))
+               (member `int` z
+                  (member `struct Inner~1 complete` inner2
+                     (member `struct Middle~2 complete` middle
+                        (outer~11 `struct Outer~3 complete`))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -134,9 +161,14 @@ exit_code: 0
                (ptr-diff `long`
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<int>`
-                        (member `int` y (member `struct Inner~1 complete` inner2 (member `struct Middle~2 complete` middle (outer~11 `struct Outer~3 complete`))))))
+                        (member `int` y
+                           (member `struct Inner~1 complete` inner2
+                              (member `struct Middle~2 complete` middle
+                                 (outer~11 `struct Outer~3 complete`))))))
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<struct Inner~1 complete>`
-                        (member `struct Inner~1 complete` inner (member `struct Middle~2 complete` middle (outer~11 `struct Outer~3 complete`)))))))))))
+                        (member `struct Inner~1 complete` inner
+                           (member `struct Middle~2 complete` middle
+                              (outer~11 `struct Outer~3 complete`)))))))))))
 
 ----- stderr -----

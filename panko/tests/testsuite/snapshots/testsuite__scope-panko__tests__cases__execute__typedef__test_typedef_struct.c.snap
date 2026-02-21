@@ -20,6 +20,8 @@ exit_code: 0
          (declaration value~2 `struct T~0 complete`
             (braced
                42))
-         (return (dot x (name value~2 `struct T~0 complete`))))))
+         (return
+            (dot x
+               (name value~2 `struct T~0 complete`))))))
 
 ----- stderr -----

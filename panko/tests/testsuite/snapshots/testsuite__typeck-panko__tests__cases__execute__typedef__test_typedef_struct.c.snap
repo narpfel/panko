@@ -20,6 +20,8 @@ exit_code: 0
          (definition value~2 `struct T~0 complete`
             (braced
                (subobject +0 (42 `int`))))
-         (return (member `int` x (value~2 `struct T~0 complete`))))))
+         (return
+            (member `int` x
+               (value~2 `struct T~0 complete`))))))
 
 ----- stderr -----
