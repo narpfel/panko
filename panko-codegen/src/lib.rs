@@ -315,6 +315,7 @@ impl<'a> Codegen<'a> {
     fn copy<'b>(&mut self, tgt: &dyn AsOperand<'b>, src: &dyn AsOperand<'b>) {
         let tgt = tgt.as_operand(try { self.current_function?.argument_area_size });
         let src = src.as_operand(try { self.current_function?.argument_area_size });
+        // TODO: can be skipped if `tgt == src`
         let ty = tgt.ty();
         assert_eq!(ty, src.ty());
         match ty {
