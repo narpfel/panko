@@ -27,10 +27,10 @@ exit_code: 0
       (main~4 `fn() -> int` (static main))
       (compound-statement
          (expression
-            (assign `int` (static t +0)
-               (member `int` (static t +0) x +0
+            (assign `int` @0
+               (member `int` @0 x +0
                   (t~1 `struct T~0 complete` (static t)))
-               (27 `int` (static t +0))))
+               (27 `int` @0)))
          (struct U~2
             (member x @0 `int`)
             (member t @4 `struct T~0 complete`))
@@ -38,14 +38,14 @@ exit_code: 0
             (addressof `ptr<struct U~2 complete>` @0
                (a~3 `struct U~2 complete` (static a))))
          (expression
-            (assign `int` @12
-               (member `int` @12 x +0
-                  (member `struct T~0 complete` @12 t +4
-                     (deref `struct U~2 complete` @8 (p~5 `ptr<struct U~2 complete>` @0))))
-               (5 `int` @12)))
+            (assign `int` @8
+               (member `int` @8 x +0
+                  (member `struct T~0 complete` @void t +4
+                     (deref `struct U~2 complete` @void (p~5 `ptr<struct U~2 complete>` @0))))
+               (5 `int` @8)))
          (return
-            (member `int` (static a +4) x +0
-               (member `struct T~0 complete` (static a +4) t +4
+            (member `int` @8 x +0
+               (member `struct T~0 complete` @void t +4
                   (a~3 `struct U~2 complete` (static a))))))))
 
 ----- stderr -----

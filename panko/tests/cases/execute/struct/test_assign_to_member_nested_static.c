@@ -1,4 +1,3 @@
-// [[known-bug]]
 // [[return: 5]]
 
 struct T { int x; } t = {42};

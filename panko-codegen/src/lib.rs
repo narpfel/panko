@@ -1036,8 +1036,10 @@ impl<'a> Codegen<'a> {
                 }
                 self.label(merge);
             }
-            Expression::MemberAccess { lhs, member: _ } => {
-                self.expr(lhs);
+            Expression::MemberAccess { lhs, member } => {
+                let member = self.member_access_lvalue(lhs, member);
+                let member = self.member_pointer(member);
+                self.copy(expr, &*member);
             }
         }
     }

@@ -510,7 +510,7 @@ fn layout_expression_in_slot<'a>(
                 Expression::Deref(operand) => Some(stack.temporary(operand.ty.ty)),
                 // For `Name` exprs, we can assign directly into the name’s slot.
                 Expression::Name(_) => Some(target.slot),
-                Expression::MemberAccess { lhs, member } => Some(lhs.slot.offset(member.offset)),
+                Expression::MemberAccess { .. } => Some(target.slot),
                 _ => unreachable!("not assignable because this expr is not an lvalue"),
             };
             let value = layout_expression_in_slot(stack, bump, value, value_slot);
@@ -638,12 +638,11 @@ fn layout_expression_in_slot<'a>(
             (slot, Expression::Conditional { condition, then, or_else })
         }
         typecheck::Expression::MemberAccess { lhs, member, member_loc: _ } => {
-            let lhs = bump.alloc(layout_expression(stack, bump, lhs));
+            let slot = make_slot();
+            let lhs_slot = Some(Slot::Void);
+            let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, lhs_slot));
             let member = layout_member(stack, bump, &member);
-            (
-                lhs.slot.offset(member.offset),
-                Expression::MemberAccess { lhs, member },
-            )
+            (slot, Expression::MemberAccess { lhs, member })
         }
     };
     LayoutedExpression { ty, slot, expr, loc }
