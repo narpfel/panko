@@ -26,7 +26,7 @@ exit_code: 0
       (member middle @4 `struct Middle~3 complete`)
       (member inner @32 `struct Inner~2 complete`)
       (member y @44 `int`))
-   (function-definition external
+   (function-definition external stack-size=376
       (main~5 `fn() -> int` (static main))
       (compound-statement
          (struct Inner~2

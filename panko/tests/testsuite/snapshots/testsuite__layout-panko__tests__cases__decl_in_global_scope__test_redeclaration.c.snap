@@ -13,7 +13,7 @@ exit_code: 0
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_redeclaration.c"
    (declaration external (f~0 `fn() -> int` (static f)) ∅)
    (declaration external (f~0 `fn() -> int` (static f)) ∅)
-   (function-definition external
+   (function-definition external stack-size=24
       (f~0 `fn() -> int` (static f))
       (compound-statement
          (return (42 `int` @0))))

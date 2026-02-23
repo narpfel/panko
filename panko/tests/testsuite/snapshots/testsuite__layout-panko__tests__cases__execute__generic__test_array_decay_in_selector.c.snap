@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/generic/test_array_decay_in_selector.c"
-   (function-definition external
+   (function-definition external stack-size=24
       (main~0 `fn() -> int` (static main))
       (compound-statement
          (definition (xs~1 `array<int; 2>` @0) (braced ∅))

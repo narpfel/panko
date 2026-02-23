@@ -17,7 +17,7 @@ exit_code: 0
    (struct T~2
       (member string @0 `struct String~1 complete`)
       (member x @8 `int`))
-   (function-definition external
+   (function-definition external stack-size=72
       (main~3 `fn() -> int` (static main))
       (compound-statement
          (struct T~2

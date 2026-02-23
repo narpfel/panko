@@ -49,6 +49,7 @@ impl AsSExpr for FunctionDefinition<'_> {
         self.reference
             .linkage
             .in_sexpr(SExpr::new("function-definition"))
+            .inline_string(format!("stack-size={}", self.stack_size))
             .lines([&self.reference])
             .lines(if self.params.0.is_empty() {
                 Either::Left(iter::empty())

@@ -12,14 +12,14 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/functions/inline/test_non_inline_declaration_provides_external_definition/f.c"
-   (function-definition inline
+   (function-definition inline stack-size=24
       (f~0 `fn() -> int` (static f))
       (compound-statement
          (return (42 `int` @0))))
    (provide-external-definition f))
 (translation-unit "panko/tests/cases/execute/functions/inline/test_non_inline_declaration_provides_external_definition/main.c"
    (declaration external (f~0 `fn() -> int` (static f)) ∅)
-   (function-definition external
+   (function-definition external stack-size=24
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (return

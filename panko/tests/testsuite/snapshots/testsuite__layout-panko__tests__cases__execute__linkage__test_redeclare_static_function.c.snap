@@ -13,14 +13,14 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/linkage/test_redeclare_static_function.c"
    (declaration internal (f~0 `fn() -> int` (static f)) ∅)
    (declaration internal (f~0 `fn() -> int` (static f)) ∅)
-   (function-definition external
+   (function-definition external stack-size=24
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (return
             (call `int` @0
                (addressof `ptr<fn() -> int>` @8
                   (f~0 `fn() -> int` (static f)))))))
-   (function-definition internal
+   (function-definition internal stack-size=24
       (f~0 `fn() -> int` (static f))
       (compound-statement
          (return (42 `int` @0)))))

@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/join-lines/test_joining_tokens.c"
    (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition external
+   (function-definition external stack-size=40
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (expression

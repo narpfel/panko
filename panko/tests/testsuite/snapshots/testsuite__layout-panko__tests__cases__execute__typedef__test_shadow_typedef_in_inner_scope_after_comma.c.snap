@@ -16,7 +16,7 @@ exit_code: 0
    (typedef ptr `int`)
    (typedef fptr `int`)
    (typedef xs `int`)
-   (function-definition external
+   (function-definition external stack-size=136
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (typedef function `int`)
@@ -102,7 +102,7 @@ exit_code: 0
                            (addressof `ptr<array<int; 5>>` @96
                               (xs~11 `array<int; 5>` @44)))
                         (sign-extend `unsigned long` @104 (0 `int` @112)))))))))
-   (function-definition external
+   (function-definition external stack-size=40
       (function~13 `fn(value: int) -> int` (static function))
       (params
          (value~14 `int` @0))

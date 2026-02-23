@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_static_block_scope_variables.c"
-   (function-definition external
+   (function-definition external stack-size=40
       (f~0 `fn() -> int` (static f))
       (compound-statement
          (definition (x~1 `int` (static x.1)) (42 `int` (static x.1)))
@@ -37,7 +37,7 @@ exit_code: 0
                            (deref `int` @16 (unnamed-temporary~2 `ptr<int>` @8))
                            (1 `int` @24)))))
                (unnamed-temporary~4 `int` @0)))))
-   (function-definition external
+   (function-definition external stack-size=40
       (g~5 `fn() -> int` (static g))
       (compound-statement
          (definition (x~6 `int` (static x.6)) (27 `int` (static x.6)))
@@ -63,7 +63,7 @@ exit_code: 0
                            (deref `int` @16 (unnamed-temporary~7 `ptr<int>` @8))
                            (1 `int` @24)))))
                (unnamed-temporary~9 `int` @0)))))
-   (function-definition external
+   (function-definition external stack-size=72
       (main~10 `fn() -> int` (static main))
       (compound-statement
          (declaration external (printf~11 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)

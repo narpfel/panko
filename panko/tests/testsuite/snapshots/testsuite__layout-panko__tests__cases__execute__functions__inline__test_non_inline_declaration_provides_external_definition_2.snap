@@ -13,13 +13,13 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/functions/inline/test_non_inline_declaration_provides_external_definition_2/f.c"
    (declaration external (f~0 `fn() -> int` (static f)) ∅)
-   (function-definition external
+   (function-definition external stack-size=24
       (f~0 `fn() -> int` (static f))
       (compound-statement
          (return (42 `int` @0)))))
 (translation-unit "panko/tests/cases/execute/functions/inline/test_non_inline_declaration_provides_external_definition_2/main.c"
    (declaration external (f~0 `fn() -> int` (static f)) ∅)
-   (function-definition external
+   (function-definition external stack-size=24
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (return

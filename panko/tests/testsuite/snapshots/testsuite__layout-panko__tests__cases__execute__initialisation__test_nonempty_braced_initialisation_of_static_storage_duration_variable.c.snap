@@ -21,7 +21,7 @@ exit_code: 0
    (definition external (value~2 `int` (static value))
       (braced
          (subobject +0 (123 `int` (static value +0)))))
-   (function-definition external
+   (function-definition external stack-size=184
       (main~3 `fn(∅: int, ∅: ptr<ptr<char>>) -> int` (static main))
       (params
          (main.unnamed_parameter.0~4 `int` @0)

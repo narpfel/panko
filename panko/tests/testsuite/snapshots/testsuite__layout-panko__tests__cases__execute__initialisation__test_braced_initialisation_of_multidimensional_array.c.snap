@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/initialisation/test_braced_initialisation_of_multidimensional_array.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (function-definition external
+   (function-definition external stack-size=120
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (definition (xs~2 `array<array<int; 2>; 3>` @0)

@@ -25,7 +25,7 @@ exit_code: 0
       (member middle @4 `struct Middle~2 complete`)
       (member inner @32 `struct Inner~1 complete`)
       (member y @44 `int`))
-   (function-definition external
+   (function-definition external stack-size=88
       (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void` (static print_inner))
       (params
          (p~5 `ptr<struct Inner~1 complete>` @0))
@@ -44,7 +44,7 @@ exit_code: 0
                   (deref `struct Inner~1 complete` @44 (p~5 `ptr<struct Inner~1 complete>` @0)))
                (member `int` @64 z +8
                   (deref `struct Inner~1 complete` @56 (p~5 `ptr<struct Inner~1 complete>` @0)))))))
-   (function-definition external
+   (function-definition external stack-size=168
       (main~6 `fn() -> int` (static main))
       (compound-statement
          (struct Inner~1

@@ -15,7 +15,7 @@ exit_code: 0
    (struct T~1
       (member c1 @0 `char`)
       (member c2 @1 `char`))
-   (function-definition external
+   (function-definition external stack-size=56
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (struct T~1

@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/preprocessor/test_ifdef_nested_in_if.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (function-definition external
+   (function-definition external stack-size=40
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (expression

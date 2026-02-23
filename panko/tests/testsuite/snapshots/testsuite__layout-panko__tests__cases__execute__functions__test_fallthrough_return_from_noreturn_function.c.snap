@@ -11,10 +11,10 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/functions/test_fallthrough_return_from_noreturn_function.c"
-   (function-definition external
+   (function-definition external stack-size=8
       (f~0 `fn() -> void` (static f))
       (compound-statement))
-   (function-definition external
+   (function-definition external stack-size=24
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (expression

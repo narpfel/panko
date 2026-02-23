@@ -22,7 +22,7 @@ exit_code: 0
    (struct U~3
       (member t @0 `struct T~1 complete`)
       (member p @16 `ptr<struct U~3>`))
-   (function-definition external
+   (function-definition external stack-size=56
       (main~4 `fn() -> int` (static main))
       (compound-statement
          (expression

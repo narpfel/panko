@@ -13,7 +13,7 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/preprocessor/test_lexer_hack_applies_to_macro_expansion.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (definition external (x~1 `int` (static x)) (42 `int` (static x)))
-   (function-definition external
+   (function-definition external stack-size=40
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (compound-statement

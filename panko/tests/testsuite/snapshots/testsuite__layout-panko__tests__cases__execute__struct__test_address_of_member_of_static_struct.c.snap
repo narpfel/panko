@@ -21,7 +21,7 @@ exit_code: 0
       (braced
          (subobject +0 (42 `int` (static static_struct +0)))
          (subobject +4 (27 `int` (static static_struct +4)))))
-   (function-definition external
+   (function-definition external stack-size=24
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (definition (p~3 `ptr<int>` @0)

@@ -14,7 +14,7 @@ exit_code: 0
    (declaration external (strcmp~0 `fn(∅: ptr<char const>, ∅: ptr<char const>) -> int` (static strcmp)) ∅)
    (declaration external (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (declaration external (puts~2 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition external
+   (function-definition external stack-size=72
       (main~3 `fn() -> int` (static main))
       (compound-statement
          (expression

@@ -11,11 +11,11 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/nullptr/test_return_nullptr_from_function.c"
-   (function-definition external
+   (function-definition external stack-size=24
       (f~0 `fn() -> nullptr_t` (static f))
       (compound-statement
          (return (nullptr `nullptr_t` @0))))
-   (function-definition external
+   (function-definition external stack-size=40
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (return

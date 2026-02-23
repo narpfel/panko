@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/test_ptr_to_static.c"
    (definition external (x~0 `int` (static x)) (42 `int` (static x)))
-   (function-definition external
+   (function-definition external stack-size=40
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (definition (p~2 `ptr<int>` @0)

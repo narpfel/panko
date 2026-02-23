@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/functions/inline/test_error_inline_function_refers_to_identifier_with_internal_linkage.c"
    (tentative-definition internal (a~0 `int` (static a)) ∅)
-   (function-definition inline
+   (function-definition inline stack-size=24
       (f~1 `fn() -> int` (static f))
       (compound-statement
          (return (0 `int` @0)))))

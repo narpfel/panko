@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/char/test_signed_unsigned_char.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (function-definition external
+   (function-definition external stack-size=56
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (definition (a~2 `char` @0) (truncate `char` @0 (97 `int` @4)))

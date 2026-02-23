@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/initialisation/struct/test_braced_init_of_struct_of_array_of_char_pointer.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (function-definition external
+   (function-definition external stack-size=56
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (struct T~2

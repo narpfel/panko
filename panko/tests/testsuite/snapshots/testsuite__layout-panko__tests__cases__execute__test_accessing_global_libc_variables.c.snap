@@ -15,7 +15,7 @@ exit_code: 0
    (declaration external (stdout~0 `ptr<void>` (static stdout)) ∅)
    (declaration external (stderr~1 `ptr<void>` (static stderr)) ∅)
    (declaration external (fprintf~2 `fn(∅: ptr<void>, ∅: ptr<char const>, ...) -> int` (static fprintf)) ∅)
-   (function-definition external
+   (function-definition external stack-size=40
       (main~3 `fn() -> int` (static main))
       (compound-statement
          (expression

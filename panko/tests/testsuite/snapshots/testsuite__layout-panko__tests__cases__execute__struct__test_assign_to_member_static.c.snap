@@ -54,7 +54,7 @@ exit_code: 0
          (subobject +36 (25 `int` (static outer +36)))
          (subobject +40 (36 `int` (static outer +40)))
          (subobject +44 (27 `int` (static outer +44)))))
-   (function-definition external
+   (function-definition external stack-size=264
       (main~7 `fn() -> int` (static main))
       (compound-statement
          (definition (expected~8 `array<int; 12>` @0)

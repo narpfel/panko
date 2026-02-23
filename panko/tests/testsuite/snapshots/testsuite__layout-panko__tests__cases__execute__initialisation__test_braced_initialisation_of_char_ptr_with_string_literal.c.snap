@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/initialisation/test_braced_initialisation_of_char_ptr_with_string_literal.c"
    (declaration external (strlen~0 `fn(∅: ptr<char const>) -> unsigned long` (static strlen)) ∅)
-   (function-definition external
+   (function-definition external stack-size=40
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (definition (s~2 `ptr<char const>` @0)

@@ -13,7 +13,7 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/arithmetic/test_preincrement.c"
    (declaration external (putchar~0 `fn(∅: int) -> int` (static putchar)) ∅)
    (declaration external (printf~1 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (function-definition external
+   (function-definition external stack-size=40
       (f~2 `fn(p: ptr<int>) -> ptr<int>` (static f))
       (params
          (p~3 `ptr<int>` @0))
@@ -29,7 +29,7 @@ exit_code: 0
                   (putchar~0 `fn(∅: int) -> int` (static putchar)))
                (10 `int` @24)))
          (return (p~3 `ptr<int>` @0))))
-   (function-definition external
+   (function-definition external stack-size=104
       (main~4 `fn(∅: int, argv: ptr<ptr<char>>) -> int` (static main))
       (params
          (main.unnamed_parameter.0~5 `int` @0)

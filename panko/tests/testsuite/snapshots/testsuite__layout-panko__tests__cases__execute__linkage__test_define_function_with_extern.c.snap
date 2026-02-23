@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_define_function_with_extern.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (function-definition external
+   (function-definition external stack-size=40
       (f~1 `fn(x: int) -> void` (static f))
       (params
          (x~2 `int` @0))
@@ -28,7 +28,7 @@ exit_code: 0
                (add `int` @24
                   (x~2 `int` @0)
                   (1 `int` @28))))))
-   (function-definition external
+   (function-definition external stack-size=24
       (main~3 `fn() -> int` (static main))
       (compound-statement
          (expression

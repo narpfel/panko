@@ -20,7 +20,7 @@ exit_code: 0
       (member x @0 `int`)
       (member inner @4 `struct Inner~1 complete`)
       (member y @16 `int`))
-   (function-definition external
+   (function-definition external stack-size=104
       (main~3 `fn() -> int` (static main))
       (compound-statement
          (struct Inner~1

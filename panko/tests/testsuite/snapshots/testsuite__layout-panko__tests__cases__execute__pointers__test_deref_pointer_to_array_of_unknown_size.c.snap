@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/pointers/test_deref_pointer_to_array_of_unknown_size.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (function-definition external
+   (function-definition external stack-size=248
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (definition (xs~2 `array<int; 42>` @0)

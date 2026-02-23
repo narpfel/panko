@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/initialisation/test_array_initialiser_list_execution_order.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (function-definition external
+   (function-definition external stack-size=40
       (f~1 `fn(x: int) -> int` (static f))
       (params
          (x~2 `int` @0))
@@ -33,7 +33,7 @@ exit_code: 0
                         (s~3 `array<char; 4>` @4))))
                (x~2 `int` @0)))
          (return (x~2 `int` @0))))
-   (function-definition external
+   (function-definition external stack-size=88
       (main~4 `fn() -> int` (static main))
       (compound-statement
          (definition (s~5 `array<char; 4>` @0)

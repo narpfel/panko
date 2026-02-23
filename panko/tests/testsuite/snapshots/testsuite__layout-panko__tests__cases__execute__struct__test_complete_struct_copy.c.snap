@@ -15,7 +15,7 @@ exit_code: 0
    (struct T~1
       (member xs @0 `array<int; 3>`)
       (member x @16 `long`))
-   (function-definition external
+   (function-definition external stack-size=184
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (struct T~1

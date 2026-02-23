@@ -17,7 +17,7 @@ exit_code: 0
    (typedef wchar_t `int`)
    (typedef nullptr_t `nullptr_t`)
    (definition external (NULL~0 `int` (static NULL)) (42 `int` (static NULL)))
-   (function-definition external
+   (function-definition external stack-size=8
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (return (NULL~0 `int` (static NULL))))))

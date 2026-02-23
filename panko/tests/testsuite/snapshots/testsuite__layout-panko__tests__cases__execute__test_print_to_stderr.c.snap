@@ -17,7 +17,7 @@ exit_code: 0
    (typedef wchar_t `int`)
    (typedef nullptr_t `nullptr_t`)
    (declaration external (write~0 `fn(∅: int, ∅: ptr<void const>, ∅: unsigned long) -> long` (static write)) ∅)
-   (function-definition external
+   (function-definition external stack-size=72
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (return

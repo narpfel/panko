@@ -15,19 +15,19 @@ exit_code: 0
    (typedef T `void`)
    (tentative-definition external (p~1 `ptr<void const>` (static p)) ∅)
    (declaration external (v~2 `fn() -> void` (static v)) ∅)
-   (function-definition external
+   (function-definition external stack-size=24
       (f~3 `fn() -> int` (static f))
       (compound-statement
          (return (123 `int` @0))))
-   (function-definition external
+   (function-definition external stack-size=24
       (g~5 `fn() -> int` (static g))
       (compound-statement
          (return (42 `int` @0))))
-   (function-definition external
+   (function-definition external stack-size=24
       (h~7 `fn() -> int` (static h))
       (compound-statement
          (return (27 `int` @0))))
-   (function-definition external
+   (function-definition external stack-size=56
       (main~9 `fn() -> int` (static main))
       (compound-statement
          (expression

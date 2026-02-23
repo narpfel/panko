@@ -14,7 +14,7 @@ exit_code: 0
    (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
    (typedef v `void`)
    (declaration external (f~1 `fn() -> void` (static f)) ∅)
-   (function-definition external
+   (function-definition external stack-size=40
       (f~1 `fn() -> void` (static f))
       (compound-statement
          (expression
@@ -26,13 +26,13 @@ exit_code: 0
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "f\0"))))))))
    (declaration external (g~4 `fn(∅: ptr<fn() -> void>) -> void` (static g)) ∅)
-   (function-definition external
+   (function-definition external stack-size=24
       (g~4 `fn(v: ptr<fn() -> void>) -> void` (static g))
       (params
          (v~6 `ptr<fn() -> void>` @0))
       (compound-statement
          (expression (call `void` @void (v~6 `ptr<fn() -> void>` @0)))))
-   (function-definition external
+   (function-definition external stack-size=40
       (print_g~7 `fn() -> void` (static print_g))
       (compound-statement
          (expression
@@ -43,7 +43,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "g\0"))))))))
-   (function-definition external
+   (function-definition external stack-size=24
       (main~9 `fn() -> int` (static main))
       (compound-statement
          (expression

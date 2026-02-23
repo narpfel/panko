@@ -13,7 +13,7 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/preprocessor/test_elif_not_taken.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (declaration external (puts~1 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition external
+   (function-definition external stack-size=40
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (expression

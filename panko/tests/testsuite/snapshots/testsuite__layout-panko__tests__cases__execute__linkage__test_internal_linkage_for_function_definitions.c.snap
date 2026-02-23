@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_for_function_definitions.c"
    (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition internal
+   (function-definition internal stack-size=40
       (f~1 `fn() -> void` (static f))
       (compound-statement
          (expression
@@ -23,7 +23,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 5>>` @16
                         (string `array<char; 5>` @void "in f\0"))))))))
-   (function-definition external
+   (function-definition external stack-size=24
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (expression

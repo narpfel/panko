@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/arrays/test_sizeof_in_array_length.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (function-definition external
+   (function-definition external stack-size=88
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (definition (cs~2 `array<char; 4>` @0) ∅)

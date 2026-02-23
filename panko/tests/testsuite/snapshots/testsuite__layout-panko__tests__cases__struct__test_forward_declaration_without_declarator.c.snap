@@ -11,17 +11,17 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/struct/test_forward_declaration_without_declarator.c"
-   (function-definition external
+   (function-definition external stack-size=24
       (f1~1 `fn() -> void` (static f1))
       (compound-statement
          (definition (p1~2 `ptr<struct T~0>` @0) ∅)
          (definition (p2~3 `ptr<struct T~0>` @8) ∅)))
-   (function-definition external
+   (function-definition external stack-size=24
       (f2~4 `fn() -> void` (static f2))
       (compound-statement
          (definition (p1~5 `ptr<struct T~0>` @0) ∅)
          (definition (p2~6 `ptr<struct T~0>` @8) ∅)))
-   (function-definition external
+   (function-definition external stack-size=24
       (forward_decl_in_local_scope~7 `fn() -> void` (static forward_decl_in_local_scope))
       (compound-statement
          (compound-statement

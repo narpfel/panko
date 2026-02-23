@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/arrays/test_char_pointer_array_initialised_with_string_literals.c"
    (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition external
+   (function-definition external stack-size=88
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (definition (hello_world~2 `array<ptr<char const>; 3>` @0)

@@ -17,7 +17,7 @@ exit_code: 0
    (typedef wchar_t `int`)
    (typedef nullptr_t `nullptr_t`)
    (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition external
+   (function-definition external stack-size=88
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (definition (xs~2 `array<int; 2>` @0) (braced ∅))

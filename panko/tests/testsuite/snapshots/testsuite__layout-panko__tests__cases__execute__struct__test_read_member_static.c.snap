@@ -25,7 +25,7 @@ exit_code: 0
       (member middle @4 `struct Middle~2 complete`)
       (member inner @32 `struct Inner~1 complete`)
       (member y @44 `int`))
-   (function-definition external
+   (function-definition external stack-size=88
       (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void` (static print_inner))
       (params
          (p~5 `ptr<struct Inner~1 complete>` @0))
@@ -72,7 +72,7 @@ exit_code: 0
          (subobject +36 (25 `int` (static outer +36)))
          (subobject +40 (36 `int` (static outer +40)))
          (subobject +44 (27 `int` (static outer +44)))))
-   (function-definition external
+   (function-definition external stack-size=56
       (main~8 `fn() -> int` (static main))
       (compound-statement
          (expression

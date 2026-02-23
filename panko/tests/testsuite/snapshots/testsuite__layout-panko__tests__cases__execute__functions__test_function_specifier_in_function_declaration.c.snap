@@ -15,7 +15,7 @@ exit_code: 0
    (declaration external (f~1 `fn() -> int` (static f)) ∅)
    (declaration external (g~2 `fn() -> void` (static g)) ∅)
    (declaration external (exit~3 `fn(∅: int) -> void` (static exit)) ∅)
-   (function-definition external
+   (function-definition external stack-size=56
       (main~4 `fn() -> int` (static main))
       (compound-statement
          (expression
@@ -33,11 +33,11 @@ exit_code: 0
             (call `void` @void
                (addressof `ptr<fn() -> void>` @0
                   (g~2 `fn() -> void` (static g)))))))
-   (function-definition external
+   (function-definition external stack-size=24
       (f~1 `fn() -> int` (static f))
       (compound-statement
          (return (42 `int` @0))))
-   (function-definition external
+   (function-definition external stack-size=24
       (g~2 `fn() -> void` (static g))
       (compound-statement
          (expression

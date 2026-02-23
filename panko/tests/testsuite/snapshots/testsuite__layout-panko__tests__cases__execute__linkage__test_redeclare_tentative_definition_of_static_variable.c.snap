@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_redeclare_tentative_definition_of_static_variable.c"
    (tentative-definition internal (x~0 `int` (static x)) ∅)
-   (function-definition external
+   (function-definition external stack-size=8
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (return (x~0 `int` (static x)))))

@@ -23,7 +23,7 @@ exit_code: 0
       (braced
          (subobject +0 (123 `int` (static a +0)))
          (subobject +4 (42 `int` (static a +4)))))
-   (function-definition external
+   (function-definition external stack-size=24
       (main~4 `fn() -> int` (static main))
       (compound-statement
          (expression

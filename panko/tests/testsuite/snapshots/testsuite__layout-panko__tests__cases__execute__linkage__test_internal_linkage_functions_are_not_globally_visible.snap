@@ -14,7 +14,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/f.c"
    (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition internal
+   (function-definition internal stack-size=40
       (function~1 `fn() -> void` (static function))
       (compound-statement
          (expression
@@ -25,7 +25,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "f\0"))))))))
-   (function-definition external
+   (function-definition external stack-size=24
       (f~2 `fn() -> void` (static f))
       (compound-statement
          (expression
@@ -34,7 +34,7 @@ exit_code: 0
                   (function~1 `fn() -> void` (static function))))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_functions_are_not_globally_visible/g.c"
    (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition internal
+   (function-definition internal stack-size=40
       (function~1 `fn() -> void` (static function))
       (compound-statement
          (expression
@@ -45,7 +45,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "g\0"))))))))
-   (function-definition external
+   (function-definition external stack-size=24
       (g~2 `fn() -> void` (static g))
       (compound-statement
          (expression
@@ -56,7 +56,7 @@ exit_code: 0
    (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
    (declaration external (f~1 `fn() -> void` (static f)) ∅)
    (declaration external (g~2 `fn() -> void` (static g)) ∅)
-   (function-definition external
+   (function-definition external stack-size=40
       (function~3 `fn() -> void` (static function))
       (compound-statement
          (expression
@@ -67,7 +67,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 9>>` @16
                         (string `array<char; 9>` @void "function\0"))))))))
-   (function-definition external
+   (function-definition external stack-size=24
       (main~4 `fn() -> int` (static main))
       (compound-statement
          (expression

@@ -14,7 +14,7 @@ exit_code: 0
    (struct T~0
       (member x @0 `int`))
    (typedef Name `struct T~0 complete`)
-   (function-definition external
+   (function-definition external stack-size=24
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (definition (value~2 `struct T~0 complete` @0)
