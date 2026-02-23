@@ -17,7 +17,7 @@ use crate::StaticId;
 use crate::SubobjectAtReference;
 use crate::TypedRegister;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) enum Offset<'a> {
     Immediate(u64),
     Plt(&'a str),
@@ -34,13 +34,13 @@ impl fmt::Display for Offset<'_> {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) struct Index {
     pub(super) register: Register,
     pub(super) size: u64,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) struct Memory<'a> {
     pub(super) pointer: Register,
     pub(super) index: Option<Index>,
@@ -70,7 +70,7 @@ impl fmt::Display for Memory<'_> {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum OperandKind<'a> {
     Register(Register),
     Pointer {
@@ -83,7 +83,7 @@ enum OperandKind<'a> {
     Label(LabelId),
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) struct Operand<'a> {
     kind: OperandKind<'a>,
     ty: Type<'a>,
