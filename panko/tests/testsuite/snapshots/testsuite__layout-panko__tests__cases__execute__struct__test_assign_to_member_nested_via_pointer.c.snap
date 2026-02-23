@@ -20,10 +20,10 @@ exit_code: 0
             (braced
                (subobject +0 (42 `int` @0))))
          (expression
-            (assign `int` @4
-               (member `int` @4 x +0
+            (assign `int` @0
+               (member `int` @0 x +0
                   (t~2 `struct T~1 complete` @0))
-               (27 `int` @4)))
+               (27 `int` @0)))
          (struct U~3
             (member x @0 `int`)
             (member t @4 `struct T~1 complete`))
@@ -44,8 +44,8 @@ exit_code: 0
                      (deref `struct U~3 complete` @void (p~5 `ptr<struct U~3 complete>` @16))))
                (5 `int` @24)))
          (return
-            (member `int` @24 x +0
-               (member `struct T~1 complete` @void t +4
+            (member `int` @8 x +0
+               (member `struct T~1 complete` @8 t +4
                   (a~4 `struct U~3 complete` @4)))))))
 
 ----- stderr -----

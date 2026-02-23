@@ -462,7 +462,9 @@ fn layout_expression_in_slot<'a>(
     let loc = expr.loc();
     let typecheck::TypedExpression { ty, expr } = *expr;
     let ty = layout_ty(stack, bump, ty);
-    let mut make_slot = || target_slot.unwrap_or_else(|| stack.temporary(ty.ty));
+    let make_slot_noborrow =
+        |stack: &mut Stack<'a>| target_slot.unwrap_or_else(|| stack.temporary(ty.ty));
+    let mut make_slot = || make_slot_noborrow(stack);
     let (slot, expr) = match expr {
         typecheck::Expression::Error(error) => (make_slot(), Expression::Error(error)),
         typecheck::Expression::Name(name) => {
@@ -638,9 +640,12 @@ fn layout_expression_in_slot<'a>(
             (slot, Expression::Conditional { condition, then, or_else })
         }
         typecheck::Expression::MemberAccess { lhs, member, member_loc: _ } => {
-            let slot = make_slot();
             let lhs_slot = Some(Slot::Void);
             let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, lhs_slot));
+            let slot = match lhs.slot {
+                slot @ Slot::Automatic(_) => slot.offset(member.offset),
+                _ => make_slot_noborrow(stack),
+            };
             let member = layout_member(stack, bump, &member);
             (slot, Expression::MemberAccess { lhs, member })
         }
