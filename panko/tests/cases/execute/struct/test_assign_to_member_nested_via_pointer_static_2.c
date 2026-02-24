@@ -1,5 +1,4 @@
-// [[known-bug]]
-// [[return: 28]]
+// [[return: 43]]
 
 struct T { int x; } t = {42};
 struct U { int x; struct T t; } a = {123, {42}};

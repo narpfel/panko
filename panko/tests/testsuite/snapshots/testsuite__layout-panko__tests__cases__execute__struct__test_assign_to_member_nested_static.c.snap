@@ -23,23 +23,23 @@ exit_code: 0
       (braced
          (subobject +0 (123 `int` (static a +0)))
          (subobject +4 (42 `int` (static a +4)))))
-   (function-definition external stack-size=8
+   (function-definition external stack-size=24
       (main~5 `fn() -> int` (static main))
       (compound-statement
          (expression
-            (assign `int` (static t +0)
-               (member `int` (static t +0) x +0
+            (assign `int` @0
+               (member `int` @0 x +0
                   (t~1 `struct T~0 complete` (static t)))
-               (27 `int` (static t +0))))
+               (27 `int` @0)))
          (expression
-            (assign `int` (static a +4)
-               (member `int` (static a +4) x +0
-                  (member `struct T~0 complete` (static a +4) t +4
+            (assign `int` @0
+               (member `int` @0 x +0
+                  (member `struct T~0 complete` @void t +4
                      (a~4 `struct ∅~3 complete` (static a))))
-               (5 `int` (static a +4))))
+               (5 `int` @0)))
          (return
-            (member `int` (static a +4) x +0
-               (member `struct T~0 complete` (static a +4) t +4
+            (member `int` @0 x +0
+               (member `struct T~0 complete` @void t +4
                   (a~4 `struct ∅~3 complete` (static a))))))))
 
 ----- stderr -----

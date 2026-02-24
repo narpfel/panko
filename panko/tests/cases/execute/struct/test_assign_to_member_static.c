@@ -1,5 +1,3 @@
-// [[known-bug]]
-
 int memcmp(void const*, void const*, typeof(sizeof 0));
 int printf(char const*, ...);
 

@@ -38,11 +38,11 @@ exit_code: 0
             (addressof `ptr<struct U~3 complete>` @16
                (a~4 `struct U~3 complete` @4)))
          (expression
-            (assign `int` @28
-               (member `int` @28 x +0
-                  (member `struct T~1 complete` @28 t +4
-                     (deref `struct U~3 complete` @24 (p~5 `ptr<struct U~3 complete>` @16))))
-               (5 `int` @28)))
+            (assign `int` @24
+               (member `int` @24 x +0
+                  (member `struct T~1 complete` @void t +4
+                     (deref `struct U~3 complete` @void (p~5 `ptr<struct U~3 complete>` @16))))
+               (5 `int` @24)))
          (return
             (member `int` @8 x +0
                (member `struct T~1 complete` @8 t +4

@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/struct/test_assign_to_member_nested_via_pointer_2.c"
-   (function-definition external stack-size=56
+   (function-definition external stack-size=40
       (main~0 `fn() -> int` (static main))
       (compound-statement
          (struct T~1
@@ -38,15 +38,15 @@ exit_code: 0
             (addressof `ptr<struct U~3 complete>` @16
                (a~4 `struct U~3 complete` @4)))
          (expression
-            (assign `int` @28
-               (member `int` @28 x +0
-                  (member `struct T~1 complete` @28 t +4
-                     (deref `struct U~3 complete` @24 (p~5 `ptr<struct U~3 complete>` @16))))
-               (add `int` @28
-                  (member `int` @36 x +0
-                     (member `struct T~1 complete` @36 t +4
-                        (deref `struct U~3 complete` @32 (p~5 `ptr<struct U~3 complete>` @16))))
-                  (1 `int` @40))))
+            (assign `int` @24
+               (member `int` @24 x +0
+                  (member `struct T~1 complete` @void t +4
+                     (deref `struct U~3 complete` @void (p~5 `ptr<struct U~3 complete>` @16))))
+               (add `int` @24
+                  (member `int` @24 x +0
+                     (member `struct T~1 complete` @void t +4
+                        (deref `struct U~3 complete` @void (p~5 `ptr<struct U~3 complete>` @16))))
+                  (1 `int` @28))))
          (return
             (member `int` @8 x +0
                (member `struct T~1 complete` @8 t +4

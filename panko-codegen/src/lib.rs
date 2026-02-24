@@ -68,7 +68,7 @@ const ARGUMENT_REGISTERS: [Register; 6] = [Rdi, Rsi, Rdx, Rcx, R8, R9];
 
 struct ByValue<T>(T);
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(u8)]
 enum Register {
     Rax,
@@ -166,7 +166,7 @@ impl Display for TypedRegister<'_, '_> {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct StaticId(u64);
 
 impl Display for StaticId {
@@ -175,7 +175,7 @@ impl Display for StaticId {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct LabelId(u64);
 
 impl Display for LabelId {
@@ -315,9 +315,11 @@ impl<'a> Codegen<'a> {
     fn copy<'b>(&mut self, tgt: &dyn AsOperand<'b>, src: &dyn AsOperand<'b>) {
         let tgt = tgt.as_operand(try { self.current_function?.argument_area_size });
         let src = src.as_operand(try { self.current_function?.argument_area_size });
-        // TODO: can be skipped if `tgt == src`
         let ty = tgt.ty();
         assert_eq!(ty, src.ty());
+        if tgt == src {
+            return;
+        }
         match ty {
             Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => {
                 self.emit_args("mov", &[&Rax.with_ty(ty), &src]);
@@ -1036,8 +1038,10 @@ impl<'a> Codegen<'a> {
                 }
                 self.label(merge);
             }
-            Expression::MemberAccess { lhs, member: _ } => {
-                self.expr(lhs);
+            Expression::MemberAccess { lhs, member } => {
+                let member = self.member_access_lvalue(lhs, member);
+                let member = self.member_pointer(member);
+                self.copy(expr, &*member);
             }
         }
     }
