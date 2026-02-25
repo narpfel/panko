@@ -186,7 +186,7 @@ impl<'a, T: Step> Type<'a, T> {
         }))
     }
 
-    pub(crate) const fn char() -> Self {
+    pub const fn char() -> Self {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Signed,
             kind: IntegralKind::PlainChar,
@@ -432,6 +432,29 @@ where
             _ => false,
         }
     }
+
+    pub fn eightbyte_size(&self) -> u64 {
+        self.size().div_ceil(8)
+    }
+
+    pub fn classify(&self) -> Class {
+        match self {
+            Self::Arithmetic(_) => Class::Integer,
+            Self::Pointer(_) => Class::Integer,
+            Self::Array(_) => unreachable!(),
+            Self::Function(_) => unreachable!(),
+            Self::Void => unreachable!(),
+            Self::Typeof { expr, unqual: _ } => match *expr {},
+            Self::Nullptr => Class::Integer,
+            Self::Struct(Struct::Incomplete { .. }) => unreachable!(),
+            ty @ Self::Struct(Struct::Complete(_)) => match ty.eightbyte_size() {
+                0 => unreachable!("structs are nonempty"),
+                1 => Class::Integer,
+                2 => Class::Pair(PairKind::Integer),
+                3.. => Class::Memory,
+            },
+        }
+    }
 }
 
 impl<T: Step> fmt::Display for Type<'_, T> {
@@ -582,4 +605,18 @@ pub(crate) fn struct_decl_as_sexpr<'a, T: Step>(decl: &'a Type<'_, T>) -> SExpr<
         unreachable!()
     };
     r#struct.as_sexpr()
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum PairKind {
+    Integer,
+    // TODO:
+    // Sse,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Class {
+    Integer,
+    Memory,
+    Pair(PairKind),
 }

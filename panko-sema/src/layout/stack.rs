@@ -12,6 +12,8 @@ use super::layout_ty;
 use crate::scope::Id;
 use crate::scope::Linkage;
 use crate::scope::StorageDuration;
+use crate::ty::Class;
+use crate::ty::PairKind;
 use crate::typecheck;
 
 #[derive(Debug, Default)]
@@ -128,8 +130,27 @@ impl<'a> Stack<'a> {
     pub(super) fn function_arguments(&mut self, args: &[LayoutedExpression<'a>]) {
         let argument_area_size = args
             .iter()
-            // TODO: this is `panko_codegen::ARGUMENT_REGISTERS.len()`
-            .skip(6)
+            .scan(0, |registers_used, arg| {
+                // TODO: this is `panko_codegen::ARGUMENT_REGISTERS.len()`
+                if *registers_used >= 6 {
+                    return Some(Some(arg));
+                }
+                match arg.ty.ty.classify() {
+                    Class::Integer => {
+                        *registers_used += 1;
+                        Some(None)
+                    }
+                    Class::Memory => Some(Some(arg)),
+                    Class::Pair(PairKind::Integer) => match registers_used {
+                        ..=4 => {
+                            *registers_used += 2;
+                            Some(None)
+                        }
+                        5.. => Some(Some(arg)),
+                    },
+                }
+            })
+            .flatten()
             .map(|arg| arg.ty.ty.size().next_multiple_of(8))
             .sum();
         self.argument_area_size = self.argument_area_size.max(argument_area_size);
