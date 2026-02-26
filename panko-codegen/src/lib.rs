@@ -458,6 +458,8 @@ impl<'a> Codegen<'a> {
                 [first, second] => {
                     self.emit_args("mov", &[param, first]);
                     let slot = param.slot().offset(8);
+                    // TODO: This unconditionally writes 8 bytes, regardless of the actual size of
+                    // the struct. Can this overwrite unrelated objects?
                     self.emit_args("mov", &[&typed(slot, Type::size_t()), second]);
                 }
                 _ => unreachable!(),
