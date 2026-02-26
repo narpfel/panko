@@ -1,0 +1,39 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/abi/test_struct_passed_as_int_pair.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/abi/test_struct_passed_as_int_pair.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct Struct~1
+      (member string `array<char; 11>`))
+   (function-definition
+      print_struct~2 `fn(value: struct Struct~1 complete) -> void`
+      (params
+         value~3 `struct Struct~1 complete`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%s\n")
+               (dot string
+                  (name value~3 `struct Struct~1 complete`))))))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (struct Struct~1
+            (member string `array<char; 11>`))
+         (declaration value~5 `struct Struct~1 complete`
+            (braced
+               (string "0123456789")))
+         (expression
+            (call (name print_struct~2 `fn(value: struct Struct~1 complete) -> void`)
+               (name value~5 `struct Struct~1 complete`))))))
+
+----- stderr -----
