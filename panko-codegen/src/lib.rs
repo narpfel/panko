@@ -1038,13 +1038,8 @@ impl<'a> Codegen<'a> {
                             self.emit_args("xor", &[second, second]);
                             for i in (0..arg.ty.ty.size() - 8).rev() {
                                 self.emit_args("shl", &[second, &8]);
-                                self.emit_args(
-                                    "movzx",
-                                    &[
-                                        &Rax.with_ty(&Type::size_t()),
-                                        &typed(arg.slot.offset(8 + i), Type::char()),
-                                    ],
-                                );
+                                let slot = typed(arg.slot.offset(8 + i), Type::char());
+                                self.emit_args("movzx", &[&Rax.with_ty(&Type::size_t()), &slot]);
                                 self.emit_args("or", &[second, &Rax]);
                             }
                         }
