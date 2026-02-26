@@ -457,7 +457,8 @@ impl<'a> Codegen<'a> {
                 [register] => self.emit_args("mov", &[param, &register.with_ty(&param.ty.ty)]),
                 [first, second] => {
                     self.emit_args("mov", &[param, first]);
-                    self.emit_args("mov", &[&typed(param.slot(), Type::size_t()), second]);
+                    let slot = param.slot().offset(8);
+                    self.emit_args("mov", &[&typed(slot, Type::size_t()), second]);
                 }
                 _ => unreachable!(),
             }
