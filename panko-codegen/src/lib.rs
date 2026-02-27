@@ -445,7 +445,13 @@ impl<'a> Codegen<'a> {
         // `rdi`, `rsi` and `rcx`.
         for InRegisters { item: param, registers } in register_parameters {
             match registers {
-                [register] => self.emit_args("mov", &[param, &register.with_ty(&param.ty.ty)]),
+                [register] => {
+                    let ty = match param.ty.ty.size().is_power_of_two() {
+                        true => &param.ty.ty,
+                        false => &Type::size_t(),
+                    };
+                    self.emit_args("mov", &[param, &register.with_ty(ty)]);
+                }
                 [first, second] => {
                     self.emit_args("mov", &[param, first]);
                     let slot = param.slot().offset(8);
@@ -1020,19 +1026,15 @@ impl<'a> Codegen<'a> {
                 }
 
                 for InRegisters { item: arg, registers } in register_arguments {
-                    // TODO: This does not work for structs with size 3, 5, 6 or 7.
+                    let size = arg.ty.ty.size();
                     match registers {
-                        [register] => self.emit_args("mov", &[&register.typed(arg), arg]),
+                        [register] => match size.is_power_of_two() {
+                            true => self.emit_args("mov", &[&register.typed(arg), arg]),
+                            false => self.load_function_argument(arg.slot, size, register),
+                        },
                         [first, second] => {
-                            debug_assert_ne!(*second, Rax);
                             self.emit_args("mov", &[first, &typed(arg.slot, Type::size_t())]);
-                            self.emit_args("xor", &[second, second]);
-                            for i in (0..arg.ty.ty.size() - 8).rev() {
-                                self.emit_args("shl", &[second, &8]);
-                                let slot = typed(arg.slot.offset(8 + i), Type::char());
-                                self.emit_args("movzx", &[&Rax.with_ty(&Type::size_t()), &slot]);
-                                self.emit_args("or", &[second, &Rax]);
-                            }
+                            self.load_function_argument(arg.slot.offset(8), size - 8, second);
                         }
                         _ => unreachable!(),
                     }
@@ -1112,6 +1114,17 @@ impl<'a> Codegen<'a> {
                 let member = self.member_pointer(member);
                 self.copy(expr, &*member);
             }
+        }
+    }
+
+    fn load_function_argument(&mut self, slot: Slot<'a>, size: u64, register: &Register) {
+        debug_assert_ne!(*register, Rax);
+        self.emit_args("xor", &[register, register]);
+        for i in (0..size).rev() {
+            self.emit_args("shl", &[register, &8]);
+            let slot = typed(slot.offset(i), Type::char());
+            self.emit_args("movzx", &[&Rax.with_ty(&Type::size_t()), &slot]);
+            self.emit_args("or", &[register, &Rax]);
         }
     }
 
