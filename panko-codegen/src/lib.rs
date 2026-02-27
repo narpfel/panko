@@ -135,15 +135,6 @@ impl Register {
 
 impl Display for TypedRegister<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let size = match self.ty {
-            Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => self.ty.size(),
-            Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
-            Type::Typeof { expr, unqual: _ } => match *expr {},
-            Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
-                todo!("register for complete struct (is this unreachable?)"),
-        };
-
         let names = match self.register {
             Rax => ["al", "ax", "eax", "rax"],
             Rcx => ["cl", "cx", "ecx", "rcx"],
@@ -156,7 +147,7 @@ impl Display for TypedRegister<'_, '_> {
             R10 => ["r10b", "r10w", "r10d", "r10"],
             Rip => ["there_is_no_8_bit_version_of_rip", "ip", "eip", "rip"],
         };
-        let index = match size {
+        let index = match self.ty.size() {
             1 => 0,
             2 => 1,
             4 => 2,
