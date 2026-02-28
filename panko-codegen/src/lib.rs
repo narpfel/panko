@@ -448,6 +448,8 @@ impl<'a> Codegen<'a> {
                 [register] => {
                     let ty = match param.ty.ty.size().is_power_of_two() {
                         true => &param.ty.ty,
+                        // TODO: This unconditionally writes 8 bytes, regardless of the actual size
+                        // of the object. Can this overwrite unrelated objects?
                         false => &Type::size_t(),
                     };
                     self.emit_args("mov", &[param, &register.with_ty(ty)]);
@@ -455,9 +457,11 @@ impl<'a> Codegen<'a> {
                 [first, second] => {
                     self.emit_args("mov", &[param, first]);
                     let slot = param.slot().offset(8);
-                    // TODO: This unconditionally writes 8 bytes, regardless of the actual size of
-                    // the struct. Can this overwrite unrelated objects?
-                    self.emit_args("mov", &[&typed(slot, Type::size_t()), second]);
+                    for i in 0..param.ty.ty.size() - 8 {
+                        let slot = typed(slot.offset(i), Type::char());
+                        self.emit_args("mov", &[&slot, &second.with_ty(&Type::char())]);
+                        self.emit_args("shr", &[second, &8]);
+                    }
                 }
                 _ => unreachable!(),
             }
@@ -1033,7 +1037,7 @@ impl<'a> Codegen<'a> {
                             false => self.load_function_argument(arg.slot, size, register),
                         },
                         [first, second] => {
-                            self.emit_args("mov", &[first, &typed(arg.slot, Type::size_t())]);
+                            self.emit_args("mov", &[first, arg]);
                             self.load_function_argument(arg.slot.offset(8), size - 8, second);
                         }
                         _ => unreachable!(),
