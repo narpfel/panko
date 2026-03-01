@@ -1,0 +1,49 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/struct/test_error_invalid_ternary.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/struct/test_error_invalid_ternary.c"
+   (struct Complete~1
+      (member x `int`))
+   (struct Other~2
+      (member x `int`))
+   (declaration returns_incomplete~3 `fn() -> ptr<struct Incomplete~0>` ∅)
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (struct Complete~1
+            (member x `int`))
+         (declaration complete~5 `struct Complete~1 complete` (braced ∅))
+         (struct Other~2
+            (member x `int`))
+         (declaration other~6 `struct Other~2 complete` (braced ∅))
+         (expression
+            (conditional
+               false
+               (deref (call (name returns_incomplete~3 `fn() -> ptr<struct Incomplete~0>`)))
+               42))
+         (expression
+            (conditional
+               true
+               42
+               (deref (call (name returns_incomplete~3 `fn() -> ptr<struct Incomplete~0>`)))))
+         (expression
+            (conditional
+               true
+               (name complete~5 `struct Complete~1 complete`)
+               (name other~6 `struct Other~2 complete`)))
+         (expression
+            (conditional
+               false
+               42
+               (name complete~5 `struct Complete~1 complete`))))))
+
+----- stderr -----

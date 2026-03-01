@@ -1,0 +1,81 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/struct/test_error_invalid_ternary.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: dereference of pointer to incomplete type `struct Incomplete~0`
+    ╭─[panko/tests/cases/struct/test_error_invalid_ternary.c:17:14]
+    │
+ 17 │     false ? *returns_incomplete() : 42;
+    │              ──────────┬─────────  
+    │                        ╰─────────── this expression has type `ptr<struct Incomplete~0>`
+────╯
+
+Error: invalid implicit conversion from `int` to `struct Incomplete~0`
+    ╭─[panko/tests/cases/struct/test_error_invalid_ternary.c:17:37]
+    │
+ 17 │     false ? *returns_incomplete() : 42;
+    │                                     ─┬  
+    │                                      ╰── this is of type `int`, which cannot be implicitly converted to `struct Incomplete~0`
+────╯
+
+Error: invalid implicit conversion from `struct Incomplete~0` to `int`
+    ╭─[panko/tests/cases/struct/test_error_invalid_ternary.c:18:17]
+    │
+ 18 │     true ? 42 : *returns_incomplete();
+    │                 ──────────┬──────────  
+    │                           ╰──────────── this is of type `struct Incomplete~0`, which cannot be implicitly converted to `int`
+────╯
+
+Error: dereference of pointer to incomplete type `struct Incomplete~0`
+    ╭─[panko/tests/cases/struct/test_error_invalid_ternary.c:18:18]
+    │
+ 18 │     true ? 42 : *returns_incomplete();
+    │                  ──────────┬─────────  
+    │                            ╰─────────── this expression has type `ptr<struct Incomplete~0>`
+────╯
+
+Error: incompatible operand types in conditional expression
+    ╭─[panko/tests/cases/struct/test_error_invalid_ternary.c:19:10]
+    │
+ 19 │     true ? complete : other;
+    │          ─ ────┬───   ──┬──  
+    │                │        ╰──── this is of type `struct Other~2 complete`
+    │                │             
+    │                ╰───────────── this is of type `struct Complete~1 complete`
+────╯
+
+Error: invalid implicit conversion from `struct Other~2 complete` to `struct Complete~1 complete`
+    ╭─[panko/tests/cases/struct/test_error_invalid_ternary.c:19:23]
+    │
+ 19 │     true ? complete : other;
+    │                       ──┬──  
+    │                         ╰──── this is of type `struct Other~2 complete`, which cannot be implicitly converted to `struct Complete~1 complete`
+────╯
+
+Error: incompatible operand types in conditional expression
+    ╭─[panko/tests/cases/struct/test_error_invalid_ternary.c:20:11]
+    │
+ 20 │     false ? 42 : complete;
+    │           ─ ─┬   ────┬───  
+    │              │       ╰───── this is of type `struct Complete~1 complete`
+    │              │             
+    │              ╰───────────── this is of type `int`
+────╯
+
+Error: invalid implicit conversion from `struct Complete~1 complete` to `int`
+    ╭─[panko/tests/cases/struct/test_error_invalid_ternary.c:20:18]
+    │
+ 20 │     false ? 42 : complete;
+    │                  ────┬───  
+    │                      ╰───── this is of type `struct Complete~1 complete`, which cannot be implicitly converted to `int`
+────╯

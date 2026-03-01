@@ -1,0 +1,57 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_member_access_in_ternary.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_member_access_in_ternary.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct Struct~1
+      (member x @0 `int`))
+   (function-definition external
+      main~2 `fn() -> int`
+      (compound-statement
+         (struct Struct~1
+            (member x @0 `int`))
+         (definition value~3 `struct Struct~1 complete`
+            (braced
+               (subobject +0 (42 `int`))))
+         (struct Struct~1
+            (member x @0 `int`))
+         (definition other~4 `struct Struct~1 complete`
+            (braced
+               (subobject +0 (27 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (member `int` x +0
+                  (conditional `struct Struct~1 complete` `struct Struct~1 complete`
+                     (true `bool`)
+                     (value~3 `struct Struct~1 complete`)
+                     (other~4 `struct Struct~1 complete`)))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (member `int` x +0
+                  (conditional `struct Struct~1 complete` `struct Struct~1 complete`
+                     (false `bool`)
+                     (value~3 `struct Struct~1 complete`)
+                     (other~4 `struct Struct~1 complete`))))))))
+
+----- stderr -----

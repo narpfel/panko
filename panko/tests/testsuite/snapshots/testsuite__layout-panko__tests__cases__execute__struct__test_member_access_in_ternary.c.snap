@@ -1,0 +1,57 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_member_access_in_ternary.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_member_access_in_ternary.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (struct Struct~1
+      (member x @0 `int`))
+   (function-definition external stack-size=56
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (struct Struct~1
+            (member x @0 `int`))
+         (definition (value~3 `struct Struct~1 complete` @0)
+            (braced
+               (subobject +0 (42 `int` @0))))
+         (struct Struct~1
+            (member x @0 `int`))
+         (definition (other~4 `struct Struct~1 complete` @4)
+            (braced
+               (subobject +0 (27 `int` @4))))
+         (expression
+            (call `int` @8
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 4>>` @24
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (member `int` @32 x +0
+                  (conditional `struct Struct~1 complete` @void
+                     (1 `bool` @32)
+                     (value~3 `struct Struct~1 complete` @0)
+                     (other~4 `struct Struct~1 complete` @4)))))
+         (expression
+            (call `int` @8
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 4>>` @24
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (member `int` @32 x +0
+                  (conditional `struct Struct~1 complete` @void
+                     (0 `bool` @32)
+                     (value~3 `struct Struct~1 complete` @0)
+                     (other~4 `struct Struct~1 complete` @4))))))))
+
+----- stderr -----

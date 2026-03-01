@@ -2290,10 +2290,23 @@ fn typeck_expression<'a>(
                 | (ty @ Type::Pointer(_), Type::Nullptr) => ty,
                 (Type::Struct(Struct::Incomplete { name: _, id: _ }), _)
                 | (_, Type::Struct(Struct::Incomplete { name: _, id: _ })) =>
-                    unreachable!("incomplete"),
-                (Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })), _)
-                | (_, Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ }))) =>
-                    todo!("check complete struct in ternary"),
+                // TODO: this is used in error recovery, should this also emit an error?
+                    then.ty.ty,
+                (
+                    Type::Struct(Struct::Complete(Complete { name: _, id: lhs_id, members: _ })),
+                    Type::Struct(Struct::Complete(Complete { name: _, id: rhs_id, members: _ })),
+                ) if lhs_id == rhs_id => then.ty.ty,
+                (Type::Struct(Struct::Complete(_)), _)
+                | (_, ty::Type::Struct(Struct::Complete(_))) => {
+                    // TODO: use this error
+                    let () = sess.emit(Diagnostic::ConditionalExprOperandTypesIncompatible {
+                        at: *question_mark,
+                        note: None,
+                        then,
+                        or_else,
+                    });
+                    then.ty.ty
+                }
             };
             let result_ty = result_ty.unqualified();
             TypedExpression {
