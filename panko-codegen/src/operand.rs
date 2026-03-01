@@ -16,6 +16,7 @@ use crate::Register;
 use crate::StaticId;
 use crate::SubobjectAtReference;
 use crate::TypedRegister;
+use crate::TypedSlot;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) enum Offset<'a> {
@@ -126,27 +127,19 @@ impl<'a> Operand<'a> {
         Self::lvalue(register, ty.ty)
     }
 
-    pub(super) fn stack_parameter_eightbyte(ty: Type<'a>, index: usize, stack_size: u64) -> Self {
-        assert!(
-            ty.size() <= 8,
-            "TODO: handle parameters that are not class INTEGER",
-        );
+    pub(super) fn stack_parameter_eightbyte(ty: Type<'a>, index: u64, stack_size: u64) -> Self {
         let offset =
             // skip the callee’s stack
             stack_size
             // skip return address
             + 8
             // each eightbyte is eight bytes large
-            + u64::try_from(index).unwrap() * 8;
+            + index * 8;
         Self::pointer_into_stack(ty, offset)
     }
 
-    pub(super) fn stack_argument_eightbyte(ty: Type<'a>, index: usize) -> Self {
-        assert!(
-            ty.size() <= 8,
-            "TODO: handle arguments that are not class INTEGER",
-        );
-        Self::pointer_into_stack(ty, u64::try_from(index).unwrap() * 8)
+    pub(super) fn stack_argument_eightbyte(ty: Type<'a>, index: u64) -> Self {
+        Self::pointer_into_stack(ty, index * 8)
     }
 
     pub(super) fn ty(&self) -> &Type<'a> {
@@ -247,6 +240,16 @@ impl<'a> AsOperand<'a> for LayoutedExpression<'a> {
 
     fn size(&self) -> u64 {
         self.ty.ty.size()
+    }
+}
+
+impl<'a> AsOperand<'a> for TypedSlot<'a> {
+    fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
+        slot_as_operand(self.slot, self.ty, argument_area_size.unwrap(), false)
+    }
+
+    fn size(&self) -> u64 {
+        self.ty.size()
     }
 }
 

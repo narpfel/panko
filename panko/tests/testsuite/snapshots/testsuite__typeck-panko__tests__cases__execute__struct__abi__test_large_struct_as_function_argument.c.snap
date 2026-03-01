@@ -1,0 +1,97 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/abi/test_large_struct_as_function_argument.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/abi/test_large_struct_as_function_argument.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct Large~1
+      (member x @0 `int`)
+      (member string @8 `ptr<char const>`)
+      (member xs @16 `array<int; 5>`))
+   (function-definition external
+      print_large~2 `fn(large: struct Large~1 complete) -> void`
+      (params
+         large~3 `struct Large~1 complete`)
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 103>>`
+                        (string `array<char; 103>` "struct Large {\n    int x = %d;\n    char const* string = \"%s\";\n    int xs[5] = {%d, %d, %d, %d, %d};\n}\n\0"))))
+               (member `int` x +0
+                  (large~3 `struct Large~1 complete`))
+               (member `ptr<char const>` string +8
+                  (large~3 `struct Large~1 complete`))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; 5>>`
+                           (member `array<int; 5>` xs +16
+                              (large~3 `struct Large~1 complete`))))
+                     (sign-extend `unsigned long` (0 `int`))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; 5>>`
+                           (member `array<int; 5>` xs +16
+                              (large~3 `struct Large~1 complete`))))
+                     (sign-extend `unsigned long` (1 `int`))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; 5>>`
+                           (member `array<int; 5>` xs +16
+                              (large~3 `struct Large~1 complete`))))
+                     (sign-extend `unsigned long` (2 `int`))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; 5>>`
+                           (member `array<int; 5>` xs +16
+                              (large~3 `struct Large~1 complete`))))
+                     (sign-extend `unsigned long` (3 `int`))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; 5>>`
+                           (member `array<int; 5>` xs +16
+                              (large~3 `struct Large~1 complete`))))
+                     (sign-extend `unsigned long` (4 `int`))))))))
+   (function-definition external
+      main~4 `fn() -> int`
+      (compound-statement
+         (struct Large~1
+            (member x @0 `int`)
+            (member string @8 `ptr<char const>`)
+            (member xs @16 `array<int; 5>`))
+         (definition large~5 `struct Large~1 complete`
+            (braced
+               (subobject +0 (42 `int`))
+               (subobject +8
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 12>>`
+                           (string `array<char; 12>` "hello world\0")))))
+               (subobject +16 (1 `int`))
+               (subobject +20 (2 `int`))
+               (subobject +24 (3 `int`))
+               (subobject +28 (4 `int`))
+               (subobject +32 (5 `int`))))
+         (expression
+            (call `void`
+               (addressof `ptr<fn(large: struct Large~1 complete) -> void>`
+                  (print_large~2 `fn(large: struct Large~1 complete) -> void`))
+               (large~5 `struct Large~1 complete`))))))
+
+----- stderr -----

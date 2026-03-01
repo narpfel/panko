@@ -15,7 +15,6 @@ use std::mem;
 
 use indexmap::IndexMap;
 use indexmap::IndexSet;
-use itertools::EitherOrBoth;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_parser::BinOpKind;
@@ -42,7 +41,9 @@ use panko_sema::layout::Type;
 use panko_sema::scope::Linkage;
 use panko_sema::scope::RefKind;
 use panko_sema::ty::ArrayType;
+use panko_sema::ty::Class;
 use panko_sema::ty::Complete;
+use panko_sema::ty::PairKind;
 use panko_sema::ty::Struct;
 use panko_sema::typecheck::ArrayLength;
 use panko_sema::typecheck::Member;
@@ -134,15 +135,6 @@ impl Register {
 
 impl Display for TypedRegister<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let size = match self.ty {
-            Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => self.ty.size(),
-            Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
-            Type::Typeof { expr, unqual: _ } => match *expr {},
-            Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
-                todo!("register for complete struct (is this unreachable?)"),
-        };
-
         let names = match self.register {
             Rax => ["al", "ax", "eax", "rax"],
             Rcx => ["cl", "cx", "ecx", "rcx"],
@@ -155,7 +147,7 @@ impl Display for TypedRegister<'_, '_> {
             R10 => ["r10b", "r10w", "r10d", "r10"],
             Rip => ["there_is_no_8_bit_version_of_rip", "ip", "eip", "rip"],
         };
-        let index = match size {
+        let index = match self.ty.size() {
             1 => 0,
             2 => 1,
             4 => 2,
@@ -226,6 +218,70 @@ impl<'a> From<&'a Initialiser<'a>> for StaticInitialiser<'a> {
 enum ShouldZero {
     No,
     Yes,
+}
+
+trait HasType<'a> {
+    fn ty(&self) -> &Type<'a>;
+}
+
+impl<'a> HasType<'a> for LayoutedExpression<'a> {
+    fn ty(&self) -> &Type<'a> {
+        &self.ty.ty
+    }
+}
+
+impl<'a> HasType<'a> for Reference<'a> {
+    fn ty(&self) -> &Type<'a> {
+        &self.ty.ty
+    }
+}
+
+struct InRegisters<'a, T> {
+    item: &'a T,
+    registers: &'static [Register],
+}
+
+struct OnStack<'a, T> {
+    item: &'a T,
+    eightbyte_index: u64,
+}
+
+fn compute_call_abi<'a, T>(items: &[T]) -> (Vec<InRegisters<T>>, Vec<OnStack<T>>)
+where
+    T: HasType<'a>,
+{
+    items
+        .iter()
+        .scan((0, 0), |(registers_used, stack_eightbytes_used), item| {
+            let mut pass_on_stack = || {
+                let eightbyte_size = item.ty().eightbyte_size();
+                let eightbyte_index = *stack_eightbytes_used;
+                *stack_eightbytes_used += eightbyte_size;
+                Some(Err(OnStack { item, eightbyte_index }))
+            };
+
+            let mut pass_in_registers = |register_count| {
+                let registers = ARGUMENT_REGISTERS[*registers_used..].get(..register_count)?;
+                *registers_used += register_count;
+                Some(Ok(InRegisters { item, registers }))
+            };
+
+            match item.ty().classify() {
+                Class::Integer => pass_in_registers(1).or_else(pass_on_stack),
+                Class::Memory => pass_on_stack(),
+                Class::Pair(PairKind::Integer) => pass_in_registers(2).or_else(pass_on_stack),
+            }
+        })
+        .partition_result()
+}
+
+struct TypedSlot<'a> {
+    slot: Slot<'a>,
+    ty: Type<'a>,
+}
+
+fn typed<'a>(slot: Slot<'a>, ty: Type<'a>) -> TypedSlot<'a> {
+    TypedSlot { slot, ty }
 }
 
 #[derive(Debug, Default)]
@@ -383,28 +439,38 @@ impl<'a> Codegen<'a> {
         self.emit_args("sub", &[&Rsp, &def.stack_size]);
         self.current_function = Some(def);
 
-        for (i, parameter) in def
-            .params
-            .0
-            .iter()
-            .zip_longest(ARGUMENT_REGISTERS)
-            .enumerate()
-        {
-            match parameter {
-                EitherOrBoth::Both(param, register) =>
-                    self.emit_args("mov", &[param, &register.with_ty(&param.ty.ty)]),
-                EitherOrBoth::Left(param) => {
-                    self.copy(
-                        param,
-                        &Operand::stack_parameter_eightbyte(
-                            param.ty.ty,
-                            i - ARGUMENT_REGISTERS.len(),
-                            def.stack_size,
-                        ),
-                    );
+        let (register_parameters, memory_parameters) = compute_call_abi(def.params.0);
+
+        // Store the register-passed arguments first because copying the stack-passed ones clobbers
+        // `rdi`, `rsi` and `rcx`.
+        for InRegisters { item: param, registers } in register_parameters {
+            match registers {
+                [register] => {
+                    let ty = match param.ty.ty.size().is_power_of_two() {
+                        true => &param.ty.ty,
+                        // TODO: This unconditionally writes 8 bytes, regardless of the actual size
+                        // of the object. Can this overwrite unrelated objects?
+                        false => &Type::size_t(),
+                    };
+                    self.emit_args("mov", &[param, &register.with_ty(ty)]);
                 }
-                EitherOrBoth::Right(_) => break,
+                [first, second] => {
+                    self.emit_args("mov", &[param, first]);
+                    let slot = param.slot().offset(8);
+                    for i in 0..param.ty.ty.size() - 8 {
+                        let slot = typed(slot.offset(i), Type::char());
+                        self.emit_args("mov", &[&slot, &second.with_ty(&Type::char())]);
+                        self.emit_args("shr", &[second, &8]);
+                    }
+                }
+                _ => unreachable!(),
             }
+        }
+
+        for OnStack { item: param, eightbyte_index } in memory_parameters {
+            let src =
+                &Operand::stack_parameter_eightbyte(param.ty.ty, eightbyte_index, def.stack_size);
+            self.copy(param, src)
         }
 
         self.compound_statement(def.body);
@@ -949,23 +1015,32 @@ impl<'a> Codegen<'a> {
             }
             Expression::Call { callee, args, is_varargs } => {
                 self.expr(callee);
+
                 for arg in args {
                     self.expr(arg);
                 }
-                for (i, argument) in args.iter().zip_longest(ARGUMENT_REGISTERS).enumerate() {
-                    match argument {
-                        EitherOrBoth::Both(arg, register) =>
-                            self.emit_args("mov", &[&register.typed(arg), arg]),
-                        EitherOrBoth::Left(arg) => {
-                            self.copy(
-                                &Operand::stack_argument_eightbyte(
-                                    arg.ty.ty,
-                                    i - ARGUMENT_REGISTERS.len(),
-                                ),
-                                arg,
-                            );
+
+                let (register_arguments, memory_arguments) = compute_call_abi(args);
+
+                // We have to copy the stack-passed args before loading the register-passed args
+                // because `memcpy` clobbers `rdi`, `rsi` and `rcx`.
+                for OnStack { item: arg, eightbyte_index } in memory_arguments {
+                    let tgt = &Operand::stack_argument_eightbyte(arg.ty.ty, eightbyte_index);
+                    self.copy(tgt, arg)
+                }
+
+                for InRegisters { item: arg, registers } in register_arguments {
+                    let size = arg.ty.ty.size();
+                    match registers {
+                        [register] => match size.is_power_of_two() {
+                            true => self.emit_args("mov", &[&register.typed(arg), arg]),
+                            false => self.load_function_argument(arg.slot, size, register),
+                        },
+                        [first, second] => {
+                            self.emit_args("mov", &[first, arg]);
+                            self.load_function_argument(arg.slot.offset(8), size - 8, second);
                         }
-                        EitherOrBoth::Right(_) => break,
+                        _ => unreachable!(),
                     }
                 }
 
@@ -1043,6 +1118,17 @@ impl<'a> Codegen<'a> {
                 let member = self.member_pointer(member);
                 self.copy(expr, &*member);
             }
+        }
+    }
+
+    fn load_function_argument(&mut self, slot: Slot<'a>, size: u64, register: &Register) {
+        debug_assert_ne!(*register, Rax);
+        self.emit_args("xor", &[register, register]);
+        for i in (0..size).rev() {
+            self.emit_args("shl", &[register, &8]);
+            let slot = typed(slot.offset(i), Type::char());
+            self.emit_args("movzx", &[&Rax.with_ty(&Type::size_t()), &slot]);
+            self.emit_args("or", &[register, &Rax]);
         }
     }
 

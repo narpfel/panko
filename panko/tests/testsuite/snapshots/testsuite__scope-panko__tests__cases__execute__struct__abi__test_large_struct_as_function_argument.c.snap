@@ -1,0 +1,72 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/abi/test_large_struct_as_function_argument.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/abi/test_large_struct_as_function_argument.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct Large~1
+      (member x `int`)
+      (member string `ptr<char const>`)
+      (member xs `array<int; 5>`))
+   (function-definition
+      print_large~2 `fn(large: struct Large~1 complete) -> void`
+      (params
+         large~3 `struct Large~1 complete`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "struct Large {\n" "    int x = %d;\n" "    char const* string = \"%s\";\n" "    int xs[5] = {%d, %d, %d, %d, %d};\n" "}\n")
+               (dot x
+                  (name large~3 `struct Large~1 complete`))
+               (dot string
+                  (name large~3 `struct Large~1 complete`))
+               (subscript
+                  (dot xs
+                     (name large~3 `struct Large~1 complete`))
+                  0)
+               (subscript
+                  (dot xs
+                     (name large~3 `struct Large~1 complete`))
+                  1)
+               (subscript
+                  (dot xs
+                     (name large~3 `struct Large~1 complete`))
+                  2)
+               (subscript
+                  (dot xs
+                     (name large~3 `struct Large~1 complete`))
+                  3)
+               (subscript
+                  (dot xs
+                     (name large~3 `struct Large~1 complete`))
+                  4)))))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (struct Large~1
+            (member x `int`)
+            (member string `ptr<char const>`)
+            (member xs `array<int; 5>`))
+         (declaration large~5 `struct Large~1 complete`
+            (braced
+               42
+               (string "hello world")
+               (braced
+                  1
+                  2
+                  3
+                  4
+                  5)))
+         (expression
+            (call (name print_large~2 `fn(large: struct Large~1 complete) -> void`)
+               (name large~5 `struct Large~1 complete`))))))
+
+----- stderr -----
