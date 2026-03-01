@@ -2247,7 +2247,9 @@ fn typeck_expression<'a>(
             let result_ty = match (then.ty.ty, or_else.ty.ty) {
                 (Type::Arithmetic(then_ty), Type::Arithmetic(or_else_ty)) =>
                     Type::Arithmetic(perform_usual_arithmetic_conversions(then_ty, or_else_ty)),
+
                 (Type::Void, Type::Void) => Type::Void,
+
                 (Type::Pointer(then_pointee), Type::Pointer(or_else_pointee))
                     if then_pointee.ty == or_else_pointee.ty
                         || then_pointee.ty == Type::Void
@@ -2261,6 +2263,7 @@ fn typeck_expression<'a>(
                         },
                         loc: HashEqIgnored(Loc::synthesised()),
                     })),
+
                 (Type::Pointer(_), Type::Pointer(_)) => {
                     // TODO: use this error
                     let () = sess.emit(Diagnostic::ConditionalExprOperandTypesIncompatible {
@@ -2271,8 +2274,11 @@ fn typeck_expression<'a>(
                     });
                     then.ty.ty
                 }
+
                 (Type::Array(_), _) | (_, Type::Array(_)) => unreachable!(),
+
                 (Type::Function(_), _) | (_, Type::Function(_)) => unreachable!(),
+
                 (Type::Arithmetic(_), Type::Pointer(_) | Type::Void | Type::Nullptr)
                 | (Type::Pointer(_), Type::Arithmetic(_) | Type::Void)
                 | (Type::Void, _)
@@ -2286,16 +2292,20 @@ fn typeck_expression<'a>(
                     });
                     then.ty.ty
                 }
+
                 (Type::Nullptr, ty @ (Type::Pointer(_) | Type::Nullptr))
                 | (ty @ Type::Pointer(_), Type::Nullptr) => ty,
+
                 (Type::Struct(Struct::Incomplete { name: _, id: _ }), _)
                 | (_, Type::Struct(Struct::Incomplete { name: _, id: _ })) =>
                 // TODO: this is used in error recovery, should this also emit an error?
                     then.ty.ty,
+
                 (
                     Type::Struct(Struct::Complete(Complete { name: _, id: lhs_id, members: _ })),
                     Type::Struct(Struct::Complete(Complete { name: _, id: rhs_id, members: _ })),
                 ) if lhs_id == rhs_id => then.ty.ty,
+
                 (Type::Struct(Struct::Complete(_)), _)
                 | (_, ty::Type::Struct(Struct::Complete(_))) => {
                     // TODO: use this error
