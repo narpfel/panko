@@ -632,7 +632,9 @@ fn layout_expression_in_slot<'a>(
             (slot, Expression::Logical { lhs, op, rhs })
         }
         typecheck::Expression::Conditional { condition, then, or_else } => {
-            let slot = make_slot();
+            let slot = target_slot
+                .filter(|slot| !matches!(slot, Slot::Void))
+                .unwrap_or_else(|| stack.temporary(ty.ty));
             let then = bump.alloc(layout_expression_in_slot(stack, bump, then, Some(slot)));
             let or_else = bump.alloc(layout_expression_in_slot(stack, bump, or_else, Some(slot)));
             let condition =

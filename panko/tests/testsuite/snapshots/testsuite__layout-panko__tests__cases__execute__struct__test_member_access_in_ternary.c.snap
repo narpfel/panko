@@ -36,8 +36,8 @@ exit_code: 0
                      (addressof `ptr<array<char; 4>>` @24
                         (string `array<char; 4>` @void "%d\n\0"))))
                (member `int` @32 x +0
-                  (conditional `struct Struct~1 complete` @void
-                     (1 `bool` @32)
+                  (conditional `struct Struct~1 complete` @32
+                     (1 `bool` @36)
                      (value~3 `struct Struct~1 complete` @0)
                      (other~4 `struct Struct~1 complete` @4)))))
          (expression
@@ -49,8 +49,8 @@ exit_code: 0
                      (addressof `ptr<array<char; 4>>` @24
                         (string `array<char; 4>` @void "%d\n\0"))))
                (member `int` @32 x +0
-                  (conditional `struct Struct~1 complete` @void
-                     (0 `bool` @32)
+                  (conditional `struct Struct~1 complete` @32
+                     (0 `bool` @36)
                      (value~3 `struct Struct~1 complete` @0)
                      (other~4 `struct Struct~1 complete` @4))))))))
 
