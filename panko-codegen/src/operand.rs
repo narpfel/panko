@@ -105,21 +105,11 @@ impl<'a> Operand<'a> {
         }
     }
 
-    pub(super) fn lvalue(register: Register, ty: Type<'a>) -> Operand<'a> {
-        Self {
-            kind: OperandKind::Pointer {
-                address: Memory {
-                    pointer: register,
-                    index: None,
-                    offset: Offset::Immediate(0),
-                },
-                is_dereferenced: false,
-            },
-            ty,
-        }
+    pub(super) fn lvalue(register: Register, ty: Type<'a>) -> LValue<'a> {
+        LValue::new(register, ty)
     }
 
-    pub(super) fn pointer(register: Register, expr: &LayoutedExpression<'a>) -> Self {
+    pub(super) fn pointer(register: Register, expr: &LayoutedExpression<'a>) -> LValue<'a> {
         let Type::Pointer(ty) = expr.ty.ty
         else {
             unreachable!()
@@ -186,6 +176,45 @@ impl fmt::Display for Operand<'_> {
             }
             OperandKind::Immediate(imm) => write!(f, "{imm}"),
             OperandKind::Label(id) => write!(f, "{id}"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(super) struct LValue<'a> {
+    register: Register,
+    ty: Type<'a>,
+    offset: u64,
+}
+
+impl<'a> LValue<'a> {
+    fn new(register: Register, ty: Type<'a>) -> Self {
+        Self { register, ty, offset: 0 }
+    }
+
+    pub(super) fn offset(self, additional_offset: u64) -> Self {
+        let Self { register, ty: _, offset } = self;
+        Self {
+            register,
+            ty: Type::char(),
+            offset: offset + additional_offset,
+        }
+    }
+}
+
+impl<'a> AsOperand<'a> for LValue<'a> {
+    fn as_operand(&self, _argument_area_size: Option<u64>) -> Operand<'a> {
+        let Self { register, ty, offset } = *self;
+        Operand {
+            kind: OperandKind::Pointer {
+                address: Memory {
+                    pointer: register,
+                    index: None,
+                    offset: Offset::Immediate(offset),
+                },
+                is_dereferenced: false,
+            },
+            ty,
         }
     }
 }

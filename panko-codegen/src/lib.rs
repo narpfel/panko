@@ -1034,11 +1034,11 @@ impl<'a> Codegen<'a> {
                     match registers {
                         [register] => match size.is_power_of_two() {
                             true => self.emit_args("mov", &[&register.typed(arg), arg]),
-                            false => self.load_function_argument(arg.slot, size, register),
+                            false => self.load_function_argument(arg, 0, register),
                         },
                         [first, second] => {
                             self.emit_args("mov", &[first, arg]);
-                            self.load_function_argument(arg.slot.offset(8), size - 8, second);
+                            self.load_function_argument(arg, 8, second);
                         }
                         _ => unreachable!(),
                     }
@@ -1121,13 +1121,22 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    fn load_function_argument(&mut self, slot: Slot<'a>, size: u64, register: &Register) {
+    fn load_function_argument(
+        &mut self,
+        from: &LayoutedExpression,
+        offset: u64,
+        register: &Register,
+    ) {
         debug_assert_ne!(*register, Rax);
+        debug_assert_ne!(*register, R10);
+        let size = from.ty.ty.size().strict_sub(offset);
+        self.emit_args("lea", &[&R10, from]);
+        let from = Operand::lvalue(R10, from.ty.ty);
         self.emit_args("xor", &[register, register]);
         for i in (0..size).rev() {
             self.emit_args("shl", &[register, &8]);
-            let slot = typed(slot.offset(i), Type::char());
-            self.emit_args("movzx", &[&Rax.with_ty(&Type::size_t()), &slot]);
+            let from = from.offset(offset + i);
+            self.emit_args("movzx", &[&Rax.with_ty(&Type::size_t()), &from]);
             self.emit_args("or", &[register, &Rax]);
         }
     }
