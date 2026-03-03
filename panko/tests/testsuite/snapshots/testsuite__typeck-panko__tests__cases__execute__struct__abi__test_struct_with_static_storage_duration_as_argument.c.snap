@@ -1,0 +1,109 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/abi/test_struct_with_static_storage_duration_as_argument.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/abi/test_struct_with_static_storage_duration_as_argument.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct Small~1
+      (member x @0 `int`)
+      (member y @4 `int`))
+   (struct Medium~2
+      (member x @0 `int`)
+      (member y @4 `int`)
+      (member z @8 `int`))
+   (struct Large~3
+      (member x @0 `long`)
+      (member y @8 `long`)
+      (member z @16 `long`))
+   (function-definition external
+      print_structs~4 `fn(small: struct Small~1 complete, medium: struct Medium~2 complete, large: struct Large~3 complete) -> void`
+      (params
+         small~5 `struct Small~1 complete`
+         medium~6 `struct Medium~2 complete`
+         large~7 `struct Large~3 complete`)
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (member `int` x +0
+                  (small~5 `struct Small~1 complete`))
+               (member `int` y +4
+                  (small~5 `struct Small~1 complete`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "%d %d %d\n\0"))))
+               (member `int` x +0
+                  (medium~6 `struct Medium~2 complete`))
+               (member `int` y +4
+                  (medium~6 `struct Medium~2 complete`))
+               (member `int` z +8
+                  (medium~6 `struct Medium~2 complete`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 13>>`
+                        (string `array<char; 13>` "%ld %ld %ld\n\0"))))
+               (member `long` x +0
+                  (large~7 `struct Large~3 complete`))
+               (member `long` y +8
+                  (large~7 `struct Large~3 complete`))
+               (member `long` z +16
+                  (large~7 `struct Large~3 complete`))))))
+   (struct Small~1
+      (member x @0 `int`)
+      (member y @4 `int`))
+   (definition external small~8 `struct Small~1 complete`
+      (braced
+         (subobject +0 (42 `int`))
+         (subobject +4 (27 `int`))))
+   (struct Medium~2
+      (member x @0 `int`)
+      (member y @4 `int`)
+      (member z @8 `int`))
+   (definition external medium~9 `struct Medium~2 complete`
+      (braced
+         (subobject +0 (1 `int`))
+         (subobject +4 (2 `int`))
+         (subobject +8 (3 `int`))))
+   (struct Large~3
+      (member x @0 `long`)
+      (member y @8 `long`)
+      (member z @16 `long`))
+   (definition external large~10 `struct Large~3 complete`
+      (braced
+         (subobject +0 (4l `long`))
+         (subobject +8 (5l `long`))
+         (subobject +16 (6l `long`))))
+   (function-definition external
+      main~11 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `void`
+               (addressof `ptr<fn(small: struct Small~1 complete, medium: struct Medium~2 complete, large: struct Large~3 complete) -> void>`
+                  (print_structs~4 `fn(small: struct Small~1 complete, medium: struct Medium~2 complete, large: struct Large~3 complete) -> void`))
+               (small~8 `struct Small~1 complete`)
+               (medium~9 `struct Medium~2 complete`)
+               (large~10 `struct Large~3 complete`))))))
+
+----- stderr -----

@@ -1,0 +1,92 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/abi/test_struct_with_static_storage_duration_as_argument.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/abi/test_struct_with_static_storage_duration_as_argument.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct Small~1
+      (member x `int`)
+      (member y `int`))
+   (struct Medium~2
+      (member x `int`)
+      (member y `int`)
+      (member z `int`))
+   (struct Large~3
+      (member x `long`)
+      (member y `long`)
+      (member z `long`))
+   (function-definition
+      print_structs~4 `fn(small: struct Small~1 complete, medium: struct Medium~2 complete, large: struct Large~3 complete) -> void`
+      (params
+         small~5 `struct Small~1 complete`
+         medium~6 `struct Medium~2 complete`
+         large~7 `struct Large~3 complete`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (dot x
+                  (name small~5 `struct Small~1 complete`))
+               (dot y
+                  (name small~5 `struct Small~1 complete`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (dot x
+                  (name medium~6 `struct Medium~2 complete`))
+               (dot y
+                  (name medium~6 `struct Medium~2 complete`))
+               (dot z
+                  (name medium~6 `struct Medium~2 complete`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%ld %ld %ld\n")
+               (dot x
+                  (name large~7 `struct Large~3 complete`))
+               (dot y
+                  (name large~7 `struct Large~3 complete`))
+               (dot z
+                  (name large~7 `struct Large~3 complete`))))))
+   (struct Small~1
+      (member x `int`)
+      (member y `int`))
+   (declaration small~8 `struct Small~1 complete`
+      (braced
+         42
+         27))
+   (struct Medium~2
+      (member x `int`)
+      (member y `int`)
+      (member z `int`))
+   (declaration medium~9 `struct Medium~2 complete`
+      (braced
+         1
+         2
+         3))
+   (struct Large~3
+      (member x `long`)
+      (member y `long`)
+      (member z `long`))
+   (declaration large~10 `struct Large~3 complete`
+      (braced
+         4l
+         5l
+         6l))
+   (function-definition
+      main~11 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name print_structs~4 `fn(small: struct Small~1 complete, medium: struct Medium~2 complete, large: struct Large~3 complete) -> void`)
+               (name small~8 `struct Small~1 complete`)
+               (name medium~9 `struct Medium~2 complete`)
+               (name large~10 `struct Large~3 complete`))))))
+
+----- stderr -----

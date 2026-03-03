@@ -1,0 +1,109 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/abi/test_struct_with_static_storage_duration_as_argument.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/abi/test_struct_with_static_storage_duration_as_argument.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (struct Small~1
+      (member x @0 `int`)
+      (member y @4 `int`))
+   (struct Medium~2
+      (member x @0 `int`)
+      (member y @4 `int`)
+      (member z @8 `int`))
+   (struct Large~3
+      (member x @0 `long`)
+      (member y @8 `long`)
+      (member z @16 `long`))
+   (function-definition external stack-size=88
+      (print_structs~4 `fn(small: struct Small~1 complete, medium: struct Medium~2 complete, large: struct Large~3 complete) -> void` (static print_structs))
+      (params
+         (small~5 `struct Small~1 complete` @0)
+         (medium~6 `struct Medium~2 complete` @8)
+         (large~7 `struct Large~3 complete` @24))
+      (compound-statement
+         (expression
+            (call `int` @48
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @64
+                  (noop-type-conversion `ptr<char>` @64
+                     (addressof `ptr<array<char; 7>>` @64
+                        (string `array<char; 7>` @void "%d %d\n\0"))))
+               (member `int` @0 x +0
+                  (small~5 `struct Small~1 complete` @0))
+               (member `int` @4 y +4
+                  (small~5 `struct Small~1 complete` @0))))
+         (expression
+            (call `int` @48
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @64
+                  (noop-type-conversion `ptr<char>` @64
+                     (addressof `ptr<array<char; 10>>` @64
+                        (string `array<char; 10>` @void "%d %d %d\n\0"))))
+               (member `int` @8 x +0
+                  (medium~6 `struct Medium~2 complete` @8))
+               (member `int` @12 y +4
+                  (medium~6 `struct Medium~2 complete` @8))
+               (member `int` @16 z +8
+                  (medium~6 `struct Medium~2 complete` @8))))
+         (expression
+            (call `int` @48
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @64
+                  (noop-type-conversion `ptr<char>` @64
+                     (addressof `ptr<array<char; 13>>` @64
+                        (string `array<char; 13>` @void "%ld %ld %ld\n\0"))))
+               (member `long` @24 x +0
+                  (large~7 `struct Large~3 complete` @24))
+               (member `long` @32 y +8
+                  (large~7 `struct Large~3 complete` @24))
+               (member `long` @40 z +16
+                  (large~7 `struct Large~3 complete` @24))))))
+   (struct Small~1
+      (member x @0 `int`)
+      (member y @4 `int`))
+   (definition external (small~8 `struct Small~1 complete` (static small))
+      (braced
+         (subobject +0 (42 `int` (static small +0)))
+         (subobject +4 (27 `int` (static small +4)))))
+   (struct Medium~2
+      (member x @0 `int`)
+      (member y @4 `int`)
+      (member z @8 `int`))
+   (definition external (medium~9 `struct Medium~2 complete` (static medium))
+      (braced
+         (subobject +0 (1 `int` (static medium +0)))
+         (subobject +4 (2 `int` (static medium +4)))
+         (subobject +8 (3 `int` (static medium +8)))))
+   (struct Large~3
+      (member x @0 `long`)
+      (member y @8 `long`)
+      (member z @16 `long`))
+   (definition external (large~10 `struct Large~3 complete` (static large))
+      (braced
+         (subobject +0 (4 `long` (static large +0)))
+         (subobject +8 (5 `long` (static large +8)))
+         (subobject +16 (6 `long` (static large +16)))))
+   (function-definition external stack-size=40
+      (main~11 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn(small: struct Small~1 complete, medium: struct Medium~2 complete, large: struct Large~3 complete) -> void>` @0
+                  (print_structs~4 `fn(small: struct Small~1 complete, medium: struct Medium~2 complete, large: struct Large~3 complete) -> void` (static print_structs)))
+               (small~8 `struct Small~1 complete` (static small))
+               (medium~9 `struct Medium~2 complete` (static medium))
+               (large~10 `struct Large~3 complete` (static large)))))))
+
+----- stderr -----
