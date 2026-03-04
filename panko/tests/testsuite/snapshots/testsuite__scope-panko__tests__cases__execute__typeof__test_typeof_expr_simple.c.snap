@@ -16,27 +16,27 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (declaration x~3 `unsigned long` 42)
-         (declaration y~4 `typeof((name x~3 `unsigned long`))` 27)
+         (declaration x~4 `unsigned long` 42)
+         (declaration y~5 `typeof((name x~4 `unsigned long`))` 27)
          (expression
             (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
                (generic
-                  (add (name x~3 `unsigned long`) (name y~4 `typeof((name x~3 `unsigned long`))`))
-                  (assoc `typeof((add (name x~3 `unsigned long`) (name y~4 `typeof((name x~3 `unsigned long`))`)))` (string "it works")))))
-         (declaration p~5 `ptr<typeof((add (name x~3 `unsigned long`) (name y~4 `typeof((name x~3 `unsigned long`))`))) const> const` (addressof (name x~3 `unsigned long`)))
-         (declaration xs~6 `array<typeof((name x~3 `unsigned long`)); 10>` (braced ∅))
+                  (add (name x~4 `unsigned long`) (name y~5 `typeof((name x~4 `unsigned long`))`))
+                  (assoc `typeof((add (name x~4 `unsigned long`) (name y~5 `typeof((name x~4 `unsigned long`))`)))` (string "it works")))))
+         (declaration p~6 `ptr<typeof((add (name x~4 `unsigned long`) (name y~5 `typeof((name x~4 `unsigned long`))`))) const> const` (addressof (name x~4 `unsigned long`)))
+         (declaration xs~7 `array<typeof((name x~4 `unsigned long`)); 10>` (braced ∅))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (lengthof (name xs~6 `array<typeof((name x~3 `unsigned long`)); 10>`))))
+               (lengthof (name xs~7 `array<typeof((name x~4 `unsigned long`)); 10>`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (lengthof `typeof((name xs~6 `array<typeof((name x~3 `unsigned long`)); 10>`))`)))
+               (lengthof `typeof((name xs~7 `array<typeof((name x~4 `unsigned long`)); 10>`))`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (sizeof `array<typeof((name x~3 `unsigned long`)); 5>`)))
-         (return (deref (name p~5 `ptr<typeof((add (name x~3 `unsigned long`) (name y~4 `typeof((name x~3 `unsigned long`))`))) const> const`))))))
+               (sizeof `array<typeof((name x~4 `unsigned long`)); 5>`)))
+         (return (deref (name p~6 `ptr<typeof((add (name x~4 `unsigned long`) (name y~5 `typeof((name x~4 `unsigned long`))`))) const> const`))))))
 
 ----- stderr -----

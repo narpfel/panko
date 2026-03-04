@@ -22,7 +22,7 @@ exit_code: 0
                   (exit~0 `fn(∅: int) -> void`))
                (42 `int`)))))
    (function-definition external
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
          (expression
             (call `void`

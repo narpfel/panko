@@ -15,15 +15,15 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration printf~2 `fn(∅: ptr<char const>, ...) -> int` ∅)
-         (declaration x~3 `int` ∅)
+         (declaration printf~3 `fn(∅: ptr<char const>, ...) -> int` ∅)
+         (declaration x~4 `int` ∅)
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (string "it works")))
          (expression
-            (call (name printf~2 `fn(∅: ptr<char const>, ...) -> int`)
+            (call (name printf~3 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (name x~3 `int`)))))
-   (declaration x~4 `int` 42))
+               (name x~4 `int`)))))
+   (declaration x~5 `int` 42))
 
 ----- stderr -----

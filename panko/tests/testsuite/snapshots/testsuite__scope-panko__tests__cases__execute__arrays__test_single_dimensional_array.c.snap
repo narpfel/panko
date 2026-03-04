@@ -14,10 +14,10 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration xs~1 `array<int; 42>` ∅)
-         (expression (assign (subscript (name xs~1 `array<int; 42>`) 0) 1))
-         (expression (assign (subscript (name xs~1 `array<int; 42>`) 1) 2))
-         (expression (assign (subscript (name xs~1 `array<int; 42>`) 41) 3))
-         (return (add (subscript (name xs~1 `array<int; 42>`) 1) (subscript (name xs~1 `array<int; 42>`) 41))))))
+         (declaration xs~2 `array<int; 42>` ∅)
+         (expression (assign (subscript (name xs~2 `array<int; 42>`) 0) 1))
+         (expression (assign (subscript (name xs~2 `array<int; 42>`) 1) 2))
+         (expression (assign (subscript (name xs~2 `array<int; 42>`) 41) 3))
+         (return (add (subscript (name xs~2 `array<int; 42>`) 1) (subscript (name xs~2 `array<int; 42>`) 41))))))
 
 ----- stderr -----

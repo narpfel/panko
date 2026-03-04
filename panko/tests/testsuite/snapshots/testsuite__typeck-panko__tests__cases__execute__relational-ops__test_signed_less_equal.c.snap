@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `int` (42 `int`))
-         (definition b~2 `int` (27 `int`))
-         (return (add `int` (less-equal `int` `int` (b~2 `int`) (a~1 `int`)) (less-equal `int` `int` (b~2 `int`) (27 `int`)))))))
+         (definition a~2 `int` (42 `int`))
+         (definition b~3 `int` (27 `int`))
+         (return (add `int` (less-equal `int` `int` (b~3 `int`) (a~2 `int`)) (less-equal `int` `int` (b~3 `int`) (27 `int`)))))))
 
 ----- stderr -----

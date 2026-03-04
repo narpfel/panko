@@ -21,8 +21,8 @@ exit_code: 0
    (function-definition
       f~0 `fn(x: int) -> int`
       (params
-         x~3 `int`)
+         x~5 `int`)
       (compound-statement
-         (return (name x~3 `int`)))))
+         (return (name x~5 `int`)))))
 
 ----- stderr -----

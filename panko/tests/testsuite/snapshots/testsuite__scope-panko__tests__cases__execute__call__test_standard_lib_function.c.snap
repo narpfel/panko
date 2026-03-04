@@ -14,10 +14,10 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration isalnum~1 `fn(∅: int) -> int` ∅)
+         (declaration isalnum~2 `fn(∅: int) -> int` ∅)
          (return
             (not-equal
-               (call (name isalnum~1 `fn(∅: int) -> int`)
+               (call (name isalnum~2 `fn(∅: int) -> int`)
                   100)
                0)))))
 

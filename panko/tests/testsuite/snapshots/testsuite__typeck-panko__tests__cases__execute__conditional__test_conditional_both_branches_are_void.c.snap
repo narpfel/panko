@@ -24,7 +24,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 2>>`
                         (string `array<char; 2>` "f\0"))))))))
    (function-definition external
-      g~2 `fn() -> void`
+      g~3 `fn() -> void`
       (compound-statement
          (expression
             (call `int`
@@ -35,7 +35,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 2>>`
                         (string `array<char; 2>` "g\0"))))))))
    (function-definition external
-      main~3 `fn() -> int`
+      main~5 `fn() -> int`
       (compound-statement
          (expression
             (conditional `void`
@@ -45,6 +45,6 @@ exit_code: 0
                      (f~1 `fn() -> void`)))
                (call `void`
                   (addressof `ptr<fn() -> void>`
-                     (g~2 `fn() -> void`))))))))
+                     (g~3 `fn() -> void`))))))))
 
 ----- stderr -----

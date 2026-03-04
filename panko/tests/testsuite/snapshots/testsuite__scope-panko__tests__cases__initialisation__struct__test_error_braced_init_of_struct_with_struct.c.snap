@@ -22,7 +22,7 @@ exit_code: 0
             (member x `int`)
             (member y `int`)
             (member z `int`))
-         (declaration value~2 `struct Struct~0 complete`
+         (declaration value~3 `struct Struct~0 complete`
             (braced
                1
                2
@@ -31,8 +31,8 @@ exit_code: 0
             (member x `int`)
             (member y `int`)
             (member z `int`))
-         (declaration copy~3 `struct Struct~0 complete`
+         (declaration copy~4 `struct Struct~0 complete`
             (braced
-               (name value~2 `struct Struct~0 complete`))))))
+               (name value~3 `struct Struct~0 complete`))))))
 
 ----- stderr -----

@@ -20,15 +20,15 @@ exit_code: 0
       (compound-statement
          (return (123 `int` @0))))
    (function-definition external stack-size=24
-      (g~5 `fn() -> int` (static g))
+      (g~6 `fn() -> int` (static g))
       (compound-statement
          (return (42 `int` @0))))
    (function-definition external stack-size=24
-      (h~7 `fn() -> int` (static h))
+      (h~9 `fn() -> int` (static h))
       (compound-statement
          (return (27 `int` @0))))
    (function-definition external stack-size=56
-      (main~9 `fn() -> int` (static main))
+      (main~12 `fn() -> int` (static main))
       (compound-statement
          (expression
             (call `int` @0
@@ -51,7 +51,7 @@ exit_code: 0
                         (string `array<char; 4>` @void "%d\n\0"))))
                (call `int` @24
                   (addressof `ptr<fn() -> int>` @32
-                     (g~5 `fn() -> int` (static g))))))
+                     (g~6 `fn() -> int` (static g))))))
          (expression
             (call `int` @0
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
@@ -62,6 +62,6 @@ exit_code: 0
                         (string `array<char; 4>` @void "%d\n\0"))))
                (call `int` @24
                   (addressof `ptr<fn() -> int>` @32
-                     (h~7 `fn() -> int` (static h)))))))))
+                     (h~9 `fn() -> int` (static h)))))))))
 
 ----- stderr -----

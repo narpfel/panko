@@ -20,23 +20,23 @@ exit_code: 0
    (function-definition external stack-size=88
       (main~1 `fn() -> int` (static main))
       (compound-statement
-         (definition (xs~2 `array<int; 2>` @0) (braced ∅))
-         (definition (p~3 `ptr<int>` @8)
+         (definition (xs~3 `array<int; 2>` @0) (braced ∅))
+         (definition (p~4 `ptr<int>` @8)
             (addressof `ptr<int>` @8
                (deref `int` @8
                   (ptr-add `ptr<int>` @16
                      (noop-type-conversion `ptr<int>` @16
                         (addressof `ptr<array<int; 2>>` @16
-                           (xs~2 `array<int; 2>` @0)))
+                           (xs~3 `array<int; 2>` @0)))
                      (sign-extend `unsigned long` @24 (0 `int` @32))))))
-         (definition (p2~4 `ptr<int const>` @16)
+         (definition (p2~5 `ptr<int const>` @16)
             (noop-type-conversion `ptr<int const>` @16
                (addressof `ptr<int>` @16
                   (deref `int` @16
                      (ptr-add `ptr<int>` @24
                         (noop-type-conversion `ptr<int>` @24
                            (addressof `ptr<array<int; 2>>` @24
-                              (xs~2 `array<int; 2>` @0)))
+                              (xs~3 `array<int; 2>` @0)))
                         (sign-extend `unsigned long` @32 (1 `int` @40)))))))
          (expression
             (call `int` @24
@@ -64,7 +64,7 @@ exit_code: 0
                         (string `array<char; 9>` @void "it works\0"))))))
          (expression
             (assign `ptr<int>` @8
-               (p~3 `ptr<int>` @8)
+               (p~4 `ptr<int>` @8)
                (noop-type-conversion `ptr<int>` @8 (nullptr `nullptr_t` @8))))
          (expression
             (conditional `int` @24
@@ -83,10 +83,10 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>` @56
                         (addressof `ptr<array<char; 5>>` @56
                            (string `array<char; 5>` @void "null\0")))))))
-         (definition (null~5 `nullptr_t` @24) (nullptr `nullptr_t` @24))
+         (definition (null~6 `nullptr_t` @24) (nullptr `nullptr_t` @24))
          (return
             (conditional `int` @32
-               (null~5 `nullptr_t` @24)
+               (null~6 `nullptr_t` @24)
                (1 `int` @32)
                (2 `int` @32))))))
 

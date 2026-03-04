@@ -14,16 +14,16 @@ exit_code: 0
    (function-definition
       f~0 `fn(x: int) -> int`
       (params
-         x~1 `int`)
+         x~2 `int`)
       (compound-statement
-         (return (name x~1 `int`))))
+         (return (name x~2 `int`))))
    (function-definition
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
-         (declaration x~3 `int` 42)
-         (declaration y~4 `int`
+         (declaration x~5 `int` 42)
+         (declaration y~6 `int`
             (call (name f~0 `fn(x: int) -> int`)
-               (name x~3 `int`)))
-         (return (name y~4 `int`)))))
+               (name x~5 `int`)))
+         (return (name y~6 `int`)))))
 
 ----- stderr -----

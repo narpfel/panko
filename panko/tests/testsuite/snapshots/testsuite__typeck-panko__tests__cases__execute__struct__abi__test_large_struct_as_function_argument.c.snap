@@ -19,7 +19,7 @@ exit_code: 0
    (function-definition external
       print_large~2 `fn(large: struct Large~1 complete) -> void`
       (params
-         large~3 `struct Large~1 complete`)
+         large~4 `struct Large~1 complete`)
       (compound-statement
          (expression
             (call `int`
@@ -30,52 +30,52 @@ exit_code: 0
                      (addressof `ptr<array<char; 103>>`
                         (string `array<char; 103>` "struct Large {\n    int x = %d;\n    char const* string = \"%s\";\n    int xs[5] = {%d, %d, %d, %d, %d};\n}\n\0"))))
                (member `int` x +0
-                  (large~3 `struct Large~1 complete`))
+                  (large~4 `struct Large~1 complete`))
                (member `ptr<char const>` string +8
-                  (large~3 `struct Large~1 complete`))
+                  (large~4 `struct Large~1 complete`))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 5>>`
                            (member `array<int; 5>` xs +16
-                              (large~3 `struct Large~1 complete`))))
+                              (large~4 `struct Large~1 complete`))))
                      (sign-extend `unsigned long` (0 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 5>>`
                            (member `array<int; 5>` xs +16
-                              (large~3 `struct Large~1 complete`))))
+                              (large~4 `struct Large~1 complete`))))
                      (sign-extend `unsigned long` (1 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 5>>`
                            (member `array<int; 5>` xs +16
-                              (large~3 `struct Large~1 complete`))))
+                              (large~4 `struct Large~1 complete`))))
                      (sign-extend `unsigned long` (2 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 5>>`
                            (member `array<int; 5>` xs +16
-                              (large~3 `struct Large~1 complete`))))
+                              (large~4 `struct Large~1 complete`))))
                      (sign-extend `unsigned long` (3 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 5>>`
                            (member `array<int; 5>` xs +16
-                              (large~3 `struct Large~1 complete`))))
+                              (large~4 `struct Large~1 complete`))))
                      (sign-extend `unsigned long` (4 `int`))))))))
    (function-definition external
-      main~4 `fn() -> int`
+      main~5 `fn() -> int`
       (compound-statement
          (struct Large~1
             (member x @0 `int`)
             (member string @8 `ptr<char const>`)
             (member xs @16 `array<int; 5>`))
-         (definition large~5 `struct Large~1 complete`
+         (definition large~7 `struct Large~1 complete`
             (braced
                (subobject +0 (42 `int`))
                (subobject +8
@@ -92,6 +92,6 @@ exit_code: 0
             (call `void`
                (addressof `ptr<fn(large: struct Large~1 complete) -> void>`
                   (print_large~2 `fn(large: struct Large~1 complete) -> void`))
-               (large~5 `struct Large~1 complete`))))))
+               (large~7 `struct Large~1 complete`))))))
 
 ----- stderr -----

@@ -15,11 +15,11 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition x~2 `int` (42 `int`))
-         (definition p~3 `ptr<int>`
+         (definition x~3 `int` (42 `int`))
+         (definition p~4 `ptr<int>`
             (addressof `ptr<int>`
-               (x~2 `int`)))
-         (definition y~4 `int` (27 `int`))
+               (x~3 `int`)))
+         (definition y~5 `int` (27 `int`))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -28,7 +28,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 8>>`
                         (string `array<char; 8>` "*p: %d\n\0"))))
-               (deref `int` (p~3 `ptr<int>`))))
+               (deref `int` (p~4 `ptr<int>`))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -37,7 +37,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 7>>`
                         (string `array<char; 7>` "x: %d\n\0"))))
-               (y~4 `int`)))
+               (y~5 `int`)))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -46,7 +46,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 7>>`
                         (string `array<char; 7>` "y: %d\n\0"))))
-               (y~4 `int`)))
-         (return (y~4 `int`)))))
+               (y~5 `int`)))
+         (return (y~5 `int`)))))
 
 ----- stderr -----

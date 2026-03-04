@@ -17,7 +17,7 @@ exit_code: 0
       (main~2 `fn() -> int` (static main))
       (compound-statement
          (compound-statement
-            (definition (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)
+            (definition (strings~4 `array<array<array<char; 100>; 2>; 3>` @0)
                (braced
                   (subobject +0 (string `array<char; 6>` @void "first\0"))
                   (subobject +100 (string `array<char; 11>` @void "also first\0"))
@@ -39,7 +39,7 @@ exit_code: 0
                                           (ptr-add `ptr<array<array<char; 100>; 2>>` @632
                                              (noop-type-conversion `ptr<array<array<char; 100>; 2>>` @632
                                                 (addressof `ptr<array<array<array<char; 100>; 2>; 3>>` @632
-                                                   (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)))
+                                                   (strings~4 `array<array<array<char; 100>; 2>; 3>` @0)))
                                              (sign-extend `unsigned long` @640 (0 `int` @648))))))
                                  (sign-extend `unsigned long` @640 (0 `int` @648)))))))))
             (expression
@@ -57,7 +57,7 @@ exit_code: 0
                                           (ptr-add `ptr<array<array<char; 100>; 2>>` @632
                                              (noop-type-conversion `ptr<array<array<char; 100>; 2>>` @632
                                                 (addressof `ptr<array<array<array<char; 100>; 2>; 3>>` @632
-                                                   (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)))
+                                                   (strings~4 `array<array<array<char; 100>; 2>; 3>` @0)))
                                              (sign-extend `unsigned long` @640 (0 `int` @648))))))
                                  (sign-extend `unsigned long` @640 (1 `int` @648)))))))))
             (expression
@@ -75,7 +75,7 @@ exit_code: 0
                                           (ptr-add `ptr<array<array<char; 100>; 2>>` @632
                                              (noop-type-conversion `ptr<array<array<char; 100>; 2>>` @632
                                                 (addressof `ptr<array<array<array<char; 100>; 2>; 3>>` @632
-                                                   (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)))
+                                                   (strings~4 `array<array<array<char; 100>; 2>; 3>` @0)))
                                              (sign-extend `unsigned long` @640 (1 `int` @648))))))
                                  (sign-extend `unsigned long` @640 (0 `int` @648)))))))))
             (expression
@@ -93,7 +93,7 @@ exit_code: 0
                                           (ptr-add `ptr<array<array<char; 100>; 2>>` @632
                                              (noop-type-conversion `ptr<array<array<char; 100>; 2>>` @632
                                                 (addressof `ptr<array<array<array<char; 100>; 2>; 3>>` @632
-                                                   (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)))
+                                                   (strings~4 `array<array<array<char; 100>; 2>; 3>` @0)))
                                              (sign-extend `unsigned long` @640 (1 `int` @648))))))
                                  (sign-extend `unsigned long` @640 (1 `int` @648)))))))))
             (expression
@@ -111,7 +111,7 @@ exit_code: 0
                                           (ptr-add `ptr<array<array<char; 100>; 2>>` @632
                                              (noop-type-conversion `ptr<array<array<char; 100>; 2>>` @632
                                                 (addressof `ptr<array<array<array<char; 100>; 2>; 3>>` @632
-                                                   (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)))
+                                                   (strings~4 `array<array<array<char; 100>; 2>; 3>` @0)))
                                              (sign-extend `unsigned long` @640 (2 `int` @648))))))
                                  (sign-extend `unsigned long` @640 (0 `int` @648)))))))))
             (expression
@@ -129,7 +129,7 @@ exit_code: 0
                                           (ptr-add `ptr<array<array<char; 100>; 2>>` @632
                                              (noop-type-conversion `ptr<array<array<char; 100>; 2>>` @632
                                                 (addressof `ptr<array<array<array<char; 100>; 2>; 3>>` @632
-                                                   (strings~3 `array<array<array<char; 100>; 2>; 3>` @0)))
+                                                   (strings~4 `array<array<array<char; 100>; 2>; 3>` @0)))
                                              (sign-extend `unsigned long` @640 (2 `int` @648))))))
                                  (sign-extend `unsigned long` @640 (1 `int` @648)))))))))
             (expression
@@ -144,7 +144,7 @@ exit_code: 0
                   (2 `unsigned long` @632)
                   (100 `unsigned long` @640))))
          (compound-statement
-            (definition (strings~4 `array<array<char; 100>; 2>` @0)
+            (definition (strings~5 `array<array<char; 100>; 2>` @0)
                (braced
                   (subobject +0 (string `array<char; 7>` @void "string\0"))
                   (subobject +100 (string `array<char; 15>` @void "another string\0"))))
@@ -168,7 +168,7 @@ exit_code: 0
                               (ptr-add `ptr<array<char; 100>>` @224
                                  (noop-type-conversion `ptr<array<char; 100>>` @224
                                     (addressof `ptr<array<array<char; 100>; 2>>` @224
-                                       (strings~4 `array<array<char; 100>; 2>` @0)))
+                                       (strings~5 `array<array<char; 100>; 2>` @0)))
                                  (sign-extend `unsigned long` @232 (0 `int` @240)))))))))
             (expression
                (call `int` @200
@@ -181,7 +181,7 @@ exit_code: 0
                               (ptr-add `ptr<array<char; 100>>` @224
                                  (noop-type-conversion `ptr<array<char; 100>>` @224
                                     (addressof `ptr<array<array<char; 100>; 2>>` @224
-                                       (strings~4 `array<array<char; 100>; 2>` @0)))
+                                       (strings~5 `array<array<char; 100>; 2>` @0)))
                                  (sign-extend `unsigned long` @232 (1 `int` @240)))))))))))))
 
 ----- stderr -----

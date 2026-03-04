@@ -29,14 +29,14 @@ exit_code: 0
             (member t @4 `struct T~2 complete`)
             (member y @12 `int`)
             (member z @16 `int`))
-         (definition (u~5 `struct U~3 complete` @0)
+         (definition (u~6 `struct U~3 complete` @0)
             (braced
                (subobject +0 (1 `int` @0))
                (subobject +4 (2 `int` @4))
                (subobject +8 (3 `int` @8))
                (subobject +12 (0 `int` @12))
                (subobject +16 (4 `int` @16))))
-         (definition (ints~6 `array<int; 6>` @20)
+         (definition (ints~7 `array<int; 6>` @20)
             (braced
                (subobject +0 (1 `int` @20))
                (subobject +4 (2 `int` @24))
@@ -57,16 +57,16 @@ exit_code: 0
                      (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)))
                   (noop-type-conversion `ptr<void const>` @80
                      (addressof `ptr<struct U~3 complete>` @80
-                        (u~5 `struct U~3 complete` @0)))
+                        (u~6 `struct U~3 complete` @0)))
                   (noop-type-conversion `ptr<void const>` @88
                      (noop-type-conversion `ptr<int>` @88
                         (addressof `ptr<array<int; 6>>` @88
-                           (ints~6 `array<int; 6>` @20))))
+                           (ints~7 `array<int; 6>` @20))))
                   (20 `unsigned long` @96))))
          (struct T~2
             (member x @0 `int`)
             (member y @4 `int`))
-         (definition (ts~7 `array<struct T~2 complete; 3>` @44)
+         (definition (ts~8 `array<struct T~2 complete; 3>` @44)
             (braced
                (subobject +0 (1 `int` @44))
                (subobject +4 (2 `int` @48))
@@ -87,11 +87,11 @@ exit_code: 0
                   (noop-type-conversion `ptr<void const>` @104
                      (noop-type-conversion `ptr<struct T~2 complete>` @104
                         (addressof `ptr<array<struct T~2 complete; 3>>` @104
-                           (ts~7 `array<struct T~2 complete; 3>` @44))))
+                           (ts~8 `array<struct T~2 complete; 3>` @44))))
                   (noop-type-conversion `ptr<void const>` @112
                      (noop-type-conversion `ptr<int>` @112
                         (addressof `ptr<array<int; 6>>` @112
-                           (ints~6 `array<int; 6>` @20))))
+                           (ints~7 `array<int; 6>` @20))))
                   (24 `unsigned long` @120)))))))
 
 ----- stderr -----

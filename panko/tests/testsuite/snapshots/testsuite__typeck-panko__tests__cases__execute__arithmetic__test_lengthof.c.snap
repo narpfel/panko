@@ -15,11 +15,11 @@ exit_code: 0
       main~0 `fn() -> int`
       (compound-statement
          (expression (0 `int`))
-         (definition xs~1 `array<int; 2>`
+         (definition xs~2 `array<int; 2>`
             (braced
                (subobject +0 (1 `int`))
                (subobject +4 (2 `int`))))
          (expression (0 `int`))
-         (return (truncate `int` (lengthof `unsigned long` 2 (xs~1 `array<int; 2>`)))))))
+         (return (truncate `int` (lengthof `unsigned long` 2 (xs~2 `array<int; 2>`)))))))
 
 ----- stderr -----

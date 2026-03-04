@@ -16,12 +16,12 @@ exit_code: 0
    (function-definition external
       main~2 `fn() -> int`
       (compound-statement
-         (declaration external puts~3 `fn(∅: ptr<char const>) -> int` ∅)
-         (declaration external puts~3 `fn(∅: ptr<char const>) -> int` ∅)
+         (declaration external puts~4 `fn(∅: ptr<char const>) -> int` ∅)
+         (declaration external puts~4 `fn(∅: ptr<char const>) -> int` ∅)
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`
-                  (puts~3 `fn(∅: ptr<char const>) -> int`))
+                  (puts~4 `fn(∅: ptr<char const>) -> int`))
                (noop-type-conversion `ptr<char const>`
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 9>>`

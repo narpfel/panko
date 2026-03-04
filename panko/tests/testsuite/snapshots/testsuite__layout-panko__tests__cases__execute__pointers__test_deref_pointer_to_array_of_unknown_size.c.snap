@@ -15,16 +15,16 @@ exit_code: 0
    (function-definition external stack-size=248
       (main~1 `fn() -> int` (static main))
       (compound-statement
-         (definition (xs~2 `array<int; 42>` @0)
+         (definition (xs~3 `array<int; 42>` @0)
             (braced
                (subobject +0 (1 `int` @0))
                (subobject +4 (2 `int` @4))
                (subobject +8 (3 `int` @8))
                (subobject +12 (4 `int` @12))
                (subobject +108 (5 `int` @108))))
-         (definition (p~3 `ptr<array<int; ∅>>` @168)
+         (definition (p~4 `ptr<array<int; ∅>>` @168)
             (addressof `ptr<array<int; 42>>` @168
-               (xs~2 `array<int; 42>` @0)))
+               (xs~3 `array<int; 42>` @0)))
          (expression
             (call `int` @176
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @184
@@ -37,7 +37,7 @@ exit_code: 0
                   (ptr-add `ptr<int>` @208
                      (noop-type-conversion `ptr<int>` @208
                         (addressof `ptr<array<int; ∅>>` @208
-                           (deref `array<int; ∅>` @208 (p~3 `ptr<array<int; ∅>>` @168))))
+                           (deref `array<int; ∅>` @208 (p~4 `ptr<array<int; ∅>>` @168))))
                      (sign-extend `unsigned long` @216 (27 `int` @224))))))
          (expression
             (call `int` @176
@@ -50,18 +50,18 @@ exit_code: 0
                (deref `int` @200
                   (noop-type-conversion `ptr<int>` @208
                      (addressof `ptr<array<int; ∅>>` @208
-                        (deref `array<int; ∅>` @208 (p~3 `ptr<array<int; ∅>>` @168)))))))
+                        (deref `array<int; ∅>` @208 (p~4 `ptr<array<int; ∅>>` @168)))))))
          (expression
             (assign `int` @176
                (deref `int` @176
                   (noop-type-conversion `ptr<int>` @184
                      (addressof `ptr<array<int; ∅>>` @184
-                        (deref `array<int; ∅>` @184 (p~3 `ptr<array<int; ∅>>` @168)))))
+                        (deref `array<int; ∅>` @184 (p~4 `ptr<array<int; ∅>>` @168)))))
                (123 `int` @192)))
          (return
             (deref `int` @176
                (noop-type-conversion `ptr<int>` @184
                   (addressof `ptr<array<int; ∅>>` @184
-                     (deref `array<int; ∅>` @184 (p~3 `ptr<array<int; ∅>>` @168)))))))))
+                     (deref `array<int; ∅>` @184 (p~4 `ptr<array<int; ∅>>` @168)))))))))
 
 ----- stderr -----

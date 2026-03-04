@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external stack-size=88
       (main~1 `fn() -> int` (static main))
       (compound-statement
-         (definition (s~2 `array<array<ptr<char const>; 1>; 1>` @0)
+         (definition (s~3 `array<array<ptr<char const>; 1>; 1>` @0)
             (braced
                (subobject +0
                   (noop-type-conversion `ptr<char const>` @0
@@ -38,7 +38,7 @@ exit_code: 0
                               (ptr-add `ptr<array<ptr<char const>; 1>>` @48
                                  (noop-type-conversion `ptr<array<ptr<char const>; 1>>` @48
                                     (addressof `ptr<array<array<ptr<char const>; 1>; 1>>` @48
-                                       (s~2 `array<array<ptr<char const>; 1>; 1>` @0)))
+                                       (s~3 `array<array<ptr<char const>; 1>; 1>` @0)))
                                  (sign-extend `unsigned long` @56 (0 `int` @64))))))
                      (sign-extend `unsigned long` @56 (0 `int` @64))))))
          (return (truncate `int` @8 (1 `unsigned long` @16))))))

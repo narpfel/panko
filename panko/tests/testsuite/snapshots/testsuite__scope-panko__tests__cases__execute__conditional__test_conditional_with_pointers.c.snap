@@ -14,53 +14,53 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration c_vp~1 `ptr<void const>` ∅)
-         (declaration vp~2 `ptr<void>` ∅)
-         (declaration c_ip~3 `ptr<int const>` ∅)
-         (declaration v_ip~4 `ptr<int volatile>` ∅)
-         (declaration ip~5 `ptr<int>` ∅)
-         (declaration c_cp~6 `ptr<char const>` ∅)
+         (declaration c_vp~2 `ptr<void const>` ∅)
+         (declaration vp~3 `ptr<void>` ∅)
+         (declaration c_ip~4 `ptr<int const>` ∅)
+         (declaration v_ip~5 `ptr<int volatile>` ∅)
+         (declaration ip~6 `ptr<int>` ∅)
+         (declaration c_cp~7 `ptr<char const>` ∅)
          (expression
             (generic
                (conditional
                   0
-                  (name c_vp~1 `ptr<void const>`)
-                  (name c_ip~3 `ptr<int const>`))
+                  (name c_vp~2 `ptr<void const>`)
+                  (name c_ip~4 `ptr<int const>`))
                (assoc `ptr<void const>` 0)))
          (expression
             (generic
                (conditional
                   0
-                  (name v_ip~4 `ptr<int volatile>`)
+                  (name v_ip~5 `ptr<int volatile>`)
                   nullptr)
                (assoc `ptr<int volatile>` 0)))
          (expression
             (generic
                (conditional
                   0
-                  (name c_ip~3 `ptr<int const>`)
-                  (name v_ip~4 `ptr<int volatile>`))
+                  (name c_ip~4 `ptr<int const>`)
+                  (name v_ip~5 `ptr<int volatile>`))
                (assoc `ptr<int const volatile>` 0)))
          (expression
             (generic
                (conditional
                   0
-                  (name vp~2 `ptr<void>`)
-                  (name c_cp~6 `ptr<char const>`))
+                  (name vp~3 `ptr<void>`)
+                  (name c_cp~7 `ptr<char const>`))
                (assoc `ptr<void const>` 0)))
          (expression
             (generic
                (conditional
                   0
-                  (name ip~5 `ptr<int>`)
-                  (name c_ip~3 `ptr<int const>`))
+                  (name ip~6 `ptr<int>`)
+                  (name c_ip~4 `ptr<int const>`))
                (assoc `ptr<int const>` 0)))
          (expression
             (generic
                (conditional
                   0
-                  (name vp~2 `ptr<void>`)
-                  (name ip~5 `ptr<int>`))
+                  (name vp~3 `ptr<void>`)
+                  (name ip~6 `ptr<int>`))
                (assoc `ptr<void>` 0))))))
 
 ----- stderr -----

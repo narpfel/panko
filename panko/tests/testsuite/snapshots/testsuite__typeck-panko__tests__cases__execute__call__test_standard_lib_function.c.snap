@@ -14,12 +14,12 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (declaration external isalnum~1 `fn(∅: int) -> int` ∅)
+         (declaration external isalnum~2 `fn(∅: int) -> int` ∅)
          (return
             (not-equal `int`
                (call `int`
                   (addressof `ptr<fn(∅: int) -> int>`
-                     (isalnum~1 `fn(∅: int) -> int`))
+                     (isalnum~2 `fn(∅: int) -> int`))
                   (100 `int`))
                (0 `int`))))))
 

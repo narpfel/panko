@@ -15,11 +15,11 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition x~2 `int` (42 `int`))
-         (definition p~3 `ptr<int>`
+         (definition x~3 `int` (42 `int`))
+         (definition p~4 `ptr<int>`
             (addressof `ptr<int>`
-               (x~2 `int`)))
-         (definition from_ptr~4 `bool` (bool-cast `bool` (p~3 `ptr<int>`)))
+               (x~3 `int`)))
+         (definition from_ptr~5 `bool` (bool-cast `bool` (p~4 `ptr<int>`)))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -28,8 +28,8 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (zero-extend `int` (from_ptr~4 `bool`))))
-         (definition from_zero~5 `bool` (bool-cast `bool` (0ull `long long`)))
+               (zero-extend `int` (from_ptr~5 `bool`))))
+         (definition from_zero~6 `bool` (bool-cast `bool` (0ull `long long`)))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -38,8 +38,8 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (zero-extend `int` (from_zero~5 `bool`))))
-         (definition b~6 `bool` (bool-cast `bool` (42 `int`)))
-         (return (truncate `int` (add `unsigned long` (zero-extend `unsigned long` (b~6 `bool`)) (1ul `unsigned long`)))))))
+               (zero-extend `int` (from_zero~6 `bool`))))
+         (definition b~7 `bool` (bool-cast `bool` (42 `int`)))
+         (return (truncate `int` (add `unsigned long` (zero-extend `unsigned long` (b~7 `bool`)) (1ul `unsigned long`)))))))
 
 ----- stderr -----

@@ -14,27 +14,27 @@ exit_code: 0
    (function-definition external
       plus_1~0 `fn(x: int) -> int`
       (params
-         x~1 `int`)
+         x~2 `int`)
       (compound-statement
-         (return (add `int` (x~1 `int`) (1 `int`)))))
-   (declaration external f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int` ∅)
+         (return (add `int` (x~2 `int`) (1 `int`)))))
+   (declaration external f~3 `fn(callback: ptr<fn(∅: int) -> int>) -> int` ∅)
    (function-definition external
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
          (return
             (call `int`
                (addressof `ptr<fn(callback: ptr<fn(∅: int) -> int>) -> int>`
-                  (f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int`))
+                  (f~3 `fn(callback: ptr<fn(∅: int) -> int>) -> int`))
                (addressof `ptr<fn(x: int) -> int>`
                   (plus_1~0 `fn(x: int) -> int`))))))
    (function-definition external
-      f~2 `fn(callback: ptr<fn(∅: int) -> int>) -> int`
+      f~3 `fn(callback: ptr<fn(∅: int) -> int>) -> int`
       (params
-         callback~5 `ptr<fn(∅: int) -> int>`)
+         callback~8 `ptr<fn(∅: int) -> int>`)
       (compound-statement
          (return
-            (call `int` (callback~5 `ptr<fn(∅: int) -> int>`)
-               (call `int` (callback~5 `ptr<fn(∅: int) -> int>`)
+            (call `int` (callback~8 `ptr<fn(∅: int) -> int>`)
+               (call `int` (callback~8 `ptr<fn(∅: int) -> int>`)
                   (42 `int`)))))))
 
 ----- stderr -----

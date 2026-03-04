@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `unsigned int` (noop-type-conversion `unsigned int` (27 `int`)))
-         (expression (assign `unsigned int` (a~1 `unsigned int`) (noop-type-conversion `unsigned int` (42 `int` `int`))))
-         (return (noop-type-conversion `int` (a~1 `unsigned int`))))))
+         (definition a~2 `unsigned int` (noop-type-conversion `unsigned int` (27 `int`)))
+         (expression (assign `unsigned int` (a~2 `unsigned int`) (noop-type-conversion `unsigned int` (42 `int` `int`))))
+         (return (noop-type-conversion `int` (a~2 `unsigned int`))))))
 
 ----- stderr -----

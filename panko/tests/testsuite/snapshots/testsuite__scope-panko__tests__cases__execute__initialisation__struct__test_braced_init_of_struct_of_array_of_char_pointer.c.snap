@@ -15,14 +15,14 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (struct T~2
+         (struct T~3
             (member s `array<typeof(`ptr<char const>`); 1>`))
-         (declaration t~3 `struct T~2 complete`
+         (declaration t~4 `struct T~3 complete`
             (braced
                (string "hello world")))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%s\n")
-               (deref (cast `ptr<ptr<char const>>` (addressof (name t~3 `struct T~2 complete`)))))))))
+               (deref (cast `ptr<ptr<char const>>` (addressof (name t~4 `struct T~3 complete`)))))))))
 
 ----- stderr -----

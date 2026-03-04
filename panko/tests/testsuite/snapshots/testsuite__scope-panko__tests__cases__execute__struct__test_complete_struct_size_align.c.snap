@@ -45,11 +45,11 @@ exit_code: 0
             (member c1 `char`)
             (member x `int`)
             (member c2 `char`))
-         (declaration value~5 `struct T~1 complete` ∅)
+         (declaration value~6 `struct T~1 complete` ∅)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (sizeof (name value~5 `struct T~1 complete`))))
+               (sizeof (name value~6 `struct T~1 complete`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")

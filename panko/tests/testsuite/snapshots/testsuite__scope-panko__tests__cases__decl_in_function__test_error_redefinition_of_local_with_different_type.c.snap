@@ -14,10 +14,10 @@ exit_code: 0
    (function-definition
       a~0 `fn() -> int`
       (compound-statement
-         (declaration x~1 `int` 42)
-         (declaration x~1 `int const` 27)
-         (declaration a~3 `int` 0)
-         (declaration a~3 `char` 1)
-         (return (name x~1 `int const`)))))
+         (declaration x~2 `int` 42)
+         (declaration x~2 `int const` 27)
+         (declaration a~4 `int` 0)
+         (declaration a~4 `char` 1)
+         (return (name x~2 `int const`)))))
 
 ----- stderr -----

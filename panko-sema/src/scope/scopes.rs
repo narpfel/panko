@@ -163,6 +163,24 @@ impl<'a> Scopes<'a> {
         }
     }
 
+    pub(super) fn add_function(
+        &mut self,
+        name: &'a str,
+        loc: Loc<'a>,
+        ty: QualifiedType<'a>,
+        linkage: Linkage,
+    ) -> (Result<Reference<'a>, QualifiedType<'a>>, Id) {
+        let maybe_reference = self.add(
+            name,
+            loc,
+            ty,
+            StorageDuration::Static(Some(linkage)),
+            IsParameter::No,
+            IsInGlobalScope::Yes,
+        );
+        (maybe_reference, self.id())
+    }
+
     pub(super) fn temporary(&mut self, loc: Loc<'a>, ty: QualifiedType<'a>) -> Reference<'a> {
         let id = self.id();
         Reference {

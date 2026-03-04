@@ -19,12 +19,12 @@ exit_code: 0
       (compound-statement
          (struct Struct~1
             (member x @0 `int`))
-         (definition value~3 `struct Struct~1 complete`
+         (definition value~4 `struct Struct~1 complete`
             (braced
                (subobject +0 (42 `int`))))
          (struct Struct~1
             (member x @0 `int`))
-         (definition other~4 `struct Struct~1 complete`
+         (definition other~5 `struct Struct~1 complete`
             (braced
                (subobject +0 (27 `int`))))
          (expression
@@ -38,8 +38,8 @@ exit_code: 0
                (member `int` x +0
                   (conditional `struct Struct~1 complete` `struct Struct~1 complete`
                      (true `bool`)
-                     (value~3 `struct Struct~1 complete`)
-                     (other~4 `struct Struct~1 complete`)))))
+                     (value~4 `struct Struct~1 complete`)
+                     (other~5 `struct Struct~1 complete`)))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -51,7 +51,7 @@ exit_code: 0
                (member `int` x +0
                   (conditional `struct Struct~1 complete` `struct Struct~1 complete`
                      (false `bool`)
-                     (value~3 `struct Struct~1 complete`)
-                     (other~4 `struct Struct~1 complete`))))))))
+                     (value~4 `struct Struct~1 complete`)
+                     (other~5 `struct Struct~1 complete`))))))))
 
 ----- stderr -----

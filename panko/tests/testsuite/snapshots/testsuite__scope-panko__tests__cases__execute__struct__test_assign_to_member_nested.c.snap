@@ -14,32 +14,32 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (struct T~1
+         (struct T~2
             (member x `int`))
-         (declaration t~2 `struct T~1 complete`
+         (declaration t~3 `struct T~2 complete`
             (braced
                42))
          (expression
             (assign
                (dot x
-                  (name t~2 `struct T~1 complete`))
+                  (name t~3 `struct T~2 complete`))
                27))
-         (struct ∅~3
+         (struct ∅~4
             (member x `int`)
-            (member t `struct T~1 complete`))
-         (declaration a~5 `struct ∅~4 complete`
+            (member t `struct T~2 complete`))
+         (declaration a~6 `struct ∅~5 complete`
             (braced
                123
-               (name t~2 `struct T~1 complete`)))
+               (name t~3 `struct T~2 complete`)))
          (expression
             (assign
                (dot x
                   (dot t
-                     (name a~5 `struct ∅~4 complete`)))
+                     (name a~6 `struct ∅~5 complete`)))
                5))
          (return
             (dot x
                (dot t
-                  (name a~5 `struct ∅~4 complete`)))))))
+                  (name a~6 `struct ∅~5 complete`)))))))
 
 ----- stderr -----

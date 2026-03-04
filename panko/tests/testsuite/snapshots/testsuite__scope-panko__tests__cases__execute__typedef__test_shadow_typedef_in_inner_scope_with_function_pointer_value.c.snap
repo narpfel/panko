@@ -15,15 +15,15 @@ exit_code: 0
    (function-definition
       f~0 `fn(name: int) -> int`
       (params
-         name~1 `int`)
+         name~2 `int`)
       (compound-statement
-         (return (multiply (name name~1 `int`) 2))))
+         (return (multiply (name name~2 `int`) 2))))
    (function-definition
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
-         (declaration name~3 `ptr<fn(∅: int) -> int>` (name f~0 `fn(name: int) -> int`))
+         (declaration name~5 `ptr<fn(∅: int) -> int>` (name f~0 `fn(name: int) -> int`))
          (return
-            (call (name name~3 `ptr<fn(∅: int) -> int>`)
+            (call (name name~5 `ptr<fn(∅: int) -> int>`)
                21)))))
 
 ----- stderr -----

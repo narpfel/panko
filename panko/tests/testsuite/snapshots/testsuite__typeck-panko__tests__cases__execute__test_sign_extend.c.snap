@@ -15,120 +15,120 @@ exit_code: 0
    (function-definition external
       print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`
       (params
-         argv~2 `ptr<ptr<char>>`
-         l~3 `long`)
+         argv~3 `ptr<ptr<char>>`
+         l~4 `long`)
       (compound-statement
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
-               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` `ptr<ptr<char>>` (argv~2 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
-               (l~3 `long`)))))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (l~4 `long`)))))
    (function-definition external
-      main~4 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      main~5 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
       (params
-         main.unnamed_parameter.0~5 `int`
-         argv~6 `ptr<ptr<char>>`)
+         main.unnamed_parameter.0~7 `int`
+         argv~8 `ptr<ptr<char>>`)
       (compound-statement
          (compound-statement
-            (definition c~7 `signed char` (truncate `signed char` (negate `int` (42 `int`))))
+            (definition c~9 `signed char` (truncate `signed char` (negate `int` (42 `int`))))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (sign-extend `long` (c~7 `signed char`))))
-            (definition s~8 `short` (sign-extend `short` (c~7 `signed char`)))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (sign-extend `long` (c~9 `signed char`))))
+            (definition s~10 `short` (sign-extend `short` (c~9 `signed char`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (sign-extend `long` (s~8 `short`))))
-            (definition i~9 `int` (sign-extend `int` (c~7 `signed char`)))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (sign-extend `long` (s~10 `short`))))
+            (definition i~11 `int` (sign-extend `int` (c~9 `signed char`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (sign-extend `long` (i~9 `int`))))
-            (definition j~10 `int` (sign-extend `int` (s~8 `short`)))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (sign-extend `long` (i~11 `int`))))
+            (definition j~12 `int` (sign-extend `int` (s~10 `short`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (sign-extend `long` (j~10 `int`))))
-            (definition l~11 `long` (sign-extend `long` (c~7 `signed char`)))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (sign-extend `long` (j~12 `int`))))
+            (definition l~13 `long` (sign-extend `long` (c~9 `signed char`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (l~11 `long`)))
-            (definition m~12 `long` (sign-extend `long` (s~8 `short`)))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (l~13 `long`)))
+            (definition m~14 `long` (sign-extend `long` (s~10 `short`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (m~12 `long`)))
-            (definition n~13 `long` (sign-extend `long` (i~9 `int`)))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (m~14 `long`)))
+            (definition n~15 `long` (sign-extend `long` (i~11 `int`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (n~13 `long`))))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (n~15 `long`))))
          (compound-statement
-            (definition c~14 `signed char` (truncate `signed char` (42 `int`)))
+            (definition c~16 `signed char` (truncate `signed char` (42 `int`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (sign-extend `long` (c~14 `signed char`))))
-            (definition s~15 `short` (sign-extend `short` (c~14 `signed char`)))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (sign-extend `long` (c~16 `signed char`))))
+            (definition s~17 `short` (sign-extend `short` (c~16 `signed char`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (sign-extend `long` (s~15 `short`))))
-            (definition i~16 `int` (sign-extend `int` (c~14 `signed char`)))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (sign-extend `long` (s~17 `short`))))
+            (definition i~18 `int` (sign-extend `int` (c~16 `signed char`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (sign-extend `long` (i~16 `int`))))
-            (definition j~17 `int` (sign-extend `int` (s~15 `short`)))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (sign-extend `long` (i~18 `int`))))
+            (definition j~19 `int` (sign-extend `int` (s~17 `short`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (sign-extend `long` (j~17 `int`))))
-            (definition l~18 `long` (sign-extend `long` (c~14 `signed char`)))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (sign-extend `long` (j~19 `int`))))
+            (definition l~20 `long` (sign-extend `long` (c~16 `signed char`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (l~18 `long`)))
-            (definition m~19 `long` (sign-extend `long` (s~15 `short`)))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (l~20 `long`)))
+            (definition m~21 `long` (sign-extend `long` (s~17 `short`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (m~19 `long`)))
-            (definition n~20 `long` (sign-extend `long` (i~16 `int`)))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (m~21 `long`)))
+            (definition n~22 `long` (sign-extend `long` (i~18 `int`)))
             (expression
                (call `void`
                   (addressof `ptr<fn(argv: ptr<ptr<char>>, l: long) -> void>`
                      (print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`))
-                  (argv~6 `ptr<ptr<char>>`)
-                  (n~20 `long`)))))))
+                  (argv~8 `ptr<ptr<char>>`)
+                  (n~22 `long`)))))))
 
 ----- stderr -----

@@ -16,16 +16,16 @@ exit_code: 0
       f~1 `fn() -> void`
       (compound-statement
          (typedef name `char const`)
-         (declaration x~2 `char const` 'a')
+         (declaration x~3 `char const` 'a')
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%c\n")
-               (name x~2 `char const`)))))
+               (name x~3 `char const`)))))
    (function-definition
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
          (expression (call (name f~1 `fn() -> void`)))
-         (declaration name~4 `int` 42)
-         (return (name name~4 `int`)))))
+         (declaration name~6 `int` 42)
+         (return (name name~6 `int`)))))
 
 ----- stderr -----

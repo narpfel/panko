@@ -20,25 +20,25 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration xs~2 `array<int; 2>` (braced ∅))
-         (declaration p~3 `ptr<int>` (addressof (subscript (name xs~2 `array<int; 2>`) 0)))
-         (declaration p2~4 `ptr<int const>` (addressof (subscript (name xs~2 `array<int; 2>`) 1)))
+         (declaration xs~3 `array<int; 2>` (braced ∅))
+         (declaration p~4 `ptr<int>` (addressof (subscript (name xs~3 `array<int; 2>`) 0)))
+         (declaration p2~5 `ptr<int const>` (addressof (subscript (name xs~3 `array<int; 2>`) 1)))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (generic
-                  (subtract (name p2~4 `ptr<int const>`) (name p~3 `ptr<int>`))
+                  (subtract (name p2~5 `ptr<int const>`) (name p~4 `ptr<int>`))
                   (assoc `typeof((subtract (cast `ptr<char>` nullptr) (cast `ptr<char>` nullptr)))` (string "it works")))))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (generic
-                  (sizeof (name xs~2 `array<int; 2>`))
+                  (sizeof (name xs~3 `array<int; 2>`))
                   (assoc `typeof((sizeof `char`))` (string "it works")))))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (generic
-                  (lengthof (name xs~2 `array<int; 2>`))
+                  (lengthof (name xs~3 `array<int; 2>`))
                   (assoc `typeof((sizeof `char`))` (string "it works")))))
-         (expression (assign (name p~3 `ptr<int>`) nullptr))
+         (expression (assign (name p~4 `ptr<int>`) nullptr))
          (expression
             (conditional
                nullptr
@@ -46,10 +46,10 @@ exit_code: 0
                   (string "not null"))
                (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                   (string "null"))))
-         (declaration null~5 `typeof(nullptr)` nullptr)
+         (declaration null~6 `typeof(nullptr)` nullptr)
          (return
             (conditional
-               (name null~5 `typeof(nullptr)`)
+               (name null~6 `typeof(nullptr)`)
                1
                2)))))
 

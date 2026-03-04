@@ -15,11 +15,11 @@ exit_code: 0
       f~0 `fn() -> void`
       (compound-statement))
    (function-definition
-      main~1 `fn() -> int`
+      main~2 `fn() -> int`
       (compound-statement
          (expression (add (call (name f~0 `fn() -> void`)) 42))
-         (declaration x~2 `int` 42)
-         (declaration c~3 `char` ∅)
-         (expression (equal (addressof (name x~2 `int`)) (addressof (name c~3 `char`)))))))
+         (declaration x~4 `int` 42)
+         (declaration c~5 `char` ∅)
+         (expression (equal (addressof (name x~4 `int`)) (addressof (name c~5 `char`)))))))
 
 ----- stderr -----

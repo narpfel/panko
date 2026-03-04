@@ -29,7 +29,7 @@ exit_code: 0
             (member t `struct T~2 complete`)
             (member y `int`)
             (member z `int`))
-         (declaration u~5 `struct U~3 complete`
+         (declaration u~6 `struct U~3 complete`
             (braced
                1
                (braced
@@ -37,7 +37,7 @@ exit_code: 0
                   3)
                0
                4))
-         (declaration ints~6 `array<int; ∅>`
+         (declaration ints~7 `array<int; ∅>`
             (braced
                1
                2
@@ -49,13 +49,13 @@ exit_code: 0
             (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
                (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
-                  (addressof (name u~5 `struct U~3 complete`))
-                  (name ints~6 `array<int; ∅>`)
-                  (sizeof (name u~5 `struct U~3 complete`)))))
+                  (addressof (name u~6 `struct U~3 complete`))
+                  (name ints~7 `array<int; ∅>`)
+                  (sizeof (name u~6 `struct U~3 complete`)))))
          (struct T~2
             (member x `int`)
             (member y `int`))
-         (declaration ts~7 `array<struct T~2 complete; ∅>`
+         (declaration ts~8 `array<struct T~2 complete; ∅>`
             (braced
                (braced
                   1
@@ -69,8 +69,8 @@ exit_code: 0
             (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
                (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
-                  (name ts~7 `array<struct T~2 complete; ∅>`)
-                  (name ints~6 `array<int; ∅>`)
-                  (sizeof (name ts~7 `array<struct T~2 complete; ∅>`))))))))
+                  (name ts~8 `array<struct T~2 complete; ∅>`)
+                  (name ints~7 `array<int; ∅>`)
+                  (sizeof (name ts~8 `array<struct T~2 complete; ∅>`))))))))
 
 ----- stderr -----

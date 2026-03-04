@@ -971,6 +971,7 @@ fn typeck_function_definition<'a>(
 ) -> FunctionDefinition<'a> {
     let scope::FunctionDefinition {
         reference,
+        return_slot: _,
         params,
         inline,
         noreturn,

@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external stack-size=104
       (main~1 `fn() -> int` (static main))
       (compound-statement
-         (definition (array~2 `array<array<int; 3>; 2>` @0)
+         (definition (array~3 `array<array<int; 3>; 2>` @0)
             (braced
                (subobject +0 (1 `int` @0))
                (subobject +12 (2 `int` @12))
@@ -36,7 +36,7 @@ exit_code: 0
                               (ptr-add `ptr<array<int; 3>>` @64
                                  (noop-type-conversion `ptr<array<int; 3>>` @64
                                     (addressof `ptr<array<array<int; 3>; 2>>` @64
-                                       (array~2 `array<array<int; 3>; 2>` @0)))
+                                       (array~3 `array<array<int; 3>; 2>` @0)))
                                  (sign-extend `unsigned long` @72 (0 `int` @80))))))
                      (sign-extend `unsigned long` @72 (0 `int` @80))))))
          (expression
@@ -55,7 +55,7 @@ exit_code: 0
                               (ptr-add `ptr<array<int; 3>>` @64
                                  (noop-type-conversion `ptr<array<int; 3>>` @64
                                     (addressof `ptr<array<array<int; 3>; 2>>` @64
-                                       (array~2 `array<array<int; 3>; 2>` @0)))
+                                       (array~3 `array<array<int; 3>; 2>` @0)))
                                  (sign-extend `unsigned long` @72 (0 `int` @80))))))
                      (sign-extend `unsigned long` @72 (1 `int` @80))))))
          (expression
@@ -74,7 +74,7 @@ exit_code: 0
                               (ptr-add `ptr<array<int; 3>>` @64
                                  (noop-type-conversion `ptr<array<int; 3>>` @64
                                     (addressof `ptr<array<array<int; 3>; 2>>` @64
-                                       (array~2 `array<array<int; 3>; 2>` @0)))
+                                       (array~3 `array<array<int; 3>; 2>` @0)))
                                  (sign-extend `unsigned long` @72 (0 `int` @80))))))
                      (sign-extend `unsigned long` @72 (2 `int` @80))))))
          (expression
@@ -93,7 +93,7 @@ exit_code: 0
                               (ptr-add `ptr<array<int; 3>>` @64
                                  (noop-type-conversion `ptr<array<int; 3>>` @64
                                     (addressof `ptr<array<array<int; 3>; 2>>` @64
-                                       (array~2 `array<array<int; 3>; 2>` @0)))
+                                       (array~3 `array<array<int; 3>; 2>` @0)))
                                  (sign-extend `unsigned long` @72 (1 `int` @80))))))
                      (sign-extend `unsigned long` @72 (0 `int` @80))))))
          (expression
@@ -112,7 +112,7 @@ exit_code: 0
                               (ptr-add `ptr<array<int; 3>>` @64
                                  (noop-type-conversion `ptr<array<int; 3>>` @64
                                     (addressof `ptr<array<array<int; 3>; 2>>` @64
-                                       (array~2 `array<array<int; 3>; 2>` @0)))
+                                       (array~3 `array<array<int; 3>; 2>` @0)))
                                  (sign-extend `unsigned long` @72 (1 `int` @80))))))
                      (sign-extend `unsigned long` @72 (1 `int` @80))))))
          (expression
@@ -131,7 +131,7 @@ exit_code: 0
                               (ptr-add `ptr<array<int; 3>>` @64
                                  (noop-type-conversion `ptr<array<int; 3>>` @64
                                     (addressof `ptr<array<array<int; 3>; 2>>` @64
-                                       (array~2 `array<array<int; 3>; 2>` @0)))
+                                       (array~3 `array<array<int; 3>; 2>` @0)))
                                  (sign-extend `unsigned long` @72 (1 `int` @80))))))
                      (sign-extend `unsigned long` @72 (2 `int` @80))))))
          (expression

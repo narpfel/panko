@@ -15,11 +15,11 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition p~2 `ptr<int>`
+         (definition p~3 `ptr<int>`
             (addressof `ptr<int>`
                (x~0 `int`)))
-         (definition local_copy~3 `int` (deref `int` (p~2 `ptr<int>`)))
-         (expression (assign `int` (deref `int` (p~2 `ptr<int>`)) (27 `int`)))
-         (return (add `int` (add `int` (local_copy~3 `int`) (deref `int` (p~2 `ptr<int>`))) (x~0 `int`))))))
+         (definition local_copy~4 `int` (deref `int` (p~3 `ptr<int>`)))
+         (expression (assign `int` (deref `int` (p~3 `ptr<int>`)) (27 `int`)))
+         (return (add `int` (add `int` (local_copy~4 `int`) (deref `int` (p~3 `ptr<int>`))) (x~0 `int`))))))
 
 ----- stderr -----

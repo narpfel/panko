@@ -16,8 +16,8 @@ exit_code: 0
    (function-definition external stack-size=152
       (main~2 `fn() -> int` (static main))
       (compound-statement
-         (definition (x~3 `unsigned long` @0) (sign-extend `unsigned long` @0 (42 `int` @8)))
-         (definition (y~4 `unsigned long` @8) (sign-extend `unsigned long` @8 (27 `int` @16)))
+         (definition (x~4 `unsigned long` @0) (sign-extend `unsigned long` @0 (42 `int` @8)))
+         (definition (y~5 `unsigned long` @8) (sign-extend `unsigned long` @8 (27 `int` @16)))
          (expression
             (call `int` @16
                (addressof `ptr<fn(∅: ptr<char const>) -> int>` @24
@@ -26,11 +26,11 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @32
                      (addressof `ptr<array<char; 9>>` @32
                         (string `array<char; 9>` @void "it works\0"))))))
-         (definition (p~5 `ptr<unsigned long const> const` @16)
+         (definition (p~6 `ptr<unsigned long const> const` @16)
             (noop-type-conversion `ptr<unsigned long const>` @16
                (addressof `ptr<unsigned long>` @16
-                  (x~3 `unsigned long` @0))))
-         (definition (xs~6 `array<unsigned long; 10>` @24) (braced ∅))
+                  (x~4 `unsigned long` @0))))
+         (definition (xs~7 `array<unsigned long; 10>` @24) (braced ∅))
          (expression
             (call `int` @104
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @112
@@ -58,6 +58,6 @@ exit_code: 0
                      (addressof `ptr<array<char; 5>>` @120
                         (string `array<char; 5>` @void "%zu\n\0"))))
                (40 `unsigned long` @128)))
-         (return (truncate `int` @104 (deref `unsigned long const` @112 (p~5 `ptr<unsigned long const> const` @16)))))))
+         (return (truncate `int` @104 (deref `unsigned long const` @112 (p~6 `ptr<unsigned long const> const` @16)))))))
 
 ----- stderr -----

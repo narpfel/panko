@@ -16,63 +16,63 @@ exit_code: 0
       (compound-statement
          (return (42 `int` @0))))
    (function-definition external stack-size=24
-      (b~1 `fn(∅: int) -> int` (static b))
+      (b~2 `fn(∅: int) -> int` (static b))
       (params
-         (b.unnamed_parameter.0~2 `int` @0))
+         (b.unnamed_parameter.0~4 `int` @0))
       (compound-statement
          (return (42 `int` @4))))
    (function-definition external stack-size=24
-      (c~3 `fn(a: int) -> int` (static c))
+      (c~5 `fn(a: int) -> int` (static c))
       (params
-         (a~4 `int` @0))
+         (a~7 `int` @0))
       (compound-statement
-         (return (a~4 `int` @0))))
+         (return (a~7 `int` @0))))
    (function-definition external stack-size=24
-      (d~5 `fn(a: int) -> int` (static d))
+      (d~8 `fn(a: int) -> int` (static d))
       (params
-         (a~6 `int` @0))
+         (a~10 `int` @0))
       (compound-statement
          (compound-statement
-            (return (a~6 `int` @0)))))
+            (return (a~10 `int` @0)))))
    (function-definition external stack-size=24
-      (e~7 `fn() -> int` (static e))
+      (e~11 `fn() -> int` (static e))
       (compound-statement
          (compound-statement)
          (expression ∅)
          (return (42 `int` @0))))
    (function-definition external stack-size=24
-      (f~8 `fn() -> int` (static f))
+      (f~13 `fn() -> int` (static f))
       (compound-statement
-         (definition (a~9 `int` @0) (42 `int` @0))
-         (expression (a~9 `int` @0))
-         (return (a~9 `int` @0))))
+         (definition (a~15 `int` @0) (42 `int` @0))
+         (expression (a~15 `int` @0))
+         (return (a~15 `int` @0))))
    (function-definition external stack-size=24
-      (g~10 `fn() -> char` (static g))
+      (g~16 `fn() -> char` (static g))
       (compound-statement
-         (definition (c~11 `char` @0) (truncate `char` @0 (0 `int` @4)))
-         (return (c~11 `char` @0))))
+         (definition (c~18 `char` @0) (truncate `char` @0 (0 `int` @4)))
+         (return (c~18 `char` @0))))
    (function-definition external stack-size=24
-      (h~12 `fn() -> int` (static h))
+      (h~19 `fn() -> int` (static h))
       (compound-statement
-         (definition (a~13 `int` @0) (42 `int` @0))
+         (definition (a~21 `int` @0) (42 `int` @0))
          (compound-statement
-            (definition (a~14 `int` @4) (27 `int` @4))
-            (return (a~14 `int` @4)))))
+            (definition (a~22 `int` @4) (27 `int` @4))
+            (return (a~22 `int` @4)))))
    (function-definition external stack-size=24
-      (i~15 `fn(a: int) -> int` (static i))
+      (i~23 `fn(a: int) -> int` (static i))
       (params
-         (a~16 `int` @0))
+         (a~25 `int` @0))
       (compound-statement
          (compound-statement
-            (definition (a~17 `int` @4) (42 `int` @4)))
-         (return (a~16 `int` @0))))
+            (definition (a~26 `int` @4) (42 `int` @4)))
+         (return (a~25 `int` @0))))
    (function-definition external stack-size=24
-      (j~18 `fn() -> int` (static j))
+      (j~27 `fn() -> int` (static j))
       (compound-statement
-         (definition (a~19 `int` @0) (42 `int` @0))
+         (definition (a~29 `int` @0) (42 `int` @0))
          (compound-statement
-            (definition (a~20 `int` @4) (27 `int` @4))
-            (expression (a~20 `int` @4)))
-         (return (a~19 `int` @0)))))
+            (definition (a~30 `int` @4) (27 `int` @4))
+            (expression (a~30 `int` @4)))
+         (return (a~29 `int` @0)))))
 
 ----- stderr -----

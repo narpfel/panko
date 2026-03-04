@@ -16,11 +16,11 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition ptr~2 `ptr<fn(∅: ptr<char const>) -> int>`
+         (definition ptr~3 `ptr<fn(∅: ptr<char const>) -> int>`
             (addressof `ptr<fn(∅: ptr<char const>) -> int>`
                (puts~0 `fn(∅: ptr<char const>) -> int`)))
          (expression
-            (call `int` (ptr~2 `ptr<fn(∅: ptr<char const>) -> int>`)
+            (call `int` (ptr~3 `ptr<fn(∅: ptr<char const>) -> int>`)
                (noop-type-conversion `ptr<char const>`
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 12>>`

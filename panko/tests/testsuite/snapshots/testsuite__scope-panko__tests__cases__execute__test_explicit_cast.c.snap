@@ -15,61 +15,61 @@ exit_code: 0
    (function-definition
       f~1 `fn(fmt: ptr<char const>) -> void`
       (params
-         fmt~2 `ptr<char const>`)
+         fmt~3 `ptr<char const>`)
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (name fmt~2 `ptr<char const>`)
+               (name fmt~3 `ptr<char const>`)
                123))))
    (function-definition
-      g~3 `fn() -> int`
+      g~4 `fn() -> int`
       (compound-statement
          (return 42)))
    (function-definition
-      main~4 `fn(argc: int, argv: ptr<ptr<char>>) -> int`
+      main~6 `fn(argc: int, argv: ptr<ptr<char>>) -> int`
       (params
-         argc~5 `int`
-         argv~6 `ptr<ptr<char>>`)
+         argc~8 `int`
+         argv~9 `ptr<ptr<char>>`)
       (compound-statement
          (expression
             (cast `void`
                (call (name f~1 `fn(fmt: ptr<char const>) -> void`)
-                  (deref (add (name argv~6 `ptr<ptr<char>>`) 2)))))
+                  (deref (add (name argv~9 `ptr<ptr<char>>`) 2)))))
          (expression (cast `void` 42))
-         (expression (cast `void` (call (name g~3 `fn() -> int`))))
-         (expression (cast `void` (name argc~5 `int`)))
-         (expression (cast `void` (name argv~6 `ptr<ptr<char>>`)))
+         (expression (cast `void` (call (name g~4 `fn() -> int`))))
+         (expression (cast `void` (name argc~8 `int`)))
+         (expression (cast `void` (name argv~9 `ptr<ptr<char>>`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (deref (add (name argv~6 `ptr<ptr<char>>`) 1))
+               (deref (add (name argv~9 `ptr<ptr<char>>`) 1))
                (cast `ptr<void>` 0)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (deref (add (name argv~6 `ptr<ptr<char>>`) 1))
+               (deref (add (name argv~9 `ptr<ptr<char>>`) 1))
                (cast `ptr<void>` (cast `ptr<int const>` 0))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (deref (add (name argv~6 `ptr<ptr<char>>`) 1))
+               (deref (add (name argv~9 `ptr<ptr<char>>`) 1))
                (cast `ptr<void>` 42)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (deref (add (name argv~6 `ptr<ptr<char>>`) 1))
+               (deref (add (name argv~9 `ptr<ptr<char>>`) 1))
                (cast `ptr<void>` (negate 1))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (deref (add (name argv~6 `ptr<ptr<char>>`) 2))
+               (deref (add (name argv~9 `ptr<ptr<char>>`) 2))
                (cast `int` (cast `char` 128))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (deref (add (name argv~6 `ptr<ptr<char>>`) 2))
+               (deref (add (name argv~9 `ptr<ptr<char>>`) 2))
                (cast `int` (cast `unsigned char` 128))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (deref (add (name argv~6 `ptr<ptr<char>>`) 2))
+               (deref (add (name argv~9 `ptr<ptr<char>>`) 2))
                (cast `int` 42)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (deref (add (name argv~6 `ptr<ptr<char>>`) 2))
+               (deref (add (name argv~9 `ptr<ptr<char>>`) 2))
                (cast `int` (cast `long` 42)))))))
 
 ----- stderr -----

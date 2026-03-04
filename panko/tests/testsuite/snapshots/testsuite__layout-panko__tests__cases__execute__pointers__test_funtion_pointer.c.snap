@@ -14,21 +14,21 @@ exit_code: 0
    (function-definition external stack-size=24
       (f~0 `fn(x: int) -> int` (static f))
       (params
-         (x~1 `int` @0))
+         (x~2 `int` @0))
       (compound-statement
          (return
             (add `int` @4
-               (x~1 `int` @0)
+               (x~2 `int` @0)
                (2 `int` @8)))))
    (function-definition external stack-size=40
-      (main~2 `fn() -> int` (static main))
+      (main~3 `fn() -> int` (static main))
       (compound-statement
-         (definition (x~3 `int` @0) (40 `int` @0))
-         (definition (p~4 `ptr<fn(∅: int) -> int>` @8)
+         (definition (x~5 `int` @0) (40 `int` @0))
+         (definition (p~6 `ptr<fn(∅: int) -> int>` @8)
             (addressof `ptr<fn(x: int) -> int>` @8
                (f~0 `fn(x: int) -> int` (static f))))
          (return
-            (call `int` @16 (p~4 `ptr<fn(∅: int) -> int>` @8)
-               (x~3 `int` @0))))))
+            (call `int` @16 (p~6 `ptr<fn(∅: int) -> int>` @8)
+               (x~5 `int` @0))))))
 
 ----- stderr -----

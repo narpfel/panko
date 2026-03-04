@@ -15,6 +15,6 @@ exit_code: 0
    (function-definition external stack-size=8
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (declaration external (a~1 `fn(a: ptr<fn(a: ptr<fn(a: int) -> int>) -> int>) -> int` (static a)) ∅))))
+         (declaration external (a~2 `fn(a: ptr<fn(a: ptr<fn(a: int) -> int>) -> int>) -> int` (static a)) ∅))))
 
 ----- stderr -----

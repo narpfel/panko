@@ -16,9 +16,9 @@ exit_code: 0
       (compound-statement
          (typedef name `int`)
          (compound-statement
-            (declaration external f~1 `fn(∅: ptr<fn() -> int>) -> int` ∅)
-            (declaration external g~2 `fn(∅: ptr<fn(∅: int) -> int>) -> int` ∅)
-            (declaration external h~3 `fn(∅: ptr<fn(∅: int) -> int>) -> int` ∅)
-            (declaration external i~4 `fn(name: int) -> int` ∅)))))
+            (declaration external f~2 `fn(∅: ptr<fn() -> int>) -> int` ∅)
+            (declaration external g~3 `fn(∅: ptr<fn(∅: int) -> int>) -> int` ∅)
+            (declaration external h~4 `fn(∅: ptr<fn(∅: int) -> int>) -> int` ∅)
+            (declaration external i~5 `fn(name: int) -> int` ∅)))))
 
 ----- stderr -----

@@ -14,13 +14,13 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (declaration external f~2 `fn(p: ptr<struct X~1 complete>) -> ptr<struct X~1 complete>` ∅)
+         (declaration external f~3 `fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2 complete>` ∅)
          (expression
             (sizeof `unsigned long` 4
-               (deref `struct X~1 complete`
-                  (call `ptr<struct X~1 complete>`
-                     (addressof `ptr<fn(p: ptr<struct X~1 complete>) -> ptr<struct X~1 complete>>`
-                        (f~2 `fn(p: ptr<struct X~1 complete>) -> ptr<struct X~1 complete>`))
-                     (noop-type-conversion `ptr<struct X~1 complete>` (nullptr `nullptr_t`)))))))))
+               (deref `struct X~2 complete`
+                  (call `ptr<struct X~2 complete>`
+                     (addressof `ptr<fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2 complete>>`
+                        (f~3 `fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2 complete>`))
+                     (noop-type-conversion `ptr<struct X~2 complete>` (nullptr `nullptr_t`)))))))))
 
 ----- stderr -----

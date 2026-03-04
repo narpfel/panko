@@ -17,9 +17,9 @@ Error: comparison of pointers to incompatible types
    │
  8 │     return p1 == p2;
    │            ─┬ ─┬ ─┬  
-   │             │  │  ╰── this is of type `ptr<struct ∅~4 complete>`
+   │             │  │  ╰── this is of type `ptr<struct ∅~5 complete>`
    │             │  │     
    │             │  ╰───── pointer comparisons are only allowed between pointers to compatible types
    │             │        
-   │             ╰──────── this is of type `ptr<struct ∅~2 complete>`
+   │             ╰──────── this is of type `ptr<struct ∅~3 complete>`
 ───╯

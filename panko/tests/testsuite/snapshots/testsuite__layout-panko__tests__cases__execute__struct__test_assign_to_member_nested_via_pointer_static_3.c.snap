@@ -33,17 +33,17 @@ exit_code: 0
                (27 `int` @0)))
          (struct T~0
             (member x @0 `int`))
-         (definition (p~5 `ptr<struct T~0 complete>` @0)
+         (definition (p~6 `ptr<struct T~0 complete>` @0)
             (addressof `ptr<struct T~0 complete>` @0
                (member `struct T~0 complete` @0 t +4
                   (a~3 `struct U~2 complete` (static a)))))
          (expression
             (assign `int` @8
                (member `int` @8 x +0
-                  (deref `struct T~0 complete` @void (p~5 `ptr<struct T~0 complete>` @0)))
+                  (deref `struct T~0 complete` @void (p~6 `ptr<struct T~0 complete>` @0)))
                (add `int` @8
                   (member `int` @8 x +0
-                     (deref `struct T~0 complete` @void (p~5 `ptr<struct T~0 complete>` @0)))
+                     (deref `struct T~0 complete` @void (p~6 `ptr<struct T~0 complete>` @0)))
                   (1 `int` @12))))
          (return
             (member `int` @8 x +0

@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition hello_world~2 `array<ptr<char const>; 3>`
+         (definition hello_world~3 `array<ptr<char const>; 3>`
             (braced
                (subobject +0
                   (noop-type-conversion `ptr<char const>`
@@ -40,7 +40,7 @@ exit_code: 0
                   (ptr-add `ptr<ptr<char const>>`
                      (noop-type-conversion `ptr<ptr<char const>>`
                         (addressof `ptr<array<ptr<char const>; 3>>`
-                           (hello_world~2 `array<ptr<char const>; 3>`)))
+                           (hello_world~3 `array<ptr<char const>; 3>`)))
                      (sign-extend `unsigned long` (0 `int`))))))
          (expression
             (call `int`
@@ -50,7 +50,7 @@ exit_code: 0
                   (ptr-add `ptr<ptr<char const>>`
                      (noop-type-conversion `ptr<ptr<char const>>`
                         (addressof `ptr<array<ptr<char const>; 3>>`
-                           (hello_world~2 `array<ptr<char const>; 3>`)))
+                           (hello_world~3 `array<ptr<char const>; 3>`)))
                      (sign-extend `unsigned long` (1 `int`))))))
          (expression
             (call `int`
@@ -60,7 +60,7 @@ exit_code: 0
                   (ptr-add `ptr<ptr<char const>>`
                      (noop-type-conversion `ptr<ptr<char const>>`
                         (addressof `ptr<array<ptr<char const>; 3>>`
-                           (hello_world~2 `array<ptr<char const>; 3>`)))
+                           (hello_world~3 `array<ptr<char const>; 3>`)))
                      (sign-extend `unsigned long` (2 `int`)))))))))
 
 ----- stderr -----

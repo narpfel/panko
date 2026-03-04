@@ -15,22 +15,22 @@ exit_code: 0
    (function-definition
       f~1 `fn(x: int) -> int`
       (params
-         x~2 `int`)
+         x~3 `int`)
       (compound-statement
-         (return (multiply (name x~2 `int`) 3))))
+         (return (multiply (name x~3 `int`) 3))))
    (function-definition
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
-         (declaration g~4 `int` 3)
+         (declaration g~6 `int` 3)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
                (multiply 2
-                  (call (name g~4 `int`)
+                  (call (name g~6 `int`)
                      9))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (multiply (multiply 2 9) (name g~4 `int`)))))))
+               (multiply (multiply 2 9) (name g~6 `int`)))))))
 
 ----- stderr -----

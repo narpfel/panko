@@ -17,7 +17,7 @@ Error: comparison of pointers to incompatible types
     │
  15 │     p1 == p4;
     │     ─┬ ─┬ ─┬  
-    │      │  │  ╰── this is of type `ptr<struct ∅~7 complete>`
+    │      │  │  ╰── this is of type `ptr<struct ∅~8 complete>`
     │      │  │     
     │      │  ╰───── pointer comparisons are only allowed between pointers to compatible types
     │      │        
@@ -29,7 +29,7 @@ Error: comparison of pointers to incompatible types
     │
  17 │     p1 == p5;
     │     ─┬ ─┬ ─┬  
-    │      │  │  ╰── this is of type `ptr<struct ∅~11 complete>`
+    │      │  │  ╰── this is of type `ptr<struct ∅~13 complete>`
     │      │  │     
     │      │  ╰───── pointer comparisons are only allowed between pointers to compatible types
     │      │        
@@ -41,9 +41,9 @@ Error: comparison of pointers to incompatible types
     │
  18 │     p4 == p5;
     │     ─┬ ─┬ ─┬  
-    │      │  │  ╰── this is of type `ptr<struct ∅~11 complete>`
+    │      │  │  ╰── this is of type `ptr<struct ∅~13 complete>`
     │      │  │     
     │      │  ╰───── pointer comparisons are only allowed between pointers to compatible types
     │      │        
-    │      ╰──────── this is of type `ptr<struct ∅~7 complete>`
+    │      ╰──────── this is of type `ptr<struct ∅~8 complete>`
 ────╯

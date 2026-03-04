@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition external stack-size=24
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (definition (a~1 `int` @0) (42 `int` @0))
-         (definition (b~2 `unsigned long` @8) (sign-extend `unsigned long` @8 (a~1 `int` @0))))))
+         (definition (a~2 `int` @0) (42 `int` @0))
+         (definition (b~3 `unsigned long` @8) (sign-extend `unsigned long` @8 (a~2 `int` @0))))))
 
 ----- stderr -----

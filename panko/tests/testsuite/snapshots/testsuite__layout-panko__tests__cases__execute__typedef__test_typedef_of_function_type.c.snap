@@ -16,11 +16,11 @@ exit_code: 0
    (function-definition external stack-size=40
       (main~1 `fn() -> int` (static main))
       (compound-statement
-         (definition (ptr~2 `ptr<fn(∅: ptr<char const>) -> int>` @0)
+         (definition (ptr~3 `ptr<fn(∅: ptr<char const>) -> int>` @0)
             (addressof `ptr<fn(∅: ptr<char const>) -> int>` @0
                (puts~0 `fn(∅: ptr<char const>) -> int` (static puts))))
          (expression
-            (call `int` @8 (ptr~2 `ptr<fn(∅: ptr<char const>) -> int>` @0)
+            (call `int` @8 (ptr~3 `ptr<fn(∅: ptr<char const>) -> int>` @0)
                (noop-type-conversion `ptr<char const>` @16
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 12>>` @16

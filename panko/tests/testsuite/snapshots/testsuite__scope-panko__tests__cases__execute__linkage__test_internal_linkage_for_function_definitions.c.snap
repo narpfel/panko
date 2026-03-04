@@ -19,7 +19,7 @@ exit_code: 0
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (string "in f")))))
    (function-definition
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
          (expression (call (name f~1 `fn() -> void`))))))
 

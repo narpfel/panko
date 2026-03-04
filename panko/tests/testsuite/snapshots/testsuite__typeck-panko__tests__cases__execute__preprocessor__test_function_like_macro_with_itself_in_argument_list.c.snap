@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `long long` (sign-extend `long long` (42 `int`)))
+         (definition x~2 `long long` (sign-extend `long long` (42 `int`)))
          (return (add `int` (27 `int`) (1 `int`))))))
 
 ----- stderr -----

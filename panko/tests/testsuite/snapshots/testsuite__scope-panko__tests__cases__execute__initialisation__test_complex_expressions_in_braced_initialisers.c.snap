@@ -15,74 +15,74 @@ exit_code: 0
    (function-definition
       fib~1 `fn(n: int) -> int`
       (params
-         n~2 `int`)
+         n~3 `int`)
       (compound-statement
          (return
             (conditional
-               (less (name n~2 `int`) 3)
+               (less (name n~3 `int`) 3)
                1
                (add
                   (call (name fib~1 `fn(n: int) -> int`)
-                     (subtract (name n~2 `int`) 1))
+                     (subtract (name n~3 `int`) 1))
                   (call (name fib~1 `fn(n: int) -> int`)
-                     (subtract (name n~2 `int`) 2)))))))
+                     (subtract (name n~3 `int`) 2)))))))
    (function-definition
-      main~3 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      main~4 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
       (params
-         main.unnamed_parameter.0~4 `int`
-         argv~5 `ptr<ptr<char>>`)
+         main.unnamed_parameter.0~6 `int`
+         argv~7 `ptr<ptr<char>>`)
       (compound-statement
-         (declaration x~6 `int`
+         (declaration x~8 `int`
             (braced
                42))
-         (declaration y~7 `int`
+         (declaration y~9 `int`
             (braced
-               (name x~6 `int`)))
+               (name x~8 `int`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (subscript (name argv~5 `ptr<ptr<char>>`) 1)
-               (name y~7 `int`)))
-         (declaration z~8 `int`
+               (subscript (name argv~7 `ptr<ptr<char>>`) 1)
+               (name y~9 `int`)))
+         (declaration z~10 `int`
             (braced
-               (negate (name x~6 `int`))))
+               (negate (name x~8 `int`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (subscript (name argv~5 `ptr<ptr<char>>`) 1)
-               (name z~8 `int`)))
-         (declaration xs~9 `array<int; 2>`
+               (subscript (name argv~7 `ptr<ptr<char>>`) 1)
+               (name z~10 `int`)))
+         (declaration xs~11 `array<int; 2>`
             (braced
-               (name x~6 `int`)
+               (name x~8 `int`)
                (braced
-                  (name z~8 `int`))))
+                  (name z~10 `int`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (subscript (name argv~5 `ptr<ptr<char>>`) 1)
-               (subscript (name xs~9 `array<int; 2>`) 0)))
+               (subscript (name argv~7 `ptr<ptr<char>>`) 1)
+               (subscript (name xs~11 `array<int; 2>`) 0)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (subscript (name argv~5 `ptr<ptr<char>>`) 1)
-               (subscript (name xs~9 `array<int; 2>`) 1)))
-         (declaration two~10 `int` 2)
-         (declaration ys~11 `array<int; 3>`
+               (subscript (name argv~7 `ptr<ptr<char>>`) 1)
+               (subscript (name xs~11 `array<int; 2>`) 1)))
+         (declaration two~12 `int` 2)
+         (declaration ys~13 `array<int; 3>`
             (braced
-               (name two~10 `int`)
+               (name two~12 `int`)
                (call (name fib~1 `fn(n: int) -> int`)
-                  (name two~10 `int`))
+                  (name two~12 `int`))
                (subtract
                   (call (name fib~1 `fn(n: int) -> int`)
-                     (add (add (name two~10 `int`) (name two~10 `int`)) (name two~10 `int`)))
-                  (name two~10 `int`))))
+                     (add (add (name two~12 `int`) (name two~12 `int`)) (name two~12 `int`)))
+                  (name two~12 `int`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (subscript (name argv~5 `ptr<ptr<char>>`) 1)
-               (subscript (name ys~11 `array<int; 3>`) 0)))
+               (subscript (name argv~7 `ptr<ptr<char>>`) 1)
+               (subscript (name ys~13 `array<int; 3>`) 0)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (subscript (name argv~5 `ptr<ptr<char>>`) 1)
-               (subscript (name ys~11 `array<int; 3>`) 1)))
+               (subscript (name argv~7 `ptr<ptr<char>>`) 1)
+               (subscript (name ys~13 `array<int; 3>`) 1)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (subscript (name argv~5 `ptr<ptr<char>>`) 1)
-               (subscript (name ys~11 `array<int; 3>`) 2))))))
+               (subscript (name argv~7 `ptr<ptr<char>>`) 1)
+               (subscript (name ys~13 `array<int; 3>`) 2))))))
 
 ----- stderr -----

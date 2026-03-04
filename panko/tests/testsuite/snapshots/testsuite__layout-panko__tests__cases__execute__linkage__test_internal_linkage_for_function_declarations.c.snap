@@ -24,11 +24,11 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 5>>` @16
                         (string `array<char; 5>` @void "in f\0"))))))))
-   (declaration external (g~3 `fn(∅: int) -> void` (static g)) ∅)
-   (declaration internal (h~4 `fn(x: int) -> void` (static h)) ∅)
-   (declaration internal (i~5 `fn() -> void` (static i)) ∅)
+   (declaration external (g~4 `fn(∅: int) -> void` (static g)) ∅)
+   (declaration internal (h~5 `fn(x: int) -> void` (static h)) ∅)
+   (declaration internal (i~6 `fn() -> void` (static i)) ∅)
    (function-definition external stack-size=24
-      (main~6 `fn() -> int` (static main))
+      (main~7 `fn() -> int` (static main))
       (compound-statement
          (expression
             (call `void` @void
@@ -37,21 +37,21 @@ exit_code: 0
          (expression
             (call `void` @void
                (addressof `ptr<fn(∅: int) -> void>` @0
-                  (g~3 `fn(∅: int) -> void` (static g)))
+                  (g~4 `fn(∅: int) -> void` (static g)))
                (4 `int` @8)))
          (expression
             (call `void` @void
                (addressof `ptr<fn(x: int) -> void>` @0
-                  (h~4 `fn(x: int) -> void` (static h)))
+                  (h~5 `fn(x: int) -> void` (static h)))
                (9 `int` @8)))
          (expression
             (call `void` @void
                (addressof `ptr<fn() -> void>` @0
-                  (i~5 `fn() -> void` (static i)))))))
+                  (i~6 `fn() -> void` (static i)))))))
    (function-definition external stack-size=40
-      (g~3 `fn(x: int) -> void` (static g))
+      (g~4 `fn(x: int) -> void` (static g))
       (params
-         (x~8 `int` @0))
+         (x~11 `int` @0))
       (compound-statement
          (expression
             (call `int` @4
@@ -62,12 +62,12 @@ exit_code: 0
                      (addressof `ptr<array<char; 10>>` @16
                         (string `array<char; 10>` @void "in g: %d\n\0"))))
                (add `int` @24
-                  (x~8 `int` @0)
+                  (x~11 `int` @0)
                   (1 `int` @28))))))
    (function-definition internal stack-size=40
-      (h~4 `fn(x: int) -> void` (static h))
+      (h~5 `fn(x: int) -> void` (static h))
       (params
-         (x~10 `int` @0))
+         (x~14 `int` @0))
       (compound-statement
          (expression
             (call `int` @4
@@ -78,10 +78,10 @@ exit_code: 0
                      (addressof `ptr<array<char; 10>>` @16
                         (string `array<char; 10>` @void "in h: %d\n\0"))))
                (add `int` @24
-                  (x~10 `int` @0)
+                  (x~14 `int` @0)
                   (1 `int` @28))))))
    (function-definition internal stack-size=40
-      (i~5 `fn() -> void` (static i))
+      (i~6 `fn() -> void` (static i))
       (compound-statement
          (expression
             (call `int` @0

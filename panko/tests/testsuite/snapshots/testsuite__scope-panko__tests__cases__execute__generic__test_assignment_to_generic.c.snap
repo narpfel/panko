@@ -14,14 +14,14 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration value~1 `int` 27)
+         (declaration value~2 `int` 27)
          (expression
             (assign
                (generic
                   123
-                  (assoc `int` (name value~1 `int`))
+                  (assoc `int` (name value~2 `int`))
                   (assoc `short` 123))
                42))
-         (return (name value~1 `int`)))))
+         (return (name value~2 `int`)))))
 
 ----- stderr -----

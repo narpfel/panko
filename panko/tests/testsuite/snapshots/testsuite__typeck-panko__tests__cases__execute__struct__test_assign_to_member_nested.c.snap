@@ -14,32 +14,32 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (struct T~1
+         (struct T~2
             (member x @0 `int`))
-         (definition t~2 `struct T~1 complete`
+         (definition t~3 `struct T~2 complete`
             (braced
                (subobject +0 (42 `int`))))
          (expression
             (assign `int`
                (member `int` x +0
-                  (t~2 `struct T~1 complete`))
+                  (t~3 `struct T~2 complete`))
                (27 `int`)))
-         (struct ∅~3
+         (struct ∅~4
             (member x @0 `int`)
-            (member t @4 `struct T~1 complete`))
-         (definition a~5 `struct ∅~4 complete`
+            (member t @4 `struct T~2 complete`))
+         (definition a~6 `struct ∅~5 complete`
             (braced
                (subobject +0 (123 `int`))
-               (subobject +4 (t~2 `struct T~1 complete`))))
+               (subobject +4 (t~3 `struct T~2 complete`))))
          (expression
             (assign `int`
                (member `int` x +0
-                  (member `struct T~1 complete` t +4
-                     (a~5 `struct ∅~4 complete`)))
+                  (member `struct T~2 complete` t +4
+                     (a~6 `struct ∅~5 complete`)))
                (5 `int`)))
          (return
             (member `int` x +0
-               (member `struct T~1 complete` t +4
-                  (a~5 `struct ∅~4 complete`)))))))
+               (member `struct T~2 complete` t +4
+                  (a~6 `struct ∅~5 complete`)))))))
 
 ----- stderr -----

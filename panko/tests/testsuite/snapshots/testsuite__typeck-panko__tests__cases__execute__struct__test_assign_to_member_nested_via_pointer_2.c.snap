@@ -14,42 +14,42 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (struct T~1
+         (struct T~2
             (member x @0 `int`))
-         (definition t~2 `struct T~1 complete`
+         (definition t~3 `struct T~2 complete`
             (braced
                (subobject +0 (42 `int`))))
          (expression
             (assign `int`
                (member `int` x +0
-                  (t~2 `struct T~1 complete`))
+                  (t~3 `struct T~2 complete`))
                (27 `int`)))
-         (struct U~3
+         (struct U~4
             (member x @0 `int`)
-            (member t @4 `struct T~1 complete`))
-         (definition a~4 `struct U~3 complete`
+            (member t @4 `struct T~2 complete`))
+         (definition a~5 `struct U~4 complete`
             (braced
                (subobject +0 (123 `int`))
-               (subobject +4 (t~2 `struct T~1 complete`))))
-         (struct U~3
+               (subobject +4 (t~3 `struct T~2 complete`))))
+         (struct U~4
             (member x @0 `int`)
-            (member t @4 `struct T~1 complete`))
-         (definition p~5 `ptr<struct U~3 complete>`
-            (addressof `ptr<struct U~3 complete>`
-               (a~4 `struct U~3 complete`)))
+            (member t @4 `struct T~2 complete`))
+         (definition p~6 `ptr<struct U~4 complete>`
+            (addressof `ptr<struct U~4 complete>`
+               (a~5 `struct U~4 complete`)))
          (expression
             (assign `int`
                (member `int` x +0
-                  (member `struct T~1 complete` t +4
-                     (deref `struct U~3 complete` (p~5 `ptr<struct U~3 complete>`))))
+                  (member `struct T~2 complete` t +4
+                     (deref `struct U~4 complete` (p~6 `ptr<struct U~4 complete>`))))
                (add `int`
                   (member `int` x +0
-                     (member `struct T~1 complete` t +4
-                        (deref `struct U~3 complete` (p~5 `ptr<struct U~3 complete>`))))
+                     (member `struct T~2 complete` t +4
+                        (deref `struct U~4 complete` (p~6 `ptr<struct U~4 complete>`))))
                   (1 `int`))))
          (return
             (member `int` x +0
-               (member `struct T~1 complete` t +4
-                  (a~4 `struct U~3 complete`)))))))
+               (member `struct T~2 complete` t +4
+                  (a~5 `struct U~4 complete`)))))))
 
 ----- stderr -----

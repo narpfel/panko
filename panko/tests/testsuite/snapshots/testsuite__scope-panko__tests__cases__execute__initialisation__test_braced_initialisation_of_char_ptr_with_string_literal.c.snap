@@ -15,11 +15,11 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration s~2 `ptr<char const>`
+         (declaration s~3 `ptr<char const>`
             (braced
                (string "abc")))
          (return
             (call (name strlen~0 `fn(∅: ptr<char const>) -> typeof((sizeof 0))`)
-               (name s~2 `ptr<char const>`))))))
+               (name s~3 `ptr<char const>`))))))
 
 ----- stderr -----

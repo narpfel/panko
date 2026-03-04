@@ -16,196 +16,196 @@ exit_code: 0
    (function-definition external
       main~2 `fn() -> int`
       (compound-statement
-         (definition str~3 `array<char; 6>` (string `array<char; 6>` "hello\0"))
-         (definition copy~4 `array<char; 6>` ∅)
-         (definition src~5 `ptr<char>`
+         (definition str~4 `array<char; 6>` (string `array<char; 6>` "hello\0"))
+         (definition copy~5 `array<char; 6>` ∅)
+         (definition src~6 `ptr<char>`
             (noop-type-conversion `ptr<char>`
                (addressof `ptr<array<char; 6>>`
-                  (str~3 `array<char; 6>`))))
-         (definition tgt~6 `ptr<char>`
+                  (str~4 `array<char; 6>`))))
+         (definition tgt~7 `ptr<char>`
             (noop-type-conversion `ptr<char>`
                (addressof `ptr<array<char; 6>>`
-                  (copy~4 `array<char; 6>`))))
+                  (copy~5 `array<char; 6>`))))
          (expression
             (assign `char`
                (deref `char`
                   (combine `ptr<char>`
                      (combine `ptr<char>`
+                        (combine `ptr<char>`
+                           (assign `ptr<ptr<char>>` (unnamed-temporary~9 `ptr<ptr<char>>`)
+                              (addressof `ptr<ptr<char>>`
+                                 (tgt~7 `ptr<char>`)))
+                           (assign `ptr<char>` (unnamed-temporary~10 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~9 `ptr<ptr<char>>`))))
                         (combine `ptr<char>`
                            (assign `ptr<ptr<char>>` (unnamed-temporary~8 `ptr<ptr<char>>`)
                               (addressof `ptr<ptr<char>>`
-                                 (tgt~6 `ptr<char>`)))
-                           (assign `ptr<char>` (unnamed-temporary~9 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~8 `ptr<ptr<char>>`))))
-                        (combine `ptr<char>`
-                           (assign `ptr<ptr<char>>` (unnamed-temporary~7 `ptr<ptr<char>>`)
-                              (addressof `ptr<ptr<char>>`
-                                 (deref `ptr<char>` (unnamed-temporary~8 `ptr<ptr<char>>`))))
-                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~7 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~7 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
-                     (unnamed-temporary~9 `ptr<char>`)))
+                                 (deref `ptr<char>` (unnamed-temporary~9 `ptr<ptr<char>>`))))
+                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~8 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~8 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
+                     (unnamed-temporary~10 `ptr<char>`)))
                (deref `char`
                   (combine `ptr<char>`
                      (combine `ptr<char>`
+                        (combine `ptr<char>`
+                           (assign `ptr<ptr<char>>` (unnamed-temporary~12 `ptr<ptr<char>>`)
+                              (addressof `ptr<ptr<char>>`
+                                 (src~6 `ptr<char>`)))
+                           (assign `ptr<char>` (unnamed-temporary~13 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~12 `ptr<ptr<char>>`))))
                         (combine `ptr<char>`
                            (assign `ptr<ptr<char>>` (unnamed-temporary~11 `ptr<ptr<char>>`)
                               (addressof `ptr<ptr<char>>`
-                                 (src~5 `ptr<char>`)))
-                           (assign `ptr<char>` (unnamed-temporary~12 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~11 `ptr<ptr<char>>`))))
-                        (combine `ptr<char>`
-                           (assign `ptr<ptr<char>>` (unnamed-temporary~10 `ptr<ptr<char>>`)
-                              (addressof `ptr<ptr<char>>`
-                                 (deref `ptr<char>` (unnamed-temporary~11 `ptr<ptr<char>>`))))
-                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~10 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~10 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
-                     (unnamed-temporary~12 `ptr<char>`)))))
+                                 (deref `ptr<char>` (unnamed-temporary~12 `ptr<ptr<char>>`))))
+                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~11 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~11 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
+                     (unnamed-temporary~13 `ptr<char>`)))))
          (expression
             (assign `char`
                (deref `char`
                   (combine `ptr<char>`
                      (combine `ptr<char>`
+                        (combine `ptr<char>`
+                           (assign `ptr<ptr<char>>` (unnamed-temporary~15 `ptr<ptr<char>>`)
+                              (addressof `ptr<ptr<char>>`
+                                 (tgt~7 `ptr<char>`)))
+                           (assign `ptr<char>` (unnamed-temporary~16 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~15 `ptr<ptr<char>>`))))
                         (combine `ptr<char>`
                            (assign `ptr<ptr<char>>` (unnamed-temporary~14 `ptr<ptr<char>>`)
                               (addressof `ptr<ptr<char>>`
-                                 (tgt~6 `ptr<char>`)))
-                           (assign `ptr<char>` (unnamed-temporary~15 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~14 `ptr<ptr<char>>`))))
-                        (combine `ptr<char>`
-                           (assign `ptr<ptr<char>>` (unnamed-temporary~13 `ptr<ptr<char>>`)
-                              (addressof `ptr<ptr<char>>`
-                                 (deref `ptr<char>` (unnamed-temporary~14 `ptr<ptr<char>>`))))
-                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~13 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~13 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
-                     (unnamed-temporary~15 `ptr<char>`)))
+                                 (deref `ptr<char>` (unnamed-temporary~15 `ptr<ptr<char>>`))))
+                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~14 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~14 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
+                     (unnamed-temporary~16 `ptr<char>`)))
                (deref `char`
                   (combine `ptr<char>`
                      (combine `ptr<char>`
+                        (combine `ptr<char>`
+                           (assign `ptr<ptr<char>>` (unnamed-temporary~18 `ptr<ptr<char>>`)
+                              (addressof `ptr<ptr<char>>`
+                                 (src~6 `ptr<char>`)))
+                           (assign `ptr<char>` (unnamed-temporary~19 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~18 `ptr<ptr<char>>`))))
                         (combine `ptr<char>`
                            (assign `ptr<ptr<char>>` (unnamed-temporary~17 `ptr<ptr<char>>`)
                               (addressof `ptr<ptr<char>>`
-                                 (src~5 `ptr<char>`)))
-                           (assign `ptr<char>` (unnamed-temporary~18 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~17 `ptr<ptr<char>>`))))
-                        (combine `ptr<char>`
-                           (assign `ptr<ptr<char>>` (unnamed-temporary~16 `ptr<ptr<char>>`)
-                              (addressof `ptr<ptr<char>>`
-                                 (deref `ptr<char>` (unnamed-temporary~17 `ptr<ptr<char>>`))))
-                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~16 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~16 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
-                     (unnamed-temporary~18 `ptr<char>`)))))
+                                 (deref `ptr<char>` (unnamed-temporary~18 `ptr<ptr<char>>`))))
+                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~17 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~17 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
+                     (unnamed-temporary~19 `ptr<char>`)))))
          (expression
             (assign `char`
                (deref `char`
                   (combine `ptr<char>`
                      (combine `ptr<char>`
+                        (combine `ptr<char>`
+                           (assign `ptr<ptr<char>>` (unnamed-temporary~21 `ptr<ptr<char>>`)
+                              (addressof `ptr<ptr<char>>`
+                                 (tgt~7 `ptr<char>`)))
+                           (assign `ptr<char>` (unnamed-temporary~22 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~21 `ptr<ptr<char>>`))))
                         (combine `ptr<char>`
                            (assign `ptr<ptr<char>>` (unnamed-temporary~20 `ptr<ptr<char>>`)
                               (addressof `ptr<ptr<char>>`
-                                 (tgt~6 `ptr<char>`)))
-                           (assign `ptr<char>` (unnamed-temporary~21 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~20 `ptr<ptr<char>>`))))
-                        (combine `ptr<char>`
-                           (assign `ptr<ptr<char>>` (unnamed-temporary~19 `ptr<ptr<char>>`)
-                              (addressof `ptr<ptr<char>>`
-                                 (deref `ptr<char>` (unnamed-temporary~20 `ptr<ptr<char>>`))))
-                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~19 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~19 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
-                     (unnamed-temporary~21 `ptr<char>`)))
+                                 (deref `ptr<char>` (unnamed-temporary~21 `ptr<ptr<char>>`))))
+                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~20 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~20 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
+                     (unnamed-temporary~22 `ptr<char>`)))
                (deref `char`
                   (combine `ptr<char>`
                      (combine `ptr<char>`
+                        (combine `ptr<char>`
+                           (assign `ptr<ptr<char>>` (unnamed-temporary~24 `ptr<ptr<char>>`)
+                              (addressof `ptr<ptr<char>>`
+                                 (src~6 `ptr<char>`)))
+                           (assign `ptr<char>` (unnamed-temporary~25 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~24 `ptr<ptr<char>>`))))
                         (combine `ptr<char>`
                            (assign `ptr<ptr<char>>` (unnamed-temporary~23 `ptr<ptr<char>>`)
                               (addressof `ptr<ptr<char>>`
-                                 (src~5 `ptr<char>`)))
-                           (assign `ptr<char>` (unnamed-temporary~24 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~23 `ptr<ptr<char>>`))))
-                        (combine `ptr<char>`
-                           (assign `ptr<ptr<char>>` (unnamed-temporary~22 `ptr<ptr<char>>`)
-                              (addressof `ptr<ptr<char>>`
-                                 (deref `ptr<char>` (unnamed-temporary~23 `ptr<ptr<char>>`))))
-                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~22 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~22 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
-                     (unnamed-temporary~24 `ptr<char>`)))))
+                                 (deref `ptr<char>` (unnamed-temporary~24 `ptr<ptr<char>>`))))
+                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~23 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~23 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
+                     (unnamed-temporary~25 `ptr<char>`)))))
          (expression
             (assign `char`
                (deref `char`
                   (combine `ptr<char>`
                      (combine `ptr<char>`
+                        (combine `ptr<char>`
+                           (assign `ptr<ptr<char>>` (unnamed-temporary~27 `ptr<ptr<char>>`)
+                              (addressof `ptr<ptr<char>>`
+                                 (tgt~7 `ptr<char>`)))
+                           (assign `ptr<char>` (unnamed-temporary~28 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~27 `ptr<ptr<char>>`))))
                         (combine `ptr<char>`
                            (assign `ptr<ptr<char>>` (unnamed-temporary~26 `ptr<ptr<char>>`)
                               (addressof `ptr<ptr<char>>`
-                                 (tgt~6 `ptr<char>`)))
-                           (assign `ptr<char>` (unnamed-temporary~27 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~26 `ptr<ptr<char>>`))))
-                        (combine `ptr<char>`
-                           (assign `ptr<ptr<char>>` (unnamed-temporary~25 `ptr<ptr<char>>`)
-                              (addressof `ptr<ptr<char>>`
-                                 (deref `ptr<char>` (unnamed-temporary~26 `ptr<ptr<char>>`))))
-                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~25 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~25 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
-                     (unnamed-temporary~27 `ptr<char>`)))
+                                 (deref `ptr<char>` (unnamed-temporary~27 `ptr<ptr<char>>`))))
+                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~26 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~26 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
+                     (unnamed-temporary~28 `ptr<char>`)))
                (deref `char`
                   (combine `ptr<char>`
                      (combine `ptr<char>`
+                        (combine `ptr<char>`
+                           (assign `ptr<ptr<char>>` (unnamed-temporary~30 `ptr<ptr<char>>`)
+                              (addressof `ptr<ptr<char>>`
+                                 (src~6 `ptr<char>`)))
+                           (assign `ptr<char>` (unnamed-temporary~31 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~30 `ptr<ptr<char>>`))))
                         (combine `ptr<char>`
                            (assign `ptr<ptr<char>>` (unnamed-temporary~29 `ptr<ptr<char>>`)
                               (addressof `ptr<ptr<char>>`
-                                 (src~5 `ptr<char>`)))
-                           (assign `ptr<char>` (unnamed-temporary~30 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~29 `ptr<ptr<char>>`))))
-                        (combine `ptr<char>`
-                           (assign `ptr<ptr<char>>` (unnamed-temporary~28 `ptr<ptr<char>>`)
-                              (addressof `ptr<ptr<char>>`
-                                 (deref `ptr<char>` (unnamed-temporary~29 `ptr<ptr<char>>`))))
-                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~28 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~28 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
-                     (unnamed-temporary~30 `ptr<char>`)))))
+                                 (deref `ptr<char>` (unnamed-temporary~30 `ptr<ptr<char>>`))))
+                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~29 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~29 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
+                     (unnamed-temporary~31 `ptr<char>`)))))
          (expression
             (assign `char`
                (deref `char`
                   (combine `ptr<char>`
                      (combine `ptr<char>`
+                        (combine `ptr<char>`
+                           (assign `ptr<ptr<char>>` (unnamed-temporary~33 `ptr<ptr<char>>`)
+                              (addressof `ptr<ptr<char>>`
+                                 (tgt~7 `ptr<char>`)))
+                           (assign `ptr<char>` (unnamed-temporary~34 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~33 `ptr<ptr<char>>`))))
                         (combine `ptr<char>`
                            (assign `ptr<ptr<char>>` (unnamed-temporary~32 `ptr<ptr<char>>`)
                               (addressof `ptr<ptr<char>>`
-                                 (tgt~6 `ptr<char>`)))
-                           (assign `ptr<char>` (unnamed-temporary~33 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~32 `ptr<ptr<char>>`))))
-                        (combine `ptr<char>`
-                           (assign `ptr<ptr<char>>` (unnamed-temporary~31 `ptr<ptr<char>>`)
-                              (addressof `ptr<ptr<char>>`
-                                 (deref `ptr<char>` (unnamed-temporary~32 `ptr<ptr<char>>`))))
-                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~31 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~31 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
-                     (unnamed-temporary~33 `ptr<char>`)))
+                                 (deref `ptr<char>` (unnamed-temporary~33 `ptr<ptr<char>>`))))
+                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~32 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~32 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
+                     (unnamed-temporary~34 `ptr<char>`)))
                (deref `char`
                   (combine `ptr<char>`
                      (combine `ptr<char>`
                         (combine `ptr<char>`
+                           (assign `ptr<ptr<char>>` (unnamed-temporary~36 `ptr<ptr<char>>`)
+                              (addressof `ptr<ptr<char>>`
+                                 (src~6 `ptr<char>`)))
+                           (assign `ptr<char>` (unnamed-temporary~37 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~36 `ptr<ptr<char>>`))))
+                        (combine `ptr<char>`
                            (assign `ptr<ptr<char>>` (unnamed-temporary~35 `ptr<ptr<char>>`)
                               (addressof `ptr<ptr<char>>`
-                                 (src~5 `ptr<char>`)))
-                           (assign `ptr<char>` (unnamed-temporary~36 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~35 `ptr<ptr<char>>`))))
-                        (combine `ptr<char>`
-                           (assign `ptr<ptr<char>>` (unnamed-temporary~34 `ptr<ptr<char>>`)
-                              (addressof `ptr<ptr<char>>`
-                                 (deref `ptr<char>` (unnamed-temporary~35 `ptr<ptr<char>>`))))
-                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~34 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~34 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
-                     (unnamed-temporary~36 `ptr<char>`)))))
+                                 (deref `ptr<char>` (unnamed-temporary~36 `ptr<ptr<char>>`))))
+                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~35 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~35 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
+                     (unnamed-temporary~37 `ptr<char>`)))))
          (expression
             (assign `char`
                (deref `char`
                   (combine `ptr<char>`
                      (combine `ptr<char>`
                         (combine `ptr<char>`
+                           (assign `ptr<ptr<char>>` (unnamed-temporary~39 `ptr<ptr<char>>`)
+                              (addressof `ptr<ptr<char>>`
+                                 (tgt~7 `ptr<char>`)))
+                           (assign `ptr<char>` (unnamed-temporary~40 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~39 `ptr<ptr<char>>`))))
+                        (combine `ptr<char>`
                            (assign `ptr<ptr<char>>` (unnamed-temporary~38 `ptr<ptr<char>>`)
                               (addressof `ptr<ptr<char>>`
-                                 (tgt~6 `ptr<char>`)))
-                           (assign `ptr<char>` (unnamed-temporary~39 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~38 `ptr<ptr<char>>`))))
-                        (combine `ptr<char>`
-                           (assign `ptr<ptr<char>>` (unnamed-temporary~37 `ptr<ptr<char>>`)
-                              (addressof `ptr<ptr<char>>`
-                                 (deref `ptr<char>` (unnamed-temporary~38 `ptr<ptr<char>>`))))
-                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~37 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~37 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
-                     (unnamed-temporary~39 `ptr<char>`)))
+                                 (deref `ptr<char>` (unnamed-temporary~39 `ptr<ptr<char>>`))))
+                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~38 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~38 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
+                     (unnamed-temporary~40 `ptr<char>`)))
                (deref `char`
                   (combine `ptr<char>`
                      (combine `ptr<char>`
                         (combine `ptr<char>`
+                           (assign `ptr<ptr<char>>` (unnamed-temporary~42 `ptr<ptr<char>>`)
+                              (addressof `ptr<ptr<char>>`
+                                 (src~6 `ptr<char>`)))
+                           (assign `ptr<char>` (unnamed-temporary~43 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~42 `ptr<ptr<char>>`))))
+                        (combine `ptr<char>`
                            (assign `ptr<ptr<char>>` (unnamed-temporary~41 `ptr<ptr<char>>`)
                               (addressof `ptr<ptr<char>>`
-                                 (src~5 `ptr<char>`)))
-                           (assign `ptr<char>` (unnamed-temporary~42 `ptr<char>`) (deref `ptr<char>` (unnamed-temporary~41 `ptr<ptr<char>>`))))
-                        (combine `ptr<char>`
-                           (assign `ptr<ptr<char>>` (unnamed-temporary~40 `ptr<ptr<char>>`)
-                              (addressof `ptr<ptr<char>>`
-                                 (deref `ptr<char>` (unnamed-temporary~41 `ptr<ptr<char>>`))))
-                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~40 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~40 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
-                     (unnamed-temporary~42 `ptr<char>`)))))
+                                 (deref `ptr<char>` (unnamed-temporary~42 `ptr<ptr<char>>`))))
+                           (assign `ptr<char>` (deref `ptr<char>` (unnamed-temporary~41 `ptr<ptr<char>>`)) (ptr-add `ptr<char>` (deref `ptr<char>` (unnamed-temporary~41 `ptr<ptr<char>>`)) (sign-extend `unsigned long` (++ `int`))))))
+                     (unnamed-temporary~43 `ptr<char>`)))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -214,14 +214,14 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 9>>`
                         (string `array<char; 9>` "%zu %zu\n\0"))))
-               (ptr-diff `long` (src~5 `ptr<char>`)
+               (ptr-diff `long` (src~6 `ptr<char>`)
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 6>>`
-                        (str~3 `array<char; 6>`))))
-               (ptr-diff `long` (tgt~6 `ptr<char>`)
+                        (str~4 `array<char; 6>`))))
+               (ptr-diff `long` (tgt~7 `ptr<char>`)
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 6>>`
-                        (copy~4 `array<char; 6>`))))))
+                        (copy~5 `array<char; 6>`))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`
@@ -229,7 +229,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>`
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 6>>`
-                        (str~3 `array<char; 6>`))))))
+                        (str~4 `array<char; 6>`))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`
@@ -237,6 +237,6 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>`
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 6>>`
-                        (copy~4 `array<char; 6>`)))))))))
+                        (copy~5 `array<char; 6>`)))))))))
 
 ----- stderr -----

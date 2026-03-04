@@ -17,7 +17,7 @@ exit_code: 0
       (compound-statement
          (return (x~0 `int`))))
    (function-definition external
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
          (return
             (call `int`

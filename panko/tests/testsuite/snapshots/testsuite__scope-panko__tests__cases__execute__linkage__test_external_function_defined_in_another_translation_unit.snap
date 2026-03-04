@@ -17,9 +17,9 @@ exit_code: 0
    (function-definition
       f~1 `fn(y: int) -> int`
       (params
-         y~2 `int`)
+         y~3 `int`)
       (compound-statement
-         (return (add (name x~0 `int`) (name y~2 `int`))))))
+         (return (add (name x~0 `int`) (name y~3 `int`))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/main.c"
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (declaration f~1 `fn(∅: int) -> int` ∅)

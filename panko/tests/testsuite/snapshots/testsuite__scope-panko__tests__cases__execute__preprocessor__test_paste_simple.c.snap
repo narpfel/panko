@@ -15,23 +15,23 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration variable~2 `int` 42)
+         (declaration variable~3 `int` 42)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (name variable~2 `int`)))
+               (name variable~3 `int`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (negate (name variable~2 `int`))))
+               (negate (name variable~3 `int`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (negate (name variable~2 `int`))))
+               (negate (name variable~3 `int`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (pre-increment (name variable~2 `int`))))
-         (return (add (name variable~2 `int`) 2)))))
+               (pre-increment (name variable~3 `int`))))
+         (return (add (name variable~3 `int`) 2)))))
 
 ----- stderr -----

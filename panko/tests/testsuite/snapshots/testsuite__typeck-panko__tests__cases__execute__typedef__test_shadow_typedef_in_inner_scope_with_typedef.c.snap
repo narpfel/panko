@@ -19,7 +19,7 @@ exit_code: 0
             (typedef name `int`)
             (compound-statement
                (typedef name `char const`)
-               (definition x~2 `char const` (truncate `char` ('a' `int`)))
+               (definition x~3 `char const` (truncate `char` ('a' `int`)))
                (expression
                   (call `int`
                      (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -28,8 +28,8 @@ exit_code: 0
                         (noop-type-conversion `ptr<char>`
                            (addressof `ptr<array<char; 4>>`
                               (string `array<char; 4>` "%c\n\0"))))
-                     (sign-extend `int` (x~2 `char const`)))))
-            (definition x~3 `int` (123 `int`))
+                     (sign-extend `int` (x~3 `char const`)))))
+            (definition x~4 `int` (123 `int`))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -38,8 +38,8 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 4>>`
                            (string `array<char; 4>` "%d\n\0"))))
-                  (x~3 `int`))))
-         (definition name~4 `int` (42 `int`))
-         (return (name~4 `int`)))))
+                  (x~4 `int`))))
+         (definition name~5 `int` (42 `int`))
+         (return (name~5 `int`)))))
 
 ----- stderr -----

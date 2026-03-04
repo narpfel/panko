@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external stack-size=72
       (main~1 `fn() -> int` (static main))
       (compound-statement
-         (definition (p~2 `ptr<long>` @0)
+         (definition (p~3 `ptr<long>` @0)
             (noop-type-conversion `ptr<long>` @0
                (call `ptr<void>` @0
                   (addressof `ptr<fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>>` @8
@@ -26,14 +26,14 @@ exit_code: 0
             (assign `long` @8
                (deref `long` @8
                   (ptr-add `ptr<long>` @16
-                     (p~2 `ptr<long>` @0)
+                     (p~3 `ptr<long>` @0)
                      (sign-extend `unsigned long` @24 (0 `int` @32))))
                (sign-extend `long` @24 (42 `int` @32))))
          (expression
             (assign `long` @8
                (deref `long` @8
                   (ptr-add `ptr<long>` @16
-                     (p~2 `ptr<long>` @0)
+                     (p~3 `ptr<long>` @0)
                      (sign-extend `unsigned long` @24 (1 `int` @32))))
                (sign-extend `long` @24 (27 `int` @32))))
          (return
@@ -41,11 +41,11 @@ exit_code: 0
                (add `long` @16
                   (deref `long` @16
                      (ptr-add `ptr<long>` @24
-                        (p~2 `ptr<long>` @0)
+                        (p~3 `ptr<long>` @0)
                         (sign-extend `unsigned long` @32 (0 `int` @40))))
                   (deref `long` @32
                      (ptr-add `ptr<long>` @40
                         (sign-extend `unsigned long` @40 (1 `int` @48))
-                        (p~2 `ptr<long>` @0)))))))))
+                        (p~3 `ptr<long>` @0)))))))))
 
 ----- stderr -----

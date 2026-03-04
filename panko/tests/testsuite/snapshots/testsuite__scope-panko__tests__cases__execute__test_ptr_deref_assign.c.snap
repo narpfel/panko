@@ -14,10 +14,10 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration x~1 `long` 42)
-         (declaration p~2 `ptr<long>` (addressof (name x~1 `long`)))
-         (declaration pp~3 `ptr<ptr<long>>` (addressof (name p~2 `ptr<long>`)))
-         (expression (assign (deref (deref (name pp~3 `ptr<ptr<long>>`))) 27))
-         (return (name x~1 `long`)))))
+         (declaration x~2 `long` 42)
+         (declaration p~3 `ptr<long>` (addressof (name x~2 `long`)))
+         (declaration pp~4 `ptr<ptr<long>>` (addressof (name p~3 `ptr<long>`)))
+         (expression (assign (deref (deref (name pp~4 `ptr<ptr<long>>`))) 27))
+         (return (name x~2 `long`)))))
 
 ----- stderr -----

@@ -14,10 +14,10 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration c~1 `char` 0)
+         (declaration c~2 `char` 0)
          (return
             (generic
-               (name c~1 `char`)
+               (name c~2 `char`)
                (assoc `int` 1)
                (assoc `long` 2)
                (assoc default 42))))))

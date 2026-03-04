@@ -15,6 +15,6 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration a~1 `fn(a: fn(a: fn(a: int) -> int) -> int) -> int` ∅))))
+         (declaration a~2 `fn(a: fn(a: fn(a: int) -> int) -> int) -> int` ∅))))
 
 ----- stderr -----

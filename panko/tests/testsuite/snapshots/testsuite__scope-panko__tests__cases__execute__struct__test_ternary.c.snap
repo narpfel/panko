@@ -17,37 +17,37 @@ exit_code: 0
    (function-definition
       print_struct~2 `fn(value: struct Struct~1 complete) -> void`
       (params
-         value~3 `struct Struct~1 complete`)
+         value~4 `struct Struct~1 complete`)
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "struct Struct { long x = %ld; }\n")
                (dot x
-                  (name value~3 `struct Struct~1 complete`))))))
+                  (name value~4 `struct Struct~1 complete`))))))
    (function-definition
-      main~4 `fn() -> int`
+      main~5 `fn() -> int`
       (compound-statement
          (struct Struct~1
             (member x `long`))
-         (declaration value~5 `struct Struct~1 complete`
+         (declaration value~7 `struct Struct~1 complete`
             (braced
                42))
          (struct Struct~1
             (member x `long`))
-         (declaration other~6 `struct Struct~1 complete`
+         (declaration other~8 `struct Struct~1 complete`
             (braced
                27))
          (expression
             (call (name print_struct~2 `fn(value: struct Struct~1 complete) -> void`)
                (conditional
                   true
-                  (name other~6 `struct Struct~1 complete`)
-                  (name value~5 `struct Struct~1 complete`))))
+                  (name other~8 `struct Struct~1 complete`)
+                  (name value~7 `struct Struct~1 complete`))))
          (expression
             (call (name print_struct~2 `fn(value: struct Struct~1 complete) -> void`)
                (conditional
                   false
-                  (name other~6 `struct Struct~1 complete`)
-                  (name value~5 `struct Struct~1 complete`)))))))
+                  (name other~8 `struct Struct~1 complete`)
+                  (name value~7 `struct Struct~1 complete`)))))))
 
 ----- stderr -----

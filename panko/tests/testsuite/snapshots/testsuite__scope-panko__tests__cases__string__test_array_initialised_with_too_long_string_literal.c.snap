@@ -14,6 +14,6 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration string~1 `array<char; 3>` (string "string")))))
+         (declaration string~2 `array<char; 3>` (string "string")))))
 
 ----- stderr -----

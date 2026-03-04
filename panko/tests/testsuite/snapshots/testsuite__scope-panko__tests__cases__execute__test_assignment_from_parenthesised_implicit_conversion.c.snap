@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration a~1 `unsigned int` 27)
-         (expression (assign (name a~1 `unsigned int`) 42))
-         (return (name a~1 `unsigned int`)))))
+         (declaration a~2 `unsigned int` 27)
+         (expression (assign (name a~2 `unsigned int`) 42))
+         (return (name a~2 `unsigned int`)))))
 
 ----- stderr -----

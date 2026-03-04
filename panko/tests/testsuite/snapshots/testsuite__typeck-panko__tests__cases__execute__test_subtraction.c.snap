@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `int` (42 `int`))
-         (definition b~2 `char` (truncate `char` (42 `int`)))
-         (return (subtract `int` (sign-extend `int` (b~2 `char`)) (a~1 `int`))))))
+         (definition a~2 `int` (42 `int`))
+         (definition b~3 `char` (truncate `char` (42 `int`)))
+         (return (subtract `int` (sign-extend `int` (b~3 `char`)) (a~2 `int`))))))
 
 ----- stderr -----

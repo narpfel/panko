@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration xs~2 `array<array<int; 2>; ∅>`
+         (declaration xs~3 `array<array<int; 2>; ∅>`
             (braced
                1
                2
@@ -26,22 +26,22 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %zu\n")
-               (lengthof (name xs~2 `array<array<int; 2>; ∅>`))
-               (lengthof (subscript (name xs~2 `array<array<int; 2>; ∅>`) 0))))
+               (lengthof (name xs~3 `array<array<int; 2>; ∅>`))
+               (lengthof (subscript (name xs~3 `array<array<int; 2>; ∅>`) 0))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d\n")
-               (subscript (subscript (name xs~2 `array<array<int; 2>; ∅>`) 0) 0)
-               (subscript (subscript (name xs~2 `array<array<int; 2>; ∅>`) 0) 1)))
+               (subscript (subscript (name xs~3 `array<array<int; 2>; ∅>`) 0) 0)
+               (subscript (subscript (name xs~3 `array<array<int; 2>; ∅>`) 0) 1)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d\n")
-               (subscript (subscript (name xs~2 `array<array<int; 2>; ∅>`) 1) 0)
-               (subscript (subscript (name xs~2 `array<array<int; 2>; ∅>`) 1) 1)))
+               (subscript (subscript (name xs~3 `array<array<int; 2>; ∅>`) 1) 0)
+               (subscript (subscript (name xs~3 `array<array<int; 2>; ∅>`) 1) 1)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d\n")
-               (subscript (subscript (name xs~2 `array<array<int; 2>; ∅>`) 2) 0)
-               (subscript (subscript (name xs~2 `array<array<int; 2>; ∅>`) 2) 1))))))
+               (subscript (subscript (name xs~3 `array<array<int; 2>; ∅>`) 2) 0)
+               (subscript (subscript (name xs~3 `array<array<int; 2>; ∅>`) 2) 1))))))
 
 ----- stderr -----

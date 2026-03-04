@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration array~2 `array<array<int; 3>; ∅>`
+         (declaration array~3 `array<array<int; 3>; ∅>`
             (braced
                (braced
                   1)
@@ -24,31 +24,31 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (subscript (subscript (name array~2 `array<array<int; 3>; ∅>`) 0) 0)))
+               (subscript (subscript (name array~3 `array<array<int; 3>; ∅>`) 0) 0)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (subscript (subscript (name array~2 `array<array<int; 3>; ∅>`) 0) 1)))
+               (subscript (subscript (name array~3 `array<array<int; 3>; ∅>`) 0) 1)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (subscript (subscript (name array~2 `array<array<int; 3>; ∅>`) 0) 2)))
+               (subscript (subscript (name array~3 `array<array<int; 3>; ∅>`) 0) 2)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (subscript (subscript (name array~2 `array<array<int; 3>; ∅>`) 1) 0)))
+               (subscript (subscript (name array~3 `array<array<int; 3>; ∅>`) 1) 0)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (subscript (subscript (name array~2 `array<array<int; 3>; ∅>`) 1) 1)))
+               (subscript (subscript (name array~3 `array<array<int; 3>; ∅>`) 1) 1)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (subscript (subscript (name array~2 `array<array<int; 3>; ∅>`) 1) 2)))
+               (subscript (subscript (name array~3 `array<array<int; 3>; ∅>`) 1) 2)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %zu\n")
-               (lengthof (name array~2 `array<array<int; 3>; ∅>`))
-               (lengthof (subscript (name array~2 `array<array<int; 3>; ∅>`) 0)))))))
+               (lengthof (name array~3 `array<array<int; 3>; ∅>`))
+               (lengthof (subscript (name array~3 `array<array<int; 3>; ∅>`) 0)))))))
 
 ----- stderr -----

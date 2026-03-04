@@ -14,29 +14,29 @@ exit_code: 0
    (function-definition
       f~0 `fn() -> int`
       (compound-statement
-         (declaration a~1 `int const` 42)
-         (expression (assign (name a~1 `int const`) 27))
-         (return (name a~1 `int const`))))
+         (declaration a~2 `int const` 42)
+         (expression (assign (name a~2 `int const`) 27))
+         (return (name a~2 `int const`))))
    (function-definition
-      g~2 `fn() -> int`
+      g~3 `fn() -> int`
       (compound-statement
-         (declaration b~3 `ptr<int const>` ∅)
-         (declaration c~4 `ptr<int const>` nullptr)
-         (expression (assign (name b~3 `ptr<int const>`) (name c~4 `ptr<int const>`)))
+         (declaration b~5 `ptr<int const>` ∅)
+         (declaration c~6 `ptr<int const>` nullptr)
+         (expression (assign (name b~5 `ptr<int const>`) (name c~6 `ptr<int const>`)))
          (return 0)))
    (function-definition
-      h~5 `fn() -> int`
+      h~7 `fn() -> int`
       (compound-statement
-         (declaration d~6 `ptr<int> const` ∅)
-         (declaration e~7 `ptr<int>` nullptr)
-         (expression (assign (name d~6 `ptr<int> const`) (name e~7 `ptr<int>`)))
+         (declaration d~9 `ptr<int> const` ∅)
+         (declaration e~10 `ptr<int>` nullptr)
+         (expression (assign (name d~9 `ptr<int> const`) (name e~10 `ptr<int>`)))
          (return 0)))
    (function-definition
-      i~8 `fn() -> int`
+      i~11 `fn() -> int`
       (compound-statement
-         (declaration f~9 `ptr<int>` ∅)
-         (declaration g~10 `ptr<int> const` nullptr)
-         (expression (assign (name f~9 `ptr<int>`) (name g~10 `ptr<int> const`)))
+         (declaration f~13 `ptr<int>` ∅)
+         (declaration g~14 `ptr<int> const` nullptr)
+         (expression (assign (name f~13 `ptr<int>`) (name g~14 `ptr<int> const`)))
          (return 0))))
 
 ----- stderr -----

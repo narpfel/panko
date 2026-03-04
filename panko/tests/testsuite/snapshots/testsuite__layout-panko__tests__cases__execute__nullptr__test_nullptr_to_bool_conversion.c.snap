@@ -24,7 +24,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 4>>` @16
                         (string `array<char; 4>` @void "%d\n\0"))))
                (zero-extend `int` @24 (bool-cast `bool` @28 (nullptr `nullptr_t` @32)))))
-         (definition (b~2 `bool` @0) (bool-cast `bool` @0 (nullptr `nullptr_t` @8)))
-         (return (zero-extend `int` @4 (b~2 `bool` @0))))))
+         (definition (b~3 `bool` @0) (bool-cast `bool` @0 (nullptr `nullptr_t` @8)))
+         (return (zero-extend `int` @4 (b~3 `bool` @0))))))
 
 ----- stderr -----

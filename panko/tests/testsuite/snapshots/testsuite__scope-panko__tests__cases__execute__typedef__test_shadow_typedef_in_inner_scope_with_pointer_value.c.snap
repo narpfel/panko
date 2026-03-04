@@ -18,19 +18,19 @@ exit_code: 0
          (compound-statement
             (typedef name `int`)
             (compound-statement
-               (declaration place~2 `long` ∅)
-               (declaration name~3 `ptr<long>` (addressof (name place~2 `long`)))
-               (expression (assign (deref (name name~3 `ptr<long>`)) (negate 42)))
+               (declaration place~3 `long` ∅)
+               (declaration name~4 `ptr<long>` (addressof (name place~3 `long`)))
+               (expression (assign (deref (name name~4 `ptr<long>`)) (negate 42)))
                (expression
                   (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                      (string "%ld\n")
-                     (name place~2 `long`))))
-            (declaration x~4 `int` 123)
+                     (name place~3 `long`))))
+            (declaration x~5 `int` 123)
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")
-                  (name x~4 `int`))))
-         (declaration name~5 `int` 42)
-         (return (name name~5 `int`)))))
+                  (name x~5 `int`))))
+         (declaration name~6 `int` 42)
+         (return (name name~6 `int`)))))
 
 ----- stderr -----

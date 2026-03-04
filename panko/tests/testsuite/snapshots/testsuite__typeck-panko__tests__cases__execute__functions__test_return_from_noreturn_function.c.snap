@@ -16,7 +16,7 @@ exit_code: 0
       (compound-statement
          (expression (error `void`))))
    (function-definition external
-      main~1 `fn() -> int`
+      main~2 `fn() -> int`
       (compound-statement
          (expression
             (call `void`

@@ -14,17 +14,17 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration xs~1 `array<int; 2>` (braced ∅))
+         (declaration xs~2 `array<int; 2>` (braced ∅))
          (expression
             (generic
-               (name xs~1 `array<int; 2>`)
+               (name xs~2 `array<int; 2>`)
                (assoc `ptr<int>` 0)
                (assoc `array<int; 1>` 1)
                (assoc `array<int; 2>` 2)
                (assoc `array<int; 3>` 3)))
          (expression
             (generic
-               (name xs~1 `array<int; 2>`)
+               (name xs~2 `array<int; 2>`)
                (assoc `array<int; 2>` 1)
                (assoc `array<int; 2>` 2))))))
 

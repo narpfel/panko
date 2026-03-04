@@ -17,11 +17,11 @@ exit_code: 0
    (function-definition external stack-size=72
       (print_struct~2 `fn(x: char, value: struct Struct~1 complete, y: char, other: struct Struct~1 complete, z: char) -> void` (static print_struct))
       (params
-         (x~3 `char` @0)
-         (value~4 `struct Struct~1 complete` @1)
-         (y~5 `char` @12)
-         (other~6 `struct Struct~1 complete` @13)
-         (z~7 `char` @24))
+         (x~4 `char` @0)
+         (value~5 `struct Struct~1 complete` @1)
+         (y~6 `char` @12)
+         (other~7 `struct Struct~1 complete` @13)
+         (z~8 `char` @24))
       (compound-statement
          (expression
             (call `int` @28
@@ -34,7 +34,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char>` @48
                   (addressof `ptr<array<char; 11>>` @48
                      (member `array<char; 11>` @1 string +0
-                        (value~4 `struct Struct~1 complete` @1))))))
+                        (value~5 `struct Struct~1 complete` @1))))))
          (expression
             (call `int` @28
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
@@ -46,7 +46,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char>` @48
                   (addressof `ptr<array<char; 11>>` @48
                      (member `array<char; 11>` @13 string +0
-                        (other~6 `struct Struct~1 complete` @13))))))
+                        (other~7 `struct Struct~1 complete` @13))))))
          (expression
             (call `int` @28
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
@@ -55,20 +55,20 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @40
                      (addressof `ptr<array<char; 10>>` @40
                         (string `array<char; 10>` @void "%d %d %d\n\0"))))
-               (sign-extend `int` @48 (x~3 `char` @0))
-               (sign-extend `int` @52 (y~5 `char` @12))
-               (sign-extend `int` @56 (z~7 `char` @24))))))
+               (sign-extend `int` @48 (x~4 `char` @0))
+               (sign-extend `int` @52 (y~6 `char` @12))
+               (sign-extend `int` @56 (z~8 `char` @24))))))
    (function-definition external stack-size=72
-      (main~8 `fn() -> int` (static main))
+      (main~9 `fn() -> int` (static main))
       (compound-statement
          (struct Struct~1
             (member string @0 `array<char; 11>`))
-         (definition (value~9 `struct Struct~1 complete` @0)
+         (definition (value~11 `struct Struct~1 complete` @0)
             (braced
                (subobject +0 (string `array<char; 11>` @void "0123456789\0"))))
          (struct Struct~1
             (member string @0 `array<char; 11>`))
-         (definition (v2~10 `struct Struct~1 complete` @11)
+         (definition (v2~12 `struct Struct~1 complete` @11)
             (braced
                (subobject +0 (string `array<char; 11>` @void "abcdefghjk\0"))))
          (expression
@@ -76,9 +76,9 @@ exit_code: 0
                (addressof `ptr<fn(x: char, value: struct Struct~1 complete, y: char, other: struct Struct~1 complete, z: char) -> void>` @24
                   (print_struct~2 `fn(x: char, value: struct Struct~1 complete, y: char, other: struct Struct~1 complete, z: char) -> void` (static print_struct)))
                (truncate `char` @32 (123 `int` @36))
-               (value~9 `struct Struct~1 complete` @0)
+               (value~11 `struct Struct~1 complete` @0)
                (truncate `char` @40 (42 `int` @44))
-               (v2~10 `struct Struct~1 complete` @11)
+               (v2~12 `struct Struct~1 complete` @11)
                (truncate `char` @48 (27 `int` @52)))))))
 
 ----- stderr -----

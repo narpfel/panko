@@ -14,12 +14,12 @@ exit_code: 0
    (function-definition
       f~0 `fn(x: int, y: int) -> int`
       (params
-         x~1 `int`
-         y~2 `int`)
+         x~2 `int`
+         y~3 `int`)
       (compound-statement
-         (return (add (multiply 2 (name x~1 `int`)) (name y~2 `int`)))))
+         (return (add (multiply 2 (name x~2 `int`)) (name y~3 `int`)))))
    (function-definition
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
          (return
             (add

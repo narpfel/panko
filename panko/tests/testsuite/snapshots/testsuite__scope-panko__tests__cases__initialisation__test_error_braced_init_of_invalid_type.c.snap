@@ -14,13 +14,13 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration t~2 `struct T~1` (braced ∅))
-         (declaration v~3 `void`
+         (declaration t~3 `struct T~2` (braced ∅))
+         (declaration v~4 `void`
             (braced
                1
                2
                3))
-         (declaration f~4 `fn() -> int`
+         (declaration f~5 `fn() -> int`
             (braced
                42)))))
 

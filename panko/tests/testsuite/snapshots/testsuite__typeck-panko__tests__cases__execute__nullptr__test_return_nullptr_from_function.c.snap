@@ -16,7 +16,7 @@ exit_code: 0
       (compound-statement
          (return (nullptr `nullptr_t`))))
    (function-definition external
-      main~1 `fn() -> int`
+      main~2 `fn() -> int`
       (compound-statement
          (return
             (ptr-equal `int`

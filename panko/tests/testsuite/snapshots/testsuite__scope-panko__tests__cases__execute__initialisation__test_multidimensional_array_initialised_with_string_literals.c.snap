@@ -17,7 +17,7 @@ exit_code: 0
       main~2 `fn() -> int`
       (compound-statement
          (compound-statement
-            (declaration strings~3 `array<array<array<char; 100>; 2>; ∅>`
+            (declaration strings~4 `array<array<array<char; 100>; 2>; ∅>`
                (braced
                   (designation ((index 0)) (string "first"))
                   (string "also first")
@@ -27,30 +27,30 @@ exit_code: 0
                   (string "also third")))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 0) 0)))
+                  (subscript (subscript (name strings~4 `array<array<array<char; 100>; 2>; ∅>`) 0) 0)))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 0) 1)))
+                  (subscript (subscript (name strings~4 `array<array<array<char; 100>; 2>; ∅>`) 0) 1)))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 1) 0)))
+                  (subscript (subscript (name strings~4 `array<array<array<char; 100>; 2>; ∅>`) 1) 0)))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 1) 1)))
+                  (subscript (subscript (name strings~4 `array<array<array<char; 100>; 2>; ∅>`) 1) 1)))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 2) 0)))
+                  (subscript (subscript (name strings~4 `array<array<array<char; 100>; 2>; ∅>`) 2) 0)))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 2) 1)))
+                  (subscript (subscript (name strings~4 `array<array<array<char; 100>; 2>; ∅>`) 2) 1)))
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%zu %zu %zu\n")
-                  (lengthof (name strings~3 `array<array<array<char; 100>; 2>; ∅>`))
-                  (lengthof (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 0))
-                  (lengthof (subscript (subscript (name strings~3 `array<array<array<char; 100>; 2>; ∅>`) 0) 0)))))
+                  (lengthof (name strings~4 `array<array<array<char; 100>; 2>; ∅>`))
+                  (lengthof (subscript (name strings~4 `array<array<array<char; 100>; 2>; ∅>`) 0))
+                  (lengthof (subscript (subscript (name strings~4 `array<array<array<char; 100>; 2>; ∅>`) 0) 0)))))
          (compound-statement
-            (declaration strings~4 `array<array<char; 100>; ∅>`
+            (declaration strings~5 `array<array<char; 100>; ∅>`
                (braced
                   (string "string")
                   (braced
@@ -58,12 +58,12 @@ exit_code: 0
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%zu\n")
-                  (lengthof (name strings~4 `array<array<char; 100>; ∅>`))))
+                  (lengthof (name strings~5 `array<array<char; 100>; ∅>`))))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (name strings~4 `array<array<char; 100>; ∅>`) 0)))
+                  (subscript (name strings~5 `array<array<char; 100>; ∅>`) 0)))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (name strings~4 `array<array<char; 100>; ∅>`) 1)))))))
+                  (subscript (name strings~5 `array<array<char; 100>; ∅>`) 1)))))))
 
 ----- stderr -----

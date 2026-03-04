@@ -15,10 +15,10 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition x~2 `int const` (42 `int`))
-         (definition y~3 `int` (27 `int`))
-         (expression (assign `int` (y~3 `int`) (5 `int`)))
-         (definition p~4 `ptr<int const>` (noop-type-conversion `ptr<int const>` (nullptr `nullptr_t`)))
+         (definition x~3 `int const` (42 `int`))
+         (definition y~4 `int` (27 `int`))
+         (expression (assign `int` (y~4 `int`) (5 `int`)))
+         (definition p~5 `ptr<int const>` (noop-type-conversion `ptr<int const>` (nullptr `nullptr_t`)))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`
@@ -27,6 +27,6 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 9>>`
                         (string `array<char; 9>` "it works\0"))))))
-         (return (y~3 `int`)))))
+         (return (y~4 `int`)))))
 
 ----- stderr -----

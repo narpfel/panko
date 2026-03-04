@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration p~2 `ptr<struct T~1>` nullptr)
-         (expression (deref (name p~2 `ptr<struct T~1>`)))
-         (expression (assign (deref (name p~2 `ptr<struct T~1>`)) 123)))))
+         (declaration p~3 `ptr<struct T~2>` nullptr)
+         (expression (deref (name p~3 `ptr<struct T~2>`)))
+         (expression (assign (deref (name p~3 `ptr<struct T~2>`)) 123)))))
 
 ----- stderr -----

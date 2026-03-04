@@ -31,7 +31,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 12>>`
                         (string `array<char; 12>` "hello world\0"))))))
-         (definition value~2 `int` (42 `int`))
-         (return (value~2 `int`)))))
+         (definition value~3 `int` (42 `int`))
+         (return (value~3 `int`)))))
 
 ----- stderr -----

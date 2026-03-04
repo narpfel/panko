@@ -16,8 +16,8 @@ exit_code: 0
       (compound-statement
          (typedef name `int`)
          (compound-statement
-            (declaration name~1 `fn() -> fn() -> int` ∅))
+            (declaration name~2 `fn() -> fn() -> int` ∅))
          (compound-statement
-            (declaration name~2 `array<fn() -> int; 42>` ∅)))))
+            (declaration name~3 `array<fn() -> int; 42>` ∅)))))
 
 ----- stderr -----

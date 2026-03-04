@@ -14,9 +14,9 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `nullptr_t` (nullptr `nullptr_t`))
-         (definition b~2 `nullptr_t` (noop-type-conversion `nullptr_t` (nullptr `nullptr_t`)))
-         (expression (assign `nullptr_t` (a~1 `nullptr_t`) (nullptr `nullptr_t`)))
-         (expression (assign `nullptr_t` (b~2 `nullptr_t`) (noop-type-conversion `nullptr_t` (nullptr `nullptr_t`)))))))
+         (definition a~2 `nullptr_t` (nullptr `nullptr_t`))
+         (definition b~3 `nullptr_t` (noop-type-conversion `nullptr_t` (nullptr `nullptr_t`)))
+         (expression (assign `nullptr_t` (a~2 `nullptr_t`) (nullptr `nullptr_t`)))
+         (expression (assign `nullptr_t` (b~3 `nullptr_t`) (noop-type-conversion `nullptr_t` (nullptr `nullptr_t`)))))))
 
 ----- stderr -----

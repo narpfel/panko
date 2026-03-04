@@ -14,9 +14,9 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration a~1 `int` ∅)
-         (declaration b~2 `int` 27)
-         (declaration c~3 `int` ∅)
-         (return (name b~2 `int`)))))
+         (declaration a~2 `int` ∅)
+         (declaration b~3 `int` 27)
+         (declaration c~4 `int` ∅)
+         (return (name b~3 `int`)))))
 
 ----- stderr -----

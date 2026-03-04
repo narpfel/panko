@@ -26,39 +26,39 @@ exit_code: 0
    (function-definition
       print_structs~4 `fn(small: struct Small~1 complete, medium: struct Medium~2 complete, large: struct Large~3 complete) -> void`
       (params
-         small~5 `struct Small~1 complete`
-         medium~6 `struct Medium~2 complete`
-         large~7 `struct Large~3 complete`)
+         small~6 `struct Small~1 complete`
+         medium~7 `struct Medium~2 complete`
+         large~8 `struct Large~3 complete`)
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d\n")
                (dot x
-                  (name small~5 `struct Small~1 complete`))
+                  (name small~6 `struct Small~1 complete`))
                (dot y
-                  (name small~5 `struct Small~1 complete`))))
+                  (name small~6 `struct Small~1 complete`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d %d\n")
                (dot x
-                  (name medium~6 `struct Medium~2 complete`))
+                  (name medium~7 `struct Medium~2 complete`))
                (dot y
-                  (name medium~6 `struct Medium~2 complete`))
+                  (name medium~7 `struct Medium~2 complete`))
                (dot z
-                  (name medium~6 `struct Medium~2 complete`))))
+                  (name medium~7 `struct Medium~2 complete`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%ld %ld %ld\n")
                (dot x
-                  (name large~7 `struct Large~3 complete`))
+                  (name large~8 `struct Large~3 complete`))
                (dot y
-                  (name large~7 `struct Large~3 complete`))
+                  (name large~8 `struct Large~3 complete`))
                (dot z
-                  (name large~7 `struct Large~3 complete`))))))
+                  (name large~8 `struct Large~3 complete`))))))
    (struct Small~1
       (member x `int`)
       (member y `int`))
-   (declaration small~8 `struct Small~1 complete`
+   (declaration small~9 `struct Small~1 complete`
       (braced
          42
          27))
@@ -66,7 +66,7 @@ exit_code: 0
       (member x `int`)
       (member y `int`)
       (member z `int`))
-   (declaration medium~9 `struct Medium~2 complete`
+   (declaration medium~10 `struct Medium~2 complete`
       (braced
          1
          2
@@ -75,18 +75,18 @@ exit_code: 0
       (member x `long`)
       (member y `long`)
       (member z `long`))
-   (declaration large~10 `struct Large~3 complete`
+   (declaration large~11 `struct Large~3 complete`
       (braced
          4l
          5l
          6l))
    (function-definition
-      main~11 `fn() -> int`
+      main~12 `fn() -> int`
       (compound-statement
          (expression
             (call (name print_structs~4 `fn(small: struct Small~1 complete, medium: struct Medium~2 complete, large: struct Large~3 complete) -> void`)
-               (name small~8 `struct Small~1 complete`)
-               (name medium~9 `struct Medium~2 complete`)
-               (name large~10 `struct Large~3 complete`))))))
+               (name small~9 `struct Small~1 complete`)
+               (name medium~10 `struct Medium~2 complete`)
+               (name large~11 `struct Large~3 complete`))))))
 
 ----- stderr -----

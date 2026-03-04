@@ -16,7 +16,7 @@ exit_code: 0
       (compound-statement
          (return (nullptr `nullptr_t` @0))))
    (function-definition external stack-size=40
-      (main~1 `fn() -> int` (static main))
+      (main~2 `fn() -> int` (static main))
       (compound-statement
          (return
             (ptr-equal `int` @0

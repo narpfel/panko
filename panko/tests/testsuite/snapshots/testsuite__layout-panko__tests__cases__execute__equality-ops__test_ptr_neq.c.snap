@@ -14,13 +14,13 @@ exit_code: 0
    (function-definition external stack-size=40
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (definition (x~1 `int` @0) ∅)
-         (definition (y~2 `int` @4) ∅)
+         (definition (x~2 `int` @0) ∅)
+         (definition (y~3 `int` @4) ∅)
          (return
             (ptr-not-equal `int` @8
                (addressof `ptr<int>` @16
-                  (x~1 `int` @0))
+                  (x~2 `int` @0))
                (addressof `ptr<int>` @24
-                  (y~2 `int` @4)))))))
+                  (y~3 `int` @4)))))))
 
 ----- stderr -----

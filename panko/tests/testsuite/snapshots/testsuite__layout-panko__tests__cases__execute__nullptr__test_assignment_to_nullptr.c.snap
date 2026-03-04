@@ -14,15 +14,15 @@ exit_code: 0
    (function-definition external stack-size=24
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (definition (a~1 `nullptr_t` @0) (nullptr `nullptr_t` @0))
-         (definition (b~2 `nullptr_t` @8) (noop-type-conversion `nullptr_t` @8 (nullptr `nullptr_t` @8)))
+         (definition (a~2 `nullptr_t` @0) (nullptr `nullptr_t` @0))
+         (definition (b~3 `nullptr_t` @8) (noop-type-conversion `nullptr_t` @8 (nullptr `nullptr_t` @8)))
          (expression
             (assign `nullptr_t` @0
-               (a~1 `nullptr_t` @0)
+               (a~2 `nullptr_t` @0)
                (nullptr `nullptr_t` @0)))
          (expression
             (assign `nullptr_t` @8
-               (b~2 `nullptr_t` @8)
+               (b~3 `nullptr_t` @8)
                (noop-type-conversion `nullptr_t` @8 (nullptr `nullptr_t` @8)))))))
 
 ----- stderr -----

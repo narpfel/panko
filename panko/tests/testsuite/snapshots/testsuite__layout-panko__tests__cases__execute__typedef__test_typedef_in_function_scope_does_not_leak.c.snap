@@ -16,7 +16,7 @@ exit_code: 0
       (f~1 `fn() -> void` (static f))
       (compound-statement
          (typedef name `char const`)
-         (definition (x~2 `char const` @0) (truncate `char` @0 (97 `int` @4)))
+         (definition (x~3 `char const` @0) (truncate `char` @0 (97 `int` @4)))
          (expression
             (call `int` @4
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
@@ -25,15 +25,15 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 4>>` @16
                         (string `array<char; 4>` @void "%c\n\0"))))
-               (sign-extend `int` @24 (x~2 `char const` @0))))))
+               (sign-extend `int` @24 (x~3 `char const` @0))))))
    (function-definition external stack-size=24
-      (main~3 `fn() -> int` (static main))
+      (main~4 `fn() -> int` (static main))
       (compound-statement
          (expression
             (call `void` @void
                (addressof `ptr<fn() -> void>` @0
                   (f~1 `fn() -> void` (static f)))))
-         (definition (name~4 `int` @0) (42 `int` @0))
-         (return (name~4 `int` @0)))))
+         (definition (name~6 `int` @0) (42 `int` @0))
+         (return (name~6 `int` @0)))))
 
 ----- stderr -----

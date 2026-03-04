@@ -15,12 +15,12 @@ exit_code: 0
    (function-definition external stack-size=56
       (fib~1 `fn(n: int) -> int` (static fib))
       (params
-         (n~2 `int` @0))
+         (n~3 `int` @0))
       (compound-statement
          (return
             (conditional `int` @4
                (less `int` @20
-                  (n~2 `int` @0)
+                  (n~3 `int` @0)
                   (3 `int` @24))
                (1 `int` @4)
                (add `int` @4
@@ -28,26 +28,26 @@ exit_code: 0
                      (addressof `ptr<fn(n: int) -> int>` @8
                         (fib~1 `fn(n: int) -> int` (static fib)))
                      (subtract `int` @16
-                        (n~2 `int` @0)
+                        (n~3 `int` @0)
                         (1 `int` @20)))
                   (call `int` @20
                      (addressof `ptr<fn(n: int) -> int>` @24
                         (fib~1 `fn(n: int) -> int` (static fib)))
                      (subtract `int` @32
-                        (n~2 `int` @0)
+                        (n~3 `int` @0)
                         (2 `int` @36))))))))
    (function-definition external stack-size=120
-      (main~3 `fn(∅: int, argv: ptr<ptr<char>>) -> int` (static main))
+      (main~4 `fn(∅: int, argv: ptr<ptr<char>>) -> int` (static main))
       (params
-         (main.unnamed_parameter.0~4 `int` @0)
-         (argv~5 `ptr<ptr<char>>` @8))
+         (main.unnamed_parameter.0~6 `int` @0)
+         (argv~7 `ptr<ptr<char>>` @8))
       (compound-statement
-         (definition (x~6 `int` @16)
+         (definition (x~8 `int` @16)
             (braced
                (subobject +0 (42 `int` @16))))
-         (definition (y~7 `int` @20)
+         (definition (y~9 `int` @20)
             (braced
-               (subobject +0 (x~6 `int` @16))))
+               (subobject +0 (x~8 `int` @16))))
          (expression
             (call `int` @24
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
@@ -55,12 +55,12 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @40
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
-                        (argv~5 `ptr<ptr<char>>` @8)
+                        (argv~7 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @56 (1 `int` @64)))))
-               (y~7 `int` @20)))
-         (definition (z~8 `int` @24)
+               (y~9 `int` @20)))
+         (definition (z~10 `int` @24)
             (braced
-               (subobject +0 (negate `int` @24 (x~6 `int` @16)))))
+               (subobject +0 (negate `int` @24 (x~8 `int` @16)))))
          (expression
             (call `int` @28
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
@@ -68,13 +68,13 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @40
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
-                        (argv~5 `ptr<ptr<char>>` @8)
+                        (argv~7 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @56 (1 `int` @64)))))
-               (z~8 `int` @24)))
-         (definition (xs~9 `array<int; 2>` @28)
+               (z~10 `int` @24)))
+         (definition (xs~11 `array<int; 2>` @28)
             (braced
-               (subobject +0 (x~6 `int` @16))
-               (subobject +4 (z~8 `int` @24))))
+               (subobject +0 (x~8 `int` @16))
+               (subobject +4 (z~10 `int` @24))))
          (expression
             (call `int` @36
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
@@ -82,13 +82,13 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @48
                   (deref `ptr<char>` @48
                      (ptr-add `ptr<ptr<char>>` @56
-                        (argv~5 `ptr<ptr<char>>` @8)
+                        (argv~7 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @64 (1 `int` @72)))))
                (deref `int` @64
                   (ptr-add `ptr<int>` @72
                      (noop-type-conversion `ptr<int>` @72
                         (addressof `ptr<array<int; 2>>` @72
-                           (xs~9 `array<int; 2>` @28)))
+                           (xs~11 `array<int; 2>` @28)))
                      (sign-extend `unsigned long` @80 (0 `int` @88))))))
          (expression
             (call `int` @36
@@ -97,23 +97,23 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @48
                   (deref `ptr<char>` @48
                      (ptr-add `ptr<ptr<char>>` @56
-                        (argv~5 `ptr<ptr<char>>` @8)
+                        (argv~7 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @64 (1 `int` @72)))))
                (deref `int` @64
                   (ptr-add `ptr<int>` @72
                      (noop-type-conversion `ptr<int>` @72
                         (addressof `ptr<array<int; 2>>` @72
-                           (xs~9 `array<int; 2>` @28)))
+                           (xs~11 `array<int; 2>` @28)))
                      (sign-extend `unsigned long` @80 (1 `int` @88))))))
-         (definition (two~10 `int` @36) (2 `int` @36))
-         (definition (ys~11 `array<int; 3>` @40)
+         (definition (two~12 `int` @36) (2 `int` @36))
+         (definition (ys~13 `array<int; 3>` @40)
             (braced
-               (subobject +0 (two~10 `int` @36))
+               (subobject +0 (two~12 `int` @36))
                (subobject +4
                   (call `int` @44
                      (addressof `ptr<fn(n: int) -> int>` @56
                         (fib~1 `fn(n: int) -> int` (static fib)))
-                     (two~10 `int` @36)))
+                     (two~12 `int` @36)))
                (subobject +8
                   (subtract `int` @48
                      (call `int` @48
@@ -121,10 +121,10 @@ exit_code: 0
                            (fib~1 `fn(n: int) -> int` (static fib)))
                         (add `int` @64
                            (add `int` @64
-                              (two~10 `int` @36)
-                              (two~10 `int` @36))
-                           (two~10 `int` @36)))
-                     (two~10 `int` @36)))))
+                              (two~12 `int` @36)
+                              (two~12 `int` @36))
+                           (two~12 `int` @36)))
+                     (two~12 `int` @36)))))
          (expression
             (call `int` @52
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56
@@ -132,13 +132,13 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @64
                   (deref `ptr<char>` @64
                      (ptr-add `ptr<ptr<char>>` @72
-                        (argv~5 `ptr<ptr<char>>` @8)
+                        (argv~7 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @80 (1 `int` @88)))))
                (deref `int` @80
                   (ptr-add `ptr<int>` @88
                      (noop-type-conversion `ptr<int>` @88
                         (addressof `ptr<array<int; 3>>` @88
-                           (ys~11 `array<int; 3>` @40)))
+                           (ys~13 `array<int; 3>` @40)))
                      (sign-extend `unsigned long` @96 (0 `int` @104))))))
          (expression
             (call `int` @52
@@ -147,13 +147,13 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @64
                   (deref `ptr<char>` @64
                      (ptr-add `ptr<ptr<char>>` @72
-                        (argv~5 `ptr<ptr<char>>` @8)
+                        (argv~7 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @80 (1 `int` @88)))))
                (deref `int` @80
                   (ptr-add `ptr<int>` @88
                      (noop-type-conversion `ptr<int>` @88
                         (addressof `ptr<array<int; 3>>` @88
-                           (ys~11 `array<int; 3>` @40)))
+                           (ys~13 `array<int; 3>` @40)))
                      (sign-extend `unsigned long` @96 (1 `int` @104))))))
          (expression
             (call `int` @52
@@ -162,13 +162,13 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @64
                   (deref `ptr<char>` @64
                      (ptr-add `ptr<ptr<char>>` @72
-                        (argv~5 `ptr<ptr<char>>` @8)
+                        (argv~7 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @80 (1 `int` @88)))))
                (deref `int` @80
                   (ptr-add `ptr<int>` @88
                      (noop-type-conversion `ptr<int>` @88
                         (addressof `ptr<array<int; 3>>` @88
-                           (ys~11 `array<int; 3>` @40)))
+                           (ys~13 `array<int; 3>` @40)))
                      (sign-extend `unsigned long` @96 (2 `int` @104)))))))))
 
 ----- stderr -----

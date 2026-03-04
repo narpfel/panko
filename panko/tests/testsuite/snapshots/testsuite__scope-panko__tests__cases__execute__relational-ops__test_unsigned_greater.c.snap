@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration a~1 `unsigned int` 42)
-         (declaration b~2 `unsigned int` 27)
-         (return (add (greater-equal (name a~1 `unsigned int`) (name b~2 `unsigned int`)) (greater-equal (name a~1 `unsigned int`) (name a~1 `unsigned int`)))))))
+         (declaration a~2 `unsigned int` 42)
+         (declaration b~3 `unsigned int` 27)
+         (return (add (greater-equal (name a~2 `unsigned int`) (name b~3 `unsigned int`)) (greater-equal (name a~2 `unsigned int`) (name a~2 `unsigned int`)))))))
 
 ----- stderr -----

@@ -28,7 +28,7 @@ exit_code: 0
    (function-definition external
       print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`
       (params
-         p~5 `ptr<struct Inner~1 complete>`)
+         p~6 `ptr<struct Inner~1 complete>`)
       (compound-statement
          (expression
             (call `int`
@@ -39,16 +39,16 @@ exit_code: 0
                      (addressof `ptr<array<char; 37>>`
                         (string `array<char; 37>` "Inner { .x = %d, .y = %d, .z = %d }\n\0"))))
                (member `int` x +0
-                  (deref `struct Inner~1 complete` (p~5 `ptr<struct Inner~1 complete>`)))
+                  (deref `struct Inner~1 complete` (p~6 `ptr<struct Inner~1 complete>`)))
                (member `int` y +4
-                  (deref `struct Inner~1 complete` (p~5 `ptr<struct Inner~1 complete>`)))
+                  (deref `struct Inner~1 complete` (p~6 `ptr<struct Inner~1 complete>`)))
                (member `int` z +8
-                  (deref `struct Inner~1 complete` (p~5 `ptr<struct Inner~1 complete>`)))))))
+                  (deref `struct Inner~1 complete` (p~6 `ptr<struct Inner~1 complete>`)))))))
    (struct Inner~1
       (member x @0 `int`)
       (member y @4 `int`)
       (member z @8 `int`))
-   (definition external inner~6 `struct Inner~1 complete`
+   (definition external inner~7 `struct Inner~1 complete`
       (braced
          (subobject +0 (1 `int`))
          (subobject +4 (2 `int`))
@@ -58,7 +58,7 @@ exit_code: 0
       (member middle @4 `struct Middle~2 complete`)
       (member inner @32 `struct Inner~1 complete`)
       (member y @44 `int`))
-   (definition external outer~7 `struct Outer~3 complete`
+   (definition external outer~8 `struct Outer~3 complete`
       (braced
          (subobject +0 (42 `int`))
          (subobject +4 (2742 `int`))
@@ -73,14 +73,14 @@ exit_code: 0
          (subobject +40 (36 `int`))
          (subobject +44 (27 `int`))))
    (function-definition external
-      main~8 `fn() -> int`
+      main~9 `fn() -> int`
       (compound-statement
          (expression
             (call `void`
                (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>`
                   (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`))
                (addressof `ptr<struct Inner~1 complete>`
-                  (inner~6 `struct Inner~1 complete`))))
+                  (inner~7 `struct Inner~1 complete`))))
          (expression
             (call `void`
                (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>`
@@ -88,28 +88,28 @@ exit_code: 0
                (addressof `ptr<struct Inner~1 complete>`
                   (member `struct Inner~1 complete` inner2 +16
                      (member `struct Middle~2 complete` middle +4
-                        (outer~7 `struct Outer~3 complete`))))))
+                        (outer~8 `struct Outer~3 complete`))))))
          (struct Inner~1
             (member x @0 `int`)
             (member y @4 `int`)
             (member z @8 `int`))
-         (definition inner_read_from_struct~9 `struct Inner~1 complete`
+         (definition inner_read_from_struct~11 `struct Inner~1 complete`
             (member `struct Inner~1 complete` inner2 +16
                (member `struct Middle~2 complete` middle +4
-                  (outer~7 `struct Outer~3 complete`))))
+                  (outer~8 `struct Outer~3 complete`))))
          (expression
             (call `void`
                (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>`
                   (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`))
                (addressof `ptr<struct Inner~1 complete>`
-                  (inner_read_from_struct~9 `struct Inner~1 complete`))))
+                  (inner_read_from_struct~11 `struct Inner~1 complete`))))
          (expression
             (call `void`
                (addressof `ptr<fn(p: ptr<struct Inner~1 complete>) -> void>`
                   (print_inner~4 `fn(p: ptr<struct Inner~1 complete>) -> void`))
                (addressof `ptr<struct Inner~1 complete>`
                   (member `struct Inner~1 complete` inner +32
-                     (outer~7 `struct Outer~3 complete`)))))
+                     (outer~8 `struct Outer~3 complete`)))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -119,14 +119,14 @@ exit_code: 0
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "%d %d %d\n\0"))))
                (member `int` y +44
-                  (outer~7 `struct Outer~3 complete`))
+                  (outer~8 `struct Outer~3 complete`))
                (member `int` y +0
                   (member `struct Middle~2 complete` middle +4
-                     (outer~7 `struct Outer~3 complete`)))
+                     (outer~8 `struct Outer~3 complete`)))
                (member `int` z +8
                   (member `struct Inner~1 complete` inner2 +16
                      (member `struct Middle~2 complete` middle +4
-                        (outer~7 `struct Outer~3 complete`))))))
+                        (outer~8 `struct Outer~3 complete`))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -141,11 +141,11 @@ exit_code: 0
                         (member `int` y +4
                            (member `struct Inner~1 complete` inner2 +16
                               (member `struct Middle~2 complete` middle +4
-                                 (outer~7 `struct Outer~3 complete`))))))
+                                 (outer~8 `struct Outer~3 complete`))))))
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<struct Inner~1 complete>`
                         (member `struct Inner~1 complete` inner +4
                            (member `struct Middle~2 complete` middle +4
-                              (outer~7 `struct Outer~3 complete`)))))))))))
+                              (outer~8 `struct Outer~3 complete`)))))))))))
 
 ----- stderr -----

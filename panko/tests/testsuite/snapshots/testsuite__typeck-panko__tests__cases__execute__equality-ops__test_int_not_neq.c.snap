@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `int` (42 `int`))
-         (return (not-equal `int` (a~1 `int`) (add `int` (21 `int`) (21 `int`)))))))
+         (definition a~2 `int` (42 `int`))
+         (return (not-equal `int` (a~2 `int`) (add `int` (21 `int`) (21 `int`)))))))
 
 ----- stderr -----

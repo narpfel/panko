@@ -15,14 +15,14 @@ exit_code: 0
    (function-definition external
       main~1 `fn(argc: int, argv: ptr<ptr<char>>) -> int`
       (params
-         argc~2 `int`
-         argv~3 `ptr<ptr<char>>`)
+         argc~3 `int`
+         argv~4 `ptr<ptr<char>>`)
       (compound-statement
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
-               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` `ptr<ptr<char>>` (argv~4 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
                (1 `int`)
                (2 `int`)
                (3 `int`)
@@ -32,6 +32,6 @@ exit_code: 0
                (7 `int`)
                (8 `int`)
                (9 `int`)
-               (add `int` (argc~2 `int`) (42 `int`)))))))
+               (add `int` (argc~3 `int`) (42 `int`)))))))
 
 ----- stderr -----

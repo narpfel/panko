@@ -18,11 +18,11 @@ exit_code: 0
          (compound-statement
             (typedef name `int`)
             (compound-statement
-               (definition place~2 `long` ∅)
-               (definition name~3 `ptr<long>`
+               (definition place~3 `long` ∅)
+               (definition name~4 `ptr<long>`
                   (addressof `ptr<long>`
-                     (place~2 `long`)))
-               (expression (assign `long` (deref `long` (name~3 `ptr<long>`)) (sign-extend `long` (negate `int` (42 `int`)))))
+                     (place~3 `long`)))
+               (expression (assign `long` (deref `long` (name~4 `ptr<long>`)) (sign-extend `long` (negate `int` (42 `int`)))))
                (expression
                   (call `int`
                      (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -31,8 +31,8 @@ exit_code: 0
                         (noop-type-conversion `ptr<char>`
                            (addressof `ptr<array<char; 5>>`
                               (string `array<char; 5>` "%ld\n\0"))))
-                     (place~2 `long`))))
-            (definition x~4 `int` (123 `int`))
+                     (place~3 `long`))))
+            (definition x~5 `int` (123 `int`))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -41,8 +41,8 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 4>>`
                            (string `array<char; 4>` "%d\n\0"))))
-                  (x~4 `int`))))
-         (definition name~5 `int` (42 `int`))
-         (return (name~5 `int`)))))
+                  (x~5 `int`))))
+         (definition name~6 `int` (42 `int`))
+         (return (name~6 `int`)))))
 
 ----- stderr -----

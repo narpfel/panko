@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition external stack-size=24
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (declaration external (f~2 `fn(p: ptr<struct X~1 complete>) -> ptr<struct X~1 complete>` (static f)) ∅)
+         (declaration external (f~3 `fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2 complete>` (static f)) ∅)
          (expression (4 `unsigned long` @0)))))
 
 ----- stderr -----

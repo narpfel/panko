@@ -14,6 +14,6 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration functions~1 `array<fn(∅: int, ∅: int) -> int; 42>` ∅))))
+         (declaration functions~2 `array<fn(∅: int, ∅: int) -> int; 42>` ∅))))
 
 ----- stderr -----

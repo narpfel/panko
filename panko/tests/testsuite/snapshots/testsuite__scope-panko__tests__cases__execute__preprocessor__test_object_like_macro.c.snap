@@ -15,13 +15,13 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration x~2 `int` 42)
+         (declaration x~3 `int` 42)
          (expression
             (call (name putchar~0 `fn(c: int) -> int`)
                'a'))
          (expression
             (call (name putchar~0 `fn(c: int) -> int`)
                '\n'))
-         (return (name x~2 `int`)))))
+         (return (name x~3 `int`)))))
 
 ----- stderr -----

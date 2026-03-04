@@ -15,10 +15,10 @@ exit_code: 0
       f~0 `fn() -> void`
       (compound-statement))
    (function-definition
-      main~1 `fn() -> int`
+      main~2 `fn() -> int`
       (compound-statement
-         (declaration x~2 `int` 42)
-         (declaration p~3 `ptr<void>` (addressof (name x~2 `int`)))
-         (expression (assign (deref (name p~3 `ptr<void>`)) (call (name f~0 `fn() -> void`)))))))
+         (declaration x~4 `int` 42)
+         (declaration p~5 `ptr<void>` (addressof (name x~4 `int`)))
+         (expression (assign (deref (name p~5 `ptr<void>`)) (call (name f~0 `fn() -> void`)))))))
 
 ----- stderr -----

@@ -14,18 +14,18 @@ exit_code: 0
    (function-definition external
       f~0 `fn(x: int) -> int`
       (params
-         x~1 `int`)
+         x~2 `int`)
       (compound-statement
-         (return (x~1 `int`))))
+         (return (x~2 `int`))))
    (function-definition external
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
-         (definition x~3 `int` (42 `int`))
-         (definition y~4 `int`
+         (definition x~5 `int` (42 `int`))
+         (definition y~6 `int`
             (call `int`
                (addressof `ptr<fn(x: int) -> int>`
                   (f~0 `fn(x: int) -> int`))
-               (x~3 `int`)))
-         (return (y~4 `int`)))))
+               (x~5 `int`)))
+         (return (y~6 `int`)))))
 
 ----- stderr -----

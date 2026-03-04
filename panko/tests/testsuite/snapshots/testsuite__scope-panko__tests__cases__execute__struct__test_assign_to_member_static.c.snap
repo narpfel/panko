@@ -61,7 +61,7 @@ exit_code: 0
    (function-definition
       main~7 `fn() -> int`
       (compound-statement
-         (declaration expected~8 `array<int; ∅>`
+         (declaration expected~9 `array<int; ∅>`
             (braced
                42
                2742
@@ -79,13 +79,13 @@ exit_code: 0
             (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %zu\n")
                (sizeof (name outer~6 `struct Outer~4 complete`))
-               (sizeof (name expected~8 `array<int; ∅>`))))
+               (sizeof (name expected~9 `array<int; ∅>`))))
          (expression
             (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
                (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
                   (addressof (name outer~6 `struct Outer~4 complete`))
-                  (name expected~8 `array<int; ∅>`)
+                  (name expected~9 `array<int; ∅>`)
                   (sizeof (name outer~6 `struct Outer~4 complete`)))))
          (expression
             (assign
@@ -96,7 +96,7 @@ exit_code: 0
             (member y `int`)
             (member inner `struct Inner~2 complete`)
             (member inner2 `struct Inner~2 complete`))
-         (declaration new_middle~9 `struct Middle~3 complete`
+         (declaration new_middle~10 `struct Middle~3 complete`
             (braced
                (dot x
                   (dot inner
@@ -107,7 +107,7 @@ exit_code: 0
             (assign
                (dot middle
                   (name outer~6 `struct Outer~4 complete`))
-               (name new_middle~9 `struct Middle~3 complete`)))
+               (name new_middle~10 `struct Middle~3 complete`)))
          (expression
             (assign
                (dot x
@@ -129,7 +129,7 @@ exit_code: 0
                      (dot middle
                         (name outer~6 `struct Outer~4 complete`))))
                0x2347))
-         (declaration new_expected~10 `array<int; ∅>`
+         (declaration new_expected~11 `array<int; ∅>`
             (braced
                0x1234
                11
@@ -148,7 +148,7 @@ exit_code: 0
                (string "%d\n")
                (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
                   (addressof (name outer~6 `struct Outer~4 complete`))
-                  (name new_expected~10 `array<int; ∅>`)
+                  (name new_expected~11 `array<int; ∅>`)
                   (sizeof (name outer~6 `struct Outer~4 complete`)))))
          (expression
             (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
@@ -197,7 +197,7 @@ exit_code: 0
             (member y `int`)
             (member inner `struct Inner~2 complete`)
             (member inner2 `struct Inner~2 complete`))
-         (declaration p~11 `ptr<struct Middle~3 complete>`
+         (declaration p~12 `ptr<struct Middle~3 complete>`
             (addressof
                (dot middle
                   (name outer~6 `struct Outer~4 complete`))))
@@ -206,27 +206,27 @@ exit_code: 0
                (string "%d 0x%x %d\n")
                (dot x
                   (arrow inner
-                     (name p~11 `ptr<struct Middle~3 complete>`)))
+                     (name p~12 `ptr<struct Middle~3 complete>`)))
                (dot y
                   (arrow inner2
-                     (name p~11 `ptr<struct Middle~3 complete>`)))
+                     (name p~12 `ptr<struct Middle~3 complete>`)))
                (dot z
                   (arrow inner
-                     (name p~11 `ptr<struct Middle~3 complete>`)))))
+                     (name p~12 `ptr<struct Middle~3 complete>`)))))
          (expression
             (assign
                (dot x
                   (arrow inner
-                     (name p~11 `ptr<struct Middle~3 complete>`)))
+                     (name p~12 `ptr<struct Middle~3 complete>`)))
                (add
                   (assign
                      (dot y
                         (arrow inner2
-                           (name p~11 `ptr<struct Middle~3 complete>`)))
+                           (name p~12 `ptr<struct Middle~3 complete>`)))
                      (add
                         (dot z
                            (arrow inner
-                              (name p~11 `ptr<struct Middle~3 complete>`)))
+                              (name p~12 `ptr<struct Middle~3 complete>`)))
                         4))
                   2)))
          (expression
@@ -234,12 +234,12 @@ exit_code: 0
                (string "%d %d %d\n")
                (dot x
                   (arrow inner
-                     (name p~11 `ptr<struct Middle~3 complete>`)))
+                     (name p~12 `ptr<struct Middle~3 complete>`)))
                (dot y
                   (arrow inner2
-                     (name p~11 `ptr<struct Middle~3 complete>`)))
+                     (name p~12 `ptr<struct Middle~3 complete>`)))
                (dot z
                   (arrow inner
-                     (name p~11 `ptr<struct Middle~3 complete>`))))))))
+                     (name p~12 `ptr<struct Middle~3 complete>`))))))))
 
 ----- stderr -----

@@ -21,10 +21,10 @@ exit_code: 0
          (struct T~1
             (member c1 @0 `char`)
             (member c2 @1 `char`))
-         (definition (t~3 `struct T~1 complete` @0)
+         (definition (t~4 `struct T~1 complete` @0)
             (braced
                (subobject +0 (truncate `char` @0 (97 `int` @4)))))
-         (definition (bytes~4 `array<char; 2>` @2)
+         (definition (bytes~5 `array<char; 2>` @2)
             (braced
                (subobject +0 (truncate `char` @2 (97 `int` @4)))))
          (return
@@ -33,11 +33,11 @@ exit_code: 0
                   (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)))
                (noop-type-conversion `ptr<void const>` @16
                   (addressof `ptr<struct T~1 complete>` @16
-                     (t~3 `struct T~1 complete` @0)))
+                     (t~4 `struct T~1 complete` @0)))
                (noop-type-conversion `ptr<void const>` @24
                   (noop-type-conversion `ptr<char>` @24
                      (addressof `ptr<array<char; 2>>` @24
-                        (bytes~4 `array<char; 2>` @2))))
+                        (bytes~5 `array<char; 2>` @2))))
                (2 `unsigned long` @32))))))
 
 ----- stderr -----

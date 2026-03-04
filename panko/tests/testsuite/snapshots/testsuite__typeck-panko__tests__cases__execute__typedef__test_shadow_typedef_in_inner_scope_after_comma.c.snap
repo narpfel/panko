@@ -21,20 +21,20 @@ exit_code: 0
       (compound-statement
          (typedef function `int`)
          (compound-statement
-            (definition a~2 `int` ∅)
-            (definition name~3 `int` (42 `int`))
-            (definition b~4 `int` ∅)
-            (definition ptr~5 `ptr<int>`
+            (definition a~3 `int` ∅)
+            (definition name~4 `int` (42 `int`))
+            (definition b~5 `int` ∅)
+            (definition ptr~6 `ptr<int>`
                (addressof `ptr<int>`
-                  (name~3 `int`)))
-            (definition c~6 `int` ∅)
-            (declaration external function~7 `fn(∅: int) -> int` ∅)
-            (definition d~8 `int` ∅)
-            (definition fptr~9 `ptr<fn(∅: int) -> int>`
+                  (name~4 `int`)))
+            (definition c~7 `int` ∅)
+            (declaration external function~8 `fn(∅: int) -> int` ∅)
+            (definition d~9 `int` ∅)
+            (definition fptr~10 `ptr<fn(∅: int) -> int>`
                (addressof `ptr<fn(∅: int) -> int>`
-                  (function~7 `fn(∅: int) -> int`)))
-            (definition e~10 `int` ∅)
-            (definition xs~11 `array<int; 5>`
+                  (function~8 `fn(∅: int) -> int`)))
+            (definition e~11 `int` ∅)
+            (definition xs~12 `array<int; 5>`
                (braced
                   (subobject +0 (123 `int`))))
             (expression
@@ -45,13 +45,13 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 4>>`
                            (string `array<char; 4>` "%d\n\0"))))
-                  (name~3 `int`)))
+                  (name~4 `int`)))
             (expression
                (combine `int`
-                  (assign `ptr<int>` (unnamed-temporary~12 `ptr<int>`)
+                  (assign `ptr<int>` (unnamed-temporary~13 `ptr<int>`)
                      (addressof `ptr<int>`
-                        (name~3 `int`)))
-                  (assign `int` (deref `int` (unnamed-temporary~12 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~12 `ptr<int>`)) (++ `int`)))))
+                        (name~4 `int`)))
+                  (assign `int` (deref `int` (unnamed-temporary~13 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~13 `ptr<int>`)) (++ `int`)))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -60,7 +60,7 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 4>>`
                            (string `array<char; 4>` "%d\n\0"))))
-                  (deref `int` (ptr~5 `ptr<int>`))))
+                  (deref `int` (ptr~6 `ptr<int>`))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -71,7 +71,7 @@ exit_code: 0
                            (string `array<char; 4>` "%d\n\0"))))
                   (call `int`
                      (addressof `ptr<fn(∅: int) -> int>`
-                        (function~7 `fn(∅: int) -> int`))
+                        (function~8 `fn(∅: int) -> int`))
                      (27 `int`))))
             (expression
                (call `int`
@@ -81,7 +81,7 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 4>>`
                            (string `array<char; 4>` "%d\n\0"))))
-                  (call `int` (fptr~9 `ptr<fn(∅: int) -> int>`)
+                  (call `int` (fptr~10 `ptr<fn(∅: int) -> int>`)
                      (5 `int`))))
             (expression
                (call `int`
@@ -95,12 +95,12 @@ exit_code: 0
                      (ptr-add `ptr<int>`
                         (noop-type-conversion `ptr<int>`
                            (addressof `ptr<array<int; 5>>`
-                              (xs~11 `array<int; 5>`)))
+                              (xs~12 `array<int; 5>`)))
                         (sign-extend `unsigned long` (0 `int`)))))))))
    (function-definition external
-      function~13 `fn(value: int) -> int`
+      function~14 `fn(value: int) -> int`
       (params
-         value~14 `int`)
+         value~16 `int`)
       (compound-statement
          (expression
             (call `int`
@@ -110,7 +110,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 13>>`
                         (string `array<char; 13>` "function %d\n\0"))))
-               (value~14 `int`)))
-         (return (add `int` (value~14 `int`) (1 `int`))))))
+               (value~16 `int`)))
+         (return (add `int` (value~16 `int`) (1 `int`))))))
 
 ----- stderr -----

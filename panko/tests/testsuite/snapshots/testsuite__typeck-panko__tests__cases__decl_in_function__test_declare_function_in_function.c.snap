@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition external
       f~0 `fn() -> int`
       (compound-statement
-         (declaration external g~1 `fn() -> int` ∅)
-         (declaration external g~1 `fn() -> int` ∅)
+         (declaration external g~2 `fn() -> int` ∅)
+         (declaration external g~2 `fn() -> int` ∅)
          (return (42 `int`)))))
 
 ----- stderr -----

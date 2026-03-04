@@ -35,12 +35,12 @@ exit_code: 0
          (struct U~2
             (member x `int`)
             (member t `struct T~0 complete`))
-         (declaration p~5 `ptr<struct U~2 complete>` (addressof (name a~3 `struct U~2 complete`)))
+         (declaration p~6 `ptr<struct U~2 complete>` (addressof (name a~3 `struct U~2 complete`)))
          (expression
             (assign
                (dot x
                   (arrow t
-                     (name p~5 `ptr<struct U~2 complete>`)))
+                     (name p~6 `ptr<struct U~2 complete>`)))
                5))
          (return
             (dot x

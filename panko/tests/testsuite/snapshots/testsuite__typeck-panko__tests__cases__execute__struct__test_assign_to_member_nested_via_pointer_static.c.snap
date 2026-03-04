@@ -34,14 +34,14 @@ exit_code: 0
          (struct U~2
             (member x @0 `int`)
             (member t @4 `struct T~0 complete`))
-         (definition p~5 `ptr<struct U~2 complete>`
+         (definition p~6 `ptr<struct U~2 complete>`
             (addressof `ptr<struct U~2 complete>`
                (a~3 `struct U~2 complete`)))
          (expression
             (assign `int`
                (member `int` x +0
                   (member `struct T~0 complete` t +4
-                     (deref `struct U~2 complete` (p~5 `ptr<struct U~2 complete>`))))
+                     (deref `struct U~2 complete` (p~6 `ptr<struct U~2 complete>`))))
                (5 `int`)))
          (return
             (member `int` x +0

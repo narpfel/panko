@@ -15,15 +15,15 @@ exit_code: 0
    (function-definition
       f~0 `fn(a: int) -> int`
       (params
-         a~1 `int`)
+         a~2 `int`)
       (compound-statement
-         (return (name a~1 `int`))))
-   (declaration global_value~2 `int` 42)
+         (return (name a~2 `int`))))
+   (declaration global_value~3 `int` 42)
    (function-definition
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
          (return
             (call (name f~0 `fn(a: int) -> int`)
-               (name global_value~2 `int`))))))
+               (name global_value~3 `int`))))))
 
 ----- stderr -----

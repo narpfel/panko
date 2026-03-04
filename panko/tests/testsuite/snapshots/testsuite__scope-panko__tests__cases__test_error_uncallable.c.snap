@@ -15,7 +15,7 @@ exit_code: 0
       f~0 `fn() -> void`
       (compound-statement))
    (function-definition
-      main~1 `fn() -> int`
+      main~2 `fn() -> int`
       (compound-statement
          (expression (call 42))
          (expression (call (call (name f~0 `fn() -> void`)))))))

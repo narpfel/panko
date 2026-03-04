@@ -15,10 +15,10 @@ exit_code: 0
       void_function~0 `fn() -> void`
       (compound-statement))
    (function-definition
-      ptr_function~1 `fn() -> ptr<int>`
+      ptr_function~2 `fn() -> ptr<int>`
       (compound-statement))
    (function-definition
-      main~2 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
          (expression
             (conditional
@@ -28,7 +28,7 @@ exit_code: 0
          (expression
             (conditional
                2
-               (call (name ptr_function~1 `fn() -> ptr<int>`))
+               (call (name ptr_function~2 `fn() -> ptr<int>`))
                42))
          (expression
             (conditional
@@ -39,6 +39,6 @@ exit_code: 0
             (conditional
                4
                27
-               (call (name ptr_function~1 `fn() -> ptr<int>`)))))))
+               (call (name ptr_function~2 `fn() -> ptr<int>`)))))))
 
 ----- stderr -----

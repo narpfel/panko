@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition external stack-size=360
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (definition (xs~1 `array<long; 42>` @0) ∅)
+         (definition (xs~2 `array<long; 42>` @0) ∅)
          (return (truncate `int` @336 (42 `unsigned long` @344))))))
 
 ----- stderr -----

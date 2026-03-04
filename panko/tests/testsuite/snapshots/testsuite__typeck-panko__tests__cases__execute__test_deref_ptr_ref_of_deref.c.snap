@@ -14,13 +14,13 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int` (42 `int`))
-         (definition p~2 `ptr<int>`
+         (definition x~2 `int` (42 `int`))
+         (definition p~3 `ptr<int>`
             (addressof `ptr<int>`
-               (x~1 `int`)))
+               (x~2 `int`)))
          (return
             (deref `int`
                (addressof `ptr<int>` `ptr<int>`
-                  (deref `int` `int` (p~2 `ptr<int>`))))))))
+                  (deref `int` `int` (p~3 `ptr<int>`))))))))
 
 ----- stderr -----

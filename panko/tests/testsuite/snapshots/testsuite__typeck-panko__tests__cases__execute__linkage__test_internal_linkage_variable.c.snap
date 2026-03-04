@@ -19,10 +19,10 @@ exit_code: 0
       (compound-statement
          (expression
             (combine `int`
-               (assign `ptr<int>` (unnamed-temporary~4 `ptr<int>`)
+               (assign `ptr<int>` (unnamed-temporary~5 `ptr<int>`)
                   (addressof `ptr<int>`
                      (y~2 `int`)))
-               (assign `int` (deref `int` (unnamed-temporary~4 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~4 `ptr<int>`)) (10 `int`)))))
+               (assign `int` (deref `int` (unnamed-temporary~5 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~5 `ptr<int>`)) (10 `int`)))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -34,10 +34,10 @@ exit_code: 0
                (y~2 `int`)))
          (expression
             (combine `int`
-               (assign `ptr<int>` (unnamed-temporary~5 `ptr<int>`)
+               (assign `ptr<int>` (unnamed-temporary~6 `ptr<int>`)
                   (addressof `ptr<int>`
                      (x~1 `int`)))
-               (assign `int` (deref `int` (unnamed-temporary~5 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~5 `ptr<int>`)) (++ `int`)))))
+               (assign `int` (deref `int` (unnamed-temporary~6 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~6 `ptr<int>`)) (++ `int`)))))
          (return (x~1 `int`)))))
 
 ----- stderr -----

@@ -16,63 +16,63 @@ exit_code: 0
       (compound-statement
          (return 42)))
    (function-definition
-      b~1 `fn(∅: int) -> int`
+      b~2 `fn(∅: int) -> int`
       (params
-         b.unnamed_parameter.0~2 `int`)
+         b.unnamed_parameter.0~4 `int`)
       (compound-statement
          (return 42)))
    (function-definition
-      c~3 `fn(a: int) -> int`
+      c~5 `fn(a: int) -> int`
       (params
-         a~4 `int`)
+         a~7 `int`)
       (compound-statement
-         (return (name a~4 `int`))))
+         (return (name a~7 `int`))))
    (function-definition
-      d~5 `fn(a: int) -> int`
+      d~8 `fn(a: int) -> int`
       (params
-         a~6 `int`)
+         a~10 `int`)
       (compound-statement
          (compound-statement
-            (return (name a~6 `int`)))))
+            (return (name a~10 `int`)))))
    (function-definition
-      e~7 `fn() -> int`
+      e~11 `fn() -> int`
       (compound-statement
          (compound-statement)
          (expression ∅)
          (return 42)))
    (function-definition
-      f~8 `fn() -> int`
+      f~13 `fn() -> int`
       (compound-statement
-         (declaration a~9 `int` 42)
-         (expression (name a~9 `int`))
-         (return (name a~9 `int`))))
+         (declaration a~15 `int` 42)
+         (expression (name a~15 `int`))
+         (return (name a~15 `int`))))
    (function-definition
-      g~10 `fn() -> char`
+      g~16 `fn() -> char`
       (compound-statement
-         (declaration c~11 `char` 0)
-         (return (name c~11 `char`))))
+         (declaration c~18 `char` 0)
+         (return (name c~18 `char`))))
    (function-definition
-      h~12 `fn() -> int`
+      h~19 `fn() -> int`
       (compound-statement
-         (declaration a~13 `int` 42)
+         (declaration a~21 `int` 42)
          (compound-statement
-            (declaration a~14 `int` 27)
-            (return (name a~14 `int`)))))
+            (declaration a~22 `int` 27)
+            (return (name a~22 `int`)))))
    (function-definition
-      i~15 `fn(a: int) -> int`
+      i~23 `fn(a: int) -> int`
       (params
-         a~16 `int`)
+         a~25 `int`)
       (compound-statement
          (compound-statement
-            (declaration a~17 `int` 42))
-         (return (name a~16 `int`))))
+            (declaration a~26 `int` 42))
+         (return (name a~25 `int`))))
    (function-definition
-      j~18 `fn() -> int`
+      j~27 `fn() -> int`
       (compound-statement
-         (declaration a~19 `int` 42)
+         (declaration a~29 `int` 42)
          (compound-statement
-            (declaration a~20 `int` 27)
-            (expression (name a~20 `int`)))
-         (return (name a~19 `int`)))))
+            (declaration a~30 `int` 27)
+            (expression (name a~30 `int`)))
+         (return (name a~29 `int`)))))
 
 ----- stderr -----

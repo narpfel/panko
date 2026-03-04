@@ -22,14 +22,14 @@ exit_code: 0
          (expression (cast `fn() -> int` 42))
          (struct T~0
             (member x `int`))
-         (declaration t~3 `struct T~0 complete` ∅)
+         (declaration t~4 `struct T~0 complete` ∅)
          (struct T~0
             (member x `int`))
-         (declaration t2~4 `struct T~0 complete` ∅)
-         (expression (cast `struct T~0 complete` (name t~3 `struct T~0 complete`)))
-         (expression (cast `struct T~0 complete const` (name t~3 `struct T~0 complete`)))
-         (expression (cast `typeof((name t2~4 `struct T~0 complete`))` (name t~3 `struct T~0 complete`)))
-         (expression (cast `struct U~1 complete` (name t~3 `struct T~0 complete`)))
-         (expression (cast `int` (name t~3 `struct T~0 complete`))))))
+         (declaration t2~5 `struct T~0 complete` ∅)
+         (expression (cast `struct T~0 complete` (name t~4 `struct T~0 complete`)))
+         (expression (cast `struct T~0 complete const` (name t~4 `struct T~0 complete`)))
+         (expression (cast `typeof((name t2~5 `struct T~0 complete`))` (name t~4 `struct T~0 complete`)))
+         (expression (cast `struct U~1 complete` (name t~4 `struct T~0 complete`)))
+         (expression (cast `int` (name t~4 `struct T~0 complete`))))))
 
 ----- stderr -----

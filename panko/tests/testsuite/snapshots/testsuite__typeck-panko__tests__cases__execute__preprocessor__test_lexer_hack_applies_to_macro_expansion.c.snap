@@ -18,7 +18,7 @@ exit_code: 0
       (compound-statement
          (compound-statement
             (typedef x `int`)
-            (definition y~3 `int` (27 `int`))
+            (definition y~4 `int` (27 `int`))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -27,7 +27,7 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 4>>`
                            (string `array<char; 4>` "%d\n\0"))))
-                  (y~3 `int`))))
+                  (y~4 `int`))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int const` (42 `int`))
-         (definition y~2 `int` (27 `int`))
-         (return (add `int` (x~1 `int const`) (y~2 `int`))))))
+         (definition x~2 `int const` (42 `int`))
+         (definition y~3 `int` (27 `int`))
+         (return (add `int` (x~2 `int const`) (y~3 `int`))))))
 
 ----- stderr -----

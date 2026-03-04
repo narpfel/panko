@@ -14,12 +14,12 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration x~1 `int const` ∅)
-         (declaration y~2 `int const` 27)
-         (declaration mutable~3 `int` ∅)
-         (expression (assign (assign (name mutable~3 `int`) (assign (name x~1 `int const`) (name y~2 `int const`))) 42))
-         (expression (assign (name mutable~3 `int`) 123))
-         (expression (assign (name x~1 `int const`) 42))
-         (return (name x~1 `int const`)))))
+         (declaration x~2 `int const` ∅)
+         (declaration y~3 `int const` 27)
+         (declaration mutable~4 `int` ∅)
+         (expression (assign (assign (name mutable~4 `int`) (assign (name x~2 `int const`) (name y~3 `int const`))) 42))
+         (expression (assign (name mutable~4 `int`) 123))
+         (expression (assign (name x~2 `int const`) 42))
+         (return (name x~2 `int const`)))))
 
 ----- stderr -----

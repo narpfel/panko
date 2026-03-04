@@ -224,6 +224,8 @@ pub(crate) enum Designator<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct FunctionDefinition<'a> {
     pub(crate) reference: Reference<'a>,
+    #[expect(dead_code)]
+    pub(crate) return_slot: Id,
     pub(crate) params: ParamRefs<'a>,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
@@ -760,14 +762,7 @@ fn resolve_function_definition<'a>(
             kind,
         ),
     };
-    let maybe_reference = scopes.add(
-        name.slice(),
-        name.loc(),
-        ty,
-        StorageDuration::Static(Some(linkage)),
-        IsParameter::No,
-        IsInGlobalScope::Yes,
-    );
+    let (maybe_reference, return_slot) = scopes.add_function(name.slice(), name.loc(), ty, linkage);
     let reference = match maybe_reference {
         Ok(reference) => {
             let initialiser = Some(RefInitialiser::FunctionBody);
@@ -838,6 +833,7 @@ fn resolve_function_definition<'a>(
     scopes.pop();
     ExternalDeclaration::FunctionDefinition(FunctionDefinition {
         reference,
+        return_slot,
         params: ParamRefs(params),
         inline: *inline,
         noreturn: *noreturn,

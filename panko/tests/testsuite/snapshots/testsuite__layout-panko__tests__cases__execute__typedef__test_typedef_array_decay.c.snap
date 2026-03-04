@@ -19,7 +19,7 @@ exit_code: 0
    (function-definition external stack-size=56
       (check_pointer_decay_of_typedefd_arrays~1 `fn(xs: ptr<int>) -> void` (static check_pointer_decay_of_typedefd_arrays))
       (params
-         (xs~2 `ptr<int>` @0))
+         (xs~3 `ptr<int>` @0))
       (compound-statement
          (expression
             (call `int` @8
@@ -34,9 +34,9 @@ exit_code: 0
          (expression (0 `int` @8))
          (expression (0 `int` @8))))
    (function-definition external stack-size=56
-      (check_pointer_decay_of_typedefd_arrays_with_unknown_length~3 `fn(xs: ptr<int>) -> void` (static check_pointer_decay_of_typedefd_arrays_with_unknown_length))
+      (check_pointer_decay_of_typedefd_arrays_with_unknown_length~4 `fn(xs: ptr<int>) -> void` (static check_pointer_decay_of_typedefd_arrays_with_unknown_length))
       (params
-         (xs~4 `ptr<int>` @0))
+         (xs~6 `ptr<int>` @0))
       (compound-statement
          (expression
             (call `int` @8
@@ -51,17 +51,17 @@ exit_code: 0
          (expression (0 `int` @8))
          (expression (0 `int` @8))))
    (function-definition external stack-size=88
-      (main~5 `fn(∅: int, ∅: ptr<ptr<char>>) -> int` (static main))
+      (main~7 `fn(∅: int, ∅: ptr<ptr<char>>) -> int` (static main))
       (params
-         (main.unnamed_parameter.0~6 `int` @0)
-         (main.unnamed_parameter.1~7 `ptr<ptr<char>>` @8))
+         (main.unnamed_parameter.0~9 `int` @0)
+         (main.unnamed_parameter.1~10 `ptr<ptr<char>>` @8))
       (compound-statement
-         (definition (a~8 `array<int; 3>` @16)
+         (definition (a~11 `array<int; 3>` @16)
             (braced
                (subobject +0 (1 `int` @16))
                (subobject +4 (2 `int` @20))
                (subobject +8 (3 `int` @24))))
-         (definition (b~9 `array<int; 4>` @28)
+         (definition (b~12 `array<int; 4>` @28)
             (braced
                (subobject +0 (1 `int` @28))
                (subobject +4 (2 `int` @32))
@@ -73,28 +73,28 @@ exit_code: 0
                   (check_pointer_decay_of_typedefd_arrays~1 `fn(xs: ptr<int>) -> void` (static check_pointer_decay_of_typedefd_arrays)))
                (noop-type-conversion `ptr<int>` @56
                   (addressof `ptr<array<int; 3>>` @56
-                     (a~8 `array<int; 3>` @16)))))
+                     (a~11 `array<int; 3>` @16)))))
          (expression
             (call `void` @void
                (addressof `ptr<fn(xs: ptr<int>) -> void>` @48
                   (check_pointer_decay_of_typedefd_arrays~1 `fn(xs: ptr<int>) -> void` (static check_pointer_decay_of_typedefd_arrays)))
                (noop-type-conversion `ptr<int>` @56
                   (addressof `ptr<array<int; 4>>` @56
-                     (b~9 `array<int; 4>` @28)))))
+                     (b~12 `array<int; 4>` @28)))))
          (expression
             (call `void` @void
                (addressof `ptr<fn(xs: ptr<int>) -> void>` @48
-                  (check_pointer_decay_of_typedefd_arrays_with_unknown_length~3 `fn(xs: ptr<int>) -> void` (static check_pointer_decay_of_typedefd_arrays_with_unknown_length)))
+                  (check_pointer_decay_of_typedefd_arrays_with_unknown_length~4 `fn(xs: ptr<int>) -> void` (static check_pointer_decay_of_typedefd_arrays_with_unknown_length)))
                (noop-type-conversion `ptr<int>` @56
                   (addressof `ptr<array<int; 3>>` @56
-                     (a~8 `array<int; 3>` @16)))))
+                     (a~11 `array<int; 3>` @16)))))
          (expression
             (call `void` @void
                (addressof `ptr<fn(xs: ptr<int>) -> void>` @48
-                  (check_pointer_decay_of_typedefd_arrays_with_unknown_length~3 `fn(xs: ptr<int>) -> void` (static check_pointer_decay_of_typedefd_arrays_with_unknown_length)))
+                  (check_pointer_decay_of_typedefd_arrays_with_unknown_length~4 `fn(xs: ptr<int>) -> void` (static check_pointer_decay_of_typedefd_arrays_with_unknown_length)))
                (noop-type-conversion `ptr<int>` @56
                   (addressof `ptr<array<int; 4>>` @56
-                     (b~9 `array<int; 4>` @28)))))
+                     (b~12 `array<int; 4>` @28)))))
          (expression
             (call `int` @44
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @48

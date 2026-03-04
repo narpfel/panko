@@ -15,27 +15,27 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration xss~2 `array<array<int; 30>; 20>` (braced ∅))
-         (expression (assign (subscript (subscript (name xss~2 `array<array<int; 30>; 20>`) 2) 3) 42))
+         (declaration xss~3 `array<array<int; 30>; 20>` (braced ∅))
+         (expression (assign (subscript (subscript (name xss~3 `array<array<int; 30>; 20>`) 2) 3) 42))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (subscript (subscript (name xss~2 `array<array<int; 30>; 20>`) 2) 3)))
+               (subscript (subscript (name xss~3 `array<array<int; 30>; 20>`) 2) 3)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (sizeof (name xss~2 `array<array<int; 30>; 20>`))))
+               (sizeof (name xss~3 `array<array<int; 30>; 20>`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (sizeof (subscript (name xss~2 `array<array<int; 30>; 20>`) 0))))
+               (sizeof (subscript (name xss~3 `array<array<int; 30>; 20>`) 0))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (lengthof (name xss~2 `array<array<int; 30>; 20>`))))
+               (lengthof (name xss~3 `array<array<int; 30>; 20>`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (lengthof (subscript (name xss~2 `array<array<int; 30>; 20>`) 0)))))))
+               (lengthof (subscript (name xss~3 `array<array<int; 30>; 20>`) 0)))))))
 
 ----- stderr -----

@@ -14,13 +14,13 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration p~2 `ptr<struct T~1>` (cast `ptr<struct T~1>` nullptr))
-         (declaration q~3 `ptr<struct T~1>` nullptr)
-         (expression (add (name p~2 `ptr<struct T~1>`) 1))
-         (expression (add 1 (name q~3 `ptr<struct T~1>`)))
-         (expression (subtract (name p~2 `ptr<struct T~1>`) 1))
-         (expression (subtract (name p~2 `ptr<struct T~1>`) (name q~3 `ptr<struct T~1>`)))
-         (declaration vp~4 `ptr<void>` nullptr)
-         (expression (add (name vp~4 `ptr<void>`) 1)))))
+         (declaration p~3 `ptr<struct T~2>` (cast `ptr<struct T~2>` nullptr))
+         (declaration q~4 `ptr<struct T~2>` nullptr)
+         (expression (add (name p~3 `ptr<struct T~2>`) 1))
+         (expression (add 1 (name q~4 `ptr<struct T~2>`)))
+         (expression (subtract (name p~3 `ptr<struct T~2>`) 1))
+         (expression (subtract (name p~3 `ptr<struct T~2>`) (name q~4 `ptr<struct T~2>`)))
+         (declaration vp~5 `ptr<void>` nullptr)
+         (expression (add (name vp~5 `ptr<void>`) 1)))))
 
 ----- stderr -----

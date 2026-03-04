@@ -65,7 +65,7 @@ exit_code: 0
             (member c1 @0 `char`)
             (member x @4 `int`)
             (member c2 @8 `char`))
-         (definition value~5 `struct T~1 complete` ∅)
+         (definition value~6 `struct T~1 complete` ∅)
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -74,7 +74,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 5>>`
                         (string `array<char; 5>` "%zu\n\0"))))
-               (sizeof `unsigned long` 12 (value~5 `struct T~1 complete`))))
+               (sizeof `unsigned long` 12 (value~6 `struct T~1 complete`))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

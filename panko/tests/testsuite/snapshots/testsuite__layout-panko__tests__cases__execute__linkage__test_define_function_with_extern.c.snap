@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external stack-size=40
       (f~1 `fn(x: int) -> void` (static f))
       (params
-         (x~2 `int` @0))
+         (x~3 `int` @0))
       (compound-statement
          (expression
             (call `int` @4
@@ -26,10 +26,10 @@ exit_code: 0
                      (addressof `ptr<array<char; 10>>` @16
                         (string `array<char; 10>` @void "in f: %d\n\0"))))
                (add `int` @24
-                  (x~2 `int` @0)
+                  (x~3 `int` @0)
                   (1 `int` @28))))))
    (function-definition external stack-size=24
-      (main~3 `fn() -> int` (static main))
+      (main~4 `fn() -> int` (static main))
       (compound-statement
          (expression
             (call `void` @void

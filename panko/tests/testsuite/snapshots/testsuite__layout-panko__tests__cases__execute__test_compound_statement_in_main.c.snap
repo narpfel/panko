@@ -14,9 +14,9 @@ exit_code: 0
    (function-definition external stack-size=24
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (definition (a~1 `int` @0) (42 `int` @0))
+         (definition (a~2 `int` @0) (42 `int` @0))
          (compound-statement
-            (definition (a~2 `int` @4) (27 `int` @4)))
-         (return (a~1 `int` @0)))))
+            (definition (a~3 `int` @4) (27 `int` @4)))
+         (return (a~2 `int` @0)))))
 
 ----- stderr -----

@@ -14,13 +14,13 @@ exit_code: 0
    (function-definition external stack-size=56
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (definition (x~1 `long` @0) (sign-extend `long` @0 (42 `int` @8)))
+         (definition (x~2 `long` @0) (sign-extend `long` @0 (42 `int` @8)))
          (return
             (truncate `int` @8
                (add `long` @16
                   (multiply `long` @16
                      (sign-extend `long` @16 (2 `int` @24))
-                     (x~1 `long` @0))
+                     (x~2 `long` @0))
                   (sign-extend `long` @32 (1 `int` @40))))))))
 
 ----- stderr -----

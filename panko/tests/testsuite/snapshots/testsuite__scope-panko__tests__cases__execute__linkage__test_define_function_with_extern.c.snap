@@ -15,14 +15,14 @@ exit_code: 0
    (function-definition
       f~1 `fn(x: int) -> void`
       (params
-         x~2 `int`)
+         x~3 `int`)
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "in f: %d\n")
-               (add (name x~2 `int`) 1)))))
+               (add (name x~3 `int`) 1)))))
    (function-definition
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
          (expression
             (call (name f~1 `fn(x: int) -> void`)

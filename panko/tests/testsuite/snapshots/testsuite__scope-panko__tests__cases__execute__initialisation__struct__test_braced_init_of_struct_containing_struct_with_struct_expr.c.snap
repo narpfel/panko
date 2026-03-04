@@ -27,7 +27,7 @@ exit_code: 0
             (member x `int`)
             (member y `int`)
             (member z `int`))
-         (declaration inner~4 `struct Inner~1 complete`
+         (declaration inner~5 `struct Inner~1 complete`
             (braced
                1
                2
@@ -36,12 +36,12 @@ exit_code: 0
             (member x `int`)
             (member inner `struct Inner~1 complete`)
             (member y `int`))
-         (declaration outer~5 `struct Outer~2 complete`
+         (declaration outer~6 `struct Outer~2 complete`
             (braced
                42
-               (name inner~4 `struct Inner~1 complete`)
+               (name inner~5 `struct Inner~1 complete`)
                27))
-         (declaration expected~6 `array<int; ∅>`
+         (declaration expected~7 `array<int; ∅>`
             (braced
                42
                1
@@ -50,8 +50,8 @@ exit_code: 0
                27))
          (return
             (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
-               (addressof (name outer~5 `struct Outer~2 complete`))
-               (name expected~6 `array<int; ∅>`)
-               (sizeof (name outer~5 `struct Outer~2 complete`)))))))
+               (addressof (name outer~6 `struct Outer~2 complete`))
+               (name expected~7 `array<int; ∅>`)
+               (sizeof (name outer~6 `struct Outer~2 complete`)))))))
 
 ----- stderr -----

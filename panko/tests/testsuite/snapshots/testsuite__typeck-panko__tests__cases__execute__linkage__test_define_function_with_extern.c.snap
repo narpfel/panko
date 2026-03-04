@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external
       f~1 `fn(x: int) -> void`
       (params
-         x~2 `int`)
+         x~3 `int`)
       (compound-statement
          (expression
             (call `int`
@@ -25,9 +25,9 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "in f: %d\n\0"))))
-               (add `int` (x~2 `int`) (1 `int`))))))
+               (add `int` (x~3 `int`) (1 `int`))))))
    (function-definition external
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
          (expression
             (call `void`

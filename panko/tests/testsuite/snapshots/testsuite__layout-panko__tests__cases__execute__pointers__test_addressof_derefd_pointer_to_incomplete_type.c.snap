@@ -14,13 +14,13 @@ exit_code: 0
    (function-definition external stack-size=40
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (definition (p~2 `ptr<struct T~1>` @0) (noop-type-conversion `ptr<struct T~1>` @0 (nullptr `nullptr_t` @0)))
-         (definition (q~3 `ptr<struct T~1>` @8)
-            (addressof `ptr<struct T~1>` @8
-               (deref `struct T~1` @8 (p~2 `ptr<struct T~1>` @0))))
+         (definition (p~3 `ptr<struct T~2>` @0) (noop-type-conversion `ptr<struct T~2>` @0 (nullptr `nullptr_t` @0)))
+         (definition (q~4 `ptr<struct T~2>` @8)
+            (addressof `ptr<struct T~2>` @8
+               (deref `struct T~2` @8 (p~3 `ptr<struct T~2>` @0))))
          (return
             (ptr-equal `int` @16
-               (p~2 `ptr<struct T~1>` @0)
-               (q~3 `ptr<struct T~1>` @8))))))
+               (p~3 `ptr<struct T~2>` @0)
+               (q~4 `ptr<struct T~2>` @8))))))
 
 ----- stderr -----

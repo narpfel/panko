@@ -14,9 +14,9 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration allowed~1 `fn() -> void` ∅)
-         (declaration also_allowed~2 `fn() -> void` ∅)
-         (declaration f~3 `fn() -> void` ∅)
-         (expression (call (name f~3 `fn() -> void`))))))
+         (declaration allowed~2 `fn() -> void` ∅)
+         (declaration also_allowed~3 `fn() -> void` ∅)
+         (declaration f~4 `fn() -> void` ∅)
+         (expression (call (name f~4 `fn() -> void`))))))
 
 ----- stderr -----

@@ -20,19 +20,19 @@ exit_code: 0
       okay~4 `fn() -> void`
       (compound-statement
          (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p2~3 `ptr<struct ∅~1 complete>`)))
-         (declaration p3~5 `ptr<struct ∅~1 complete>` nullptr)
-         (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p3~5 `ptr<struct ∅~1 complete>`)))))
-   (struct ∅~6
+         (declaration p3~6 `ptr<struct ∅~1 complete>` nullptr)
+         (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p3~6 `ptr<struct ∅~1 complete>`)))))
+   (struct ∅~7
       (member x `int`))
-   (declaration p4~8 `ptr<struct ∅~7 complete>` ∅)
+   (declaration p4~9 `ptr<struct ∅~8 complete>` ∅)
    (function-definition
-      should_error~9 `fn() -> void`
+      should_error~10 `fn() -> void`
       (compound-statement
-         (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p4~8 `ptr<struct ∅~7 complete>`)))
-         (struct ∅~10
+         (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p4~9 `ptr<struct ∅~8 complete>`)))
+         (struct ∅~12
             (member x `int`))
-         (declaration p5~12 `ptr<struct ∅~11 complete>` ∅)
-         (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p5~12 `ptr<struct ∅~11 complete>`)))
-         (expression (equal (name p4~8 `ptr<struct ∅~7 complete>`) (name p5~12 `ptr<struct ∅~11 complete>`))))))
+         (declaration p5~14 `ptr<struct ∅~13 complete>` ∅)
+         (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p5~14 `ptr<struct ∅~13 complete>`)))
+         (expression (equal (name p4~9 `ptr<struct ∅~8 complete>`) (name p5~14 `ptr<struct ∅~13 complete>`))))))
 
 ----- stderr -----

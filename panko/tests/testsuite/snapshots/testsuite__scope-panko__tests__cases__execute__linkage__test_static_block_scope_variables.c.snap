@@ -14,31 +14,31 @@ exit_code: 0
    (function-definition
       f~0 `fn() -> int`
       (compound-statement
-         (declaration x~1 `int` 42)
-         (return (post-increment (name x~1 `int`)))))
+         (declaration x~2 `int` 42)
+         (return (post-increment (name x~2 `int`)))))
    (function-definition
-      g~5 `fn() -> int`
+      g~6 `fn() -> int`
       (compound-statement
-         (declaration x~6 `int` 27)
-         (return (post-increment (name x~6 `int`)))))
+         (declaration x~8 `int` 27)
+         (return (post-increment (name x~8 `int`)))))
    (function-definition
-      main~10 `fn() -> int`
+      main~12 `fn() -> int`
       (compound-statement
-         (declaration printf~11 `fn(∅: ptr<char const>, ...) -> int` ∅)
+         (declaration printf~14 `fn(∅: ptr<char const>, ...) -> int` ∅)
          (expression
-            (call (name printf~11 `fn(∅: ptr<char const>, ...) -> int`)
+            (call (name printf~14 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d\n")
                (call (name f~0 `fn() -> int`))
-               (call (name g~5 `fn() -> int`))))
+               (call (name g~6 `fn() -> int`))))
          (expression
-            (call (name printf~11 `fn(∅: ptr<char const>, ...) -> int`)
+            (call (name printf~14 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d\n")
                (call (name f~0 `fn() -> int`))
-               (call (name g~5 `fn() -> int`))))
+               (call (name g~6 `fn() -> int`))))
          (expression
-            (call (name printf~11 `fn(∅: ptr<char const>, ...) -> int`)
+            (call (name printf~14 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d\n")
                (call (name f~0 `fn() -> int`))
-               (call (name g~5 `fn() -> int`)))))))
+               (call (name g~6 `fn() -> int`)))))))
 
 ----- stderr -----

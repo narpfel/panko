@@ -17,11 +17,11 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition value~2 `struct T~0 complete`
+         (definition value~3 `struct T~0 complete`
             (braced
                (subobject +0 (42 `int`))))
          (return
             (member `int` x +0
-               (value~2 `struct T~0 complete`))))))
+               (value~3 `struct T~0 complete`))))))
 
 ----- stderr -----

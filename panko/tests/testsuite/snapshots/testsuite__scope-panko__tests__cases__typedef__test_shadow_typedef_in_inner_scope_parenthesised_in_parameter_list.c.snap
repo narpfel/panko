@@ -16,9 +16,9 @@ exit_code: 0
       (compound-statement
          (typedef name `int`)
          (compound-statement
-            (declaration f~1 `fn(∅: fn() -> int) -> int` ∅)
-            (declaration g~2 `fn(∅: fn(∅: int) -> int) -> int` ∅)
-            (declaration h~3 `fn(∅: fn(∅: int) -> int) -> int` ∅)
-            (declaration i~4 `fn(name: int) -> int` ∅)))))
+            (declaration f~2 `fn(∅: fn() -> int) -> int` ∅)
+            (declaration g~3 `fn(∅: fn(∅: int) -> int) -> int` ∅)
+            (declaration h~4 `fn(∅: fn(∅: int) -> int) -> int` ∅)
+            (declaration i~5 `fn(name: int) -> int` ∅)))))
 
 ----- stderr -----

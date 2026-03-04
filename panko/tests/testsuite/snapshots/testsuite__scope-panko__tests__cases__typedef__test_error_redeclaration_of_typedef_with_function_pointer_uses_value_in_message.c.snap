@@ -18,7 +18,7 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration c~2 `ptr<fn() -> int>` ∅)
+         (declaration c~3 `ptr<fn() -> int>` ∅)
          (redeclared c)
          (typedef d `int`)
          (redeclared d))))

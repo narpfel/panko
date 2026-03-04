@@ -14,11 +14,11 @@ exit_code: 0
    (function-definition external stack-size=24
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (definition (x~1 `int const` @0) (42 `int` @0))
-         (definition (y~2 `int` @4) (27 `int` @4))
+         (definition (x~2 `int const` @0) (42 `int` @0))
+         (definition (y~3 `int` @4) (27 `int` @4))
          (return
             (add `int` @8
-               (x~1 `int const` @0)
-               (y~2 `int` @4))))))
+               (x~2 `int const` @0)
+               (y~3 `int` @4))))))
 
 ----- stderr -----

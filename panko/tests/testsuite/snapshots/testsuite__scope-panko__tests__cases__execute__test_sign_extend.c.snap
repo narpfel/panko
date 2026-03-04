@@ -15,90 +15,90 @@ exit_code: 0
    (function-definition
       print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`
       (params
-         argv~2 `ptr<ptr<char>>`
-         l~3 `long`)
+         argv~3 `ptr<ptr<char>>`
+         l~4 `long`)
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (deref (add (name argv~2 `ptr<ptr<char>>`) 1))
-               (name l~3 `long`)))))
+               (deref (add (name argv~3 `ptr<ptr<char>>`) 1))
+               (name l~4 `long`)))))
    (function-definition
-      main~4 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
+      main~5 `fn(∅: int, argv: ptr<ptr<char>>) -> int`
       (params
-         main.unnamed_parameter.0~5 `int`
-         argv~6 `ptr<ptr<char>>`)
+         main.unnamed_parameter.0~7 `int`
+         argv~8 `ptr<ptr<char>>`)
       (compound-statement
          (compound-statement
-            (declaration c~7 `signed char` (negate 42))
+            (declaration c~9 `signed char` (negate 42))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name c~7 `signed char`)))
-            (declaration s~8 `short` (name c~7 `signed char`))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name c~9 `signed char`)))
+            (declaration s~10 `short` (name c~9 `signed char`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name s~8 `short`)))
-            (declaration i~9 `int` (name c~7 `signed char`))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name s~10 `short`)))
+            (declaration i~11 `int` (name c~9 `signed char`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name i~9 `int`)))
-            (declaration j~10 `int` (name s~8 `short`))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name i~11 `int`)))
+            (declaration j~12 `int` (name s~10 `short`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name j~10 `int`)))
-            (declaration l~11 `long` (name c~7 `signed char`))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name j~12 `int`)))
+            (declaration l~13 `long` (name c~9 `signed char`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name l~11 `long`)))
-            (declaration m~12 `long` (name s~8 `short`))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name l~13 `long`)))
+            (declaration m~14 `long` (name s~10 `short`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name m~12 `long`)))
-            (declaration n~13 `long` (name i~9 `int`))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name m~14 `long`)))
+            (declaration n~15 `long` (name i~11 `int`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name n~13 `long`))))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name n~15 `long`))))
          (compound-statement
-            (declaration c~14 `signed char` 42)
+            (declaration c~16 `signed char` 42)
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name c~14 `signed char`)))
-            (declaration s~15 `short` (name c~14 `signed char`))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name c~16 `signed char`)))
+            (declaration s~17 `short` (name c~16 `signed char`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name s~15 `short`)))
-            (declaration i~16 `int` (name c~14 `signed char`))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name s~17 `short`)))
+            (declaration i~18 `int` (name c~16 `signed char`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name i~16 `int`)))
-            (declaration j~17 `int` (name s~15 `short`))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name i~18 `int`)))
+            (declaration j~19 `int` (name s~17 `short`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name j~17 `int`)))
-            (declaration l~18 `long` (name c~14 `signed char`))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name j~19 `int`)))
+            (declaration l~20 `long` (name c~16 `signed char`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name l~18 `long`)))
-            (declaration m~19 `long` (name s~15 `short`))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name l~20 `long`)))
+            (declaration m~21 `long` (name s~17 `short`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name m~19 `long`)))
-            (declaration n~20 `long` (name i~16 `int`))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name m~21 `long`)))
+            (declaration n~22 `long` (name i~18 `int`))
             (expression
                (call (name print~1 `fn(argv: ptr<ptr<char>>, l: long) -> void`)
-                  (name argv~6 `ptr<ptr<char>>`)
-                  (name n~20 `long`)))))))
+                  (name argv~8 `ptr<ptr<char>>`)
+                  (name n~22 `long`)))))))
 
 ----- stderr -----

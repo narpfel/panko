@@ -15,13 +15,13 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration s~2 `array<typeof(`ptr<char const>`); ∅>`
+         (declaration s~3 `array<typeof(`ptr<char const>`); ∅>`
             (braced
                (string "hello world")))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%s\n")
-               (subscript (name s~2 `array<typeof(`ptr<char const>`); ∅>`) 0)))
-         (return (lengthof (name s~2 `array<typeof(`ptr<char const>`); ∅>`))))))
+               (subscript (name s~3 `array<typeof(`ptr<char const>`); ∅>`) 0)))
+         (return (lengthof (name s~3 `array<typeof(`ptr<char const>`); ∅>`))))))
 
 ----- stderr -----

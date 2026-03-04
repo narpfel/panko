@@ -27,7 +27,7 @@ exit_code: 0
             (member x @0 `int`)
             (member y @4 `int`)
             (member z @8 `int`))
-         (definition (inner~4 `struct Inner~1 complete` @0)
+         (definition (inner~5 `struct Inner~1 complete` @0)
             (braced
                (subobject +0 (1 `int` @0))
                (subobject +4 (2 `int` @4))
@@ -36,12 +36,12 @@ exit_code: 0
             (member x @0 `int`)
             (member inner @4 `struct Inner~1 complete`)
             (member y @16 `int`))
-         (definition (outer~5 `struct Outer~2 complete` @12)
+         (definition (outer~6 `struct Outer~2 complete` @12)
             (braced
                (subobject +0 (42 `int` @12))
-               (subobject +4 (inner~4 `struct Inner~1 complete` @0))
+               (subobject +4 (inner~5 `struct Inner~1 complete` @0))
                (subobject +16 (27 `int` @28))))
-         (definition (expected~6 `array<int; 5>` @32)
+         (definition (expected~7 `array<int; 5>` @32)
             (braced
                (subobject +0 (42 `int` @32))
                (subobject +4 (1 `int` @36))
@@ -54,11 +54,11 @@ exit_code: 0
                   (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)))
                (noop-type-conversion `ptr<void const>` @64
                   (addressof `ptr<struct Outer~2 complete>` @64
-                     (outer~5 `struct Outer~2 complete` @12)))
+                     (outer~6 `struct Outer~2 complete` @12)))
                (noop-type-conversion `ptr<void const>` @72
                   (noop-type-conversion `ptr<int>` @72
                      (addressof `ptr<array<int; 5>>` @72
-                        (expected~6 `array<int; 5>` @32))))
+                        (expected~7 `array<int; 5>` @32))))
                (20 `unsigned long` @80))))))
 
 ----- stderr -----

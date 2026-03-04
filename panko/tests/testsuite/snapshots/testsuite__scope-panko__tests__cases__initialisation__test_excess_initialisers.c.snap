@@ -23,24 +23,24 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (declaration x~3 `int`
+         (declaration x~4 `int`
             (braced
                1
                2))
-         (declaration xs~4 `array<int; 2>`
+         (declaration xs~5 `array<int; 2>`
             (braced
                1
                2
                3
                4))
-         (declaration ys~5 `array<array<int; 2>; 2>`
+         (declaration ys~6 `array<array<int; 2>; 2>`
             (braced
                1
                2
                3
                4
                5))
-         (declaration zs~6 `array<array<int; 2>; 3>`
+         (declaration zs~7 `array<array<int; 2>; 3>`
             (braced
                (braced
                   1
@@ -49,19 +49,19 @@ exit_code: 0
                (braced
                   4
                   5)))
-         (declaration scalar_in_array_initialiser~7 `array<int; 2>`
+         (declaration scalar_in_array_initialiser~8 `array<int; 2>`
             (braced
                1
                (braced
                   2
                   3)))
-         (declaration nested_braces_in_first_initialiser~8 `array<int; 2>`
+         (declaration nested_braces_in_first_initialiser~9 `array<int; 2>`
             (braced
                (braced
                   (braced
                      1
                      2))))
-         (declaration multiline~9 `array<array<int; 2>; 3>`
+         (declaration multiline~10 `array<array<int; 2>; 3>`
             (braced
                (braced
                   1

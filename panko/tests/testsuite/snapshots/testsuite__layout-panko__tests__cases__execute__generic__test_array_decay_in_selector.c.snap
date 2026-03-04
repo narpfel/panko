@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition external stack-size=24
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (definition (xs~1 `array<int; 2>` @0) (braced ∅))
+         (definition (xs~2 `array<int; 2>` @0) (braced ∅))
          (return (0 `int` @8)))))
 
 ----- stderr -----

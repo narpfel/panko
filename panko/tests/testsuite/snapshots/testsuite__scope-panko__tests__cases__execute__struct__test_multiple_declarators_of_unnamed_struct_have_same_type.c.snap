@@ -14,10 +14,10 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (struct ∅~1
+         (struct ∅~2
             (member x `int`))
-         (declaration p1~3 `ptr<struct ∅~2 complete>` nullptr)
-         (declaration p2~5 `ptr<struct ∅~4 complete>` nullptr)
-         (return (equal (name p1~3 `ptr<struct ∅~2 complete>`) (name p2~5 `ptr<struct ∅~4 complete>`))))))
+         (declaration p1~4 `ptr<struct ∅~3 complete>` nullptr)
+         (declaration p2~6 `ptr<struct ∅~5 complete>` nullptr)
+         (return (equal (name p1~4 `ptr<struct ∅~3 complete>`) (name p2~6 `ptr<struct ∅~5 complete>`))))))
 
 ----- stderr -----

@@ -15,11 +15,11 @@ exit_code: 0
    (function-definition external stack-size=24
       (id~1 `fn(n: int) -> int` (static id))
       (params
-         (n~2 `int` @0))
+         (n~3 `int` @0))
       (compound-statement
-         (return (n~2 `int` @0))))
+         (return (n~3 `int` @0))))
    (function-definition external stack-size=120
-      (main~3 `fn() -> int` (static main))
+      (main~4 `fn() -> int` (static main))
       (compound-statement
          (return
             (call `int` @0
@@ -42,18 +42,18 @@ exit_code: 0
    (function-definition external stack-size=56
       (f~0 `fn(a1: int, a2: int, a3: int, a4: int, a5: int, a6: int, a7: int, a8: int, a9: int, a10: int, a11: int) -> int` (static f))
       (params
-         (a1~5 `int` @0)
-         (a2~6 `int` @4)
-         (a3~7 `int` @8)
-         (a4~8 `int` @12)
-         (a5~9 `int` @16)
-         (a6~10 `int` @20)
-         (a7~11 `int` @24)
-         (a8~12 `int` @28)
-         (a9~13 `int` @32)
-         (a10~14 `int` @36)
-         (a11~15 `int` @40))
+         (a1~8 `int` @0)
+         (a2~9 `int` @4)
+         (a3~10 `int` @8)
+         (a4~11 `int` @12)
+         (a5~12 `int` @16)
+         (a6~13 `int` @20)
+         (a7~14 `int` @24)
+         (a8~15 `int` @28)
+         (a9~16 `int` @32)
+         (a10~17 `int` @36)
+         (a11~18 `int` @40))
       (compound-statement
-         (return (a10~14 `int` @36)))))
+         (return (a10~17 `int` @36)))))
 
 ----- stderr -----

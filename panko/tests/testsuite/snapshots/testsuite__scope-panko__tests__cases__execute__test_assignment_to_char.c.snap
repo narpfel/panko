@@ -14,11 +14,11 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration a~1 `char` 1)
-         (declaration b~2 `char` 2)
-         (declaration c~3 `char` 42)
-         (declaration d~4 `char` 3)
-         (expression (assign (name b~2 `char`) 123))
-         (return (name c~3 `char`)))))
+         (declaration a~2 `char` 1)
+         (declaration b~3 `char` 2)
+         (declaration c~4 `char` 42)
+         (declaration d~5 `char` 3)
+         (expression (assign (name b~3 `char`) 123))
+         (return (name c~4 `char`)))))
 
 ----- stderr -----

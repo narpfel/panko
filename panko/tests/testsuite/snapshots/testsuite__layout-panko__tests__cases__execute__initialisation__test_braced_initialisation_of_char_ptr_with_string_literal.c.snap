@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external stack-size=40
       (main~1 `fn() -> int` (static main))
       (compound-statement
-         (definition (s~2 `ptr<char const>` @0)
+         (definition (s~3 `ptr<char const>` @0)
             (braced
                (subobject +0
                   (noop-type-conversion `ptr<char const>` @0
@@ -27,6 +27,6 @@ exit_code: 0
                (call `unsigned long` @16
                   (addressof `ptr<fn(∅: ptr<char const>) -> unsigned long>` @24
                      (strlen~0 `fn(∅: ptr<char const>) -> unsigned long` (static strlen)))
-                  (s~2 `ptr<char const>` @0)))))))
+                  (s~3 `ptr<char const>` @0)))))))
 
 ----- stderr -----

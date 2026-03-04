@@ -14,14 +14,14 @@ exit_code: 0
    (function-definition external
       f~0 `fn(x: int) -> int`
       (params
-         x~1 `int`)
+         x~2 `int`)
       (compound-statement
-         (return (add `int` (x~1 `int`) (2 `int`)))))
+         (return (add `int` (x~2 `int`) (2 `int`)))))
    (function-definition external
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
-         (definition x~3 `int` (40 `int`))
-         (definition p~4 `ptr<fn(∅: int) -> int>`
+         (definition x~5 `int` (40 `int`))
+         (definition p~6 `ptr<fn(∅: int) -> int>`
             (addressof `ptr<fn(x: int) -> int>`
                (f~0 `fn(x: int) -> int`)))
          (return
@@ -33,7 +33,7 @@ exit_code: 0
                            (addressof `ptr<fn(∅: int) -> int>`
                               (deref `fn(∅: int) -> int`
                                  (addressof `ptr<fn(∅: int) -> int>`
-                                    (deref `fn(∅: int) -> int` (p~4 `ptr<fn(∅: int) -> int>`)))))))))
-               (x~3 `int`))))))
+                                    (deref `fn(∅: int) -> int` (p~6 `ptr<fn(∅: int) -> int>`)))))))))
+               (x~5 `int`))))))
 
 ----- stderr -----

@@ -14,11 +14,11 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> typeof(`int`)`
       (compound-statement
-         (declaration x~1 `typeof(`ptr<int const>`)` nullptr)
-         (declaration xs~2 `typeof(`array<typeof(`int const`); 5>`)` (braced ∅))
-         (expression (assign (name x~1 `typeof(`ptr<int const>`)`) (name xs~2 `typeof(`array<typeof(`int const`); 5>`)`)))
-         (declaration ys~3 `typeof(`array<int const; 5>`)` (braced ∅))
+         (declaration x~2 `typeof(`ptr<int const>`)` nullptr)
+         (declaration xs~3 `typeof(`array<typeof(`int const`); 5>`)` (braced ∅))
+         (expression (assign (name x~2 `typeof(`ptr<int const>`)`) (name xs~3 `typeof(`array<typeof(`int const`); 5>`)`)))
+         (declaration ys~4 `typeof(`array<int const; 5>`)` (braced ∅))
          (expression (cast `ptr<typeof(`int`)>` nullptr))
-         (return (add (subscript (name x~1 `typeof(`ptr<int const>`)`) 0) (subscript (name ys~3 `typeof(`array<int const; 5>`)`) (subtract (lengthof (name ys~3 `typeof(`array<int const; 5>`)`)) 1)))))))
+         (return (add (subscript (name x~2 `typeof(`ptr<int const>`)`) 0) (subscript (name ys~4 `typeof(`array<int const; 5>`)`) (subtract (lengthof (name ys~4 `typeof(`array<int const; 5>`)`)) 1)))))))
 
 ----- stderr -----

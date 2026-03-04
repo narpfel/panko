@@ -19,16 +19,16 @@ exit_code: 0
       (compound-statement
          (return (x~0 `int`))))
    (function-definition external
-      add_f~2 `fn(y: int) -> void`
+      add_f~3 `fn(y: int) -> void`
       (params
-         y~3 `int`)
+         y~5 `int`)
       (compound-statement
          (expression
             (combine `int`
-               (assign `ptr<int>` (unnamed-temporary~4 `ptr<int>`)
+               (assign `ptr<int>` (unnamed-temporary~6 `ptr<int>`)
                   (addressof `ptr<int>`
                      (x~0 `int`)))
-               (assign `int` (deref `int` (unnamed-temporary~4 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~4 `ptr<int>`)) (y~3 `int`))))))))
+               (assign `int` (deref `int` (unnamed-temporary~6 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~6 `ptr<int>`)) (y~5 `int`))))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/g.c"
    (definition internal x~0 `int` (10 `int`))
    (function-definition external
@@ -36,16 +36,16 @@ exit_code: 0
       (compound-statement
          (return (x~0 `int`))))
    (function-definition external
-      add_g~2 `fn(y: int) -> void`
+      add_g~3 `fn(y: int) -> void`
       (params
-         y~3 `int`)
+         y~5 `int`)
       (compound-statement
          (expression
             (combine `int`
-               (assign `ptr<int>` (unnamed-temporary~4 `ptr<int>`)
+               (assign `ptr<int>` (unnamed-temporary~6 `ptr<int>`)
                   (addressof `ptr<int>`
                      (x~0 `int`)))
-               (assign `int` (deref `int` (unnamed-temporary~4 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~4 `ptr<int>`)) (y~3 `int`))))))))
+               (assign `int` (deref `int` (unnamed-temporary~6 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~6 `ptr<int>`)) (y~5 `int`))))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/main.c"
    (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (declaration external f~1 `fn() -> int` ∅)
@@ -88,7 +88,7 @@ exit_code: 0
                   (addressof `ptr<fn() -> int>`
                      (g~3 `fn() -> int`)))))))
    (function-definition external
-      main~7 `fn() -> int`
+      main~8 `fn() -> int`
       (compound-statement
          (expression
             (call `void`

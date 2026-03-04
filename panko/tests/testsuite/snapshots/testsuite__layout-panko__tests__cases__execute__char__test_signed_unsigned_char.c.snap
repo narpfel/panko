@@ -15,9 +15,9 @@ exit_code: 0
    (function-definition external stack-size=56
       (main~1 `fn() -> int` (static main))
       (compound-statement
-         (definition (a~2 `char` @0) (truncate `char` @0 (97 `int` @4)))
-         (definition (b~3 `unsigned char` @1) (truncate `unsigned char` @1 (98 `int` @4)))
-         (definition (c~4 `signed char` @2) (truncate `signed char` @2 (99 `int` @4)))
+         (definition (a~3 `char` @0) (truncate `char` @0 (97 `int` @4)))
+         (definition (b~4 `unsigned char` @1) (truncate `unsigned char` @1 (98 `int` @4)))
+         (definition (c~5 `signed char` @2) (truncate `signed char` @2 (99 `int` @4)))
          (expression
             (call `int` @4
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
@@ -26,11 +26,11 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 8>>` @16
                         (string `array<char; 8>` @void "%c%c%c\n\0"))))
-               (sign-extend `int` @24 (a~2 `char` @0))
-               (zero-extend `int` @28 (b~3 `unsigned char` @1))
-               (sign-extend `int` @32 (c~4 `signed char` @2))))
-         (definition (x~5 `unsigned char` @3) (truncate `unsigned char` @3 (200 `int` @4)))
-         (definition (y~6 `signed char` @4) (truncate `signed char` @4 (negate `int` @8 (5 `int` @8))))
+               (sign-extend `int` @24 (a~3 `char` @0))
+               (zero-extend `int` @28 (b~4 `unsigned char` @1))
+               (sign-extend `int` @32 (c~5 `signed char` @2))))
+         (definition (x~6 `unsigned char` @3) (truncate `unsigned char` @3 (200 `int` @4)))
+         (definition (y~7 `signed char` @4) (truncate `signed char` @4 (negate `int` @8 (5 `int` @8))))
          (expression
             (call `int` @8
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
@@ -39,7 +39,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @24
                      (addressof `ptr<array<char; 4>>` @24
                         (string `array<char; 4>` @void "%d\n\0"))))
-               (zero-extend `int` @32 (x~5 `unsigned char` @3))))
+               (zero-extend `int` @32 (x~6 `unsigned char` @3))))
          (expression
             (call `int` @8
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
@@ -48,6 +48,6 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @24
                      (addressof `ptr<array<char; 4>>` @24
                         (string `array<char; 4>` @void "%d\n\0"))))
-               (sign-extend `int` @32 (y~6 `signed char` @4)))))))
+               (sign-extend `int` @32 (y~7 `signed char` @4)))))))
 
 ----- stderr -----

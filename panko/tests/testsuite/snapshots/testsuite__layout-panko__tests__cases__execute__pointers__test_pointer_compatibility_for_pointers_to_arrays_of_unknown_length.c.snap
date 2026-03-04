@@ -14,16 +14,16 @@ exit_code: 0
    (function-definition external stack-size=200
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (definition (xs~1 `array<int; 42>` @0) (braced ∅))
-         (definition (p~2 `ptr<array<int; ∅>>` @168)
+         (definition (xs~2 `array<int; 42>` @0) (braced ∅))
+         (definition (p~3 `ptr<array<int; ∅>>` @168)
             (addressof `ptr<array<int; 42>>` @168
-               (xs~1 `array<int; 42>` @0)))
-         (definition (q~3 `ptr<array<int; 42>>` @176)
+               (xs~2 `array<int; 42>` @0)))
+         (definition (q~4 `ptr<array<int; 42>>` @176)
             (addressof `ptr<array<int; 42>>` @176
-               (xs~1 `array<int; 42>` @0)))
+               (xs~2 `array<int; 42>` @0)))
          (return
             (ptr-equal `int` @184
-               (p~2 `ptr<array<int; ∅>>` @168)
-               (q~3 `ptr<array<int; 42>>` @176))))))
+               (p~3 `ptr<array<int; ∅>>` @168)
+               (q~4 `ptr<array<int; 42>>` @176))))))
 
 ----- stderr -----

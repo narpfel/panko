@@ -14,13 +14,13 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition xs~1 `array<int; 42>` (braced ∅))
-         (definition p~2 `ptr<array<int; ∅>>`
+         (definition xs~2 `array<int; 42>` (braced ∅))
+         (definition p~3 `ptr<array<int; ∅>>`
             (addressof `ptr<array<int; 42>>`
-               (xs~1 `array<int; 42>`)))
-         (definition q~3 `ptr<array<int; 42>>`
+               (xs~2 `array<int; 42>`)))
+         (definition q~4 `ptr<array<int; 42>>`
             (addressof `ptr<array<int; 42>>`
-               (xs~1 `array<int; 42>`)))
-         (return (ptr-equal `int` (p~2 `ptr<array<int; ∅>>`) (q~3 `ptr<array<int; 42>>`))))))
+               (xs~2 `array<int; 42>`)))
+         (return (ptr-equal `int` (p~3 `ptr<array<int; ∅>>`) (q~4 `ptr<array<int; 42>>`))))))
 
 ----- stderr -----

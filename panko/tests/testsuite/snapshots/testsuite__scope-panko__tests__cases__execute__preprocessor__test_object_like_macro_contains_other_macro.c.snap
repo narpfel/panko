@@ -15,21 +15,21 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration x~2 `int` 42)
-         (declaration p~3 `ptr<int>` (addressof (name x~2 `int`)))
-         (declaration y~4 `int` 27)
+         (declaration x~3 `int` 42)
+         (declaration p~4 `ptr<int>` (addressof (name x~3 `int`)))
+         (declaration y~5 `int` 27)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "*p: %d\n")
-               (deref (name p~3 `ptr<int>`))))
+               (deref (name p~4 `ptr<int>`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "x: %d\n")
-               (name y~4 `int`)))
+               (name y~5 `int`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "y: %d\n")
-               (name y~4 `int`)))
-         (return (name y~4 `int`)))))
+               (name y~5 `int`)))
+         (return (name y~5 `int`)))))
 
 ----- stderr -----

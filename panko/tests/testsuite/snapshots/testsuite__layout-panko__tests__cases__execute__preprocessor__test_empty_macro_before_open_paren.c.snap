@@ -24,7 +24,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "a\0"))))))))
    (function-definition external stack-size=40
-      (b~2 `fn() -> void` (static b))
+      (b~3 `fn() -> void` (static b))
       (compound-statement
          (expression
             (call `int` @0
@@ -35,7 +35,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "b\0"))))))))
    (function-definition external stack-size=40
-      (c~3 `fn() -> void` (static c))
+      (c~5 `fn() -> void` (static c))
       (compound-statement
          (expression
             (call `int` @0
@@ -46,7 +46,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "c\0"))))))))
    (function-definition external stack-size=40
-      (d~4 `fn() -> void` (static d))
+      (d~7 `fn() -> void` (static d))
       (compound-statement
          (expression
             (call `int` @0
@@ -57,15 +57,15 @@ exit_code: 0
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "d\0"))))))))
    (function-definition external stack-size=24
-      (main~5 `fn() -> int` (static main))
+      (main~9 `fn() -> int` (static main))
       (compound-statement
          (expression
             (call `void` @void
                (addressof `ptr<fn() -> void>` @0
-                  (d~4 `fn() -> void` (static d)))))
+                  (d~7 `fn() -> void` (static d)))))
          (expression
             (call `void` @void
                (addressof `ptr<fn() -> void>` @0
-                  (d~4 `fn() -> void` (static d))))))))
+                  (d~7 `fn() -> void` (static d))))))))
 
 ----- stderr -----

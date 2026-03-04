@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `long` (sign-extend `long` (42 `int`)))
-         (return (truncate `int` (add `long` (multiply `long` (sign-extend `long` (2 `int`)) (x~1 `long`)) (sign-extend `long` (1 `int`))))))))
+         (definition x~2 `long` (sign-extend `long` (42 `int`)))
+         (return (truncate `int` (add `long` (multiply `long` (sign-extend `long` (2 `int`)) (x~2 `long`)) (sign-extend `long` (1 `int`))))))))
 
 ----- stderr -----

@@ -14,9 +14,9 @@ exit_code: 0
    (function-definition external stack-size=24
       (main~0 `fn(argc: int, ∅: ptr<ptr<char>>) -> int` (static main))
       (params
-         (argc~1 `int` @0)
-         (main.unnamed_parameter.1~2 `ptr<ptr<char>>` @8))
+         (argc~2 `int` @0)
+         (main.unnamed_parameter.1~3 `ptr<ptr<char>>` @8))
       (compound-statement
-         (return (argc~1 `int` @0)))))
+         (return (argc~2 `int` @0)))))
 
 ----- stderr -----

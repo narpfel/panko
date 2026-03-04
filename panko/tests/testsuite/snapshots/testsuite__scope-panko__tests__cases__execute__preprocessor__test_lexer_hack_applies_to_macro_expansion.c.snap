@@ -18,11 +18,11 @@ exit_code: 0
       (compound-statement
          (compound-statement
             (typedef x `int`)
-            (declaration y~3 `int` 27)
+            (declaration y~4 `int` 27)
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")
-                  (name y~3 `int`))))
+                  (name y~4 `int`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")

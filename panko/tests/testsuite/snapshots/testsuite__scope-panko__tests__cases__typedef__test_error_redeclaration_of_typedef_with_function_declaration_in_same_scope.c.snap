@@ -20,7 +20,7 @@ exit_code: 0
       (compound-statement
          (typedef c `int`)
          (redeclared c)
-         (declaration d~2 `fn() -> int` ∅)
+         (declaration d~3 `fn() -> int` ∅)
          (redeclared d))))
 
 ----- stderr -----

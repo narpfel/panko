@@ -19,18 +19,18 @@ exit_code: 0
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (string "f")))))
    (function-definition
-      g~2 `fn() -> void`
+      g~3 `fn() -> void`
       (compound-statement
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (string "g")))))
    (function-definition
-      main~3 `fn() -> int`
+      main~5 `fn() -> int`
       (compound-statement
          (expression
             (conditional
                1
                (call (name f~1 `fn() -> void`))
-               (call (name g~2 `fn() -> void`)))))))
+               (call (name g~3 `fn() -> void`)))))))
 
 ----- stderr -----

@@ -14,12 +14,12 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int` (42 `int`))
+         (definition x~2 `int` (42 `int`))
          (return
             (combine `int`
-               (assign `ptr<int>` (unnamed-temporary~2 `ptr<int>`)
+               (assign `ptr<int>` (unnamed-temporary~3 `ptr<int>`)
                   (addressof `ptr<int>`
-                     (x~1 `int`)))
-               (assign `int` (deref `int` (unnamed-temporary~2 `ptr<int>`)) (truncate `int` (add `long` (sign-extend `long` (deref `int` (unnamed-temporary~2 `ptr<int>`))) (27l `long`)))))))))
+                     (x~2 `int`)))
+               (assign `int` (deref `int` (unnamed-temporary~3 `ptr<int>`)) (truncate `int` (add `long` (sign-extend `long` (deref `int` (unnamed-temporary~3 `ptr<int>`))) (27l `long`)))))))))
 
 ----- stderr -----

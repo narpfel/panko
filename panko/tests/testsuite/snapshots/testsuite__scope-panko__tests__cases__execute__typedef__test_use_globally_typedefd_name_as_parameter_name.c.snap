@@ -15,11 +15,11 @@ exit_code: 0
    (function-definition
       f~0 `fn(a: int) -> int`
       (params
-         a~1 `int`)
+         a~2 `int`)
       (compound-statement
-         (return (name a~1 `int`))))
+         (return (name a~2 `int`))))
    (function-definition
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
          (return
             (call (name f~0 `fn(a: int) -> int`)

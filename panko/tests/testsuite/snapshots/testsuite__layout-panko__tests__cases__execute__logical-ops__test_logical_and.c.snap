@@ -16,8 +16,8 @@ exit_code: 0
    (function-definition external stack-size=104
       (main~2 `fn(∅: int, argv: ptr<ptr<char>>) -> int` (static main))
       (params
-         (main.unnamed_parameter.0~3 `int` @0)
-         (argv~4 `ptr<ptr<char>>` @8))
+         (main.unnamed_parameter.0~4 `int` @0)
+         (argv~5 `ptr<ptr<char>>` @8))
       (compound-statement
          (expression
             (call `int` @16
@@ -26,7 +26,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
-                        (argv~4 `ptr<ptr<char>>` @8)
+                        (argv~5 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (logical-and `int` @48
                   (0 `int` @48)
@@ -38,7 +38,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
-                        (argv~4 `ptr<ptr<char>>` @8)
+                        (argv~5 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (logical-and `int` @48
                   (0 `int` @48)
@@ -50,7 +50,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
-                        (argv~4 `ptr<ptr<char>>` @8)
+                        (argv~5 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (logical-and `int` @48
                   (27 `int` @48)
@@ -62,7 +62,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
-                        (argv~4 `ptr<ptr<char>>` @8)
+                        (argv~5 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
                (logical-and `int` @48
                   (42 `int` @48)
@@ -76,7 +76,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char const>` @32
                      (deref `ptr<char>` @32
                         (ptr-add `ptr<ptr<char>>` @40
-                           (argv~4 `ptr<ptr<char>>` @8)
+                           (argv~5 `ptr<ptr<char>>` @8)
                            (sign-extend `unsigned long` @48 (1 `int` @56)))))
                   (123 `int` @48))))
          (expression
@@ -88,7 +88,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char const>` @32
                      (deref `ptr<char>` @32
                         (ptr-add `ptr<ptr<char>>` @40
-                           (argv~4 `ptr<ptr<char>>` @8)
+                           (argv~5 `ptr<ptr<char>>` @8)
                            (sign-extend `unsigned long` @48 (1 `int` @56)))))
                   (456 `int` @48))))
          (expression
@@ -99,7 +99,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char const>` @32
                      (deref `ptr<char>` @32
                         (ptr-add `ptr<ptr<char>>` @40
-                           (argv~4 `ptr<ptr<char>>` @8)
+                           (argv~5 `ptr<ptr<char>>` @8)
                            (sign-extend `unsigned long` @48 (1 `int` @56)))))
                   (5 `int` @48))
                (call `int` @52
@@ -108,7 +108,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char const>` @64
                      (deref `ptr<char>` @64
                         (ptr-add `ptr<ptr<char>>` @72
-                           (argv~4 `ptr<ptr<char>>` @8)
+                           (argv~5 `ptr<ptr<char>>` @8)
                            (sign-extend `unsigned long` @80 (1 `int` @88)))))
                   (7 `int` @80))))
          (expression
@@ -122,7 +122,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char const>` @48
                      (deref `ptr<char>` @48
                         (ptr-add `ptr<ptr<char>>` @56
-                           (argv~4 `ptr<ptr<char>>` @8)
+                           (argv~5 `ptr<ptr<char>>` @8)
                            (sign-extend `unsigned long` @64 (1 `int` @72)))))
                   (1 `int` @64))))))
    (function-definition external stack-size=24

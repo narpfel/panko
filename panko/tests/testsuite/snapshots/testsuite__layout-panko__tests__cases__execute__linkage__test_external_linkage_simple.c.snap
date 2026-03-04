@@ -15,8 +15,8 @@ exit_code: 0
    (function-definition external stack-size=40
       (main~1 `fn() -> int` (static main))
       (compound-statement
-         (declaration external (printf~2 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-         (declaration external (x~3 `int` (static x)) ∅)
+         (declaration external (printf~3 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+         (declaration external (x~4 `int` (static x)) ∅)
          (expression
             (call `int` @0
                (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
@@ -28,12 +28,12 @@ exit_code: 0
          (expression
             (call `int` @0
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
-                  (printf~2 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (printf~3 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
                (noop-type-conversion `ptr<char const>` @16
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 4>>` @16
                         (string `array<char; 4>` @void "%d\n\0"))))
-               (x~3 `int` (static x))))))
-   (definition external (x~4 `int` (static x)) (42 `int` (static x))))
+               (x~4 `int` (static x))))))
+   (definition external (x~5 `int` (static x)) (42 `int` (static x))))
 
 ----- stderr -----

@@ -16,14 +16,14 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (declaration actual~3 `array<array<array<int; 2>; 1>; ∅>`
+         (declaration actual~4 `array<array<array<int; 2>; 1>; ∅>`
             (braced
                1
                2
                (braced
                   3)
                4))
-         (declaration expected~4 `array<int; ∅>`
+         (declaration expected~5 `array<int; ∅>`
             (braced
                1
                2
@@ -34,12 +34,12 @@ exit_code: 0
          (expression
             (call (name printf~1 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %zu\n")
-               (sizeof (name actual~3 `array<array<array<int; 2>; 1>; ∅>`))
-               (sizeof (name expected~4 `array<int; ∅>`))))
+               (sizeof (name actual~4 `array<array<array<int; 2>; 1>; ∅>`))
+               (sizeof (name expected~5 `array<int; ∅>`))))
          (return
             (call (name memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
-               (name actual~3 `array<array<array<int; 2>; 1>; ∅>`)
-               (name expected~4 `array<int; ∅>`)
-               (sizeof (name actual~3 `array<array<array<int; 2>; 1>; ∅>`)))))))
+               (name actual~4 `array<array<array<int; 2>; 1>; ∅>`)
+               (name expected~5 `array<int; ∅>`)
+               (sizeof (name actual~4 `array<array<array<int; 2>; 1>; ∅>`)))))))
 
 ----- stderr -----

@@ -14,16 +14,16 @@ exit_code: 0
    (function-definition
       f~0 `fn(x: int) -> int`
       (params
-         x~1 `int`)
+         x~2 `int`)
       (compound-statement
-         (return (add (name x~1 `int`) 2))))
+         (return (add (name x~2 `int`) 2))))
    (function-definition
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
-         (declaration x~3 `int` 40)
-         (declaration p~4 `ptr<fn(∅: int) -> int>` (addressof (name f~0 `fn(x: int) -> int`)))
+         (declaration x~5 `int` 40)
+         (declaration p~6 `ptr<fn(∅: int) -> int>` (addressof (name f~0 `fn(x: int) -> int`)))
          (return
-            (call (deref (deref (deref (deref (name p~4 `ptr<fn(∅: int) -> int>`)))))
-               (name x~3 `int`))))))
+            (call (deref (deref (deref (deref (name p~6 `ptr<fn(∅: int) -> int>`)))))
+               (name x~5 `int`))))))
 
 ----- stderr -----

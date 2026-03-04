@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition external stack-size=24
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (definition (value~1 `int` @0) (negate `int` @0 (42 `int` @0)))
-         (return (negate `int` @4 (value~1 `int` @0))))))
+         (definition (value~2 `int` @0) (negate `int` @0 (42 `int` @0)))
+         (return (negate `int` @4 (value~2 `int` @0))))))
 
 ----- stderr -----

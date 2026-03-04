@@ -24,11 +24,11 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 5>>`
                         (string `array<char; 5>` "in f\0"))))))))
-   (declaration external g~3 `fn(∅: int) -> void` ∅)
-   (declaration internal h~4 `fn(x: int) -> void` ∅)
-   (declaration internal i~5 `fn() -> void` ∅)
+   (declaration external g~4 `fn(∅: int) -> void` ∅)
+   (declaration internal h~5 `fn(x: int) -> void` ∅)
+   (declaration internal i~6 `fn() -> void` ∅)
    (function-definition external
-      main~6 `fn() -> int`
+      main~7 `fn() -> int`
       (compound-statement
          (expression
             (call `void`
@@ -37,21 +37,21 @@ exit_code: 0
          (expression
             (call `void`
                (addressof `ptr<fn(∅: int) -> void>`
-                  (g~3 `fn(∅: int) -> void`))
+                  (g~4 `fn(∅: int) -> void`))
                (4 `int`)))
          (expression
             (call `void`
                (addressof `ptr<fn(x: int) -> void>`
-                  (h~4 `fn(x: int) -> void`))
+                  (h~5 `fn(x: int) -> void`))
                (9 `int`)))
          (expression
             (call `void`
                (addressof `ptr<fn() -> void>`
-                  (i~5 `fn() -> void`))))))
+                  (i~6 `fn() -> void`))))))
    (function-definition external
-      g~3 `fn(x: int) -> void`
+      g~4 `fn(x: int) -> void`
       (params
-         x~8 `int`)
+         x~11 `int`)
       (compound-statement
          (expression
             (call `int`
@@ -61,11 +61,11 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "in g: %d\n\0"))))
-               (add `int` (x~8 `int`) (1 `int`))))))
+               (add `int` (x~11 `int`) (1 `int`))))))
    (function-definition internal
-      h~4 `fn(x: int) -> void`
+      h~5 `fn(x: int) -> void`
       (params
-         x~10 `int`)
+         x~14 `int`)
       (compound-statement
          (expression
             (call `int`
@@ -75,9 +75,9 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "in h: %d\n\0"))))
-               (add `int` (x~10 `int`) (1 `int`))))))
+               (add `int` (x~14 `int`) (1 `int`))))))
    (function-definition internal
-      i~5 `fn() -> void`
+      i~6 `fn() -> void`
       (compound-statement
          (expression
             (call `int`

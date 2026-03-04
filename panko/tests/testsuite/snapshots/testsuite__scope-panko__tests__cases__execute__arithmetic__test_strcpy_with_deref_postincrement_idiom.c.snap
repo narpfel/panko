@@ -16,26 +16,26 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (declaration str~3 `array<char; ∅>` (string "hello"))
-         (declaration copy~4 `array<char; 6>` ∅)
-         (declaration src~5 `ptr<char>` (name str~3 `array<char; ∅>`))
-         (declaration tgt~6 `ptr<char>` (name copy~4 `array<char; 6>`))
-         (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
-         (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
-         (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
-         (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
-         (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
-         (expression (assign (deref (post-increment (name tgt~6 `ptr<char>`))) (deref (post-increment (name src~5 `ptr<char>`)))))
+         (declaration str~4 `array<char; ∅>` (string "hello"))
+         (declaration copy~5 `array<char; 6>` ∅)
+         (declaration src~6 `ptr<char>` (name str~4 `array<char; ∅>`))
+         (declaration tgt~7 `ptr<char>` (name copy~5 `array<char; 6>`))
+         (expression (assign (deref (post-increment (name tgt~7 `ptr<char>`))) (deref (post-increment (name src~6 `ptr<char>`)))))
+         (expression (assign (deref (post-increment (name tgt~7 `ptr<char>`))) (deref (post-increment (name src~6 `ptr<char>`)))))
+         (expression (assign (deref (post-increment (name tgt~7 `ptr<char>`))) (deref (post-increment (name src~6 `ptr<char>`)))))
+         (expression (assign (deref (post-increment (name tgt~7 `ptr<char>`))) (deref (post-increment (name src~6 `ptr<char>`)))))
+         (expression (assign (deref (post-increment (name tgt~7 `ptr<char>`))) (deref (post-increment (name src~6 `ptr<char>`)))))
+         (expression (assign (deref (post-increment (name tgt~7 `ptr<char>`))) (deref (post-increment (name src~6 `ptr<char>`)))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %zu\n")
-               (subtract (name src~5 `ptr<char>`) (name str~3 `array<char; ∅>`))
-               (subtract (name tgt~6 `ptr<char>`) (name copy~4 `array<char; 6>`))))
+               (subtract (name src~6 `ptr<char>`) (name str~4 `array<char; ∅>`))
+               (subtract (name tgt~7 `ptr<char>`) (name copy~5 `array<char; 6>`))))
          (expression
             (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-               (name str~3 `array<char; ∅>`)))
+               (name str~4 `array<char; ∅>`)))
          (expression
             (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-               (name copy~4 `array<char; 6>`))))))
+               (name copy~5 `array<char; 6>`))))))
 
 ----- stderr -----

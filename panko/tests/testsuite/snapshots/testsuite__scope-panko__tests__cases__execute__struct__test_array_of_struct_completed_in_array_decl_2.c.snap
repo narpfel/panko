@@ -15,31 +15,31 @@ exit_code: 0
    (function-definition
       f~1 `fn() -> void`
       (compound-statement
-         (declaration funcs~3 `array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~2 complete>`)`)>`); (sizeof `struct X~2 complete`)>` (braced ∅))
+         (declaration funcs~4 `array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~3 complete>`)`)>`); (sizeof `struct X~3 complete`)>` (braced ∅))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (lengthof (name funcs~3 `array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~2 complete>`)`)>`); (sizeof `struct X~2 complete`)>`))))
+               (lengthof (name funcs~4 `array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~3 complete>`)`)>`); (sizeof `struct X~3 complete`)>`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (sizeof (deref (call (subscript (name funcs~3 `array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~2 complete>`)`)>`); (sizeof `struct X~2 complete`)>`) 0))))))))
+               (sizeof (deref (call (subscript (name funcs~4 `array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~3 complete>`)`)>`); (sizeof `struct X~3 complete`)>`) 0))))))))
    (function-definition
-      g~4 `fn() -> void`
+      g~5 `fn() -> void`
       (compound-statement
-         (declaration funcs~6 `typeof(`array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~5 complete>`)`)>`); (sizeof `struct X~5 complete`)>`)` (braced ∅))
+         (declaration funcs~8 `typeof(`array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~7 complete>`)`)>`); (sizeof `struct X~7 complete`)>`)` (braced ∅))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (lengthof (name funcs~6 `typeof(`array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~5 complete>`)`)>`); (sizeof `struct X~5 complete`)>`)`))))
+               (lengthof (name funcs~8 `typeof(`array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~7 complete>`)`)>`); (sizeof `struct X~7 complete`)>`)`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (sizeof (deref (call (subscript (name funcs~6 `typeof(`array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~5 complete>`)`)>`); (sizeof `struct X~5 complete`)>`)`) 0))))))))
+               (sizeof (deref (call (subscript (name funcs~8 `typeof(`array<typeof(`ptr<typeof(`fn() -> typeof(`ptr<struct X~7 complete>`)`)>`); (sizeof `struct X~7 complete`)>`)`) 0))))))))
    (function-definition
-      main~7 `fn() -> int`
+      main~9 `fn() -> int`
       (compound-statement
          (expression (call (name f~1 `fn() -> void`)))
-         (expression (call (name g~4 `fn() -> void`))))))
+         (expression (call (name g~5 `fn() -> void`))))))
 
 ----- stderr -----

@@ -24,7 +24,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 5>>`
                         (string `array<char; 5>` "in f\0"))))))))
    (function-definition external
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
          (expression
             (call `void`

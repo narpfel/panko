@@ -15,12 +15,12 @@ exit_code: 0
       f~0 `fn() -> void`
       (compound-statement))
    (function-definition
-      g~1 `fn() -> void`
+      g~2 `fn() -> void`
       (compound-statement
          (return (call (name f~0 `fn() -> void`)))))
    (function-definition
-      main~2 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
-         (expression (call (name g~1 `fn() -> void`))))))
+         (expression (call (name g~2 `fn() -> void`))))))
 
 ----- stderr -----

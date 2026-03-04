@@ -23,8 +23,8 @@ exit_code: 0
    (function-definition external stack-size=24
       (f~0 `fn(x: int) -> int` (static f))
       (params
-         (x~3 `int` @0))
+         (x~5 `int` @0))
       (compound-statement
-         (return (x~3 `int` @0)))))
+         (return (x~5 `int` @0)))))
 
 ----- stderr -----

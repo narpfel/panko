@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external
       f~1 `fn() -> void`
       (compound-statement
-         (definition funcs~3 `array<ptr<fn() -> ptr<struct X~2 complete>>; 8>` (braced ∅))
+         (definition funcs~4 `array<ptr<fn() -> ptr<struct X~3 complete>>; 8>` (braced ∅))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -24,7 +24,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 5>>`
                         (string `array<char; 5>` "%zu\n\0"))))
-               (lengthof `unsigned long` 8 (funcs~3 `array<ptr<fn() -> ptr<struct X~2 complete>>; 8>`))))
+               (lengthof `unsigned long` 8 (funcs~4 `array<ptr<fn() -> ptr<struct X~3 complete>>; 8>`))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -34,18 +34,18 @@ exit_code: 0
                      (addressof `ptr<array<char; 5>>`
                         (string `array<char; 5>` "%zu\n\0"))))
                (sizeof `unsigned long` 8
-                  (deref `struct X~2 complete`
-                     (call `ptr<struct X~2 complete>`
-                        (deref `ptr<fn() -> ptr<struct X~2 complete>>`
-                           (ptr-add `ptr<ptr<fn() -> ptr<struct X~2 complete>>>`
-                              (noop-type-conversion `ptr<ptr<fn() -> ptr<struct X~2 complete>>>`
-                                 (addressof `ptr<array<ptr<fn() -> ptr<struct X~2 complete>>; 8>>`
-                                    (funcs~3 `array<ptr<fn() -> ptr<struct X~2 complete>>; 8>`)))
+                  (deref `struct X~3 complete`
+                     (call `ptr<struct X~3 complete>`
+                        (deref `ptr<fn() -> ptr<struct X~3 complete>>`
+                           (ptr-add `ptr<ptr<fn() -> ptr<struct X~3 complete>>>`
+                              (noop-type-conversion `ptr<ptr<fn() -> ptr<struct X~3 complete>>>`
+                                 (addressof `ptr<array<ptr<fn() -> ptr<struct X~3 complete>>; 8>>`
+                                    (funcs~4 `array<ptr<fn() -> ptr<struct X~3 complete>>; 8>`)))
                               (sign-extend `unsigned long` (0 `int`)))))))))))
    (function-definition external
-      g~4 `fn() -> void`
+      g~5 `fn() -> void`
       (compound-statement
-         (definition funcs~6 `array<ptr<fn() -> ptr<struct X~5 complete>>; 4>` (braced ∅))
+         (definition funcs~8 `array<ptr<fn() -> ptr<struct X~7 complete>>; 4>` (braced ∅))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -54,7 +54,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 5>>`
                         (string `array<char; 5>` "%zu\n\0"))))
-               (lengthof `unsigned long` 4 (funcs~6 `array<ptr<fn() -> ptr<struct X~5 complete>>; 4>`))))
+               (lengthof `unsigned long` 4 (funcs~8 `array<ptr<fn() -> ptr<struct X~7 complete>>; 4>`))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -64,16 +64,16 @@ exit_code: 0
                      (addressof `ptr<array<char; 5>>`
                         (string `array<char; 5>` "%zu\n\0"))))
                (sizeof `unsigned long` 4
-                  (deref `struct X~5 complete`
-                     (call `ptr<struct X~5 complete>`
-                        (deref `ptr<fn() -> ptr<struct X~5 complete>>`
-                           (ptr-add `ptr<ptr<fn() -> ptr<struct X~5 complete>>>`
-                              (noop-type-conversion `ptr<ptr<fn() -> ptr<struct X~5 complete>>>`
-                                 (addressof `ptr<array<ptr<fn() -> ptr<struct X~5 complete>>; 4>>`
-                                    (funcs~6 `array<ptr<fn() -> ptr<struct X~5 complete>>; 4>`)))
+                  (deref `struct X~7 complete`
+                     (call `ptr<struct X~7 complete>`
+                        (deref `ptr<fn() -> ptr<struct X~7 complete>>`
+                           (ptr-add `ptr<ptr<fn() -> ptr<struct X~7 complete>>>`
+                              (noop-type-conversion `ptr<ptr<fn() -> ptr<struct X~7 complete>>>`
+                                 (addressof `ptr<array<ptr<fn() -> ptr<struct X~7 complete>>; 4>>`
+                                    (funcs~8 `array<ptr<fn() -> ptr<struct X~7 complete>>; 4>`)))
                               (sign-extend `unsigned long` (0 `int`)))))))))))
    (function-definition external
-      main~7 `fn() -> int`
+      main~9 `fn() -> int`
       (compound-statement
          (expression
             (call `void`
@@ -82,6 +82,6 @@ exit_code: 0
          (expression
             (call `void`
                (addressof `ptr<fn() -> void>`
-                  (g~4 `fn() -> void`)))))))
+                  (g~5 `fn() -> void`)))))))
 
 ----- stderr -----

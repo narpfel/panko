@@ -14,12 +14,12 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition p~2 `ptr<struct T~1>` (noop-type-conversion `ptr<struct T~1>` (nullptr `nullptr_t`)))
-         (definition q~3 `ptr<struct T~1>` (p~2 `ptr<struct T~1>`))
-         (definition r~4 `ptr<struct T~1>` (p~2 `ptr<struct T~1>`))
+         (definition p~3 `ptr<struct T~2>` (noop-type-conversion `ptr<struct T~2>` (nullptr `nullptr_t`)))
+         (definition q~4 `ptr<struct T~2>` (p~3 `ptr<struct T~2>`))
+         (definition r~5 `ptr<struct T~2>` (p~3 `ptr<struct T~2>`))
          (return
             (logical-and `int`
-               (ptr-equal `int` (p~2 `ptr<struct T~1>`) (q~3 `ptr<struct T~1>`))
-               (ptr-equal `int` (p~2 `ptr<struct T~1>`) (r~4 `ptr<struct T~1>`)))))))
+               (ptr-equal `int` (p~3 `ptr<struct T~2>`) (q~4 `ptr<struct T~2>`))
+               (ptr-equal `int` (p~3 `ptr<struct T~2>`) (r~5 `ptr<struct T~2>`)))))))
 
 ----- stderr -----

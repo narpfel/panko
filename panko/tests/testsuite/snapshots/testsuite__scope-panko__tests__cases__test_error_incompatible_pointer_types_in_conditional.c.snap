@@ -14,12 +14,12 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration p~1 `ptr<int const>` ∅)
-         (declaration c~2 `ptr<char const>` ∅)
+         (declaration p~2 `ptr<int const>` ∅)
+         (declaration c~3 `ptr<char const>` ∅)
          (expression
             (conditional
                1
-               (name p~1 `ptr<int const>`)
-               (name c~2 `ptr<char const>`))))))
+               (name p~2 `ptr<int const>`)
+               (name c~3 `ptr<char const>`))))))
 
 ----- stderr -----

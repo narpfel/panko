@@ -20,7 +20,7 @@ exit_code: 0
       (compound-statement
          (typedef local `int`)
          (redeclared local)
-         (declaration another_local~2 `int` ∅)
+         (declaration another_local~3 `int` ∅)
          (redeclared another_local))))
 
 ----- stderr -----

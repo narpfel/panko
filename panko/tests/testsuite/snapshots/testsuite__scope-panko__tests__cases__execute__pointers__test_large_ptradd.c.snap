@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration xs~1 `array<array<int; 123>; 123>` ∅)
-         (expression (assign (subscript (subscript (name xs~1 `array<array<int; 123>; 123>`) 122) 122) 42))
-         (return (subscript (subscript (name xs~1 `array<array<int; 123>; 123>`) 122) 122)))))
+         (declaration xs~2 `array<array<int; 123>; 123>` ∅)
+         (expression (assign (subscript (subscript (name xs~2 `array<array<int; 123>; 123>`) 122) 122) 42))
+         (return (subscript (subscript (name xs~2 `array<array<int; 123>; 123>`) 122) 122)))))
 
 ----- stderr -----

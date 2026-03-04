@@ -16,7 +16,7 @@ exit_code: 0
       (compound-statement
          (return ∅)))
    (function-definition external stack-size=24
-      (main~1 `fn() -> int` (static main))
+      (main~2 `fn() -> int` (static main))
       (compound-statement
          (expression
             (call `void` @void

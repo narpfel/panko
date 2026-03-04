@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration xs~1 `array<int; 5>` ∅)
-         (return (sizeof (name xs~1 `array<int; 5>`))))))
+         (declaration xs~2 `array<int; 5>` ∅)
+         (return (sizeof (name xs~2 `array<int; 5>`))))))
 
 ----- stderr -----

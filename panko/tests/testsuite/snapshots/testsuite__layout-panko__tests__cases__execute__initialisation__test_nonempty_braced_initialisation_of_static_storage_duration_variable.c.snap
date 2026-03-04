@@ -24,10 +24,10 @@ exit_code: 0
    (function-definition external stack-size=184
       (main~3 `fn(∅: int, ∅: ptr<ptr<char>>) -> int` (static main))
       (params
-         (main.unnamed_parameter.0~4 `int` @0)
-         (main.unnamed_parameter.1~5 `ptr<ptr<char>>` @8))
+         (main.unnamed_parameter.0~5 `int` @0)
+         (main.unnamed_parameter.1~6 `ptr<ptr<char>>` @8))
       (compound-statement
-         (definition (s~6 `array<char; 100>` @16)
+         (definition (s~7 `array<char; 100>` @16)
             (braced
                (subobject +0 (truncate `char` @16 (37 `int` @116)))
                (subobject +1 (truncate `char` @17 (100 `int` @116)))
@@ -39,7 +39,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @128
                   (noop-type-conversion `ptr<char>` @128
                      (addressof `ptr<array<char; 100>>` @128
-                        (s~6 `array<char; 100>` @16))))
+                        (s~7 `array<char; 100>` @16))))
                (deref `int` @136
                   (ptr-add `ptr<int>` @144
                      (noop-type-conversion `ptr<int>` @144
@@ -53,7 +53,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @128
                   (noop-type-conversion `ptr<char>` @128
                      (addressof `ptr<array<char; 100>>` @128
-                        (s~6 `array<char; 100>` @16))))
+                        (s~7 `array<char; 100>` @16))))
                (deref `int` @136
                   (ptr-add `ptr<int>` @144
                      (noop-type-conversion `ptr<int>` @144
@@ -67,7 +67,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @128
                   (noop-type-conversion `ptr<char>` @128
                      (addressof `ptr<array<char; 100>>` @128
-                        (s~6 `array<char; 100>` @16))))
+                        (s~7 `array<char; 100>` @16))))
                (deref `int` @136
                   (ptr-add `ptr<int>` @144
                      (noop-type-conversion `ptr<int>` @144
@@ -81,7 +81,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @128
                   (noop-type-conversion `ptr<char>` @128
                      (addressof `ptr<array<char; 100>>` @128
-                        (s~6 `array<char; 100>` @16))))
+                        (s~7 `array<char; 100>` @16))))
                (deref `int` @136
                   (ptr-add `ptr<int>` @144
                      (noop-type-conversion `ptr<int>` @144
@@ -95,7 +95,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @128
                   (noop-type-conversion `ptr<char>` @128
                      (addressof `ptr<array<char; 100>>` @128
-                        (s~6 `array<char; 100>` @16))))
+                        (s~7 `array<char; 100>` @16))))
                (deref `int` @136
                   (ptr-add `ptr<int>` @144
                      (noop-type-conversion `ptr<int>` @144
@@ -109,7 +109,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @128
                   (noop-type-conversion `ptr<char>` @128
                      (addressof `ptr<array<char; 100>>` @128
-                        (s~6 `array<char; 100>` @16))))
+                        (s~7 `array<char; 100>` @16))))
                (deref `int` @136
                   (ptr-add `ptr<int>` @144
                      (noop-type-conversion `ptr<int>` @144
@@ -123,7 +123,7 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @128
                   (noop-type-conversion `ptr<char>` @128
                      (addressof `ptr<array<char; 100>>` @128
-                        (s~6 `array<char; 100>` @16))))
+                        (s~7 `array<char; 100>` @16))))
                (value~2 `int` (static value)))))))
 
 ----- stderr -----

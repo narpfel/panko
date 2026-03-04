@@ -15,9 +15,9 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition a~2 `int` (10 `int`))
-         (definition b~3 `int` (20 `int`))
-         (definition c~4 `int` (30 `int`))
-         (return (add `int` (add `int` (add `int` (a~2 `int`) (5 `int`)) (3 `int`)) (1 `int`))))))
+         (definition a~3 `int` (10 `int`))
+         (definition b~4 `int` (20 `int`))
+         (definition c~5 `int` (30 `int`))
+         (return (add `int` (add `int` (add `int` (a~3 `int`) (5 `int`)) (3 `int`)) (1 `int`))))))
 
 ----- stderr -----

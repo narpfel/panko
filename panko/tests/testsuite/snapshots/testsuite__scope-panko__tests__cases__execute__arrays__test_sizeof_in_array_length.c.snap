@@ -15,12 +15,12 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration cs~2 `array<char; (sizeof 0)>` ∅)
-         (declaration xs~3 `array<int; (sizeof `array<int; 2>`)>` ∅)
+         (declaration cs~3 `array<char; (sizeof 0)>` ∅)
+         (declaration xs~4 `array<int; (sizeof `array<int; 2>`)>` ∅)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %zu\n")
-               (lengthof (name cs~2 `array<char; (sizeof 0)>`))
-               (lengthof (name xs~3 `array<int; (sizeof `array<int; 2>`)>`)))))))
+               (lengthof (name cs~3 `array<char; (sizeof 0)>`))
+               (lengthof (name xs~4 `array<int; (sizeof `array<int; 2>`)>`)))))))
 
 ----- stderr -----

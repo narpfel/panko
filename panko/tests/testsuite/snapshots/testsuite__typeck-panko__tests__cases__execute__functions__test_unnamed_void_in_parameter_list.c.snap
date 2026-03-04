@@ -20,15 +20,15 @@ exit_code: 0
       (compound-statement
          (return (123 `int`))))
    (function-definition external
-      g~5 `fn() -> int`
+      g~6 `fn() -> int`
       (compound-statement
          (return (42 `int`))))
    (function-definition external
-      h~7 `fn() -> int`
+      h~9 `fn() -> int`
       (compound-statement
          (return (27 `int`))))
    (function-definition external
-      main~9 `fn() -> int`
+      main~12 `fn() -> int`
       (compound-statement
          (expression
             (call `int`
@@ -51,7 +51,7 @@ exit_code: 0
                         (string `array<char; 4>` "%d\n\0"))))
                (call `int`
                   (addressof `ptr<fn() -> int>`
-                     (g~5 `fn() -> int`)))))
+                     (g~6 `fn() -> int`)))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -62,6 +62,6 @@ exit_code: 0
                         (string `array<char; 4>` "%d\n\0"))))
                (call `int`
                   (addressof `ptr<fn() -> int>`
-                     (h~7 `fn() -> int`))))))))
+                     (h~9 `fn() -> int`))))))))
 
 ----- stderr -----

@@ -17,7 +17,7 @@ exit_code: 0
    (function-definition external stack-size=56
       (print_struct~2 `fn(value: struct Struct~1 complete) -> void` (static print_struct))
       (params
-         (value~3 `struct Struct~1 complete` @0))
+         (value~4 `struct Struct~1 complete` @0))
       (compound-statement
          (expression
             (call `int` @12
@@ -30,19 +30,19 @@ exit_code: 0
                (noop-type-conversion `ptr<char>` @32
                   (addressof `ptr<array<char; 11>>` @32
                      (member `array<char; 11>` @0 string +0
-                        (value~3 `struct Struct~1 complete` @0))))))))
+                        (value~4 `struct Struct~1 complete` @0))))))))
    (function-definition external stack-size=40
-      (main~4 `fn() -> int` (static main))
+      (main~5 `fn() -> int` (static main))
       (compound-statement
          (struct Struct~1
             (member string @0 `array<char; 11>`))
-         (definition (value~5 `struct Struct~1 complete` @0)
+         (definition (value~7 `struct Struct~1 complete` @0)
             (braced
                (subobject +0 (string `array<char; 11>` @void "0123456789\0"))))
          (expression
             (call `void` @void
                (addressof `ptr<fn(value: struct Struct~1 complete) -> void>` @16
                   (print_struct~2 `fn(value: struct Struct~1 complete) -> void` (static print_struct)))
-               (value~5 `struct Struct~1 complete` @0))))))
+               (value~7 `struct Struct~1 complete` @0))))))
 
 ----- stderr -----

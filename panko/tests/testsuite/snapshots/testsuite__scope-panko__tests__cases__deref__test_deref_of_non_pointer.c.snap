@@ -14,10 +14,10 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration a~1 `int` 42)
-         (expression (assign (deref (name a~1 `int`)) 2))
+         (declaration a~2 `int` 42)
+         (expression (assign (deref (name a~2 `int`)) 2))
          (expression (deref 42))
          (expression (subscript 42 27))
-         (expression (assign (subscript 42 (name a~1 `int`)) (name a~1 `int`))))))
+         (expression (assign (subscript 42 (name a~2 `int`)) (name a~2 `int`))))))
 
 ----- stderr -----

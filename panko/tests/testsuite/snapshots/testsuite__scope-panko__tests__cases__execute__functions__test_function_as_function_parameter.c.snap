@@ -14,24 +14,24 @@ exit_code: 0
    (function-definition
       plus_1~0 `fn(x: int) -> int`
       (params
-         x~1 `int`)
+         x~2 `int`)
       (compound-statement
-         (return (add (name x~1 `int`) 1))))
-   (declaration f~2 `fn(callback: fn(∅: int) -> int) -> int` ∅)
+         (return (add (name x~2 `int`) 1))))
+   (declaration f~3 `fn(callback: fn(∅: int) -> int) -> int` ∅)
    (function-definition
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
          (return
-            (call (name f~2 `fn(callback: fn(∅: int) -> int) -> int`)
+            (call (name f~3 `fn(callback: fn(∅: int) -> int) -> int`)
                (name plus_1~0 `fn(x: int) -> int`)))))
    (function-definition
-      f~2 `fn(callback: fn(∅: int) -> int) -> int`
+      f~3 `fn(callback: fn(∅: int) -> int) -> int`
       (params
-         callback~5 `fn(∅: int) -> int`)
+         callback~8 `fn(∅: int) -> int`)
       (compound-statement
          (return
-            (call (name callback~5 `fn(∅: int) -> int`)
-               (call (name callback~5 `fn(∅: int) -> int`)
+            (call (name callback~8 `fn(∅: int) -> int`)
+               (call (name callback~8 `fn(∅: int) -> int`)
                   42))))))
 
 ----- stderr -----

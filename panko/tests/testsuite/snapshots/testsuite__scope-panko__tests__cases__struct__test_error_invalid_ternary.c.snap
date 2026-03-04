@@ -21,10 +21,10 @@ exit_code: 0
       (compound-statement
          (struct Complete~1
             (member x `int`))
-         (declaration complete~5 `struct Complete~1 complete` (braced ∅))
+         (declaration complete~6 `struct Complete~1 complete` (braced ∅))
          (struct Other~2
             (member x `int`))
-         (declaration other~6 `struct Other~2 complete` (braced ∅))
+         (declaration other~7 `struct Other~2 complete` (braced ∅))
          (expression
             (conditional
                false
@@ -38,12 +38,12 @@ exit_code: 0
          (expression
             (conditional
                true
-               (name complete~5 `struct Complete~1 complete`)
-               (name other~6 `struct Other~2 complete`)))
+               (name complete~6 `struct Complete~1 complete`)
+               (name other~7 `struct Other~2 complete`)))
          (expression
             (conditional
                false
                42
-               (name complete~5 `struct Complete~1 complete`))))))
+               (name complete~6 `struct Complete~1 complete`))))))
 
 ----- stderr -----

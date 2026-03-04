@@ -15,8 +15,8 @@ exit_code: 0
    (function-definition external stack-size=40
       (main~1 `fn() -> int` (static main))
       (compound-statement
-         (definition (x~2 `int` @0) (negate `int` @0 (42 `int` @0)))
-         (definition (y~3 `unsigned int` @4) (noop-type-conversion `unsigned int` @4 (27 `int` @4)))
+         (definition (x~3 `int` @0) (negate `int` @0 (42 `int` @0)))
+         (definition (y~4 `unsigned int` @4) (noop-type-conversion `unsigned int` @4 (27 `int` @4)))
          (expression
             (call `int` @8
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
@@ -25,7 +25,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @24
                      (addressof `ptr<array<char; 4>>` @24
                         (string `array<char; 4>` @void "%d\n\0"))))
-               (x~2 `int` @0)))
+               (x~3 `int` @0)))
          (expression
             (call `int` @8
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
@@ -34,6 +34,6 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @24
                      (addressof `ptr<array<char; 4>>` @24
                         (string `array<char; 4>` @void "%u\n\0"))))
-               (y~3 `unsigned int` @4))))))
+               (y~4 `unsigned int` @4))))))
 
 ----- stderr -----

@@ -15,17 +15,17 @@ exit_code: 0
    (function-definition external
       f~0 `fn(name: int) -> int`
       (params
-         name~1 `int`)
+         name~2 `int`)
       (compound-statement
-         (return (multiply `int` (name~1 `int`) (2 `int`)))))
+         (return (multiply `int` (name~2 `int`) (2 `int`)))))
    (function-definition external
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
-         (definition name~3 `ptr<fn(∅: int) -> int>`
+         (definition name~5 `ptr<fn(∅: int) -> int>`
             (addressof `ptr<fn(name: int) -> int>`
                (f~0 `fn(name: int) -> int`)))
          (return
-            (call `int` (name~3 `ptr<fn(∅: int) -> int>`)
+            (call `int` (name~5 `ptr<fn(∅: int) -> int>`)
                (21 `int`))))))
 
 ----- stderr -----

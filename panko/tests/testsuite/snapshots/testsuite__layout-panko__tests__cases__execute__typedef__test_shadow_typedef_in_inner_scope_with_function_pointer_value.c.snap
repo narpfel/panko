@@ -15,20 +15,20 @@ exit_code: 0
    (function-definition external stack-size=24
       (f~0 `fn(name: int) -> int` (static f))
       (params
-         (name~1 `int` @0))
+         (name~2 `int` @0))
       (compound-statement
          (return
             (multiply `int` @4
-               (name~1 `int` @0)
+               (name~2 `int` @0)
                (2 `int` @8)))))
    (function-definition external stack-size=24
-      (main~2 `fn() -> int` (static main))
+      (main~3 `fn() -> int` (static main))
       (compound-statement
-         (definition (name~3 `ptr<fn(∅: int) -> int>` @0)
+         (definition (name~5 `ptr<fn(∅: int) -> int>` @0)
             (addressof `ptr<fn(name: int) -> int>` @0
                (f~0 `fn(name: int) -> int` (static f))))
          (return
-            (call `int` @8 (name~3 `ptr<fn(∅: int) -> int>` @0)
+            (call `int` @8 (name~5 `ptr<fn(∅: int) -> int>` @0)
                (21 `int` @12))))))
 
 ----- stderr -----

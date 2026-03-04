@@ -15,25 +15,25 @@ exit_code: 0
    (function-definition
       print~1 `fn(xs: array<int; ∅>) -> void`
       (params
-         xs~2 `array<int; ∅> const`)
+         xs~3 `array<int; ∅> const`)
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (subscript (name xs~2 `array<int; ∅> const`) 0)))
+               (subscript (name xs~3 `array<int; ∅> const`) 0)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (subscript (name xs~2 `array<int; ∅> const`) 1)))))
+               (subscript (name xs~3 `array<int; ∅> const`) 1)))))
    (function-definition
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
-         (declaration xs~4 `array<int; ∅>`
+         (declaration xs~6 `array<int; ∅>`
             (braced
                42
                27))
          (expression
             (call (name print~1 `fn(xs: array<int; ∅>) -> void`)
-               (name xs~4 `array<int; ∅>`))))))
+               (name xs~6 `array<int; ∅>`))))))
 
 ----- stderr -----

@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external stack-size=104
       (f~1 `fn() -> void` (static f))
       (compound-statement
-         (definition (funcs~3 `array<ptr<fn() -> ptr<struct X~2 complete>>; 8>` @0) (braced ∅))
+         (definition (funcs~4 `array<ptr<fn() -> ptr<struct X~3 complete>>; 8>` @0) (braced ∅))
          (expression
             (call `int` @64
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @72
@@ -35,9 +35,9 @@ exit_code: 0
                         (string `array<char; 5>` @void "%zu\n\0"))))
                (8 `unsigned long` @88)))))
    (function-definition external stack-size=72
-      (g~4 `fn() -> void` (static g))
+      (g~5 `fn() -> void` (static g))
       (compound-statement
-         (definition (funcs~6 `array<ptr<fn() -> ptr<struct X~5 complete>>; 4>` @0) (braced ∅))
+         (definition (funcs~8 `array<ptr<fn() -> ptr<struct X~7 complete>>; 4>` @0) (braced ∅))
          (expression
             (call `int` @32
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
@@ -57,7 +57,7 @@ exit_code: 0
                         (string `array<char; 5>` @void "%zu\n\0"))))
                (4 `unsigned long` @56)))))
    (function-definition external stack-size=24
-      (main~7 `fn() -> int` (static main))
+      (main~9 `fn() -> int` (static main))
       (compound-statement
          (expression
             (call `void` @void
@@ -66,6 +66,6 @@ exit_code: 0
          (expression
             (call `void` @void
                (addressof `ptr<fn() -> void>` @0
-                  (g~4 `fn() -> void` (static g))))))))
+                  (g~5 `fn() -> void` (static g))))))))
 
 ----- stderr -----

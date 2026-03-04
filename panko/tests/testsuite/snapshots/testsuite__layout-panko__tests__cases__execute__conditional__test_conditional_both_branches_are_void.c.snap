@@ -24,7 +24,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "f\0"))))))))
    (function-definition external stack-size=40
-      (g~2 `fn() -> void` (static g))
+      (g~3 `fn() -> void` (static g))
       (compound-statement
          (expression
             (call `int` @0
@@ -35,7 +35,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 2>>` @16
                         (string `array<char; 2>` @void "g\0"))))))))
    (function-definition external stack-size=40
-      (main~3 `fn() -> int` (static main))
+      (main~5 `fn() -> int` (static main))
       (compound-statement
          (expression
             (conditional `void` @void
@@ -45,6 +45,6 @@ exit_code: 0
                      (f~1 `fn() -> void` (static f))))
                (call `void` @void
                   (addressof `ptr<fn() -> void>` @8
-                     (g~2 `fn() -> void` (static g)))))))))
+                     (g~3 `fn() -> void` (static g)))))))))
 
 ----- stderr -----

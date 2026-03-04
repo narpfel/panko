@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration xs~1 `array<long; 42>` ∅)
-         (return (lengthof (name xs~1 `array<long; 42>`))))))
+         (declaration xs~2 `array<long; 42>` ∅)
+         (return (lengthof (name xs~2 `array<long; 42>`))))))
 
 ----- stderr -----

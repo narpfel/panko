@@ -15,7 +15,7 @@ exit_code: 0
       (main~0 `fn() -> int` (static main))
       (compound-statement
          (expression (0 `int` @0))
-         (definition (xs~1 `array<int; 2>` @0)
+         (definition (xs~2 `array<int; 2>` @0)
             (braced
                (subobject +0 (1 `int` @0))
                (subobject +4 (2 `int` @4))))

@@ -20,13 +20,13 @@ exit_code: 0
          (expression
             (combine `int` @0
                (assign `ptr<int>` @8
-                  (unnamed-temporary~4 `ptr<int>` @8)
+                  (unnamed-temporary~5 `ptr<int>` @8)
                   (addressof `ptr<int>` @8
                      (y~2 `int` (static y))))
                (assign `int` @0
-                  (deref `int` @0 (unnamed-temporary~4 `ptr<int>` @8))
+                  (deref `int` @0 (unnamed-temporary~5 `ptr<int>` @8))
                   (add `int` @16
-                     (deref `int` @16 (unnamed-temporary~4 `ptr<int>` @8))
+                     (deref `int` @16 (unnamed-temporary~5 `ptr<int>` @8))
                      (10 `int` @24)))))
          (expression
             (call `int` @0
@@ -40,13 +40,13 @@ exit_code: 0
          (expression
             (combine `int` @0
                (assign `ptr<int>` @8
-                  (unnamed-temporary~5 `ptr<int>` @8)
+                  (unnamed-temporary~6 `ptr<int>` @8)
                   (addressof `ptr<int>` @8
                      (x~1 `int` (static x))))
                (assign `int` @0
-                  (deref `int` @0 (unnamed-temporary~5 `ptr<int>` @8))
+                  (deref `int` @0 (unnamed-temporary~6 `ptr<int>` @8))
                   (add `int` @16
-                     (deref `int` @16 (unnamed-temporary~5 `ptr<int>` @8))
+                     (deref `int` @16 (unnamed-temporary~6 `ptr<int>` @8))
                      (1 `int` @24)))))
          (return (x~1 `int` (static x))))))
 

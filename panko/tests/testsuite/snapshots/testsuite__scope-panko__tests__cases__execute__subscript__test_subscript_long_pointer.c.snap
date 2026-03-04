@@ -15,12 +15,12 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration p~2 `ptr<long>`
+         (declaration p~3 `ptr<long>`
             (call (name calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`)
                2
                (sizeof `long`)))
-         (expression (assign (subscript (name p~2 `ptr<long>`) 0) 42))
-         (expression (assign (subscript (name p~2 `ptr<long>`) 1) 27))
-         (return (add (subscript (name p~2 `ptr<long>`) 0) (subscript 1 (name p~2 `ptr<long>`)))))))
+         (expression (assign (subscript (name p~3 `ptr<long>`) 0) 42))
+         (expression (assign (subscript (name p~3 `ptr<long>`) 1) 27))
+         (return (add (subscript (name p~3 `ptr<long>`) 0) (subscript 1 (name p~3 `ptr<long>`)))))))
 
 ----- stderr -----

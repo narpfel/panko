@@ -23,19 +23,19 @@ exit_code: 0
             (member x @0 `int`)
             (member cs @4 `array<char; 4>`)
             (member y @8 `int`))
-         (definition (zeroed_t~3 `struct T~1 complete` @0) (braced ∅))
-         (definition (zeros~4 `array<char; 12>` @12) (braced ∅))
+         (definition (zeroed_t~4 `struct T~1 complete` @0) (braced ∅))
+         (definition (zeros~5 `array<char; 12>` @12) (braced ∅))
          (return
             (call `int` @24
                (addressof `ptr<fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int>` @32
                   (memcmp~0 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` (static memcmp)))
                (noop-type-conversion `ptr<void const>` @40
                   (addressof `ptr<struct T~1 complete>` @40
-                     (zeroed_t~3 `struct T~1 complete` @0)))
+                     (zeroed_t~4 `struct T~1 complete` @0)))
                (noop-type-conversion `ptr<void const>` @48
                   (noop-type-conversion `ptr<char>` @48
                      (addressof `ptr<array<char; 12>>` @48
-                        (zeros~4 `array<char; 12>` @12))))
+                        (zeros~5 `array<char; 12>` @12))))
                (12 `unsigned long` @56))))))
 
 ----- stderr -----

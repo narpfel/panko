@@ -16,8 +16,8 @@ exit_code: 0
       main~1 `fn() -> int`
       (compound-statement
          (compound-statement
-            (definition x~2 `int` (42 `int`))
-            (definition y~3 `int` (27 `int`))
+            (definition x~3 `int` (42 `int`))
+            (definition y~4 `int` (27 `int`))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -28,8 +28,8 @@ exit_code: 0
                            (string `array<char; 4>` "%d\n\0"))))
                   (conditional `int`
                      (0 `int`)
-                     (x~2 `int`)
-                     (y~3 `int`))))
+                     (x~3 `int`)
+                     (y~4 `int`))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -40,11 +40,11 @@ exit_code: 0
                            (string `array<char; 4>` "%d\n\0"))))
                   (conditional `int`
                      (1 `int`)
-                     (x~2 `int`)
-                     (y~3 `int`)))))
+                     (x~3 `int`)
+                     (y~4 `int`)))))
          (compound-statement
-            (definition x~4 `short` (truncate `short` (42 `int`)))
-            (definition y~5 `short` (truncate `short` (27 `int`)))
+            (definition x~5 `short` (truncate `short` (42 `int`)))
+            (definition y~6 `short` (truncate `short` (27 `int`)))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -55,8 +55,8 @@ exit_code: 0
                            (string `array<char; 4>` "%d\n\0"))))
                   (conditional `int`
                      (0 `int`)
-                     (sign-extend `int` (x~4 `short`))
-                     (sign-extend `int` (y~5 `short`)))))
+                     (sign-extend `int` (x~5 `short`))
+                     (sign-extend `int` (y~6 `short`)))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -67,11 +67,11 @@ exit_code: 0
                            (string `array<char; 4>` "%d\n\0"))))
                   (conditional `int`
                      (1 `int`)
-                     (sign-extend `int` (x~4 `short`))
-                     (sign-extend `int` (y~5 `short`))))))
+                     (sign-extend `int` (x~5 `short`))
+                     (sign-extend `int` (y~6 `short`))))))
          (compound-statement
-            (definition x~6 `long` (sign-extend `long` (42 `int`)))
-            (definition y~7 `long` (sign-extend `long` (27 `int`)))
+            (definition x~7 `long` (sign-extend `long` (42 `int`)))
+            (definition y~8 `long` (sign-extend `long` (27 `int`)))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -82,8 +82,8 @@ exit_code: 0
                            (string `array<char; 5>` "%ld\n\0"))))
                   (conditional `long`
                      (0 `int`)
-                     (x~6 `long`)
-                     (y~7 `long`))))
+                     (x~7 `long`)
+                     (y~8 `long`))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -94,7 +94,7 @@ exit_code: 0
                            (string `array<char; 5>` "%ld\n\0"))))
                   (conditional `long`
                      (1 `int`)
-                     (x~6 `long`)
-                     (y~7 `long`))))))))
+                     (x~7 `long`)
+                     (y~8 `long`))))))))
 
 ----- stderr -----

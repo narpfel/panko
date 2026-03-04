@@ -14,17 +14,17 @@ exit_code: 0
    (function-definition
       f~0 `fn(xs: array<int; 2>) -> int`
       (params
-         xs~1 `array<int; 2>`)
+         xs~2 `array<int; 2>`)
       (compound-statement
-         (return (add (subscript (name xs~1 `array<int; 2>`) 0) (subscript (name xs~1 `array<int; 2>`) 1)))))
+         (return (add (subscript (name xs~2 `array<int; 2>`) 0) (subscript (name xs~2 `array<int; 2>`) 1)))))
    (function-definition
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
-         (declaration xs~3 `array<int; 2>` ∅)
-         (expression (assign (subscript (name xs~3 `array<int; 2>`) 0) 4))
-         (expression (assign (subscript (name xs~3 `array<int; 2>`) 1) 6))
+         (declaration xs~5 `array<int; 2>` ∅)
+         (expression (assign (subscript (name xs~5 `array<int; 2>`) 0) 4))
+         (expression (assign (subscript (name xs~5 `array<int; 2>`) 1) 6))
          (return
             (call (name f~0 `fn(xs: array<int; 2>) -> int`)
-               (name xs~3 `array<int; 2>`))))))
+               (name xs~5 `array<int; 2>`))))))
 
 ----- stderr -----

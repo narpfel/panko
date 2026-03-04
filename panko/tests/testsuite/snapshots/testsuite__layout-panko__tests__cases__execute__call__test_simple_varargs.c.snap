@@ -15,8 +15,8 @@ exit_code: 0
    (function-definition external stack-size=72
       (main~1 `fn(argc: int, argv: ptr<ptr<char>>) -> int` (static main))
       (params
-         (argc~2 `int` @0)
-         (argv~3 `ptr<ptr<char>>` @8))
+         (argc~3 `int` @0)
+         (argv~4 `ptr<ptr<char>>` @8))
       (compound-statement
          (return
             (call `int` @16
@@ -25,8 +25,8 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>` @32
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
-                        (argv~3 `ptr<ptr<char>>` @8)
+                        (argv~4 `ptr<ptr<char>>` @8)
                         (sign-extend `unsigned long` @48 (1 `int` @56)))))
-               (argc~2 `int` @0))))))
+               (argc~3 `int` @0))))))
 
 ----- stderr -----

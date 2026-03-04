@@ -18,14 +18,14 @@ exit_code: 0
             (generic
                (lengthof `array<int; 42>`)
                (assoc `unsigned long` 0)))
-         (declaration xs~1 `array<int; ∅>`
+         (declaration xs~2 `array<int; ∅>`
             (braced
                1
                2))
          (expression
             (generic
-               (lengthof (name xs~1 `array<int; ∅>`))
+               (lengthof (name xs~2 `array<int; ∅>`))
                (assoc `unsigned long` 0)))
-         (return (lengthof (name xs~1 `array<int; ∅>`))))))
+         (return (lengthof (name xs~2 `array<int; ∅>`))))))
 
 ----- stderr -----

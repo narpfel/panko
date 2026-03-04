@@ -15,20 +15,20 @@ exit_code: 0
       (main~0 `fn() -> int` (static main))
       (compound-statement
          (typedef a `int`)
-         (declaration external (f~1 `fn(a: int) -> int` (static f)) ∅)
-         (definition (b~2 `int` @0) (42 `int` @0))
+         (declaration external (f~2 `fn(a: int) -> int` (static f)) ∅)
+         (definition (b~3 `int` @0) (42 `int` @0))
          (return
             (add `int` @4
-               (b~2 `int` @0)
+               (b~3 `int` @0)
                (call `int` @8
                   (addressof `ptr<fn(a: int) -> int>` @16
-                     (f~1 `fn(a: int) -> int` (static f)))
-                  (b~2 `int` @0))))))
+                     (f~2 `fn(a: int) -> int` (static f)))
+                  (b~3 `int` @0))))))
    (function-definition external stack-size=24
-      (f~3 `fn(a: int) -> int` (static f))
+      (f~4 `fn(a: int) -> int` (static f))
       (params
-         (a~4 `int` @0))
+         (a~6 `int` @0))
       (compound-statement
-         (return (a~4 `int` @0)))))
+         (return (a~6 `int` @0)))))
 
 ----- stderr -----

@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration name~1 `int` 12)
-         (return (add 0x1e (name name~1 `int`))))))
+         (declaration name~2 `int` 12)
+         (return (add 0x1e (name name~2 `int`))))))
 
 ----- stderr -----

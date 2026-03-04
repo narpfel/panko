@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration array~1 `ptr<int>` ∅)
-         (declaration p~2 `ptr<char>` ∅)
-         (expression (subtract (name array~1 `ptr<int>`) (name p~2 `ptr<char>`))))))
+         (declaration array~2 `ptr<int>` ∅)
+         (declaration p~3 `ptr<char>` ∅)
+         (expression (subtract (name array~2 `ptr<int>`) (name p~3 `ptr<char>`))))))
 
 ----- stderr -----

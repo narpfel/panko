@@ -17,9 +17,9 @@ exit_code: 0
       (compound-statement
          (return (27 `int` @0))))
    (function-definition external stack-size=56
-      (main~2 `fn() -> int` (static main))
+      (main~3 `fn() -> int` (static main))
       (compound-statement
-         (definition (called~3 `int` @0) (42 `int` @0))
+         (definition (called~5 `int` @0) (42 `int` @0))
          (expression
             (call `int` @4
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
@@ -28,7 +28,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 4>>` @16
                         (string `array<char; 4>` @void "%d\n\0"))))
-               (called~3 `int` @0)))
+               (called~5 `int` @0)))
          (expression
             (call `int` @4
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
@@ -48,6 +48,6 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 4>>` @16
                         (string `array<char; 4>` @void "%d\n\0"))))
-               (called~3 `int` @0))))))
+               (called~5 `int` @0))))))
 
 ----- stderr -----

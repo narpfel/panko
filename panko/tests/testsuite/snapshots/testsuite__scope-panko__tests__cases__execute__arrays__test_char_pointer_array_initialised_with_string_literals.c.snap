@@ -15,19 +15,19 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration hello_world~2 `array<ptr<char const>; ∅>`
+         (declaration hello_world~3 `array<ptr<char const>; ∅>`
             (braced
                (string "hello")
                (string "world")
                (string "or something")))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (subscript (name hello_world~2 `array<ptr<char const>; ∅>`) 0)))
+               (subscript (name hello_world~3 `array<ptr<char const>; ∅>`) 0)))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (subscript (name hello_world~2 `array<ptr<char const>; ∅>`) 1)))
+               (subscript (name hello_world~3 `array<ptr<char const>; ∅>`) 1)))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (subscript (name hello_world~2 `array<ptr<char const>; ∅>`) 2))))))
+               (subscript (name hello_world~3 `array<ptr<char const>; ∅>`) 2))))))
 
 ----- stderr -----

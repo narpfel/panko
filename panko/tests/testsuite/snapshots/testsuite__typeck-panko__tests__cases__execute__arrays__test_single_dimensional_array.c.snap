@@ -14,14 +14,14 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition xs~1 `array<int; 42>` ∅)
+         (definition xs~2 `array<int; 42>` ∅)
          (expression
             (assign `int`
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 42>>`
-                           (xs~1 `array<int; 42>`)))
+                           (xs~2 `array<int; 42>`)))
                      (sign-extend `unsigned long` (0 `int`))))
                (1 `int`)))
          (expression
@@ -30,7 +30,7 @@ exit_code: 0
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 42>>`
-                           (xs~1 `array<int; 42>`)))
+                           (xs~2 `array<int; 42>`)))
                      (sign-extend `unsigned long` (1 `int`))))
                (2 `int`)))
          (expression
@@ -39,7 +39,7 @@ exit_code: 0
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 42>>`
-                           (xs~1 `array<int; 42>`)))
+                           (xs~2 `array<int; 42>`)))
                      (sign-extend `unsigned long` (41 `int`))))
                (3 `int`)))
          (return
@@ -48,13 +48,13 @@ exit_code: 0
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 42>>`
-                           (xs~1 `array<int; 42>`)))
+                           (xs~2 `array<int; 42>`)))
                      (sign-extend `unsigned long` (1 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 42>>`
-                           (xs~1 `array<int; 42>`)))
+                           (xs~2 `array<int; 42>`)))
                      (sign-extend `unsigned long` (41 `int`)))))))))
 
 ----- stderr -----

@@ -19,40 +19,40 @@ exit_code: 0
          (expression
             (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
                (string "in f")))))
-   (declaration g~3 `fn(∅: int) -> void` ∅)
-   (declaration h~4 `fn(x: int) -> void` ∅)
-   (declaration i~5 `fn() -> void` ∅)
+   (declaration g~4 `fn(∅: int) -> void` ∅)
+   (declaration h~5 `fn(x: int) -> void` ∅)
+   (declaration i~6 `fn() -> void` ∅)
    (function-definition
-      main~6 `fn() -> int`
+      main~7 `fn() -> int`
       (compound-statement
          (expression (call (name f~2 `fn() -> void`)))
          (expression
-            (call (name g~3 `fn(∅: int) -> void`)
+            (call (name g~4 `fn(∅: int) -> void`)
                4))
          (expression
-            (call (name h~4 `fn(x: int) -> void`)
+            (call (name h~5 `fn(x: int) -> void`)
                9))
-         (expression (call (name i~5 `fn() -> void`)))))
+         (expression (call (name i~6 `fn() -> void`)))))
    (function-definition
-      g~3 `fn(x: int) -> void`
+      g~4 `fn(x: int) -> void`
       (params
-         x~8 `int`)
+         x~11 `int`)
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "in g: %d\n")
-               (add (name x~8 `int`) 1)))))
+               (add (name x~11 `int`) 1)))))
    (function-definition
-      h~4 `fn(x: int) -> void`
+      h~5 `fn(x: int) -> void`
       (params
-         x~10 `int`)
+         x~14 `int`)
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "in h: %d\n")
-               (add (name x~10 `int`) 1)))))
+               (add (name x~14 `int`) 1)))))
    (function-definition
-      i~5 `fn() -> void`
+      i~6 `fn() -> void`
       (compound-statement
          (expression
             (call (name puts~1 `fn(∅: ptr<char const>) -> int`)

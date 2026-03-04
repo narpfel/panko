@@ -15,11 +15,11 @@ exit_code: 0
    (function-definition
       main~1 `fn(argc: int, argv: ptr<ptr<char>>) -> int`
       (params
-         argc~2 `int`
-         argv~3 `ptr<ptr<char>>`)
+         argc~3 `int`
+         argv~4 `ptr<ptr<char>>`)
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
-               (deref (add (name argv~3 `ptr<ptr<char>>`) 1)))))))
+               (deref (add (name argv~4 `ptr<ptr<char>>`) 1)))))))
 
 ----- stderr -----

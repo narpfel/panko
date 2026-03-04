@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration xs~2 `array<int; 6>`
+         (declaration xs~3 `array<int; 6>`
             (braced
                7
                7
@@ -25,13 +25,13 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %d %d %d %d %d %d\n")
-               (lengthof (name xs~2 `array<int; 6>`))
-               (subscript (name xs~2 `array<int; 6>`) 0)
-               (subscript (name xs~2 `array<int; 6>`) 1)
-               (subscript (name xs~2 `array<int; 6>`) 2)
-               (subscript (name xs~2 `array<int; 6>`) 3)
-               (subscript (name xs~2 `array<int; 6>`) 4)
-               (subscript (name xs~2 `array<int; 6>`) 5)))
+               (lengthof (name xs~3 `array<int; 6>`))
+               (subscript (name xs~3 `array<int; 6>`) 0)
+               (subscript (name xs~3 `array<int; 6>`) 1)
+               (subscript (name xs~3 `array<int; 6>`) 2)
+               (subscript (name xs~3 `array<int; 6>`) 3)
+               (subscript (name xs~3 `array<int; 6>`) 4)
+               (subscript (name xs~3 `array<int; 6>`) 5)))
          (return 16))))
 
 ----- stderr -----

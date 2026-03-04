@@ -16,7 +16,7 @@ exit_code: 0
       (compound-statement
          (return nullptr)))
    (function-definition
-      main~1 `fn() -> int`
+      main~2 `fn() -> int`
       (compound-statement
          (return (equal (call (name f~0 `fn() -> typeof(nullptr)`)) nullptr)))))
 

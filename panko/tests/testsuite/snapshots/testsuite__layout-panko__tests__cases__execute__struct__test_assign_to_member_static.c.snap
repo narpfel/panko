@@ -57,7 +57,7 @@ exit_code: 0
    (function-definition external stack-size=200
       (main~7 `fn() -> int` (static main))
       (compound-statement
-         (definition (expected~8 `array<int; 12>` @0)
+         (definition (expected~9 `array<int; 12>` @0)
             (braced
                (subobject +0 (42 `int` @0))
                (subobject +4 (2742 `int` @4))
@@ -98,7 +98,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<void const>` @96
                      (noop-type-conversion `ptr<int>` @96
                         (addressof `ptr<array<int; 12>>` @96
-                           (expected~8 `array<int; 12>` @0))))
+                           (expected~9 `array<int; 12>` @0))))
                   (48 `unsigned long` @104))))
          (expression
             (assign `int` @48
@@ -109,7 +109,7 @@ exit_code: 0
             (member y @0 `int`)
             (member inner @4 `struct Inner~2 complete`)
             (member inner2 @16 `struct Inner~2 complete`))
-         (definition (new_middle~9 `struct Middle~3 complete` @48)
+         (definition (new_middle~10 `struct Middle~3 complete` @48)
             (braced
                (subobject +0
                   (member `int` @48 x +0
@@ -122,7 +122,7 @@ exit_code: 0
             (assign `struct Middle~3 complete` @76
                (member `struct Middle~3 complete` @76 middle +4
                   (outer~6 `struct Outer~4 complete` (static outer)))
-               (new_middle~9 `struct Middle~3 complete` @48)))
+               (new_middle~10 `struct Middle~3 complete` @48)))
          (expression
             (assign `int` @76
                (member `int` @76 x +0
@@ -144,7 +144,7 @@ exit_code: 0
                      (member `struct Middle~3 complete` @void middle +4
                         (outer~6 `struct Outer~4 complete` (static outer)))))
                (9031 `int` @76)))
-         (definition (new_expected~10 `array<int; 12>` @76)
+         (definition (new_expected~11 `array<int; 12>` @76)
             (braced
                (subobject +0 (4660 `int` @76))
                (subobject +4 (11 `int` @80))
@@ -175,7 +175,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<void const>` @168
                      (noop-type-conversion `ptr<int>` @168
                         (addressof `ptr<array<int; 12>>` @168
-                           (new_expected~10 `array<int; 12>` @76))))
+                           (new_expected~11 `array<int; 12>` @76))))
                   (48 `unsigned long` @176))))
          (expression
             (call `int` @124
@@ -234,7 +234,7 @@ exit_code: 0
             (member y @0 `int`)
             (member inner @4 `struct Inner~2 complete`)
             (member inner2 @16 `struct Inner~2 complete`))
-         (definition (p~11 `ptr<struct Middle~3 complete>` @128)
+         (definition (p~12 `ptr<struct Middle~3 complete>` @128)
             (addressof `ptr<struct Middle~3 complete>` @128
                (member `struct Middle~3 complete` @128 middle +4
                   (outer~6 `struct Outer~4 complete` (static outer)))))
@@ -248,27 +248,27 @@ exit_code: 0
                         (string `array<char; 12>` @void "%d 0x%x %d\n\0"))))
                (member `int` @160 x +0
                   (member `struct Inner~2 complete` @void inner +4
-                     (deref `struct Middle~3 complete` @void (p~11 `ptr<struct Middle~3 complete>` @128))))
+                     (deref `struct Middle~3 complete` @void (p~12 `ptr<struct Middle~3 complete>` @128))))
                (member `int` @164 y +4
                   (member `struct Inner~2 complete` @void inner2 +16
-                     (deref `struct Middle~3 complete` @void (p~11 `ptr<struct Middle~3 complete>` @128))))
+                     (deref `struct Middle~3 complete` @void (p~12 `ptr<struct Middle~3 complete>` @128))))
                (member `int` @168 z +8
                   (member `struct Inner~2 complete` @void inner +4
-                     (deref `struct Middle~3 complete` @void (p~11 `ptr<struct Middle~3 complete>` @128))))))
+                     (deref `struct Middle~3 complete` @void (p~12 `ptr<struct Middle~3 complete>` @128))))))
          (expression
             (assign `int` @136
                (member `int` @136 x +0
                   (member `struct Inner~2 complete` @void inner +4
-                     (deref `struct Middle~3 complete` @void (p~11 `ptr<struct Middle~3 complete>` @128))))
+                     (deref `struct Middle~3 complete` @void (p~12 `ptr<struct Middle~3 complete>` @128))))
                (add `int` @136
                   (assign `int` @140
                      (member `int` @140 y +4
                         (member `struct Inner~2 complete` @void inner2 +16
-                           (deref `struct Middle~3 complete` @void (p~11 `ptr<struct Middle~3 complete>` @128))))
+                           (deref `struct Middle~3 complete` @void (p~12 `ptr<struct Middle~3 complete>` @128))))
                      (add `int` @140
                         (member `int` @140 z +8
                            (member `struct Inner~2 complete` @void inner +4
-                              (deref `struct Middle~3 complete` @void (p~11 `ptr<struct Middle~3 complete>` @128))))
+                              (deref `struct Middle~3 complete` @void (p~12 `ptr<struct Middle~3 complete>` @128))))
                         (4 `int` @144)))
                   (2 `int` @144))))
          (expression
@@ -281,12 +281,12 @@ exit_code: 0
                         (string `array<char; 10>` @void "%d %d %d\n\0"))))
                (member `int` @160 x +0
                   (member `struct Inner~2 complete` @void inner +4
-                     (deref `struct Middle~3 complete` @void (p~11 `ptr<struct Middle~3 complete>` @128))))
+                     (deref `struct Middle~3 complete` @void (p~12 `ptr<struct Middle~3 complete>` @128))))
                (member `int` @164 y +4
                   (member `struct Inner~2 complete` @void inner2 +16
-                     (deref `struct Middle~3 complete` @void (p~11 `ptr<struct Middle~3 complete>` @128))))
+                     (deref `struct Middle~3 complete` @void (p~12 `ptr<struct Middle~3 complete>` @128))))
                (member `int` @168 z +8
                   (member `struct Inner~2 complete` @void inner +4
-                     (deref `struct Middle~3 complete` @void (p~11 `ptr<struct Middle~3 complete>` @128)))))))))
+                     (deref `struct Middle~3 complete` @void (p~12 `ptr<struct Middle~3 complete>` @128)))))))))
 
 ----- stderr -----

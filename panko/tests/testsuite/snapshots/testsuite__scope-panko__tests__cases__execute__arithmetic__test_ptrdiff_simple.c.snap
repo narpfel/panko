@@ -15,11 +15,11 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (declaration array~2 `ptr<int>`
+         (declaration array~3 `ptr<int>`
             (call (name calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`)
                42
-               (sizeof (deref (name array~2 `ptr<int>`)))))
-         (declaration ptrdiff~3 `unsigned long` (subtract (addressof (subscript (name array~2 `ptr<int>`) 10)) (addressof (subscript (name array~2 `ptr<int>`) 0))))
-         (return (name ptrdiff~3 `unsigned long`)))))
+               (sizeof (deref (name array~3 `ptr<int>`)))))
+         (declaration ptrdiff~4 `unsigned long` (subtract (addressof (subscript (name array~3 `ptr<int>`) 10)) (addressof (subscript (name array~3 `ptr<int>`) 0))))
+         (return (name ptrdiff~4 `unsigned long`)))))
 
 ----- stderr -----

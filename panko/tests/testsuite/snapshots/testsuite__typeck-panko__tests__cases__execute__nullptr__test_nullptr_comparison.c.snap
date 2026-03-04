@@ -15,10 +15,10 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition x~2 `int` (42 `int`))
-         (definition p~3 `ptr<int>`
+         (definition x~3 `int` (42 `int`))
+         (definition p~4 `ptr<int>`
             (addressof `ptr<int>`
-               (x~2 `int`)))
+               (x~3 `int`)))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -27,7 +27,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (ptr-equal `int` (p~3 `ptr<int>`) (nullptr `nullptr_t`))))
+               (ptr-equal `int` (p~4 `ptr<int>`) (nullptr `nullptr_t`))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -36,7 +36,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (ptr-not-equal `int` (p~3 `ptr<int>`) (nullptr `nullptr_t`))))
+               (ptr-not-equal `int` (p~4 `ptr<int>`) (nullptr `nullptr_t`))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -55,7 +55,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
                (ptr-not-equal `int` (nullptr `nullptr_t`) (nullptr `nullptr_t`))))
-         (definition null~4 `ptr<array<long; 10>>` (noop-type-conversion `ptr<array<long; 10>>` (nullptr `nullptr_t`)))
+         (definition null~5 `ptr<array<long; 10>>` (noop-type-conversion `ptr<array<long; 10>>` (nullptr `nullptr_t`)))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -64,7 +64,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (ptr-equal `int` (null~4 `ptr<array<long; 10>>`) (nullptr `nullptr_t`))))
+               (ptr-equal `int` (null~5 `ptr<array<long; 10>>`) (nullptr `nullptr_t`))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -73,6 +73,6 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (ptr-not-equal `int` (null~4 `ptr<array<long; 10>>`) (nullptr `nullptr_t`)))))))
+               (ptr-not-equal `int` (null~5 `ptr<array<long; 10>>`) (nullptr `nullptr_t`)))))))
 
 ----- stderr -----

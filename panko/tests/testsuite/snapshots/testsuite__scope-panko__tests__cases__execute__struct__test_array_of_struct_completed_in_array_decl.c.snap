@@ -15,28 +15,28 @@ exit_code: 0
    (function-definition
       f~1 `fn() -> void`
       (compound-statement
-         (declaration xs~3 `array<struct X~2 complete; (sizeof `struct X~2 complete`)>` ∅)
+         (declaration xs~4 `array<struct X~3 complete; (sizeof `struct X~3 complete`)>` ∅)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %zu\n")
-               (sizeof `struct X~2 complete`)
-               (sizeof (name xs~3 `array<struct X~2 complete; (sizeof `struct X~2 complete`)>`))))))
+               (sizeof `struct X~3 complete`)
+               (sizeof (name xs~4 `array<struct X~3 complete; (sizeof `struct X~3 complete`)>`))))))
    (function-definition
-      g~4 `fn() -> void`
+      g~5 `fn() -> void`
       (compound-statement
-         (struct X~5
+         (struct X~7
             (member c `char`)
             (member x `int`))
-         (declaration xs~6 `array<struct X~5 complete; (sizeof `struct X~5 complete`)>` ∅)
+         (declaration xs~8 `array<struct X~7 complete; (sizeof `struct X~7 complete`)>` ∅)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %zu\n")
-               (sizeof `struct X~5 complete`)
-               (sizeof (name xs~6 `array<struct X~5 complete; (sizeof `struct X~5 complete`)>`))))))
+               (sizeof `struct X~7 complete`)
+               (sizeof (name xs~8 `array<struct X~7 complete; (sizeof `struct X~7 complete`)>`))))))
    (function-definition
-      main~7 `fn() -> int`
+      main~9 `fn() -> int`
       (compound-statement
          (expression (call (name f~1 `fn() -> void`)))
-         (expression (call (name g~4 `fn() -> void`))))))
+         (expression (call (name g~5 `fn() -> void`))))))
 
 ----- stderr -----

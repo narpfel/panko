@@ -14,10 +14,10 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration xs~1 `array<int; 2>` (braced ∅))
+         (declaration xs~2 `array<int; 2>` (braced ∅))
          (return
             (generic
-               (name xs~1 `array<int; 2>`)
+               (name xs~2 `array<int; 2>`)
                (assoc `ptr<int>` 0)
                (assoc `array<int; 2>` 1))))))
 

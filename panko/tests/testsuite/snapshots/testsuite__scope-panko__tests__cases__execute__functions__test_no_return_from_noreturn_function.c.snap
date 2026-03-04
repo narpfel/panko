@@ -20,7 +20,7 @@ exit_code: 0
                42))
          (return ∅)))
    (function-definition
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
          (expression (call (name f~1 `fn() -> void`))))))
 

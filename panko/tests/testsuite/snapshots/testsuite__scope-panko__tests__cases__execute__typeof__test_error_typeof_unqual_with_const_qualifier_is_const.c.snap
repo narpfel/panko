@@ -14,8 +14,8 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration this_is_const~1 `typeof_unqual(42) const` ∅)
-         (expression (assign (name this_is_const~1 `typeof_unqual(42) const`) 42))
-         (return (name this_is_const~1 `typeof_unqual(42) const`)))))
+         (declaration this_is_const~2 `typeof_unqual(42) const` ∅)
+         (expression (assign (name this_is_const~2 `typeof_unqual(42) const`) 42))
+         (return (name this_is_const~2 `typeof_unqual(42) const`)))))
 
 ----- stderr -----

@@ -14,11 +14,11 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition a~1 `char` (truncate `char` (1 `int`)))
-         (definition b~2 `char` (truncate `char` (2 `int`)))
-         (definition c~3 `char` (truncate `char` (42 `int`)))
-         (definition d~4 `char` (truncate `char` (3 `int`)))
-         (expression (assign `char` (b~2 `char`) (truncate `char` (123 `int`))))
-         (return (sign-extend `int` (c~3 `char`))))))
+         (definition a~2 `char` (truncate `char` (1 `int`)))
+         (definition b~3 `char` (truncate `char` (2 `int`)))
+         (definition c~4 `char` (truncate `char` (42 `int`)))
+         (definition d~5 `char` (truncate `char` (3 `int`)))
+         (expression (assign `char` (b~3 `char`) (truncate `char` (123 `int`))))
+         (return (sign-extend `int` (c~4 `char`))))))
 
 ----- stderr -----

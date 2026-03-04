@@ -19,17 +19,17 @@ exit_code: 0
             (typedef name `int`)
             (compound-statement
                (typedef name `char const`)
-               (declaration x~2 `char const` 'a')
+               (declaration x~3 `char const` 'a')
                (expression
                   (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                      (string "%c\n")
-                     (name x~2 `char const`))))
-            (declaration x~3 `int` 123)
+                     (name x~3 `char const`))))
+            (declaration x~4 `int` 123)
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")
-                  (name x~3 `int`))))
-         (declaration name~4 `int` 42)
-         (return (name name~4 `int`)))))
+                  (name x~4 `int`))))
+         (declaration name~5 `int` 42)
+         (return (name name~5 `int`)))))
 
 ----- stderr -----

@@ -16,7 +16,7 @@ exit_code: 0
       (compound-statement
          (return 42)))
    (function-definition
-      main~1 `fn() -> int`
+      main~2 `fn() -> int`
       (compound-statement
          (return (call (name f~0 `fn() -> int`))))))
 

@@ -27,7 +27,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 25>>`
                         (string `array<char; 25>` "some string concatenated\0"))))))
-         (definition char_star~2 `ptr<char>`
+         (definition char_star~3 `ptr<char>`
             (noop-type-conversion `ptr<char>`
                (addressof `ptr<array<char; 10>>`
                   (string `array<char; 10>` "char star\0"))))
@@ -35,8 +35,8 @@ exit_code: 0
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`
                   (puts~0 `fn(∅: ptr<char const>) -> int`))
-               (noop-type-conversion `ptr<char const>` (char_star~2 `ptr<char>`))))
-         (definition char_const_star~3 `ptr<char const>`
+               (noop-type-conversion `ptr<char const>` (char_star~3 `ptr<char>`))))
+         (definition char_const_star~4 `ptr<char const>`
             (noop-type-conversion `ptr<char const>`
                (noop-type-conversion `ptr<char>`
                   (addressof `ptr<array<char; 16>>`
@@ -45,7 +45,7 @@ exit_code: 0
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`
                   (puts~0 `fn(∅: ptr<char const>) -> int`))
-               (char_const_star~3 `ptr<char const>`)))
+               (char_const_star~4 `ptr<char const>`)))
          (return (truncate `int` (lengthof `unsigned long` 7 (string `array<char; 7>` "string\0")))))))
 
 ----- stderr -----

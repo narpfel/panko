@@ -19,7 +19,7 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration xs~1 `array<int; ∅>`
+         (declaration xs~2 `array<int; ∅>`
             (braced
                1
                2))
@@ -29,7 +29,7 @@ exit_code: 0
                   (sizeof 42)
                   (assoc `typeof((sizeof `char`))` 0))
                (generic
-                  (subtract (addressof (subscript (name xs~1 `array<int; ∅>`) 1)) (addressof (subscript (name xs~1 `array<int; ∅>`) 0)))
+                  (subtract (addressof (subscript (name xs~2 `array<int; ∅>`) 1)) (addressof (subscript (name xs~2 `array<int; ∅>`) 0)))
                   (assoc `typeof((subtract (cast `ptr<char>` nullptr) (cast `ptr<char>` nullptr)))` 1)))))))
 
 ----- stderr -----

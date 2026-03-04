@@ -15,18 +15,18 @@ exit_code: 0
       f~0 `fn() -> void`
       (compound-statement))
    (function-definition external
-      g~1 `fn() -> void`
+      g~2 `fn() -> void`
       (compound-statement
          (return
             (call `void`
                (addressof `ptr<fn() -> void>`
                   (f~0 `fn() -> void`))))))
    (function-definition external
-      main~2 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
          (expression
             (call `void`
                (addressof `ptr<fn() -> void>`
-                  (g~1 `fn() -> void`)))))))
+                  (g~2 `fn() -> void`)))))))
 
 ----- stderr -----

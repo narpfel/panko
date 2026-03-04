@@ -76,7 +76,7 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 4>>`
                            (string `array<char; 4>` "q\nq\0")))))))
-         (definition s~3 `ptr<char const>`
+         (definition s~4 `ptr<char const>`
             (noop-type-conversion `ptr<char const>`
                (noop-type-conversion `ptr<char>`
                   (addressof `ptr<array<char; 3>>`
@@ -89,9 +89,9 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 6>>`
                         (string `array<char; 6>` "%d%s\n\0"))))
-               (sign-extend `int` (deref `char const` (ptr-add `ptr<char const>` (s~3 `ptr<char const>`) (sign-extend `unsigned long` (0 `int`)))))
+               (sign-extend `int` (deref `char const` (ptr-add `ptr<char const>` (s~4 `ptr<char const>`) (sign-extend `unsigned long` (0 `int`)))))
                (addressof `ptr<char const>`
-                  (deref `char const` (ptr-add `ptr<char const>` (s~3 `ptr<char const>`) (sign-extend `unsigned long` (1 `int`)))))))
+                  (deref `char const` (ptr-add `ptr<char const>` (s~4 `ptr<char const>`) (sign-extend `unsigned long` (1 `int`)))))))
          (return (truncate `int` (lengthof `unsigned long` 2 (string `array<char; 2>` "\n\0")))))))
 
 ----- stderr -----

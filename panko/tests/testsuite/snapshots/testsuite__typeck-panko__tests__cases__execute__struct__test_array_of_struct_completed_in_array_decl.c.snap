@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external
       f~1 `fn() -> void`
       (compound-statement
-         (definition xs~3 `array<struct X~2 complete; 4>` ∅)
+         (definition xs~4 `array<struct X~3 complete; 4>` ∅)
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -24,15 +24,15 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 9>>`
                         (string `array<char; 9>` "%zu %zu\n\0"))))
-               (sizeof `unsigned long` 4 `struct X~2 complete`)
-               (sizeof `unsigned long` 16 (xs~3 `array<struct X~2 complete; 4>`))))))
+               (sizeof `unsigned long` 4 `struct X~3 complete`)
+               (sizeof `unsigned long` 16 (xs~4 `array<struct X~3 complete; 4>`))))))
    (function-definition external
-      g~4 `fn() -> void`
+      g~5 `fn() -> void`
       (compound-statement
-         (struct X~5
+         (struct X~7
             (member c @0 `char`)
             (member x @4 `int`))
-         (definition xs~6 `array<struct X~5 complete; 8>` ∅)
+         (definition xs~8 `array<struct X~7 complete; 8>` ∅)
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -41,10 +41,10 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 9>>`
                         (string `array<char; 9>` "%zu %zu\n\0"))))
-               (sizeof `unsigned long` 8 `struct X~5 complete`)
-               (sizeof `unsigned long` 64 (xs~6 `array<struct X~5 complete; 8>`))))))
+               (sizeof `unsigned long` 8 `struct X~7 complete`)
+               (sizeof `unsigned long` 64 (xs~8 `array<struct X~7 complete; 8>`))))))
    (function-definition external
-      main~7 `fn() -> int`
+      main~9 `fn() -> int`
       (compound-statement
          (expression
             (call `void`
@@ -53,6 +53,6 @@ exit_code: 0
          (expression
             (call `void`
                (addressof `ptr<fn() -> void>`
-                  (g~4 `fn() -> void`)))))))
+                  (g~5 `fn() -> void`)))))))
 
 ----- stderr -----

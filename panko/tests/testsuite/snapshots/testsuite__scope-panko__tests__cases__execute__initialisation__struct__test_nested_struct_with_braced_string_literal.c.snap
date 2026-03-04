@@ -23,7 +23,7 @@ exit_code: 0
          (struct T~2
             (member string `struct String~1 complete`)
             (member x `int`))
-         (declaration t~4 `struct T~2 complete`
+         (declaration t~5 `struct T~2 complete`
             (braced
                (braced
                   (string "hello world"))
@@ -31,6 +31,6 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%s\n")
-               (deref (cast `ptr<ptr<char const>>` (addressof (name t~4 `struct T~2 complete`)))))))))
+               (deref (cast `ptr<ptr<char const>>` (addressof (name t~5 `struct T~2 complete`)))))))))
 
 ----- stderr -----

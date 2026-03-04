@@ -15,8 +15,8 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition cs~2 `array<char; 4>` ∅)
-         (definition xs~3 `array<int; 8>` ∅)
+         (definition cs~3 `array<char; 4>` ∅)
+         (definition xs~4 `array<int; 8>` ∅)
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -25,7 +25,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 9>>`
                         (string `array<char; 9>` "%zu %zu\n\0"))))
-               (lengthof `unsigned long` 4 (cs~2 `array<char; 4>`))
-               (lengthof `unsigned long` 8 (xs~3 `array<int; 8>`)))))))
+               (lengthof `unsigned long` 4 (cs~3 `array<char; 4>`))
+               (lengthof `unsigned long` 8 (xs~4 `array<int; 8>`)))))))
 
 ----- stderr -----

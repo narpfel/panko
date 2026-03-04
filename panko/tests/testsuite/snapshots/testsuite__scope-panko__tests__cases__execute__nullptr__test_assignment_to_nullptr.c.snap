@@ -14,9 +14,9 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration a~1 `typeof(nullptr)` nullptr)
-         (declaration b~2 `typeof(nullptr)` (cast `typeof(nullptr)` nullptr))
-         (expression (assign (name a~1 `typeof(nullptr)`) nullptr))
-         (expression (assign (name b~2 `typeof(nullptr)`) (cast `typeof(nullptr)` nullptr))))))
+         (declaration a~2 `typeof(nullptr)` nullptr)
+         (declaration b~3 `typeof(nullptr)` (cast `typeof(nullptr)` nullptr))
+         (expression (assign (name a~2 `typeof(nullptr)`) nullptr))
+         (expression (assign (name b~3 `typeof(nullptr)`) (cast `typeof(nullptr)` nullptr))))))
 
 ----- stderr -----

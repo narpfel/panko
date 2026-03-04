@@ -22,7 +22,7 @@ exit_code: 0
                (42 `int`)))
          (expression (error `void`))))
    (function-definition external
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
          (expression
             (call `void`

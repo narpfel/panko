@@ -32,7 +32,7 @@ exit_code: 0
             (member x `int`)
             (member y `int`)
             (member z `int`))
-         (declaration inner_1~5 `struct Inner~0 complete`
+         (declaration inner_1~6 `struct Inner~0 complete`
             (braced
                1
                2
@@ -41,28 +41,28 @@ exit_code: 0
             (member x `int`)
             (member inner `struct Inner~0 complete`)
             (member y `int`))
-         (declaration outer_1~6 `struct Outer~1 complete`
+         (declaration outer_1~7 `struct Outer~1 complete`
             (braced
                42
                (braced
-                  (name inner_1~5 `struct Inner~0 complete`)
+                  (name inner_1~6 `struct Inner~0 complete`)
                   5)
                27))
          (struct Inner2~2
             (member c `char`))
-         (declaration inner_2~7 `struct Inner2~2 complete`
+         (declaration inner_2~8 `struct Inner2~2 complete`
             (braced
                'a'))
          (struct Outer2~3
             (member x `int`)
             (member inner `struct Inner2~2 complete`)
             (member y `int`))
-         (declaration outer_2~8 `struct Outer2~3 complete`
+         (declaration outer_2~9 `struct Outer2~3 complete`
             (braced
                42
                (braced
                   (braced
-                     (name inner_2~7 `struct Inner2~2 complete`)))
+                     (name inner_2~8 `struct Inner2~2 complete`)))
                27)))))
 
 ----- stderr -----

@@ -16,55 +16,55 @@ exit_code: 0
       main~1 `fn() -> int`
       (compound-statement
          (compound-statement
-            (declaration x~2 `int` 42)
-            (declaration y~3 `int` 27)
+            (declaration x~3 `int` 42)
+            (declaration y~4 `int` 27)
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")
                   (conditional
                      0
-                     (name x~2 `int`)
-                     (name y~3 `int`))))
+                     (name x~3 `int`)
+                     (name y~4 `int`))))
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")
                   (conditional
                      1
-                     (name x~2 `int`)
-                     (name y~3 `int`)))))
+                     (name x~3 `int`)
+                     (name y~4 `int`)))))
          (compound-statement
-            (declaration x~4 `short` 42)
-            (declaration y~5 `short` 27)
+            (declaration x~5 `short` 42)
+            (declaration y~6 `short` 27)
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")
                   (conditional
                      0
-                     (name x~4 `short`)
-                     (name y~5 `short`))))
+                     (name x~5 `short`)
+                     (name y~6 `short`))))
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")
                   (conditional
                      1
-                     (name x~4 `short`)
-                     (name y~5 `short`)))))
+                     (name x~5 `short`)
+                     (name y~6 `short`)))))
          (compound-statement
-            (declaration x~6 `long` 42)
-            (declaration y~7 `long` 27)
+            (declaration x~7 `long` 42)
+            (declaration y~8 `long` 27)
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%ld\n")
                   (conditional
                      0
-                     (name x~6 `long`)
-                     (name y~7 `long`))))
+                     (name x~7 `long`)
+                     (name y~8 `long`))))
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%ld\n")
                   (conditional
                      1
-                     (name x~6 `long`)
-                     (name y~7 `long`))))))))
+                     (name x~7 `long`)
+                     (name y~8 `long`))))))))
 
 ----- stderr -----

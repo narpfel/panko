@@ -20,23 +20,23 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition xs~2 `array<int; 2>` (braced ∅))
-         (definition p~3 `ptr<int>`
+         (definition xs~3 `array<int; 2>` (braced ∅))
+         (definition p~4 `ptr<int>`
             (addressof `ptr<int>`
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 2>>`
-                           (xs~2 `array<int; 2>`)))
+                           (xs~3 `array<int; 2>`)))
                      (sign-extend `unsigned long` (0 `int`))))))
-         (definition p2~4 `ptr<int const>`
+         (definition p2~5 `ptr<int const>`
             (noop-type-conversion `ptr<int const>`
                (addressof `ptr<int>`
                   (deref `int`
                      (ptr-add `ptr<int>`
                         (noop-type-conversion `ptr<int>`
                            (addressof `ptr<array<int; 2>>`
-                              (xs~2 `array<int; 2>`)))
+                              (xs~3 `array<int; 2>`)))
                         (sign-extend `unsigned long` (1 `int`)))))))
          (expression
             (call `int`
@@ -62,7 +62,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 9>>`
                         (string `array<char; 9>` "it works\0"))))))
-         (expression (assign `ptr<int>` (p~3 `ptr<int>`) (noop-type-conversion `ptr<int>` (nullptr `nullptr_t`))))
+         (expression (assign `ptr<int>` (p~4 `ptr<int>`) (noop-type-conversion `ptr<int>` (nullptr `nullptr_t`))))
          (expression
             (conditional `int`
                (nullptr `nullptr_t`)
@@ -80,10 +80,10 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 5>>`
                            (string `array<char; 5>` "null\0")))))))
-         (definition null~5 `nullptr_t` (nullptr `nullptr_t`))
+         (definition null~6 `nullptr_t` (nullptr `nullptr_t`))
          (return
             (conditional `int`
-               (null~5 `nullptr_t`)
+               (null~6 `nullptr_t`)
                (1 `int`)
                (2 `int`))))))
 

@@ -14,17 +14,17 @@ exit_code: 0
    (function-definition external stack-size=24
       (f~0 `fn(x: int, y: int) -> int` (static f))
       (params
-         (x~1 `int` @0)
-         (y~2 `int` @4))
+         (x~2 `int` @0)
+         (y~3 `int` @4))
       (compound-statement
          (return
             (add `int` @8
                (multiply `int` @8
                   (2 `int` @8)
-                  (x~1 `int` @0))
-               (y~2 `int` @4)))))
+                  (x~2 `int` @0))
+               (y~3 `int` @4)))))
    (function-definition external stack-size=56
-      (main~3 `fn() -> int` (static main))
+      (main~4 `fn() -> int` (static main))
       (compound-statement
          (return
             (add `int` @0

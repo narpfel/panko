@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition x~2 `int` (42 `int`))
+         (definition x~3 `int` (42 `int`))
          (expression
             (call `int`
                (addressof `ptr<fn(c: int) -> int>`
@@ -26,6 +26,6 @@ exit_code: 0
                (addressof `ptr<fn(c: int) -> int>`
                   (putchar~0 `fn(c: int) -> int`))
                ('\n' `int`)))
-         (return (x~2 `int`)))))
+         (return (x~3 `int`)))))
 
 ----- stderr -----

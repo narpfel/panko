@@ -15,17 +15,17 @@ exit_code: 0
    (function-definition external stack-size=24
       (f~0 `fn(a: int) -> int` (static f))
       (params
-         (a~1 `int` @0))
+         (a~2 `int` @0))
       (compound-statement
-         (return (a~1 `int` @0))))
-   (definition external (global_value~2 `int` (static global_value)) (42 `int` (static global_value)))
+         (return (a~2 `int` @0))))
+   (definition external (global_value~3 `int` (static global_value)) (42 `int` (static global_value)))
    (function-definition external stack-size=24
-      (main~3 `fn() -> int` (static main))
+      (main~4 `fn() -> int` (static main))
       (compound-statement
          (return
             (call `int` @0
                (addressof `ptr<fn(a: int) -> int>` @8
                   (f~0 `fn(a: int) -> int` (static f)))
-               (global_value~2 `int` (static global_value)))))))
+               (global_value~3 `int` (static global_value)))))))
 
 ----- stderr -----

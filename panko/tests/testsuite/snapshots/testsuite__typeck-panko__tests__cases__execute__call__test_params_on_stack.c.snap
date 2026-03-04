@@ -15,11 +15,11 @@ exit_code: 0
    (function-definition external
       id~1 `fn(n: int) -> int`
       (params
-         n~2 `int`)
+         n~3 `int`)
       (compound-statement
-         (return (n~2 `int`))))
+         (return (n~3 `int`))))
    (function-definition external
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
          (return
             (call `int`
@@ -42,18 +42,18 @@ exit_code: 0
    (function-definition external
       f~0 `fn(a1: int, a2: int, a3: int, a4: int, a5: int, a6: int, a7: int, a8: int, a9: int, a10: int, a11: int) -> int`
       (params
-         a1~5 `int`
-         a2~6 `int`
-         a3~7 `int`
-         a4~8 `int`
-         a5~9 `int`
-         a6~10 `int`
-         a7~11 `int`
-         a8~12 `int`
-         a9~13 `int`
-         a10~14 `int`
-         a11~15 `int`)
+         a1~8 `int`
+         a2~9 `int`
+         a3~10 `int`
+         a4~11 `int`
+         a5~12 `int`
+         a6~13 `int`
+         a7~14 `int`
+         a8~15 `int`
+         a9~16 `int`
+         a10~17 `int`
+         a11~18 `int`)
       (compound-statement
-         (return (a10~14 `int`)))))
+         (return (a10~17 `int`)))))
 
 ----- stderr -----

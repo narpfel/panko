@@ -15,8 +15,8 @@ exit_code: 0
    (function-definition external stack-size=88
       (main~1 `fn() -> int` (static main))
       (compound-statement
-         (definition (cs~2 `array<char; 4>` @0) ∅)
-         (definition (xs~3 `array<int; 8>` @4) ∅)
+         (definition (cs~3 `array<char; 4>` @0) ∅)
+         (definition (xs~4 `array<int; 8>` @4) ∅)
          (expression
             (call `int` @36
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40

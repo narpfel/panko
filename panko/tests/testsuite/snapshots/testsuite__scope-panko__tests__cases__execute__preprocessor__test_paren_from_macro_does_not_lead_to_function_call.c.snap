@@ -17,13 +17,13 @@ exit_code: 0
       (compound-statement
          (return 27)))
    (function-definition
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
-         (declaration called~3 `int` 42)
+         (declaration called~5 `int` 42)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (name called~3 `int`)))
+               (name called~5 `int`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
@@ -31,6 +31,6 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (name called~3 `int`))))))
+               (name called~5 `int`))))))
 
 ----- stderr -----

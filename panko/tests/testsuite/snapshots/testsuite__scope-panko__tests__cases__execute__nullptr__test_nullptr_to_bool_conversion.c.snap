@@ -19,7 +19,7 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
                (cast `bool` nullptr)))
-         (declaration b~2 `bool` nullptr)
-         (return (name b~2 `bool`)))))
+         (declaration b~3 `bool` nullptr)
+         (return (name b~3 `bool`)))))
 
 ----- stderr -----

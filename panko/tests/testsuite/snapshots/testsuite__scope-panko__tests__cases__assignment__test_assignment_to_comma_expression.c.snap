@@ -14,13 +14,13 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration x~1 `int` 0)
-         (declaration y~2 `int` 0)
+         (declaration x~2 `int` 0)
+         (declaration y~3 `int` 0)
          (expression
             (assign
                (comma
-                  (name x~1 `int`)
-                  (name y~2 `int`))
+                  (name x~2 `int`)
+                  (name y~3 `int`))
                42)))))
 
 ----- stderr -----

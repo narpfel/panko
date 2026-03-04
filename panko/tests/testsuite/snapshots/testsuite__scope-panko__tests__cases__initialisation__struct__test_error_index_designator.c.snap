@@ -20,7 +20,7 @@ exit_code: 0
          (struct T~0
             (member x `int`)
             (member y `int`))
-         (declaration t~2 `struct T~0 complete`
+         (declaration t~3 `struct T~0 complete`
             (braced
                (designation ((index 1)) 42))))))
 

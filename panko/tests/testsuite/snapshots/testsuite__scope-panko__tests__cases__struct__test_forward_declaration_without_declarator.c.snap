@@ -14,21 +14,21 @@ exit_code: 0
    (function-definition
       f1~1 `fn() -> void`
       (compound-statement
-         (declaration p1~2 `ptr<struct T~0>` ∅)
-         (declaration p2~3 `ptr<struct T~0>` ∅)))
+         (declaration p1~3 `ptr<struct T~0>` ∅)
+         (declaration p2~4 `ptr<struct T~0>` ∅)))
    (function-definition
-      f2~4 `fn() -> void`
+      f2~5 `fn() -> void`
       (compound-statement
-         (declaration p1~5 `ptr<struct T~0>` ∅)
-         (declaration p2~6 `ptr<struct T~0>` ∅)))
+         (declaration p1~7 `ptr<struct T~0>` ∅)
+         (declaration p2~8 `ptr<struct T~0>` ∅)))
    (function-definition
-      forward_decl_in_local_scope~7 `fn() -> void`
+      forward_decl_in_local_scope~9 `fn() -> void`
       (compound-statement
          (compound-statement
-            (declaration p1~9 `ptr<struct U~8>` ∅)
-            (declaration p2~10 `ptr<struct U~8>` ∅))
+            (declaration p1~12 `ptr<struct U~11>` ∅)
+            (declaration p2~13 `ptr<struct U~11>` ∅))
          (compound-statement
-            (declaration p1~11 `ptr<struct U~8>` ∅)
-            (declaration p2~12 `ptr<struct U~8>` ∅)))))
+            (declaration p1~14 `ptr<struct U~11>` ∅)
+            (declaration p2~15 `ptr<struct U~11>` ∅)))))
 
 ----- stderr -----

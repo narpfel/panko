@@ -14,47 +14,47 @@ exit_code: 0
    (function-definition external
       f~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int` (42 `int`))
+         (definition x~2 `int` (42 `int`))
          (return
             (combine `int`
                (combine `int`
+                  (combine `int`
+                     (assign `ptr<int>` (unnamed-temporary~4 `ptr<int>`)
+                        (addressof `ptr<int>`
+                           (x~2 `int`)))
+                     (assign `int` (unnamed-temporary~5 `int`) (deref `int` (unnamed-temporary~4 `ptr<int>`))))
                   (combine `int`
                      (assign `ptr<int>` (unnamed-temporary~3 `ptr<int>`)
                         (addressof `ptr<int>`
-                           (x~1 `int`)))
-                     (assign `int` (unnamed-temporary~4 `int`) (deref `int` (unnamed-temporary~3 `ptr<int>`))))
-                  (combine `int`
-                     (assign `ptr<int>` (unnamed-temporary~2 `ptr<int>`)
-                        (addressof `ptr<int>`
-                           (deref `int` (unnamed-temporary~3 `ptr<int>`))))
-                     (assign `int` (deref `int` (unnamed-temporary~2 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~2 `ptr<int>`)) (++ `int`)))))
-               (unnamed-temporary~4 `int`)))))
+                           (deref `int` (unnamed-temporary~4 `ptr<int>`))))
+                     (assign `int` (deref `int` (unnamed-temporary~3 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~3 `ptr<int>`)) (++ `int`)))))
+               (unnamed-temporary~5 `int`)))))
    (function-definition external
-      g~5 `fn() -> int`
+      g~6 `fn() -> int`
       (compound-statement
-         (definition x~6 `int` (27 `int`))
+         (definition x~8 `int` (27 `int`))
          (return
             (combine `int`
                (combine `int`
                   (combine `int`
-                     (assign `ptr<int>` (unnamed-temporary~8 `ptr<int>`)
+                     (assign `ptr<int>` (unnamed-temporary~10 `ptr<int>`)
                         (addressof `ptr<int>`
-                           (x~6 `int`)))
-                     (assign `int` (unnamed-temporary~9 `int`) (deref `int` (unnamed-temporary~8 `ptr<int>`))))
+                           (x~8 `int`)))
+                     (assign `int` (unnamed-temporary~11 `int`) (deref `int` (unnamed-temporary~10 `ptr<int>`))))
                   (combine `int`
-                     (assign `ptr<int>` (unnamed-temporary~7 `ptr<int>`)
+                     (assign `ptr<int>` (unnamed-temporary~9 `ptr<int>`)
                         (addressof `ptr<int>`
-                           (deref `int` (unnamed-temporary~8 `ptr<int>`))))
-                     (assign `int` (deref `int` (unnamed-temporary~7 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~7 `ptr<int>`)) (++ `int`)))))
-               (unnamed-temporary~9 `int`)))))
+                           (deref `int` (unnamed-temporary~10 `ptr<int>`))))
+                     (assign `int` (deref `int` (unnamed-temporary~9 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~9 `ptr<int>`)) (++ `int`)))))
+               (unnamed-temporary~11 `int`)))))
    (function-definition external
-      main~10 `fn() -> int`
+      main~12 `fn() -> int`
       (compound-statement
-         (declaration external printf~11 `fn(∅: ptr<char const>, ...) -> int` ∅)
+         (declaration external printf~14 `fn(∅: ptr<char const>, ...) -> int` ∅)
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
-                  (printf~11 `fn(∅: ptr<char const>, ...) -> int`))
+                  (printf~14 `fn(∅: ptr<char const>, ...) -> int`))
                (noop-type-conversion `ptr<char const>`
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 7>>`
@@ -64,11 +64,11 @@ exit_code: 0
                      (f~0 `fn() -> int`)))
                (call `int`
                   (addressof `ptr<fn() -> int>`
-                     (g~5 `fn() -> int`)))))
+                     (g~6 `fn() -> int`)))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
-                  (printf~11 `fn(∅: ptr<char const>, ...) -> int`))
+                  (printf~14 `fn(∅: ptr<char const>, ...) -> int`))
                (noop-type-conversion `ptr<char const>`
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 7>>`
@@ -78,11 +78,11 @@ exit_code: 0
                      (f~0 `fn() -> int`)))
                (call `int`
                   (addressof `ptr<fn() -> int>`
-                     (g~5 `fn() -> int`)))))
+                     (g~6 `fn() -> int`)))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
-                  (printf~11 `fn(∅: ptr<char const>, ...) -> int`))
+                  (printf~14 `fn(∅: ptr<char const>, ...) -> int`))
                (noop-type-conversion `ptr<char const>`
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 7>>`
@@ -92,6 +92,6 @@ exit_code: 0
                      (f~0 `fn() -> int`)))
                (call `int`
                   (addressof `ptr<fn() -> int>`
-                     (g~5 `fn() -> int`))))))))
+                     (g~6 `fn() -> int`))))))))
 
 ----- stderr -----

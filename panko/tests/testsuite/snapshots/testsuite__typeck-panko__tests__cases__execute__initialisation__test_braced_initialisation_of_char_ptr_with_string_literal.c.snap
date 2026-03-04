@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (definition s~2 `ptr<char const>`
+         (definition s~3 `ptr<char const>`
             (braced
                (subobject +0
                   (noop-type-conversion `ptr<char const>`
@@ -27,6 +27,6 @@ exit_code: 0
                (call `unsigned long`
                   (addressof `ptr<fn(∅: ptr<char const>) -> unsigned long>`
                      (strlen~0 `fn(∅: ptr<char const>) -> unsigned long`))
-                  (s~2 `ptr<char const>`)))))))
+                  (s~3 `ptr<char const>`)))))))
 
 ----- stderr -----

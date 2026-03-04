@@ -14,12 +14,12 @@ exit_code: 0
    (function-definition external stack-size=40
       (main~0 `fn() -> int` (static main))
       (compound-statement
-         (declaration external (isalnum~1 `fn(∅: int) -> int` (static isalnum)) ∅)
+         (declaration external (isalnum~2 `fn(∅: int) -> int` (static isalnum)) ∅)
          (return
             (not-equal `int` @0
                (call `int` @0
                   (addressof `ptr<fn(∅: int) -> int>` @8
-                     (isalnum~1 `fn(∅: int) -> int` (static isalnum)))
+                     (isalnum~2 `fn(∅: int) -> int` (static isalnum)))
                   (100 `int` @16))
                (0 `int` @20))))))
 

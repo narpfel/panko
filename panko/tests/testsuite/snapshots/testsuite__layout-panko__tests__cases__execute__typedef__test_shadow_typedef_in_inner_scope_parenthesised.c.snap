@@ -16,16 +16,16 @@ exit_code: 0
       (compound-statement
          (typedef name `int`)
          (compound-statement
-            (declaration external (name~1 `fn() -> int` (static name)) ∅)
-            (expression (0 `int` @0)))
-         (compound-statement
             (declaration external (name~2 `fn() -> int` (static name)) ∅)
             (expression (0 `int` @0)))
          (compound-statement
-            (definition (name~3 `array<int; 42>` @0) ∅)
-            (expression (42 `unsigned long` @168)))
+            (declaration external (name~3 `fn() -> int` (static name)) ∅)
+            (expression (0 `int` @0)))
          (compound-statement
             (definition (name~4 `array<int; 42>` @0) ∅)
+            (expression (42 `unsigned long` @168)))
+         (compound-statement
+            (definition (name~5 `array<int; 42>` @0) ∅)
             (expression (42 `unsigned long` @168))))))
 
 ----- stderr -----

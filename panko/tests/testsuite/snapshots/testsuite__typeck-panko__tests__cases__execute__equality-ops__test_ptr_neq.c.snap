@@ -14,13 +14,13 @@ exit_code: 0
    (function-definition external
       main~0 `fn() -> int`
       (compound-statement
-         (definition x~1 `int` ∅)
-         (definition y~2 `int` ∅)
+         (definition x~2 `int` ∅)
+         (definition y~3 `int` ∅)
          (return
             (ptr-not-equal `int`
                (addressof `ptr<int>`
-                  (x~1 `int`))
+                  (x~2 `int`))
                (addressof `ptr<int>`
-                  (y~2 `int`)))))))
+                  (y~3 `int`)))))))
 
 ----- stderr -----
