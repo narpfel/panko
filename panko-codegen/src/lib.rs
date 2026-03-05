@@ -250,26 +250,28 @@ fn compute_call_abi<'a, T>(items: &[T]) -> (Vec<InRegisters<T>>, Vec<OnStack<T>>
 where
     T: HasType<'a>,
 {
+    let registers = &mut &ARGUMENT_REGISTERS[..];
+    let mut stack_eightbytes_used = 0;
     items
         .iter()
-        .scan((0, 0), |(registers_used, stack_eightbytes_used), item| {
+        .map(|item| {
             let mut pass_on_stack = || {
                 let eightbyte_size = item.ty().eightbyte_size();
-                let eightbyte_index = *stack_eightbytes_used;
-                *stack_eightbytes_used += eightbyte_size;
-                Some(Err(OnStack { item, eightbyte_index }))
+                let eightbyte_index = stack_eightbytes_used;
+                stack_eightbytes_used += eightbyte_size;
+                Err(OnStack { item, eightbyte_index })
             };
 
             let mut pass_in_registers = |register_count| {
-                let registers = ARGUMENT_REGISTERS[*registers_used..].get(..register_count)?;
-                *registers_used += register_count;
+                let registers = registers.split_off(..register_count)?;
                 Some(Ok(InRegisters { item, registers }))
             };
 
             match item.ty().classify() {
-                Class::Integer => pass_in_registers(1).or_else(pass_on_stack),
+                Class::Integer => pass_in_registers(1).unwrap_or_else(pass_on_stack),
                 Class::Memory => pass_on_stack(),
-                Class::Pair(PairKind::Integer) => pass_in_registers(2).or_else(pass_on_stack),
+                Class::Pair(PairKind::Integer) =>
+                    pass_in_registers(2).unwrap_or_else(pass_on_stack),
             }
         })
         .partition_result()
