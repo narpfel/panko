@@ -446,24 +446,15 @@ impl<'a> Codegen<'a> {
         // Store the register-passed arguments first because copying the stack-passed ones clobbers
         // `rdi`, `rsi` and `rcx`.
         for InRegisters { item: param, registers } in register_parameters {
+            let ty = &param.ty.ty;
             match registers {
-                [register] => {
-                    let ty = match param.ty.ty.size().is_power_of_two() {
-                        true => &param.ty.ty,
-                        // TODO: This unconditionally writes 8 bytes, regardless of the actual size
-                        // of the object. Can this overwrite unrelated objects?
-                        false => &Type::size_t(),
-                    };
-                    self.emit_args("mov", &[param, &register.with_ty(ty)]);
-                }
+                [register] => match ty.size().is_power_of_two() {
+                    true => self.emit_args("mov", &[&ByValue(param), &register.with_ty(ty)]),
+                    false => self.store_from_register(param.slot(), ty, 0, *register),
+                },
                 [first, second] => {
                     self.emit_args("mov", &[param, first]);
-                    let slot = param.slot().offset(8);
-                    for i in 0..param.ty.ty.size() - 8 {
-                        let slot = typed(slot.offset(i), Type::char());
-                        self.emit_args("mov", &[&slot, &second.with_ty(&Type::char())]);
-                        self.emit_args("shr", &[second, &8]);
-                    }
+                    self.store_from_register(param.slot(), ty, 8, *second);
                 }
                 _ => unreachable!(),
             }
@@ -1035,7 +1026,7 @@ impl<'a> Codegen<'a> {
                     let size = arg.ty.ty.size();
                     match registers {
                         [register] => match size.is_power_of_two() {
-                            true => self.emit_args("mov", &[&register.typed(arg), arg]),
+                            true => self.emit_args("mov", &[&register.typed(arg), &ByValue(arg)]),
                             false => self.load_function_argument(arg, 0, register),
                         },
                         [first, second] => {
@@ -1140,6 +1131,15 @@ impl<'a> Codegen<'a> {
             let from = from.offset(offset + i);
             self.emit_args("movzx", &[&Rax.with_ty(&Type::size_t()), &from]);
             self.emit_args("or", &[register, &Rax]);
+        }
+    }
+
+    fn store_from_register(&mut self, slot: Slot, ty: &Type, offset: u64, register: Register) {
+        let slot = slot.offset(offset);
+        for i in 0..ty.size() - offset {
+            let slot = typed(slot.offset(i), Type::char());
+            self.emit_args("mov", &[&slot, &register.with_ty(&Type::char())]);
+            self.emit_args("shr", &[&register, &8]);
         }
     }
 

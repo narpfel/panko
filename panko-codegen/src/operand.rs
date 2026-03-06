@@ -304,7 +304,10 @@ impl<'a> AsOperand<'a> for Reference<'a> {
     }
 }
 
-impl<'a> AsOperand<'a> for ByValue<&dyn AsOperand<'a>> {
+impl<'a, T> AsOperand<'a> for ByValue<&T>
+where
+    T: AsOperand<'a> + ?Sized,
+{
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
         let Operand { kind, ty } = self.0.as_operand(argument_area_size);
 
