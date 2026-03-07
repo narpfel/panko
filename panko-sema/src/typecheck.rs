@@ -50,6 +50,7 @@ use crate::scope::RefKind;
 use crate::scope::StorageDuration;
 use crate::ty;
 use crate::ty::ArrayType;
+use crate::ty::Class;
 use crate::ty::Complete;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
@@ -226,11 +227,19 @@ pub(crate) struct SubobjectInitialiser<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct FunctionDefinition<'a> {
     pub(crate) reference: Reference<'a>,
+    pub(crate) return_slot: Return<'a>,
     pub(crate) params: ParamRefs<'a>,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) is_varargs: bool,
     pub(crate) body: CompoundStatement<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum Return<'a> {
+    Void,
+    InRegisters(Class),
+    OnStack(Reference<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -656,13 +665,15 @@ fn typeck_function_ty<'a>(
     let FunctionType { params, return_type, is_varargs } = ty;
     let return_type = sess.alloc(typeck_ty(sess, *return_type, IsParameter::No));
     match return_type.ty {
-        Type::Arithmetic(_) | Type::Pointer(_) | Type::Void | Type::Nullptr => (),
+        Type::Arithmetic(_)
+        | Type::Pointer(_)
+        | Type::Void
+        | Type::Nullptr
+        | Type::Struct(Struct::Complete(_)) => (),
         Type::Array(_)
         | Type::Function(_)
         | Type::Struct(Struct::Incomplete { name: _, id: _ }) =>
             sess.emit(Diagnostic::InvalidFunctionReturnType { at: *return_type }),
-        Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
-            todo!("check if complete struct is valid as return type"),
         Type::Typeof { expr, unqual: _ } => match expr {},
     }
     let params = sess.alloc_slice_fill_iter(params.iter().map(
@@ -971,7 +982,7 @@ fn typeck_function_definition<'a>(
 ) -> FunctionDefinition<'a> {
     let scope::FunctionDefinition {
         reference,
-        return_slot: _,
+        return_slot,
         params,
         inline,
         noreturn,
@@ -986,6 +997,20 @@ fn typeck_function_definition<'a>(
         unreachable!()
     };
 
+    let return_slot = match ty.return_type.ty.try_classify() {
+        None => Return::Void,
+        Some(class @ (Class::Integer | Class::Pair(_))) => Return::InRegisters(class),
+        Some(Class::Memory) => Return::OnStack(Reference {
+            name: "return",
+            decl_loc: reference.decl_loc,
+            ty: Type::Pointer(ty.return_type).unqualified(),
+            id: return_slot,
+            usage_loc: reference.decl_loc,
+            kind: RefKind::Definition,
+            storage_duration: StorageDuration::Automatic,
+        }),
+    };
+
     let params = match ty.params {
         [] => &[],
         _ => sess.alloc_slice_fill_iter(
@@ -998,6 +1023,7 @@ fn typeck_function_definition<'a>(
 
     FunctionDefinition {
         reference,
+        return_slot,
         params: ParamRefs(params),
         inline,
         noreturn,

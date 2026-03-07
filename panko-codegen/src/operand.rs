@@ -109,8 +109,8 @@ impl<'a> Operand<'a> {
         LValue::new(register, ty)
     }
 
-    pub(super) fn pointer(register: Register, expr: &LayoutedExpression<'a>) -> LValue<'a> {
-        let Type::Pointer(ty) = expr.ty.ty
+    pub(super) fn pointer(register: Register, pointer_ty: &Type<'a>) -> LValue<'a> {
+        let Type::Pointer(ty) = pointer_ty
         else {
             unreachable!()
         };

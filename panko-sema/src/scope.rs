@@ -224,7 +224,6 @@ pub(crate) enum Designator<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct FunctionDefinition<'a> {
     pub(crate) reference: Reference<'a>,
-    #[expect(dead_code)]
     pub(crate) return_slot: Id,
     pub(crate) params: ParamRefs<'a>,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,

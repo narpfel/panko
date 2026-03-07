@@ -437,23 +437,27 @@ where
         self.size().div_ceil(8)
     }
 
-    pub fn classify(&self) -> Class {
+    pub fn try_classify(&self) -> Option<Class> {
         match self {
-            Self::Arithmetic(_) => Class::Integer,
-            Self::Pointer(_) => Class::Integer,
-            Self::Array(_) => unreachable!(),
-            Self::Function(_) => unreachable!(),
-            Self::Void => unreachable!(),
+            Self::Arithmetic(_) => Some(Class::Integer),
+            Self::Pointer(_) => Some(Class::Integer),
+            Self::Array(_) => None,
+            Self::Function(_) => None,
+            Self::Void => None,
             Self::Typeof { expr, unqual: _ } => match *expr {},
-            Self::Nullptr => Class::Integer,
-            Self::Struct(Struct::Incomplete { .. }) => unreachable!(),
+            Self::Nullptr => Some(Class::Integer),
+            Self::Struct(Struct::Incomplete { .. }) => None,
             ty @ Self::Struct(Struct::Complete(_)) => match ty.eightbyte_size() {
                 0 => unreachable!("structs are nonempty"),
-                1 => Class::Integer,
-                2 => Class::Pair(PairKind::Integer),
-                3.. => Class::Memory,
+                1 => Some(Class::Integer),
+                2 => Some(Class::Pair(PairKind::Integer)),
+                3.. => Some(Class::Memory),
             },
         }
+    }
+
+    pub fn classify(&self) -> Class {
+        self.try_classify().unwrap()
     }
 }
 

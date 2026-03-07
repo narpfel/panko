@@ -127,10 +127,19 @@ impl<'a> Stack<'a> {
         self.slots.add_slot(ty)
     }
 
-    pub(super) fn function_arguments(&mut self, args: &[LayoutedExpression<'a>]) {
+    pub(super) fn function_arguments(
+        &mut self,
+        return_ty: Type<'a>,
+        args: &[LayoutedExpression<'a>],
+    ) {
+        let registers_used = match return_ty.try_classify() {
+            Some(Class::Integer | Class::Pair(PairKind::Integer)) | None => 0,
+            Some(Class::Memory) => 1,
+        };
         let argument_area_size = args
             .iter()
-            .scan(0, |registers_used, arg| {
+            // TODO: use `map_with`
+            .scan(registers_used, |registers_used, arg| {
                 // TODO: this is `panko_codegen::ARGUMENT_REGISTERS.len()`
                 if *registers_used >= 6 {
                     return Some(Some(arg));

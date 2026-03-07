@@ -16,6 +16,7 @@ use crate::scope::Linkage;
 use crate::scope::RefKind;
 use crate::ty;
 use crate::ty::ArrayType;
+use crate::ty::Class;
 use crate::ty::Complete;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
@@ -97,6 +98,7 @@ impl<'a> Subobject<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct FunctionDefinition<'a> {
     pub reference: Reference<'a>,
+    pub return_slot: Return<'a>,
     pub params: ParamRefs<'a>,
     #[expect(unused)]
     inline: Option<cst::FunctionSpecifier<'a>>,
@@ -105,6 +107,13 @@ pub struct FunctionDefinition<'a> {
     pub stack_size: u64,
     pub argument_area_size: u64,
     pub body: CompoundStatement<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Return<'a> {
+    Void,
+    InRegisters(Class),
+    OnStack(Reference<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -341,6 +350,7 @@ fn layout_function_definition<'a>(
     let mut stack = Stack::default();
     let typecheck::FunctionDefinition {
         reference,
+        return_slot,
         params,
         inline,
         noreturn,
@@ -348,6 +358,11 @@ fn layout_function_definition<'a>(
         body,
     } = *def;
     let reference = stack.add(bump, reference);
+    let return_slot = match return_slot {
+        typecheck::Return::Void => Return::Void,
+        typecheck::Return::InRegisters(class) => Return::InRegisters(class),
+        typecheck::Return::OnStack(reference) => Return::OnStack(stack.add(bump, reference)),
+    };
     let params =
         ParamRefs(bump.alloc_slice_fill_iter(params.0.iter().map(|&param| stack.add(bump, param))));
     let body = layout_compound_statement(&mut stack, bump, body);
@@ -357,6 +372,7 @@ fn layout_function_definition<'a>(
     let stack_size = (stack.size() + argument_area_size).next_multiple_of(16) + 8;
     FunctionDefinition {
         reference,
+        return_slot,
         params,
         inline,
         noreturn,
@@ -577,7 +593,7 @@ fn layout_expression_in_slot<'a>(
             let args = bump
                 .alloc_slice_fill_iter(args.iter().map(|arg| layout_expression(stack, bump, arg)));
             // TODO: handle arguments that are not class INTEGER
-            stack.function_arguments(args);
+            stack.function_arguments(ty.ty, args);
             (slot, Expression::Call { callee, args, is_varargs })
         }
         typecheck::Expression::Negate { minus: _, operand } => {

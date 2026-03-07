@@ -32,6 +32,7 @@ use panko_sema::layout::Initialiser;
 use panko_sema::layout::Layout;
 use panko_sema::layout::LayoutedExpression;
 use panko_sema::layout::Reference;
+use panko_sema::layout::Return;
 use panko_sema::layout::Slot;
 use panko_sema::layout::Statement;
 use panko_sema::layout::Subobject;
@@ -81,6 +82,7 @@ enum Register {
     R8,
     R9,
     R10,
+    R11,
     Rip,
 }
 
@@ -96,6 +98,7 @@ impl Display for Register {
             R8 => "r8",
             R9 => "r9",
             R10 => "r10",
+            R11 => "r11",
             Rip => "rip",
         };
         write!(f, "{s}")
@@ -145,6 +148,7 @@ impl Display for TypedRegister<'_, '_> {
             R8 => ["r8b", "r8w", "r8d", "r8"],
             R9 => ["r9b", "r9w", "r9d", "r9"],
             R10 => ["r10b", "r10w", "r10d", "r10"],
+            R11 => ["r11b", "r11w", "r11d", "r11"],
             Rip => ["there_is_no_8_bit_version_of_rip", "ip", "eip", "rip"],
         };
         let index = match self.ty.size() {
@@ -246,11 +250,18 @@ struct OnStack<'a, T> {
     eightbyte_index: u64,
 }
 
-fn compute_call_abi<'a, T>(items: &[T]) -> (Vec<InRegisters<T>>, Vec<OnStack<T>>)
+fn compute_call_abi<'a, T>(
+    return_ty: &Type,
+    items: &'a [T],
+) -> (Vec<InRegisters<'a, T>>, Vec<OnStack<'a, T>>)
 where
     T: HasType<'a>,
 {
-    let registers = &mut &ARGUMENT_REGISTERS[..];
+    let argument_registers_used = match return_ty.try_classify() {
+        Some(Class::Integer | Class::Pair(PairKind::Integer)) | None => 0,
+        Some(Class::Memory) => 1,
+    };
+    let registers = &mut &ARGUMENT_REGISTERS[argument_registers_used..];
     let mut stack_eightbytes_used = 0;
     items
         .iter()
@@ -441,7 +452,16 @@ impl<'a> Codegen<'a> {
         self.emit_args("sub", &[&Rsp, &def.stack_size]);
         self.current_function = Some(def);
 
-        let (register_parameters, memory_parameters) = compute_call_abi(def.params.0);
+        let return_ty = match def.reference.ty.ty {
+            Type::Function(function_ty) => &function_ty.return_type.ty,
+            _ => unreachable!(),
+        };
+        let (register_parameters, memory_parameters) = compute_call_abi(return_ty, def.params.0);
+
+        match def.return_slot {
+            Return::Void | Return::InRegisters(_) => (),
+            Return::OnStack(reference) => self.emit_args("mov", &[&reference, &Rdi]),
+        }
 
         // Store the register-passed arguments first because copying the stack-passed ones clobbers
         // `rdi`, `rsi` and `rcx`.
@@ -653,13 +673,28 @@ impl<'a> Codegen<'a> {
                 },
             Statement::Compound(stmts) => self.compound_statement(*stmts),
             Statement::Return(expr) => {
+                let function = self.current_function.unwrap();
                 if let Some(expr) = expr.as_ref() {
                     self.expr(expr);
-                    if expr.ty.ty != Type::Void {
-                        self.emit_args("mov", &[&Rax.typed(expr), expr]);
+                    match &function.return_slot {
+                        Return::Void => (),
+                        Return::InRegisters(class) => {
+                            self.load_into_register(expr, 0, &Rax);
+                            match class {
+                                Class::Integer => (),
+                                Class::Memory => unreachable!(),
+                                Class::Pair(PairKind::Integer) =>
+                                    self.load_into_register(expr, 8, &Rdx),
+                            }
+                        }
+                        Return::OnStack(return_slot) => {
+                            let ty = &return_slot.ty.ty;
+                            self.emit_args("mov", &[&R10.with_ty(ty), return_slot]);
+                            self.copy(&Operand::pointer(R10, ty), expr);
+                        }
                     }
                 }
-                self.emit_args("add", &[&Rsp, &self.current_function.unwrap().stack_size]);
+                self.emit_args("add", &[&Rsp, &function.stack_size]);
                 self.emit("ret");
             }
         }
@@ -806,7 +841,7 @@ impl<'a> Codegen<'a> {
                     self.expr(operand);
                     self.expr(value);
                     self.emit_args("mov", &[&R10.typed(operand), operand]);
-                    self.copy(&Operand::pointer(R10, operand), value);
+                    self.copy(&Operand::pointer(R10, &operand.ty.ty), value);
                     if expr.slot != value.slot {
                         self.copy(expr, value);
                     }
@@ -1004,7 +1039,7 @@ impl<'a> Codegen<'a> {
             Expression::Deref(operand) => {
                 self.expr(operand);
                 self.emit_args("mov", &[&R10.typed(operand), operand]);
-                self.copy(expr, &Operand::pointer(R10, operand));
+                self.copy(expr, &Operand::pointer(R10, &operand.ty.ty));
             }
             Expression::Call { callee, args, is_varargs } => {
                 self.expr(callee);
@@ -1013,7 +1048,7 @@ impl<'a> Codegen<'a> {
                     self.expr(arg);
                 }
 
-                let (register_arguments, memory_arguments) = compute_call_abi(args);
+                let (register_arguments, memory_arguments) = compute_call_abi(&expr.ty.ty, args);
 
                 // We have to copy the stack-passed args before loading the register-passed args
                 // because `memcpy` clobbers `rdi`, `rsi` and `rcx`.
@@ -1022,16 +1057,22 @@ impl<'a> Codegen<'a> {
                     self.copy(tgt, arg)
                 }
 
+                let class = expr.ty.ty.try_classify();
+                match class {
+                    Some(Class::Memory) => self.emit_args("lea", &[&Rdi, expr]),
+                    Some(Class::Integer | Class::Pair(PairKind::Integer)) | None => (),
+                }
+
                 for InRegisters { item: arg, registers } in register_arguments {
                     let size = arg.ty.ty.size();
                     match registers {
                         [register] => match size.is_power_of_two() {
                             true => self.emit_args("mov", &[&register.typed(arg), &ByValue(arg)]),
-                            false => self.load_function_argument(arg, 0, register),
+                            false => self.load_into_register(arg, 0, register),
                         },
                         [first, second] => {
                             self.emit_args("mov", &[first, arg]);
-                            self.load_function_argument(arg, 8, second);
+                            self.load_into_register(arg, 8, second);
                         }
                         _ => unreachable!(),
                     }
@@ -1044,8 +1085,18 @@ impl<'a> Codegen<'a> {
                 }
 
                 self.emit_args("call", &[callee]);
-                if expr.ty.ty != Type::Void {
-                    self.emit_args("mov", &[expr, &Rax.typed(expr)]);
+
+                match class {
+                    None => (),
+                    Some(Class::Integer) => match expr.ty.ty.size().is_power_of_two() {
+                        true => self.emit_args("mov", &[&ByValue(expr), &Rax.typed(expr)]),
+                        false => self.store_from_register(expr.slot, &expr.ty.ty, 0, Rax),
+                    },
+                    Some(Class::Pair(PairKind::Integer)) => {
+                        self.emit_args("mov", &[expr, &Rax]);
+                        self.store_from_register(expr.slot, &expr.ty.ty, 8, Rdx);
+                    }
+                    Some(Class::Memory) => (),
                 }
             }
             Expression::Negate(operand) => {
@@ -1114,14 +1165,9 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    fn load_function_argument(
-        &mut self,
-        from: &LayoutedExpression,
-        offset: u64,
-        register: &Register,
-    ) {
-        debug_assert_ne!(*register, Rax);
+    fn load_into_register(&mut self, from: &LayoutedExpression, offset: u64, register: &Register) {
         debug_assert_ne!(*register, R10);
+        debug_assert_ne!(*register, R11);
         let size = from.ty.ty.size().strict_sub(offset);
         self.emit_args("lea", &[&R10, from]);
         let from = Operand::lvalue(R10, from.ty.ty);
@@ -1129,8 +1175,8 @@ impl<'a> Codegen<'a> {
         for i in (0..size).rev() {
             self.emit_args("shl", &[register, &8]);
             let from = from.offset(offset + i);
-            self.emit_args("movzx", &[&Rax.with_ty(&Type::size_t()), &from]);
-            self.emit_args("or", &[register, &Rax]);
+            self.emit_args("movzx", &[&R11.with_ty(&Type::size_t()), &from]);
+            self.emit_args("or", &[register, &R11]);
         }
     }
 
