@@ -474,7 +474,7 @@ impl<'a> TypedExpression<'a> {
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.is_lvalue(),
             Expression::Deref { .. } => self.ty.ty.is_object() && !matches!(self.ty.ty, Type::Void),
             Expression::String(_) => true,
-            Expression::MemberAccess { .. } => true,
+            Expression::MemberAccess { lhs, member: _, member_loc: _ } => lhs.is_lvalue(),
             Expression::Nullptr(_)
             | Expression::Integer { .. }
             | Expression::NoopTypeConversion(_)

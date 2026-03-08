@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/struct/test_error_assign_to_member_access_on_non_lvalue.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to this expression because it is not an lvalue
+   ╭─[panko/tests/cases/struct/test_error_assign_to_member_access_on_non_lvalue.c:8:5]
+   │
+ 8 │     make_struct().member = 42;
+   │     ──────────┬─────────  
+   │               ╰─────────── this expression is not an lvalue
+───╯
+
+Error: cannot assign to this expression because it is not an lvalue
+    ╭─[panko/tests/cases/struct/test_error_assign_to_member_access_on_non_lvalue.c:10:5]
+    │
+ 10 │     (true ? value : value).member = 27;
+    │     ──────────────┬──────────────  
+    │                   ╰──────────────── this expression is not an lvalue
+────╯

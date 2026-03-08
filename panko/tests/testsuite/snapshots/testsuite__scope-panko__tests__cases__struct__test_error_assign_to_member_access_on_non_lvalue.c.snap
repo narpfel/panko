@@ -5,12 +5,12 @@ info:
   args:
     - "--print=scopes"
     - "--stop-after=scopes"
-    - panko/tests/cases/execute/struct/test_error_assign_to_member_access_on_non_lvalue.c
+    - panko/tests/cases/struct/test_error_assign_to_member_access_on_non_lvalue.c
 ---
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit "panko/tests/cases/execute/struct/test_error_assign_to_member_access_on_non_lvalue.c"
+(translation-unit "panko/tests/cases/struct/test_error_assign_to_member_access_on_non_lvalue.c"
    (struct Struct~0
       (member member `int`))
    (struct Struct~0
