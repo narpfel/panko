@@ -1000,15 +1000,8 @@ fn typeck_function_definition<'a>(
     let return_slot = match ty.return_type.ty.try_classify() {
         None => Return::Void,
         Some(class @ (Class::Integer | Class::Pair(_))) => Return::InRegisters(class),
-        Some(Class::Memory) => Return::OnStack(Reference {
-            name: "return",
-            decl_loc: reference.decl_loc,
-            ty: Type::Pointer(ty.return_type).unqualified(),
-            id: return_slot,
-            usage_loc: reference.decl_loc,
-            kind: RefKind::Definition,
-            storage_duration: StorageDuration::Automatic,
-        }),
+        Some(Class::Memory) =>
+            Return::OnStack(typeck_reference(sess, return_slot, NeedsInitialiser::No)),
     };
 
     let params = match ty.params {

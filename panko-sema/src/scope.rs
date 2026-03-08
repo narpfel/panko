@@ -224,7 +224,7 @@ pub(crate) enum Designator<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct FunctionDefinition<'a> {
     pub(crate) reference: Reference<'a>,
-    pub(crate) return_slot: Id,
+    pub(crate) return_slot: Reference<'a>,
     pub(crate) params: ParamRefs<'a>,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
@@ -761,7 +761,7 @@ fn resolve_function_definition<'a>(
             kind,
         ),
     };
-    let (maybe_reference, return_slot) = scopes.add_function(name.slice(), name.loc(), ty, linkage);
+    let maybe_reference = scopes.add_function(name.slice(), name.loc(), ty, linkage);
     let reference = match maybe_reference {
         Ok(reference) => {
             let initialiser = Some(RefInitialiser::FunctionBody);
@@ -777,7 +777,7 @@ fn resolve_function_definition<'a>(
     };
     scopes.push();
 
-    let FunctionType { params, return_type: _, is_varargs } = match ty {
+    let FunctionType { params, return_type, is_varargs } = match ty {
         QualifiedType {
             is_const: false,
             is_volatile: false,
@@ -798,6 +798,17 @@ fn resolve_function_definition<'a>(
             }
         }
     };
+
+    let return_slot = scopes
+        .add(
+            "return",
+            reference.decl_loc,
+            Type::Pointer(return_type).unqualified(),
+            StorageDuration::Automatic,
+            IsParameter::No,
+            IsInGlobalScope::No,
+        )
+        .expect("`return` is a keyword, so there are no types with that name");
 
     let params = scopes.sess.alloc_slice_copy(
         &params
