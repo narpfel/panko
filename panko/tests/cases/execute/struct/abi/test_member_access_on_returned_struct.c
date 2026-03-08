@@ -1,4 +1,3 @@
-// [[known-bug]]
 // [[return: 42]]
 
 struct Struct {

@@ -26,9 +26,9 @@ exit_code: 0
       (main~4 `fn() -> int` (static main))
       (compound-statement
          (return
-            (member `int` @8 value +0
-               (call `struct Struct~0 complete` @void
-                  (addressof `ptr<fn() -> struct Struct~0 complete>` @0
+            (member `int` @0 value +0
+               (call `struct Struct~0 complete` @0
+                  (addressof `ptr<fn() -> struct Struct~0 complete>` @8
                      (make_struct~1 `fn() -> struct Struct~0 complete` (static make_struct)))))))))
 
 ----- stderr -----

@@ -481,6 +481,11 @@ fn layout_expression_in_slot<'a>(
     let make_slot_noborrow =
         |stack: &mut Stack<'a>| target_slot.unwrap_or_else(|| stack.temporary(ty.ty));
     let mut make_slot = || make_slot_noborrow(stack);
+    let make_non_void_slot = |stack: &mut Stack<'a>| {
+        target_slot
+            .filter(|slot| !matches!(slot, Slot::Void))
+            .unwrap_or_else(|| stack.temporary(ty.ty))
+    };
     let (slot, expr) = match expr {
         typecheck::Expression::Error(error) => (make_slot(), Expression::Error(error)),
         typecheck::Expression::Name(name) => {
@@ -588,7 +593,7 @@ fn layout_expression_in_slot<'a>(
             (slot, Expression::Deref(operand))
         }
         typecheck::Expression::Call { callee, args, is_varargs, close_paren: _ } => {
-            let slot = make_slot();
+            let slot = make_non_void_slot(stack);
             let callee = bump.alloc(layout_expression(stack, bump, callee));
             let args = bump
                 .alloc_slice_fill_iter(args.iter().map(|arg| layout_expression(stack, bump, arg)));
@@ -648,9 +653,7 @@ fn layout_expression_in_slot<'a>(
             (slot, Expression::Logical { lhs, op, rhs })
         }
         typecheck::Expression::Conditional { condition, then, or_else } => {
-            let slot = target_slot
-                .filter(|slot| !matches!(slot, Slot::Void))
-                .unwrap_or_else(|| stack.temporary(ty.ty));
+            let slot = make_non_void_slot(stack);
             let then = bump.alloc(layout_expression_in_slot(stack, bump, then, Some(slot)));
             let or_else = bump.alloc(layout_expression_in_slot(stack, bump, or_else, Some(slot)));
             let condition =
