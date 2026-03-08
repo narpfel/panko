@@ -162,6 +162,9 @@ impl fmt::Display for Operand<'_> {
                     Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
                         match is_dereferenced {
                             true => self.ty.size(),
+                            // TODO: there are several spots that use `!is_dereferenced`
+                            // `Class::Pair` structs to copy the first eightbyte of the struct.
+                            // This feels a bit hacky.
                             false => 8,
                         },
                 };
