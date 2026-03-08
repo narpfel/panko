@@ -1,0 +1,34 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/abi/test_member_access_on_returned_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/abi/test_member_access_on_returned_struct.c"
+   (struct Struct~0
+      (member value @0 `int`))
+   (function-definition external
+      make_struct~1 `fn() -> struct Struct~0 complete`
+      (compound-statement
+         (struct Struct~0
+            (member value @0 `int`))
+         (definition value~3 `struct Struct~0 complete`
+            (braced
+               (subobject +0 (42 `int`))))
+         (return (value~3 `struct Struct~0 complete`))))
+   (function-definition external
+      main~4 `fn() -> int`
+      (compound-statement
+         (return
+            (member `int` value +0
+               (call `struct Struct~0 complete`
+                  (addressof `ptr<fn() -> struct Struct~0 complete>`
+                     (make_struct~1 `fn() -> struct Struct~0 complete`))))))))
+
+----- stderr -----

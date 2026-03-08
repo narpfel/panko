@@ -1,0 +1,39 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_error_assign_to_member_access_on_non_lvalue.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_error_assign_to_member_access_on_non_lvalue.c"
+   (struct Struct~0
+      (member member `int`))
+   (struct Struct~0
+      (member member `int`))
+   (declaration make_struct~1 `fn() -> struct Struct~0 complete` ∅)
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (expression
+            (assign
+               (dot member
+                  (call (name make_struct~1 `fn() -> struct Struct~0 complete`)))
+               42))
+         (struct Struct~0
+            (member member `int`))
+         (declaration value~4 `struct Struct~0 complete` (braced ∅))
+         (expression
+            (assign
+               (dot member
+                  (conditional
+                     true
+                     (name value~4 `struct Struct~0 complete`)
+                     (name value~4 `struct Struct~0 complete`)))
+               27)))))
+
+----- stderr -----
