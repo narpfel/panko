@@ -9,6 +9,15 @@ struct Size4 make_size4(int value) {
     return s;
 }
 
+struct Size7 {
+    char string[7];
+};
+
+struct Size7 make_size7() {
+    struct Size7 value = {"size 7"};
+    return value;
+}
+
 struct Size8 {
     long x;
 };
@@ -51,6 +60,10 @@ int main() {
     struct Size4 size4 = make_size4(42);
     // [[print: 42]]
     printf("%d\n", size4.x);
+
+    struct Size7 size7 = make_size7();
+    // [[print: size 7]]
+    printf("%s\n", size7.string);
 
     struct Size8 size8 = make_size8();
     // [[print: 123]]

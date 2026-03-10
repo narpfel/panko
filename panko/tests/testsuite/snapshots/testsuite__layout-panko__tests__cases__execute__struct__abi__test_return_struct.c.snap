@@ -25,76 +25,87 @@ exit_code: 0
             (braced
                (subobject +0 (value~4 `int` @0))))
          (return (s~5 `struct Size4~1 complete` @4))))
-   (struct Size8~6
+   (struct Size7~6
+      (member string @0 `array<char; 7>`))
+   (function-definition external stack-size=24
+      (make_size7~7 `fn() -> struct Size7~6 complete` (static make_size7))
+      (compound-statement
+         (struct Size7~6
+            (member string @0 `array<char; 7>`))
+         (definition (value~9 `struct Size7~6 complete` @0)
+            (braced
+               (subobject +0 (string `array<char; 7>` @void "size 7\0"))))
+         (return (value~9 `struct Size7~6 complete` @0))))
+   (struct Size8~10
       (member x @0 `long`))
    (function-definition external stack-size=24
-      (make_size8~7 `fn() -> struct Size8~6 complete` (static make_size8))
+      (make_size8~11 `fn() -> struct Size8~10 complete` (static make_size8))
       (compound-statement
-         (struct Size8~6
+         (struct Size8~10
             (member x @0 `long`))
-         (definition (value~9 `struct Size8~6 complete` @0) (braced ∅))
+         (definition (value~13 `struct Size8~10 complete` @0) (braced ∅))
          (expression
             (assign `long` @0
                (member `long` @0 x +0
-                  (value~9 `struct Size8~6 complete` @0))
+                  (value~13 `struct Size8~10 complete` @0))
                (sign-extend `long` @0 (123 `int` @8))))
-         (return (value~9 `struct Size8~6 complete` @0))))
-   (struct Size11~10
+         (return (value~13 `struct Size8~10 complete` @0))))
+   (struct Size11~14
       (member string @0 `array<char; 11>`))
    (function-definition external stack-size=56
-      (make_size11~11 `fn(use_numbers: bool) -> struct Size11~10 complete` (static make_size11))
+      (make_size11~15 `fn(use_numbers: bool) -> struct Size11~14 complete` (static make_size11))
       (params
-         (use_numbers~13 `bool` @0))
+         (use_numbers~17 `bool` @0))
       (compound-statement
-         (struct Size11~10
+         (struct Size11~14
             (member string @0 `array<char; 11>`))
-         (definition (numbers~14 `struct Size11~10 complete` @1)
+         (definition (numbers~18 `struct Size11~14 complete` @1)
             (braced
                (subobject +0 (string `array<char; 11>` @void "0123456789\0"))))
-         (struct Size11~10
+         (struct Size11~14
             (member string @0 `array<char; 11>`))
-         (definition (letters~15 `struct Size11~10 complete` @12)
+         (definition (letters~19 `struct Size11~14 complete` @12)
             (braced
                (subobject +0 (string `array<char; 11>` @void "abcdefghij\0"))))
          (return
-            (conditional `struct Size11~10 complete` @23
-               (use_numbers~13 `bool` @0)
-               (numbers~14 `struct Size11~10 complete` @1)
-               (letters~15 `struct Size11~10 complete` @12)))))
-   (struct Size16~16
+            (conditional `struct Size11~14 complete` @23
+               (use_numbers~17 `bool` @0)
+               (numbers~18 `struct Size11~14 complete` @1)
+               (letters~19 `struct Size11~14 complete` @12)))))
+   (struct Size16~20
       (member x @0 `long`)
       (member y @8 `long`))
    (function-definition external stack-size=40
-      (make_size16~17 `fn(x: long, y: long) -> struct Size16~16 complete` (static make_size16))
+      (make_size16~21 `fn(x: long, y: long) -> struct Size16~20 complete` (static make_size16))
       (params
-         (x~19 `long` @0)
-         (y~20 `long` @8))
+         (x~23 `long` @0)
+         (y~24 `long` @8))
       (compound-statement
-         (struct Size16~16
+         (struct Size16~20
             (member x @0 `long`)
             (member y @8 `long`))
-         (definition (value~21 `struct Size16~16 complete` @16)
+         (definition (value~25 `struct Size16~20 complete` @16)
             (braced
-               (subobject +0 (x~19 `long` @0))
-               (subobject +8 (y~20 `long` @8))))
-         (return (value~21 `struct Size16~16 complete` @16))))
-   (struct Size27~22
+               (subobject +0 (x~23 `long` @0))
+               (subobject +8 (y~24 `long` @8))))
+         (return (value~25 `struct Size16~20 complete` @16))))
+   (struct Size27~26
       (member string @0 `array<char; 27>`))
    (function-definition external stack-size=56
-      (make_size27~23 `fn() -> struct Size27~22 complete` (static make_size27))
+      (make_size27~27 `fn() -> struct Size27~26 complete` (static make_size27))
       (compound-statement
-         (struct Size27~22
+         (struct Size27~26
             (member string @0 `array<char; 27>`))
-         (definition (value~25 `struct Size27~22 complete` @8)
+         (definition (value~29 `struct Size27~26 complete` @8)
             (braced
                (subobject +0 (string `array<char; 27>` @void "abcdefghijklmnopqrstuvwxyz\0"))))
-         (return (value~25 `struct Size27~22 complete` @8))))
-   (function-definition external stack-size=120
-      (main~26 `fn() -> int` (static main))
+         (return (value~29 `struct Size27~26 complete` @8))))
+   (function-definition external stack-size=136
+      (main~30 `fn() -> int` (static main))
       (compound-statement
          (struct Size4~1
             (member x @0 `int`))
-         (definition (size4~28 `struct Size4~1 complete` @0)
+         (definition (size4~32 `struct Size4~1 complete` @0)
             (call `struct Size4~1 complete` @0
                (addressof `ptr<fn(value: int) -> struct Size4~1 complete>` @8
                   (make_size4~2 `fn(value: int) -> struct Size4~1 complete` (static make_size4)))
@@ -108,89 +119,107 @@ exit_code: 0
                      (addressof `ptr<array<char; 4>>` @16
                         (string `array<char; 4>` @void "%d\n\0"))))
                (member `int` @0 x +0
-                  (size4~28 `struct Size4~1 complete` @0))))
-         (struct Size8~6
+                  (size4~32 `struct Size4~1 complete` @0))))
+         (struct Size7~6
+            (member string @0 `array<char; 7>`))
+         (definition (size7~33 `struct Size7~6 complete` @4)
+            (call `struct Size7~6 complete` @4
+               (addressof `ptr<fn() -> struct Size7~6 complete>` @16
+                  (make_size7~7 `fn() -> struct Size7~6 complete` (static make_size7)))))
+         (expression
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 4>>` @24
+                        (string `array<char; 4>` @void "%s\n\0"))))
+               (noop-type-conversion `ptr<char>` @32
+                  (addressof `ptr<array<char; 7>>` @32
+                     (member `array<char; 7>` @4 string +0
+                        (size7~33 `struct Size7~6 complete` @4))))))
+         (struct Size8~10
             (member x @0 `long`))
-         (definition (size8~29 `struct Size8~6 complete` @8)
-            (call `struct Size8~6 complete` @8
-               (addressof `ptr<fn() -> struct Size8~6 complete>` @16
-                  (make_size8~7 `fn() -> struct Size8~6 complete` (static make_size8)))))
+         (definition (size8~34 `struct Size8~10 complete` @16)
+            (call `struct Size8~10 complete` @16
+               (addressof `ptr<fn() -> struct Size8~10 complete>` @24
+                  (make_size8~11 `fn() -> struct Size8~10 complete` (static make_size8)))))
          (expression
-            (call `int` @16
-               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @32
-                  (noop-type-conversion `ptr<char>` @32
-                     (addressof `ptr<array<char; 5>>` @32
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 5>>` @40
                         (string `array<char; 5>` @void "%ld\n\0"))))
-               (member `long` @8 x +0
-                  (size8~29 `struct Size8~6 complete` @8))))
-         (struct Size11~10
+               (member `long` @16 x +0
+                  (size8~34 `struct Size8~10 complete` @16))))
+         (struct Size11~14
             (member string @0 `array<char; 11>`))
-         (definition (numbers~30 `struct Size11~10 complete` @16)
-            (call `struct Size11~10 complete` @16
-               (addressof `ptr<fn(use_numbers: bool) -> struct Size11~10 complete>` @32
-                  (make_size11~11 `fn(use_numbers: bool) -> struct Size11~10 complete` (static make_size11)))
-               (1 `bool` @40)))
-         (definition (letters~31 `struct Size11~10 complete` @27)
-            (call `struct Size11~10 complete` @27
-               (addressof `ptr<fn(use_numbers: bool) -> struct Size11~10 complete>` @40
-                  (make_size11~11 `fn(use_numbers: bool) -> struct Size11~10 complete` (static make_size11)))
-               (0 `bool` @48)))
+         (definition (numbers~35 `struct Size11~14 complete` @24)
+            (call `struct Size11~14 complete` @24
+               (addressof `ptr<fn(use_numbers: bool) -> struct Size11~14 complete>` @40
+                  (make_size11~15 `fn(use_numbers: bool) -> struct Size11~14 complete` (static make_size11)))
+               (1 `bool` @48)))
+         (definition (letters~36 `struct Size11~14 complete` @35)
+            (call `struct Size11~14 complete` @35
+               (addressof `ptr<fn(use_numbers: bool) -> struct Size11~14 complete>` @48
+                  (make_size11~15 `fn(use_numbers: bool) -> struct Size11~14 complete` (static make_size11)))
+               (0 `bool` @56)))
          (expression
-            (call `int` @40
-               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @48
+            (call `int` @48
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @56
-                  (noop-type-conversion `ptr<char>` @56
-                     (addressof `ptr<array<char; 7>>` @56
+               (noop-type-conversion `ptr<char const>` @64
+                  (noop-type-conversion `ptr<char>` @64
+                     (addressof `ptr<array<char; 7>>` @64
                         (string `array<char; 7>` @void "%s\n%s\n\0"))))
-               (noop-type-conversion `ptr<char>` @64
-                  (addressof `ptr<array<char; 11>>` @64
-                     (member `array<char; 11>` @16 string +0
-                        (numbers~30 `struct Size11~10 complete` @16))))
                (noop-type-conversion `ptr<char>` @72
                   (addressof `ptr<array<char; 11>>` @72
-                     (member `array<char; 11>` @27 string +0
-                        (letters~31 `struct Size11~10 complete` @27))))))
-         (struct Size16~16
+                     (member `array<char; 11>` @24 string +0
+                        (numbers~35 `struct Size11~14 complete` @24))))
+               (noop-type-conversion `ptr<char>` @80
+                  (addressof `ptr<array<char; 11>>` @80
+                     (member `array<char; 11>` @35 string +0
+                        (letters~36 `struct Size11~14 complete` @35))))))
+         (struct Size16~20
             (member x @0 `long`)
             (member y @8 `long`))
-         (definition (size16~32 `struct Size16~16 complete` @40)
-            (call `struct Size16~16 complete` @40
-               (addressof `ptr<fn(x: long, y: long) -> struct Size16~16 complete>` @56
-                  (make_size16~17 `fn(x: long, y: long) -> struct Size16~16 complete` (static make_size16)))
-               (sign-extend `long` @64 (42 `int` @72))
-               (sign-extend `long` @80 (27 `int` @88))))
+         (definition (size16~37 `struct Size16~20 complete` @48)
+            (call `struct Size16~20 complete` @48
+               (addressof `ptr<fn(x: long, y: long) -> struct Size16~20 complete>` @64
+                  (make_size16~21 `fn(x: long, y: long) -> struct Size16~20 complete` (static make_size16)))
+               (sign-extend `long` @72 (42 `int` @80))
+               (sign-extend `long` @88 (27 `int` @96))))
          (expression
-            (call `int` @56
-               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @64
+            (call `int` @64
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @72
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @72
-                  (noop-type-conversion `ptr<char>` @72
-                     (addressof `ptr<array<char; 9>>` @72
+               (noop-type-conversion `ptr<char const>` @80
+                  (noop-type-conversion `ptr<char>` @80
+                     (addressof `ptr<array<char; 9>>` @80
                         (string `array<char; 9>` @void "%ld %ld\n\0"))))
-               (member `long` @40 x +0
-                  (size16~32 `struct Size16~16 complete` @40))
-               (member `long` @48 y +8
-                  (size16~32 `struct Size16~16 complete` @40))))
-         (struct Size27~22
+               (member `long` @48 x +0
+                  (size16~37 `struct Size16~20 complete` @48))
+               (member `long` @56 y +8
+                  (size16~37 `struct Size16~20 complete` @48))))
+         (struct Size27~26
             (member string @0 `array<char; 27>`))
-         (definition (size27~33 `struct Size27~22 complete` @56)
-            (call `struct Size27~22 complete` @56
-               (addressof `ptr<fn() -> struct Size27~22 complete>` @88
-                  (make_size27~23 `fn() -> struct Size27~22 complete` (static make_size27)))))
+         (definition (size27~38 `struct Size27~26 complete` @64)
+            (call `struct Size27~26 complete` @64
+               (addressof `ptr<fn() -> struct Size27~26 complete>` @96
+                  (make_size27~27 `fn() -> struct Size27~26 complete` (static make_size27)))))
          (expression
-            (call `int` @84
-               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @88
+            (call `int` @92
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @96
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
-               (noop-type-conversion `ptr<char const>` @96
-                  (noop-type-conversion `ptr<char>` @96
-                     (addressof `ptr<array<char; 4>>` @96
+               (noop-type-conversion `ptr<char const>` @104
+                  (noop-type-conversion `ptr<char>` @104
+                     (addressof `ptr<array<char; 4>>` @104
                         (string `array<char; 4>` @void "%s\n\0"))))
-               (noop-type-conversion `ptr<char>` @104
-                  (addressof `ptr<array<char; 27>>` @104
-                     (member `array<char; 27>` @56 string +0
-                        (size27~33 `struct Size27~22 complete` @56)))))))))
+               (noop-type-conversion `ptr<char>` @112
+                  (addressof `ptr<array<char; 27>>` @112
+                     (member `array<char; 27>` @64 string +0
+                        (size27~38 `struct Size27~26 complete` @64)))))))))
 
 ----- stderr -----
