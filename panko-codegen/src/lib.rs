@@ -466,18 +466,7 @@ impl<'a> Codegen<'a> {
         // Store the register-passed arguments first because copying the stack-passed ones clobbers
         // `rdi`, `rsi` and `rcx`.
         for InRegisters { item: param, registers } in register_parameters {
-            let ty = &param.ty.ty;
-            match registers {
-                [register] => match ty.size().is_power_of_two() {
-                    true => self.emit_args("mov", &[&ByValue(param), &register.with_ty(ty)]),
-                    false => self.store_from_register(param.slot(), ty, 0, *register),
-                },
-                [first, second] => {
-                    self.emit_args("mov", &[param, first]);
-                    self.store_from_register(param.slot(), ty, 8, *second);
-                }
-                _ => unreachable!(),
-            }
+            self.store_from_registers(param.slot(), &param.ty.ty, registers);
         }
 
         for OnStack { item: param, eightbyte_index } in memory_parameters {
@@ -1088,14 +1077,10 @@ impl<'a> Codegen<'a> {
 
                 match class {
                     None => (),
-                    Some(Class::Integer) => match expr.ty.ty.size().is_power_of_two() {
-                        true => self.emit_args("mov", &[&ByValue(expr), &Rax.typed(expr)]),
-                        false => self.store_from_register(expr.slot, &expr.ty.ty, 0, Rax),
-                    },
-                    Some(Class::Pair(PairKind::Integer)) => {
-                        self.emit_args("mov", &[expr, &Rax]);
-                        self.store_from_register(expr.slot, &expr.ty.ty, 8, Rdx);
-                    }
+                    Some(Class::Integer) =>
+                        self.store_from_registers(expr.slot, &expr.ty.ty, &[Rax]),
+                    Some(Class::Pair(PairKind::Integer)) =>
+                        self.store_from_registers(expr.slot, &expr.ty.ty, &[Rax, Rdx]),
                     Some(Class::Memory) => (),
                 }
             }
@@ -1177,6 +1162,21 @@ impl<'a> Codegen<'a> {
             let from = from.offset(offset + i);
             self.emit_args("movzx", &[&R11.with_ty(&Type::size_t()), &from]);
             self.emit_args("or", &[register, &R11]);
+        }
+    }
+
+    fn store_from_registers(&mut self, slot: Slot<'a>, ty: &Type<'a>, registers: &[Register]) {
+        let typed_slot = typed(slot, *ty);
+        match registers {
+            [register] => match ty.size().is_power_of_two() {
+                true => self.emit_args("mov", &[&ByValue(&typed_slot), &register.with_ty(ty)]),
+                false => self.store_from_register(slot, ty, 0, *register),
+            },
+            [first, second] => {
+                self.emit_args("mov", &[&typed_slot, first]);
+                self.store_from_register(slot, ty, 8, *second);
+            }
+            _ => unreachable!(),
         }
     }
 
