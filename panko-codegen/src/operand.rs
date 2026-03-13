@@ -91,18 +91,8 @@ pub(super) struct Operand<'a> {
 }
 
 impl<'a> Operand<'a> {
-    fn pointer_into_stack(ty: Type<'a>, offset: u64) -> Self {
-        Self {
-            kind: OperandKind::Pointer {
-                address: Memory {
-                    pointer: Register::Rsp,
-                    index: None,
-                    offset: Offset::Immediate(offset),
-                },
-                is_dereferenced: false,
-            },
-            ty,
-        }
+    fn pointer_into_stack(ty: Type, offset: u64) -> LValue {
+        LValue::new(Register::Rsp, Type::Void).typed_offset(ty, offset)
     }
 
     pub(super) fn lvalue(register: Register, ty: Type<'a>) -> LValue<'a> {
@@ -117,7 +107,7 @@ impl<'a> Operand<'a> {
         Self::lvalue(register, ty.ty)
     }
 
-    pub(super) fn stack_parameter_eightbyte(ty: Type<'a>, index: u64, stack_size: u64) -> Self {
+    pub(super) fn stack_parameter_eightbyte(ty: Type, index: u64, stack_size: u64) -> LValue {
         let offset =
             // skip the callee’s stack
             stack_size
@@ -128,7 +118,7 @@ impl<'a> Operand<'a> {
         Self::pointer_into_stack(ty, offset)
     }
 
-    pub(super) fn stack_argument_eightbyte(ty: Type<'a>, index: u64) -> Self {
+    pub(super) fn stack_argument_eightbyte(ty: Type, index: u64) -> LValue {
         Self::pointer_into_stack(ty, index * 8)
     }
 
@@ -202,6 +192,11 @@ impl<'a> LValue<'a> {
             ty: Type::char(),
             offset: offset + additional_offset,
         }
+    }
+
+    fn typed_offset(self, ty: Type<'a>, offset: u64) -> Self {
+        let Self { register, ty: _, offset } = self.offset(offset);
+        Self { register, ty, offset }
     }
 }
 
