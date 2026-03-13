@@ -95,7 +95,7 @@ impl<'a> Operand<'a> {
         LValue::new(Register::Rsp, Type::Void).typed_offset(ty, offset)
     }
 
-    pub(super) fn lvalue(register: Register, ty: Type<'a>) -> LValue<'a> {
+    pub(super) fn lvalue(register: Register, ty: Type) -> LValue {
         LValue::new(register, ty)
     }
 
