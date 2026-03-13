@@ -1729,6 +1729,8 @@ fn check_assignable<'a>(
         }
         else {
             assert!(!target.is_modifiable());
+            // TODO: give a reason why `target` is not assignable (e. g. “because it is declared
+            // `const`” or “because it has a member declared `const`”)
             match target.expr.unwrap_parens() {
                 Expression::Name(reference) => sess.emit(Diagnostic::AssignmentToConstName {
                     at: &target.expr,
