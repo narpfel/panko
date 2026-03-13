@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/struct/test_error_assign_to_const_member_of_struct.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to `const` expression
+    ╭─[panko/tests/cases/struct/test_error_assign_to_const_member_of_struct.c:10:5]
+    │
+ 10 │     value.y = 123;
+    │     ───┬───  
+    │        ╰───── this value is `const`
+────╯

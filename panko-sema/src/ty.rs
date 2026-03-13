@@ -582,6 +582,23 @@ impl<'a> QualifiedType<'a, Typeck> {
             loc: *loc,
         })
     }
+
+    pub(crate) fn is_modifiable(&self) -> bool {
+        let Self { is_const, is_volatile: _, ty, loc: _ } = self;
+        let aggregate_members_are_modifiable = || match ty {
+            Type::Typeof { expr, unqual: _ } => match *expr {},
+            Type::Arithmetic(_)
+            | Type::Pointer(_)
+            | Type::Array(_)
+            | Type::Function(_)
+            | Type::Void
+            | Type::Nullptr
+            | Type::Struct(Struct::Incomplete { .. }) => true,
+            Type::Struct(Struct::Complete(Complete { name: _, id: _, members })) =>
+                members.iter().all(|member| member.ty.is_modifiable()),
+        };
+        !is_const && aggregate_members_are_modifiable()
+    }
 }
 
 impl<T: Step> fmt::Display for QualifiedType<'_, T> {

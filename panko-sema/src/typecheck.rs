@@ -506,7 +506,7 @@ impl<'a> TypedExpression<'a> {
     }
 
     fn is_modifiable(&self) -> bool {
-        !self.ty.is_const
+        self.ty.is_modifiable()
     }
 }
 
@@ -1734,9 +1734,9 @@ fn check_assignable<'a>(
                     at: &target.expr,
                     decl: reference.at_decl(),
                 }),
-                Expression::Deref { .. } =>
+                Expression::Deref { .. } | Expression::MemberAccess { .. } =>
                     sess.emit(Diagnostic::AssignmentToConst { at: target.expr }),
-                _ => todo!("for const struct members etc."),
+                _ => unreachable!("other expression kinds are not lvalues"),
             }
         };
         sess.alloc(TypedExpression { ty: target.ty, expr: error })

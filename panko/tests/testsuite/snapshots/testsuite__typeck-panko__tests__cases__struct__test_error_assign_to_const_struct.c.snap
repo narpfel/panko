@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/struct/test_error_assign_to_const_struct.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to `const` value `const_value`
+    ╭─[panko/tests/cases/struct/test_error_assign_to_const_struct.c:10:5]
+    │
+  9 │     struct Struct const const_value = value;
+    │                         ─────┬─────  
+    │                              ╰─────── note: `const_value` declared here
+ 10 │     const_value = value;
+    │     ─────┬─────  
+    │          ╰─────── this value is `const`
+────╯

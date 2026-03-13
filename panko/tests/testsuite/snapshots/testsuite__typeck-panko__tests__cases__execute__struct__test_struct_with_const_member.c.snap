@@ -1,0 +1,78 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_struct_with_const_member.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_struct_with_const_member.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct Struct~1
+      (member x @0 `int`)
+      (member y @4 `int const`)
+      (member z @8 `int`))
+   (function-definition external
+      make_struct~2 `fn() -> struct Struct~1 complete`
+      (compound-statement
+         (struct Struct~1
+            (member x @0 `int`)
+            (member y @4 `int const`)
+            (member z @8 `int`))
+         (definition value~4 `struct Struct~1 complete`
+            (braced
+               (subobject +0 (1 `int`))
+               (subobject +4 (2 `int`))
+               (subobject +8 (3 `int`))))
+         (return (value~4 `struct Struct~1 complete`))))
+   (function-definition external
+      print_struct~5 `fn(value: struct Struct~1 complete) -> void`
+      (params
+         value~7 `struct Struct~1 complete`)
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "%d %d %d\n\0"))))
+               (member `int` x +0
+                  (value~7 `struct Struct~1 complete`))
+               (member `int const` y +4
+                  (value~7 `struct Struct~1 complete`))
+               (member `int` z +8
+                  (value~7 `struct Struct~1 complete`))))))
+   (function-definition external
+      main~8 `fn() -> int`
+      (compound-statement
+         (struct Struct~1
+            (member x @0 `int`)
+            (member y @4 `int const`)
+            (member z @8 `int`))
+         (definition value~10 `struct Struct~1 complete`
+            (call `struct Struct~1 complete`
+               (addressof `ptr<fn() -> struct Struct~1 complete>`
+                  (make_struct~2 `fn() -> struct Struct~1 complete`))))
+         (expression
+            (assign `int`
+               (member `int` x +0
+                  (value~10 `struct Struct~1 complete`))
+               (42 `int`)))
+         (expression
+            (assign `int`
+               (member `int` z +8
+                  (value~10 `struct Struct~1 complete`))
+               (27 `int`)))
+         (expression
+            (call `void`
+               (addressof `ptr<fn(value: struct Struct~1 complete) -> void>`
+                  (print_struct~5 `fn(value: struct Struct~1 complete) -> void`))
+               (value~10 `struct Struct~1 complete`))))))
+
+----- stderr -----

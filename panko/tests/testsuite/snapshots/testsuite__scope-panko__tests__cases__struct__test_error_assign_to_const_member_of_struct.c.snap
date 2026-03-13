@@ -1,0 +1,46 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/struct/test_error_assign_to_const_member_of_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/struct/test_error_assign_to_const_member_of_struct.c"
+   (struct Struct~0
+      (member x `int`)
+      (member y `int const`)
+      (member z `int`))
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (struct Struct~0
+            (member x `int`)
+            (member y `int const`)
+            (member z `int`))
+         (declaration value~3 `struct Struct~0 complete`
+            (braced
+               1
+               2
+               3))
+         (expression
+            (assign
+               (dot x
+                  (name value~3 `struct Struct~0 complete`))
+               42))
+         (expression
+            (assign
+               (dot y
+                  (name value~3 `struct Struct~0 complete`))
+               123))
+         (expression
+            (assign
+               (dot z
+                  (name value~3 `struct Struct~0 complete`))
+               27)))))
+
+----- stderr -----

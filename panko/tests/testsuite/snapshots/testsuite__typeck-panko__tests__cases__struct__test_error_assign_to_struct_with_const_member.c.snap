@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/struct/test_error_assign_to_struct_with_const_member.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to `const` value `value`
+    ╭─[panko/tests/cases/struct/test_error_assign_to_struct_with_const_member.c:10:5]
+    │
+  8 │     struct Struct value = {1, 2, 3};
+    │                   ──┬──  
+    │                     ╰──── note: `value` declared here
+    │ 
+ 10 │     value = copy;
+    │     ──┬──  
+    │       ╰──── this value is `const`
+────╯
