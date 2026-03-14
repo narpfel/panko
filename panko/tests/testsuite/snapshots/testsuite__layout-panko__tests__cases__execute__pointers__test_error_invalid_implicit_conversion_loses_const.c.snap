@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/pointers/test_error_invalid_implicit_conversion_loses_const.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_error_invalid_implicit_conversion_loses_const.c"
+   (function-definition external stack-size=24
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (x~2 `int const` @0) (42 `int` @0))
+         (definition (p~3 `ptr<int>` @8)
+            (noop-type-conversion `ptr<int>` @8
+               (addressof `ptr<int const>` @8
+                  (x~2 `int const` @0)))))))
+
+----- stderr -----

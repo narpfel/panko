@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/pointers/test_error_invalid_implicit_conversion_loses_const.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_error_invalid_implicit_conversion_loses_const.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration x~2 `int const` 42)
+         (declaration p~3 `ptr<int>` (addressof (name x~2 `int const`))))))
+
+----- stderr -----
