@@ -1,4 +1,3 @@
-#![feature(closure_lifetime_binder)]
 #![feature(iter_map_windows)]
 #![feature(type_alias_impl_trait)]
 #![feature(unqualified_local_imports)]

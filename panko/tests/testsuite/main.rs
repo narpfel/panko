@@ -1,5 +1,4 @@
 #![feature(gen_blocks)]
-#![feature(iterator_try_collect)]
 #![feature(unqualified_local_imports)]
 
 use std::collections::HashSet;

@@ -1,6 +1,4 @@
-#![feature(assert_matches)]
 #![feature(bstr)]
-#![feature(if_let_guard)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
@@ -641,14 +639,9 @@ impl<'a> Codegen<'a> {
                 match reference.slot() {
                     Slot::Automatic(_) => self.initialise(reference, initialiser.as_ref()),
                     Slot::Static(name) if reference.ty.ty.is_object() => {
-                        self.deferred_definitions.insert(
-                            name,
-                            (
-                                reference.linkage(),
-                                reference.ty.ty,
-                                try { StaticInitialiser::from(initialiser.as_ref()?) },
-                            ),
-                        );
+                        let initialiser = try { StaticInitialiser::from(initialiser.as_ref()?) };
+                        let deferred = (reference.linkage(), reference.ty.ty, initialiser);
+                        self.deferred_definitions.insert(name, deferred);
                     }
                     Slot::Static(_) => (),
                     Slot::Void | Slot::StaticWithOffset { .. } => unreachable!(),

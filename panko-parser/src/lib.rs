@@ -1,8 +1,6 @@
-#![feature(assert_matches)]
 #![feature(closure_track_caller)]
 #![feature(coverage_attribute)]
 #![feature(gen_blocks)]
-#![feature(if_let_guard)]
 #![feature(never_type)]
 #![feature(stmt_expr_attributes)]
 #![feature(try_blocks)]

@@ -436,6 +436,7 @@ impl<'a> Expander<'a> {
     fn push(&mut self, expanding: Expanding<'a>) {
         match expanding {
             Expanding::Argument(Argument { call, update_hideset, .. }) =>
+                #[expect(clippy::collapsible_match, reason = "TODO: false positive")]
                 if update_hideset {
                     assert!(self.hidden.remove(call.name))
                 },
@@ -448,6 +449,7 @@ impl<'a> Expander<'a> {
     fn done(&mut self, expanding: &Expanding<'a>) {
         match expanding {
             Expanding::Argument(Argument { call, update_hideset, .. }) =>
+                #[expect(clippy::collapsible_match, reason = "TODO: false positive")]
                 if *update_hideset {
                     assert!(self.hidden.insert(call.name))
                 },
