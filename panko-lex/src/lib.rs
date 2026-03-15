@@ -459,7 +459,7 @@ fn skip_block_comment(lexer: &mut Lexer<TokenKind>) -> Result<Skip, ErrorKind> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Logos)]
 #[logos(error = ErrorKind)]
 #[logos(skip r"[ \r\t\f]+")]
-#[logos(skip r"//[^\n]*")]
+#[logos(skip r"//[^\n]*?")]
 pub enum TokenKind {
     Error(ErrorKind),
 
