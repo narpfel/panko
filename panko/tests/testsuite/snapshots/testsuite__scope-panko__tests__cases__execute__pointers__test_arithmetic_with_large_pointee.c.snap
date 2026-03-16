@@ -1,0 +1,48 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/pointers/test_arithmetic_with_large_pointee.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_arithmetic_with_large_pointee.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration malloc~1 `fn(∅: typeof((sizeof 0))) -> ptr<void>` ∅)
+   (struct Large~2
+      (member ten_gb `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof `struct Large~2 complete`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal (sizeof `struct Large~2 complete`) (multiply (multiply (multiply (multiply (sizeof `char`) 10) 1024) 1024) 1024))))
+         (struct Large~2
+            (member ten_gb `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
+         (declaration p~5 `ptr<struct Large~2 complete>`
+            (call (name malloc~1 `fn(∅: typeof((sizeof 0))) -> ptr<void>`)
+               (multiply 20 (sizeof `struct Large~2 complete`))))
+         (struct Large~2
+            (member ten_gb `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
+         (declaration third~6 `ptr<struct Large~2 complete>` (add (name p~5 `ptr<struct Large~2 complete>`) 3))
+         (declaration difference~7 `typeof((subtract (name third~6 `ptr<struct Large~2 complete>`) (name p~5 `ptr<struct Large~2 complete>`)))` (subtract (name third~6 `ptr<struct Large~2 complete>`) (name p~5 `ptr<struct Large~2 complete>`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%td\n")
+               (name difference~7 `typeof((subtract (name third~6 `ptr<struct Large~2 complete>`) (name p~5 `ptr<struct Large~2 complete>`)))`)))
+         (declaration byte_difference~8 `typeof((name difference~7 `typeof((subtract (name third~6 `ptr<struct Large~2 complete>`) (name p~5 `ptr<struct Large~2 complete>`)))`))` (subtract (cast `ptr<char>` (name third~6 `ptr<struct Large~2 complete>`)) (cast `ptr<char>` (name p~5 `ptr<struct Large~2 complete>`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal (name byte_difference~8 `typeof((name difference~7 `typeof((subtract (name third~6 `ptr<struct Large~2 complete>`) (name p~5 `ptr<struct Large~2 complete>`)))`))`) (multiply 3 (sizeof `struct Large~2 complete`))))))))
+
+----- stderr -----

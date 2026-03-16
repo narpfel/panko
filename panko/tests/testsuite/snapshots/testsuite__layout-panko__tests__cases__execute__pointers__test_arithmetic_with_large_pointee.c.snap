@@ -1,0 +1,96 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/pointers/test_arithmetic_with_large_pointee.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_arithmetic_with_large_pointee.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration external (malloc~1 `fn(∅: unsigned long) -> ptr<void>` (static malloc)) ∅)
+   (struct Large~2
+      (member ten_gb @0 `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
+   (function-definition external stack-size=104
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (10737418240 `unsigned long` @24)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (equal `int` @24
+                  (10737418240 `unsigned long` @32)
+                  (multiply `unsigned long` @40
+                     (multiply `unsigned long` @40
+                        (multiply `unsigned long` @40
+                           (multiply `unsigned long` @40
+                              (1 `unsigned long` @40)
+                              (sign-extend `unsigned long` @48 (10 `int` @56)))
+                           (sign-extend `unsigned long` @48 (1024 `int` @56)))
+                        (sign-extend `unsigned long` @48 (1024 `int` @56)))
+                     (sign-extend `unsigned long` @48 (1024 `int` @56))))))
+         (struct Large~2
+            (member ten_gb @0 `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
+         (definition (p~5 `ptr<struct Large~2 complete>` @0)
+            (noop-type-conversion `ptr<struct Large~2 complete>` @0
+               (call `ptr<void>` @0
+                  (addressof `ptr<fn(∅: unsigned long) -> ptr<void>>` @8
+                     (malloc~1 `fn(∅: unsigned long) -> ptr<void>` (static malloc)))
+                  (multiply `unsigned long` @16
+                     (sign-extend `unsigned long` @16 (20 `int` @24))
+                     (10737418240 `unsigned long` @32)))))
+         (struct Large~2
+            (member ten_gb @0 `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
+         (definition (third~6 `ptr<struct Large~2 complete>` @8)
+            (ptr-add `ptr<struct Large~2 complete>` @8
+               (p~5 `ptr<struct Large~2 complete>` @0)
+               (sign-extend `unsigned long` @16 (3 `int` @24))))
+         (definition (difference~7 `long` @16)
+            (ptr-diff `long` @16
+               (third~6 `ptr<struct Large~2 complete>` @8)
+               (p~5 `ptr<struct Large~2 complete>` @0)))
+         (expression
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 5>>` @40
+                        (string `array<char; 5>` @void "%td\n\0"))))
+               (difference~7 `long` @16)))
+         (definition (byte_difference~8 `long` @24)
+            (ptr-diff `long` @24
+               (noop-type-conversion `ptr<char>` @8 (third~6 `ptr<struct Large~2 complete>` @8))
+               (noop-type-conversion `ptr<char>` @0 (p~5 `ptr<struct Large~2 complete>` @0))))
+         (expression
+            (call `int` @32
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 4>>` @48
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (equal `int` @56
+                  (noop-type-conversion `unsigned long` @24 (byte_difference~8 `long` @24))
+                  (multiply `unsigned long` @64
+                     (sign-extend `unsigned long` @64 (3 `int` @72))
+                     (10737418240 `unsigned long` @80))))))))
+
+----- stderr -----

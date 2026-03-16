@@ -1,0 +1,71 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/pointers/test_arithmetic_with_large_pointee.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_arithmetic_with_large_pointee.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration external malloc~1 `fn(∅: unsigned long) -> ptr<void>` ∅)
+   (struct Large~2
+      (member ten_gb @0 `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
+   (function-definition external
+      main~3 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "%zu\n\0"))))
+               (sizeof `unsigned long` 10737418240 `struct Large~2 complete`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (equal `int` (sizeof `unsigned long` 10737418240 `struct Large~2 complete`) (multiply `unsigned long` (multiply `unsigned long` (multiply `unsigned long` (multiply `unsigned long` (sizeof `unsigned long` 1 `char`) (sign-extend `unsigned long` (10 `int`))) (sign-extend `unsigned long` (1024 `int`))) (sign-extend `unsigned long` (1024 `int`))) (sign-extend `unsigned long` (1024 `int`))))))
+         (struct Large~2
+            (member ten_gb @0 `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
+         (definition p~5 `ptr<struct Large~2 complete>`
+            (noop-type-conversion `ptr<struct Large~2 complete>`
+               (call `ptr<void>`
+                  (addressof `ptr<fn(∅: unsigned long) -> ptr<void>>`
+                     (malloc~1 `fn(∅: unsigned long) -> ptr<void>`))
+                  (multiply `unsigned long` (sign-extend `unsigned long` (20 `int`)) (sizeof `unsigned long` 10737418240 `struct Large~2 complete`)))))
+         (struct Large~2
+            (member ten_gb @0 `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
+         (definition third~6 `ptr<struct Large~2 complete>` (ptr-add `ptr<struct Large~2 complete>` (p~5 `ptr<struct Large~2 complete>`) (sign-extend `unsigned long` (3 `int`))))
+         (definition difference~7 `long` (ptr-diff `long` (third~6 `ptr<struct Large~2 complete>`) (p~5 `ptr<struct Large~2 complete>`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "%td\n\0"))))
+               (difference~7 `long`)))
+         (definition byte_difference~8 `long` (ptr-diff `long` (noop-type-conversion `ptr<char>` (third~6 `ptr<struct Large~2 complete>`)) (noop-type-conversion `ptr<char>` (p~5 `ptr<struct Large~2 complete>`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (equal `int` (noop-type-conversion `unsigned long` (byte_difference~8 `long`)) (multiply `unsigned long` (sign-extend `unsigned long` (3 `int`)) (sizeof `unsigned long` 10737418240 `struct Large~2 complete`))))))))
+
+----- stderr -----
