@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration value~3 `struct Incomplete~2` ∅)
+         (expression
+            (dot member
+               (name value~3 `struct Incomplete~2`)))
+         (declaration pointer~4 `ptr<struct Incomplete~2>` ∅)
+         (expression
+            (arrow member
+               (name pointer~4 `ptr<struct Incomplete~2>`))))))
+
+----- stderr -----

@@ -1,0 +1,47 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot declare variable `value` with incomplete type `struct Incomplete~2`
+   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c:2:23]
+   │
+ 2 │     struct Incomplete value;
+   │                       ──┬──  
+   │                         ╰──── declared here
+───╯
+
+Error: member access on incomplete struct type `struct Incomplete~2`
+   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c:3:5]
+   │
+ 3 │     value.member;
+   │     ──┬─────────  
+   │       │           
+   │       ╰─────────── this expression has incomplete struct type `struct Incomplete~2`
+───╯
+
+Error: dereference of pointer to incomplete type `struct Incomplete~2`
+   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c:5:5]
+   │
+ 5 │     pointer->member;
+   │     ───┬───  
+   │        ╰───── this expression has type `ptr<struct Incomplete~2>`
+───╯
+
+Error: member access on incomplete struct type `struct Incomplete~2`
+   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c:5:5]
+   │
+ 5 │     pointer->member;
+   │     ────┬──────────  
+   │         │            
+   │         ╰──────────── this expression has incomplete struct type `struct Incomplete~2`
+───╯

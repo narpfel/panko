@@ -2404,7 +2404,11 @@ fn typeck_expression<'a>(
             let name = member_tok.slice();
             let member = match lhs.ty.ty {
                 Type::Struct(Struct::Incomplete { name: _, id: _ }) =>
-                    error_todo!(lhs, "member access on incomplete struct type"),
+                    return sess.emit(Diagnostic::MemberAccessOnIncompleteStruct {
+                        at: *lhs,
+                        op: token,
+                        member: *member_tok,
+                    }),
                 Type::Struct(Struct::Complete(Complete { name: _, id: _, members })) => members
                     .iter()
                     .find(|member| member.name == name)

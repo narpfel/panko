@@ -581,6 +581,19 @@ pub(super) enum Diagnostic<'a> {
         at: Token<'a>,
         ty: QualifiedType<'a>,
     },
+
+    #[error("member access on incomplete struct type `{ty}`")]
+    #[with(ty = at.ty)]
+    #[diagnostics(
+        at(colour = Red, label = "this expression has incomplete struct type `{ty}`"),
+        op(colour = Magenta),
+        member(colour = Blue),
+    )]
+    MemberAccessOnIncompleteStruct {
+        at: TypedExpression<'a>,
+        op: Token<'a>,
+        member: Token<'a>,
+    },
 }
 
 fn describe_ty_completeness(ty: &QualifiedType) -> (&'static str, &'static str, &'static str) {
