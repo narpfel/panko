@@ -2403,18 +2403,21 @@ fn typeck_expression<'a>(
             let lhs = sess.alloc(typeck_expression(sess, lhs, Context::Default));
             let name = member_tok.slice();
             let member = match lhs.ty.ty {
-                Type::Struct(Struct::Incomplete { name: _, id: _ }) =>
-                    return sess.emit(Diagnostic::MemberAccessOnIncompleteStruct {
-                        at: *lhs,
-                        op: token,
-                        member: *member_tok,
-                    }),
                 Type::Struct(Struct::Complete(Complete { name: _, id: _, members })) => members
                     .iter()
                     .find(|member| member.name == name)
                     .copied()
                     .unwrap_or_else(|| error_todo!(lhs, "no such member {}", name)),
-                _ => error_todo!(lhs, "member access on non-struct or -union type"),
+                ty =>
+                    return sess.emit(Diagnostic::MemberAccessOnIncompleteOrNonStruct {
+                        at: *lhs,
+                        op: token,
+                        member: *member_tok,
+                        kind: match ty {
+                            Type::Struct(_) => "incomplete struct",
+                            _ => "non-struct-or-union",
+                        },
+                    }),
             };
             TypedExpression {
                 ty: member.ty.merge_qualifiers(&lhs.ty),

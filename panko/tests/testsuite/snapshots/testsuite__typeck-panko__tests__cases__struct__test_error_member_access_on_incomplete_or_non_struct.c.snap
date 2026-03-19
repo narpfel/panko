@@ -3,9 +3,9 @@ source: panko/tests/testsuite/main.rs
 info:
   program: panko
   args:
-    - "--print=layout"
-    - "--stop-after=layout"
-    - panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/struct/test_error_member_access_on_incomplete_or_non_struct.c
 ---
 success: false
 exit_code: 1
@@ -13,7 +13,7 @@ exit_code: 1
 
 ----- stderr -----
 Error: cannot declare variable `value` with incomplete type `struct Incomplete~2`
-   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c:2:23]
+   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_or_non_struct.c:2:23]
    │
  2 │     struct Incomplete value;
    │                       ──┬──  
@@ -21,7 +21,7 @@ Error: cannot declare variable `value` with incomplete type `struct Incomplete~2
 ───╯
 
 Error: member access on incomplete struct type `struct Incomplete~2`
-   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c:3:5]
+   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_or_non_struct.c:3:5]
    │
  3 │     value.member;
    │     ──┬─────────  
@@ -30,7 +30,7 @@ Error: member access on incomplete struct type `struct Incomplete~2`
 ───╯
 
 Error: dereference of pointer to incomplete type `struct Incomplete~2`
-   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c:5:5]
+   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_or_non_struct.c:5:5]
    │
  5 │     pointer->member;
    │     ───┬───  
@@ -38,10 +38,28 @@ Error: dereference of pointer to incomplete type `struct Incomplete~2`
 ───╯
 
 Error: member access on incomplete struct type `struct Incomplete~2`
-   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c:5:5]
+   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_or_non_struct.c:5:5]
    │
  5 │     pointer->member;
    │     ────┬──────────  
    │         │            
    │         ╰──────────── this expression has incomplete struct type `struct Incomplete~2`
+───╯
+
+Error: member access on non-struct-or-union type `int`
+   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_or_non_struct.c:7:5]
+   │
+ 7 │     x.member;
+   │     ┬───────  
+   │     │         
+   │     ╰───────── this expression has non-struct-or-union type `int`
+───╯
+
+Error: member access on non-struct-or-union type `bool`
+   ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_or_non_struct.c:8:5]
+   │
+ 8 │     true.member;
+   │     ──┬────────  
+   │       │          
+   │       ╰────────── this expression has non-struct-or-union type `bool`
 ───╯

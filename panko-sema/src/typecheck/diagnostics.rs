@@ -582,17 +582,18 @@ pub(super) enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
     },
 
-    #[error("member access on incomplete struct type `{ty}`")]
+    #[error("member access on {kind} type `{ty}`")]
     #[with(ty = at.ty)]
     #[diagnostics(
-        at(colour = Red, label = "this expression has incomplete struct type `{ty}`"),
+        at(colour = Red, label = "this expression has {kind} type `{ty}`"),
         op(colour = Magenta),
         member(colour = Blue),
     )]
-    MemberAccessOnIncompleteStruct {
+    MemberAccessOnIncompleteOrNonStruct {
         at: TypedExpression<'a>,
         op: Token<'a>,
         member: Token<'a>,
+        kind: &'a str,
     },
 }
 

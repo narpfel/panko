@@ -5,12 +5,12 @@ info:
   args:
     - "--print=scopes"
     - "--stop-after=scopes"
-    - panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c
+    - panko/tests/cases/struct/test_error_member_access_on_incomplete_or_non_struct.c
 ---
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit "panko/tests/cases/struct/test_error_member_access_on_incomplete_struct.c"
+(translation-unit "panko/tests/cases/struct/test_error_member_access_on_incomplete_or_non_struct.c"
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
@@ -21,6 +21,13 @@ exit_code: 0
          (declaration pointer~4 `ptr<struct Incomplete~2>` ∅)
          (expression
             (arrow member
-               (name pointer~4 `ptr<struct Incomplete~2>`))))))
+               (name pointer~4 `ptr<struct Incomplete~2>`)))
+         (declaration x~5 `int` 42)
+         (expression
+            (dot member
+               (name x~5 `int`)))
+         (expression
+            (dot member
+               true)))))
 
 ----- stderr -----
