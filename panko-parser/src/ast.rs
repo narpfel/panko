@@ -763,13 +763,7 @@ pub(crate) enum ParsedSpecifiers<'a> {
         unqual: bool,
         ty: &'a QualifiedType<'a>,
     },
-    IncompleteStruct {
-        name: Token<'a>,
-    },
-    CompleteStruct {
-        name: Option<Token<'a>>,
-        members: &'a [cst::Declaration<'a>],
-    },
+    Struct(cst::Struct<'a>),
 }
 
 impl<'a> ParsedSpecifiers<'a> {
@@ -798,16 +792,18 @@ impl<'a> ParsedSpecifiers<'a> {
             Self::Typedef(token) => Type::Typedef(token),
             Self::Typeof { unqual, expr } => Type::Typeof { unqual, expr },
             Self::TypeofTy { unqual, ty } => Type::TypeofTy { unqual, ty },
-            Self::IncompleteStruct { name } => Type::Struct(Struct::Incomplete { name }),
-            Self::CompleteStruct { name, members } => Type::Struct(Struct::Complete {
-                name,
-                members: sess.alloc_slice_copy(
-                    &members
-                        .iter()
-                        .flat_map(|member| Member::parse(sess, member))
-                        .collect_vec(),
-                ),
-            }),
+            Self::Struct(cst::Struct::Incomplete { name }) =>
+                Type::Struct(Struct::Incomplete { name }),
+            Self::Struct(cst::Struct::Complete { name, members }) =>
+                Type::Struct(Struct::Complete {
+                    name,
+                    members: sess.alloc_slice_copy(
+                        &members
+                            .iter()
+                            .flat_map(|member| Member::parse(sess, member))
+                            .collect_vec(),
+                    ),
+                }),
         }
     }
 }

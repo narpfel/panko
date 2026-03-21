@@ -518,10 +518,7 @@ impl<'a> TypeSpecifier<'a> {
             }),
             Kind::Typeof { unqual, expr } => exclusive(Parsed::Typeof { unqual, expr }),
             Kind::TypeofTy { unqual, ty } => exclusive(Parsed::TypeofTy { unqual, ty }),
-            Kind::Struct(Struct::Incomplete { name }) =>
-                exclusive(Parsed::IncompleteStruct { name }),
-            Kind::Struct(Struct::Complete { name, members }) =>
-                exclusive(Parsed::CompleteStruct { name, members }),
+            Kind::Struct(r#struct) => exclusive(Parsed::Struct(r#struct)),
             _ => todo!("unimplemented type specifier: {self:#?}"),
         }
     }
