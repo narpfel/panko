@@ -27,7 +27,7 @@ jobs:
 
           git \
             clone https://github.com/narpfel/delta-c \
-            --revision=23e1e25e3980918063660e601ecbf59924d62f63
+            --revision=130458791e59b9803fbc9aa1bd6739166baef59f
 
           python delta-c/Δc.py \
             origin/"${{ github.base_ref }}" \
