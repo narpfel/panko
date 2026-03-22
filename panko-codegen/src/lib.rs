@@ -394,8 +394,9 @@ impl<'a> Codegen<'a> {
             }
             Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
             Type::Typeof { expr, unqual: _ } => match *expr {},
-            Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
+            Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
+                unreachable!("incomplete"),
+            Type::Struct(Struct::Complete(Complete { name: _, id: _, kind: _, members: _ })) =>
                 self.memcpy(&tgt, &src, ty.size()),
         }
     }

@@ -8,6 +8,7 @@
 #![feature(unqualified_local_imports)]
 
 use std::cell::RefCell;
+use std::fmt;
 use std::iter::empty;
 use std::path::Path;
 
@@ -32,6 +33,7 @@ use crate::ast::ParsedSpecifiers;
 use crate::ast::QualifiedType;
 use crate::ast::Signedness;
 pub use crate::preprocess::preprocess;
+use crate::sexpr_builder::AsSExpr as _;
 
 mod as_sexpr;
 pub mod ast;
@@ -351,6 +353,26 @@ fn type_qualifier_kind(token_kind: TokenKind) -> TypeQualifierKind {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum StructKind {
+    Struct,
+    Union,
+}
+
+impl fmt::Display for StructKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_sexpr())
+    }
+}
+
+fn struct_kind(token_kind: TokenKind) -> StructKind {
+    match token_kind {
+        TokenKind::Struct => StructKind::Struct,
+        TokenKind::Union => StructKind::Union,
+        _ => unreachable!(),
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 struct TypeSpecifier<'a> {
     token: Token<'a>,
@@ -365,28 +387,31 @@ impl<'a> TypeSpecifier<'a> {
         }
     }
 
-    fn incomplete_struct(r#struct: Token<'a>, name: Token<'a>) -> Self {
+    fn incomplete_struct(struct_or_union: Token<'a>, name: Token<'a>) -> Self {
+        let kind = struct_kind(struct_or_union.kind);
         Self {
-            token: r#struct,
-            kind: TypeSpecifierKind::Struct(Struct::Incomplete { name }),
+            token: struct_or_union,
+            kind: TypeSpecifierKind::Struct(Struct::Incomplete { name, kind }),
         }
     }
 
     fn r#struct(
-        r#struct: Token<'a>,
+        struct_or_union: Token<'a>,
         name: Option<Token<'a>>,
         members: &'a [Declaration<'a>],
     ) -> Self {
+        let kind = struct_kind(struct_or_union.kind);
         Self {
-            token: r#struct,
-            kind: TypeSpecifierKind::Struct(Struct::Complete { name, members }),
+            token: struct_or_union,
+            kind: TypeSpecifierKind::Struct(Struct::Complete { name, kind, members }),
         }
     }
 
     fn loc(&self) -> Loc<'a> {
         match self.kind {
             TypeSpecifierKind::Struct(
-                Struct::Incomplete { name } | Struct::Complete { name: Some(name), members: _ },
+                Struct::Incomplete { name, kind: _ }
+                | Struct::Complete { name: Some(name), kind: _, members: _ },
             ) => self.token.loc().until(name.loc()),
             _ => self.token.loc(),
         }
@@ -528,9 +553,11 @@ impl<'a> TypeSpecifier<'a> {
 enum Struct<'a> {
     Incomplete {
         name: Token<'a>,
+        kind: StructKind,
     },
     Complete {
         name: Option<Token<'a>>,
+        kind: StructKind,
         members: &'a [Declaration<'a>],
     },
 }

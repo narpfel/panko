@@ -9,6 +9,7 @@ use panko_lex::EncodingPrefix;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser::NO_VALUE;
+use panko_parser::StructKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
@@ -124,13 +125,14 @@ impl<T: Step> fmt::Display for FunctionType<'_, T> {
 pub struct Complete<'a, T: Step> {
     pub name: Option<&'a str>,
     pub id: Id,
+    pub kind: StructKind,
     pub members: &'a [T::Member<'a>],
 }
 
 impl<T: Step> AsSExpr for Complete<'_, T> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name, id, members } = self;
-        SExpr::new("struct")
+        let Self { name, id, kind, members } = self;
+        kind.as_sexpr()
             .inline_string(format!("{name}~{id}", name = name.as_sexpr(), id = id.0))
             .lines_explicit_empty(*members)
     }
@@ -138,15 +140,26 @@ impl<T: Step> AsSExpr for Complete<'_, T> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Struct<'a, T: Step> {
-    Incomplete { name: &'a str, id: Id },
+    Incomplete {
+        name: &'a str,
+        id: Id,
+        kind: StructKind,
+    },
     Complete(Complete<'a, T>),
 }
 
 impl<T: Step> Struct<'_, T> {
     pub(crate) fn id(&self) -> Id {
         match self {
-            Self::Incomplete { name: _, id }
-            | Self::Complete(Complete { name: _, id, members: _ }) => *id,
+            Self::Incomplete { name: _, id, kind: _ }
+            | Self::Complete(Complete { name: _, id, kind: _, members: _ }) => *id,
+        }
+    }
+
+    pub(crate) fn kind(&self) -> StructKind {
+        match self {
+            Self::Incomplete { name: _, id: _, kind }
+            | Self::Complete(Complete { name: _, id: _, kind, members: _ }) => *kind,
         }
     }
 }
@@ -154,7 +167,7 @@ impl<T: Step> Struct<'_, T> {
 impl<T: Step> AsSExpr for Struct<'_, T> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            Self::Incomplete { name: _, id: _ } => Discard.as_sexpr(),
+            Self::Incomplete { name: _, id: _, kind: _ } => Discard.as_sexpr(),
             Self::Complete(complete) => complete.as_sexpr(),
         }
     }
@@ -364,9 +377,12 @@ where
             Type::Void => unreachable!("void is not an object and doesn’t have a size"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => Self::size_t().size(),
-            Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Struct(Struct::Complete(Complete { name: _, id: _, members })) => {
-                let last_member = members.last().expect("empty structs are not allowed");
+            Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
+                unreachable!("incomplete"),
+            Type::Struct(Struct::Complete(Complete { name: _, id: _, kind, members })) => {
+                let last_member = members
+                    .last()
+                    .unwrap_or_else(|| panic!("empty {kind}s are not allowed"));
                 (last_member.offset + last_member.ty.ty.size()).next_multiple_of(self.align())
             }
         }
@@ -382,12 +398,13 @@ where
             Type::Void => unreachable!("void is not an object and doesn’t have an alignment"),
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => Self::size_t().align(),
-            Type::Struct(Struct::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Struct(Struct::Complete(Complete { name: _, id: _, members })) => members
+            Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
+                unreachable!("incomplete"),
+            Type::Struct(Struct::Complete(Complete { name: _, id: _, kind, members })) => members
                 .iter()
                 .map(|member| member.ty.ty.align())
                 .max()
-                .expect("empty structs are not allowed"),
+                .unwrap_or_else(|| panic!("empty {kind}s are not allowed")),
         }
     }
 
@@ -411,7 +428,7 @@ where
             Type::Void => false,
             Type::Typeof { expr, unqual: _ } => match *expr {},
             Type::Nullptr => true,
-            Type::Struct(Struct::Incomplete { name: _, id: _ }) => false,
+            Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) => false,
             Type::Struct(Struct::Complete(_)) => true,
         }
     }
@@ -476,10 +493,10 @@ impl<T: Step> fmt::Display for Type<'_, T> {
                 expr.as_sexpr(),
             ),
             Type::Nullptr => write!(f, "nullptr_t"),
-            Type::Struct(Struct::Incomplete { name, id }) =>
-                write!(f, "struct {name}~{id}", id = id.0),
-            Type::Struct(Struct::Complete(Complete { name, id, members: _ })) =>
-                write!(f, "struct {}~{} complete", name.as_sexpr(), id.0),
+            Type::Struct(Struct::Incomplete { name, id, kind }) =>
+                write!(f, "{kind} {name}~{id}", id = id.0),
+            Type::Struct(Struct::Complete(Complete { name, id, kind, members: _ })) =>
+                write!(f, "{kind} {}~{} complete", name.as_sexpr(), id.0),
         }
     }
 }
@@ -594,7 +611,7 @@ impl<'a> QualifiedType<'a, Typeck> {
             | Type::Void
             | Type::Nullptr
             | Type::Struct(Struct::Incomplete { .. }) => true,
-            Type::Struct(Struct::Complete(Complete { name: _, id: _, members })) =>
+            Type::Struct(Struct::Complete(Complete { name: _, id: _, kind: _, members })) =>
                 members.iter().all(|member| member.ty.is_modifiable()),
         };
         !is_const && aggregate_members_are_modifiable()

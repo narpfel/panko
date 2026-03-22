@@ -27,6 +27,7 @@ use crate::ParameterDeclaration;
 use crate::Pointer;
 use crate::PrimaryBlock;
 use crate::StorageClassSpecifier;
+use crate::StructKind;
 use crate::TranslationUnit;
 use crate::TypeQualifier;
 use crate::TypeSpecifier;
@@ -103,6 +104,16 @@ impl AsSExpr for TypeQualifier<'_> {
 impl AsSExpr for TypeSpecifier<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::string(self.token.slice())
+    }
+}
+
+impl AsSExpr for StructKind {
+    fn as_sexpr(&self) -> SExpr {
+        let s = match self {
+            Self::Struct => "struct",
+            Self::Union => "union",
+        };
+        SExpr::string(s)
     }
 }
 

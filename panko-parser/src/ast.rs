@@ -28,6 +28,7 @@ use crate::JumpStatement;
 use crate::NO_VALUE;
 use crate::PrimaryBlock;
 use crate::StorageClassSpecifierKind;
+use crate::StructKind;
 use crate::TypeQualifier;
 use crate::TypeQualifierKind;
 use crate::TypeSpecifierQualifier::Qualifier;
@@ -330,9 +331,11 @@ pub struct ParameterDeclaration<'a> {
 pub enum Struct<'a> {
     Incomplete {
         name: Token<'a>,
+        kind: StructKind,
     },
     Complete {
         name: Option<Token<'a>>,
+        kind: StructKind,
         members: &'a [Member<'a>],
     },
 }
@@ -351,7 +354,10 @@ impl<'a> Member<'a> {
         let (type_decl, member_decls) = Declaration::from_parse_tree(sess, member);
         assert_matches!(
             type_decl,
-            None | Some(TypeDeclaration::Struct(Struct::Incomplete { name: _ })),
+            None | Some(TypeDeclaration::Struct(Struct::Incomplete {
+                name: _,
+                kind: _,
+            })),
             "TODO: structs in structs (also special-case unnamed structs here)",
         );
         member_decls.map(|member| {
@@ -491,9 +497,9 @@ impl fmt::Display for Type<'_> {
                 if *unqual { "_unqual" } else { "" },
                 ty.as_sexpr(),
             ),
-            Type::Struct(Struct::Incomplete { name }) => write!(f, "struct {}", name.slice()),
-            Type::Struct(Struct::Complete { name, members: _ }) =>
-                write!(f, "struct {} complete", name.as_sexpr()),
+            Type::Struct(Struct::Incomplete { name, kind }) => write!(f, "{kind} {}", name.slice()),
+            Type::Struct(Struct::Complete { name, kind, members: _ }) =>
+                write!(f, "{kind} {} complete", name.as_sexpr()),
         }
     }
 }
@@ -792,11 +798,12 @@ impl<'a> ParsedSpecifiers<'a> {
             Self::Typedef(token) => Type::Typedef(token),
             Self::Typeof { unqual, expr } => Type::Typeof { unqual, expr },
             Self::TypeofTy { unqual, ty } => Type::TypeofTy { unqual, ty },
-            Self::Struct(cst::Struct::Incomplete { name }) =>
-                Type::Struct(Struct::Incomplete { name }),
-            Self::Struct(cst::Struct::Complete { name, members }) =>
+            Self::Struct(cst::Struct::Incomplete { name, kind }) =>
+                Type::Struct(Struct::Incomplete { name, kind }),
+            Self::Struct(cst::Struct::Complete { name, kind, members }) =>
                 Type::Struct(Struct::Complete {
                     name,
+                    kind,
                     members: sess.alloc_slice_copy(
                         &members
                             .iter()

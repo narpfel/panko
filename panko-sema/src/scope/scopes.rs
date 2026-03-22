@@ -3,6 +3,7 @@ use std::collections::hash_map::Entry;
 use std::collections::hash_map::OccupiedEntry;
 
 use panko_lex::Loc;
+use panko_parser::StructKind;
 use panko_parser::ast;
 use panko_parser::ast::Session;
 use panko_parser::nonempty;
@@ -234,12 +235,12 @@ impl<'a> Scopes<'a> {
         self.struct_entry(name).map(|entry| *entry.get())
     }
 
-    pub(super) fn lookup_or_add_struct(&mut self, name: &'a str) -> Type<'a> {
+    pub(super) fn lookup_or_add_struct(&mut self, name: &'a str, kind: StructKind) -> Type<'a> {
         self.lookup_struct(name).unwrap_or_else(|| {
             let id = self.id();
             *self
                 .lookup_struct_innermost(name)
-                .insert_entry(Type::Struct(Struct::Incomplete { name, id }))
+                .insert_entry(Type::Struct(Struct::Incomplete { name, id, kind }))
                 .get()
         })
     }
@@ -247,12 +248,13 @@ impl<'a> Scopes<'a> {
     pub(super) fn lookup_or_add_complete_struct(
         &mut self,
         name: Option<&'a str>,
+        kind: StructKind,
         members: &'a [ast::Member<'a>],
     ) -> (Type<'a>, Option<Type<'a>>) {
         let previous_definition = try { self.lookup_struct(name?)? };
 
         // forward declare so that `name` is available in the body
-        let forward_decl = try { self.lookup_or_add_struct(name?) };
+        let forward_decl = try { self.lookup_or_add_struct(name?, kind) };
 
         self.open_new_scope();
         let members = super::resolve_struct_members(self, members);
@@ -263,7 +265,7 @@ impl<'a> Scopes<'a> {
             Some(_) => unreachable!(),
             None => self.id(),
         };
-        let ty = Type::Struct(Struct::Complete(Complete { name, id, members }));
+        let ty = Type::Struct(Struct::Complete(Complete { name, id, kind, members }));
 
         if let Some(name) = name {
             // complete the forward declaration

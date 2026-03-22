@@ -20,6 +20,7 @@ use panko_parser::IncrementOpKind;
 use panko_parser::LogicalOp;
 use panko_parser::MemberAccessOp;
 use panko_parser::MemberAccessOpKind;
+use panko_parser::StructKind;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast::Arithmetic;
@@ -672,7 +673,7 @@ fn typeck_function_ty<'a>(
         | Type::Struct(Struct::Complete(_)) => (),
         Type::Array(_)
         | Type::Function(_)
-        | Type::Struct(Struct::Incomplete { name: _, id: _ }) =>
+        | Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
             sess.emit(Diagnostic::InvalidFunctionReturnType { at: *return_type }),
         Type::Typeof { expr, unqual: _ } => match expr {},
     }
@@ -739,9 +740,9 @@ fn typeck_ty_with_initialiser<'a>(
             }
         }
         ty::Type::Nullptr => Type::Nullptr,
-        ty::Type::Struct(Struct::Incomplete { name, id }) =>
-            Type::Struct(Struct::Incomplete { name, id }),
-        ty::Type::Struct(Struct::Complete(Complete { name, id, members })) => {
+        ty::Type::Struct(Struct::Incomplete { name, id, kind }) =>
+            Type::Struct(Struct::Incomplete { name, id, kind }),
+        ty::Type::Struct(Struct::Complete(Complete { name, id, kind, members })) => {
             let size = &mut 0_u64;
             let members = sess.alloc_slice_fill_iter(members.iter().map(|member| {
                 let NoHashEq(scope::Member { name, ty }) = *member;
@@ -758,11 +759,14 @@ fn typeck_ty_with_initialiser<'a>(
                     }
                 };
                 *size = size.next_multiple_of(align);
-                let offset = *size;
+                let offset = match kind {
+                    StructKind::Struct => *size,
+                    StructKind::Union => 0,
+                };
                 *size += ty_size;
                 Member { name: name.slice(), ty, offset }
             }));
-            Type::Struct(Struct::Complete(Complete { name, id, members }))
+            Type::Struct(Struct::Complete(Complete { name, id, kind, members }))
         }
     };
     QualifiedType { is_const, is_volatile, ty, loc }
@@ -956,7 +960,10 @@ fn convert<'a>(
             if kind == ConversionKind::Explicit =>
             convert(),
 
-        (Type::Struct(lhs), Type::Struct(rhs)) if lhs.id() == rhs.id() => return expr,
+        (Type::Struct(lhs), Type::Struct(rhs)) if lhs.id() == rhs.id() => {
+            assert_eq!(lhs.kind(), rhs.kind());
+            return expr;
+        }
 
         _ => sess.emit(Diagnostic::InvalidConversion {
             at: expr,
@@ -2318,15 +2325,28 @@ fn typeck_expression<'a>(
                 (Type::Nullptr, ty @ (Type::Pointer(_) | Type::Nullptr))
                 | (ty @ Type::Pointer(_), Type::Nullptr) => ty,
 
-                (Type::Struct(Struct::Incomplete { name: _, id: _ }), _)
-                | (_, Type::Struct(Struct::Incomplete { name: _, id: _ })) =>
+                (Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }), _)
+                | (_, Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ })) =>
                 // TODO: this is used in error recovery, should this also emit an error?
                     then.ty.ty,
 
                 (
-                    Type::Struct(Struct::Complete(Complete { name: _, id: lhs_id, members: _ })),
-                    Type::Struct(Struct::Complete(Complete { name: _, id: rhs_id, members: _ })),
-                ) if lhs_id == rhs_id => then.ty.ty,
+                    Type::Struct(Struct::Complete(Complete {
+                        name: _,
+                        id: lhs_id,
+                        kind: lhs_kind,
+                        members: _,
+                    })),
+                    Type::Struct(Struct::Complete(Complete {
+                        name: _,
+                        id: rhs_id,
+                        kind: rhs_kind,
+                        members: _,
+                    })),
+                ) if lhs_id == rhs_id => {
+                    assert_eq!(lhs_kind, rhs_kind);
+                    then.ty.ty
+                }
 
                 (Type::Struct(Struct::Complete(_)), _)
                 | (_, ty::Type::Struct(Struct::Complete(_))) => {
@@ -2403,18 +2423,20 @@ fn typeck_expression<'a>(
             let lhs = sess.alloc(typeck_expression(sess, lhs, Context::Default));
             let name = member_tok.slice();
             let member = match lhs.ty.ty {
-                Type::Struct(Struct::Complete(Complete { name: _, id: _, members })) => members
-                    .iter()
-                    .find(|member| member.name == name)
-                    .copied()
-                    .unwrap_or_else(|| error_todo!(lhs, "no such member {}", name)),
+                Type::Struct(Struct::Complete(Complete { name: _, id: _, kind: _, members })) =>
+                    members
+                        .iter()
+                        .find(|member| member.name == name)
+                        .copied()
+                        .unwrap_or_else(|| error_todo!(lhs, "no such member {}", name)),
                 ty =>
                     return sess.emit(Diagnostic::MemberAccessOnIncompleteOrNonStruct {
                         at: *lhs,
                         op: token,
                         member: *member_tok,
                         kind: match ty {
-                            Type::Struct(_) => "incomplete struct",
+                            Type::Struct(r#struct) =>
+                                sess.alloc_str(&format!("incomplete {}", r#struct.kind())),
                             _ => "non-struct-or-union",
                         },
                     }),

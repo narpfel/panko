@@ -1,5 +1,6 @@
 use std::num::NonZero;
 
+use panko_parser::StructKind;
 use panko_parser::nonempty;
 
 use crate::ty::ArrayType;
@@ -40,7 +41,10 @@ impl<'a> SubobjectIterator<'a> {
     fn new(ty: &Type<'a>, offset: u64) -> Result<Self, ()> {
         match *ty {
             Type::Array(ty) => Ok(Self::Array { ty, index: 0, offset }),
-            Type::Struct(Struct::Complete(ty)) => Ok(Self::Struct { ty, index: 0, offset }),
+            Type::Struct(Struct::Complete(ty)) => match ty.kind {
+                StructKind::Struct => Ok(Self::Struct { ty, index: 0, offset }),
+                StructKind::Union => todo!("subobjects for union"),
+            },
             ty if ty.is_scalar() => Ok(Self::Scalar { ty, is_exhausted: false, offset }),
             _ => Err(()),
         }
@@ -189,7 +193,14 @@ impl<'a> Subobjects<'a> {
                 Type::Array(ty) =>
                     self.push(SubobjectIterator::Array { ty, index: 0, offset: subobject.offset }),
                 struct_ty @ Type::Struct(Struct::Complete(ty)) if initialiser_ty != &struct_ty =>
-                    self.push(SubobjectIterator::Struct { ty, index: 0, offset: subobject.offset }),
+                    match ty.kind {
+                        StructKind::Struct => self.push(SubobjectIterator::Struct {
+                            ty,
+                            index: 0,
+                            offset: subobject.offset,
+                        }),
+                        StructKind::Union => todo!(),
+                    },
                 _ => {
                     if let (_, explicit @ Explicit::Next) = self.stack.last_mut() {
                         *explicit = Explicit::No;

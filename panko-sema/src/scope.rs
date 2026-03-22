@@ -714,10 +714,13 @@ fn resolve_function_ty<'a>(
 
 fn resolve_struct<'a>(scopes: &mut Scopes<'a>, r#struct: &Struct<'a>) -> Type<'a> {
     match r#struct {
-        Struct::Incomplete { name } => scopes.lookup_or_add_struct(name.slice()),
-        Struct::Complete { name, members } => {
-            let (ty, _previous_definition) =
-                scopes.lookup_or_add_complete_struct(try { name.as_ref()?.slice() }, members);
+        Struct::Incomplete { name, kind } => scopes.lookup_or_add_struct(name.slice(), *kind),
+        Struct::Complete { name, kind, members } => {
+            let (ty, _previous_definition) = scopes.lookup_or_add_complete_struct(
+                try { name.as_ref()?.slice() },
+                *kind,
+                members,
+            );
             // TODO: implement check that `ty` is a valid redeclaration of `_previous_definition`
             ty
         }
