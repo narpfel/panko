@@ -359,6 +359,15 @@ pub enum StructKind {
     Union,
 }
 
+impl StructKind {
+    pub fn str(&self) -> &'static str {
+        match self {
+            Self::Struct => "struct",
+            Self::Union => "union",
+        }
+    }
+}
+
 impl fmt::Display for StructKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_sexpr())

@@ -1,0 +1,42 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/struct/test_error_excess_initialisers_in_braced_initialisation_of_union.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/struct/test_error_excess_initialisers_in_braced_initialisation_of_union.c"
+   (union IntInt~0
+      (member i `int`)
+      (member u `unsigned int`))
+   (struct T~1
+      (member x `int`)
+      (member y `int`))
+   (union IntStruct~2
+      (member x `int`)
+      (member t `struct T~1 complete`))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (union IntInt~0
+            (member i `int`)
+            (member u `unsigned int`))
+         (declaration int_int~5 `union IntInt~0 complete`
+            (braced
+               1
+               2))
+         (union IntStruct~2
+            (member x `int`)
+            (member t `struct T~1 complete`))
+         (declaration int_struct~6 `union IntStruct~2 complete`
+            (braced
+               1
+               2
+               3)))))
+
+----- stderr -----

@@ -109,11 +109,7 @@ impl AsSExpr for TypeSpecifier<'_> {
 
 impl AsSExpr for StructKind {
     fn as_sexpr(&self) -> SExpr {
-        let s = match self {
-            Self::Struct => "struct",
-            Self::Union => "union",
-        };
-        SExpr::string(s)
+        SExpr::string(self.str())
     }
 }
 

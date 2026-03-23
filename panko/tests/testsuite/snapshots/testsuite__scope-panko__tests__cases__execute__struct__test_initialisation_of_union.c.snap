@@ -1,0 +1,83 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_initialisation_of_union.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_initialisation_of_union.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (union IntInt~1
+      (member i `int`)
+      (member u `unsigned int`))
+   (struct T~2
+      (member x `unsigned int`)
+      (member y `unsigned int`))
+   (union StructInt~3
+      (member t `struct T~2 complete`)
+      (member x `int`))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (union IntInt~1
+            (member i `int`)
+            (member u `unsigned int`))
+         (declaration int_int~6 `union IntInt~1 complete`
+            (braced
+               (negate 1)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal
+                  (cast `long`
+                     (dot i
+                        (name int_int~6 `union IntInt~1 complete`)))
+                  (negate 1LL))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal
+                  (cast `long`
+                     (dot u
+                        (name int_int~6 `union IntInt~1 complete`)))
+                  0xffff'ffffLL)))
+         (union StructInt~3
+            (member t `struct T~2 complete`)
+            (member x `int`))
+         (declaration struct_int~7 `union StructInt~3 complete`
+            (braced
+               0xffff'ffff
+               42))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal
+                  (cast `long`
+                     (dot x
+                        (dot t
+                           (name struct_int~7 `union StructInt~3 complete`))))
+                  0xffff'ffffLL)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal
+                  (cast `long`
+                     (dot y
+                        (dot t
+                           (name struct_int~7 `union StructInt~3 complete`))))
+                  42LL)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal
+                  (cast `long`
+                     (dot x
+                        (name struct_int~7 `union StructInt~3 complete`)))
+                  (negate 1LL)))))))
+
+----- stderr -----

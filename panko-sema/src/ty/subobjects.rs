@@ -41,10 +41,7 @@ impl<'a> SubobjectIterator<'a> {
     fn new(ty: &Type<'a>, offset: u64) -> Result<Self, ()> {
         match *ty {
             Type::Array(ty) => Ok(Self::Array { ty, index: 0, offset }),
-            Type::Struct(Struct::Complete(ty)) => match ty.kind {
-                StructKind::Struct => Ok(Self::Struct { ty, index: 0, offset }),
-                StructKind::Union => todo!("subobjects for union"),
-            },
+            Type::Struct(Struct::Complete(ty)) => Ok(Self::Struct { ty, index: 0, offset }),
             ty if ty.is_scalar() => Ok(Self::Scalar { ty, is_exhausted: false, offset }),
             _ => Err(()),
         }
@@ -104,7 +101,10 @@ impl<'a> SubobjectIterator<'a> {
                     todo!("VLAs cannot be initialised by braced initialisation"),
                 ArrayLength::Unknown => false,
             },
-            Self::Struct { ty, index, offset: _ } => *index >= ty.members.len(),
+            Self::Struct { ty, index, offset: _ } => match ty.kind {
+                StructKind::Struct => *index >= ty.members.len(),
+                StructKind::Union => *index > 0,
+            },
         }
     }
 
@@ -112,7 +112,7 @@ impl<'a> SubobjectIterator<'a> {
         match self {
             Self::Scalar { .. } => "scalar",
             Self::Array { .. } => "array",
-            Self::Struct { .. } => "struct",
+            Self::Struct { ty, .. } => ty.kind.str(),
         }
     }
 }
