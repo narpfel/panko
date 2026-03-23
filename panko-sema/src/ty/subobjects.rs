@@ -193,14 +193,7 @@ impl<'a> Subobjects<'a> {
                 Type::Array(ty) =>
                     self.push(SubobjectIterator::Array { ty, index: 0, offset: subobject.offset }),
                 struct_ty @ Type::Struct(Struct::Complete(ty)) if initialiser_ty != &struct_ty =>
-                    match ty.kind {
-                        StructKind::Struct => self.push(SubobjectIterator::Struct {
-                            ty,
-                            index: 0,
-                            offset: subobject.offset,
-                        }),
-                        StructKind::Union => todo!(),
-                    },
+                    self.push(SubobjectIterator::Struct { ty, index: 0, offset: subobject.offset }),
                 _ => {
                     if let (_, explicit @ Explicit::Next) = self.stack.last_mut() {
                         *explicit = Explicit::No;

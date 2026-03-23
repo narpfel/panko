@@ -12,22 +12,27 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/struct/test_initialisation_of_union.c"
    (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (union IntInt~1
+   (declaration external memcmp~1 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int` ∅)
+   (union IntInt~2
       (member i @0 `int`)
       (member u @0 `unsigned int`))
-   (struct T~2
+   (struct T~3
       (member x @0 `unsigned int`)
       (member y @4 `unsigned int`))
-   (union StructInt~3
-      (member t @0 `struct T~2 complete`)
+   (union StructInt~4
+      (member t @0 `struct T~3 complete`)
       (member x @0 `int`))
+   (struct ContainsUnion~5
+      (member x @0 `int`)
+      (member struct_int @4 `union StructInt~4 complete`)
+      (member y @12 `int`))
    (function-definition external
-      main~4 `fn() -> int`
+      main~6 `fn() -> int`
       (compound-statement
-         (union IntInt~1
+         (union IntInt~2
             (member i @0 `int`)
             (member u @0 `unsigned int`))
-         (definition int_int~6 `union IntInt~1 complete`
+         (definition int_int~8 `union IntInt~2 complete`
             (braced
                (subobject +0 (negate `int` (1 `int`)))))
          (expression
@@ -42,7 +47,7 @@ exit_code: 0
                   (noop-type-conversion `long long`
                      (sign-extend `long`
                         (member `int` i +0
-                           (int_int~6 `union IntInt~1 complete`))))
+                           (int_int~8 `union IntInt~2 complete`))))
                   (negate `long long` (1LL `long long`)))))
          (expression
             (call `int`
@@ -56,12 +61,12 @@ exit_code: 0
                   (noop-type-conversion `long long`
                      (zero-extend `long`
                         (member `unsigned int` u +0
-                           (int_int~6 `union IntInt~1 complete`))))
+                           (int_int~8 `union IntInt~2 complete`))))
                   (0xffff'ffffLL `long long`))))
-         (union StructInt~3
-            (member t @0 `struct T~2 complete`)
+         (union StructInt~4
+            (member t @0 `struct T~3 complete`)
             (member x @0 `int`))
-         (definition struct_int~7 `union StructInt~3 complete`
+         (definition struct_int~9 `union StructInt~4 complete`
             (braced
                (subobject +0 (0xffff'ffff `unsigned int`))
                (subobject +4 (noop-type-conversion `unsigned int` (42 `int`)))))
@@ -77,8 +82,8 @@ exit_code: 0
                   (noop-type-conversion `long long`
                      (zero-extend `long`
                         (member `unsigned int` x +0
-                           (member `struct T~2 complete` t +0
-                              (struct_int~7 `union StructInt~3 complete`)))))
+                           (member `struct T~3 complete` t +0
+                              (struct_int~9 `union StructInt~4 complete`)))))
                   (0xffff'ffffLL `long long`))))
          (expression
             (call `int`
@@ -92,8 +97,8 @@ exit_code: 0
                   (noop-type-conversion `long long`
                      (zero-extend `long`
                         (member `unsigned int` y +4
-                           (member `struct T~2 complete` t +0
-                              (struct_int~7 `union StructInt~3 complete`)))))
+                           (member `struct T~3 complete` t +0
+                              (struct_int~9 `union StructInt~4 complete`)))))
                   (42LL `long long`))))
          (expression
             (call `int`
@@ -107,7 +112,104 @@ exit_code: 0
                   (noop-type-conversion `long long`
                      (sign-extend `long`
                         (member `int` x +0
-                           (struct_int~7 `union StructInt~3 complete`))))
-                  (negate `long long` (1LL `long long`))))))))
+                           (struct_int~9 `union StructInt~4 complete`))))
+                  (negate `long long` (1LL `long long`)))))
+         (struct ContainsUnion~5
+            (member x @0 `int`)
+            (member struct_int @4 `union StructInt~4 complete`)
+            (member y @12 `int`))
+         (definition contains_union~10 `struct ContainsUnion~5 complete`
+            (braced
+               (subobject +0 (2 `int`))
+               (subobject +4 (0xffff'ffff `unsigned int`))
+               (subobject +8 (0xffff'fffe `unsigned int`))
+               (subobject +12 (3 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (member `int` x +0
+                  (contains_union~10 `struct ContainsUnion~5 complete`))
+               (member `int` y +12
+                  (contains_union~10 `struct ContainsUnion~5 complete`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (equal `int`
+                  (noop-type-conversion `long long`
+                     (zero-extend `long`
+                        (member `unsigned int` x +0
+                           (member `struct T~3 complete` t +0
+                              (member `union StructInt~4 complete` struct_int +4
+                                 (contains_union~10 `struct ContainsUnion~5 complete`))))))
+                  (0xffff'ffffLL `long long`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (equal `int`
+                  (noop-type-conversion `long long`
+                     (zero-extend `long`
+                        (member `unsigned int` y +4
+                           (member `struct T~3 complete` t +0
+                              (member `union StructInt~4 complete` struct_int +4
+                                 (contains_union~10 `struct ContainsUnion~5 complete`))))))
+                  (0xffff'fffeLL `long long`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (equal `int`
+                  (noop-type-conversion `long long`
+                     (sign-extend `long`
+                        (member `int` x +0
+                           (member `union StructInt~4 complete` struct_int +4
+                              (contains_union~10 `struct ContainsUnion~5 complete`)))))
+                  (negate `long long` (1LL `long long`)))))
+         (struct ContainsUnion~5
+            (member x @0 `int`)
+            (member struct_int @4 `union StructInt~4 complete`)
+            (member y @12 `int`))
+         (definition contains_union_2~11 `struct ContainsUnion~5 complete`
+            (braced
+               (subobject +0 (2 `int`))
+               (subobject +4 (0xffff'ffff `unsigned int`))
+               (subobject +8 (0xffff'fffe `unsigned int`))
+               (subobject +12 (3 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int>`
+                     (memcmp~1 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: unsigned long) -> int`))
+                  (noop-type-conversion `ptr<void const>`
+                     (addressof `ptr<struct ContainsUnion~5 complete>`
+                        (contains_union~10 `struct ContainsUnion~5 complete`)))
+                  (noop-type-conversion `ptr<void const>`
+                     (addressof `ptr<struct ContainsUnion~5 complete>`
+                        (contains_union_2~11 `struct ContainsUnion~5 complete`)))
+                  (sizeof `unsigned long` 16 (contains_union~10 `struct ContainsUnion~5 complete`))))))))
 
 ----- stderr -----

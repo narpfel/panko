@@ -12,22 +12,27 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/struct/test_initialisation_of_union.c"
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (union IntInt~1
+   (declaration memcmp~1 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int` ∅)
+   (union IntInt~2
       (member i `int`)
       (member u `unsigned int`))
-   (struct T~2
+   (struct T~3
       (member x `unsigned int`)
       (member y `unsigned int`))
-   (union StructInt~3
-      (member t `struct T~2 complete`)
+   (union StructInt~4
+      (member t `struct T~3 complete`)
       (member x `int`))
+   (struct ContainsUnion~5
+      (member x `int`)
+      (member struct_int `union StructInt~4 complete`)
+      (member y `int`))
    (function-definition
-      main~4 `fn() -> int`
+      main~6 `fn() -> int`
       (compound-statement
-         (union IntInt~1
+         (union IntInt~2
             (member i `int`)
             (member u `unsigned int`))
-         (declaration int_int~6 `union IntInt~1 complete`
+         (declaration int_int~8 `union IntInt~2 complete`
             (braced
                (negate 1)))
          (expression
@@ -36,7 +41,7 @@ exit_code: 0
                (equal
                   (cast `long`
                      (dot i
-                        (name int_int~6 `union IntInt~1 complete`)))
+                        (name int_int~8 `union IntInt~2 complete`)))
                   (negate 1LL))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
@@ -44,12 +49,12 @@ exit_code: 0
                (equal
                   (cast `long`
                      (dot u
-                        (name int_int~6 `union IntInt~1 complete`)))
+                        (name int_int~8 `union IntInt~2 complete`)))
                   0xffff'ffffLL)))
-         (union StructInt~3
-            (member t `struct T~2 complete`)
+         (union StructInt~4
+            (member t `struct T~3 complete`)
             (member x `int`))
-         (declaration struct_int~7 `union StructInt~3 complete`
+         (declaration struct_int~9 `union StructInt~4 complete`
             (braced
                0xffff'ffff
                42))
@@ -60,7 +65,7 @@ exit_code: 0
                   (cast `long`
                      (dot x
                         (dot t
-                           (name struct_int~7 `union StructInt~3 complete`))))
+                           (name struct_int~9 `union StructInt~4 complete`))))
                   0xffff'ffffLL)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
@@ -69,7 +74,7 @@ exit_code: 0
                   (cast `long`
                      (dot y
                         (dot t
-                           (name struct_int~7 `union StructInt~3 complete`))))
+                           (name struct_int~9 `union StructInt~4 complete`))))
                   42LL)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
@@ -77,7 +82,72 @@ exit_code: 0
                (equal
                   (cast `long`
                      (dot x
-                        (name struct_int~7 `union StructInt~3 complete`)))
-                  (negate 1LL)))))))
+                        (name struct_int~9 `union StructInt~4 complete`)))
+                  (negate 1LL))))
+         (struct ContainsUnion~5
+            (member x `int`)
+            (member struct_int `union StructInt~4 complete`)
+            (member y `int`))
+         (declaration contains_union~10 `struct ContainsUnion~5 complete`
+            (braced
+               2
+               0xffff'ffff
+               0xffff'fffe
+               3))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (dot x
+                  (name contains_union~10 `struct ContainsUnion~5 complete`))
+               (dot y
+                  (name contains_union~10 `struct ContainsUnion~5 complete`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal
+                  (cast `long`
+                     (dot x
+                        (dot t
+                           (dot struct_int
+                              (name contains_union~10 `struct ContainsUnion~5 complete`)))))
+                  0xffff'ffffLL)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal
+                  (cast `long`
+                     (dot y
+                        (dot t
+                           (dot struct_int
+                              (name contains_union~10 `struct ContainsUnion~5 complete`)))))
+                  0xffff'fffeLL)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal
+                  (cast `long`
+                     (dot x
+                        (dot struct_int
+                           (name contains_union~10 `struct ContainsUnion~5 complete`))))
+                  (negate 1LL))))
+         (struct ContainsUnion~5
+            (member x `int`)
+            (member struct_int `union StructInt~4 complete`)
+            (member y `int`))
+         (declaration contains_union_2~11 `struct ContainsUnion~5 complete`
+            (braced
+               2
+               (braced
+                  (braced
+                     0xffff'ffff
+                     0xffff'fffe))
+               3))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (call (name memcmp~1 `fn(∅: ptr<void const>, ∅: ptr<void const>, ∅: typeof((sizeof 0))) -> int`)
+                  (addressof (name contains_union~10 `struct ContainsUnion~5 complete`))
+                  (addressof (name contains_union_2~11 `struct ContainsUnion~5 complete`))
+                  (sizeof (name contains_union~10 `struct ContainsUnion~5 complete`))))))))
 
 ----- stderr -----
