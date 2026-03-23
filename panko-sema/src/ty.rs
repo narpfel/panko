@@ -380,10 +380,12 @@ where
             Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
                 unreachable!("incomplete"),
             Type::Struct(Struct::Complete(Complete { name: _, id: _, kind, members })) => {
-                let last_member = members
-                    .last()
-                    .unwrap_or_else(|| panic!("empty {kind}s are not allowed"));
-                (last_member.offset + last_member.ty.ty.size()).next_multiple_of(self.align())
+                let member = match kind {
+                    StructKind::Struct => members.last(),
+                    StructKind::Union => members.iter().max_by_key(|member| member.ty.ty.size()),
+                };
+                let member = member.unwrap_or_else(|| panic!("empty {kind}s are not allowed"));
+                (member.offset + member.ty.ty.size()).next_multiple_of(self.align())
             }
         }
     }

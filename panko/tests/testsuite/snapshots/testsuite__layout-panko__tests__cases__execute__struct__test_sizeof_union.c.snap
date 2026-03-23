@@ -29,7 +29,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 9>>` @16
                         (string `array<char; 9>` @void "%zu %zu\n\0"))))
-               (4 `unsigned long` @24)
+               (8 `unsigned long` @24)
                (12 `unsigned long` @32))))))
 
 ----- stderr -----
