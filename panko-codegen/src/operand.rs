@@ -147,16 +147,20 @@ impl fmt::Display for Operand<'_> {
                     },
                     Type::Void => unreachable!(),
                     Type::Typeof { expr, unqual: _ } => match expr {},
-                    Type::Struct(Struct::Incomplete { name: _, id: _ }) =>
+                    Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
                         unreachable!("incomplete"),
-                    Type::Struct(Struct::Complete(Complete { name: _, id: _, members: _ })) =>
-                        match is_dereferenced {
-                            true => self.ty.size(),
-                            // TODO: there are several spots that use `!is_dereferenced`
-                            // `Class::Pair` structs to copy the first eightbyte of the struct.
-                            // This feels a bit hacky.
-                            false => 8,
-                        },
+                    Type::Struct(Struct::Complete(Complete {
+                        name: _,
+                        id: _,
+                        kind: _,
+                        members: _,
+                    })) => match is_dereferenced {
+                        true => self.ty.size(),
+                        // TODO: there are several spots that use `!is_dereferenced`
+                        // `Class::Pair` structs to copy the first eightbyte of the struct.
+                        // This feels a bit hacky.
+                        false => 8,
+                    },
                 };
                 let ptr_type = match size {
                     1 => "byte",

@@ -82,10 +82,9 @@ impl AsSExpr for ParameterDeclaration<'_> {
 impl AsSExpr for Struct<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            Self::Incomplete { name } => SExpr::new("struct").inherit(name),
-            Self::Complete { name, members } => SExpr::new("struct")
-                .inherit(name)
-                .lines_explicit_empty(*members),
+            Self::Incomplete { name, kind } => kind.as_sexpr().inherit(name),
+            Self::Complete { name, kind, members } =>
+                kind.as_sexpr().inherit(name).lines_explicit_empty(*members),
         }
     }
 }

@@ -48,6 +48,7 @@ extern {
         "typedef" => Token { kind: TokenKind::Typedef, .. },
 
         "struct" => Token { kind: TokenKind::Struct, .. },
+        "union" => Token { kind: TokenKind::Union, .. },
 
         // TypeSpecifierToken
         "void" => Token { kind: TokenKind::Void, .. },
@@ -546,9 +547,14 @@ PopIsInTypedef: () = {
     },
 }
 
+StructOrUnion = {
+    "struct",
+    "union",
+}
+
 StructOrUnionSpecifier: ast::TypeSpecifier<'a> = {
-    "struct" AnyIdentifier => ast::TypeSpecifier::incomplete_struct(<>),
-    <"struct"> <AnyIdentifier?> "{" PushIsInTypedef <Many<Declaration>> PopIsInTypedef "}" =>
+    StructOrUnion AnyIdentifier => ast::TypeSpecifier::incomplete_struct(<>),
+    <StructOrUnion> <AnyIdentifier?> "{" PushIsInTypedef <Many<Declaration>> PopIsInTypedef "}" =>
         ast::TypeSpecifier::r#struct(<>),
 }
 

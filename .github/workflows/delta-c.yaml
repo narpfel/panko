@@ -7,7 +7,7 @@ env:
   TERM: xterm-256color
 
 jobs:
-  ci:
+  delta-c:
     runs-on: ubuntu-24.04
     steps:
       - name: checkout
@@ -27,9 +27,9 @@ jobs:
 
           git \
             clone https://github.com/narpfel/delta-c \
-            --revision=23e1e25e3980918063660e601ecbf59924d62f63
+            --revision=9ca2c6fbb363aa870fa2be1355140d1c31db0882
 
           python delta-c/Δc.py \
             origin/"${{ github.base_ref }}" \
             origin/"${{ github.head_ref }}" \
-            -- cargo llvm-cov --text
+            -- cargo llvm-cov --text --branch

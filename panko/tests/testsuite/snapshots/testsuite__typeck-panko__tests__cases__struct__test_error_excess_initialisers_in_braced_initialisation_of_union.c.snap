@@ -1,0 +1,43 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/struct/test_error_excess_initialisers_in_braced_initialisation_of_union.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: excess element in union initialiser
+    ╭─[panko/tests/cases/struct/test_error_excess_initialisers_in_braced_initialisation_of_union.c:17:32]
+    │
+ 17 │     union IntInt int_int = {1, 2};
+    │                  ───┬───       ┬  
+    │                     │          ╰── trying to initialise element at index 1 for `union IntInt~0 complete`
+    │                     │             
+    │                     ╰───────────── while initialising this variable
+────╯
+
+Error: excess element in union initialiser
+    ╭─[panko/tests/cases/struct/test_error_excess_initialisers_in_braced_initialisation_of_union.c:18:38]
+    │
+ 18 │     union IntStruct int_struct = {1, 2, 3};
+    │                     ─────┬────       ┬  
+    │                          │           ╰── trying to initialise element at index 1 for `union IntStruct~2 complete`
+    │                          │              
+    │                          ╰────────────── while initialising this variable
+────╯
+
+Error: excess element in union initialiser
+    ╭─[panko/tests/cases/struct/test_error_excess_initialisers_in_braced_initialisation_of_union.c:18:41]
+    │
+ 18 │     union IntStruct int_struct = {1, 2, 3};
+    │                     ─────┬────          ┬  
+    │                          │              ╰── trying to initialise element at index 2 for `union IntStruct~2 complete`
+    │                          │                 
+    │                          ╰───────────────── while initialising this variable
+────╯

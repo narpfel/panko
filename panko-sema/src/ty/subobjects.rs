@@ -1,5 +1,6 @@
 use std::num::NonZero;
 
+use panko_parser::StructKind;
 use panko_parser::nonempty;
 
 use crate::ty::ArrayType;
@@ -100,7 +101,10 @@ impl<'a> SubobjectIterator<'a> {
                     todo!("VLAs cannot be initialised by braced initialisation"),
                 ArrayLength::Unknown => false,
             },
-            Self::Struct { ty, index, offset: _ } => *index >= ty.members.len(),
+            Self::Struct { ty, index, offset: _ } => match ty.kind {
+                StructKind::Struct => *index >= ty.members.len(),
+                StructKind::Union => *index > 0,
+            },
         }
     }
 
@@ -108,7 +112,7 @@ impl<'a> SubobjectIterator<'a> {
         match self {
             Self::Scalar { .. } => "scalar",
             Self::Array { .. } => "array",
-            Self::Struct { .. } => "struct",
+            Self::Struct { ty, .. } => ty.kind.str(),
         }
     }
 }

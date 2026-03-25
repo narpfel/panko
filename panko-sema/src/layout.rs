@@ -328,15 +328,15 @@ fn layout_ty_unqual<'a>(
             }),
         ty::Type::Void => Type::Void,
         ty::Type::Nullptr => Type::Nullptr,
-        ty::Type::Struct(Struct::Incomplete { name, id }) =>
-            Type::Struct(Struct::Incomplete { name, id }),
-        ty::Type::Struct(Struct::Complete(Complete { name, id, members })) => {
+        ty::Type::Struct(Struct::Incomplete { name, id, kind }) =>
+            Type::Struct(Struct::Incomplete { name, id, kind }),
+        ty::Type::Struct(Struct::Complete(Complete { name, id, kind, members })) => {
             let members = bump.alloc_slice_fill_iter(
                 members
                     .iter()
                     .map(|member| layout_member(stack, bump, member)),
             );
-            Type::Struct(Struct::Complete(Complete { name, id, members }))
+            Type::Struct(Struct::Complete(Complete { name, id, kind, members }))
         }
     }
 }

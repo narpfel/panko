@@ -1,0 +1,54 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_union.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_union.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct T~1
+      (member x `unsigned int`))
+   (union U~2
+      (member x `int`)
+      (member t `struct T~1 complete`))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (union U~2
+            (member x `int`)
+            (member t `struct T~1 complete`))
+         (declaration u~5 `union U~2 complete` ∅)
+         (expression
+            (assign
+               (dot x
+                  (name u~5 `union U~2 complete`))
+               (negate 1)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal
+                  (cast `long`
+                     (dot x
+                        (dot t
+                           (name u~5 `union U~2 complete`))))
+                  0xffff'ffffLL)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof `union U~2 complete`)))
+         (expression
+            (pre-increment
+               (dot x
+                  (dot t
+                     (name u~5 `union U~2 complete`)))))
+         (return
+            (dot x
+               (name u~5 `union U~2 complete`))))))
+
+----- stderr -----
