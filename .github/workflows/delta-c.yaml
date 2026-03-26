@@ -27,9 +27,10 @@ jobs:
 
           git \
             clone https://github.com/narpfel/delta-c \
-            --revision=9ca2c6fbb363aa870fa2be1355140d1c31db0882
+            --revision=e8e7dffd16c227f6308bb473a8b58cf4f1a89877
 
           python delta-c/Δc.py \
+            --color=always \
             origin/"${{ github.base_ref }}" \
             origin/"${{ github.head_ref }}" \
             -- cargo llvm-cov --text --branch
