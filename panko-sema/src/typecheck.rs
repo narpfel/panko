@@ -1118,7 +1118,7 @@ fn typeck_initialiser_list<'a>(
                     subobjects: &mut Subobjects<'a>,
                     designator: &Designator<'a>,
                 ) {
-                    match designator {
+                    let goto_result = match designator {
                         Designator::Bracketed { open_bracket: _, index, close_bracket: _ } => {
                             let index = typeck_expression(sess, index, Context::Default);
                             // TODO: constexpr evaluate
@@ -1126,16 +1126,18 @@ fn typeck_initialiser_list<'a>(
                                 Expression::Integer { value, token: _ } => value,
                                 _ => todo!(),
                             };
-                            match subobjects.goto_index(index) {
-                                Ok(()) => (),
-                                Err(iterator) => sess.emit(Diagnostic::NoSuchSubobject {
-                                    at: *designator,
-                                    reference: *reference,
-                                    iterator,
-                                }),
-                            }
+                            subobjects.goto_index(index)
                         }
-                        Designator::Identifier { .. } => todo!(),
+                        Designator::Identifier { dot: _, ident } =>
+                            subobjects.goto_member(ident.slice()),
+                    };
+                    match goto_result {
+                        Ok(()) => (),
+                        Err(iterator) => sess.emit(Diagnostic::NoSuchSubobject {
+                            at: *designator,
+                            reference: *reference,
+                            iterator,
+                        }),
                     }
                 }
 
