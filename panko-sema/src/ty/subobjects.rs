@@ -220,9 +220,10 @@ impl<'a> Subobjects<'a> {
                 struct_ty @ Type::Struct(Struct::Complete(ty)) if initialiser_ty != &struct_ty =>
                     self.push(SubobjectIterator::Struct { ty, index: 0, offset: subobject.offset }),
                 _ => {
-                    if let (_, explicit @ Explicit::Next) = self.stack.last_mut() {
-                        *explicit = Explicit::No;
-                    }
+                    let stack = self.stack.iter_mut().rev();
+                    stack
+                        .take_while(|(_, explicit)| matches!(explicit, Explicit::Next))
+                        .for_each(|(_, explicit)| *explicit = Explicit::No);
                     return Ok(subobject);
                 }
             }
