@@ -1,0 +1,36 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/initialisation/test_multilevel_designated_initialisation_of_array_2.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/test_multilevel_designated_initialisation_of_array_2.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (declaration xs~3 `array<array<array<int; 2>; 2>; 2>`
+            (braced
+               (designation ((index 0) (index 1) (index 0)) 42)
+               (designation ((index 0) (index 1) (index 1)) 27)
+               1
+               2))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d %d %d %d %d %d\n")
+               (subscript (subscript (subscript (name xs~3 `array<array<array<int; 2>; 2>; 2>`) 0) 0) 0)
+               (subscript (subscript (subscript (name xs~3 `array<array<array<int; 2>; 2>; 2>`) 0) 0) 1)
+               (subscript (subscript (subscript (name xs~3 `array<array<array<int; 2>; 2>; 2>`) 0) 1) 0)
+               (subscript (subscript (subscript (name xs~3 `array<array<array<int; 2>; 2>; 2>`) 0) 1) 1)
+               (subscript (subscript (subscript (name xs~3 `array<array<array<int; 2>; 2>; 2>`) 1) 0) 0)
+               (subscript (subscript (subscript (name xs~3 `array<array<array<int; 2>; 2>; 2>`) 1) 0) 1)
+               (subscript (subscript (subscript (name xs~3 `array<array<array<int; 2>; 2>; 2>`) 1) 1) 0)
+               (subscript (subscript (subscript (name xs~3 `array<array<array<int; 2>; 2>; 2>`) 1) 1) 1))))))
+
+----- stderr -----

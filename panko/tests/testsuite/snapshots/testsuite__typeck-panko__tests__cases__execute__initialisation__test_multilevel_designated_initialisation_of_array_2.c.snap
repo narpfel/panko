@@ -1,0 +1,43 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/initialisation/test_multilevel_designated_initialisation_of_array_2.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: no such subobject while initialising object of type `int`
+   ╭─[panko/tests/cases/execute/initialisation/test_multilevel_designated_initialisation_of_array_2.c:6:46]
+   │
+ 6 │     int xs[2][2][2] = {[0][1][0] = 42, [0][1][1] = 27, 1, 2};
+   │         ─┬                                   ─┬─  
+   │          │                                    ╰─── no such subobject
+   │          │                                        
+   │          ╰──────────────────────────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/execute/initialisation/test_multilevel_designated_initialisation_of_array_2.c:6:56]
+   │
+ 6 │     int xs[2][2][2] = {[0][1][0] = 42, [0][1][1] = 27, 1, 2};
+   │         ─┬                                             ┬  
+   │          │                                             ╰── trying to initialise element at index 2 for `array<int; 2>`
+   │          │                                                
+   │          ╰──────────────────────────────────────────────── while initialising this variable
+───╯
+
+Error: excess element in array initialiser
+   ╭─[panko/tests/cases/execute/initialisation/test_multilevel_designated_initialisation_of_array_2.c:6:59]
+   │
+ 6 │     int xs[2][2][2] = {[0][1][0] = 42, [0][1][1] = 27, 1, 2};
+   │         ─┬                                                ┬  
+   │          │                                                ╰── trying to initialise element at index 3 for `array<int; 2>`
+   │          │                                                   
+   │          ╰─────────────────────────────────────────────────── while initialising this variable
+───╯
