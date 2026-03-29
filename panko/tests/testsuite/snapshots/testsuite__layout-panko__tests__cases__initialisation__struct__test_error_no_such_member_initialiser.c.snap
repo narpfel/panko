@@ -1,0 +1,83 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/initialisation/struct/test_error_no_such_member_initialiser.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: no such subobject while initialising object of type `struct Struct~0 complete`
+    ╭─[panko/tests/cases/initialisation/struct/test_error_no_such_member_initialiser.c:12:38]
+    │
+ 12 │     struct Struct s = {.member = 42, .this_does_not_exist = 123};
+    │                   ┬                  ──────────┬─────────  
+    │                   │                            ╰─────────── no such subobject
+    │                   │                                        
+    │                   ╰──────────────────────────────────────── while initialising this variable
+────╯
+
+Error: no such subobject while initialising object of type `int`
+    ╭─[panko/tests/cases/initialisation/struct/test_error_no_such_member_initialiser.c:13:32]
+    │
+ 13 │     struct Struct s2 = {.member.submember = 0};
+    │                   ─┬           ─────┬────  
+    │                    │                ╰────── no such subobject
+    │                    │                       
+    │                    ╰─────────────────────── while initialising this variable
+────╯
+
+Error: excess element in union initialiser
+    ╭─[panko/tests/cases/initialisation/struct/test_error_no_such_member_initialiser.c:14:42]
+    │
+ 14 │     union Union u = {.union_member = 42, 27};
+    │                 ┬                        ─┬  
+    │                 │                         ╰── trying to initialise element at index 1 for `union Union~1 complete`
+    │                 │                            
+    │                 ╰──────────────────────────── while initialising this variable
+────╯
+
+Error: no such subobject while initialising object of type `union Union~1 complete`
+    ╭─[panko/tests/cases/initialisation/struct/test_error_no_such_member_initialiser.c:15:43]
+    │
+ 15 │     union Union u2 = {.union_member = 42, .also_does_not_exist = 123};
+    │                 ─┬                        ──────────┬─────────  
+    │                  │                                  ╰─────────── no such subobject
+    │                  │                                              
+    │                  ╰────────────────────────────────────────────── while initialising this variable
+────╯
+
+Error: excess element in union initialiser
+    ╭─[panko/tests/cases/initialisation/struct/test_error_no_such_member_initialiser.c:15:66]
+    │
+ 15 │     union Union u2 = {.union_member = 42, .also_does_not_exist = 123};
+    │                 ─┬                                               ─┬─  
+    │                  │                                                ╰─── trying to initialise element at index 1 for `union Union~1 complete`
+    │                  │                                                    
+    │                  ╰──────────────────────────────────────────────────── while initialising this variable
+────╯
+
+Error: no such subobject while initialising object of type `int`
+    ╭─[panko/tests/cases/initialisation/struct/test_error_no_such_member_initialiser.c:16:36]
+    │
+ 16 │     union Union u3 = {.union_member.wrong.member = 123};
+    │                 ─┬                 ───┬──  
+    │                  │                    ╰──── no such subobject
+    │                  │                         
+    │                  ╰───────────────────────── while initialising this variable
+────╯
+
+Error: no such subobject while initialising object of type `int`
+    ╭─[panko/tests/cases/initialisation/struct/test_error_no_such_member_initialiser.c:16:42]
+    │
+ 16 │     union Union u3 = {.union_member.wrong.member = 123};
+    │                 ─┬                       ───┬───  
+    │                  │                          ╰───── no such subobject
+    │                  │                                
+    │                  ╰──────────────────────────────── while initialising this variable
+────╯
