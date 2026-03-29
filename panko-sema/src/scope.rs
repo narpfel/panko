@@ -217,8 +217,10 @@ pub(crate) enum Designator<'a> {
         index: Expression<'a>,
         close_bracket: Token<'a>,
     },
-    #[expect(unused, reason = "TODO: `struct`s are not implemented")]
-    Identifier { dot: Token<'a>, ident: Token<'a> },
+    Identifier {
+        dot: Token<'a>,
+        ident: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -891,8 +893,8 @@ fn resolve_initialiser<'a>(
                                 index: resolve_expr(scopes, index),
                                 close_bracket: *close_bracket,
                             },
-                        cst::Designator::Identifier { .. } =>
-                            todo!("structs are not implemented yet"),
+                        cst::Designator::Identifier { dot, ident } =>
+                            Designator::Identifier { dot: *dot, ident: *ident },
                     }
                 })),
         )

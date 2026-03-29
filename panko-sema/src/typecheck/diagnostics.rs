@@ -390,7 +390,7 @@ pub(super) enum Diagnostic<'a> {
                 let index = index.strict_sub(1).fg(Red);
                 format!("trying to initialise element at index {index} for `{ty}`")
             }
-            SubobjectIterator::Struct { ty, index, offset: _ } => {
+            SubobjectIterator::Struct { ty, index, offset: _, is_empty: _ } => {
                 let ty = Type::Struct(Struct::Complete(*ty)).fg(Blue);
                 // trying to get the non-existing element increments the index, so we undo this
                 // here

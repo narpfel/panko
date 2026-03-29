@@ -21,6 +21,12 @@ pub(crate) struct Subobject<'a> {
     pub(crate) offset: u64,
 }
 
+#[derive(Debug, Clone)]
+pub(crate) enum IsEmpty {
+    Maybe,
+    No,
+}
+
 #[derive(Clone)]
 pub(crate) enum SubobjectIterator<'a> {
     Scalar {
@@ -37,6 +43,7 @@ pub(crate) enum SubobjectIterator<'a> {
         ty: Complete<'a, Typeck>,
         index: usize,
         offset: u64,
+        is_empty: IsEmpty,
     },
 }
 
@@ -49,7 +56,7 @@ impl AsSExpr for SubobjectIterator<'_> {
             .inherit(ty),
             Self::Array { ty, index, offset } =>
                 SExpr::new(format!("array-subobject @{offset} index={index}")).inherit(ty),
-            Self::Struct { ty, index, offset } =>
+            Self::Struct { ty, index, offset, is_empty: _ } =>
                 SExpr::new(format!("struct-subobject @{offset} index={index}"))
                     .inline_string(Type::Struct(Struct::Complete(*ty)).as_sexpr().to_string()),
         }
@@ -66,7 +73,12 @@ impl<'a> SubobjectIterator<'a> {
     fn new(ty: &Type<'a>, offset: u64) -> Result<Self, ()> {
         match *ty {
             Type::Array(ty) => Ok(Self::Array { ty, index: 0, offset }),
-            Type::Struct(Struct::Complete(ty)) => Ok(Self::Struct { ty, index: 0, offset }),
+            Type::Struct(Struct::Complete(ty)) => Ok(Self::Struct {
+                ty,
+                index: 0,
+                offset,
+                is_empty: IsEmpty::Maybe,
+            }),
             ty if ty.is_scalar() => Ok(Self::Scalar { ty, is_exhausted: false, offset }),
             _ => Err(()),
         }
@@ -77,7 +89,10 @@ impl<'a> SubobjectIterator<'a> {
         match self {
             Self::Scalar { ty: _, is_exhausted, offset: _ } => *is_exhausted = true,
             Self::Array { ty: _, index, offset: _ } => *index = index.strict_add(1),
-            Self::Struct { ty: _, index, offset: _ } => *index = index.strict_add(1),
+            Self::Struct { ty: _, index, offset: _, is_empty } => {
+                *index = index.strict_add(1);
+                *is_empty = IsEmpty::Maybe;
+            }
         }
         result
     }
@@ -87,7 +102,7 @@ impl<'a> SubobjectIterator<'a> {
             Self::Scalar { .. } => None,
             Self::Array { ty, index: _, offset } =>
                 Some(Subobject { ty: Type::Array(*ty), offset: *offset }),
-            Self::Struct { ty, index: _, offset } => Some(Subobject {
+            Self::Struct { ty, index: _, offset, is_empty: _ } => Some(Subobject {
                 ty: Type::Struct(Struct::Complete(*ty)),
                 offset: *offset,
             }),
@@ -106,7 +121,7 @@ impl<'a> SubobjectIterator<'a> {
                     ty: ty.ty.ty,
                     offset: offset.strict_add(index.strict_mul(ty.ty.ty.size())),
                 }),
-                Self::Struct { ty, index, offset } => {
+                Self::Struct { ty, index, offset, is_empty: _ } => {
                     let Member { name: _, ty, offset: member_offset } = ty.members[*index];
                     Some(Subobject {
                         ty: ty.ty,
@@ -126,9 +141,12 @@ impl<'a> SubobjectIterator<'a> {
                     todo!("VLAs cannot be initialised by braced initialisation"),
                 ArrayLength::Unknown => false,
             },
-            Self::Struct { ty, index, offset: _ } => match ty.kind {
+            Self::Struct { ty, index, offset: _, is_empty } => match ty.kind {
                 StructKind::Struct => *index >= ty.members.len(),
-                StructKind::Union => *index > 0,
+                StructKind::Union => match is_empty {
+                    IsEmpty::Maybe => *index > 0,
+                    IsEmpty::No => false,
+                },
             },
         }
     }
@@ -190,6 +208,22 @@ impl<'a> Subobjects<'a> {
         }
     }
 
+    pub(crate) fn goto_member(&mut self, name: &str) -> Result<(), SubobjectIterator<'a>> {
+        match self.current_mut() {
+            SubobjectIterator::Struct { ty, index, offset: _, is_empty }
+                if let Some((member_index, _)) =
+                    ty.members.iter().enumerate().find(|(_, m)| m.name == name) =>
+            {
+                *index = member_index;
+                *is_empty = IsEmpty::No;
+                Ok(())
+            }
+            SubobjectIterator::Scalar { .. }
+            | SubobjectIterator::Array { .. }
+            | SubobjectIterator::Struct { .. } => Err(self.current().clone()),
+        }
+    }
+
     fn leave_empty_subobjects(&mut self) {
         while self.current().is_empty() {
             let left = self.try_leave_subobject(AllowExplicit::No);
@@ -218,7 +252,12 @@ impl<'a> Subobjects<'a> {
                 Type::Array(ty) =>
                     self.push(SubobjectIterator::Array { ty, index: 0, offset: subobject.offset }),
                 struct_ty @ Type::Struct(Struct::Complete(ty)) if initialiser_ty != &struct_ty =>
-                    self.push(SubobjectIterator::Struct { ty, index: 0, offset: subobject.offset }),
+                    self.push(SubobjectIterator::Struct {
+                        ty,
+                        index: 0,
+                        offset: subobject.offset,
+                        is_empty: IsEmpty::Maybe,
+                    }),
                 _ => {
                     let stack = self.stack.iter_mut().rev();
                     stack
