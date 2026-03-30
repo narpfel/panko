@@ -86,6 +86,7 @@ pub(crate) enum Diagnostic<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Member<'a> {
     pub(crate) name: &'a Token<'a>,
+    pub(crate) bitfield_width: Option<Expression<'a>>,
     pub(crate) ty: QualifiedType<'a>,
 }
 
@@ -735,8 +736,10 @@ fn resolve_struct_members<'a>(
 ) -> &'a [NoHashEq<Member<'a>>] {
     let sess = scopes.sess;
     sess.alloc_slice_fill_iter(members.iter().map(|member| {
-        let ast::Member { name, ty } = member;
-        NoHashEq(Member { name, ty: resolve_ty(scopes, ty) })
+        let ast::Member { name, bitfield_width, ty } = member;
+        let bitfield_width = try { resolve_expr(scopes, bitfield_width.as_ref()?) };
+        let ty = resolve_ty(scopes, ty);
+        NoHashEq(Member { name, bitfield_width, ty })
     }))
 }
 
@@ -929,10 +932,15 @@ fn resolve_declaration<'a>(
     let ast::Declaration {
         ty,
         name,
+        bitfield_width,
         initialiser,
         storage_class,
         function_specifiers,
     } = decl;
+    if let Some(bitfield_width) = bitfield_width {
+        let bitfield_width = resolve_expr(scopes, bitfield_width);
+        error_todo!(bitfield_width, "bitfields can only be struct members");
+    }
     let ty = resolve_ty(scopes, ty);
 
     let linkage = match try { storage_class.as_ref()?.kind } {

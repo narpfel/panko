@@ -214,6 +214,7 @@ impl<'a> FromError<'a> for ExternalDeclaration<'a> {
 pub struct Declaration<'a> {
     pub ty: QualifiedType<'a>,
     pub name: Token<'a>,
+    pub bitfield_width: Option<Expression<'a>>,
     pub initialiser: Option<Initialiser<'a>>,
     pub storage_class: Option<cst::StorageClassSpecifier<'a>>,
     pub function_specifiers: FunctionSpecifiers<'a>,
@@ -343,6 +344,7 @@ pub enum Struct<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct Member<'a> {
     pub name: Token<'a>,
+    pub bitfield_width: Option<Expression<'a>>,
     pub ty: QualifiedType<'a>,
 }
 
@@ -364,6 +366,7 @@ impl<'a> Member<'a> {
             let Declaration {
                 ty,
                 name,
+                bitfield_width,
                 initialiser,
                 storage_class,
                 function_specifiers,
@@ -381,7 +384,7 @@ impl<'a> Member<'a> {
                 "TODO: error message for storage_class in struct member",
             );
             reject_function_specifiers(sess, &function_specifiers, name.loc(), "struct member");
-            Member { name, ty }
+            Member { name, bitfield_width, ty }
         })
     }
 }
@@ -558,12 +561,13 @@ impl<'a> Declaration<'a> {
 
         let type_decl = ty.ty.as_type_decl();
         let value_decls = decl.init_declarator_list.iter().map(
-            move |&InitDeclarator { declarator, initialiser }| {
+            move |&InitDeclarator { declarator, bitfield_width, initialiser }| {
                 let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
                 match name {
                     Some(name) => Ok(Self {
                         ty,
                         name,
+                        bitfield_width,
                         initialiser,
                         storage_class,
                         function_specifiers,

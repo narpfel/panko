@@ -671,6 +671,7 @@ fn function_specifier_kind(token_kind: TokenKind) -> FunctionSpecifierKind {
 #[derive(Debug, Clone, Copy)]
 struct InitDeclarator<'a> {
     declarator: Declarator<'a>,
+    bitfield_width: Option<Expression<'a>>,
     initialiser: Option<Initialiser<'a>>,
 }
 

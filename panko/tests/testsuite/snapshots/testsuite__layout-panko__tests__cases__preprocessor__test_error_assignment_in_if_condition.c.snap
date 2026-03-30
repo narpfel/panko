@@ -17,7 +17,7 @@ Error: unexpected token `=` of kind `Equal`
    │
  1 │ #if 1 = 2 + 42
    │       ┬  
-   │       ╰── expected one of the following token kinds: ["*", "+", "-", "/", "%", "==", "!=", "<", "<=", ">", ">=", "&", "^", "|", "<<", ">>", "&&", "||", "?"]
+   │       ╰── expected one of the following token kinds: []
 ───╯
 
 Error: assignments are not allowed in preprocessor expressions

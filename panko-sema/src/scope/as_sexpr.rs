@@ -27,8 +27,11 @@ use crate::ty::struct_decl_as_sexpr;
 
 impl AsSExpr for Member<'_> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name, ty } = self;
-        SExpr::new("member").inherit(name).inherit(ty)
+        let Self { name, bitfield_width, ty } = self;
+        SExpr::new("member")
+            .inherit(name)
+            .inherit_many(bitfield_width)
+            .inherit(ty)
     }
 }
 

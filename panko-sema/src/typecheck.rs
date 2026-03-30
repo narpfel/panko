@@ -745,7 +745,10 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Struct(Struct::Complete(Complete { name, id, kind, members })) => {
             let size = &mut 0_u64;
             let members = sess.alloc_slice_fill_iter(members.iter().map(|member| {
-                let NoHashEq(scope::Member { name, ty }) = *member;
+                let NoHashEq(scope::Member { name, bitfield_width, ty }) = *member;
+                let bitfield_width =
+                    try { typeck_expression(sess, bitfield_width.as_ref()?, Context::Default) };
+                assert!(bitfield_width.is_none(), "TODO: implement bitfields");
                 // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
                 // better error recovery due to trying to compute the size and align of incomplete
                 // types when using this struct)
