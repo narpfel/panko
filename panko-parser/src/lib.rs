@@ -24,7 +24,7 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
 use panko_lex::TypedefNames;
-use panko_report::Report;
+pub use panko_report::Report;
 use panko_report::Sliced as _;
 
 use crate::ast::FromError;
@@ -161,13 +161,15 @@ pub enum TodoError<'a> {
 macro_rules! error_todo {
     ($at:expr $(,)?) => {{
         let msg = String::from("unimplemented error");
-        $crate::TodoError::Error { at: $at.loc(), msg: msg.clone() }.print();
+        let error = $crate::TodoError::Error { at: $at.loc(), msg: msg.clone() };
+        $crate::Report::print(&error);
         todo!("{msg}")
     }};
     ($at:expr, $msg:literal $(, $param:expr)* $(,)?) => {{
         let at = $at.loc();
         let msg = format!(concat!("unimplemented error: ", $msg), $($param,)*);
-        $crate::TodoError::Error { at, msg: msg.clone() }.print();
+        let error = $crate::TodoError::Error { at, msg: msg.clone() };
+        $crate::Report::print(&error);
         todo!("{msg}")
     }};
 }
