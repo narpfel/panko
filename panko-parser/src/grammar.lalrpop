@@ -173,7 +173,12 @@ FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = 
             = declarator.expect("`NonAbstractInitDeclarator` always returns `Some(init_declarator)`");
 
         if let Some(bitfield_width) = bitfield_width {
-            ast::error_todo!(bitfield_width, "bitfields can only be struct members");
+            sess.emit(ast::Diagnostic::NonStructMemberBitfield {
+                at: bitfield_width,
+                declarator,
+                declaration_specifiers,
+                kind: "function",
+            })
         }
         assert!(
             initialiser.is_none(),

@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/struct/test_error_non_struct_member_bitfields.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: bitfields can only be struct or union members, not functions
+   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:1:16]
+   │
+ 1 │ int function():123 {
+   │ ───────┬────── ─┬─  
+   │        │        ╰─── bitfields are not allowed here
+   │        │            
+   │        ╰──────────── in this function
+───╯
