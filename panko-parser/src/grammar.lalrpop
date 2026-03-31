@@ -408,7 +408,12 @@ ParameterDeclaration: ast::ParameterDeclaration<'a> = {
         let declarator = try {
             let ast::InitDeclarator { declarator, bitfield_width, initialiser } = declarator?;
             if let Some(bitfield_width) = bitfield_width {
-                ast::error_todo!(bitfield_width, "bitfields can only be struct members");
+                sess.emit(ast::Diagnostic::NonStructMemberBitfield {
+                    at: bitfield_width,
+                    declarator,
+                    declaration_specifiers,
+                    kind: "parameter",
+                })
             }
             if let Some(initialiser) = initialiser {
                 sess.emit(ast::Diagnostic::DefaultParameter {

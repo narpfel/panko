@@ -21,3 +21,13 @@ Error: bitfields can only be struct or union members, not functions
    │        │            
    │        ╰──────────── in this function
 ───╯
+
+Error: bitfields can only be struct or union members, not parameters
+   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:5:29]
+   │
+ 5 │ int f(int x, bool parameter:1, int y) {
+   │              ───────┬────── ┬  
+   │                     │       ╰── bitfields are not allowed here
+   │                     │          
+   │                     ╰────────── in this parameter
+───╯
