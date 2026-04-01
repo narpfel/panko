@@ -31,3 +31,23 @@ Error: bitfields can only be struct or union members, not parameters
    │                     │          
    │                     ╰────────── in this parameter
 ───╯
+
+Error: bitfields can only be struct or union members, not global variables
+   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:9:12]
+   │
+ 9 │ int global:10 = 10;
+   │ ─────┬──── ─┬  
+   │      │      ╰── bitfields are not allowed here
+   │      │         
+   │      ╰───────── in this global variable
+───╯
+
+Error: bitfields can only be struct or union members, not local variables
+    ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:12:15]
+    │
+ 12 │     int local:20 = 20;
+    │     ────┬──── ─┬  
+    │         │      ╰── bitfields are not allowed here
+    │         │         
+    │         ╰───────── in this local variable
+────╯

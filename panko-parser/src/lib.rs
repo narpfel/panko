@@ -127,17 +127,19 @@ enum Diagnostic<'a> {
         at: Initialiser<'a>,
         param_loc: Loc<'a>,
     },
+}
 
+#[derive(Debug, Report)]
+#[exit_code(1)]
+pub enum BitfieldDiagnostic<'a> {
     #[error("bitfields can only be struct or union members, not {kind}s")]
-    #[with(decl_loc = declarator.loc_with(*declaration_specifiers))]
     #[diagnostics(
         at(colour = Blue, label = "bitfields are not allowed here"),
         decl_loc(colour = Red, label = "in this {kind}"),
     )]
     NonStructMemberBitfield {
         at: Expression<'a>,
-        declarator: Declarator<'a>,
-        declaration_specifiers: DeclarationSpecifiers<'a>,
+        decl_loc: Loc<'a>,
         kind: &'a str,
     },
 }

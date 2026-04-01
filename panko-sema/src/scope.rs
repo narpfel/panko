@@ -937,10 +937,6 @@ fn resolve_declaration<'a>(
         storage_class,
         function_specifiers,
     } = decl;
-    if let Some(bitfield_width) = bitfield_width {
-        let bitfield_width = resolve_expr(scopes, bitfield_width);
-        error_todo!(bitfield_width, "bitfields can only be struct members");
-    }
     let ty = resolve_ty(scopes, ty);
 
     let linkage = match try { storage_class.as_ref()?.kind } {
@@ -1019,6 +1015,21 @@ fn resolve_declaration<'a>(
     };
     let ref_initialiser = initialiser.map(RefInitialiser::Initialiser);
     scopes.add_initialiser(&reference, ref_initialiser);
+
+    if let Some(bitfield_width) = bitfield_width {
+        let _ = resolve_expr(scopes, bitfield_width);
+        scopes
+            .sess
+            .emit(cst::BitfieldDiagnostic::NonStructMemberBitfield {
+                at: *bitfield_width,
+                decl_loc: reference.ty.loc().until(reference.decl_loc),
+                kind: match scopes.is_in_global_scope() {
+                    IsInGlobalScope::Yes => "global variable",
+                    IsInGlobalScope::No => "local variable",
+                },
+            })
+    }
+
     DeclarationOrTypedef::Declaration(Declaration {
         function_specifiers: *function_specifiers,
         reference: Reference {

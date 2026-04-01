@@ -173,10 +173,9 @@ FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = 
             = declarator.expect("`NonAbstractInitDeclarator` always returns `Some(init_declarator)`");
 
         if let Some(bitfield_width) = bitfield_width {
-            sess.emit(ast::Diagnostic::NonStructMemberBitfield {
+            sess.emit(ast::BitfieldDiagnostic::NonStructMemberBitfield {
                 at: bitfield_width,
-                declarator,
-                declaration_specifiers,
+                decl_loc: declarator.loc_with(declaration_specifiers),
                 kind: "function",
             })
         }
@@ -408,10 +407,9 @@ ParameterDeclaration: ast::ParameterDeclaration<'a> = {
         let declarator = try {
             let ast::InitDeclarator { declarator, bitfield_width, initialiser } = declarator?;
             if let Some(bitfield_width) = bitfield_width {
-                sess.emit(ast::Diagnostic::NonStructMemberBitfield {
+                sess.emit(ast::BitfieldDiagnostic::NonStructMemberBitfield {
                     at: bitfield_width,
-                    declarator,
-                    declaration_specifiers,
+                    decl_loc: declarator.loc_with(declaration_specifiers),
                     kind: "parameter",
                 })
             }
