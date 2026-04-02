@@ -710,6 +710,40 @@ fn typeck_function_ty<'a>(
     }
 }
 
+fn typeck_struct_members<'a>(
+    sess: &'a Session<'a>,
+    kind: StructKind,
+    members: &[NoHashEq<scope::Member<'a>>],
+) -> &'a [Member<'a, Typeck>] {
+    let size = &mut 0_u64;
+    sess.alloc_slice_fill_iter(members.iter().map(|member| {
+        let NoHashEq(scope::Member { name, bitfield_width, ty }) = *member;
+        let bitfield_width = try {
+            let BitfieldWidth { width } = bitfield_width.as_ref()?;
+            typeck_expression(sess, width, Context::Default)
+        };
+        assert!(bitfield_width.is_none(), "TODO: implement bitfields");
+        // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
+        // better error recovery due to trying to compute the size and align of incomplete
+        // types when using this struct)
+        let ty = typeck_ty(sess, ty, IsParameter::No);
+        let (ty_size, align) = match ty.ty.is_complete() && ty.ty.is_object() {
+            true => (ty.ty.size(), ty.ty.align()),
+            false => {
+                let () = sess.emit(Diagnostic::IncompleteOrNonObjectStructMember { at: *name, ty });
+                (1, 1)
+            }
+        };
+        *size = size.next_multiple_of(align);
+        let offset = match kind {
+            StructKind::Struct => *size,
+            StructKind::Union => 0,
+        };
+        *size += ty_size;
+        Member { name: name.slice(), ty, offset }
+    }))
+}
+
 fn typeck_ty_with_initialiser<'a>(
     sess: &'a Session<'a>,
     ty: scope::QualifiedType<'a>,
@@ -744,34 +778,7 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Struct(Struct::Incomplete { name, id, kind }) =>
             Type::Struct(Struct::Incomplete { name, id, kind }),
         ty::Type::Struct(Struct::Complete(Complete { name, id, kind, members })) => {
-            let size = &mut 0_u64;
-            let members = sess.alloc_slice_fill_iter(members.iter().map(|member| {
-                let NoHashEq(scope::Member { name, bitfield_width, ty }) = *member;
-                let bitfield_width = try {
-                    let BitfieldWidth { width } = bitfield_width.as_ref()?;
-                    typeck_expression(sess, width, Context::Default)
-                };
-                assert!(bitfield_width.is_none(), "TODO: implement bitfields");
-                // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
-                // better error recovery due to trying to compute the size and align of incomplete
-                // types when using this struct)
-                let ty = typeck_ty(sess, ty, IsParameter::No);
-                let (ty_size, align) = match ty.ty.is_complete() && ty.ty.is_object() {
-                    true => (ty.ty.size(), ty.ty.align()),
-                    false => {
-                        let () = sess
-                            .emit(Diagnostic::IncompleteOrNonObjectStructMember { at: *name, ty });
-                        (1, 1)
-                    }
-                };
-                *size = size.next_multiple_of(align);
-                let offset = match kind {
-                    StructKind::Struct => *size,
-                    StructKind::Union => 0,
-                };
-                *size += ty_size;
-                Member { name: name.slice(), ty, offset }
-            }));
+            let members = typeck_struct_members(sess, kind, members);
             Type::Struct(Struct::Complete(Complete { name, id, kind, members }))
         }
     };
