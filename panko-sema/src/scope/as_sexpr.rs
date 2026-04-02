@@ -22,6 +22,7 @@ use super::Statement;
 use super::TranslationUnit;
 use super::Typedef;
 use super::Typeof;
+use crate::scope::BitfieldWidth;
 use crate::scope::Member;
 use crate::ty::struct_decl_as_sexpr;
 
@@ -32,6 +33,13 @@ impl AsSExpr for Member<'_> {
             .inherit(name)
             .inherit_many(bitfield_width)
             .inherit(ty)
+    }
+}
+
+impl AsSExpr for BitfieldWidth<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { width } = self;
+        SExpr::new("bitfield-width").inherit(width)
     }
 }
 

@@ -86,8 +86,13 @@ pub(crate) enum Diagnostic<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Member<'a> {
     pub(crate) name: &'a Token<'a>,
-    pub(crate) bitfield_width: Option<Expression<'a>>,
+    pub(crate) bitfield_width: Option<BitfieldWidth<'a>>,
     pub(crate) ty: QualifiedType<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct BitfieldWidth<'a> {
+    pub(crate) width: Expression<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -737,7 +742,11 @@ fn resolve_struct_members<'a>(
     let sess = scopes.sess;
     sess.alloc_slice_fill_iter(members.iter().map(|member| {
         let ast::Member { name, bitfield_width, ty } = member;
-        let bitfield_width = try { resolve_expr(scopes, bitfield_width.as_ref()?) };
+        let bitfield_width = try {
+            BitfieldWidth {
+                width: resolve_expr(scopes, bitfield_width.as_ref()?),
+            }
+        };
         let ty = resolve_ty(scopes, ty);
         NoHashEq(Member { name, bitfield_width, ty })
     }))

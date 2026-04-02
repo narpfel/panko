@@ -37,6 +37,7 @@ use variant_types::IntoVariant as _;
 use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
 use crate::scope;
+use crate::scope::BitfieldWidth;
 use crate::scope::DesignatedInitialiser;
 use crate::scope::Designation;
 use crate::scope::Designator;
@@ -746,8 +747,10 @@ fn typeck_ty_with_initialiser<'a>(
             let size = &mut 0_u64;
             let members = sess.alloc_slice_fill_iter(members.iter().map(|member| {
                 let NoHashEq(scope::Member { name, bitfield_width, ty }) = *member;
-                let bitfield_width =
-                    try { typeck_expression(sess, bitfield_width.as_ref()?, Context::Default) };
+                let bitfield_width = try {
+                    let BitfieldWidth { width } = bitfield_width.as_ref()?;
+                    typeck_expression(sess, width, Context::Default)
+                };
                 assert!(bitfield_width.is_none(), "TODO: implement bitfields");
                 // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
                 // better error recovery due to trying to compute the size and align of incomplete
