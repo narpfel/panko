@@ -46,6 +46,7 @@ use panko_sema::ty::PairKind;
 use panko_sema::ty::Struct;
 use panko_sema::typecheck::ArrayLength;
 use panko_sema::typecheck::Member;
+use panko_sema::typecheck::MemberKind;
 
 use crate::Register::*;
 use crate::lineno::Linenos;
@@ -830,10 +831,24 @@ impl<'a> Codegen<'a> {
                     }
                 }
                 Expression::MemberAccess { lhs, member } => {
+                    let kind = member.kind;
                     let member = self.member_access_lvalue(lhs, member);
                     self.expr(value);
                     let member = self.member_pointer(member);
-                    self.copy(&*member, value);
+                    match kind {
+                        MemberKind::Normal => self.copy(&*member, value),
+                        MemberKind::Bitfield { offset, width } => {
+                            let mask = 2_u64.pow(u32::try_from(width).unwrap()) - 1;
+                            self.emit_args("movabs", &[&R11, &mask]);
+                            self.emit_args("and", &[value, &mask]);
+                            let mask = !mask.strict_shl(u32::try_from(offset).unwrap());
+                            self.emit_args("movabs", &[&R11, &mask]);
+                            self.emit_args("and", &[&*member, &R11.with_ty(&member.ty())]);
+                            self.emit_args("mov", &[&Rax.typed(value), value]);
+                            self.emit_args("shl", &[&Rax, &offset]);
+                            self.emit_args("or", &[&*member, &Rax.with_ty(&member.ty())]);
+                        }
+                    }
                     if expr.slot != value.slot {
                         self.copy(expr, value);
                     }
@@ -1011,6 +1026,7 @@ impl<'a> Codegen<'a> {
                         self.emit_args("lea", &[&Rax, &id]);
                     }
                     Expression::MemberAccess { lhs, member } => {
+                        assert!(!matches!(member.kind, MemberKind::Bitfield { .. }));
                         let member = self.member_access_lvalue(lhs, member);
                         let member = self.member_pointer(member);
                         self.emit_args("lea", &[&Rax, &*member]);
@@ -1137,9 +1153,18 @@ impl<'a> Codegen<'a> {
                 self.label(merge);
             }
             Expression::MemberAccess { lhs, member } => {
+                let kind = member.kind;
                 let member = self.member_access_lvalue(lhs, member);
                 let member = self.member_pointer(member);
                 self.copy(expr, &*member);
+                match kind {
+                    MemberKind::Normal => (),
+                    MemberKind::Bitfield { offset, width } => {
+                        self.emit_args("shr", &[expr, &offset]);
+                        let mask = 2_u64.pow(u32::try_from(width).unwrap()) - 1;
+                        self.emit_args("and", &[expr, &mask]);
+                    }
+                }
             }
         }
     }

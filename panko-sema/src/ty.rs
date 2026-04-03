@@ -484,6 +484,10 @@ where
     pub fn classify(&self) -> Class {
         self.try_classify().unwrap()
     }
+
+    pub(crate) fn is_valid_for_bitfield(&self) -> bool {
+        matches!(self, Self::Arithmetic(Arithmetic::Integral(_)))
+    }
 }
 
 impl<T: Step> fmt::Display for Type<'_, T> {

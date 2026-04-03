@@ -22,6 +22,7 @@ use super::Typedef;
 use crate::ty::Step;
 use crate::ty::struct_decl_as_sexpr;
 use crate::typecheck::Member;
+use crate::typecheck::MemberKind;
 
 impl<Expression> AsSExpr for ArrayLength<Expression>
 where
@@ -38,16 +39,22 @@ where
 
 impl<'a, T: Step> Member<'a, T> {
     pub(crate) fn as_sexpr_without_ty(&self, offset_sign: &str) -> SExpr {
-        let Self { name, ty: _, offset } = self;
+        let Self { name, ty: _, offset, kind } = self;
         SExpr::new("member")
             .inherit(name)
-            .inline_string(format!("{offset_sign}{offset}"))
+            .inline_string(match kind {
+                MemberKind::Normal => format!("{offset_sign}{offset}"),
+                MemberKind::Bitfield { offset: subobject_offset, width } => format!(
+                    "{offset_sign}{offset}[{subobject_offset}:{}]",
+                    subobject_offset.strict_add(*width),
+                ),
+            })
     }
 }
 
 impl<T: Step> AsSExpr for Member<'_, T> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name: _, ty, offset: _ } = self;
+        let Self { name: _, ty, offset: _, kind: _ } = self;
         self.as_sexpr_without_ty("@").inherit(ty)
     }
 }

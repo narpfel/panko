@@ -11,6 +11,7 @@ use crate::ty::Complete;
 use crate::ty::Struct;
 use crate::typecheck::ArrayLength;
 use crate::typecheck::Member;
+use crate::typecheck::MemberKind;
 use crate::typecheck::QualifiedType;
 use crate::typecheck::Type;
 use crate::typecheck::Typeck;
@@ -122,7 +123,11 @@ impl<'a> SubobjectIterator<'a> {
                     offset: offset.strict_add(index.strict_mul(ty.ty.ty.size())),
                 }),
                 Self::Struct { ty, index, offset, is_empty: _ } => {
-                    let Member { name: _, ty, offset: member_offset } = ty.members[*index];
+                    let Member { name: _, ty, offset: member_offset, kind } = ty.members[*index];
+                    match kind {
+                        MemberKind::Normal => (),
+                        MemberKind::Bitfield { .. } => todo!("initialising bitfield members"),
+                    }
                     Some(Subobject {
                         ty: ty.ty,
                         offset: offset.strict_add(member_offset),

@@ -126,10 +126,17 @@ impl<Expression> Hash for ArrayLength<Expression> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum MemberKind {
+    Normal,
+    Bitfield { offset: u64, width: u64 },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Member<'a, T: ty::Step> {
     pub(crate) name: &'a str,
     pub ty: ty::QualifiedType<'a, T>,
     pub offset: u64,
+    pub kind: MemberKind,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -715,32 +722,49 @@ fn typeck_struct_members<'a>(
     kind: StructKind,
     members: &[NoHashEq<scope::Member<'a>>],
 ) -> &'a [Member<'a, Typeck>] {
-    let size = &mut 0_u64;
+    let mut size = 0_u64;
     sess.alloc_slice_fill_iter(members.iter().map(|member| {
         let NoHashEq(scope::Member { name, bitfield_width, ty }) = *member;
         let bitfield_width = try {
             let BitfieldWidth { width } = bitfield_width.as_ref()?;
-            typeck_expression(sess, width, Context::Default)
+            let width = typeck_expression(sess, width, Context::Default);
+            // TODO: constexpr evaluate
+            match width.expr {
+                Expression::Integer { value, token: _ } => value,
+                expr => error_todo!(expr),
+            }
         };
-        assert!(bitfield_width.is_none(), "TODO: implement bitfields");
         // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
         // better error recovery due to trying to compute the size and align of incomplete
         // types when using this struct)
         let ty = typeck_ty(sess, ty, IsParameter::No);
         let (ty_size, align) = match ty.ty.is_complete() && ty.ty.is_object() {
-            true => (ty.ty.size(), ty.ty.align()),
+            true => (ty.ty.size() * 8, ty.ty.align() * 8),
             false => {
                 let () = sess.emit(Diagnostic::IncompleteOrNonObjectStructMember { at: *name, ty });
-                (1, 1)
+                (8, 8)
             }
         };
-        *size = size.next_multiple_of(align);
+        let width = bitfield_width.unwrap_or(ty_size);
+        if size + width > size.next_multiple_of(ty_size) {
+            size = size.next_multiple_of(align);
+        }
         let offset = match kind {
-            StructKind::Struct => *size,
+            StructKind::Struct => size / align * align / 8,
             StructKind::Union => 0,
         };
-        *size += ty_size;
-        Member { name: name.slice(), ty, offset }
+        let kind = match bitfield_width {
+            Some(0) if ty.ty.is_valid_for_bitfield() => {
+                // TODO: error if `name.is_some()`
+                todo!("zero-length bitfield")
+            }
+            Some(width) if ty.ty.is_valid_for_bitfield() =>
+                MemberKind::Bitfield { offset: size % ty_size, width },
+            Some(_) => error_todo!(name, "nonintegral bitfield"),
+            None => MemberKind::Normal,
+        };
+        size += width;
+        Member { name: name.slice(), ty, offset, kind }
     }))
 }
 

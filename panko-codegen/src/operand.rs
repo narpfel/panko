@@ -253,8 +253,14 @@ fn slot_as_operand<'a>(
 pub(super) trait AsOperand<'a> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a>;
 
+    // TODO: this calls `as_operand` just to get the type. Implementers can provide a more
+    // efficient implementation, but it’s not clear if this is necessary.
+    fn ty(&self) -> Type<'a> {
+        self.as_operand(Some(0)).ty
+    }
+
     fn size(&self) -> u64 {
-        self.as_operand(Some(0)).ty.size()
+        self.ty().size()
     }
 }
 

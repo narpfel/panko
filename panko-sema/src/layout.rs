@@ -23,6 +23,7 @@ use crate::ty::ParameterDeclaration;
 use crate::ty::Struct;
 use crate::typecheck;
 use crate::typecheck::Member;
+use crate::typecheck::MemberKind;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::Typeck;
 use crate::typecheck::Typedef;
@@ -296,9 +297,9 @@ fn layout_member<'a>(
     bump: &'a Bump,
     member: &Member<'a, Typeck>,
 ) -> Member<'a, Layout> {
-    let Member { name, ty, offset } = *member;
+    let Member { name, ty, offset, kind } = *member;
     let ty = layout_ty(stack, bump, ty);
-    Member { name, ty, offset }
+    Member { name, ty, offset, kind }
 }
 
 fn layout_ty_unqual<'a>(
@@ -675,7 +676,8 @@ fn layout_expression_in_slot<'a>(
             let lhs_slot = Some(Slot::Void);
             let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, lhs_slot));
             let slot = match lhs.slot {
-                slot @ Slot::Automatic(_) => slot.offset(member.offset),
+                slot @ Slot::Automatic(_) if let MemberKind::Normal = member.kind =>
+                    slot.offset(member.offset),
                 _ => make_slot_noborrow(stack),
             };
             let member = layout_member(stack, bump, &member);
