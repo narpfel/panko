@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/bitfield/test_error_typeof_bitfield.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/bitfield/test_error_typeof_bitfield.c"
+   (struct T~0
+      (member x @0[0:20] `int`))
+   (function-definition external stack-size=24
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (struct T~0
+            (member x @0[0:20] `int`))
+         (definition (value~3 `struct T~0 complete` @0) (braced ∅))
+         (definition (x~4 `int` @4)
+            (member `int` @4 x +0[0:20]
+               (value~3 `struct T~0 complete` @0))))))
+
+----- stderr -----
