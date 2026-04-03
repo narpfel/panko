@@ -22,6 +22,10 @@ exit_code: 0
          (declaration x~4 `typeof((dot x
    (name value~3 `struct T~0 complete`)))`
             (dot x
+               (name value~3 `struct T~0 complete`)))
+         (declaration y~5 `typeof_unqual((dot x
+   (name value~3 `struct T~0 complete`)))`
+            (dot x
                (name value~3 `struct T~0 complete`))))))
 
 ----- stderr -----

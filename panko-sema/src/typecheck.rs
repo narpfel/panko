@@ -784,7 +784,15 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Void => Type::Void,
         ty::Type::Typeof { expr: NoHashEq(expr), unqual } => {
             let ty = match expr {
-                scope::Typeof::Expr(expr) => typeck_expression(sess, expr, Context::Typeof).ty,
+                scope::Typeof::Expr(expr) => {
+                    let expr = typeck_expression(sess, expr, Context::Typeof);
+                    if let Expression::MemberAccess { lhs: _, member, member_loc: _ } = expr.expr
+                        && let MemberKind::Bitfield { .. } = member.kind
+                    {
+                        sess.emit(Diagnostic::TypeofOfBitfield { at: expr, unqual })
+                    }
+                    expr.ty
+                }
                 scope::Typeof::Ty(ty) => typeck_ty(sess, *ty, is_parameter),
             };
             match unqual {

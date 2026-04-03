@@ -595,6 +595,16 @@ pub(super) enum Diagnostic<'a> {
         member: Token<'a>,
         kind: &'a str,
     },
+
+    #[error("`typeof{unqual}` cannot be applied to bitfields")]
+    #[diagnostics(
+        at(colour = Red, label = "this expression designates a bitfield"),
+    )]
+    #[with(unqual = unqual.then_some("_unqual").unwrap_or_default())]
+    TypeofOfBitfield {
+        at: TypedExpression<'a>,
+        unqual: bool,
+    },
 }
 
 fn describe_ty_completeness(ty: &QualifiedType) -> (&'static str, &'static str, &'static str) {
