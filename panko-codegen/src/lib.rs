@@ -1160,9 +1160,17 @@ impl<'a> Codegen<'a> {
                 match kind {
                     MemberKind::Normal => (),
                     MemberKind::Bitfield { offset, width } => {
-                        self.emit_args("shr", &[expr, &offset]);
-                        let mask = 2_u64.pow(u32::try_from(width).unwrap()) - 1;
-                        self.emit_args("and", &[expr, &mask]);
+                        let size = expr.ty.ty.size() * 8;
+                        self.emit_args("shl", &[expr, &(size - width - offset)]);
+                        let right_shift = match expr.ty.ty {
+                            Type::Arithmetic(Arithmetic::Integral(integral)) =>
+                                match integral.signedness {
+                                    Signedness::Signed => "sar",
+                                    Signedness::Unsigned => "shr",
+                                },
+                            _ => unreachable!("nonintegral bitfield"),
+                        };
+                        self.emit_args(right_shift, &[expr, &(size - width)]);
                     }
                 }
             }
