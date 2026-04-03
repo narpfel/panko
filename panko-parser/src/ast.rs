@@ -371,7 +371,11 @@ impl<'a> Member<'a> {
                 storage_class,
                 function_specifiers,
             } = member.unwrap_or_else(|ty| {
-                error_todo!(ty, "struct member declared with an abstract declarator")
+                error_todo!(
+                    ty,
+                    "struct member declared with an abstract declarator \
+                    (TODO: bitfields can have abstract declarators)",
+                )
             });
             assert_matches!(
                 initialiser,
