@@ -514,6 +514,14 @@ impl<'a> TypedExpression<'a> {
         }
     }
 
+    fn is_bitfield(&self) -> bool {
+        matches!(
+            self.expr,
+            Expression::MemberAccess { member, .. }
+            if matches!(member.kind, MemberKind::Bitfield { .. }),
+        )
+    }
+
     fn is_modifiable(&self) -> bool {
         self.ty.is_modifiable()
     }
@@ -786,9 +794,7 @@ fn typeck_ty_with_initialiser<'a>(
             let ty = match expr {
                 scope::Typeof::Expr(expr) => {
                     let expr = typeck_expression(sess, expr, Context::Typeof);
-                    if let Expression::MemberAccess { lhs: _, member, member_loc: _ } = expr.expr
-                        && let MemberKind::Bitfield { .. } = member.kind
-                    {
+                    if expr.is_bitfield() {
                         sess.emit(Diagnostic::TypeofOfBitfield { at: expr, unqual })
                     }
                     expr.ty
@@ -1618,11 +1624,17 @@ fn typeck_unary_op<'a>(
             // `is_lvalue`.
             let is_lvalue = operand.is_lvalue()
                 // TODO
-                /* && !operand.is_bitfield() && !operand.has_register_storage_class() */;
+                /* && !operand.has_register_storage_class() */;
             if !(is_function_designator || is_lvalue) {
-                // TODO: update error message for bitfields and `register` storage class
+                // TODO: update error message for `register` storage class
                 // TODO: this should be the correct type, not `Type::Error` or `void`
                 sess.emit(Diagnostic::CannotTakeAddress { at: operand, reason: "not an lvalue" })
+            }
+            else if operand.is_bitfield() {
+                sess.emit(Diagnostic::CannotTakeAddress {
+                    at: operand,
+                    reason: "a bitfield member",
+                })
             }
             else {
                 TypedExpression {

@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/struct/test_error_bitfields.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot take address of this expression because it is a bitfield member
+   ╭─[panko/tests/cases/struct/test_error_bitfields.c:7:17]
+   │
+ 7 │     int* ptr = &s.x;
+   │                 ─┬─  
+   │                  ╰─── this expression is a bitfield member
+───╯
+
+Error: invalid implicit conversion from `void` to `ptr<int>`
+   ╭─[panko/tests/cases/struct/test_error_bitfields.c:7:17]
+   │
+ 7 │     int* ptr = &s.x;
+   │                 ─┬─  
+   │                  ╰─── this is of type `void`, which cannot be implicitly converted to `ptr<int>`
+───╯

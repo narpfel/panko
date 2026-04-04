@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/struct/test_error_bitfields.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/struct/test_error_bitfields.c"
+   (struct Struct~0
+      (member x (bitfield-width 20) `int`))
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (struct Struct~0
+            (member x (bitfield-width 20) `int`))
+         (declaration s~3 `struct Struct~0 complete` (braced ∅))
+         (declaration ptr~4 `ptr<int>`
+            (addressof
+               (dot x
+                  (name s~3 `struct Struct~0 complete`)))))))
+
+----- stderr -----
