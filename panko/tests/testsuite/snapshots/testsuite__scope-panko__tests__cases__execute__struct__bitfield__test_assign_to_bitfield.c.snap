@@ -1,0 +1,74 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/bitfield/test_assign_to_bitfield.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/bitfield/test_assign_to_bitfield.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct T~1
+      (member x (bitfield-width 20) `unsigned int`)
+      (member y (bitfield-width 20) `long`))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (union ∅~4
+            (member t `struct T~1 complete`)
+            (member x `long`))
+         (declaration u~6 `union ∅~5 complete` (braced ∅))
+         (expression
+            (assign
+               (dot x
+                  (dot t
+                     (name u~6 `union ∅~5 complete`)))
+               0x55555))
+         (expression
+            (assign
+               (dot y
+                  (dot t
+                     (name u~6 `union ∅~5 complete`)))
+               0xbbbbb))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%016lx\n")
+               (dot x
+                  (name u~6 `union ∅~5 complete`))))
+         (declaration assign_to_x~7 `unsigned int`
+            (assign
+               (dot x
+                  (dot t
+                     (name u~6 `union ∅~5 complete`)))
+               0xabcde))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%016lx 0x%08x 0x%08x\n")
+               (dot x
+                  (name u~6 `union ∅~5 complete`))
+               (dot x
+                  (dot t
+                     (name u~6 `union ∅~5 complete`)))
+               (name assign_to_x~7 `unsigned int`)))
+         (declaration assign_to_y~8 `long`
+            (assign
+               (dot y
+                  (dot t
+                     (name u~6 `union ∅~5 complete`)))
+               0xcba98))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%016lx 0x%08x 0x%08x\n")
+               (dot x
+                  (name u~6 `union ∅~5 complete`))
+               (cast `int`
+                  (dot y
+                     (dot t
+                        (name u~6 `union ∅~5 complete`))))
+               (cast `int` (name assign_to_y~8 `long`)))))))
+
+----- stderr -----

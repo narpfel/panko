@@ -1,0 +1,89 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/bitfield/test_assign_to_bitfield.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/bitfield/test_assign_to_bitfield.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (struct T~1
+      (member x @0[0:20] `unsigned int`)
+      (member y @0[20:40] `long`))
+   (function-definition external stack-size=88
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (union ∅~4
+            (member t @0 `struct T~1 complete`)
+            (member x @0 `long`))
+         (definition (u~6 `union ∅~5 complete` @0) (braced ∅))
+         (expression
+            (assign `unsigned int` @8
+               (member `unsigned int` @8 x +0[0:20]
+                  (member `struct T~1 complete` @0 t +0
+                     (u~6 `union ∅~5 complete` @0)))
+               (noop-type-conversion `unsigned int` @8 (349525 `int` @8))))
+         (expression
+            (assign `long` @8
+               (member `long` @8 y +0[20:40]
+                  (member `struct T~1 complete` @0 t +0
+                     (u~6 `union ∅~5 complete` @0)))
+               (sign-extend `long` @8 (768955 `int` @16))))
+         (expression
+            (call `int` @8
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 10>>` @24
+                        (string `array<char; 10>` @void "0x%016lx\n\0"))))
+               (member `long` @0 x +0
+                  (u~6 `union ∅~5 complete` @0))))
+         (definition (assign_to_x~7 `unsigned int` @8)
+            (assign `unsigned int` @12
+               (member `unsigned int` @12 x +0[0:20]
+                  (member `struct T~1 complete` @0 t +0
+                     (u~6 `union ∅~5 complete` @0)))
+               (noop-type-conversion `unsigned int` @12 (703710 `int` @12))))
+         (expression
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 24>>` @24
+                        (string `array<char; 24>` @void "0x%016lx 0x%08x 0x%08x\n\0"))))
+               (member `long` @0 x +0
+                  (u~6 `union ∅~5 complete` @0))
+               (member `unsigned int` @32 x +0[0:20]
+                  (member `struct T~1 complete` @0 t +0
+                     (u~6 `union ∅~5 complete` @0)))
+               (assign_to_x~7 `unsigned int` @8)))
+         (definition (assign_to_y~8 `long` @16)
+            (assign `long` @24
+               (member `long` @24 y +0[20:40]
+                  (member `struct T~1 complete` @0 t +0
+                     (u~6 `union ∅~5 complete` @0)))
+               (sign-extend `long` @24 (834200 `int` @32))))
+         (expression
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 24>>` @40
+                        (string `array<char; 24>` @void "0x%016lx 0x%08x 0x%08x\n\0"))))
+               (member `long` @0 x +0
+                  (u~6 `union ∅~5 complete` @0))
+               (truncate `int` @48
+                  (member `long` @56 y +0[20:40]
+                     (member `struct T~1 complete` @0 t +0
+                        (u~6 `union ∅~5 complete` @0))))
+               (truncate `int` @64 (assign_to_y~8 `long` @16)))))))
+
+----- stderr -----
