@@ -64,6 +64,39 @@ exit_code: 0
                (string "0x%016lx\n")
                (dot x
                   (name u~6 `union ∅~5 complete`))))
+         (declaration compound_assignment_result~7 `unsigned int`
+            (add-assign
+               (dot x
+                  (dot t
+                     (name u~6 `union ∅~5 complete`)))
+               11))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%016lx %x %x\n")
+               (dot x
+                  (name u~6 `union ∅~5 complete`))
+               (dot x
+                  (dot t
+                     (name u~6 `union ∅~5 complete`)))
+               (name compound_assignment_result~7 `unsigned int`)))
+         (declaration preincrement_result~9 `int`
+            (cast `int`
+               (pre-increment
+                  (dot y
+                     (dot t
+                        (name u~6 `union ∅~5 complete`))))))
+         (declaration uty~11 `int`
+            (cast `int`
+               (dot y
+                  (dot t
+                     (name u~6 `union ∅~5 complete`)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%016lx %x %x\n")
+               (dot x
+                  (name u~6 `union ∅~5 complete`))
+               (name uty~11 `int`)
+               (name preincrement_result~9 `int`)))
          (return (sizeof `struct T~1 complete`)))))
 
 ----- stderr -----

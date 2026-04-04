@@ -20,5 +20,15 @@ int main() {
     printf("%d %d %d\n", u.t.x > 0, u.t.y < 0, u.t.z > 0);
     // [[print: 0x0cccccbbbbb55555]]
     printf("0x%016lx\n", u.x);
+
+    unsigned compound_assignment_result = u.t.x += 11;
+    // [[print: 0x0cccccbbbbb55560 55560 55560]]
+    printf("0x%016lx %x %x\n", u.x, u.t.x, compound_assignment_result);
+
+    int preincrement_result = (int)++u.t.y;
+    int uty = (int)u.t.y;
+    // [[print: 0x0cccccbbbbc55560 fffbbbbc bbbbc]]
+    printf("0x%016lx %x %x\n", u.x, uty, preincrement_result);
+
     return sizeof(struct T);
 }

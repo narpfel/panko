@@ -1924,8 +1924,7 @@ fn desugar_postfix_increment<'a>(
     // `x++` is mostly equivalent to the following expression, so we use that as a desugaring:
     // __pointer = &x, __copy = *__pointer, *__pointer += 1, __copy
 
-    // TODO: this desugaring has the same problem as for `CompoundAssign`: bitfields
-    // are not supported.
+    // TODO: this desugaring does not support bitfields.
 
     let token = op.token;
 
@@ -2041,43 +2040,93 @@ fn typeck_expression<'a>(
             })
         }
         scope::Expression::CompoundAssign { target, target_temporary, op, value } => {
+            let untypechecked_target = target;
             let target = sess.alloc(typeck_expression(sess, target, Context::Default));
             let target = check_assignable(target, sess);
             let ty = target.ty;
-            let target = sess.alloc(TypedExpression {
-                ty: Type::Pointer(&target.ty).unqualified(),
-                // TODO: `op.token` should not be included in the synthesised expr’s location
-                // TODO: this will fail for bitfields
-                expr: Expression::Addressof { ampersand: op.token, operand: target },
-            });
-            let target_temporary = typeck_reference(sess, *target_temporary, NeedsInitialiser::No);
-            let target_addr = sess.alloc(TypedExpression {
-                ty: target.ty,
-                expr: Expression::Name(Reference { ty: target.ty, ..target_temporary }),
-            });
-            let deref_target_addr = sess.alloc(TypedExpression {
-                ty,
-                // TODO: `op.token` should not be included in the synthesised expr’s location
-                expr: Expression::Deref { star: op.token, operand: target_addr },
-            });
-            let first = TypedExpression {
-                ty: target.ty,
-                expr: Expression::Assign { target: target_addr, value: target },
-            };
-            // TODO: when `target` is `const` this emits a duplicate “cannot assign to `const`”
-            // error because we already check that `target` is assignable
-            let second = typeck_assign(deref_target_addr, sess, || {
-                let value = typeck_expression(sess, value, Context::Default);
-                typeck_binop(sess, *deref_target_addr, op, value)
-            });
-            TypedExpression {
-                // TODO: `ty` is the type that `target` would have after lvalue conversion, so it
-                // might be necessary to add a `NoopTypeConversion` here
-                ty,
-                expr: Expression::Combine {
-                    first: sess.alloc(first),
-                    second: sess.alloc(second),
-                },
+
+            if target.is_bitfield() {
+                // desugar `expr.bitfield <op>= value` to
+                // `__ptr = &expr, __ptr->bitfield = __ptr->bitfield <op> value`
+                let scope::Expression::MemberAccess { lhs, member, .. } = untypechecked_target
+                else {
+                    unreachable!()
+                };
+
+                let struct_ty = scope::Type::Typeof {
+                    expr: NoHashEq(scope::Typeof::Expr(lhs)),
+                    unqual: false,
+                };
+                let target = sess.alloc(scope::Expression::Name(scope::Reference {
+                    ty: scope::Type::Pointer(sess.alloc(struct_ty.unqualified())).unqualified(),
+                    ..*target_temporary
+                }));
+                let pointer = sess.alloc(scope::Expression::UnaryOp {
+                    operator: UnaryOp {
+                        kind: UnaryOpKind::Addressof,
+                        // TODO: `op.token` should not be included in the synthesised expr’s
+                        // location
+                        token: op.token,
+                    },
+                    operand: lhs,
+                });
+                let assign_pointer =
+                    sess.alloc(scope::Expression::Assign { target, value: pointer });
+
+                let target = sess.alloc(scope::Expression::MemberAccess {
+                    lhs: target,
+                    op: MemberAccessOp {
+                        kind: MemberAccessOpKind::Arrow,
+                        token: op.token,
+                    },
+                    member: *member,
+                });
+                let value =
+                    sess.alloc(scope::Expression::BinOp { lhs: target, op: *op, rhs: value });
+                let assign_result = sess.alloc(scope::Expression::Assign { target, value });
+
+                return typeck_expression(
+                    sess,
+                    &scope::Expression::Comma { lhs: assign_pointer, rhs: assign_result },
+                    Context::Default,
+                );
+            }
+            else {
+                let target = sess.alloc(TypedExpression {
+                    ty: Type::Pointer(&target.ty).unqualified(),
+                    // TODO: `op.token` should not be included in the synthesised expr’s location
+                    expr: Expression::Addressof { ampersand: op.token, operand: target },
+                });
+                let target_temporary =
+                    typeck_reference(sess, *target_temporary, NeedsInitialiser::No);
+                let target_addr = sess.alloc(TypedExpression {
+                    ty: target.ty,
+                    expr: Expression::Name(Reference { ty: target.ty, ..target_temporary }),
+                });
+                let deref_target_addr = sess.alloc(TypedExpression {
+                    ty,
+                    // TODO: `op.token` should not be included in the synthesised expr’s location
+                    expr: Expression::Deref { star: op.token, operand: target_addr },
+                });
+                let first = TypedExpression {
+                    ty: target.ty,
+                    expr: Expression::Assign { target: target_addr, value: target },
+                };
+                // TODO: when `target` is `const` this emits a duplicate “cannot assign to `const`”
+                // error because we already check that `target` is assignable
+                let second = typeck_assign(deref_target_addr, sess, || {
+                    let value = typeck_expression(sess, value, Context::Default);
+                    typeck_binop(sess, *deref_target_addr, op, value)
+                });
+                TypedExpression {
+                    // TODO: `ty` is the type that `target` would have after lvalue conversion, so it
+                    // might be necessary to add a `NoopTypeConversion` here
+                    ty,
+                    expr: Expression::Combine {
+                        first: sess.alloc(first),
+                        second: sess.alloc(second),
+                    },
+                }
             }
         }
         scope::Expression::BinOp { lhs, op, rhs } => {
