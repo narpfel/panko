@@ -1625,26 +1625,18 @@ fn typeck_unary_op<'a>(
             let is_lvalue = operand.is_lvalue()
                 // TODO
                 /* && !operand.has_register_storage_class() */;
-            if !(is_function_designator || is_lvalue) {
-                // TODO: update error message for `register` storage class
-                // TODO: this should be the correct type, not `Type::Error` or `void`
-                sess.emit(Diagnostic::CannotTakeAddress { at: operand, reason: "not an lvalue" })
-            }
-            else if operand.is_bitfield() {
-                sess.emit(Diagnostic::CannotTakeAddress {
-                    at: operand,
-                    reason: "a bitfield member",
-                })
-            }
-            else {
-                TypedExpression {
-                    ty: Type::Pointer(sess.alloc(operand.ty)).unqualified(),
-                    expr: Expression::Addressof {
-                        ampersand: operator.token,
-                        operand: sess.alloc(operand),
-                    },
-                }
-            }
+            let error = |reason| sess.emit(Diagnostic::CannotTakeAddress { at: operand, reason });
+            // TODO: update error message for `register` storage class
+            let expr = match () {
+                () if !(is_function_designator || is_lvalue) => error("not an lvalue"),
+                () if operand.is_bitfield() => error("a bitfield member"),
+                () => Expression::Addressof {
+                    ampersand: operator.token,
+                    operand: sess.alloc(operand),
+                },
+            };
+            let ty = Type::Pointer(sess.alloc(operand.ty)).unqualified();
+            TypedExpression { ty, expr }
         }
         UnaryOpKind::Deref => match operand.ty.ty {
             Type::Pointer(pointee_ty) => {
