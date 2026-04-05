@@ -838,13 +838,15 @@ impl<'a> Codegen<'a> {
                     match kind {
                         MemberKind::Normal => self.copy(&*member, value),
                         MemberKind::Bitfield { offset, width } => {
-                            let mask = 2_u64.pow(u32::try_from(width).unwrap()) - 1;
-                            self.emit_args("movabs", &[&R11, &mask]);
-                            self.emit_args("and", &[value, &mask]);
-                            let mask = !mask.strict_shl(u32::try_from(offset).unwrap());
-                            self.emit_args("movabs", &[&R11, &mask]);
+                            self.bitfield_sign_extend(value, width, 0);
+                            let value_mask = 2_u64.pow(u32::try_from(width).unwrap()) - 1;
+                            let member_mask =
+                                !value_mask.strict_shl(u32::try_from(offset).unwrap());
+                            self.emit_args("movabs", &[&R11, &member_mask]);
                             self.emit_args("and", &[&*member, &R11.with_ty(&member.ty())]);
                             self.emit_args("mov", &[&Rax.typed(value), value]);
+                            self.emit_args("movabs", &[&R11, &value_mask]);
+                            self.emit_args("and", &[&Rax, &R11]);
                             self.emit_args("shl", &[&Rax, &offset]);
                             self.emit_args("or", &[&*member, &Rax.with_ty(&member.ty())]);
                         }
@@ -1159,19 +1161,8 @@ impl<'a> Codegen<'a> {
                 self.copy(expr, &*member);
                 match kind {
                     MemberKind::Normal => (),
-                    MemberKind::Bitfield { offset, width } => {
-                        let size = expr.ty.ty.size() * 8;
-                        self.emit_args("shl", &[expr, &(size - width - offset)]);
-                        let right_shift = match expr.ty.ty {
-                            Type::Arithmetic(Arithmetic::Integral(integral)) =>
-                                match integral.signedness {
-                                    Signedness::Signed => "sar",
-                                    Signedness::Unsigned => "shr",
-                                },
-                            _ => unreachable!("nonintegral bitfield"),
-                        };
-                        self.emit_args(right_shift, &[expr, &(size - width)]);
-                    }
+                    MemberKind::Bitfield { offset, width } =>
+                        self.bitfield_sign_extend(expr, width, offset),
                 }
             }
         }
@@ -1266,6 +1257,19 @@ impl<'a> Codegen<'a> {
                 Box::new(Operand::lvalue(R10, ty))
             }
         }
+    }
+
+    fn bitfield_sign_extend(&mut self, value: &LayoutedExpression, width: u64, offset: u64) {
+        let size = value.ty.ty.size() * 8;
+        self.emit_args("shl", &[value, &size.strict_sub(width).strict_sub(offset)]);
+        let right_shift = match value.ty.ty {
+            Type::Arithmetic(Arithmetic::Integral(integral)) => match integral.signedness {
+                Signedness::Signed => "sar",
+                Signedness::Unsigned => "shr",
+            },
+            _ => unreachable!("nonintegral bitfield"),
+        };
+        self.emit_args(right_shift, &[value, &size.strict_sub(width)]);
     }
 }
 

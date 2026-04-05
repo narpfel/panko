@@ -27,7 +27,7 @@ int main() {
 
     int preincrement_result = (int)++u.t.y;
     int uty = (int)u.t.y;
-    // [[print: 0x0cccccbbbbc55560 fffbbbbc bbbbc]]
+    // [[print: 0x0cccccbbbbc55560 fffbbbbc fffbbbbc]]
     printf("0x%016lx %x %x\n", u.x, uty, preincrement_result);
 
     return sizeof(struct T);
