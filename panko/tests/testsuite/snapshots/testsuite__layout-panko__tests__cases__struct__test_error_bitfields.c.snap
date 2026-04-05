@@ -19,3 +19,15 @@ Error: cannot take address of this expression because it is a bitfield member
    │                 ─┬─  
    │                  ╰─── this expression is a bitfield member
 ───╯
+
+Error: bitfields must have integral type, not `struct Struct~0 complete`
+    ╭─[panko/tests/cases/struct/test_error_bitfields.c:11:19]
+    │
+ 11 │     struct Struct bitfield:42;
+    │     ──────┬────── ────┬─── ─┬  
+    │           │           │     ╰── bitfield declaration here
+    │           │           │        
+    │           │           ╰──────── in this member declaration
+    │           │                    
+    │           ╰──────────────────── `struct Struct~0 complete` is not an integral type
+────╯

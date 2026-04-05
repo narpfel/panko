@@ -605,6 +605,18 @@ pub(super) enum Diagnostic<'a> {
         at: TypedExpression<'a>,
         unqual: bool,
     },
+
+    #[error("bitfields must have integral type, not `{ty}`")]
+    #[diagnostics(
+        at(colour = Magenta, label = "in this member declaration"),
+        ty(colour = Red, label = "`{ty}` is not an integral type"),
+        width(colour = Blue, label = "bitfield declaration here"),
+    )]
+    NonintegralBitfield {
+        at: Token<'a>,
+        ty: QualifiedType<'a>,
+        width: TypedExpression<'a>,
+    },
 }
 
 fn describe_ty_completeness(ty: &QualifiedType) -> (&'static str, &'static str, &'static str) {

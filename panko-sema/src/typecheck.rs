@@ -137,6 +137,12 @@ pub enum MemberKind {
     Bitfield(Bitfield),
 }
 
+impl<'a> FromError<'a> for MemberKind {
+    fn from_error(_error: &'a dyn Report) -> Self {
+        Self::Normal
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Member<'a, T: ty::Step> {
     pub(crate) name: &'a str,
@@ -739,15 +745,17 @@ fn typeck_struct_members<'a>(
     let mut size = 0_u64;
     sess.alloc_slice_fill_iter(members.iter().map(|member| {
         let NoHashEq(scope::Member { name, bitfield_width, ty }) = *member;
-        let bitfield_width = try {
+        let (width_expr, bitfield_width) = try {
             let BitfieldWidth { width } = bitfield_width.as_ref()?;
             let width = typeck_expression(sess, width, Context::Default);
             // TODO: constexpr evaluate
-            match width.expr {
+            let value = match width.expr {
                 Expression::Integer { value, token: _ } => value,
                 expr => error_todo!(expr),
-            }
-        };
+            };
+            (width, value)
+        }
+        .unzip();
         // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
         // better error recovery due to trying to compute the size and align of incomplete
         // types when using this struct)
@@ -774,7 +782,11 @@ fn typeck_struct_members<'a>(
             }
             Some(width) if ty.ty.is_valid_for_bitfield() =>
                 MemberKind::Bitfield(Bitfield { offset: size % ty_size, width }),
-            Some(_) => error_todo!(name, "nonintegral bitfield"),
+            Some(_) => sess.emit(Diagnostic::NonintegralBitfield {
+                at: *name,
+                ty,
+                width: width_expr.unwrap(),
+            }),
             None => MemberKind::Normal,
         };
         size += width;

@@ -22,6 +22,8 @@ exit_code: 0
          (declaration ptr~4 `ptr<int>`
             (addressof
                (dot x
-                  (name s~3 `struct Struct~0 complete`)))))))
+                  (name s~3 `struct Struct~0 complete`))))))
+   (struct NonintegralBitfield~5
+      (member bitfield (bitfield-width 42) `struct Struct~0 complete`)))
 
 ----- stderr -----
