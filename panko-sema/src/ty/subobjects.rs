@@ -126,7 +126,7 @@ impl<'a> SubobjectIterator<'a> {
                     let Member { name: _, ty, offset: member_offset, kind } = ty.members[*index];
                     match kind {
                         MemberKind::Normal => (),
-                        MemberKind::Bitfield { .. } => todo!("initialising bitfield members"),
+                        MemberKind::Bitfield(_) => todo!("initialising bitfield members"),
                     }
                     Some(Subobject {
                         ty: ty.ty,

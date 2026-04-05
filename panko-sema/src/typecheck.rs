@@ -126,9 +126,15 @@ impl<Expression> Hash for ArrayLength<Expression> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Bitfield {
+    pub offset: u64,
+    pub width: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum MemberKind {
     Normal,
-    Bitfield { offset: u64, width: u64 },
+    Bitfield(Bitfield),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -767,7 +773,7 @@ fn typeck_struct_members<'a>(
                 todo!("zero-length bitfield")
             }
             Some(width) if ty.ty.is_valid_for_bitfield() =>
-                MemberKind::Bitfield { offset: size % ty_size, width },
+                MemberKind::Bitfield(Bitfield { offset: size % ty_size, width }),
             Some(_) => error_todo!(name, "nonintegral bitfield"),
             None => MemberKind::Normal,
         };

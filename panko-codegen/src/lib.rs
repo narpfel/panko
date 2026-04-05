@@ -45,6 +45,7 @@ use panko_sema::ty::Complete;
 use panko_sema::ty::PairKind;
 use panko_sema::ty::Struct;
 use panko_sema::typecheck::ArrayLength;
+use panko_sema::typecheck::Bitfield;
 use panko_sema::typecheck::Member;
 use panko_sema::typecheck::MemberKind;
 
@@ -837,8 +838,8 @@ impl<'a> Codegen<'a> {
                     let member = self.member_pointer(member);
                     match kind {
                         MemberKind::Normal => self.copy(&*member, value),
-                        MemberKind::Bitfield { offset, width } => {
-                            self.bitfield_sign_extend(value, width, 0);
+                        MemberKind::Bitfield(Bitfield { offset, width }) => {
+                            self.bitfield_sign_extend(value, Bitfield { offset: 0, width });
                             let value_mask = 2_u64.pow(u32::try_from(width).unwrap()) - 1;
                             let member_mask =
                                 !value_mask.strict_shl(u32::try_from(offset).unwrap());
@@ -1161,8 +1162,7 @@ impl<'a> Codegen<'a> {
                 self.copy(expr, &*member);
                 match kind {
                     MemberKind::Normal => (),
-                    MemberKind::Bitfield { offset, width } =>
-                        self.bitfield_sign_extend(expr, width, offset),
+                    MemberKind::Bitfield(bitfield) => self.bitfield_sign_extend(expr, bitfield),
                 }
             }
         }
@@ -1259,7 +1259,11 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    fn bitfield_sign_extend(&mut self, value: &LayoutedExpression, width: u64, offset: u64) {
+    fn bitfield_sign_extend(
+        &mut self,
+        value: &LayoutedExpression,
+        Bitfield { offset, width }: Bitfield,
+    ) {
         let size = value.ty.ty.size() * 8;
         self.emit_args("shl", &[value, &size.strict_sub(width).strict_sub(offset)]);
         let right_shift = match value.ty.ty {
