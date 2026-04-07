@@ -8,6 +8,8 @@ struct T {
     unsigned int z : 20;
 };
 
+struct T static_t = {.x = 0x12345u, .y = 0x6789al, .z = 0xbcdefu};
+
 int main() {
     union {
         struct T t;
@@ -16,7 +18,8 @@ int main() {
         .t.x = 0x55555,
         .t.y = 0xbbbbb,
         .t.z = 0xccccc,
-    };
+    },
+        u_with_static = {.t = static_t};
     // [[print: 1 1 1]]
     printf("%d %d %d\n", u.t.x > 0, u.t.y < 0, u.t.z > 0);
     // [[print: 0x0cccccbbbbb55555]]
@@ -30,6 +33,11 @@ int main() {
     int uty = (int)u.t.y;
     // [[print: 0x0cccccbbbbc55560 fffbbbbc fffbbbbc]]
     printf("0x%016lx %x %x\n", u.x, uty, preincrement_result);
+
+    // [[print: 0x12345 0x6789a 0xbcdef]]
+    printf("0x%x 0x%x 0x%x\n", static_t.x, static_t.y, static_t.z);
+    // [[print: 0x0bcdef6789a12345]]
+    printf("0x%016lx\n", u_with_static.x);
 
     return sizeof(struct T);
 }

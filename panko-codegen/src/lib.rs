@@ -14,6 +14,7 @@ use std::mem;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use itertools::Itertools as _;
+use itertools::zip_eq;
 use panko_lex::Loc;
 use panko_parser::BinOpKind;
 use panko_parser::Comparison;
@@ -569,13 +570,29 @@ impl<'a> Codegen<'a> {
                     // TODO: this can be made a lot more efficient for sparse initialisers
                     let mut bytes = vec![0; usize::try_from(size).unwrap()];
                     for SubobjectInitialiser { subobject, initialiser } in subobject_initialisers {
-                        let Subobject { ty, offset, kind: _ } = subobject;
+                        let Subobject { ty, offset, kind } = subobject;
                         let subobject_size = usize::try_from(ty.size()).unwrap();
                         let offset = usize::try_from(offset).unwrap();
-                        match initialiser {
-                            Expression::Integer(value) => bytes[offset..][..subobject_size]
-                                .copy_from_slice(&value.to_le_bytes()[..subobject_size]),
-                            _ => todo!(),
+                        match kind {
+                            MemberKind::Normal => match initialiser {
+                                Expression::Integer(value) => bytes[offset..][..subobject_size]
+                                    .copy_from_slice(&value.to_le_bytes()[..subobject_size]),
+                                _ => todo!(),
+                            },
+                            MemberKind::Bitfield(Bitfield {
+                                offset: bitfield_offset,
+                                width: _,
+                            }) => match initialiser {
+                                Expression::Integer(value) => {
+                                    for (tgt_byte, src_byte) in zip_eq(
+                                        &mut bytes[offset..][..subobject_size],
+                                        &(value << bitfield_offset).to_le_bytes()[..subobject_size],
+                                    ) {
+                                        *tgt_byte |= src_byte;
+                                    }
+                                }
+                                _ => todo!(),
+                            },
                         }
                     }
                     self.constant(&bytes);

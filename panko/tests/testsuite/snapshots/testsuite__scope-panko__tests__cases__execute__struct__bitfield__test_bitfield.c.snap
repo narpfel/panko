@@ -16,73 +16,99 @@ exit_code: 0
       (member x (bitfield-width 20) `unsigned int`)
       (member y (bitfield-width 20) `long`)
       (member z (bitfield-width 20) `unsigned int`))
+   (struct T~1
+      (member x (bitfield-width 20) `unsigned int`)
+      (member y (bitfield-width 20) `long`)
+      (member z (bitfield-width 20) `unsigned int`))
+   (declaration static_t~2 `struct T~1 complete`
+      (braced
+         (designation ((member x)) 0x12345u)
+         (designation ((member y)) 0x6789al)
+         (designation ((member z)) 0xbcdefu)))
    (function-definition
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
-         (union ∅~4
+         (union ∅~5
             (member t `struct T~1 complete`)
             (member x `long`))
-         (declaration u~6 `union ∅~5 complete`
+         (declaration u~7 `union ∅~6 complete`
             (braced
                (designation ((member t) (member x)) 0x55555)
                (designation ((member t) (member y)) 0xbbbbb)
                (designation ((member t) (member z)) 0xccccc)))
+         (declaration u_with_static~9 `union ∅~8 complete`
+            (braced
+               (designation ((member t)) (name static_t~2 `struct T~1 complete`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d %d\n")
                (greater
                   (dot x
                      (dot t
-                        (name u~6 `union ∅~5 complete`)))
+                        (name u~7 `union ∅~6 complete`)))
                   0)
                (less
                   (dot y
                      (dot t
-                        (name u~6 `union ∅~5 complete`)))
+                        (name u~7 `union ∅~6 complete`)))
                   0)
                (greater
                   (dot z
                      (dot t
-                        (name u~6 `union ∅~5 complete`)))
+                        (name u~7 `union ∅~6 complete`)))
                   0)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "0x%016lx\n")
                (dot x
-                  (name u~6 `union ∅~5 complete`))))
-         (declaration compound_assignment_result~7 `unsigned int`
+                  (name u~7 `union ∅~6 complete`))))
+         (declaration compound_assignment_result~10 `unsigned int`
             (add-assign
                (dot x
                   (dot t
-                     (name u~6 `union ∅~5 complete`)))
+                     (name u~7 `union ∅~6 complete`)))
                11))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "0x%016lx %x %x\n")
                (dot x
-                  (name u~6 `union ∅~5 complete`))
+                  (name u~7 `union ∅~6 complete`))
                (dot x
                   (dot t
-                     (name u~6 `union ∅~5 complete`)))
-               (name compound_assignment_result~7 `unsigned int`)))
-         (declaration preincrement_result~9 `int`
+                     (name u~7 `union ∅~6 complete`)))
+               (name compound_assignment_result~10 `unsigned int`)))
+         (declaration preincrement_result~12 `int`
             (cast `int`
                (pre-increment
                   (dot y
                      (dot t
-                        (name u~6 `union ∅~5 complete`))))))
-         (declaration uty~11 `int`
+                        (name u~7 `union ∅~6 complete`))))))
+         (declaration uty~14 `int`
             (cast `int`
                (dot y
                   (dot t
-                     (name u~6 `union ∅~5 complete`)))))
+                     (name u~7 `union ∅~6 complete`)))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "0x%016lx %x %x\n")
                (dot x
-                  (name u~6 `union ∅~5 complete`))
-               (name uty~11 `int`)
-               (name preincrement_result~9 `int`)))
+                  (name u~7 `union ∅~6 complete`))
+               (name uty~14 `int`)
+               (name preincrement_result~12 `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%x 0x%x 0x%x\n")
+               (dot x
+                  (name static_t~2 `struct T~1 complete`))
+               (dot y
+                  (name static_t~2 `struct T~1 complete`))
+               (dot z
+                  (name static_t~2 `struct T~1 complete`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%016lx\n")
+               (dot x
+                  (name u_with_static~9 `union ∅~8 complete`))))
          (return (sizeof `struct T~1 complete`)))))
 
 ----- stderr -----
