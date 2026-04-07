@@ -29,7 +29,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 4>>` @32
                         (string `array<char; 4>` @void "%d\n\0"))))
                (zero-extend `int` @40 (from_ptr~5 `bool` @16))))
-         (definition (from_zero~6 `bool` @17) (bool-cast `bool` @17 (0 `long long` @24)))
+         (definition (from_zero~6 `bool` @17) (bool-cast `bool` @17 (0 `unsigned long long` @24)))
          (expression
             (call `int` @20
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24

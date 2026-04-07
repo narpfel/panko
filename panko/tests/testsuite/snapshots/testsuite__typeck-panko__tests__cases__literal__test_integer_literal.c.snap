@@ -18,6 +18,9 @@ exit_code: 0
          (expression (0x42 `int`))
          (expression (042 `int`))
          (expression (0 `int`))
-         (expression (0b1010'1010 `int`)))))
+         (expression (0b1010'1010 `int`))
+         (expression (0x1234u `unsigned int`))
+         (expression (0ul `unsigned long`))
+         (expression (0b110011ull `unsigned long long`)))))
 
 ----- stderr -----
