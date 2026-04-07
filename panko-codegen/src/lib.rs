@@ -187,7 +187,7 @@ struct SubobjectAtReference<'a> {
 
 impl<'a> SubobjectAtReference<'a> {
     fn slot(&self) -> Slot<'a> {
-        self.reference.slot().offset(self.subobject.offset())
+        self.reference.slot().offset(self.subobject.offset)
     }
 }
 
@@ -569,10 +569,11 @@ impl<'a> Codegen<'a> {
                     // TODO: this can be made a lot more efficient for sparse initialisers
                     let mut bytes = vec![0; usize::try_from(size).unwrap()];
                     for SubobjectInitialiser { subobject, initialiser } in subobject_initialisers {
-                        let subobject_size = usize::try_from(subobject.ty().size()).unwrap();
+                        let Subobject { ty, offset, kind: _ } = subobject;
+                        let subobject_size = usize::try_from(ty.size()).unwrap();
+                        let offset = usize::try_from(offset).unwrap();
                         match initialiser {
-                            Expression::Integer(value) => bytes
-                                [usize::try_from(subobject.offset()).unwrap()..][..subobject_size]
+                            Expression::Integer(value) => bytes[offset..][..subobject_size]
                                 .copy_from_slice(&value.to_le_bytes()[..subobject_size]),
                             _ => todo!(),
                         }

@@ -82,19 +82,9 @@ pub struct SubobjectInitialiser<'a, Expression> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Subobject<'a> {
-    pub(crate) ty: Type<'a>,
-    pub(crate) offset: u64,
+    pub ty: Type<'a>,
+    pub offset: u64,
     pub kind: MemberKind,
-}
-
-impl<'a> Subobject<'a> {
-    pub fn ty(&self) -> &Type<'a> {
-        &self.ty
-    }
-
-    pub fn offset(&self) -> u64 {
-        self.offset
-    }
 }
 
 #[derive(Debug, Clone, Copy)]
