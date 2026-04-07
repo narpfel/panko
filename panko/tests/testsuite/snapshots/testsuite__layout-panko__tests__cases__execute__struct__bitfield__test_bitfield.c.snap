@@ -22,25 +22,11 @@ exit_code: 0
          (union ∅~4
             (member t @0 `struct T~1 complete`)
             (member x @0 `long`))
-         (definition (u~6 `union ∅~5 complete` @0) (braced ∅))
-         (expression
-            (assign `unsigned int` @8
-               (member `unsigned int` @8 x +0[0:20]
-                  (member `struct T~1 complete` @0 t +0
-                     (u~6 `union ∅~5 complete` @0)))
-               (noop-type-conversion `unsigned int` @8 (349525 `int` @8))))
-         (expression
-            (assign `long` @8
-               (member `long` @8 y +0[20:40]
-                  (member `struct T~1 complete` @0 t +0
-                     (u~6 `union ∅~5 complete` @0)))
-               (sign-extend `long` @8 (768955 `int` @16))))
-         (expression
-            (assign `unsigned int` @8
-               (member `unsigned int` @8 z +4[8:28]
-                  (member `struct T~1 complete` @0 t +0
-                     (u~6 `union ∅~5 complete` @0)))
-               (noop-type-conversion `unsigned int` @8 (838860 `int` @8))))
+         (definition (u~6 `union ∅~5 complete` @0)
+            (braced
+               (subobject +0[0:20] (noop-type-conversion `unsigned int` @8 (349525 `int` @8)))
+               (subobject +0[20:40] (sign-extend `long` @8 (768955 `int` @16)))
+               (subobject +4[8:28] (noop-type-conversion `unsigned int` @8 (838860 `int` @8)))))
          (expression
             (call `int` @8
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16

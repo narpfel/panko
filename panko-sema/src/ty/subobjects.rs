@@ -20,6 +20,15 @@ use crate::typecheck::Typeck;
 pub(crate) struct Subobject<'a> {
     pub(crate) ty: Type<'a>,
     pub(crate) offset: u64,
+    pub(crate) kind: MemberKind,
+}
+
+pub(crate) type SubobjectKey = (u64, MemberKind);
+
+impl Subobject<'_> {
+    pub(crate) fn key(&self) -> SubobjectKey {
+        (self.offset, self.kind)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -101,11 +110,15 @@ impl<'a> SubobjectIterator<'a> {
     fn parent(&self) -> Option<Subobject<'a>> {
         match self {
             Self::Scalar { .. } => None,
-            Self::Array { ty, index: _, offset } =>
-                Some(Subobject { ty: Type::Array(*ty), offset: *offset }),
+            Self::Array { ty, index: _, offset } => Some(Subobject {
+                ty: Type::Array(*ty),
+                offset: *offset,
+                kind: MemberKind::Normal,
+            }),
             Self::Struct { ty, index: _, offset, is_empty: _ } => Some(Subobject {
                 ty: Type::Struct(Struct::Complete(*ty)),
                 offset: *offset,
+                kind: MemberKind::Normal,
             }),
         }
     }
@@ -116,21 +129,22 @@ impl<'a> SubobjectIterator<'a> {
         }
         else {
             match self {
-                Self::Scalar { ty, is_exhausted: _, offset } =>
-                    Some(Subobject { ty: *ty, offset: *offset }),
+                Self::Scalar { ty, is_exhausted: _, offset } => Some(Subobject {
+                    ty: *ty,
+                    offset: *offset,
+                    kind: MemberKind::Normal,
+                }),
                 Self::Array { ty, index, offset } => Some(Subobject {
                     ty: ty.ty.ty,
                     offset: offset.strict_add(index.strict_mul(ty.ty.ty.size())),
+                    kind: MemberKind::Normal,
                 }),
                 Self::Struct { ty, index, offset, is_empty: _ } => {
                     let Member { name: _, ty, offset: member_offset, kind } = ty.members[*index];
-                    match kind {
-                        MemberKind::Normal => (),
-                        MemberKind::Bitfield(_) => todo!("initialising bitfield members"),
-                    }
                     Some(Subobject {
                         ty: ty.ty,
                         offset: offset.strict_add(member_offset),
+                        kind,
                     })
                 }
             }
@@ -282,7 +296,7 @@ impl<'a> Subobjects<'a> {
         let depth = self.depth();
 
         let (iterator, result) = match self.current_mut().next() {
-            Some(Subobject { ty, offset }) =>
+            Some(Subobject { ty, offset, kind: _ }) =>
                 (SubobjectIterator::new(&ty, offset).expect("todo"), Ok(())),
             // Example for this case:
             //     int x = {1, {}};

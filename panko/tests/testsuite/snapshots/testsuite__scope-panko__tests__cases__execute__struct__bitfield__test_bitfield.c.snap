@@ -22,25 +22,11 @@ exit_code: 0
          (union ∅~4
             (member t `struct T~1 complete`)
             (member x `long`))
-         (declaration u~6 `union ∅~5 complete` (braced ∅))
-         (expression
-            (assign
-               (dot x
-                  (dot t
-                     (name u~6 `union ∅~5 complete`)))
-               0x55555))
-         (expression
-            (assign
-               (dot y
-                  (dot t
-                     (name u~6 `union ∅~5 complete`)))
-               0xbbbbb))
-         (expression
-            (assign
-               (dot z
-                  (dot t
-                     (name u~6 `union ∅~5 complete`)))
-               0xccccc))
+         (declaration u~6 `union ∅~5 complete`
+            (braced
+               (designation ((member t) (member x)) 0x55555)
+               (designation ((member t) (member y)) 0xbbbbb)
+               (designation ((member t) (member z)) 0xccccc)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d %d\n")

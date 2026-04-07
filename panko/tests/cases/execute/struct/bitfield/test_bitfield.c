@@ -12,10 +12,11 @@ int main() {
     union {
         struct T t;
         long x;
-    } u = {};
-    u.t.x = 0x55555;
-    u.t.y = 0xbbbbb;
-    u.t.z = 0xccccc;
+    } u = {
+        .t.x = 0x55555,
+        .t.y = 0xbbbbb,
+        .t.z = 0xccccc,
+    };
     // [[print: 1 1 1]]
     printf("%d %d %d\n", u.t.x > 0, u.t.y < 0, u.t.z > 0);
     // [[print: 0x0cccccbbbbb55555]]

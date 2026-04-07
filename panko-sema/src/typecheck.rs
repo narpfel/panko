@@ -60,6 +60,7 @@ use crate::ty::Struct;
 use crate::ty::subobjects::AllowExplicit;
 use crate::ty::subobjects::Subobject;
 use crate::ty::subobjects::SubobjectIterator;
+use crate::ty::subobjects::SubobjectKey;
 use crate::ty::subobjects::Subobjects;
 use crate::typecheck::diagnostics::Diagnostic;
 use crate::typecheck::literal::StringLiteral;
@@ -125,13 +126,13 @@ impl<Expression> Hash for ArrayLength<Expression> {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Bitfield {
     pub offset: u64,
     pub width: u64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum MemberKind {
     Normal,
     Bitfield(Bitfield),
@@ -1144,7 +1145,7 @@ fn typeck_array_initialisation_with_string<'a>(
 fn typeck_initialiser_list<'a>(
     sess: &'a Session<'a>,
     reference: &Reference<'a>,
-    subobject_initialisers: &mut IndexMap<u64, SubobjectInitialiser<'a>>,
+    subobject_initialisers: &mut IndexMap<SubobjectKey, SubobjectInitialiser<'a>>,
     subobjects: &mut Subobjects<'a>,
     initialiser_list: &[DesignatedInitialiser<'a>],
     emit_nested_excess_initialiser_errors: bool,
@@ -1168,7 +1169,7 @@ fn typeck_initialiser_list<'a>(
                 typeck_array_initialisation_with_string(sess, reference, &array_ty, initialiser)
         {
             subobject_initialisers.insert(
-                subobject.offset,
+                subobject.key(),
                 SubobjectInitialiser { subobject, initialiser },
             );
             let _ = subobjects.try_leave_subobject(AllowExplicit::No);
@@ -1279,10 +1280,8 @@ fn typeck_initialiser_list<'a>(
                                 ),
                             }
                         };
-                        subobject_initialisers.insert(
-                            subobject_initialiser.subobject.offset,
-                            subobject_initialiser,
-                        );
+                        subobject_initialisers
+                            .insert(subobject_initialiser.subobject.key(), subobject_initialiser);
                     }
                     Err(iterator) =>
                         if emit_nested_excess_initialiser_errors {

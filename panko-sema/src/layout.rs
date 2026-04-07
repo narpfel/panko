@@ -84,6 +84,7 @@ pub struct SubobjectInitialiser<'a, Expression> {
 pub struct Subobject<'a> {
     pub(crate) ty: Type<'a>,
     pub(crate) offset: u64,
+    pub kind: MemberKind,
 }
 
 impl<'a> Subobject<'a> {
@@ -406,20 +407,24 @@ fn layout_declaration<'a>(
                 let subobject_initialisers = bump.alloc_slice_fill_iter(
                     subobject_initialisers.iter().map(|subobject_initialiser| {
                         let typecheck::SubobjectInitialiser {
-                            subobject: ty::subobjects::Subobject { ty, offset },
+                            subobject: ty::subobjects::Subobject { ty, offset, kind },
                             initialiser,
                         } = *subobject_initialiser;
                         SubobjectInitialiser {
                             subobject: Subobject {
                                 ty: layout_ty_unqual(stack, bump, ty),
                                 offset,
+                                kind,
                             },
                             initialiser: stack.with_block(|stack| {
                                 layout_expression_in_slot(
                                     stack,
                                     bump,
                                     &initialiser,
-                                    Some(slot.offset(offset)),
+                                    match kind {
+                                        MemberKind::Normal => Some(slot.offset(offset)),
+                                        MemberKind::Bitfield(_) => None,
+                                    },
                                 )
                             }),
                         }

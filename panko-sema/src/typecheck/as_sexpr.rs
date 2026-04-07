@@ -21,6 +21,7 @@ use super::TypedExpression;
 use super::Typedef;
 use crate::ty::Step;
 use crate::ty::struct_decl_as_sexpr;
+use crate::ty::subobjects::Subobject;
 use crate::typecheck::Bitfield;
 use crate::typecheck::Member;
 use crate::typecheck::MemberKind;
@@ -136,9 +137,15 @@ impl AsSExpr for Initialiser<'_> {
 
 impl AsSExpr for SubobjectInitialiser<'_> {
     fn as_sexpr(&self) -> SExpr {
+        let Self { subobject, initialiser } = self;
+        let Subobject { ty: _, offset, kind } = subobject;
         SExpr::new("subobject")
-            .inline_string(format!("+{}", self.subobject.offset))
-            .inherit(&self.initialiser)
+            .inline_string(match kind {
+                MemberKind::Normal => format!("+{offset}"),
+                MemberKind::Bitfield(Bitfield { offset: bitfield_offset, width }) =>
+                    format!("+{offset}[{bitfield_offset}:{}]", bitfield_offset + width),
+            })
+            .inherit(initialiser)
     }
 }
 

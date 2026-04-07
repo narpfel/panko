@@ -736,8 +736,13 @@ impl<'a> Codegen<'a> {
                         else {
                             self.expr(initialiser);
 
-                            if target.slot() != initialiser.slot {
-                                self.copy(&target, initialiser);
+                            match subobject.kind {
+                                MemberKind::Normal =>
+                                    if target.slot() != initialiser.slot {
+                                        self.copy(&target, initialiser);
+                                    },
+                                MemberKind::Bitfield(bitfield) =>
+                                    self.store_bitfield_member(&target, initialiser, bitfield),
                             }
                         }
                     },
@@ -838,18 +843,9 @@ impl<'a> Codegen<'a> {
                     let member = self.member_pointer(member);
                     match kind {
                         MemberKind::Normal => self.copy(&*member, value),
-                        MemberKind::Bitfield(Bitfield { offset, width }) => {
+                        MemberKind::Bitfield(bitfield @ Bitfield { offset: _, width }) => {
                             self.bitfield_sign_extend(value, Bitfield { offset: 0, width });
-                            let value_mask = 2_u64.pow(u32::try_from(width).unwrap()) - 1;
-                            let member_mask =
-                                !value_mask.strict_shl(u32::try_from(offset).unwrap());
-                            self.emit_args("movabs", &[&R11, &member_mask]);
-                            self.emit_args("and", &[&*member, &R11.with_ty(&member.ty())]);
-                            self.emit_args("mov", &[&Rax.typed(value), value]);
-                            self.emit_args("movabs", &[&R11, &value_mask]);
-                            self.emit_args("and", &[&Rax, &R11]);
-                            self.emit_args("shl", &[&Rax, &offset]);
-                            self.emit_args("or", &[&*member, &Rax.with_ty(&member.ty())]);
+                            self.store_bitfield_member(&*member, value, bitfield);
                         }
                     }
                     if expr.slot != value.slot {
@@ -1274,6 +1270,23 @@ impl<'a> Codegen<'a> {
             _ => unreachable!("nonintegral bitfield"),
         };
         self.emit_args(right_shift, &[value, &size.strict_sub(width)]);
+    }
+
+    fn store_bitfield_member(
+        &mut self,
+        member: &dyn AsOperand,
+        value: &LayoutedExpression,
+        Bitfield { offset, width }: Bitfield,
+    ) {
+        let value_mask = 2_u64.pow(u32::try_from(width).unwrap()) - 1;
+        let member_mask = !value_mask.strict_shl(u32::try_from(offset).unwrap());
+        self.emit_args("movabs", &[&R11, &member_mask]);
+        self.emit_args("and", &[member, &R11.with_ty(&member.ty())]);
+        self.emit_args("mov", &[&Rax.typed(value), value]);
+        self.emit_args("movabs", &[&R11, &value_mask]);
+        self.emit_args("and", &[&Rax, &R11]);
+        self.emit_args("shl", &[&Rax, &offset]);
+        self.emit_args("or", &[member, &Rax.with_ty(&member.ty())]);
     }
 }
 

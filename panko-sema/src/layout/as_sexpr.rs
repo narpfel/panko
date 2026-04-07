@@ -18,7 +18,10 @@ use super::Slot;
 use super::Statement;
 use super::SubobjectInitialiser;
 use super::TranslationUnit;
+use crate::layout::Subobject;
 use crate::ty::struct_decl_as_sexpr;
+use crate::typecheck::Bitfield;
+use crate::typecheck::MemberKind;
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {
@@ -91,9 +94,15 @@ where
     Expression: AsSExpr,
 {
     fn as_sexpr(&self) -> SExpr {
+        let Self { subobject, initialiser } = self;
+        let Subobject { ty: _, offset, kind } = subobject;
         SExpr::new("subobject")
-            .inline_string(format!("+{}", self.subobject.offset))
-            .inherit(&self.initialiser)
+            .inline_string(match kind {
+                MemberKind::Normal => format!("+{offset}"),
+                MemberKind::Bitfield(Bitfield { offset: bitfield_offset, width }) =>
+                    format!("+{offset}[{bitfield_offset}:{}]", bitfield_offset + width),
+            })
+            .inherit(initialiser)
     }
 }
 
