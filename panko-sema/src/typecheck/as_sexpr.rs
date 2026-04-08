@@ -22,7 +22,6 @@ use super::Typedef;
 use crate::ty::Step;
 use crate::ty::struct_decl_as_sexpr;
 use crate::ty::subobjects::Subobject;
-use crate::typecheck::Bitfield;
 use crate::typecheck::Member;
 use crate::typecheck::MemberKind;
 
@@ -46,10 +45,7 @@ impl<'a, T: Step> Member<'a, T> {
             .inherit(name)
             .inline_string(match kind {
                 MemberKind::Normal => format!("{offset_sign}{offset}"),
-                MemberKind::Bitfield(Bitfield { offset: subobject_offset, width }) => format!(
-                    "{offset_sign}{offset}[{subobject_offset}:{}]",
-                    subobject_offset.strict_add(*width),
-                ),
+                MemberKind::Bitfield(bitfield) => format!("{offset_sign}{offset}[{bitfield}]"),
             })
     }
 }
@@ -142,8 +138,7 @@ impl AsSExpr for SubobjectInitialiser<'_> {
         SExpr::new("subobject")
             .inline_string(match kind {
                 MemberKind::Normal => format!("+{offset}"),
-                MemberKind::Bitfield(Bitfield { offset: bitfield_offset, width }) =>
-                    format!("+{offset}[{bitfield_offset}:{}]", bitfield_offset + width),
+                MemberKind::Bitfield(bitfield) => format!("+{offset}[{bitfield}]"),
             })
             .inherit(initialiser)
     }

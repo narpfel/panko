@@ -20,7 +20,6 @@ use super::SubobjectInitialiser;
 use super::TranslationUnit;
 use crate::layout::Subobject;
 use crate::ty::struct_decl_as_sexpr;
-use crate::typecheck::Bitfield;
 use crate::typecheck::MemberKind;
 
 impl AsSExpr for TranslationUnit<'_> {
@@ -99,8 +98,7 @@ where
         SExpr::new("subobject")
             .inline_string(match kind {
                 MemberKind::Normal => format!("+{offset}"),
-                MemberKind::Bitfield(Bitfield { offset: bitfield_offset, width }) =>
-                    format!("+{offset}[{bitfield_offset}:{}]", bitfield_offset + width),
+                MemberKind::Bitfield(bitfield) => format!("+{offset}[{bitfield}]"),
             })
             .inherit(initialiser)
     }

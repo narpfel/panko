@@ -132,6 +132,13 @@ pub struct Bitfield {
     pub width: u64,
 }
 
+impl fmt::Display for Bitfield {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let Self { offset, width } = *self;
+        write!(f, "{offset}:{}", offset.strict_add(width))
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum MemberKind {
     Normal,
