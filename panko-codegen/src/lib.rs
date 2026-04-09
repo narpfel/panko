@@ -1296,7 +1296,7 @@ impl<'a> Codegen<'a> {
         value: &LayoutedExpression,
         Bitfield { offset, width }: Bitfield,
     ) {
-        let value_mask = 2_u64.pow(u32::try_from(width).unwrap()) - 1;
+        let value_mask = 2_u64.pow(u32::try_from(width).unwrap()).strict_sub(1);
         let member_mask = !value_mask.strict_shl(u32::try_from(offset).unwrap());
         self.emit_args("movabs", &[&R11, &member_mask]);
         self.emit_args("and", &[member, &R11.with_ty(&member.ty())]);
