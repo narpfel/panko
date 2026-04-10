@@ -24,6 +24,9 @@ exit_code: 0
                (dot x
                   (name s~3 `struct Struct~0 complete`))))))
    (struct NonintegralBitfield~5
-      (member bitfield (bitfield-width 42) `struct Struct~0 complete`)))
+      (member bitfield (bitfield-width 42) `struct Struct~0 complete`))
+   (struct TooLarge~6
+      (member too_large_int (bitfield-width 123) `int`)
+      (member b (bitfield-width 2) `bool`)))
 
 ----- stderr -----

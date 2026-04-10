@@ -617,6 +617,23 @@ pub(super) enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
         width: TypedExpression<'a>,
     },
+
+    #[error("bitfield of {width} bits does not fit in type `{ty}` of size {ty_size} bits")]
+    #[diagnostics(
+        at(colour = Red, label = "too large for type `{ty}`"),
+        name(colour = Blue),
+        ty(colour = Magenta, label = "this has size `{ty_size}` bits"),
+    )]
+    #[with(
+        ty_size = ty.ty.max_bitfield_size(),
+        width = width.fg(Red),
+    )]
+    BitfieldTooWide {
+        at: TypedExpression<'a>,
+        width: u64,
+        ty: QualifiedType<'a>,
+        name: Token<'a>,
+    },
 }
 
 fn describe_ty_completeness(ty: &QualifiedType) -> (&'static str, &'static str, &'static str) {

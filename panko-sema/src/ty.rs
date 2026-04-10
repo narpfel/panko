@@ -488,6 +488,16 @@ where
     pub(crate) fn is_valid_for_bitfield(&self) -> bool {
         matches!(self, Self::Arithmetic(Arithmetic::Integral(_)))
     }
+
+    pub(crate) fn max_bitfield_size(&self) -> u64 {
+        match self {
+            Self::Arithmetic(Arithmetic::Integral(Integral {
+                signedness: _,
+                kind: IntegralKind::Bool,
+            })) => 1,
+            _ => self.size() * 8,
+        }
+    }
 }
 
 impl<T: Step> fmt::Display for Type<'_, T> {

@@ -31,3 +31,23 @@ Error: bitfields must have integral type, not `struct Struct~0 complete`
     │           │                    
     │           ╰──────────────────── `struct Struct~0 complete` is not an integral type
 ────╯
+
+Error: bitfield of 123 bits does not fit in type `int` of size 32 bits
+    ╭─[panko/tests/cases/struct/test_error_bitfields.c:15:23]
+    │
+ 15 │     int too_large_int:123;
+    │     ─┬─ ───────────── ─┬─  
+    │      │                 ╰─── too large for type `int`
+    │      │                     
+    │      ╰───────────────────── this has size `32` bits
+────╯
+
+Error: bitfield of 2 bits does not fit in type `bool` of size 1 bits
+    ╭─[panko/tests/cases/struct/test_error_bitfields.c:16:12]
+    │
+ 16 │     bool b:2;
+    │     ──┬─ ─ ┬  
+    │       │    ╰── too large for type `bool`
+    │       │       
+    │       ╰─────── this has size `1` bits
+────╯

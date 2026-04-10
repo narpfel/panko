@@ -784,17 +784,29 @@ fn typeck_struct_members<'a>(
             StructKind::Union => 0,
         };
         let kind = match bitfield_width {
-            Some(0) if ty.ty.is_valid_for_bitfield() => {
+            Some(_) if !ty.ty.is_valid_for_bitfield() =>
+                sess.emit(Diagnostic::NonintegralBitfield {
+                    at: *name,
+                    ty,
+                    width: width_expr.unwrap(),
+                }),
+            Some(0) => {
                 // TODO: error if `name.is_some()`
                 todo!("zero-length bitfield")
             }
-            Some(width) if ty.ty.is_valid_for_bitfield() =>
-                MemberKind::Bitfield(Bitfield { offset: size % ty_size, width }),
-            Some(_) => sess.emit(Diagnostic::NonintegralBitfield {
-                at: *name,
-                ty,
-                width: width_expr.unwrap(),
-            }),
+            Some(width) => {
+                let max_size = ty.ty.max_bitfield_size();
+                if width > max_size {
+                    sess.emit(Diagnostic::BitfieldTooWide {
+                        at: width_expr.unwrap(),
+                        width,
+                        ty,
+                        name: *name,
+                    })
+                }
+                let width = width.min(max_size);
+                MemberKind::Bitfield(Bitfield { offset: size % ty_size, width })
+            }
             None => MemberKind::Normal,
         };
         size += width;
