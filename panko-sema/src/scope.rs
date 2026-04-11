@@ -1109,19 +1109,7 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         },
         ast::Expression::CompoundAssign { target, op, value } => {
             let target = scopes.sess.alloc(resolve_expr(scopes, target));
-            let target_temporary = scopes.temporary(
-                target.loc(),
-                Type::Pointer(
-                    scopes.sess.alloc(
-                        Type::Typeof {
-                            expr: NoHashEq(Typeof::Expr(target)),
-                            unqual: false,
-                        }
-                        .unqualified(),
-                    ),
-                )
-                .unqualified(),
-            );
+            let target_temporary = scopes.temporary(target.loc(), Type::Void.unqualified());
             Expression::CompoundAssign {
                 target,
                 target_temporary,
