@@ -711,7 +711,7 @@ fn typeck_function_ty<'a>(
         | Type::Function(_)
         | Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
             sess.emit(Diagnostic::InvalidFunctionReturnType { at: *return_type }),
-        Type::Typeof { expr, unqual: _ } => match expr {},
+        Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match expr {},
     }
     let params = sess.alloc_slice_fill_iter(params.iter().map(
         |&ParameterDeclaration { loc, ty, name }| {
@@ -828,11 +828,15 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Array(ty) => typeck_array_ty(sess, ty, is_parameter, reference),
         ty::Type::Function(ty) => typeck_function_ty(sess, ty, is_parameter),
         ty::Type::Void => Type::Void,
-        ty::Type::Typeof { expr: NoHashEq(expr), unqual } => {
+        ty::Type::Typeof {
+            expr: NoHashEq(expr),
+            unqual,
+            allow_bitfields,
+        } => {
             let ty = match expr {
                 scope::Typeof::Expr(expr) => {
                     let expr = typeck_expression(sess, expr, Context::Typeof);
-                    if expr.is_bitfield() {
+                    if !allow_bitfields && expr.is_bitfield() {
                         sess.emit(Diagnostic::TypeofOfBitfield { at: expr, unqual })
                     }
                     expr.ty
@@ -1954,18 +1958,30 @@ fn desugar_postfix_increment<'a>(
     op: BinOp<'a>,
     operand: &'a scope::Expression<'a>,
     reference: &scope::Reference<'a>,
+    member: Option<&Token<'a>>,
     pointer: &scope::Reference<'a>,
     copy: &scope::Reference<'a>,
 ) -> scope::Expression<'a> {
     // `x++` is mostly equivalent to the following expression, so we use that as a desugaring:
     // __pointer = &x, __copy = *__pointer, *__pointer += 1, __copy
 
-    // TODO: this desugaring does not support bitfields.
-
     let token = op.token;
 
     let pointer = sess.alloc(scope::Expression::Name(*pointer));
     let copy = sess.alloc(scope::Expression::Name(*copy));
+
+    let target = sess.alloc(scope::Expression::UnaryOp {
+        operator: UnaryOp { kind: UnaryOpKind::Deref, token },
+        operand: pointer,
+    });
+    let target = match member {
+        Some(&member) => sess.alloc(scope::Expression::MemberAccess {
+            lhs: target,
+            op: MemberAccessOp { kind: MemberAccessOpKind::Dot, token },
+            member,
+        }),
+        _ => target,
+    };
 
     scope::Expression::Comma {
         lhs: sess.alloc(scope::Expression::Comma {
@@ -1979,20 +1995,11 @@ fn desugar_postfix_increment<'a>(
                     }),
                 }),
                 // copy = *pointer
-                rhs: sess.alloc(scope::Expression::Assign {
-                    target: copy,
-                    value: sess.alloc(scope::Expression::UnaryOp {
-                        operator: UnaryOp { kind: UnaryOpKind::Deref, token },
-                        operand: pointer,
-                    }),
-                }),
+                rhs: sess.alloc(scope::Expression::Assign { target: copy, value: target }),
             }),
             // *pointer <op>= 1
             rhs: sess.alloc(scope::Expression::CompoundAssign {
-                target: sess.alloc(scope::Expression::UnaryOp {
-                    operator: UnaryOp { kind: UnaryOpKind::Deref, token },
-                    operand: pointer,
-                }),
+                target,
                 target_temporary: *reference,
                 op,
                 value: sess.alloc(scope::Expression::Integer {
@@ -2500,8 +2507,8 @@ fn typeck_expression<'a>(
                         ),
                     }),
                 },
-                IncrementFixity::Postfix { pointer, copy } =>
-                    desugar_postfix_increment(sess, op, operand, reference, pointer, copy),
+                IncrementFixity::Postfix { member, pointer, copy } =>
+                    desugar_postfix_increment(sess, op, operand, reference, *member, pointer, copy),
             };
             typeck_expression(sess, &expr, Context::Default)
         }

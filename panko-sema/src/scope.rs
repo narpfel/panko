@@ -11,8 +11,10 @@ use panko_parser::BinOp;
 use panko_parser::IncrementOp;
 use panko_parser::LogicalOp;
 use panko_parser::MemberAccessOp;
+use panko_parser::MemberAccessOpKind;
 use panko_parser::StorageClassSpecifierKind;
 use panko_parser::UnaryOp;
+use panko_parser::UnaryOpKind;
 use panko_parser::ast;
 use panko_parser::ast::FromError;
 use panko_parser::ast::FunctionSpecifiers;
@@ -622,6 +624,7 @@ impl RefKind {
 pub enum IncrementFixity<'a> {
     Prefix,
     Postfix {
+        member: Option<&'a Token<'a>>,
         pointer: Reference<'a>,
         copy: Reference<'a>,
     },
@@ -631,7 +634,7 @@ impl IncrementFixity<'_> {
     fn str(&self) -> &'static str {
         match self {
             IncrementFixity::Prefix => "pre",
-            IncrementFixity::Postfix { pointer: _, copy: _ } => "post",
+            IncrementFixity::Postfix { member: _, pointer: _, copy: _ } => "post",
         }
     }
 }
@@ -673,10 +676,12 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
         ast::Type::Typeof { unqual, expr } => Type::Typeof {
             expr: NoHashEq(Typeof::Expr(scopes.sess.alloc(resolve_expr(scopes, expr)))),
             unqual,
+            allow_bitfields: false,
         },
         ast::Type::TypeofTy { unqual, ty } => Type::Typeof {
             expr: NoHashEq(Typeof::Ty(scopes.sess.alloc(resolve_ty(scopes, ty)))),
             unqual,
+            allow_bitfields: false,
         },
         ast::Type::Struct(r#struct) => resolve_struct(scopes, &r#struct),
     };
@@ -1185,22 +1190,48 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         },
         ast::Expression::Increment { operator, operand, fixity } => {
             let operand = scopes.sess.alloc(resolve_expr(scopes, operand));
+            let typeof_copy = Type::Typeof {
+                expr: NoHashEq(Typeof::Expr(operand)),
+                unqual: true,
+                allow_bitfields: true,
+            };
+            let (member, operand) = match operand {
+                Expression::MemberAccess { lhs, op, member }
+                    if matches!(fixity, cst::IncrementFixity::Postfix) =>
+                {
+                    let operand = match op.kind {
+                        MemberAccessOpKind::Dot => lhs,
+                        MemberAccessOpKind::Arrow => scopes.sess.alloc(Expression::UnaryOp {
+                            operator: UnaryOp {
+                                kind: UnaryOpKind::Deref,
+                                token: op.token,
+                            },
+                            operand: lhs,
+                        }),
+                    };
+                    (Some(member), operand)
+                }
+                _ => (None, operand),
+            };
             let reference = scopes.temporary(operand.loc(), Type::Void.unqualified());
-            let expr = NoHashEq(Typeof::Expr(operand));
-            let typeof_operand_unqual = Type::Typeof { expr, unqual: true };
-            let typeof_operand = Type::Typeof { expr, unqual: false };
+            let typeof_pointer = Type::Typeof {
+                expr: NoHashEq(Typeof::Expr(operand)),
+                unqual: false,
+                allow_bitfields: false,
+            };
             Expression::Increment {
                 operator: *operator,
                 operand,
                 fixity: match fixity {
                     cst::IncrementFixity::Prefix => IncrementFixity::Prefix,
                     cst::IncrementFixity::Postfix => IncrementFixity::Postfix {
+                        member,
                         pointer: scopes.temporary(
                             operand.loc(),
-                            Type::Pointer(scopes.sess.alloc(typeof_operand.unqualified()))
+                            Type::Pointer(scopes.sess.alloc(typeof_pointer.unqualified()))
                                 .unqualified(),
                         ),
-                        copy: scopes.temporary(operand.loc(), typeof_operand_unqual.unqualified()),
+                        copy: scopes.temporary(operand.loc(), typeof_copy.unqualified()),
                     },
                 },
                 reference,

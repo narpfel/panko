@@ -34,6 +34,11 @@ int main() {
     // [[print: 0x0cccccbbbbc55560 fffbbbbc fffbbbbc]]
     printf("0x%016lx %x %x\n", u.x, uty, preincrement_result);
 
+    int postincrement_result = (int)u.t.y++;
+    uty = (int)u.t.y;
+    // [[print: 0x0cccccbbbbd55560 fffbbbbd fffbbbbc]]
+    printf("0x%016lx %x %x\n", u.x, uty, postincrement_result);
+
     // [[print: 0x12345 0x6789a 0xbcdef]]
     printf("0x%x 0x%x 0x%x\n", static_t.x, static_t.y, static_t.z);
     // [[print: 0x0bcdef6789a12345]]

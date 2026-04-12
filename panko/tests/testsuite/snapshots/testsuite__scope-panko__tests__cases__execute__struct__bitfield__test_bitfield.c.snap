@@ -95,6 +95,24 @@ exit_code: 0
                   (name u~7 `union ∅~6 complete`))
                (name uty~14 `int`)
                (name preincrement_result~12 `int`)))
+         (declaration postincrement_result~15 `int`
+            (cast `int`
+               (post-increment
+                  (dot t
+                     (name u~7 `union ∅~6 complete`)))))
+         (expression
+            (assign (name uty~14 `int`)
+               (cast `int`
+                  (dot y
+                     (dot t
+                        (name u~7 `union ∅~6 complete`))))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%016lx %x %x\n")
+               (dot x
+                  (name u~7 `union ∅~6 complete`))
+               (name uty~14 `int`)
+               (name postincrement_result~15 `int`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "0x%x 0x%x 0x%x\n")

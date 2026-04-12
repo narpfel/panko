@@ -214,6 +214,7 @@ impl AsSExpr for Expression<'_> {
                 or_else,
             } => SExpr::new("conditional").lines([condition, then, or_else]),
             Expression::Comma { lhs, rhs } => SExpr::new("comma").lines([lhs, rhs]),
+            // TODO: this does not show the member when `operand` is a `MemberAccess` expr
             Expression::Increment { operator, operand, fixity, reference: _ } =>
                 SExpr::new(format!("{}-{}", fixity.str(), operator.str())).inherit(operand),
             Expression::MemberAccess { lhs, op, member } => op

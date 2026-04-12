@@ -396,7 +396,7 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[&tgt, &Rax.with_ty(ty)]);
             }
             Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
-            Type::Typeof { expr, unqual: _ } => match *expr {},
+            Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match *expr {},
             Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
                 unreachable!("incomplete"),
             Type::Struct(Struct::Complete(Complete { name: _, id: _, kind: _, members: _ })) =>

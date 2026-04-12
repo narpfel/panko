@@ -130,6 +130,48 @@ exit_code: 0
                   (u~7 `union ∅~6 complete`))
                (uty~14 `int`)
                (preincrement_result~12 `int`)))
+         (definition postincrement_result~15 `int`
+            (truncate `int`
+               (combine `long`
+                  (combine `long`
+                     (combine `long`
+                        (assign `ptr<struct T~1 complete>` (unnamed-temporary~17 `ptr<struct T~1 complete>`)
+                           (addressof `ptr<struct T~1 complete>`
+                              (member `struct T~1 complete` t +0
+                                 (u~7 `union ∅~6 complete`))))
+                        (assign `long` (unnamed-temporary~18 `long`)
+                           (member `long` y +0[20:40]
+                              (deref `struct T~1 complete` (unnamed-temporary~17 `ptr<struct T~1 complete>`)))))
+                     (combine `long`
+                        (assign `ptr<struct T~1 complete>` (unnamed-temporary~16 `ptr<struct T~1 complete>`)
+                           (addressof `ptr<struct T~1 complete>`
+                              (deref `struct T~1 complete` (unnamed-temporary~17 `ptr<struct T~1 complete>`))))
+                        (assign `long`
+                           (member `long` y +0[20:40]
+                              (deref `struct T~1 complete` (unnamed-temporary~16 `ptr<struct T~1 complete>`)))
+                           (add `long`
+                              (member `long` y +0[20:40]
+                                 (deref `struct T~1 complete` (unnamed-temporary~16 `ptr<struct T~1 complete>`)))
+                              (sign-extend `long` (++ `int`))))))
+                  (unnamed-temporary~18 `long`))))
+         (expression
+            (assign `int` (uty~14 `int`)
+               (truncate `int`
+                  (member `long` y +0[20:40]
+                     (member `struct T~1 complete` t +0
+                        (u~7 `union ∅~6 complete`))))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 16>>`
+                        (string `array<char; 16>` "0x%016lx %x %x\n\0"))))
+               (member `long` x +0
+                  (u~7 `union ∅~6 complete`))
+               (uty~14 `int`)
+               (postincrement_result~15 `int`)))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

@@ -146,7 +146,7 @@ impl fmt::Display for Operand<'_> {
                         false => 8,
                     },
                     Type::Void => unreachable!(),
-                    Type::Typeof { expr, unqual: _ } => match expr {},
+                    Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match expr {},
                     Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
                         unreachable!("incomplete"),
                     Type::Struct(Struct::Complete(Complete {
