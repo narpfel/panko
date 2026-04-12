@@ -39,6 +39,12 @@ int main() {
     // [[print: 0x0cccccbbbbd55560 fffbbbbd fffbbbbc]]
     printf("0x%016lx %x %x\n", u.x, uty, postincrement_result);
 
+    struct T* ptr = &u.t;
+    int postdecrement_result = (int)ptr->z--;
+    unsigned utz = u.t.z;
+    // [[print: 0x0ccccbbbbbd55560 ccccb ccccc]]
+    printf("0x%016lx %x %x\n", u.x, utz, postdecrement_result);
+
     // [[print: 0x12345 0x6789a 0xbcdef]]
     printf("0x%x 0x%x 0x%x\n", static_t.x, static_t.y, static_t.z);
     // [[print: 0x0bcdef6789a12345]]

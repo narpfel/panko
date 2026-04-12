@@ -172,6 +172,53 @@ exit_code: 0
                   (u~7 `union ∅~6 complete`))
                (uty~14 `int`)
                (postincrement_result~15 `int`)))
+         (struct T~1
+            (member x @0[0:20] `unsigned int`)
+            (member y @0[20:40] `long`)
+            (member z @4[8:28] `unsigned int`))
+         (definition ptr~19 `ptr<struct T~1 complete>`
+            (addressof `ptr<struct T~1 complete>`
+               (member `struct T~1 complete` t +0
+                  (u~7 `union ∅~6 complete`))))
+         (definition postdecrement_result~20 `int`
+            (noop-type-conversion `int`
+               (combine `unsigned int`
+                  (combine `unsigned int`
+                     (combine `unsigned int`
+                        (assign `ptr<struct T~1 complete>` (unnamed-temporary~22 `ptr<struct T~1 complete>`)
+                           (addressof `ptr<struct T~1 complete>`
+                              (deref `struct T~1 complete` (ptr~19 `ptr<struct T~1 complete>`))))
+                        (assign `unsigned int` (unnamed-temporary~23 `unsigned int`)
+                           (member `unsigned int` z +4[8:28]
+                              (deref `struct T~1 complete` (unnamed-temporary~22 `ptr<struct T~1 complete>`)))))
+                     (combine `unsigned int`
+                        (assign `ptr<struct T~1 complete>` (unnamed-temporary~21 `ptr<struct T~1 complete>`)
+                           (addressof `ptr<struct T~1 complete>`
+                              (deref `struct T~1 complete` (unnamed-temporary~22 `ptr<struct T~1 complete>`))))
+                        (assign `unsigned int`
+                           (member `unsigned int` z +4[8:28]
+                              (deref `struct T~1 complete` (unnamed-temporary~21 `ptr<struct T~1 complete>`)))
+                           (subtract `unsigned int`
+                              (member `unsigned int` z +4[8:28]
+                                 (deref `struct T~1 complete` (unnamed-temporary~21 `ptr<struct T~1 complete>`)))
+                              (noop-type-conversion `unsigned int` (-- `int`))))))
+                  (unnamed-temporary~23 `unsigned int`))))
+         (definition utz~24 `unsigned int`
+            (member `unsigned int` z +4[8:28]
+               (member `struct T~1 complete` t +0
+                  (u~7 `union ∅~6 complete`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 16>>`
+                        (string `array<char; 16>` "0x%016lx %x %x\n\0"))))
+               (member `long` x +0
+                  (u~7 `union ∅~6 complete`))
+               (utz~24 `unsigned int`)
+               (postdecrement_result~20 `int`)))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

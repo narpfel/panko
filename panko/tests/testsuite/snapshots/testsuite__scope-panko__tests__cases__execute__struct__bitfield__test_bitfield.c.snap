@@ -113,6 +113,26 @@ exit_code: 0
                   (name u~7 `union ∅~6 complete`))
                (name uty~14 `int`)
                (name postincrement_result~15 `int`)))
+         (struct T~1
+            (member x (bitfield-width 20) `unsigned int`)
+            (member y (bitfield-width 20) `long`)
+            (member z (bitfield-width 20) `unsigned int`))
+         (declaration ptr~19 `ptr<struct T~1 complete>`
+            (addressof
+               (dot t
+                  (name u~7 `union ∅~6 complete`))))
+         (declaration postdecrement_result~20 `int` (cast `int` (post-decrement (deref (name ptr~19 `ptr<struct T~1 complete>`)))))
+         (declaration utz~24 `unsigned int`
+            (dot z
+               (dot t
+                  (name u~7 `union ∅~6 complete`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%016lx %x %x\n")
+               (dot x
+                  (name u~7 `union ∅~6 complete`))
+               (name utz~24 `unsigned int`)
+               (name postdecrement_result~20 `int`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "0x%x 0x%x 0x%x\n")
