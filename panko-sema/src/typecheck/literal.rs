@@ -319,7 +319,9 @@ fn grow_to_fit(signedness: Signedness, kind: IntegralKind, base: u32, value: u64
     ];
     POSSIBLE_TYS
         .into_iter()
-        .filter(|ty| base != 10 || ty.signedness == signedness)
+        .filter(|ty| {
+            (base != 10 && signedness == Signedness::Signed) || ty.signedness == signedness
+        })
         .filter(|ty| ty.kind >= kind)
         .find(|ty| ty.can_represent(value))
         .unwrap_or_else(|| todo!("emit error: integer constant cannot be represented"))

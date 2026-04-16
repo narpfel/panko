@@ -14,6 +14,7 @@ use std::mem;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use itertools::Itertools as _;
+use itertools::zip_eq;
 use panko_lex::Loc;
 use panko_parser::BinOpKind;
 use panko_parser::Comparison;
@@ -45,7 +46,9 @@ use panko_sema::ty::Complete;
 use panko_sema::ty::PairKind;
 use panko_sema::ty::Struct;
 use panko_sema::typecheck::ArrayLength;
+use panko_sema::typecheck::Bitfield;
 use panko_sema::typecheck::Member;
+use panko_sema::typecheck::MemberKind;
 
 use crate::Register::*;
 use crate::lineno::Linenos;
@@ -185,7 +188,7 @@ struct SubobjectAtReference<'a> {
 
 impl<'a> SubobjectAtReference<'a> {
     fn slot(&self) -> Slot<'a> {
-        self.reference.slot().offset(self.subobject.offset())
+        self.reference.slot().offset(self.subobject.offset)
     }
 }
 
@@ -393,7 +396,7 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[&tgt, &Rax.with_ty(ty)]);
             }
             Type::Array(_) | Type::Function(_) | Type::Void => unreachable!(),
-            Type::Typeof { expr, unqual: _ } => match *expr {},
+            Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match *expr {},
             Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
                 unreachable!("incomplete"),
             Type::Struct(Struct::Complete(Complete { name: _, id: _, kind: _, members: _ })) =>
@@ -567,12 +570,29 @@ impl<'a> Codegen<'a> {
                     // TODO: this can be made a lot more efficient for sparse initialisers
                     let mut bytes = vec![0; usize::try_from(size).unwrap()];
                     for SubobjectInitialiser { subobject, initialiser } in subobject_initialisers {
-                        let subobject_size = usize::try_from(subobject.ty().size()).unwrap();
-                        match initialiser {
-                            Expression::Integer(value) => bytes
-                                [usize::try_from(subobject.offset()).unwrap()..][..subobject_size]
-                                .copy_from_slice(&value.to_le_bytes()[..subobject_size]),
-                            _ => todo!(),
+                        let Subobject { ty, offset, kind } = subobject;
+                        let subobject_size = usize::try_from(ty.size()).unwrap();
+                        let offset = usize::try_from(offset).unwrap();
+                        match kind {
+                            MemberKind::Normal => match initialiser {
+                                Expression::Integer(value) => bytes[offset..][..subobject_size]
+                                    .copy_from_slice(&value.to_le_bytes()[..subobject_size]),
+                                _ => todo!(),
+                            },
+                            MemberKind::Bitfield(Bitfield {
+                                offset: bitfield_offset,
+                                width: _,
+                            }) => match initialiser {
+                                Expression::Integer(value) => {
+                                    for (tgt_byte, src_byte) in zip_eq(
+                                        &mut bytes[offset..][..subobject_size],
+                                        &(value << bitfield_offset).to_le_bytes()[..subobject_size],
+                                    ) {
+                                        *tgt_byte |= src_byte;
+                                    }
+                                }
+                                _ => todo!(),
+                            },
                         }
                     }
                     self.constant(&bytes);
@@ -734,8 +754,13 @@ impl<'a> Codegen<'a> {
                         else {
                             self.expr(initialiser);
 
-                            if target.slot() != initialiser.slot {
-                                self.copy(&target, initialiser);
+                            match subobject.kind {
+                                MemberKind::Normal =>
+                                    if target.slot() != initialiser.slot {
+                                        self.copy(&target, initialiser);
+                                    },
+                                MemberKind::Bitfield(bitfield) =>
+                                    self.store_bitfield_member(&target, initialiser, bitfield),
                             }
                         }
                     },
@@ -830,10 +855,17 @@ impl<'a> Codegen<'a> {
                     }
                 }
                 Expression::MemberAccess { lhs, member } => {
+                    let kind = member.kind;
                     let member = self.member_access_lvalue(lhs, member);
                     self.expr(value);
                     let member = self.member_pointer(member);
-                    self.copy(&*member, value);
+                    match kind {
+                        MemberKind::Normal => self.copy(&*member, value),
+                        MemberKind::Bitfield(bitfield @ Bitfield { offset: _, width }) => {
+                            self.bitfield_sign_extend(value, Bitfield { offset: 0, width });
+                            self.store_bitfield_member(&*member, value, bitfield);
+                        }
+                    }
                     if expr.slot != value.slot {
                         self.copy(expr, value);
                     }
@@ -1011,6 +1043,7 @@ impl<'a> Codegen<'a> {
                         self.emit_args("lea", &[&Rax, &id]);
                     }
                     Expression::MemberAccess { lhs, member } => {
+                        assert!(!matches!(member.kind, MemberKind::Bitfield { .. }));
                         let member = self.member_access_lvalue(lhs, member);
                         let member = self.member_pointer(member);
                         self.emit_args("lea", &[&Rax, &*member]);
@@ -1137,9 +1170,14 @@ impl<'a> Codegen<'a> {
                 self.label(merge);
             }
             Expression::MemberAccess { lhs, member } => {
+                let kind = member.kind;
                 let member = self.member_access_lvalue(lhs, member);
                 let member = self.member_pointer(member);
                 self.copy(expr, &*member);
+                match kind {
+                    MemberKind::Normal => (),
+                    MemberKind::Bitfield(bitfield) => self.bitfield_sign_extend(expr, bitfield),
+                }
             }
         }
     }
@@ -1233,6 +1271,40 @@ impl<'a> Codegen<'a> {
                 Box::new(Operand::lvalue(R10, ty))
             }
         }
+    }
+
+    fn bitfield_sign_extend(
+        &mut self,
+        value: &LayoutedExpression,
+        Bitfield { offset, width }: Bitfield,
+    ) {
+        let size = value.ty.ty.size() * 8;
+        self.emit_args("shl", &[value, &size.strict_sub(width).strict_sub(offset)]);
+        let right_shift = match value.ty.ty {
+            Type::Arithmetic(Arithmetic::Integral(integral)) => match integral.signedness {
+                Signedness::Signed => "sar",
+                Signedness::Unsigned => "shr",
+            },
+            _ => unreachable!("nonintegral bitfield"),
+        };
+        self.emit_args(right_shift, &[value, &size.strict_sub(width)]);
+    }
+
+    fn store_bitfield_member(
+        &mut self,
+        member: &dyn AsOperand,
+        value: &LayoutedExpression,
+        Bitfield { offset, width }: Bitfield,
+    ) {
+        let value_mask = 2_u64.pow(u32::try_from(width).unwrap()).strict_sub(1);
+        let member_mask = !value_mask.strict_shl(u32::try_from(offset).unwrap());
+        self.emit_args("movabs", &[&R11, &member_mask]);
+        self.emit_args("and", &[member, &R11.with_ty(&member.ty())]);
+        self.emit_args("mov", &[&Rax.typed(value), value]);
+        self.emit_args("movabs", &[&R11, &value_mask]);
+        self.emit_args("and", &[&Rax, &R11]);
+        self.emit_args("shl", &[&Rax, &offset]);
+        self.emit_args("or", &[member, &Rax.with_ty(&member.ty())]);
     }
 }
 

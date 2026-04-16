@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/bitfield/test_error_typeof_bitfield.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `typeof` cannot be applied to bitfields
+   ╭─[panko/tests/cases/execute/struct/bitfield/test_error_typeof_bitfield.c:8:12]
+   │
+ 8 │     typeof(value.x) x = value.x;
+   │            ───┬───  
+   │               ╰───── this expression designates a bitfield
+───╯
+
+Error: `typeof_unqual` cannot be applied to bitfields
+   ╭─[panko/tests/cases/execute/struct/bitfield/test_error_typeof_bitfield.c:9:19]
+   │
+ 9 │     typeof_unqual(value.x) y = value.x;
+   │                   ───┬───  
+   │                      ╰───── this expression designates a bitfield
+───╯

@@ -23,6 +23,7 @@ use crate::ty::ParameterDeclaration;
 use crate::ty::Struct;
 use crate::typecheck;
 use crate::typecheck::Member;
+use crate::typecheck::MemberKind;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::Typeck;
 use crate::typecheck::Typedef;
@@ -81,18 +82,9 @@ pub struct SubobjectInitialiser<'a, Expression> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Subobject<'a> {
-    pub(crate) ty: Type<'a>,
-    pub(crate) offset: u64,
-}
-
-impl<'a> Subobject<'a> {
-    pub fn ty(&self) -> &Type<'a> {
-        &self.ty
-    }
-
-    pub fn offset(&self) -> u64 {
-        self.offset
-    }
+    pub ty: Type<'a>,
+    pub offset: u64,
+    pub kind: MemberKind,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -296,9 +288,9 @@ fn layout_member<'a>(
     bump: &'a Bump,
     member: &Member<'a, Typeck>,
 ) -> Member<'a, Layout> {
-    let Member { name, ty, offset } = *member;
+    let Member { name, ty, offset, kind } = *member;
     let ty = layout_ty(stack, bump, ty);
-    Member { name, ty, offset }
+    Member { name, ty, offset, kind }
 }
 
 fn layout_ty_unqual<'a>(
@@ -405,20 +397,24 @@ fn layout_declaration<'a>(
                 let subobject_initialisers = bump.alloc_slice_fill_iter(
                     subobject_initialisers.iter().map(|subobject_initialiser| {
                         let typecheck::SubobjectInitialiser {
-                            subobject: ty::subobjects::Subobject { ty, offset },
+                            subobject: ty::subobjects::Subobject { ty, offset, kind },
                             initialiser,
                         } = *subobject_initialiser;
                         SubobjectInitialiser {
                             subobject: Subobject {
                                 ty: layout_ty_unqual(stack, bump, ty),
                                 offset,
+                                kind,
                             },
                             initialiser: stack.with_block(|stack| {
                                 layout_expression_in_slot(
                                     stack,
                                     bump,
                                     &initialiser,
-                                    Some(slot.offset(offset)),
+                                    match kind {
+                                        MemberKind::Normal => Some(slot.offset(offset)),
+                                        MemberKind::Bitfield(_) => None,
+                                    },
                                 )
                             }),
                         }
@@ -675,7 +671,8 @@ fn layout_expression_in_slot<'a>(
             let lhs_slot = Some(Slot::Void);
             let lhs = bump.alloc(layout_expression_in_slot(stack, bump, lhs, lhs_slot));
             let slot = match lhs.slot {
-                slot @ Slot::Automatic(_) => slot.offset(member.offset),
+                slot @ Slot::Automatic(_) if let MemberKind::Normal = member.kind =>
+                    slot.offset(member.offset),
                 _ => make_slot_noborrow(stack),
             };
             let member = layout_member(stack, bump, &member);

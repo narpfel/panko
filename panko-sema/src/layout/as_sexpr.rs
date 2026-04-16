@@ -18,8 +18,9 @@ use super::Slot;
 use super::Statement;
 use super::SubobjectInitialiser;
 use super::TranslationUnit;
+use crate::layout::Subobject;
 use crate::ty::struct_decl_as_sexpr;
-use crate::typecheck::Member;
+use crate::typecheck::MemberKind;
 
 impl AsSExpr for TranslationUnit<'_> {
     fn as_sexpr(&self) -> SExpr {
@@ -92,9 +93,14 @@ where
     Expression: AsSExpr,
 {
     fn as_sexpr(&self) -> SExpr {
+        let Self { subobject, initialiser } = self;
+        let Subobject { ty: _, offset, kind } = subobject;
         SExpr::new("subobject")
-            .inline_string(format!("+{}", self.subobject.offset))
-            .inherit(&self.initialiser)
+            .inline_string(match kind {
+                MemberKind::Normal => format!("+{offset}"),
+                MemberKind::Bitfield(bitfield) => format!("+{offset}[{bitfield}]"),
+            })
+            .inherit(initialiser)
     }
 }
 
@@ -184,12 +190,8 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new(format!("logical-{}", op.str())).lines([lhs, rhs]),
             Expression::Conditional { condition, then, or_else } =>
                 SExpr::new("conditional").lines([condition, then, or_else]),
-            Expression::MemberAccess {
-                lhs,
-                member: Member { name, ty: _, offset },
-            } => SExpr::new("member")
-                .inline_string(format!("{name} +{offset}"))
-                .lines([lhs]),
+            Expression::MemberAccess { lhs, member } =>
+                member.as_sexpr_without_ty("+").lines([lhs]),
         }
     }
 }

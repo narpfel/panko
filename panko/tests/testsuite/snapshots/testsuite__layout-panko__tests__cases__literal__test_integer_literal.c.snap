@@ -18,6 +18,9 @@ exit_code: 0
          (expression (66 `int` @0))
          (expression (34 `int` @0))
          (expression (0 `int` @0))
-         (expression (170 `int` @0)))))
+         (expression (170 `int` @0))
+         (expression (4660 `unsigned int` @0))
+         (expression (0 `unsigned long` @0))
+         (expression (51 `unsigned long long` @0)))))
 
 ----- stderr -----

@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/struct/test_error_bitfields.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot take address of this expression because it is a bitfield member
+   ╭─[panko/tests/cases/struct/test_error_bitfields.c:7:17]
+   │
+ 7 │     int* ptr = &s.x;
+   │                 ─┬─  
+   │                  ╰─── this expression is a bitfield member
+───╯
+
+Error: bitfields must have integral type, not `struct Struct~0 complete`
+    ╭─[panko/tests/cases/struct/test_error_bitfields.c:11:19]
+    │
+ 11 │     struct Struct bitfield:42;
+    │     ──────┬────── ────┬─── ─┬  
+    │           │           │     ╰── bitfield declaration here
+    │           │           │        
+    │           │           ╰──────── in this member declaration
+    │           │                    
+    │           ╰──────────────────── `struct Struct~0 complete` is not an integral type
+────╯
+
+Error: bitfield of 123 bits does not fit in type `int` of size 32 bits
+    ╭─[panko/tests/cases/struct/test_error_bitfields.c:15:23]
+    │
+ 15 │     int too_large_int:123;
+    │     ─┬─ ───────────── ─┬─  
+    │      │                 ╰─── too large for type `int`
+    │      │                     
+    │      ╰───────────────────── this has size `32` bits
+────╯
+
+Error: bitfield of 2 bits does not fit in type `bool` of size 1 bits
+    ╭─[panko/tests/cases/struct/test_error_bitfields.c:16:12]
+    │
+ 16 │     bool b:2;
+    │     ──┬─ ─ ┬  
+    │       │    ╰── too large for type `bool`
+    │       │       
+    │       ╰─────── this has size `1` bits
+────╯

@@ -169,8 +169,16 @@ FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = 
         NonAbstractInitDeclarator
     >> => {
         let (declaration_specifiers, declarator) = head;
-        let ast::InitDeclarator { declarator, initialiser }
+        let ast::InitDeclarator { declarator, bitfield_width, initialiser }
             = declarator.expect("`NonAbstractInitDeclarator` always returns `Some(init_declarator)`");
+
+        if let Some(bitfield_width) = bitfield_width {
+            sess.emit(ast::BitfieldDiagnostic::NonStructMemberBitfield {
+                at: bitfield_width,
+                decl_loc: declarator.loc_with(declaration_specifiers),
+                kind: "function",
+            })
+        }
         assert!(
             initialiser.is_none(),
             "TODO: generate a good error message; e. g. `int a() = 42 {{}}`",
@@ -254,11 +262,11 @@ DeclarationHead<IsAbstractDeclaratorAllowed, MaybeInitDeclarator>: (
                 add_typedef_name(name);
                 return (
                     ast::DeclarationSpecifiers(specifiers),
-                    Some(ast::InitDeclarator { declarator, initialiser: None }),
+                    Some(ast::InitDeclarator { declarator, bitfield_width: None, initialiser: None }),
                 );
             }
             else if let Some(declarator) = declarator
-                && let ast::InitDeclarator { declarator, initialiser } = declarator
+                && let ast::InitDeclarator { declarator, bitfield_width, initialiser } = declarator
                 && let ast::Declarator { pointers, direct_declarator } = declarator
                 && let Some(direct_declarator) = direct_declarator.with_name(sess, name)
             {
@@ -266,16 +274,16 @@ DeclarationHead<IsAbstractDeclaratorAllowed, MaybeInitDeclarator>: (
                 add_typedef_name(name);
                 return (
                     ast::DeclarationSpecifiers(specifiers),
-                    Some(ast::InitDeclarator { declarator, initialiser }),
+                    Some(ast::InitDeclarator { declarator, bitfield_width, initialiser }),
                 );
             }
         }
         else if let ast::AbstractDeclaratorAllowed::No = is_abstract_declarator_allowed
-            && let Some(ast::InitDeclarator { declarator, initialiser }) = declarator
+            && let Some(ast::InitDeclarator { declarator, bitfield_width, initialiser }) = declarator
             && let Some((name, declarator)) = declarator.reinterpret_as_concrete(sess)
         {
             add_typedef_name(name);
-            return (specifiers, Some(ast::InitDeclarator { declarator, initialiser }));
+            return (specifiers, Some(ast::InitDeclarator { declarator, bitfield_width, initialiser }));
         }
         (specifiers, declarator)
     },
@@ -296,7 +304,10 @@ InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
 }
 
 InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
-    <declarator:Declarator> <initialiser:("=" <Initialiser>)?> => {
+    <declarator:Declarator>
+        <bitfield_width:(":" <ConstantExpression>)?>
+        <initialiser:("=" <Initialiser>)?>
+    => {
         if let Some(name) = declarator.direct_declarator.name() {
             let kind = if *is_in_typedef.borrow().last() {
                 TokenKind::TypeIdentifier
@@ -308,14 +319,23 @@ InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
         }
         ast::InitDeclarator { <> }
     },
-    "=" <Initialiser> => {
+    <bitfield_width:(":" <ConstantExpression>)?> "=" <initialiser:Initialiser> => {
         ast::InitDeclarator {
             declarator: ast::Declarator {
                 pointers: None,
                 direct_declarator: ast::DirectDeclarator::Abstract,
             },
-            initialiser: Some(<>),
+            bitfield_width,
+            initialiser: Some(initialiser),
         }
+    },
+    ":" <ConstantExpression> => ast::InitDeclarator {
+        declarator: ast::Declarator {
+            pointers: None,
+            direct_declarator: ast::DirectDeclarator::Abstract,
+        },
+        bitfield_width: Some(<>),
+        initialiser: None,
     },
 }
 
@@ -385,7 +405,14 @@ ParameterDeclaration: ast::ParameterDeclaration<'a> = {
     >> => {
         let (declaration_specifiers, declarator) = declarator;
         let declarator = try {
-            let ast::InitDeclarator { declarator, initialiser } = declarator?;
+            let ast::InitDeclarator { declarator, bitfield_width, initialiser } = declarator?;
+            if let Some(bitfield_width) = bitfield_width {
+                sess.emit(ast::BitfieldDiagnostic::NonStructMemberBitfield {
+                    at: bitfield_width,
+                    decl_loc: declarator.loc_with(declaration_specifiers),
+                    kind: "parameter",
+                })
+            }
             if let Some(initialiser) = initialiser {
                 sess.emit(ast::Diagnostic::DefaultParameter {
                     at: initialiser,

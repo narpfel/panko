@@ -189,6 +189,7 @@ pub enum Type<'a, T: Step> {
     Typeof {
         expr: T::TypeofExpr<'a>,
         unqual: bool,
+        allow_bitfields: bool,
     },
     Nullptr,
     Struct(Struct<'a, T>),
@@ -381,7 +382,7 @@ where
             }
             Type::Function(_) => unreachable!("functions are not objects and don’t have a size"),
             Type::Void => unreachable!("void is not an object and doesn’t have a size"),
-            Type::Typeof { expr, unqual: _ } => match *expr {},
+            Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match *expr {},
             Type::Nullptr => Self::size_t().size(),
             Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
                 unreachable!("incomplete"),
@@ -404,7 +405,7 @@ where
             Type::Function(_) =>
                 unreachable!("functions are not objects and don’t have an alignment"),
             Type::Void => unreachable!("void is not an object and doesn’t have an alignment"),
-            Type::Typeof { expr, unqual: _ } => match *expr {},
+            Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match *expr {},
             Type::Nullptr => Self::size_t().align(),
             Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
                 unreachable!("incomplete"),
@@ -434,7 +435,7 @@ where
             Type::Array(ArrayType { ty, length, loc: _ }) =>
                 length.is_known() && ty.ty.is_complete(),
             Type::Void => false,
-            Type::Typeof { expr, unqual: _ } => match *expr {},
+            Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match *expr {},
             Type::Nullptr => true,
             Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) => false,
             Type::Struct(Struct::Complete(_)) => true,
@@ -469,7 +470,7 @@ where
             Self::Array(_) => None,
             Self::Function(_) => None,
             Self::Void => None,
-            Self::Typeof { expr, unqual: _ } => match *expr {},
+            Self::Typeof { expr, unqual: _, allow_bitfields: _ } => match *expr {},
             Self::Nullptr => Some(Class::Integer),
             Self::Struct(Struct::Incomplete { .. }) => None,
             ty @ Self::Struct(Struct::Complete(_)) => match ty.eightbyte_size() {
@@ -484,6 +485,20 @@ where
     pub fn classify(&self) -> Class {
         self.try_classify().unwrap()
     }
+
+    pub(crate) fn is_valid_for_bitfield(&self) -> bool {
+        matches!(self, Self::Arithmetic(Arithmetic::Integral(_)))
+    }
+
+    pub(crate) fn max_bitfield_size(&self) -> u64 {
+        match self {
+            Self::Arithmetic(Arithmetic::Integral(Integral {
+                signedness: _,
+                kind: IntegralKind::Bool,
+            })) => 1,
+            _ => self.size() * 8,
+        }
+    }
 }
 
 impl<T: Step> fmt::Display for Type<'_, T> {
@@ -494,7 +509,7 @@ impl<T: Step> fmt::Display for Type<'_, T> {
             Type::Array(array) => write!(f, "{array}"),
             Type::Function(function) => write!(f, "{function}"),
             Type::Void => write!(f, "void"),
-            Type::Typeof { expr, unqual } => write!(
+            Type::Typeof { expr, unqual, allow_bitfields: _ } => write!(
                 f,
                 "typeof{}({})",
                 if *unqual { "_unqual" } else { "" },
@@ -617,7 +632,7 @@ impl<'a> QualifiedType<'a, Typeck> {
     pub(crate) fn is_modifiable(&self) -> bool {
         let Self { is_const, is_volatile: _, ty, loc: _ } = self;
         let aggregate_members_are_modifiable = || match ty {
-            Type::Typeof { expr, unqual: _ } => match *expr {},
+            Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match *expr {},
             Type::Arithmetic(_)
             | Type::Pointer(_)
             | Type::Array(_)

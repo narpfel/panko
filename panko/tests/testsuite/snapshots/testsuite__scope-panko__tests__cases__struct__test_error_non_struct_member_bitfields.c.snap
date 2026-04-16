@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/struct/test_error_non_struct_member_bitfields.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: bitfields can only be struct or union members, not functions
+   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:1:16]
+   │
+ 1 │ int function():123 {
+   │ ───────┬────── ─┬─  
+   │        │        ╰─── bitfields are not allowed here
+   │        │            
+   │        ╰──────────── in this function
+───╯
+
+Error: bitfields can only be struct or union members, not parameters
+   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:5:29]
+   │
+ 5 │ int f(int x, bool parameter:1, int y) {
+   │              ───────┬────── ┬  
+   │                     │       ╰── bitfields are not allowed here
+   │                     │          
+   │                     ╰────────── in this parameter
+───╯
+
+Error: bitfields can only be struct or union members, not global variables
+   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:9:12]
+   │
+ 9 │ int global:10 = 10;
+   │ ─────┬──── ─┬  
+   │      │      ╰── bitfields are not allowed here
+   │      │         
+   │      ╰───────── in this global variable
+───╯
+
+Error: bitfields can only be struct or union members, not local variables
+    ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:12:15]
+    │
+ 12 │     int local:20 = 20;
+    │     ────┬──── ─┬  
+    │         │      ╰── bitfields are not allowed here
+    │         │         
+    │         ╰───────── in this local variable
+────╯

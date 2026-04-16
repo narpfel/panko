@@ -24,7 +24,7 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
 use panko_lex::TypedefNames;
-use panko_report::Report;
+pub use panko_report::Report;
 use panko_report::Sliced as _;
 
 use crate::ast::FromError;
@@ -129,6 +129,21 @@ enum Diagnostic<'a> {
     },
 }
 
+#[derive(Debug, Report)]
+#[exit_code(1)]
+pub enum BitfieldDiagnostic<'a> {
+    #[error("bitfields can only be struct or union members, not {kind}s")]
+    #[diagnostics(
+        at(colour = Blue, label = "bitfields are not allowed here"),
+        decl_loc(colour = Red, label = "in this {kind}"),
+    )]
+    NonStructMemberBitfield {
+        at: Expression<'a>,
+        decl_loc: Loc<'a>,
+        kind: &'a str,
+    },
+}
+
 #[derive(Debug, Clone, Copy, Report)]
 #[exit_code(1)]
 pub enum IntegerLiteralDiagnostic<'a> {
@@ -161,13 +176,15 @@ pub enum TodoError<'a> {
 macro_rules! error_todo {
     ($at:expr $(,)?) => {{
         let msg = String::from("unimplemented error");
-        $crate::TodoError::Error { at: $at.loc(), msg: msg.clone() }.print();
+        let error = $crate::TodoError::Error { at: $at.loc(), msg: msg.clone() };
+        $crate::Report::print(&error);
         todo!("{msg}")
     }};
     ($at:expr, $msg:literal $(, $param:expr)* $(,)?) => {{
         let at = $at.loc();
         let msg = format!(concat!("unimplemented error: ", $msg), $($param,)*);
-        $crate::TodoError::Error { at, msg: msg.clone() }.print();
+        let error = $crate::TodoError::Error { at, msg: msg.clone() };
+        $crate::Report::print(&error);
         todo!("{msg}")
     }};
 }
@@ -669,6 +686,7 @@ fn function_specifier_kind(token_kind: TokenKind) -> FunctionSpecifierKind {
 #[derive(Debug, Clone, Copy)]
 struct InitDeclarator<'a> {
     declarator: Declarator<'a>,
+    bitfield_width: Option<Expression<'a>>,
     initialiser: Option<Initialiser<'a>>,
 }
 

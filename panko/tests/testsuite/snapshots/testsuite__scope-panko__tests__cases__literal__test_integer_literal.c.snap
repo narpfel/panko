@@ -18,6 +18,9 @@ exit_code: 0
          (expression 0x42)
          (expression 042)
          (expression 0)
-         (expression 0b1010'1010))))
+         (expression 0b1010'1010)
+         (expression 0x1234u)
+         (expression 0ul)
+         (expression 0b110011ull))))
 
 ----- stderr -----

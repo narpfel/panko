@@ -91,8 +91,11 @@ impl AsSExpr for Struct<'_> {
 
 impl AsSExpr for Member<'_> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name, ty } = self;
-        SExpr::new("member").inherit(name).inherit(ty)
+        let Self { name, bitfield_width, ty } = self;
+        SExpr::new("member")
+            .inherit(name)
+            .inherit(bitfield_width)
+            .inherit(ty)
     }
 }
 

@@ -22,13 +22,24 @@ use super::Statement;
 use super::TranslationUnit;
 use super::Typedef;
 use super::Typeof;
+use crate::scope::BitfieldWidth;
 use crate::scope::Member;
 use crate::ty::struct_decl_as_sexpr;
 
 impl AsSExpr for Member<'_> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name, ty } = self;
-        SExpr::new("member").inherit(name).inherit(ty)
+        let Self { name, bitfield_width, ty } = self;
+        SExpr::new("member")
+            .inherit(name)
+            .inherit_many(bitfield_width)
+            .inherit(ty)
+    }
+}
+
+impl AsSExpr for BitfieldWidth<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { width } = self;
+        SExpr::new("bitfield-width").inherit(width)
     }
 }
 
@@ -203,6 +214,7 @@ impl AsSExpr for Expression<'_> {
                 or_else,
             } => SExpr::new("conditional").lines([condition, then, or_else]),
             Expression::Comma { lhs, rhs } => SExpr::new("comma").lines([lhs, rhs]),
+            // TODO: this does not show the member when `operand` is a `MemberAccess` expr
             Expression::Increment { operator, operand, fixity, reference: _ } =>
                 SExpr::new(format!("{}-{}", fixity.str(), operator.str())).inherit(operand),
             Expression::MemberAccess { lhs, op, member } => op

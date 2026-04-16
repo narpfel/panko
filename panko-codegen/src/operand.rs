@@ -146,7 +146,7 @@ impl fmt::Display for Operand<'_> {
                         false => 8,
                     },
                     Type::Void => unreachable!(),
-                    Type::Typeof { expr, unqual: _ } => match expr {},
+                    Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match expr {},
                     Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
                         unreachable!("incomplete"),
                     Type::Struct(Struct::Complete(Complete {
@@ -253,8 +253,14 @@ fn slot_as_operand<'a>(
 pub(super) trait AsOperand<'a> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a>;
 
+    // TODO: this calls `as_operand` just to get the type. Implementers can provide a more
+    // efficient implementation, but it’s not clear if this is necessary.
+    fn ty(&self) -> Type<'a> {
+        self.as_operand(Some(0)).ty
+    }
+
     fn size(&self) -> u64 {
-        self.as_operand(None).ty.size()
+        self.ty().size()
     }
 }
 
@@ -268,19 +274,11 @@ impl<'a> AsOperand<'a> for LayoutedExpression<'a> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
         slot_as_operand(self.slot, self.ty.ty, argument_area_size.unwrap(), false)
     }
-
-    fn size(&self) -> u64 {
-        self.ty.ty.size()
-    }
 }
 
 impl<'a> AsOperand<'a> for TypedSlot<'a> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
         slot_as_operand(self.slot, self.ty, argument_area_size.unwrap(), false)
-    }
-
-    fn size(&self) -> u64 {
-        self.ty.size()
     }
 }
 
@@ -300,10 +298,6 @@ impl<'a> AsOperand<'a> for Reference<'a> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
         slot_as_operand(self.slot(), self.ty.ty, argument_area_size.unwrap(), false)
     }
-
-    fn size(&self) -> u64 {
-        self.ty.ty.size()
-    }
 }
 
 impl<'a, T> AsOperand<'a> for ByValue<&T>
@@ -321,24 +315,16 @@ where
 
         Operand { kind, ty }
     }
-
-    fn size(&self) -> u64 {
-        self.0.size()
-    }
 }
 
 impl<'a> AsOperand<'a> for SubobjectAtReference<'a> {
     fn as_operand(&self, argument_area_size: Option<u64>) -> Operand<'a> {
         slot_as_operand(
             self.slot(),
-            *self.subobject.ty(),
+            self.subobject.ty,
             argument_area_size.unwrap(),
             false,
         )
-    }
-
-    fn size(&self) -> u64 {
-        self.subobject.ty().size()
     }
 }
 

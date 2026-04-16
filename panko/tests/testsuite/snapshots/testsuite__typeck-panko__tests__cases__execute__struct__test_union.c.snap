@@ -55,12 +55,17 @@ exit_code: 0
                (sizeof `unsigned long` 4 `union U~2 complete`)))
          (expression
             (combine `unsigned int`
-               (assign `ptr<unsigned int>` (unnamed-temporary~6 `ptr<unsigned int>`)
-                  (addressof `ptr<unsigned int>`
+               (assign `ptr<struct T~1 complete>` (unnamed-temporary~6 `ptr<struct T~1 complete>`)
+                  (addressof `ptr<struct T~1 complete>`
+                     (member `struct T~1 complete` t +0
+                        (u~5 `union U~2 complete`))))
+               (assign `unsigned int`
+                  (member `unsigned int` x +0
+                     (deref `struct T~1 complete` (unnamed-temporary~6 `ptr<struct T~1 complete>`)))
+                  (add `unsigned int`
                      (member `unsigned int` x +0
-                        (member `struct T~1 complete` t +0
-                           (u~5 `union U~2 complete`)))))
-               (assign `unsigned int` (deref `unsigned int` (unnamed-temporary~6 `ptr<unsigned int>`)) (add `unsigned int` (deref `unsigned int` (unnamed-temporary~6 `ptr<unsigned int>`)) (noop-type-conversion `unsigned int` (++ `int`))))))
+                        (deref `struct T~1 complete` (unnamed-temporary~6 `ptr<struct T~1 complete>`)))
+                     (noop-type-conversion `unsigned int` (++ `int`))))))
          (return
             (member `int` x +0
                (u~5 `union U~2 complete`))))))

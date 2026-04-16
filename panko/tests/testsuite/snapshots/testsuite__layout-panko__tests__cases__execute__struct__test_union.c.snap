@@ -54,18 +54,19 @@ exit_code: 0
                         (string `array<char; 5>` @void "%zu\n\0"))))
                (4 `unsigned long` @24)))
          (expression
-            (combine `unsigned int` @4
-               (assign `ptr<unsigned int>` @8
-                  (unnamed-temporary~6 `ptr<unsigned int>` @8)
-                  (addressof `ptr<unsigned int>` @8
-                     (member `unsigned int` @0 x +0
-                        (member `struct T~1 complete` @0 t +0
-                           (u~5 `union U~2 complete` @0)))))
-               (assign `unsigned int` @4
-                  (deref `unsigned int` @4 (unnamed-temporary~6 `ptr<unsigned int>` @8))
+            (combine `unsigned int` @16
+               (assign `ptr<struct T~1 complete>` @8
+                  (unnamed-temporary~6 `ptr<struct T~1 complete>` @8)
+                  (addressof `ptr<struct T~1 complete>` @8
+                     (member `struct T~1 complete` @0 t +0
+                        (u~5 `union U~2 complete` @0))))
+               (assign `unsigned int` @16
+                  (member `unsigned int` @16 x +0
+                     (deref `struct T~1 complete` @void (unnamed-temporary~6 `ptr<struct T~1 complete>` @8)))
                   (add `unsigned int` @16
-                     (deref `unsigned int` @16 (unnamed-temporary~6 `ptr<unsigned int>` @8))
-                     (noop-type-conversion `unsigned int` @24 (1 `int` @24))))))
+                     (member `unsigned int` @16 x +0
+                        (deref `struct T~1 complete` @void (unnamed-temporary~6 `ptr<struct T~1 complete>` @8)))
+                     (noop-type-conversion `unsigned int` @20 (1 `int` @20))))))
          (return
             (member `int` @0 x +0
                (u~5 `union U~2 complete` @0))))))

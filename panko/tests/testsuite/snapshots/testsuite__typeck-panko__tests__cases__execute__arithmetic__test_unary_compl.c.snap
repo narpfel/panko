@@ -31,7 +31,7 @@ exit_code: 0
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
                (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` `ptr<ptr<char>>` (argv~4 `ptr<ptr<char>>`) (sign-extend `unsigned long` (2 `int`)))))
-               (compl `int` (0u `int`))))
+               (compl `unsigned int` (0u `unsigned int`))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

@@ -595,6 +595,45 @@ pub(super) enum Diagnostic<'a> {
         member: Token<'a>,
         kind: &'a str,
     },
+
+    #[error("`typeof{unqual}` cannot be applied to bitfields")]
+    #[diagnostics(
+        at(colour = Red, label = "this expression designates a bitfield"),
+    )]
+    #[with(unqual = unqual.then_some("_unqual").unwrap_or_default())]
+    TypeofOfBitfield {
+        at: TypedExpression<'a>,
+        unqual: bool,
+    },
+
+    #[error("bitfields must have integral type, not `{ty}`")]
+    #[diagnostics(
+        at(colour = Magenta, label = "in this member declaration"),
+        ty(colour = Red, label = "`{ty}` is not an integral type"),
+        width(colour = Blue, label = "bitfield declaration here"),
+    )]
+    NonintegralBitfield {
+        at: Token<'a>,
+        ty: QualifiedType<'a>,
+        width: TypedExpression<'a>,
+    },
+
+    #[error("bitfield of {width} bits does not fit in type `{ty}` of size {ty_size} bits")]
+    #[diagnostics(
+        at(colour = Red, label = "too large for type `{ty}`"),
+        name(colour = Blue),
+        ty(colour = Magenta, label = "this has size `{ty_size}` bits"),
+    )]
+    #[with(
+        ty_size = ty.ty.max_bitfield_size(),
+        width = width.fg(Red),
+    )]
+    BitfieldTooWide {
+        at: TypedExpression<'a>,
+        width: u64,
+        ty: QualifiedType<'a>,
+        name: Token<'a>,
+    },
 }
 
 fn describe_ty_completeness(ty: &QualifiedType) -> (&'static str, &'static str, &'static str) {

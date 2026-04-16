@@ -37,6 +37,7 @@ use variant_types::IntoVariant as _;
 use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
 use crate::scope;
+use crate::scope::BitfieldWidth;
 use crate::scope::DesignatedInitialiser;
 use crate::scope::Designation;
 use crate::scope::Designator;
@@ -59,6 +60,7 @@ use crate::ty::Struct;
 use crate::ty::subobjects::AllowExplicit;
 use crate::ty::subobjects::Subobject;
 use crate::ty::subobjects::SubobjectIterator;
+use crate::ty::subobjects::SubobjectKey;
 use crate::ty::subobjects::Subobjects;
 use crate::typecheck::diagnostics::Diagnostic;
 use crate::typecheck::literal::StringLiteral;
@@ -124,11 +126,37 @@ impl<Expression> Hash for ArrayLength<Expression> {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Bitfield {
+    pub offset: u64,
+    pub width: u64,
+}
+
+impl fmt::Display for Bitfield {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let Self { offset, width } = *self;
+        write!(f, "{offset}:{}", offset.strict_add(width))
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum MemberKind {
+    Normal,
+    Bitfield(Bitfield),
+}
+
+impl<'a> FromError<'a> for MemberKind {
+    fn from_error(_error: &'a dyn Report) -> Self {
+        Self::Normal
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Member<'a, T: ty::Step> {
     pub(crate) name: &'a str,
     pub ty: ty::QualifiedType<'a, T>,
     pub offset: u64,
+    pub kind: MemberKind,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -506,6 +534,14 @@ impl<'a> TypedExpression<'a> {
         }
     }
 
+    fn is_bitfield(&self) -> bool {
+        matches!(
+            self.expr,
+            Expression::MemberAccess { member, .. }
+            if matches!(member.kind, MemberKind::Bitfield { .. }),
+        )
+    }
+
     fn is_modifiable(&self) -> bool {
         self.ty.is_modifiable()
     }
@@ -675,7 +711,7 @@ fn typeck_function_ty<'a>(
         | Type::Function(_)
         | Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
             sess.emit(Diagnostic::InvalidFunctionReturnType { at: *return_type }),
-        Type::Typeof { expr, unqual: _ } => match expr {},
+        Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match expr {},
     }
     let params = sess.alloc_slice_fill_iter(params.iter().map(
         |&ParameterDeclaration { loc, ty, name }| {
@@ -709,6 +745,75 @@ fn typeck_function_ty<'a>(
     }
 }
 
+fn typeck_struct_members<'a>(
+    sess: &'a Session<'a>,
+    kind: StructKind,
+    members: &[NoHashEq<scope::Member<'a>>],
+) -> &'a [Member<'a, Typeck>] {
+    let mut size = 0_u64;
+    sess.alloc_slice_fill_iter(members.iter().map(|member| {
+        let NoHashEq(scope::Member { name, bitfield_width, ty }) = *member;
+        let (width_expr, bitfield_width) = try {
+            let BitfieldWidth { width } = bitfield_width.as_ref()?;
+            let width = typeck_expression(sess, width, Context::Default);
+            // TODO: constexpr evaluate
+            let value = match width.expr {
+                Expression::Integer { value, token: _ } => value,
+                expr => error_todo!(expr),
+            };
+            (width, value)
+        }
+        .unzip();
+        // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
+        // better error recovery due to trying to compute the size and align of incomplete
+        // types when using this struct)
+        let ty = typeck_ty(sess, ty, IsParameter::No);
+        let (ty_size, align) = match ty.ty.is_complete() && ty.ty.is_object() {
+            true => (ty.ty.size() * 8, ty.ty.align() * 8),
+            false => {
+                let () = sess.emit(Diagnostic::IncompleteOrNonObjectStructMember { at: *name, ty });
+                (8, 8)
+            }
+        };
+        let width = bitfield_width.unwrap_or(ty_size);
+        if size + width > size.next_multiple_of(ty_size) {
+            size = size.next_multiple_of(align);
+        }
+        let offset = match kind {
+            StructKind::Struct => size / align * align / 8,
+            StructKind::Union => 0,
+        };
+        let kind = match bitfield_width {
+            Some(_) if !ty.ty.is_valid_for_bitfield() =>
+                sess.emit(Diagnostic::NonintegralBitfield {
+                    at: *name,
+                    ty,
+                    width: width_expr.unwrap(),
+                }),
+            Some(0) => {
+                // TODO: error if `name.is_some()`
+                todo!("zero-length bitfield")
+            }
+            Some(width) => {
+                let max_size = ty.ty.max_bitfield_size();
+                if width > max_size {
+                    sess.emit(Diagnostic::BitfieldTooWide {
+                        at: width_expr.unwrap(),
+                        width,
+                        ty,
+                        name: *name,
+                    })
+                }
+                let width = width.min(max_size);
+                MemberKind::Bitfield(Bitfield { offset: size % ty_size, width })
+            }
+            None => MemberKind::Normal,
+        };
+        size += width;
+        Member { name: name.slice(), ty, offset, kind }
+    }))
+}
+
 fn typeck_ty_with_initialiser<'a>(
     sess: &'a Session<'a>,
     ty: scope::QualifiedType<'a>,
@@ -723,9 +828,19 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Array(ty) => typeck_array_ty(sess, ty, is_parameter, reference),
         ty::Type::Function(ty) => typeck_function_ty(sess, ty, is_parameter),
         ty::Type::Void => Type::Void,
-        ty::Type::Typeof { expr: NoHashEq(expr), unqual } => {
+        ty::Type::Typeof {
+            expr: NoHashEq(expr),
+            unqual,
+            allow_bitfields,
+        } => {
             let ty = match expr {
-                scope::Typeof::Expr(expr) => typeck_expression(sess, expr, Context::Typeof).ty,
+                scope::Typeof::Expr(expr) => {
+                    let expr = typeck_expression(sess, expr, Context::Typeof);
+                    if !allow_bitfields && expr.is_bitfield() {
+                        sess.emit(Diagnostic::TypeofOfBitfield { at: expr, unqual })
+                    }
+                    expr.ty
+                }
                 scope::Typeof::Ty(ty) => typeck_ty(sess, *ty, is_parameter),
             };
             match unqual {
@@ -743,29 +858,7 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Struct(Struct::Incomplete { name, id, kind }) =>
             Type::Struct(Struct::Incomplete { name, id, kind }),
         ty::Type::Struct(Struct::Complete(Complete { name, id, kind, members })) => {
-            let size = &mut 0_u64;
-            let members = sess.alloc_slice_fill_iter(members.iter().map(|member| {
-                let NoHashEq(scope::Member { name, ty }) = *member;
-                // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
-                // better error recovery due to trying to compute the size and align of incomplete
-                // types when using this struct)
-                let ty = typeck_ty(sess, ty, IsParameter::No);
-                let (ty_size, align) = match ty.ty.is_complete() && ty.ty.is_object() {
-                    true => (ty.ty.size(), ty.ty.align()),
-                    false => {
-                        let () = sess
-                            .emit(Diagnostic::IncompleteOrNonObjectStructMember { at: *name, ty });
-                        (1, 1)
-                    }
-                };
-                *size = size.next_multiple_of(align);
-                let offset = match kind {
-                    StructKind::Struct => *size,
-                    StructKind::Union => 0,
-                };
-                *size += ty_size;
-                Member { name: name.slice(), ty, offset }
-            }));
+            let members = typeck_struct_members(sess, kind, members);
             Type::Struct(Struct::Complete(Complete { name, id, kind, members }))
         }
     };
@@ -1075,7 +1168,7 @@ fn typeck_array_initialisation_with_string<'a>(
 fn typeck_initialiser_list<'a>(
     sess: &'a Session<'a>,
     reference: &Reference<'a>,
-    subobject_initialisers: &mut IndexMap<u64, SubobjectInitialiser<'a>>,
+    subobject_initialisers: &mut IndexMap<SubobjectKey, SubobjectInitialiser<'a>>,
     subobjects: &mut Subobjects<'a>,
     initialiser_list: &[DesignatedInitialiser<'a>],
     emit_nested_excess_initialiser_errors: bool,
@@ -1099,7 +1192,7 @@ fn typeck_initialiser_list<'a>(
                 typeck_array_initialisation_with_string(sess, reference, &array_ty, initialiser)
         {
             subobject_initialisers.insert(
-                subobject.offset,
+                subobject.key(),
                 SubobjectInitialiser { subobject, initialiser },
             );
             let _ = subobjects.try_leave_subobject(AllowExplicit::No);
@@ -1210,10 +1303,8 @@ fn typeck_initialiser_list<'a>(
                                 ),
                             }
                         };
-                        subobject_initialisers.insert(
-                            subobject_initialiser.subobject.offset,
-                            subobject_initialiser,
-                        );
+                        subobject_initialisers
+                            .insert(subobject_initialiser.subobject.key(), subobject_initialiser);
                     }
                     Err(iterator) =>
                         if emit_nested_excess_initialiser_errors {
@@ -1573,21 +1664,19 @@ fn typeck_unary_op<'a>(
             // `is_lvalue`.
             let is_lvalue = operand.is_lvalue()
                 // TODO
-                /* && !operand.is_bitfield() && !operand.has_register_storage_class() */;
-            if !(is_function_designator || is_lvalue) {
-                // TODO: update error message for bitfields and `register` storage class
-                // TODO: this should be the correct type, not `Type::Error` or `void`
-                sess.emit(Diagnostic::CannotTakeAddress { at: operand, reason: "not an lvalue" })
-            }
-            else {
-                TypedExpression {
-                    ty: Type::Pointer(sess.alloc(operand.ty)).unqualified(),
-                    expr: Expression::Addressof {
-                        ampersand: operator.token,
-                        operand: sess.alloc(operand),
-                    },
-                }
-            }
+                /* && !operand.has_register_storage_class() */;
+            let error = |reason| sess.emit(Diagnostic::CannotTakeAddress { at: operand, reason });
+            // TODO: update error message for `register` storage class
+            let expr = match () {
+                () if !(is_function_designator || is_lvalue) => error("not an lvalue"),
+                () if operand.is_bitfield() => error("a bitfield member"),
+                () => Expression::Addressof {
+                    ampersand: operator.token,
+                    operand: sess.alloc(operand),
+                },
+            };
+            let ty = Type::Pointer(sess.alloc(operand.ty)).unqualified();
+            TypedExpression { ty, expr }
         }
         UnaryOpKind::Deref => match operand.ty.ty {
             Type::Pointer(pointee_ty) => {
@@ -1869,19 +1958,30 @@ fn desugar_postfix_increment<'a>(
     op: BinOp<'a>,
     operand: &'a scope::Expression<'a>,
     reference: &scope::Reference<'a>,
+    member: Option<&Token<'a>>,
     pointer: &scope::Reference<'a>,
     copy: &scope::Reference<'a>,
 ) -> scope::Expression<'a> {
     // `x++` is mostly equivalent to the following expression, so we use that as a desugaring:
     // __pointer = &x, __copy = *__pointer, *__pointer += 1, __copy
 
-    // TODO: this desugaring has the same problem as for `CompoundAssign`: bitfields
-    // are not supported.
-
     let token = op.token;
 
     let pointer = sess.alloc(scope::Expression::Name(*pointer));
     let copy = sess.alloc(scope::Expression::Name(*copy));
+
+    let target = sess.alloc(scope::Expression::UnaryOp {
+        operator: UnaryOp { kind: UnaryOpKind::Deref, token },
+        operand: pointer,
+    });
+    let target = match member {
+        Some(&member) => sess.alloc(scope::Expression::MemberAccess {
+            lhs: target,
+            op: MemberAccessOp { kind: MemberAccessOpKind::Dot, token },
+            member,
+        }),
+        _ => target,
+    };
 
     scope::Expression::Comma {
         lhs: sess.alloc(scope::Expression::Comma {
@@ -1895,20 +1995,11 @@ fn desugar_postfix_increment<'a>(
                     }),
                 }),
                 // copy = *pointer
-                rhs: sess.alloc(scope::Expression::Assign {
-                    target: copy,
-                    value: sess.alloc(scope::Expression::UnaryOp {
-                        operator: UnaryOp { kind: UnaryOpKind::Deref, token },
-                        operand: pointer,
-                    }),
-                }),
+                rhs: sess.alloc(scope::Expression::Assign { target: copy, value: target }),
             }),
             // *pointer <op>= 1
             rhs: sess.alloc(scope::Expression::CompoundAssign {
-                target: sess.alloc(scope::Expression::UnaryOp {
-                    operator: UnaryOp { kind: UnaryOpKind::Deref, token },
-                    operand: pointer,
-                }),
+                target,
                 target_temporary: *reference,
                 op,
                 value: sess.alloc(scope::Expression::Integer {
@@ -1994,11 +2085,14 @@ fn typeck_expression<'a>(
         scope::Expression::CompoundAssign { target, target_temporary, op, value } => {
             let target = sess.alloc(typeck_expression(sess, target, Context::Default));
             let target = check_assignable(target, sess);
-            let ty = target.ty;
+            let TypedExpression { ty, expr: target_expr } = *target;
+            let target = match target_expr {
+                Expression::MemberAccess { lhs, .. } => lhs,
+                _ => target,
+            };
             let target = sess.alloc(TypedExpression {
                 ty: Type::Pointer(&target.ty).unqualified(),
                 // TODO: `op.token` should not be included in the synthesised expr’s location
-                // TODO: this will fail for bitfields
                 expr: Expression::Addressof { ampersand: op.token, operand: target },
             });
             let target_temporary = typeck_reference(sess, *target_temporary, NeedsInitialiser::No);
@@ -2006,11 +2100,17 @@ fn typeck_expression<'a>(
                 ty: target.ty,
                 expr: Expression::Name(Reference { ty: target.ty, ..target_temporary }),
             });
-            let deref_target_addr = sess.alloc(TypedExpression {
-                ty,
-                // TODO: `op.token` should not be included in the synthesised expr’s location
-                expr: Expression::Deref { star: op.token, operand: target_addr },
-            });
+            // TODO: `op.token` should not be included in the synthesised expr’s location
+            let expr = Expression::Deref { star: op.token, operand: target_addr };
+            let expr = match target_expr {
+                Expression::MemberAccess { lhs, member, member_loc } => Expression::MemberAccess {
+                    lhs: sess.alloc(TypedExpression { ty: lhs.ty, expr }),
+                    member,
+                    member_loc,
+                },
+                _ => expr,
+            };
+            let deref_target_addr = sess.alloc(TypedExpression { ty, expr });
             let first = TypedExpression {
                 ty: target.ty,
                 expr: Expression::Assign { target: target_addr, value: target },
@@ -2407,8 +2507,8 @@ fn typeck_expression<'a>(
                         ),
                     }),
                 },
-                IncrementFixity::Postfix { pointer, copy } =>
-                    desugar_postfix_increment(sess, op, operand, reference, pointer, copy),
+                IncrementFixity::Postfix { member, pointer, copy } =>
+                    desugar_postfix_increment(sess, op, operand, reference, *member, pointer, copy),
             };
             typeck_expression(sess, &expr, Context::Default)
         }

@@ -21,7 +21,9 @@ use super::TypedExpression;
 use super::Typedef;
 use crate::ty::Step;
 use crate::ty::struct_decl_as_sexpr;
+use crate::ty::subobjects::Subobject;
 use crate::typecheck::Member;
+use crate::typecheck::MemberKind;
 
 impl<Expression> AsSExpr for ArrayLength<Expression>
 where
@@ -36,13 +38,22 @@ where
     }
 }
 
-impl<T: Step> AsSExpr for Member<'_, T> {
-    fn as_sexpr(&self) -> SExpr {
-        let Self { name, ty, offset } = self;
+impl<'a, T: Step> Member<'a, T> {
+    pub(crate) fn as_sexpr_without_ty(&self, offset_sign: &str) -> SExpr {
+        let Self { name, ty: _, offset, kind } = self;
         SExpr::new("member")
             .inherit(name)
-            .inline_string(format!("@{offset}"))
-            .inherit(ty)
+            .inline_string(match kind {
+                MemberKind::Normal => format!("{offset_sign}{offset}"),
+                MemberKind::Bitfield(bitfield) => format!("{offset_sign}{offset}[{bitfield}]"),
+            })
+    }
+}
+
+impl<T: Step> AsSExpr for Member<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { name: _, ty, offset: _, kind: _ } = self;
+        self.as_sexpr_without_ty("@").inherit(ty)
     }
 }
 
@@ -122,9 +133,14 @@ impl AsSExpr for Initialiser<'_> {
 
 impl AsSExpr for SubobjectInitialiser<'_> {
     fn as_sexpr(&self) -> SExpr {
+        let Self { subobject, initialiser } = self;
+        let Subobject { ty: _, offset, kind } = subobject;
         SExpr::new("subobject")
-            .inline_string(format!("+{}", self.subobject.offset))
-            .inherit(&self.initialiser)
+            .inline_string(match kind {
+                MemberKind::Normal => format!("+{offset}"),
+                MemberKind::Bitfield(bitfield) => format!("+{offset}[{bitfield}]"),
+            })
+            .inherit(initialiser)
     }
 }
 
@@ -224,13 +240,8 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new(format!("logical-{}", op.str())).lines([lhs, rhs]),
             Expression::Conditional { condition, then, or_else } =>
                 SExpr::new("conditional").lines([condition, then, or_else]),
-            Expression::MemberAccess {
-                lhs,
-                member: Member { name, ty: _, offset },
-                member_loc: _,
-            } => SExpr::new("member")
-                .inline_string(format!("{name} +{offset}"))
-                .lines([lhs]),
+            Expression::MemberAccess { lhs, member, member_loc: _ } =>
+                member.as_sexpr_without_ty("+").lines([lhs]),
         }
     }
 }

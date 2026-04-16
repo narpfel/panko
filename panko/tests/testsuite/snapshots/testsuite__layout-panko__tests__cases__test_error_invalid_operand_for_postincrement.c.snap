@@ -20,14 +20,6 @@ Error: cannot take address of this expression because it is not an lvalue
    │      ╰─── this expression is not an lvalue
 ───╯
 
-Error: invalid implicit conversion from `void` to `ptr<void>`
-   ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:9:5]
-   │
- 9 │     f()++;
-   │     ─┬─  
-   │      ╰─── this is of type `void`, which cannot be implicitly converted to `ptr<void>`
-───╯
-
 Error: cannot assign to this expression because it is not an lvalue
    ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:9:5]
    │
@@ -85,12 +77,4 @@ Error: cannot take address of this expression because it is not an lvalue
  10 │     returns_int()++;
     │     ──────┬──────  
     │           ╰──────── this expression is not an lvalue
-────╯
-
-Error: invalid implicit conversion from `void` to `ptr<int>`
-    ╭─[panko/tests/cases/test_error_invalid_operand_for_postincrement.c:10:5]
-    │
- 10 │     returns_int()++;
-    │     ──────┬──────  
-    │           ╰──────── this is of type `void`, which cannot be implicitly converted to `ptr<int>`
 ────╯
