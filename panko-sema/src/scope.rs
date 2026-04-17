@@ -87,9 +87,27 @@ pub(crate) enum Diagnostic<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Member<'a> {
-    pub(crate) name: &'a Token<'a>,
+    pub(crate) name: Option<&'a Token<'a>>,
     pub(crate) bitfield_width: Option<BitfieldWidth<'a>>,
     pub(crate) ty: QualifiedType<'a>,
+}
+
+impl<'a> Member<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
+        let Self { name, bitfield_width: _, ty } = *self;
+        match name {
+            Some(name) => name.loc(),
+            None => ty.loc(),
+        }
+    }
+
+    pub(crate) fn slice(&self) -> String {
+        let Self { name, bitfield_width: _, ty } = self;
+        match name {
+            Some(name) => name.slice().to_string(),
+            None => format!("<unnamed struct member of type `{ty}`>"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -747,6 +765,7 @@ fn resolve_struct_members<'a>(
     let sess = scopes.sess;
     sess.alloc_slice_fill_iter(members.iter().map(|member| {
         let ast::Member { name, bitfield_width, ty } = member;
+        let name = name.as_ref();
         let bitfield_width = try {
             BitfieldWidth {
                 width: resolve_expr(scopes, bitfield_width.as_ref()?),

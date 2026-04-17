@@ -578,7 +578,7 @@ pub(super) enum Diagnostic<'a> {
         kind = kind.fg(Red),
     )]
     IncompleteOrNonObjectStructMember {
-        at: Token<'a>,
+        at: scope::Member<'a>,
         ty: QualifiedType<'a>,
     },
 
@@ -613,7 +613,7 @@ pub(super) enum Diagnostic<'a> {
         width(colour = Blue, label = "bitfield declaration here"),
     )]
     NonintegralBitfield {
-        at: Token<'a>,
+        at: scope::Member<'a>,
         ty: QualifiedType<'a>,
         width: TypedExpression<'a>,
     },
@@ -632,7 +632,7 @@ pub(super) enum Diagnostic<'a> {
         at: TypedExpression<'a>,
         width: u64,
         ty: QualifiedType<'a>,
-        name: Token<'a>,
+        name: scope::Member<'a>,
     },
 }
 

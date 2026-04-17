@@ -751,67 +751,81 @@ fn typeck_struct_members<'a>(
     members: &[NoHashEq<scope::Member<'a>>],
 ) -> &'a [Member<'a, Typeck>] {
     let mut size = 0_u64;
-    sess.alloc_slice_fill_iter(members.iter().map(|member| {
-        let NoHashEq(scope::Member { name, bitfield_width, ty }) = *member;
-        let (width_expr, bitfield_width) = try {
-            let BitfieldWidth { width } = bitfield_width.as_ref()?;
-            let width = typeck_expression(sess, width, Context::Default);
-            // TODO: constexpr evaluate
-            let value = match width.expr {
-                Expression::Integer { value, token: _ } => value,
-                expr => error_todo!(expr),
-            };
-            (width, value)
-        }
-        .unzip();
-        // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
-        // better error recovery due to trying to compute the size and align of incomplete
-        // types when using this struct)
-        let ty = typeck_ty(sess, ty, IsParameter::No);
-        let (ty_size, align) = match ty.ty.is_complete() && ty.ty.is_object() {
-            true => (ty.ty.size() * 8, ty.ty.align() * 8),
-            false => {
-                let () = sess.emit(Diagnostic::IncompleteOrNonObjectStructMember { at: *name, ty });
-                (8, 8)
+    let members = gen {
+        for member in members {
+            let NoHashEq(member @ scope::Member { name, bitfield_width, ty }) = *member;
+            let (width_expr, bitfield_width) = try {
+                let BitfieldWidth { width } = bitfield_width.as_ref()?;
+                let width = typeck_expression(sess, width, Context::Default);
+                // TODO: constexpr evaluate
+                let value = match width.expr {
+                    Expression::Integer { value, token: _ } => value,
+                    expr => error_todo!(expr),
+                };
+                (width, value)
             }
-        };
-        let width = bitfield_width.unwrap_or(ty_size);
-        if size + width > size.next_multiple_of(ty_size) {
-            size = size.next_multiple_of(align);
-        }
-        let offset = match kind {
-            StructKind::Struct => size / align * align / 8,
-            StructKind::Union => 0,
-        };
-        let kind = match bitfield_width {
-            Some(_) if !ty.ty.is_valid_for_bitfield() =>
-                sess.emit(Diagnostic::NonintegralBitfield {
-                    at: *name,
-                    ty,
-                    width: width_expr.unwrap(),
-                }),
-            Some(0) => {
-                // TODO: error if `name.is_some()`
-                todo!("zero-length bitfield")
-            }
-            Some(width) => {
-                let max_size = ty.ty.max_bitfield_size();
-                if width > max_size {
-                    sess.emit(Diagnostic::BitfieldTooWide {
-                        at: width_expr.unwrap(),
-                        width,
-                        ty,
-                        name: *name,
-                    })
+            .unzip();
+            // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
+            // better error recovery due to trying to compute the size and align of incomplete
+            // types when using this struct)
+            let ty = typeck_ty(sess, ty, IsParameter::No);
+            let (ty_size, align) = match ty.ty.is_complete() && ty.ty.is_object() {
+                true => (ty.ty.size() * 8, ty.ty.align() * 8),
+                false => {
+                    let () =
+                        sess.emit(Diagnostic::IncompleteOrNonObjectStructMember { at: member, ty });
+                    (8, 8)
                 }
-                let width = width.min(max_size);
-                MemberKind::Bitfield(Bitfield { offset: size % ty_size, width })
+            };
+            let width = bitfield_width.unwrap_or(ty_size);
+            if size + width > size.next_multiple_of(ty_size) {
+                size = size.next_multiple_of(align);
             }
-            None => MemberKind::Normal,
-        };
-        size += width;
-        Member { name: name.slice(), ty, offset, kind }
-    }))
+            let offset = match kind {
+                StructKind::Struct => size / align * align / 8,
+                StructKind::Union => 0,
+            };
+            let kind = match bitfield_width {
+                Some(_) if !ty.ty.is_valid_for_bitfield() =>
+                    sess.emit(Diagnostic::NonintegralBitfield {
+                        at: member,
+                        ty,
+                        width: width_expr.unwrap(),
+                    }),
+                Some(0) => {
+                    // TODO: error if `name.is_some()`
+                    todo!("zero-length bitfield")
+                }
+                Some(width) => {
+                    let max_size = ty.ty.max_bitfield_size();
+                    if width > max_size {
+                        sess.emit(Diagnostic::BitfieldTooWide {
+                            at: width_expr.unwrap(),
+                            width,
+                            ty,
+                            name: member,
+                        })
+                    }
+                    let width = width.min(max_size);
+                    MemberKind::Bitfield(Bitfield { offset: size % ty_size, width })
+                }
+                None => MemberKind::Normal,
+            };
+            size += width;
+            match name {
+                Some(name) => yield Member { name: name.slice(), ty, offset, kind },
+                None if let Type::Struct(Struct::Complete(s)) = ty.ty
+                    && s.name.is_none() =>
+                    todo!("anonymous struct member"),
+                None => match kind {
+                    MemberKind::Normal =>
+                        error_todo!(ty, "struct member declared with an abstract declarator"),
+                    MemberKind::Bitfield(_) => (),
+                },
+            }
+        }
+    };
+    sess.alloc_slice_copy(&members.collect_vec())
 }
 
 fn typeck_ty_with_initialiser<'a>(
