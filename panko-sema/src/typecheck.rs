@@ -793,8 +793,11 @@ fn typeck_struct_members<'a>(
                         width: width_expr.unwrap(),
                     }),
                 Some(0) => {
-                    // TODO: error if `name.is_some()`
-                    todo!("zero-length bitfield")
+                    if let Some(name) = name {
+                        error_todo!(name, "should be unnamed, not `{}`", name.slice());
+                    }
+                    size = size.next_multiple_of(align);
+                    continue;
                 }
                 Some(width) => {
                     let max_size = ty.ty.max_bitfield_size();
