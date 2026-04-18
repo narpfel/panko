@@ -15,3 +15,9 @@ struct TooLarge {
     int too_large_int:123;
     bool b:2;
 };
+
+struct ZeroWidthBitfieldWithName {
+    int x:2;
+    int zero_length:0;
+    int y:2;
+};

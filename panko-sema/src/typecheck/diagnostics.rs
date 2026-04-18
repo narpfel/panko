@@ -634,6 +634,16 @@ pub(super) enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
         name: scope::Member<'a>,
     },
+
+    #[error("zero-width bitfields must be unnamed")]
+    #[diagnostics(
+        at(colour = Red, label = "this bitfield must not have a name"),
+        width(colour = Blue, label = "declared as zero-width here"),
+    )]
+    NamedZeroWidthBitfield {
+        at: Token<'a>,
+        width: TypedExpression<'a>,
+    },
 }
 
 fn describe_ty_completeness(ty: &QualifiedType) -> (&'static str, &'static str, &'static str) {

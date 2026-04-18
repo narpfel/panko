@@ -51,3 +51,13 @@ Error: bitfield of 2 bits does not fit in type `bool` of size 1 bits
     │       │       
     │       ╰─────── this has size `1` bits
 ────╯
+
+Error: zero-width bitfields must be unnamed
+    ╭─[panko/tests/cases/struct/test_error_bitfields.c:21:9]
+    │
+ 21 │     int zero_length:0;
+    │         ─────┬───── ┬  
+    │              │      ╰── declared as zero-width here
+    │              │         
+    │              ╰───────── this bitfield must not have a name
+────╯

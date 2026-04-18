@@ -27,6 +27,10 @@ exit_code: 0
       (member bitfield (bitfield-width 42) `struct Struct~0 complete`))
    (struct TooLarge~6
       (member too_large_int (bitfield-width 123) `int`)
-      (member b (bitfield-width 2) `bool`)))
+      (member b (bitfield-width 2) `bool`))
+   (struct ZeroWidthBitfieldWithName~7
+      (member x (bitfield-width 2) `int`)
+      (member zero_length (bitfield-width 0) `int`)
+      (member y (bitfield-width 2) `int`)))
 
 ----- stderr -----
