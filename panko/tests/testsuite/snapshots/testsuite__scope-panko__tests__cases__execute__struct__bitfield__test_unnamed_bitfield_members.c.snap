@@ -32,8 +32,12 @@ exit_code: 0
       (member x (bitfield-width 2) `int`)
       (member ∅ (bitfield-width 0) `long`)
       (member y (bitfield-width 2) `int`))
+   (struct UnnamedNonzeroLengthBitfield~6
+      (member x (bitfield-width 7) `int`)
+      (member ∅ (bitfield-width 7) `long`)
+      (member y (bitfield-width 7) `int`))
    (function-definition
-      main~6 `fn() -> int`
+      main~7 `fn() -> int`
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
@@ -54,6 +58,26 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (sizeof `struct ZeroLengthLong~5 complete`))))))
+               (sizeof `struct ZeroLengthLong~5 complete`)))
+         (union ∅~9
+            (member s `struct UnnamedNonzeroLengthBitfield~6 complete`)
+            (member as_int `int`))
+         (declaration u~11 `union ∅~10 complete`
+            (braced
+               (designation ((member s) (member x)) 0b0110'1111)
+               (designation ((member s) (member y)) 0b0111'0111)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof `struct UnnamedNonzeroLengthBitfield~6 complete`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (alignof `struct UnnamedNonzeroLengthBitfield~6 complete`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0b%032b\n")
+               (dot as_int
+                  (name u~11 `union ∅~10 complete`)))))))
 
 ----- stderr -----

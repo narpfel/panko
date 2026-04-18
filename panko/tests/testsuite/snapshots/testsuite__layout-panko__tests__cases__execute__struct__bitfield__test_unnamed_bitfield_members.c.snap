@@ -27,8 +27,11 @@ exit_code: 0
    (struct ZeroLengthLong~5
       (member x @0[0:2] `int`)
       (member y @8[0:2] `int`))
+   (struct UnnamedNonzeroLengthBitfield~6
+      (member x @0[0:7] `int`)
+      (member y @0[14:21] `int`))
    (function-definition external stack-size=40
-      (main~6 `fn() -> int` (static main))
+      (main~7 `fn() -> int` (static main))
       (compound-statement
          (expression
             (call `int` @0
@@ -74,6 +77,41 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 5>>` @16
                         (string `array<char; 5>` @void "%zu\n\0"))))
-               (12 `unsigned long` @24))))))
+               (12 `unsigned long` @24)))
+         (union ∅~9
+            (member s @0 `struct UnnamedNonzeroLengthBitfield~6 complete`)
+            (member as_int @0 `int`))
+         (definition (u~11 `union ∅~10 complete` @0)
+            (braced
+               (subobject +0[0:7] (111 `int` @4))
+               (subobject +0[14:21] (119 `int` @4))))
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (4 `unsigned long` @24)))
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (4 `unsigned long` @24)))
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 9>>` @16
+                        (string `array<char; 9>` @void "0b%032b\n\0"))))
+               (member `int` @0 as_int +0
+                  (u~11 `union ∅~10 complete` @0)))))))
 
 ----- stderr -----
