@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/preprocessor/include/test_include_header_with_macro_in_name.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/preprocessor/include/test_include_header_with_macro_in_name.c"
+   (function-definition external stack-size=24
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (return
+            (bit-or `int` @0
+               (0 `int` @0)
+               (1 `int` @4))))))
+
+----- stderr -----
