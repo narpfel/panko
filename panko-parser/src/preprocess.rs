@@ -949,52 +949,64 @@ impl<'a> Preprocessor<'a> {
     fn eval_include(&mut self, hash: &Token<'a>) {
         let include = self.next_token().unwrap();
         let include_loc = || hash.loc().until(include.loc());
-        let tokens = self.tokens.last_mut().until_newline();
-        let tokens: Vec<_> = self.expander.expand_macros(&self.macros, tokens).collect();
-        let (original_name, (included_filename, src), loc) = match &tokens[..] {
-            [] =>
-                return self
-                    .sess
-                    .emit(Diagnostic::IncludeDoesNotIncludeAnything { at: include_loc() }),
-            [token] if token.kind == TokenKind::String => {
-                let string = token.slice();
-                let from_filename = include.loc().file();
-                let filename = &string[1..string.len() - 1];
-                if filename.is_empty() {
-                    return self.sess.emit(Diagnostic::EmptyFilenameInInclude {
-                        at: token.loc(),
-                        include: include_loc(),
-                    });
+        let tokens = self.tokens.last_mut().until_newline().collect_vec();
+        let token_sequences = gen {
+            yield Cow::Borrowed(&tokens);
+            yield Cow::Owned(
+                self.expander
+                    .expand_macros(&self.macros, tokens.iter().copied())
+                    .collect(),
+            );
+        };
+        let (original_name, (included_filename, src), loc) = 'parse: {
+            for tokens in token_sequences {
+                match tokens.as_slice() {
+                    [] =>
+                        return self
+                            .sess
+                            .emit(Diagnostic::IncludeDoesNotIncludeAnything { at: include_loc() }),
+                    [token] if token.kind == TokenKind::String => {
+                        let string = token.slice();
+                        let from_filename = include.loc().file();
+                        let filename = &string[1..string.len() - 1];
+                        if filename.is_empty() {
+                            return self.sess.emit(Diagnostic::EmptyFilenameInInclude {
+                                at: token.loc(),
+                                include: include_loc(),
+                            });
+                        }
+                        let included_file = self
+                            .include_paths
+                            .lookup_quoted(from_filename, Path::new(filename));
+                        break 'parse (Cow::Borrowed(filename), included_file, token.loc());
+                    }
+                    [less, rest @ .., greater]
+                        if less.kind == TokenKind::Less && greater.kind == TokenKind::Greater =>
+                    {
+                        if rest.is_empty() {
+                            return self.sess.emit(Diagnostic::EmptyFilenameInInclude {
+                                at: less.loc().until(greater.loc()),
+                                include: include_loc(),
+                            });
+                        }
+                        let loc = tokens_loc(rest);
+                        let mut filename = Vec::new();
+                        write_preprocessed_tokens(&mut filename, rest.iter().copied(), |token| {
+                            token.slice()
+                        })
+                        .unwrap();
+                        let filename = String::from_utf8(filename).unwrap();
+                        let included_file = self.include_paths.lookup_bracketed(&filename);
+                        break 'parse (Cow::Owned(filename), included_file, loc);
+                    }
+                    _tokens => (),
                 }
-                let included_file = self
-                    .include_paths
-                    .lookup_quoted(from_filename, Path::new(filename));
-                (Cow::Borrowed(filename), included_file, token.loc())
             }
-            [less, rest @ .., greater]
-                if less.kind == TokenKind::Less && greater.kind == TokenKind::Greater =>
-            {
-                if rest.is_empty() {
-                    return self.sess.emit(Diagnostic::EmptyFilenameInInclude {
-                        at: less.loc().until(greater.loc()),
-                        include: include_loc(),
-                    });
-                }
-                let loc = tokens_loc(rest);
-                let mut filename = Vec::new();
-                write_preprocessed_tokens(&mut filename, rest.iter().copied(), |token| {
-                    token.slice()
-                })
-                .unwrap();
-                let filename = String::from_utf8(filename).unwrap();
-                let included_file = self.include_paths.lookup_bracketed(&filename);
-                (Cow::Owned(filename), included_file, loc)
-            }
-            tokens =>
-                return self.sess.emit(Diagnostic::InvalidSyntaxInInclude {
-                    at: tokens_loc(tokens),
-                    include: include_loc(),
-                }),
+            return self.sess.emit(Diagnostic::InvalidSyntaxInInclude {
+                // TODO: this is the location of the unexpanded tokens
+                at: tokens_loc(&tokens),
+                include: include_loc(),
+            });
         };
 
         let filename = alloc_path(self.sess.bump(), &included_filename);

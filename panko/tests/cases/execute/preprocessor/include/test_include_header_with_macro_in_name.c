@@ -1,4 +1,3 @@
-// [[known-bug]]
 // [[return: 1]]
 
 #define iso646 wat

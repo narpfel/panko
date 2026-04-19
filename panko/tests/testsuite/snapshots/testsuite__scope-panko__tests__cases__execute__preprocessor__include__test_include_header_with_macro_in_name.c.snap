@@ -7,26 +7,13 @@ info:
     - "--stop-after=scopes"
     - panko/tests/cases/execute/preprocessor/include/test_include_header_with_macro_in_name.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/preprocessor/include/test_include_header_with_macro_in_name.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (return (bit-or 0 1)))))
 
 ----- stderr -----
-Error: could not open `#include` file `"wat .h"`: No such file or directory (os error 2)
-   ╭─[panko/tests/cases/execute/preprocessor/include/test_include_header_with_macro_in_name.c:4:16]
-   │
- 4 │ ╭─▶ #define iso646 wat
-   ┆ ┆   
- 6 │ ├─▶ #include <iso646.h>
-   │ │   ────────              
-   │ │                         
-   │ ╰───────────────────────── could not open this file
-───╯
-
-Error: unexpected token `bitor` of kind `Identifier`
-   ╭─[panko/tests/cases/execute/preprocessor/include/test_include_header_with_macro_in_name.c:9:14]
-   │
- 9 │     return 0 bitor 1;
-   │              ──┬──  
-   │                ╰──── expected one of the following token kinds: [";", ",", "=", "*", "(", "[", "+", "-", "/", "%", "==", "!=", "<", "<=", ">", ">=", "&", "^", "|", "<<", ">>", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|=", "&&", "||", "?", "++", "--", ".", "->"]
-───╯

@@ -17,8 +17,23 @@ exit_code: 0
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int main() {
-    return 0 bitor 1;
+    return 0 | 1;
 }
 
 ----- stderr -----
