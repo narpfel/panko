@@ -951,15 +951,18 @@ impl<'a> Preprocessor<'a> {
         let include_loc = || hash.loc().until(include.loc());
         let tokens = self.tokens.last_mut().until_newline().collect_vec();
         let token_sequences = gen {
-            yield Cow::Borrowed(&tokens);
-            yield Cow::Owned(
-                self.expander
-                    .expand_macros(&self.macros, tokens.iter().copied())
-                    .collect(),
+            yield (Cow::Borrowed(&tokens), false);
+            yield (
+                Cow::Owned(
+                    self.expander
+                        .expand_macros(&self.macros, tokens.iter().copied())
+                        .collect(),
+                ),
+                true,
             );
         };
         let (original_name, (included_filename, src), loc) = 'parse: {
-            for tokens in token_sequences {
+            for (tokens, emit_error) in token_sequences {
                 match tokens.as_slice() {
                     [] =>
                         return self
@@ -999,14 +1002,16 @@ impl<'a> Preprocessor<'a> {
                         let included_file = self.include_paths.lookup_bracketed(&filename);
                         break 'parse (Cow::Owned(filename), included_file, loc);
                     }
-                    _tokens => (),
+                    tokens =>
+                        if emit_error {
+                            self.sess.emit(Diagnostic::InvalidSyntaxInInclude {
+                                at: tokens_loc(tokens),
+                                include: include_loc(),
+                            })
+                        },
                 }
             }
-            return self.sess.emit(Diagnostic::InvalidSyntaxInInclude {
-                // TODO: this is the location of the unexpanded tokens
-                at: tokens_loc(&tokens),
-                include: include_loc(),
-            });
+            return;
         };
 
         let filename = alloc_path(self.sess.bump(), &included_filename);
