@@ -644,6 +644,10 @@ pub(super) enum Diagnostic<'a> {
         at: Token<'a>,
         width: TypedExpression<'a>,
     },
+
+    #[error("struct member declared with an abstract declarator")]
+    #[diagnostics(at(colour = Red, label = "in this declaration"))]
+    MemberWithAbstractDeclarator { at: QualifiedType<'a> },
 }
 
 fn describe_ty_completeness(ty: &QualifiedType) -> (&'static str, &'static str, &'static str) {

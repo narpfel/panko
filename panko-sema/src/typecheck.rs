@@ -825,7 +825,7 @@ fn typeck_struct_members<'a>(
                     todo!("anonymous struct member"),
                 None => match kind {
                     MemberKind::Normal =>
-                        error_todo!(ty, "struct member declared with an abstract declarator"),
+                        sess.emit(Diagnostic::MemberWithAbstractDeclarator { at: ty }),
                     MemberKind::Bitfield(_) => (),
                 },
             }

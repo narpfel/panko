@@ -1,0 +1,4 @@
+struct Invalid {
+    int*;
+    int();
+};
