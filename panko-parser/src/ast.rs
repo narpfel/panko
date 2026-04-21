@@ -272,22 +272,6 @@ pub enum Type<'a> {
     // TODO
 }
 
-impl<'a> Type<'a> {
-    fn as_type_decl(&self) -> Option<TypeDeclaration<'a>> {
-        match self {
-            Self::Arithmetic(_)
-            | Self::Pointer(_)
-            | Self::Array(_)
-            | Self::Function(_)
-            | Self::Void
-            | Self::Typedef(_)
-            | Self::Typeof { unqual: _, expr: _ }
-            | Self::TypeofTy { unqual: _, ty: _ } => None,
-            Type::Struct(r#struct) => Some(TypeDeclaration::Struct(*r#struct)),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Arithmetic {
     Integral(Integral),
@@ -362,38 +346,37 @@ impl<'a> Member<'a> {
         sess: &'a Session<'a>,
         member: &'a cst::Declaration<'a>,
     ) -> impl Iterator<Item = Self> {
-        let (type_decl, member_decls) = Declaration::from_parse_tree(sess, member);
-        assert_matches!(
-            type_decl,
-            None | Some(TypeDeclaration::Struct(Struct::Incomplete {
-                name: _,
-                kind: _,
-            })),
-            "TODO: structs in structs (also special-case unnamed structs here)",
-        );
-        member_decls.map(|member| {
-            let MaybeUnnamedDeclaration {
-                ty,
-                name,
-                bitfield_width,
-                initialiser,
-                storage_class,
-                function_specifiers,
-            } = member;
-            assert_matches!(
-                initialiser,
-                None,
-                "TODO: error message for initialiser in struct member",
-            );
-            assert_matches!(
-                storage_class,
-                None,
-                "TODO: error message for storage_class in struct member",
-            );
-            let loc = try { name?.loc() }.unwrap_or_else(|| ty.loc());
-            reject_function_specifiers(sess, &function_specifiers, loc, "struct member");
-            Member { name, bitfield_width, ty }
-        })
+        Declaration::from_parse_tree(sess, member)
+            .filter(|member| {
+                member.name.is_some()
+                    || member.bitfield_width.is_some()
+                    // TODO: `from_parse_tree` should probably yield `Declaration |
+                    // TypeDeclaration` so that this check is more robust
+                    || !matches!(member.ty.ty, Type::Struct(_))
+            })
+            .map(|member| {
+                let MaybeUnnamedDeclaration {
+                    ty,
+                    name,
+                    bitfield_width,
+                    initialiser,
+                    storage_class,
+                    function_specifiers,
+                } = member;
+                assert_matches!(
+                    initialiser,
+                    None,
+                    "TODO: error message for initialiser in struct member",
+                );
+                assert_matches!(
+                    storage_class,
+                    None,
+                    "TODO: error message for storage_class in struct member",
+                );
+                let loc = try { name?.loc() }.unwrap_or_else(|| ty.loc());
+                reject_function_specifiers(sess, &function_specifiers, loc, "struct member");
+                Member { name, bitfield_width, ty }
+            })
     }
 }
 
@@ -430,14 +413,14 @@ impl<'a> ExternalDeclaration<'a> {
                     FunctionDefinition::from_parse_tree(sess, def),
                 ))),
             cst::ExternalDeclaration::Declaration(decl) => Either::Right({
-                let (type_decl, value_decls) = Declaration::from_parse_tree(sess, decl);
-                type_decl
-                    .map(ExternalDeclaration::TypeDeclaration)
-                    .into_iter()
-                    .chain(value_decls.map(|parsed| match parsed.into_decl() {
+                Declaration::from_parse_tree(sess, decl)
+                    .map(MaybeUnnamedDeclaration::into_decl)
+                    .map(|parsed| match parsed {
                         Ok(decl) => ExternalDeclaration::Declaration(decl),
+                        Err(ty) if let Type::Struct(ty) = ty.ty =>
+                            ExternalDeclaration::TypeDeclaration(TypeDeclaration::Struct(ty)),
                         Err(ty) => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl, ty }),
-                    }))
+                    })
             }),
         }
     }
@@ -581,32 +564,36 @@ impl<'a> MaybeUnnamedDeclaration<'a> {
 }
 
 impl<'a> Declaration<'a> {
-    fn from_parse_tree(
+    gen fn from_parse_tree(
         sess: &'a Session<'a>,
         decl: &'a cst::Declaration<'a>,
-    ) -> (
-        Option<TypeDeclaration<'a>>,
-        impl Iterator<Item = MaybeUnnamedDeclaration<'a>> + 'a,
-    ) {
+    ) -> MaybeUnnamedDeclaration<'a> {
         let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
             parse_declaration_specifiers(sess, decl.specifiers);
 
-        let type_decl = ty.ty.as_type_decl();
-        let value_decls = decl.init_declarator_list.iter().map(
-            move |&InitDeclarator { declarator, bitfield_width, initialiser }| {
-                let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
-                MaybeUnnamedDeclaration {
-                    ty,
-                    name,
-                    bitfield_width,
-                    initialiser,
-                    storage_class,
-                    function_specifiers,
-                }
-            },
-        );
+        if let Type::Struct(_) = ty.ty {
+            yield MaybeUnnamedDeclaration {
+                ty,
+                name: None,
+                bitfield_width: None,
+                initialiser: None,
+                storage_class,
+                function_specifiers,
+            }
+        }
 
-        (type_decl, value_decls)
+        for init_declarator in decl.init_declarator_list {
+            let &InitDeclarator { declarator, bitfield_width, initialiser } = init_declarator;
+            let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
+            yield MaybeUnnamedDeclaration {
+                ty,
+                name,
+                bitfield_width,
+                initialiser,
+                storage_class,
+                function_specifiers,
+            };
+        }
     }
 }
 
@@ -650,14 +637,14 @@ impl<'a> Statement<'a> {
     ) -> impl Iterator<Item = Self> + 'a {
         match item {
             BlockItem::Declaration(decl) => Either::Left({
-                let (type_decl, value_decls) = Declaration::from_parse_tree(sess, decl);
-                type_decl
-                    .map(Self::TypeDeclaration)
-                    .into_iter()
-                    .chain(value_decls.map(|maybe_decl| match maybe_decl.into_decl() {
+                Declaration::from_parse_tree(sess, decl)
+                    .map(MaybeUnnamedDeclaration::into_decl)
+                    .map(|maybe_decl| match maybe_decl {
                         Ok(decl) => Self::Declaration(decl),
+                        Err(ty) if let Type::Struct(ty) = ty.ty =>
+                            Self::TypeDeclaration(TypeDeclaration::Struct(ty)),
                         Err(ty) => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl, ty }),
-                    }))
+                    })
             }),
             BlockItem::UnlabeledStatement(stmt) =>
                 Either::Right(once(Self::from_unlabeled_statement(sess, stmt))),
