@@ -20,9 +20,6 @@ exit_code: 0
    (function-definition external
       main~3 `fn() -> int`
       (compound-statement
-         (struct T~2
-            (member string @0 `struct String~1 complete`)
-            (member x @8 `int`))
          (definition t~5 `struct T~2 complete`
             (braced
                (subobject +0

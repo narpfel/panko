@@ -26,13 +26,9 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
                (equal (sizeof `struct Large~2 complete`) (multiply (multiply (multiply (multiply (sizeof `char`) 10) 1024) 1024) 1024))))
-         (struct Large~2
-            (member ten_gb `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
          (declaration p~5 `ptr<struct Large~2 complete>`
             (call (name malloc~1 `fn(∅: typeof((sizeof 0))) -> ptr<void>`)
                (multiply 20 (sizeof `struct Large~2 complete`))))
-         (struct Large~2
-            (member ten_gb `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
          (declaration third~6 `ptr<struct Large~2 complete>` (add (name p~5 `ptr<struct Large~2 complete>`) 3))
          (declaration difference~7 `typeof((subtract (name third~6 `ptr<struct Large~2 complete>`) (name p~5 `ptr<struct Large~2 complete>`)))` (subtract (name third~6 `ptr<struct Large~2 complete>`) (name p~5 `ptr<struct Large~2 complete>`)))
          (expression

@@ -18,9 +18,6 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (struct T~1
-            (member c1 `char`)
-            (member c2 `char`))
          (declaration t~4 `struct T~1 complete`
             (braced
                'a'))

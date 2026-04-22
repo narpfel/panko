@@ -178,10 +178,6 @@ exit_code: 0
                   (u~7 `union ∅~6 complete` @0))
                (uty~14 `int` @24)
                (postincrement_result~15 `int` @28)))
-         (struct T~1
-            (member x @0[0:20] `unsigned int`)
-            (member y @0[20:40] `long`)
-            (member z @4[8:28] `unsigned int`))
          (definition (ptr~19 `ptr<struct T~1 complete>` @32)
             (addressof `ptr<struct T~1 complete>` @32
                (member `struct T~1 complete` @0 t +0

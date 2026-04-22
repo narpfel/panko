@@ -47,10 +47,6 @@ exit_code: 0
    (function-definition external
       main~7 `fn() -> int`
       (compound-statement
-         (struct Inner~1
-            (member x @0 `int`)
-            (member y @4 `int`)
-            (member z @8 `int`))
          (definition inner~9 `struct Inner~1 complete`
             (braced
                (subobject +0 (1 `int`))
@@ -78,20 +74,11 @@ exit_code: 0
                      (member `int` z +8
                         (inner2~10 `struct Inner~1 complete`))
                      (30 `int`)))))
-         (struct Middle~2
-            (member y @0 `int`)
-            (member inner @4 `struct Inner~1 complete`)
-            (member inner2 @16 `struct Inner~1 complete`))
          (definition middle~12 `struct Middle~2 complete`
             (braced
                (subobject +0 (2742 `int`))
                (subobject +4 (inner~9 `struct Inner~1 complete`))
                (subobject +16 (inner2~10 `struct Inner~1 complete`))))
-         (struct Outer~3
-            (member x @0 `int`)
-            (member middle @4 `struct Middle~2 complete`)
-            (member inner @32 `struct Inner~1 complete`)
-            (member y @44 `int`))
          (definition outer~13 `struct Outer~3 complete`
             (braced
                (subobject +0 (42 `int`))
@@ -112,10 +99,6 @@ exit_code: 0
                   (member `struct Inner~1 complete` inner2 +16
                      (member `struct Middle~2 complete` middle +4
                         (outer~13 `struct Outer~3 complete`))))))
-         (struct Inner~1
-            (member x @0 `int`)
-            (member y @4 `int`)
-            (member z @8 `int`))
          (definition inner_read_from_struct~14 `struct Inner~1 complete`
             (member `struct Inner~1 complete` inner2 +16
                (member `struct Middle~2 complete` middle +4

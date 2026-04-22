@@ -29,9 +29,6 @@ exit_code: 0
    (function-definition
       main~6 `fn() -> int`
       (compound-statement
-         (union IntInt~2
-            (member i `int`)
-            (member u `unsigned int`))
          (declaration int_int~8 `union IntInt~2 complete`
             (braced
                (negate 1)))
@@ -51,9 +48,6 @@ exit_code: 0
                      (dot u
                         (name int_int~8 `union IntInt~2 complete`)))
                   0xffff'ffffLL)))
-         (union StructInt~4
-            (member t `struct T~3 complete`)
-            (member x `int`))
          (declaration struct_int~9 `union StructInt~4 complete`
             (braced
                0xffff'ffff
@@ -84,10 +78,6 @@ exit_code: 0
                      (dot x
                         (name struct_int~9 `union StructInt~4 complete`)))
                   (negate 1LL))))
-         (struct ContainsUnion~5
-            (member x `int`)
-            (member struct_int `union StructInt~4 complete`)
-            (member y `int`))
          (declaration contains_union~10 `struct ContainsUnion~5 complete`
             (braced
                2
@@ -130,10 +120,6 @@ exit_code: 0
                         (dot struct_int
                            (name contains_union~10 `struct ContainsUnion~5 complete`))))
                   (negate 1LL))))
-         (struct ContainsUnion~5
-            (member x `int`)
-            (member struct_int `union StructInt~4 complete`)
-            (member y `int`))
          (declaration contains_union_2~11 `struct ContainsUnion~5 complete`
             (braced
                2

@@ -16,8 +16,6 @@ exit_code: 0
    (function-definition
       make_struct~1 `fn() -> struct Struct~0 complete`
       (compound-statement
-         (struct Struct~0
-            (member value `int`))
          (declaration value~3 `struct Struct~0 complete`
             (braced
                42))

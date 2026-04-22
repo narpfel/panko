@@ -19,10 +19,6 @@ exit_code: 0
    (function-definition external
       make_struct~2 `fn() -> struct Struct~1 complete`
       (compound-statement
-         (struct Struct~1
-            (member x @0 `int`)
-            (member y @4 `int const`)
-            (member z @8 `int`))
          (definition value~4 `struct Struct~1 complete`
             (braced
                (subobject +0 (1 `int`))
@@ -51,10 +47,6 @@ exit_code: 0
    (function-definition external
       main~8 `fn() -> int`
       (compound-statement
-         (struct Struct~1
-            (member x @0 `int`)
-            (member y @4 `int const`)
-            (member z @8 `int`))
          (definition value~10 `struct Struct~1 complete`
             (call `struct Struct~1 complete`
                (addressof `ptr<fn() -> struct Struct~1 complete>`

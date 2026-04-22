@@ -20,9 +20,6 @@ exit_code: 0
    (function-definition external stack-size=56
       (main~3 `fn() -> int` (static main))
       (compound-statement
-         (union U~2
-            (member x @0 `int`)
-            (member t @0 `struct T~1 complete`))
          (definition (u~5 `union U~2 complete` @0) ∅)
          (expression
             (assign `int` @0

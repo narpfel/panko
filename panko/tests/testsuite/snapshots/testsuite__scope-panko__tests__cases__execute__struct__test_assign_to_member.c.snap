@@ -29,10 +29,6 @@ exit_code: 0
    (function-definition
       main~5 `fn() -> int`
       (compound-statement
-         (struct Inner~2
-            (member x `int`)
-            (member y `int`)
-            (member z `int`))
          (declaration inner~7 `struct Inner~2 complete`
             (braced
                1
@@ -57,20 +53,11 @@ exit_code: 0
                   (dot z
                      (name inner2~8 `struct Inner~2 complete`))
                   30)))
-         (struct Middle~3
-            (member y `int`)
-            (member inner `struct Inner~2 complete`)
-            (member inner2 `struct Inner~2 complete`))
          (declaration middle~10 `struct Middle~3 complete`
             (braced
                2742
                (name inner~7 `struct Inner~2 complete`)
                (name inner2~8 `struct Inner~2 complete`)))
-         (struct Outer~4
-            (member x `int`)
-            (member middle `struct Middle~3 complete`)
-            (member inner `struct Inner~2 complete`)
-            (member y `int`))
          (declaration outer~11 `struct Outer~4 complete`
             (braced
                42
@@ -108,10 +95,6 @@ exit_code: 0
                (dot x
                   (name outer~11 `struct Outer~4 complete`))
                0x1234))
-         (struct Middle~3
-            (member y `int`)
-            (member inner `struct Inner~2 complete`)
-            (member inner2 `struct Inner~2 complete`))
          (declaration new_middle~13 `struct Middle~3 complete`
             (braced
                (dot x
@@ -209,10 +192,6 @@ exit_code: 0
                (dot y
                   (dot middle
                      (name outer~11 `struct Outer~4 complete`)))))
-         (struct Middle~3
-            (member y `int`)
-            (member inner `struct Inner~2 complete`)
-            (member inner2 `struct Inner~2 complete`))
          (declaration p~15 `ptr<struct Middle~3 complete>`
             (addressof
                (dot middle

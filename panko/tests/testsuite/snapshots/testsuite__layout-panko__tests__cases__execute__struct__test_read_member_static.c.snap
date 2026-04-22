@@ -89,10 +89,6 @@ exit_code: 0
                   (member `struct Inner~1 complete` @8 inner2 +16
                      (member `struct Middle~2 complete` @void middle +4
                         (outer~8 `struct Outer~3 complete` (static outer)))))))
-         (struct Inner~1
-            (member x @0 `int`)
-            (member y @4 `int`)
-            (member z @8 `int`))
          (definition (inner_read_from_struct~11 `struct Inner~1 complete` @0)
             (member `struct Inner~1 complete` @0 inner2 +16
                (member `struct Middle~2 complete` @void middle +4

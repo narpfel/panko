@@ -16,8 +16,6 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (struct Struct~0
-            (member x (bitfield-width 20) `int`))
          (declaration s~3 `struct Struct~0 complete` (braced ∅))
          (declaration ptr~4 `ptr<int>`
             (addressof

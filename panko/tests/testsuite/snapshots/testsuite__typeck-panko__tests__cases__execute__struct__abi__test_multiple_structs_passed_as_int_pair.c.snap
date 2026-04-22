@@ -61,13 +61,9 @@ exit_code: 0
    (function-definition external
       main~9 `fn() -> int`
       (compound-statement
-         (struct Struct~1
-            (member string @0 `array<char; 11>`))
          (definition value~11 `struct Struct~1 complete`
             (braced
                (subobject +0 (string `array<char; 11>` "0123456789\0"))))
-         (struct Struct~1
-            (member string @0 `array<char; 11>`))
          (definition v2~12 `struct Struct~1 complete`
             (braced
                (subobject +0 (string `array<char; 11>` "abcdefghjk\0"))))

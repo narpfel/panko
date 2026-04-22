@@ -92,10 +92,6 @@ exit_code: 0
                (dot x
                   (name outer~6 `struct Outer~4 complete`))
                0x1234))
-         (struct Middle~3
-            (member y `int`)
-            (member inner `struct Inner~2 complete`)
-            (member inner2 `struct Inner~2 complete`))
          (declaration new_middle~10 `struct Middle~3 complete`
             (braced
                (dot x
@@ -193,10 +189,6 @@ exit_code: 0
                (dot y
                   (dot middle
                      (name outer~6 `struct Outer~4 complete`)))))
-         (struct Middle~3
-            (member y `int`)
-            (member inner `struct Inner~2 complete`)
-            (member inner2 `struct Inner~2 complete`))
          (declaration p~12 `ptr<struct Middle~3 complete>`
             (addressof
                (dot middle

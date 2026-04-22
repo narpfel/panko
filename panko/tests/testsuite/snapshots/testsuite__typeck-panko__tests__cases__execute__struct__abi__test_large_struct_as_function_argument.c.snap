@@ -71,10 +71,6 @@ exit_code: 0
    (function-definition external
       main~5 `fn() -> int`
       (compound-statement
-         (struct Large~1
-            (member x @0 `int`)
-            (member string @8 `ptr<char const>`)
-            (member xs @16 `array<int; 5>`))
          (definition large~7 `struct Large~1 complete`
             (braced
                (subobject +0 (42 `int`))

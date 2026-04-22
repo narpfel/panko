@@ -16,8 +16,6 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (struct T~0
-            (member x (bitfield-width 20) `int`))
          (declaration value~3 `struct T~0 complete` (braced ∅))
          (declaration x~4 `typeof((dot x
    (name value~3 `struct T~0 complete`)))`

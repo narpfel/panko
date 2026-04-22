@@ -105,10 +105,6 @@ exit_code: 0
                (member `int` x +0
                   (outer~6 `struct Outer~4 complete`))
                (0x1234 `int`)))
-         (struct Middle~3
-            (member y @0 `int`)
-            (member inner @4 `struct Inner~2 complete`)
-            (member inner2 @16 `struct Inner~2 complete`))
          (definition new_middle~10 `struct Middle~3 complete`
             (braced
                (subobject +0
@@ -230,10 +226,6 @@ exit_code: 0
                (member `int` y +0
                   (member `struct Middle~3 complete` middle +4
                      (outer~6 `struct Outer~4 complete`)))))
-         (struct Middle~3
-            (member y @0 `int`)
-            (member inner @4 `struct Inner~2 complete`)
-            (member inner2 @16 `struct Inner~2 complete`))
          (definition p~12 `ptr<struct Middle~3 complete>`
             (addressof `ptr<struct Middle~3 complete>`
                (member `struct Middle~3 complete` middle +4

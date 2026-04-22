@@ -18,19 +18,11 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
-         (struct Struct~0
-            (member x `int`)
-            (member y `int`)
-            (member z `int`))
          (declaration value~3 `struct Struct~0 complete`
             (braced
                1
                2
                3))
-         (struct Struct~0
-            (member x `int`)
-            (member y `int`)
-            (member z `int`))
          (declaration copy~4 `struct Struct~0 complete`
             (braced
                (name value~3 `struct Struct~0 complete`))))))

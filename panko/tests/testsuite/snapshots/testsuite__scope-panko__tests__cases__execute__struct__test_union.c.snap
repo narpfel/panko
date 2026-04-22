@@ -20,9 +20,6 @@ exit_code: 0
    (function-definition
       main~3 `fn() -> int`
       (compound-statement
-         (union U~2
-            (member x `int`)
-            (member t `struct T~1 complete`))
          (declaration u~5 `union U~2 complete` ∅)
          (expression
             (assign

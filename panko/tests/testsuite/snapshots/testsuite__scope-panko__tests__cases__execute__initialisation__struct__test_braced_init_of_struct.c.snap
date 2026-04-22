@@ -20,11 +20,6 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (struct T~1
-            (member x `int`)
-            (member cs `array<char; 4>`)
-            (member y `int`)
-            (member z `int`))
          (declaration t~4 `struct T~1 complete`
             (braced
                0x1234'5678

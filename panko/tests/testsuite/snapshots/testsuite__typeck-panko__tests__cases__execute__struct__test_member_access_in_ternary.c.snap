@@ -17,13 +17,9 @@ exit_code: 0
    (function-definition external
       main~2 `fn() -> int`
       (compound-statement
-         (struct Struct~1
-            (member x @0 `int`))
          (definition value~4 `struct Struct~1 complete`
             (braced
                (subobject +0 (42 `int`))))
-         (struct Struct~1
-            (member x @0 `int`))
          (definition other~5 `struct Struct~1 complete`
             (braced
                (subobject +0 (27 `int`))))

@@ -83,10 +83,6 @@ exit_code: 0
                   (dot inner2
                      (dot middle
                         (name outer~8 `struct Outer~3 complete`))))))
-         (struct Inner~1
-            (member x `int`)
-            (member y `int`)
-            (member z `int`))
          (declaration inner_read_from_struct~11 `struct Inner~1 complete`
             (dot inner2
                (dot middle

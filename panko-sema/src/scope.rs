@@ -902,9 +902,13 @@ fn resolve_compound_statement<'a>(
         scopes.open_new_scope();
     }
     let stmts = CompoundStatement(
-        scopes
-            .sess
-            .alloc_slice_fill_iter(stmts.0.iter().map(|stmt| resolve_stmt(scopes, stmt))),
+        scopes.sess.alloc_slice_copy(
+            &stmts
+                .0
+                .iter()
+                .filter_map(|stmt| resolve_stmt(scopes, stmt))
+                .collect_vec(),
+        ),
     );
     if let OpenNewScope::Yes = open_new_scope {
         scopes.exit_scope();
@@ -1073,10 +1077,15 @@ fn resolve_declaration<'a>(
     })
 }
 
-fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Statement<'a> {
-    match stmt {
-        ast::Statement::TypeDeclaration(TypeDeclaration::Struct(r#struct)) =>
-            Statement::StructDecl(resolve_struct(scopes, r#struct)),
+fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Option<Statement<'a>> {
+    Some(match stmt {
+        ast::Statement::TypeDeclaration(TypeDeclaration::Struct(r#struct)) => {
+            let resolved_struct = resolve_struct(scopes, r#struct);
+            match r#struct {
+                Struct::Complete { .. } => Statement::StructDecl(resolved_struct),
+                Struct::Incomplete { .. } => return None,
+            }
+        }
         ast::Statement::Declaration(decl) => match resolve_declaration(scopes, decl) {
             DeclarationOrTypedef::Declaration(declaration) => Statement::Declaration(declaration),
             DeclarationOrTypedef::Typedef(typedef) => Statement::Typedef(typedef),
@@ -1090,7 +1099,7 @@ fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> State
             return_: *return_,
             expr: try { resolve_expr(scopes, expr.as_ref()?) },
         },
-    }
+    })
 }
 
 fn resolve_assoc<'a>(

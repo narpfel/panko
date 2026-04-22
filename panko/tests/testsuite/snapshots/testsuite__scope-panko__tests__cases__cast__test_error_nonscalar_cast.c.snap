@@ -20,11 +20,7 @@ exit_code: 0
       main~2 `fn() -> int`
       (compound-statement
          (expression (cast `fn() -> int` 42))
-         (struct T~0
-            (member x `int`))
          (declaration t~4 `struct T~0 complete` ∅)
-         (struct T~0
-            (member x `int`))
          (declaration t2~5 `struct T~0 complete` ∅)
          (expression (cast `struct T~0 complete` (name t~4 `struct T~0 complete`)))
          (expression (cast `struct T~0 complete const` (name t~4 `struct T~0 complete`)))

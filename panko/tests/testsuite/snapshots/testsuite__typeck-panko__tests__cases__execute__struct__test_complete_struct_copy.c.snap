@@ -18,9 +18,6 @@ exit_code: 0
    (function-definition external
       main~2 `fn() -> int`
       (compound-statement
-         (struct T~1
-            (member xs @0 `array<int; 3>`)
-            (member x @16 `long`))
          (definition t~4 `struct T~1 complete` ∅)
          (definition xs~5 `ptr<array<int; 3>>`
             (noop-type-conversion `ptr<array<int; 3>>`
@@ -53,9 +50,6 @@ exit_code: 0
                            (deref `array<int; 3>` (xs~5 `ptr<array<int; 3>>`))))
                      (sign-extend `unsigned long` (2 `int`))))
                (123 `int`)))
-         (struct T~1
-            (member xs @0 `array<int; 3>`)
-            (member x @16 `long`))
          (definition copy~6 `struct T~1 complete` (t~4 `struct T~1 complete`))
          (expression
             (assign `ptr<array<int; 3>>` (xs~5 `ptr<array<int; 3>>`)
@@ -97,9 +91,6 @@ exit_code: 0
                            (deref `array<int; 3>` (xs~5 `ptr<array<int; 3>>`))))
                      (sign-extend `unsigned long` (1 `int`))))
                (5 `int`)))
-         (struct T~1
-            (member xs @0 `array<int; 3>`)
-            (member x @16 `long`))
          (definition another_copy~7 `struct T~1 complete` ∅)
          (expression (assign `struct T~1 complete` (another_copy~7 `struct T~1 complete`) (copy~6 `struct T~1 complete`)))
          (expression

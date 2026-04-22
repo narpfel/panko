@@ -32,8 +32,6 @@ exit_code: 0
                (dot x
                   (name t~1 `struct T~0 complete`))
                27))
-         (struct T~0
-            (member x `int`))
          (declaration p~6 `ptr<struct T~0 complete>`
             (addressof
                (dot t

@@ -36,16 +36,12 @@ exit_code: 0
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
                (equal `int` (sizeof `unsigned long` 10737418240 `struct Large~2 complete`) (multiply `unsigned long` (multiply `unsigned long` (multiply `unsigned long` (multiply `unsigned long` (sizeof `unsigned long` 1 `char`) (sign-extend `unsigned long` (10 `int`))) (sign-extend `unsigned long` (1024 `int`))) (sign-extend `unsigned long` (1024 `int`))) (sign-extend `unsigned long` (1024 `int`))))))
-         (struct Large~2
-            (member ten_gb @0 `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
          (definition p~5 `ptr<struct Large~2 complete>`
             (noop-type-conversion `ptr<struct Large~2 complete>`
                (call `ptr<void>`
                   (addressof `ptr<fn(∅: unsigned long) -> ptr<void>>`
                      (malloc~1 `fn(∅: unsigned long) -> ptr<void>`))
                   (multiply `unsigned long` (sign-extend `unsigned long` (20 `int`)) (sizeof `unsigned long` 10737418240 `struct Large~2 complete`)))))
-         (struct Large~2
-            (member ten_gb @0 `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
          (definition third~6 `ptr<struct Large~2 complete>` (ptr-add `ptr<struct Large~2 complete>` (p~5 `ptr<struct Large~2 complete>`) (sign-extend `unsigned long` (3 `int`))))
          (definition difference~7 `long` (ptr-diff `long` (third~6 `ptr<struct Large~2 complete>`) (p~5 `ptr<struct Large~2 complete>`)))
          (expression

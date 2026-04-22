@@ -23,19 +23,11 @@ exit_code: 0
    (function-definition external stack-size=104
       (main~3 `fn() -> int` (static main))
       (compound-statement
-         (struct Inner~1
-            (member x @0 `int`)
-            (member y @4 `int`)
-            (member z @8 `int`))
          (definition (inner~5 `struct Inner~1 complete` @0)
             (braced
                (subobject +0 (1 `int` @0))
                (subobject +4 (2 `int` @4))
                (subobject +8 (3 `int` @8))))
-         (struct Outer~2
-            (member x @0 `int`)
-            (member inner @4 `struct Inner~1 complete`)
-            (member y @16 `int`))
          (definition (outer~6 `struct Outer~2 complete` @12)
             (braced
                (subobject +0 (42 `int` @12))

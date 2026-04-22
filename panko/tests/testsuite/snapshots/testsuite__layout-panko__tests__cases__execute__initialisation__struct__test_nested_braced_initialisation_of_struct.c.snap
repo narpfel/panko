@@ -24,11 +24,6 @@ exit_code: 0
    (function-definition external stack-size=136
       (main~4 `fn() -> int` (static main))
       (compound-statement
-         (struct U~3
-            (member x @0 `int`)
-            (member t @4 `struct T~2 complete`)
-            (member y @12 `int`)
-            (member z @16 `int`))
          (definition (u~6 `struct U~3 complete` @0)
             (braced
                (subobject +0 (1 `int` @0))
@@ -63,9 +58,6 @@ exit_code: 0
                         (addressof `ptr<array<int; 6>>` @88
                            (ints~7 `array<int; 6>` @20))))
                   (20 `unsigned long` @96))))
-         (struct T~2
-            (member x @0 `int`)
-            (member y @4 `int`))
          (definition (ts~8 `array<struct T~2 complete; 3>` @44)
             (braced
                (subobject +0 (1 `int` @44))

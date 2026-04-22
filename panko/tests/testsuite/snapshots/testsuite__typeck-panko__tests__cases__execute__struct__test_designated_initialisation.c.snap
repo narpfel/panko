@@ -31,9 +31,6 @@ exit_code: 0
    (function-definition external
       main~7 `fn() -> int`
       (compound-statement
-         (union IntInt~2
-            (member i @0 `int`)
-            (member u @0 `unsigned int`))
          (definition int_int~9 `union IntInt~2 complete`
             (braced
                (subobject +0 (0xffff'ffff `unsigned int`))))
@@ -65,9 +62,6 @@ exit_code: 0
                         (member `unsigned int` u +0
                            (int_int~9 `union IntInt~2 complete`))))
                   (0xffff'ffffLL `long long`))))
-         (union StructInt~4
-            (member t @0 `struct T~3 complete`)
-            (member x @0 `int`))
          (definition struct_int~10 `union StructInt~4 complete`
             (braced
                (subobject +0 (0xffff'ffff `unsigned int`))
@@ -116,10 +110,6 @@ exit_code: 0
                         (member `int` x +0
                            (struct_int~10 `union StructInt~4 complete`))))
                   (negate `long long` (1LL `long long`)))))
-         (struct ContainsUnion~5
-            (member x @0 `int`)
-            (member struct_int @4 `union StructInt~4 complete`)
-            (member y @12 `int`))
          (definition contains_union~11 `struct ContainsUnion~5 complete`
             (braced
                (subobject +0 (2 `int`))
@@ -185,10 +175,6 @@ exit_code: 0
                            (member `union StructInt~4 complete` struct_int +4
                               (contains_union~11 `struct ContainsUnion~5 complete`)))))
                   (negate `long long` (1LL `long long`)))))
-         (struct ContainsUnion~5
-            (member x @0 `int`)
-            (member struct_int @4 `union StructInt~4 complete`)
-            (member y @12 `int`))
          (definition contains_union_2~12 `struct ContainsUnion~5 complete`
             (braced
                (subobject +0 (2 `int`))
@@ -213,8 +199,6 @@ exit_code: 0
                      (addressof `ptr<struct ContainsUnion~5 complete>`
                         (contains_union_2~12 `struct ContainsUnion~5 complete`)))
                   (sizeof `unsigned long` 16 (contains_union~11 `struct ContainsUnion~5 complete`)))))
-         (struct ContainsArray~6
-            (member ts @0 `array<struct T~3 complete; 3>`))
          (definition contains_array~13 `struct ContainsArray~6 complete`
             (braced
                (subobject +0 (noop-type-conversion `unsigned int` (42 `int`)))
