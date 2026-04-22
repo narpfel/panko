@@ -26,20 +26,11 @@ exit_code: 0
       (member middle @4 `struct Middle~3 complete`)
       (member inner @32 `struct Inner~2 complete`)
       (member y @44 `int`))
-   (struct Inner~2
-      (member x @0 `int`)
-      (member y @4 `int`)
-      (member z @8 `int`))
    (definition external inner~5 `struct Inner~2 complete`
       (braced
          (subobject +0 (1 `int`))
          (subobject +4 (2 `int`))
          (subobject +8 (3 `int`))))
-   (struct Outer~4
-      (member x @0 `int`)
-      (member middle @4 `struct Middle~3 complete`)
-      (member inner @32 `struct Inner~2 complete`)
-      (member y @44 `int`))
    (definition external outer~6 `struct Outer~4 complete`
       (braced
          (subobject +0 (42 `int`))

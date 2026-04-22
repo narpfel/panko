@@ -39,20 +39,11 @@ exit_code: 0
                   (name p~6 `ptr<struct Inner~1 complete>`))
                (arrow z
                   (name p~6 `ptr<struct Inner~1 complete>`))))))
-   (struct Inner~1
-      (member x `int`)
-      (member y `int`)
-      (member z `int`))
    (declaration inner~7 `struct Inner~1 complete`
       (braced
          1
          2
          3))
-   (struct Outer~3
-      (member x `int`)
-      (member middle `struct Middle~2 complete`)
-      (member inner `struct Inner~1 complete`)
-      (member y `int`))
    (declaration outer~8 `struct Outer~3 complete`
       (braced
          42

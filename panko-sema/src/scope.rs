@@ -1077,15 +1077,22 @@ fn resolve_declaration<'a>(
     })
 }
 
+fn resolve_type_declaration<'a, T>(
+    scopes: &mut Scopes<'a>,
+    TypeDeclaration::Struct(r#struct): &TypeDeclaration<'a>,
+    f: impl FnOnce(Type<'a>) -> T,
+) -> Option<T> {
+    let resolved_struct = resolve_struct(scopes, r#struct);
+    match r#struct {
+        Struct::Complete { .. } => Some(f(resolved_struct)),
+        Struct::Incomplete { .. } => None,
+    }
+}
+
 fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Option<Statement<'a>> {
     Some(match stmt {
-        ast::Statement::TypeDeclaration(TypeDeclaration::Struct(r#struct)) => {
-            let resolved_struct = resolve_struct(scopes, r#struct);
-            match r#struct {
-                Struct::Complete { .. } => Statement::StructDecl(resolved_struct),
-                Struct::Incomplete { .. } => return None,
-            }
-        }
+        ast::Statement::TypeDeclaration(type_decl) =>
+            resolve_type_declaration(scopes, type_decl, Statement::StructDecl)?,
         ast::Statement::Declaration(decl) => match resolve_declaration(scopes, decl) {
             DeclarationOrTypedef::Declaration(declaration) => Statement::Declaration(declaration),
             DeclarationOrTypedef::Typedef(typedef) => Statement::Typedef(typedef),
@@ -1276,10 +1283,10 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
 fn resolve_external_declaration<'a>(
     scopes: &mut Scopes<'a>,
     decl: &ast::ExternalDeclaration<'a>,
-) -> ExternalDeclaration<'a> {
-    match decl {
-        ast::ExternalDeclaration::TypeDeclaration(TypeDeclaration::Struct(r#struct)) =>
-            ExternalDeclaration::StructDecl(resolve_struct(scopes, r#struct)),
+) -> Option<ExternalDeclaration<'a>> {
+    Some(match decl {
+        ast::ExternalDeclaration::TypeDeclaration(type_decl) =>
+            resolve_type_declaration(scopes, type_decl, ExternalDeclaration::StructDecl)?,
         ast::ExternalDeclaration::FunctionDefinition(def) =>
             resolve_function_definition(scopes, def),
         ast::ExternalDeclaration::Declaration(decl) => match resolve_declaration(scopes, decl) {
@@ -1290,7 +1297,7 @@ fn resolve_external_declaration<'a>(
                 ExternalDeclaration::Redeclared(redeclared),
         },
         ast::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
-    }
+    })
 }
 
 pub fn resolve_names<'a>(
@@ -1301,10 +1308,11 @@ pub fn resolve_names<'a>(
     let ast::TranslationUnit { filename, decls } = translation_unit;
     TranslationUnit {
         filename,
-        decls: sess.alloc_slice_fill_iter(
-            decls
+        decls: sess.alloc_slice_copy(
+            &decls
                 .iter()
-                .map(|decl| resolve_external_declaration(scopes, decl)),
+                .filter_map(|decl| resolve_external_declaration(scopes, decl))
+                .collect_vec(),
         ),
     }
 }

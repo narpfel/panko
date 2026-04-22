@@ -26,20 +26,11 @@ exit_code: 0
       (member middle `struct Middle~3 complete`)
       (member inner `struct Inner~2 complete`)
       (member y `int`))
-   (struct Inner~2
-      (member x `int`)
-      (member y `int`)
-      (member z `int`))
    (declaration inner~5 `struct Inner~2 complete`
       (braced
          1
          2
          3))
-   (struct Outer~4
-      (member x `int`)
-      (member middle `struct Middle~3 complete`)
-      (member inner `struct Inner~2 complete`)
-      (member y `int`))
    (declaration outer~6 `struct Outer~4 complete`
       (braced
          42

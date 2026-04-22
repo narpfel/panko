@@ -16,10 +16,6 @@ exit_code: 0
       (member x @0[0:20] `unsigned int`)
       (member y @0[20:40] `long`)
       (member z @4[8:28] `unsigned int`))
-   (struct T~1
-      (member x @0[0:20] `unsigned int`)
-      (member y @0[20:40] `long`)
-      (member z @4[8:28] `unsigned int`))
    (definition external (static_t~2 `struct T~1 complete` (static static_t))
       (braced
          (subobject +0[0:20] (74565 `unsigned int` @0))

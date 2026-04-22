@@ -15,8 +15,6 @@ exit_code: 0
    (declaration ptrs~2 `array<ptr<struct T~1>; 10>` ∅)
    (struct T~1
       (member x `int`))
-   (struct T~1
-      (member x `int`))
    (declaration ptr~3 `ptr<struct T~1 complete>` ∅)
    (function-definition
       main~4 `fn() -> int`
