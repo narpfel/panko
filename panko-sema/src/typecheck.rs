@@ -831,7 +831,7 @@ fn typeck_struct_members<'a>(
             }
         }
     };
-    sess.alloc_slice_copy(&members.collect_vec())
+    sess.alloc_slice_collect(members)
 }
 
 fn typeck_ty_with_initialiser<'a>(

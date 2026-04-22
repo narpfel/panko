@@ -132,6 +132,15 @@ impl<'a> Session<'a> {
         self.bump.alloc_slice_fill_iter(value)
     }
 
+    pub fn alloc_slice_collect<I, T>(&self, values: I) -> &'a [T]
+    where
+        I: IntoIterator<Item = T>,
+        T: Copy,
+    {
+        let values = values.into_iter().collect_vec();
+        self.alloc_slice_copy(&values)
+    }
+
     pub fn alloc_slice_copy<T>(&self, values: &[T]) -> &'a [T]
     where
         T: Copy,
@@ -619,12 +628,10 @@ impl<'a> TypeQualifier<'a> {
 impl<'a> CompoundStatement<'a> {
     fn from_parse_tree(sess: &'a Session<'a>, stmt: &cst::CompoundStatement<'a>) -> Self {
         Self(
-            sess.alloc_slice_copy(
-                &stmt
-                    .0
+            sess.alloc_slice_collect(
+                stmt.0
                     .iter()
-                    .flat_map(|stmt| Statement::from_parse_tree(sess, stmt))
-                    .collect_vec(),
+                    .flat_map(|stmt| Statement::from_parse_tree(sess, stmt)),
             ),
         )
     }
@@ -824,11 +831,10 @@ impl<'a> ParsedSpecifiers<'a> {
                 Type::Struct(Struct::Complete {
                     name,
                     kind,
-                    members: sess.alloc_slice_copy(
-                        &members
+                    members: sess.alloc_slice_collect(
+                        members
                             .iter()
-                            .flat_map(|member| Member::parse(sess, member))
-                            .collect_vec(),
+                            .flat_map(|member| Member::parse(sess, member)),
                     ),
                 }),
         }
@@ -1047,11 +1053,10 @@ pub(crate) fn from_parse_tree<'a>(
     let cst::TranslationUnit { filename, decls } = parse_tree;
     TranslationUnit {
         filename,
-        decls: sess.alloc_slice_copy(
-            &decls
+        decls: sess.alloc_slice_collect(
+            decls
                 .iter()
-                .flat_map(|decl| ExternalDeclaration::from_parse_tree(sess, decl))
-                .collect_vec(),
+                .flat_map(|decl| ExternalDeclaration::from_parse_tree(sess, decl)),
         ),
     }
 }

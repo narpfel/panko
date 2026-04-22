@@ -851,34 +851,30 @@ fn resolve_function_definition<'a>(
         )
         .expect("`return` is a keyword, so there are no types with that name");
 
-    let params = scopes.sess.alloc_slice_copy(
-        &params
-            .iter()
-            .enumerate()
-            .map(|(i, param)| {
-                let name = param.name.map_or_else(
-                    || {
-                        scopes
-                            .sess
-                            .alloc_str(&format!("{}.unnamed_parameter.{i}", name.slice()))
-                    },
-                    |name| name.slice(),
-                );
-                let maybe_reference = scopes.add(
-                    name,
-                    param.loc,
-                    param.ty,
-                    StorageDuration::Automatic,
-                    IsParameter::Yes,
-                    IsInGlobalScope::No,
-                );
-                match maybe_reference {
-                    Ok(reference) => reference,
-                    Err(_ty) => todo!("emit error"),
-                }
-            })
-            .collect_vec(),
-    );
+    let params = scopes
+        .sess
+        .alloc_slice_collect(params.iter().enumerate().map(|(i, param)| {
+            let name = param.name.map_or_else(
+                || {
+                    scopes
+                        .sess
+                        .alloc_str(&format!("{}.unnamed_parameter.{i}", name.slice()))
+                },
+                |name| name.slice(),
+            );
+            let maybe_reference = scopes.add(
+                name,
+                param.loc,
+                param.ty,
+                StorageDuration::Automatic,
+                IsParameter::Yes,
+                IsInGlobalScope::No,
+            );
+            match maybe_reference {
+                Ok(reference) => reference,
+                Err(_ty) => todo!("emit error"),
+            }
+        }));
 
     let body = resolve_compound_statement(scopes, body, OpenNewScope::No);
     scopes.pop();
@@ -902,13 +898,9 @@ fn resolve_compound_statement<'a>(
         scopes.open_new_scope();
     }
     let stmts = CompoundStatement(
-        scopes.sess.alloc_slice_copy(
-            &stmts
-                .0
-                .iter()
-                .filter_map(|stmt| resolve_stmt(scopes, stmt))
-                .collect_vec(),
-        ),
+        scopes
+            .sess
+            .alloc_slice_collect(stmts.0.iter().filter_map(|stmt| resolve_stmt(scopes, stmt))),
     );
     if let OpenNewScope::Yes = open_new_scope {
         scopes.exit_scope();
@@ -1308,11 +1300,10 @@ pub fn resolve_names<'a>(
     let ast::TranslationUnit { filename, decls } = translation_unit;
     TranslationUnit {
         filename,
-        decls: sess.alloc_slice_copy(
-            &decls
+        decls: sess.alloc_slice_collect(
+            decls
                 .iter()
-                .filter_map(|decl| resolve_external_declaration(scopes, decl))
-                .collect_vec(),
+                .filter_map(|decl| resolve_external_declaration(scopes, decl)),
         ),
     }
 }

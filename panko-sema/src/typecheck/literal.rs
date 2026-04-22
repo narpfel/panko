@@ -241,7 +241,7 @@ pub(super) fn parse_char_literal<'a>(
 }
 
 fn parse_string_literal<'a>(sess: &'a Session<'a>, tokens: &[Token<'a>]) -> StringLiteral<'a> {
-    let value: Vec<u8> = tokens
+    let value = tokens
         .iter()
         .flat_map(|token| {
             parse_escape_sequences(
@@ -250,10 +250,9 @@ fn parse_string_literal<'a>(sess: &'a Session<'a>, tokens: &[Token<'a>]) -> Stri
             )
         })
         .chain(std::iter::once(Char::Codepoint('\0')))
-        .flat_map(|c| c.encode_utf8())
-        .collect();
+        .flat_map(|c| c.encode_utf8());
     StringLiteral {
-        value: ByteStr::new(sess.alloc_slice_copy(&value)),
+        value: ByteStr::new(sess.alloc_slice_collect(value)),
         loc: tokens
             .first()
             .unwrap()
