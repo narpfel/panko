@@ -33,7 +33,7 @@ command = [
 ]
 background = false
 need_stdout = true
-env.PANKO_COMPILETEST_USE_LINKER = "wild"
+env.PANKO_COMPILETEST_USE_LINKER = "mold"
 
 [jobs.covtest]
 command = [
@@ -91,7 +91,7 @@ command = [
 ]
 need_stdout = true
 on_success = "back"
-env.PANKO_COMPILETEST_USE_LINKER = "wild"
+env.PANKO_COMPILETEST_USE_LINKER = "mold"
 
 [keybindings]
 shift-a = "job:accept-snapshots"
