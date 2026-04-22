@@ -851,30 +851,25 @@ fn resolve_function_definition<'a>(
         )
         .expect("`return` is a keyword, so there are no types with that name");
 
-    let params = scopes
-        .sess
-        .alloc_slice_collect(params.iter().enumerate().map(|(i, param)| {
-            let name = param.name.map_or_else(
-                || {
-                    scopes
-                        .sess
-                        .alloc_str(&format!("{}.unnamed_parameter.{i}", name.slice()))
-                },
-                |name| name.slice(),
-            );
-            let maybe_reference = scopes.add(
-                name,
-                param.loc,
-                param.ty,
-                StorageDuration::Automatic,
-                IsParameter::Yes,
-                IsInGlobalScope::No,
-            );
-            match maybe_reference {
-                Ok(reference) => reference,
-                Err(_ty) => todo!("emit error"),
-            }
-        }));
+    let sess = scopes.sess;
+    let params = sess.alloc_slice_collect(params.iter().enumerate().map(|(i, param)| {
+        let name = param.name.map_or_else(
+            || sess.alloc_str(&format!("{}.unnamed_parameter.{i}", name.slice())),
+            |name| name.slice(),
+        );
+        let maybe_reference = scopes.add(
+            name,
+            param.loc,
+            param.ty,
+            StorageDuration::Automatic,
+            IsParameter::Yes,
+            IsInGlobalScope::No,
+        );
+        match maybe_reference {
+            Ok(reference) => reference,
+            Err(ty) => error_todo!(ty, "typedef redeclared as value in parameter list"),
+        }
+    }));
 
     let body = resolve_compound_statement(scopes, body, OpenNewScope::No);
     scopes.pop();
