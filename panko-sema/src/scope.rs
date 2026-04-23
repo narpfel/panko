@@ -31,6 +31,7 @@ use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
 use crate::scope::scopes::Scopes;
 use crate::ty;
+use crate::ty::Complete;
 use crate::ty::ParameterDeclaration;
 
 mod as_sexpr;
@@ -146,7 +147,7 @@ pub struct TranslationUnit<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum ExternalDeclaration<'a> {
-    StructDecl(Type<'a>),
+    StructDecl(Complete<'a, Scope>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -268,11 +269,12 @@ pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 
 // TODO: this is a hack required by the `variant_types` derive macro
 type MaybeExpr<'a> = Option<Expression<'a>>;
+type CompleteStruct<'a> = Complete<'a, Scope>;
 
 #[variant_types::derive_variant_types]
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
-    StructDecl(Type<'a>),
+    StructDecl(CompleteStruct<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(MaybeExpr<'a>),
@@ -1067,12 +1069,14 @@ fn resolve_declaration<'a>(
 fn resolve_type_declaration<'a, T>(
     scopes: &mut Scopes<'a>,
     TypeDeclaration::Struct(r#struct): &TypeDeclaration<'a>,
-    f: impl FnOnce(Type<'a>) -> T,
+    f: impl FnOnce(Complete<'a, Scope>) -> T,
 ) -> Option<T> {
     let resolved_struct = resolve_struct(scopes, r#struct);
-    match r#struct {
-        Struct::Complete { .. } => Some(f(resolved_struct)),
-        Struct::Incomplete { .. } => None,
+    match (r#struct, resolved_struct) {
+        (Struct::Complete { .. }, Type::Struct(ty::Struct::Complete(complete))) =>
+            Some(f(complete)),
+        (Struct::Complete { .. }, _) => unreachable!(),
+        (Struct::Incomplete { .. }, _) => None,
     }
 }
 

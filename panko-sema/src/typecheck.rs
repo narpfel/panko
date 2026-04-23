@@ -179,7 +179,7 @@ pub struct TranslationUnit<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum ExternalDeclaration<'a> {
-    StructDecl(Type<'a>),
+    StructDecl(Complete<'a, Typeck>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -279,7 +279,7 @@ pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
-    StructDecl(Type<'a>),
+    StructDecl(Complete<'a, Typeck>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<TypedExpression<'a>>),
@@ -834,6 +834,15 @@ fn typeck_struct_members<'a>(
     sess.alloc_slice_collect(members)
 }
 
+fn typeck_complete_struct<'a>(
+    sess: &'a Session<'a>,
+    complete: &Complete<'a, scope::Scope>,
+) -> Complete<'a, Typeck> {
+    let Complete { name, id, kind, members } = *complete;
+    let members = typeck_struct_members(sess, kind, members);
+    Complete { name, id, kind, members }
+}
+
 fn typeck_ty_with_initialiser<'a>(
     sess: &'a Session<'a>,
     ty: scope::QualifiedType<'a>,
@@ -877,10 +886,8 @@ fn typeck_ty_with_initialiser<'a>(
         ty::Type::Nullptr => Type::Nullptr,
         ty::Type::Struct(Struct::Incomplete { name, id, kind }) =>
             Type::Struct(Struct::Incomplete { name, id, kind }),
-        ty::Type::Struct(Struct::Complete(Complete { name, id, kind, members })) => {
-            let members = typeck_struct_members(sess, kind, members);
-            Type::Struct(Struct::Complete(Complete { name, id, kind, members }))
-        }
+        ty::Type::Struct(Struct::Complete(complete)) =>
+            Type::Struct(Struct::Complete(typeck_complete_struct(sess, &complete))),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -1524,8 +1531,8 @@ fn typeck_statement<'a>(
     function: &scope::FunctionDefinition<'a>,
 ) -> Statement<'a> {
     match stmt {
-        scope::Statement::StructDecl(ty) =>
-            Statement::StructDecl(typeck_ty(sess, ty.unqualified(), IsParameter::No).ty),
+        scope::Statement::StructDecl(complete) =>
+            Statement::StructDecl(typeck_complete_struct(sess, complete)),
         scope::Statement::Declaration(decl) =>
             Statement::Declaration(typeck_declaration(sess, decl)),
         scope::Statement::Typedef(typedef) => Statement::Typedef(typeck_typedef(sess, typedef)),
@@ -2644,9 +2651,8 @@ pub fn resolve_types<'a>(
     TranslationUnit {
         filename,
         decls: sess.alloc_slice_fill_iter(decls.iter().map(|decl| match decl {
-            scope::ExternalDeclaration::StructDecl(ty) => ExternalDeclaration::StructDecl(
-                typeck_ty(sess, ty.unqualified(), IsParameter::No).ty,
-            ),
+            scope::ExternalDeclaration::StructDecl(complete) =>
+                ExternalDeclaration::StructDecl(typeck_complete_struct(sess, complete)),
             scope::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(typeck_function_definition(sess, def)),
             scope::ExternalDeclaration::Typedef(typedef) =>

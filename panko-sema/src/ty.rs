@@ -15,7 +15,6 @@ use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Signedness;
 use panko_parser::sexpr_builder::AsSExpr;
-use panko_parser::sexpr_builder::Discard;
 use panko_parser::sexpr_builder::SExpr;
 use yansi::Paint as _;
 
@@ -166,15 +165,6 @@ impl<T: Step> Struct<'_, T> {
         match self {
             Self::Incomplete { name: _, id: _, kind }
             | Self::Complete(Complete { name: _, id: _, kind, members: _ }) => *kind,
-        }
-    }
-}
-
-impl<T: Step> AsSExpr for Struct<'_, T> {
-    fn as_sexpr(&self) -> SExpr {
-        match self {
-            Self::Incomplete { name: _, id: _, kind: _ } => Discard.as_sexpr(),
-            Self::Complete(complete) => complete.as_sexpr(),
         }
     }
 }
@@ -664,14 +654,6 @@ impl<T: Step> AsSExpr for QualifiedType<'_, T> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::display(&self.italic())
     }
-}
-
-pub(crate) fn struct_decl_as_sexpr<'a, T: Step>(decl: &'a Type<'_, T>) -> SExpr<'a> {
-    let Type::Struct(r#struct) = decl
-    else {
-        unreachable!()
-    };
-    r#struct.as_sexpr()
 }
 
 #[derive(Debug, Clone, Copy)]
