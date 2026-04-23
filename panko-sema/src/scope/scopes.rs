@@ -256,9 +256,7 @@ impl<'a> Scopes<'a> {
         // forward declare so that `name` is available in the body
         let forward_decl = try { self.lookup_or_add_struct(name?, kind) };
 
-        self.open_new_scope();
         let members = super::resolve_struct_members(self, members);
-        self.exit_scope();
 
         let id = match forward_decl {
             Some(Type::Struct(r#struct)) => r#struct.id(),

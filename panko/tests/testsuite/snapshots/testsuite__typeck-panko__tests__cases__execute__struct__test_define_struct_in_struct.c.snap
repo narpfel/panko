@@ -7,35 +7,60 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/struct/test_define_struct_in_struct.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_define_struct_in_struct.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct T~1
+      (member x @0 `int`)
+      (member inner @4 `struct Inner~2 complete`))
+   (function-definition external
+      main~3 `fn() -> int`
+      (compound-statement
+         (definition t~5 `struct T~1 complete` ∅)
+         (expression
+            (assign `int`
+               (member `int` x +0
+                  (t~5 `struct T~1 complete`))
+               (42 `int`)))
+         (definition inner~6 `struct Inner~2 complete`
+            (braced
+               (subobject +0 (27 `int`))))
+         (expression
+            (assign `struct Inner~2 complete`
+               (member `struct Inner~2 complete` inner +4
+                  (t~5 `struct T~1 complete`))
+               (inner~6 `struct Inner~2 complete`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (member `int` x +0
+                  (t~5 `struct T~1 complete`))
+               (member `int` y +0
+                  (member `struct Inner~2 complete` inner +4
+                     (t~5 `struct T~1 complete`)))))
+         (definition t2~7 `struct T~1 complete`
+            (braced
+               (subobject +0 (123 `int`))
+               (subobject +4 (456 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (member `int` x +0
+                  (t2~7 `struct T~1 complete`))
+               (member `int` y +0
+                  (member `struct Inner~2 complete` inner +4
+                     (t2~7 `struct T~1 complete`))))))))
 
 ----- stderr -----
-Error: cannot declare variable `inner` with incomplete type `struct Inner~6`
-    ╭─[panko/tests/cases/execute/struct/test_define_struct_in_struct.c:15:18]
-    │
- 15 │     struct Inner inner = {.y = 27};
-    │                  ──┬──  
-    │                    ╰──── declared here
-────╯
-
-Error: cannot initialise variable of incomplete type `struct Inner~6`
-    ╭─[panko/tests/cases/execute/struct/test_define_struct_in_struct.c:15:26]
-    │
- 15 │     struct Inner inner = {.y = 27};
-    │     ──────┬───── ──┬──   ────┬────  
-    │           │        │         ╰────── cannot initialise variable of incomplete type
-    │           │        │                
-    │           │        ╰──────────────── while defining this variable
-    │           │                         
-    │           ╰───────────────────────── `struct Inner~6` is incomplete
-────╯
-
-Error: invalid implicit conversion from `struct Inner~6` to `struct Inner~2 complete`
-    ╭─[panko/tests/cases/execute/struct/test_define_struct_in_struct.c:16:15]
-    │
- 16 │     t.inner = inner;
-    │               ──┬──  
-    │                 ╰──── this is of type `struct Inner~6`, which cannot be implicitly converted to `struct Inner~2 complete`
-────╯

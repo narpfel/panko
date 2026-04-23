@@ -24,14 +24,14 @@ exit_code: 0
                (dot x
                   (name t~5 `struct T~1 complete`))
                42))
-         (declaration inner~7 `struct Inner~6`
+         (declaration inner~6 `struct Inner~2 complete`
             (braced
                (designation ((member y)) 27)))
          (expression
             (assign
                (dot inner
                   (name t~5 `struct T~1 complete`))
-               (name inner~7 `struct Inner~6`)))
+               (name inner~6 `struct Inner~2 complete`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d\n")
@@ -40,7 +40,7 @@ exit_code: 0
                (dot y
                   (dot inner
                      (name t~5 `struct T~1 complete`)))))
-         (declaration t2~8 `struct T~1 complete`
+         (declaration t2~7 `struct T~1 complete`
             (braced
                (designation ((member x)) 123)
                (designation ((member inner) (member y)) 456)))
@@ -48,9 +48,9 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d\n")
                (dot x
-                  (name t2~8 `struct T~1 complete`))
+                  (name t2~7 `struct T~1 complete`))
                (dot y
                   (dot inner
-                     (name t2~8 `struct T~1 complete`))))))))
+                     (name t2~7 `struct T~1 complete`))))))))
 
 ----- stderr -----
