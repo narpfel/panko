@@ -1,0 +1,41 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_define_struct_in_struct.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot declare variable `inner` with incomplete type `struct Inner~6`
+    ╭─[panko/tests/cases/execute/struct/test_define_struct_in_struct.c:15:18]
+    │
+ 15 │     struct Inner inner = {.y = 27};
+    │                  ──┬──  
+    │                    ╰──── declared here
+────╯
+
+Error: cannot initialise variable of incomplete type `struct Inner~6`
+    ╭─[panko/tests/cases/execute/struct/test_define_struct_in_struct.c:15:26]
+    │
+ 15 │     struct Inner inner = {.y = 27};
+    │     ──────┬───── ──┬──   ────┬────  
+    │           │        │         ╰────── cannot initialise variable of incomplete type
+    │           │        │                
+    │           │        ╰──────────────── while defining this variable
+    │           │                         
+    │           ╰───────────────────────── `struct Inner~6` is incomplete
+────╯
+
+Error: invalid implicit conversion from `struct Inner~6` to `struct Inner~2 complete`
+    ╭─[panko/tests/cases/execute/struct/test_define_struct_in_struct.c:16:15]
+    │
+ 16 │     t.inner = inner;
+    │               ──┬──  
+    │                 ╰──── this is of type `struct Inner~6`, which cannot be implicitly converted to `struct Inner~2 complete`
+────╯

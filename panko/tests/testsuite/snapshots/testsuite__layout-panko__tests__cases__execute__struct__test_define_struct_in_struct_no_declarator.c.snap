@@ -1,0 +1,42 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_define_struct_in_struct_no_declarator.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot declare variable `s` with incomplete type `struct NoDeclarator~4`
+    ╭─[panko/tests/cases/execute/struct/test_define_struct_in_struct_no_declarator.c:13:25]
+    │
+ 13 │     struct NoDeclarator s = {.y = 2};
+    │                         ┬  
+    │                         ╰── declared here
+────╯
+
+Error: cannot initialise variable of incomplete type `struct NoDeclarator~4`
+    ╭─[panko/tests/cases/execute/struct/test_define_struct_in_struct_no_declarator.c:13:29]
+    │
+ 13 │     struct NoDeclarator s = {.y = 2};
+    │     ─────────┬───────── ┬   ────┬───  
+    │              │          │       ╰───── cannot initialise variable of incomplete type
+    │              │          │             
+    │              │          ╰───────────── while defining this variable
+    │              │                        
+    │              ╰──────────────────────── `struct NoDeclarator~4` is incomplete
+────╯
+
+Error: member access on incomplete struct type `struct NoDeclarator~4`
+    ╭─[panko/tests/cases/execute/struct/test_define_struct_in_struct_no_declarator.c:15:20]
+    │
+ 15 │     printf("%d\n", s.y);
+    │                    ┬──  
+    │                    │    
+    │                    ╰──── this expression has incomplete struct type `struct NoDeclarator~4`
+────╯
