@@ -76,6 +76,8 @@ exit_code: 0
                      (addressof `ptr<array<char; 9>>` @40
                         (string `array<char; 9>` @void "%zu %zu\n\0"))))
                (24 `unsigned long` @48)
-               (8 `unsigned long` @56))))))
+               (8 `unsigned long` @56)))
+         (struct ∅~11
+            (member test_maybe_anonymous_struct_at_block_scope @0 `int`)))))
 
 ----- stderr -----

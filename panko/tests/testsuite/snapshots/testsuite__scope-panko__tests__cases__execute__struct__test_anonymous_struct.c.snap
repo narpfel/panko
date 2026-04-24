@@ -54,6 +54,8 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %zu\n")
                (sizeof `struct WithMemberName~6 complete`)
-               (alignof `struct WithMemberName~6 complete`))))))
+               (alignof `struct WithMemberName~6 complete`)))
+         (struct ∅~11
+            (member test_maybe_anonymous_struct_at_block_scope `int`)))))
 
 ----- stderr -----

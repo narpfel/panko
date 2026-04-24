@@ -76,6 +76,8 @@ exit_code: 0
                      (addressof `ptr<array<char; 9>>`
                         (string `array<char; 9>` "%zu %zu\n\0"))))
                (sizeof `unsigned long` 24 `struct WithMemberName~6 complete`)
-               (alignof `unsigned long` 8 `struct WithMemberName~6 complete`))))))
+               (alignof `unsigned long` 8 `struct WithMemberName~6 complete`)))
+         (struct ∅~11
+            (member test_maybe_anonymous_struct_at_block_scope @0 `int`)))))
 
 ----- stderr -----

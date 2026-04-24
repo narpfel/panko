@@ -45,4 +45,8 @@ int main() {
 
     // [[print: 24 8]]
     printf("%zu %zu\n", sizeof(struct WithMemberName), _Alignof(struct WithMemberName));
+
+    struct {
+        int test_maybe_anonymous_struct_at_block_scope;
+    };
 }
