@@ -221,7 +221,6 @@ impl<'a> FromError<'a> for ExternalDeclaration<'a> {
 #[derive(Debug, Clone, Copy)]
 struct MaybeUnnamedDeclaration<'a> {
     ty: QualifiedType<'a>,
-    name: Option<Token<'a>>,
     bitfield_width: Option<Expression<'a>>,
     initialiser: Option<Initialiser<'a>>,
     storage_class: Option<cst::StorageClassSpecifier<'a>>,
@@ -355,23 +354,16 @@ impl<'a> Member<'a> {
         sess: &'a Session<'a>,
         member: &'a cst::Declaration<'a>,
     ) -> impl Iterator<Item = Self> {
-        Declaration::from_parse_tree(sess, member)
-            .filter(|member| {
-                member.name.is_some()
-                    || member.bitfield_width.is_some()
-                    // TODO: `from_parse_tree` should probably yield `Declaration |
-                    // TypeDeclaration` so that this check is more robust
-                    || !matches!(member.ty.ty, Type::Struct(_))
-            })
-            .map(|member| {
+        Declaration::from_parse_tree(sess, member).filter_map(|member| match member {
+            DeclarationKind::Value { name, decl }
+            | DeclarationKind::MaybeAnonymousStruct { name, decl } => {
                 let MaybeUnnamedDeclaration {
                     ty,
-                    name,
                     bitfield_width,
                     initialiser,
                     storage_class,
                     function_specifiers,
-                } = member;
+                } = decl;
                 assert_matches!(
                     initialiser,
                     None,
@@ -384,8 +376,10 @@ impl<'a> Member<'a> {
                 );
                 let loc = try { name?.loc() }.unwrap_or_else(|| ty.loc());
                 reject_function_specifiers(sess, &function_specifiers, loc, "struct member");
-                Member { name, bitfield_width, ty }
-            })
+                Some(Member { name, bitfield_width, ty })
+            }
+            DeclarationKind::Type(_) => None,
+        })
     }
 }
 
@@ -421,16 +415,19 @@ impl<'a> ExternalDeclaration<'a> {
                 Either::Left(once(ExternalDeclaration::FunctionDefinition(
                     FunctionDefinition::from_parse_tree(sess, def),
                 ))),
-            cst::ExternalDeclaration::Declaration(decl) => Either::Right({
-                Declaration::from_parse_tree(sess, decl)
-                    .map(MaybeUnnamedDeclaration::into_decl)
-                    .map(|parsed| match parsed {
-                        Ok(decl) => ExternalDeclaration::Declaration(decl),
-                        Err(ty) if let Type::Struct(ty) = ty.ty =>
-                            ExternalDeclaration::TypeDeclaration(TypeDeclaration::Struct(ty)),
-                        Err(ty) => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl, ty }),
+            cst::ExternalDeclaration::Declaration(decl) => Either::Right(
+                Declaration::from_parse_tree(sess, decl).filter_map(|parsed| {
+                    Some(match parsed {
+                        DeclarationKind::Type(type_decl) =>
+                            ExternalDeclaration::TypeDeclaration(type_decl),
+                        DeclarationKind::Value { name: Some(name), decl } =>
+                            ExternalDeclaration::Declaration(decl.with_name(name)),
+                        DeclarationKind::Value { name: None, decl: parsed } => sess
+                            .emit(Diagnostic::DeclarationWithoutName { at: *decl, ty: parsed.ty }),
+                        DeclarationKind::MaybeAnonymousStruct { .. } => return None,
                     })
-            }),
+                }),
+            ),
         }
     }
 }
@@ -549,59 +546,74 @@ impl fmt::Display for FunctionType<'_> {
 }
 
 impl<'a> MaybeUnnamedDeclaration<'a> {
-    fn into_decl(self) -> Result<Declaration<'a>, QualifiedType<'a>> {
+    fn with_name(self, name: Token<'a>) -> Declaration<'a> {
         let Self {
+            ty,
+            bitfield_width,
+            initialiser,
+            storage_class,
+            function_specifiers,
+        } = self;
+        Declaration {
             ty,
             name,
             bitfield_width,
             initialiser,
             storage_class,
             function_specifiers,
-        } = self;
-        match name {
-            Some(name) => Ok(Declaration {
-                ty,
-                name,
-                bitfield_width,
-                initialiser,
-                storage_class,
-                function_specifiers,
-            }),
-            None => Err(ty),
         }
     }
+}
+
+enum DeclarationKind<'a> {
+    Type(TypeDeclaration<'a>),
+    Value {
+        name: Option<Token<'a>>,
+        decl: MaybeUnnamedDeclaration<'a>,
+    },
+    MaybeAnonymousStruct {
+        name: Option<Token<'a>>,
+        decl: MaybeUnnamedDeclaration<'a>,
+    },
 }
 
 impl<'a> Declaration<'a> {
     gen fn from_parse_tree(
         sess: &'a Session<'a>,
         decl: &'a cst::Declaration<'a>,
-    ) -> MaybeUnnamedDeclaration<'a> {
+    ) -> DeclarationKind<'a> {
         let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
             parse_declaration_specifiers(sess, decl.specifiers);
 
-        if let Type::Struct(_) = ty.ty {
-            yield MaybeUnnamedDeclaration {
-                ty,
-                name: None,
-                bitfield_width: None,
-                initialiser: None,
-                storage_class,
-                function_specifiers,
+        if let Type::Struct(r#struct) = ty.ty {
+            yield DeclarationKind::Type(TypeDeclaration::Struct(r#struct));
+            if decl.init_declarator_list.is_empty()
+                && let Struct::Complete { name: None, .. } = r#struct
+            {
+                yield DeclarationKind::MaybeAnonymousStruct {
+                    name: None,
+                    decl: MaybeUnnamedDeclaration {
+                        ty,
+                        bitfield_width: None,
+                        initialiser: None,
+                        storage_class,
+                        function_specifiers,
+                    },
+                }
             }
         }
 
         for init_declarator in decl.init_declarator_list {
             let &InitDeclarator { declarator, bitfield_width, initialiser } = init_declarator;
             let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
-            yield MaybeUnnamedDeclaration {
+            let decl = MaybeUnnamedDeclaration {
                 ty,
-                name,
                 bitfield_width,
                 initialiser,
                 storage_class,
                 function_specifiers,
             };
+            yield DeclarationKind::Value { name, decl }
         }
     }
 }
@@ -643,16 +655,18 @@ impl<'a> Statement<'a> {
         item: &'a BlockItem<'a>,
     ) -> impl Iterator<Item = Self> + 'a {
         match item {
-            BlockItem::Declaration(decl) => Either::Left({
-                Declaration::from_parse_tree(sess, decl)
-                    .map(MaybeUnnamedDeclaration::into_decl)
-                    .map(|maybe_decl| match maybe_decl {
-                        Ok(decl) => Self::Declaration(decl),
-                        Err(ty) if let Type::Struct(ty) = ty.ty =>
-                            Self::TypeDeclaration(TypeDeclaration::Struct(ty)),
-                        Err(ty) => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl, ty }),
+            BlockItem::Declaration(decl) => Either::Left(
+                Declaration::from_parse_tree(sess, decl).filter_map(|parsed| {
+                    Some(match parsed {
+                        DeclarationKind::Type(type_decl) => Self::TypeDeclaration(type_decl),
+                        DeclarationKind::Value { name: Some(name), decl } =>
+                            Self::Declaration(decl.with_name(name)),
+                        DeclarationKind::Value { name: None, decl: parsed } => sess
+                            .emit(Diagnostic::DeclarationWithoutName { at: *decl, ty: parsed.ty }),
+                        DeclarationKind::MaybeAnonymousStruct { .. } => return None,
                     })
-            }),
+                }),
+            ),
             BlockItem::UnlabeledStatement(stmt) =>
                 Either::Right(once(Self::from_unlabeled_statement(sess, stmt))),
         }

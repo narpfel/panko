@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/struct/test_error_anonymous_struct_propagates_qualifiers.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to `const` expression
+    ╭─[panko/tests/cases/struct/test_error_anonymous_struct_propagates_qualifiers.c:14:5]
+    │
+ 14 │     p.y = 2;
+    │     ─┬─  
+    │      ╰─── this value is `const`
+────╯
+
+Error: cannot assign to `const` expression
+    ╭─[panko/tests/cases/struct/test_error_anonymous_struct_propagates_qualifiers.c:15:5]
+    │
+ 15 │     p.l = 3;
+    │     ─┬─  
+    │      ╰─── this value is `const`
+────╯

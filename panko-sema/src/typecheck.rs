@@ -820,9 +820,14 @@ fn typeck_struct_members<'a>(
             size += width;
             match name {
                 Some(name) => yield Member { name: name.slice(), ty, offset, kind },
-                None if let Type::Struct(Struct::Complete(s)) = ty.ty
-                    && s.name.is_none() =>
-                    todo!("anonymous struct member"),
+                None if let Type::Struct(Struct::Complete(complete)) = ty.ty
+                    && let Complete { name: None, id: _, kind: _, members } = complete =>
+                    for &member in members {
+                        let Member { name, ty: m_ty, offset: m_offset, kind } = member;
+                        let ty = m_ty.merge_qualifiers(&ty);
+                        let offset = offset + m_offset;
+                        yield Member { name, ty, offset, kind };
+                    },
                 None => match kind {
                     MemberKind::Normal =>
                         sess.emit(Diagnostic::MemberWithAbstractDeclarator { at: ty }),

@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/struct/test_error_anonymous_struct_propagates_qualifiers.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/struct/test_error_anonymous_struct_propagates_qualifiers.c"
+   (struct PropagatesQualifiers~0
+      (member x `int`)
+      (member ∅ `struct ∅~1 complete const`))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (declaration p~4 `struct PropagatesQualifiers~0 complete` (braced ∅))
+         (expression
+            (assign
+               (dot x
+                  (name p~4 `struct PropagatesQualifiers~0 complete`))
+               1))
+         (expression
+            (assign
+               (dot y
+                  (name p~4 `struct PropagatesQualifiers~0 complete`))
+               2))
+         (expression
+            (assign
+               (dot l
+                  (name p~4 `struct PropagatesQualifiers~0 complete`))
+               3)))))
+
+----- stderr -----

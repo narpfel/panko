@@ -1,0 +1,59 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_anonymous_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_anonymous_struct.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct WithAnonymousStruct~1
+      (member x `int`)
+      (member ∅ `struct ∅~2 complete`))
+   (struct PropagatesQualifiers~3
+      (member x `int`)
+      (member ∅ `struct ∅~4 complete const`))
+   (struct WithStructName~5
+      (member x `int`))
+   (struct WithMemberName~6
+      (member x `int`)
+      (member s `struct ∅~7 complete`))
+   (function-definition
+      main~8 `fn() -> int`
+      (compound-statement
+         (declaration value~10 `struct WithAnonymousStruct~1 complete`
+            (braced
+               (designation ((member x)) 42)
+               (designation ((member y)) 27)
+               (designation ((member l)) 123)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %ld\n")
+               (dot x
+                  (name value~10 `struct WithAnonymousStruct~1 complete`))
+               (dot y
+                  (name value~10 `struct WithAnonymousStruct~1 complete`))
+               (dot l
+                  (name value~10 `struct WithAnonymousStruct~1 complete`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu %zu\n")
+               (sizeof `struct WithAnonymousStruct~1 complete`)
+               (alignof `struct WithAnonymousStruct~1 complete`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu %zu\n")
+               (sizeof `struct WithStructName~5 complete`)
+               (alignof `struct WithStructName~5 complete`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu %zu\n")
+               (sizeof `struct WithMemberName~6 complete`)
+               (alignof `struct WithMemberName~6 complete`))))))
+
+----- stderr -----
