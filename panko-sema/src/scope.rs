@@ -3,6 +3,7 @@ use std::path::Path;
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
 use ariadne::Fmt as _;
+use itertools::Either;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
@@ -762,19 +763,26 @@ fn resolve_struct<'a>(scopes: &mut Scopes<'a>, r#struct: &Struct<'a>) -> Type<'a
 
 fn resolve_struct_members<'a>(
     scopes: &mut Scopes<'a>,
-    members: &'a [ast::Member<'a>],
+    members: &'a [Either<TypeDeclaration<'a>, ast::Member<'a>>],
 ) -> &'a [NoHashEq<Member<'a>>] {
     let sess = scopes.sess;
-    sess.alloc_slice_fill_iter(members.iter().map(|member| {
-        let ast::Member { name, bitfield_width, ty } = member;
-        let name = name.as_ref();
-        let bitfield_width = try {
-            BitfieldWidth {
-                width: resolve_expr(scopes, bitfield_width.as_ref()?),
-            }
-        };
-        let ty = resolve_ty(scopes, ty);
-        NoHashEq(Member { name, bitfield_width, ty })
+    sess.alloc_slice_collect(members.iter().filter_map(|member| match member {
+        Either::Left(type_decl) => {
+            resolve_type_declaration(scopes, type_decl, |_| ());
+            // TODO: don’t ignore
+            None
+        }
+        Either::Right(member) => {
+            let ast::Member { name, bitfield_width, ty } = member;
+            let name = name.as_ref();
+            let bitfield_width = try {
+                BitfieldWidth {
+                    width: resolve_expr(scopes, bitfield_width.as_ref()?),
+                }
+            };
+            let ty = resolve_ty(scopes, ty);
+            Some(NoHashEq(Member { name, bitfield_width, ty }))
+        }
     }))
 }
 

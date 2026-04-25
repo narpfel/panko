@@ -338,7 +338,7 @@ pub enum Struct<'a> {
     Complete {
         name: Option<Token<'a>>,
         kind: StructKind,
-        members: &'a [Member<'a>],
+        members: &'a [Either<TypeDeclaration<'a>, Member<'a>>],
     },
 }
 
@@ -353,8 +353,8 @@ impl<'a> Member<'a> {
     fn parse(
         sess: &'a Session<'a>,
         member: &'a cst::Declaration<'a>,
-    ) -> impl Iterator<Item = Self> {
-        Declaration::from_parse_tree(sess, member).filter_map(|member| match member {
+    ) -> impl Iterator<Item = Either<TypeDeclaration<'a>, Self>> {
+        Declaration::from_parse_tree(sess, member).map(|member| match member {
             DeclarationKind::Value { name, decl }
             | DeclarationKind::MaybeAnonymousStruct { name, decl } => {
                 let MaybeUnnamedDeclaration {
@@ -376,9 +376,9 @@ impl<'a> Member<'a> {
                 );
                 let loc = try { name?.loc() }.unwrap_or_else(|| ty.loc());
                 reject_function_specifiers(sess, &function_specifiers, loc, "struct member");
-                Some(Member { name, bitfield_width, ty })
+                Either::Right(Member { name, bitfield_width, ty })
             }
-            DeclarationKind::Type(_) => None,
+            DeclarationKind::Type(type_decl) => Either::Left(type_decl),
         })
     }
 }

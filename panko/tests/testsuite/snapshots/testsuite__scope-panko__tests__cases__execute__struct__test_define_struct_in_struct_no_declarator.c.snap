@@ -12,18 +12,18 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/struct/test_define_struct_in_struct_no_declarator.c"
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (struct ∅~1
+   (struct ∅~2
       (member x `int`))
    (function-definition
-      main~2 `fn() -> int`
+      main~3 `fn() -> int`
       (compound-statement
-         (declaration s~5 `struct NoDeclarator~4`
+         (declaration s~5 `struct NoDeclarator~1 complete`
             (braced
                (designation ((member y)) 2)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
                (dot y
-                  (name s~5 `struct NoDeclarator~4`)))))))
+                  (name s~5 `struct NoDeclarator~1 complete`)))))))
 
 ----- stderr -----
