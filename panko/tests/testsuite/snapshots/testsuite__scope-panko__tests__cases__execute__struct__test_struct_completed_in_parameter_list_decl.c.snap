@@ -19,6 +19,7 @@ exit_code: 0
             (sizeof
                (deref
                   (call (name f~3 `fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2 complete>`)
-                     nullptr)))))))
+                     nullptr))))
+         (declaration incomplete_here~4 `struct X~2 complete` (braced ∅)))))
 
 ----- stderr -----

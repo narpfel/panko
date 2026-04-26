@@ -15,6 +15,7 @@ exit_code: 0
       (main~0 `fn() -> int` (static main))
       (compound-statement
          (declaration external (f~3 `fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2 complete>` (static f)) ∅)
-         (expression (4 `unsigned long` @0)))))
+         (expression (4 `unsigned long` @0))
+         (definition (incomplete_here~4 `struct X~2 complete` @0) (braced ∅)))))
 
 ----- stderr -----

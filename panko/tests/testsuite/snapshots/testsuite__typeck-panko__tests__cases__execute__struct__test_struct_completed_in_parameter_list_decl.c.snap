@@ -21,6 +21,7 @@ exit_code: 0
                   (call `ptr<struct X~2 complete>`
                      (addressof `ptr<fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2 complete>>`
                         (f~3 `fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2 complete>`))
-                     (noop-type-conversion `ptr<struct X~2 complete>` (nullptr `nullptr_t`)))))))))
+                     (noop-type-conversion `ptr<struct X~2 complete>` (nullptr `nullptr_t`))))))
+         (definition incomplete_here~4 `struct X~2 complete` (braced ∅)))))
 
 ----- stderr -----
