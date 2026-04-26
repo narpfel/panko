@@ -716,6 +716,7 @@ fn resolve_function_ty<'a>(
 ) -> FunctionType<'a> {
     let ast::FunctionType { params, return_type, is_varargs } = *function_ty;
 
+    scopes.open_new_scope();
     let params = scopes.sess.alloc_slice_fill_iter(params.iter().map(
         |&ast::ParameterDeclaration { loc, ty, name }| ParameterDeclaration {
             loc,
@@ -723,6 +724,7 @@ fn resolve_function_ty<'a>(
             name,
         },
     ));
+    scopes.exit_scope();
     let return_type = scopes.sess.alloc(resolve_ty(scopes, return_type));
 
     // TODO: this makes a bunch of unnecessary allocations
