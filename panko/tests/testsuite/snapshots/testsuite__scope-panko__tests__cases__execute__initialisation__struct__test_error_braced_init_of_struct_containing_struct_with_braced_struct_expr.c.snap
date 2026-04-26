@@ -22,19 +22,11 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (struct Inner~0
-            (member x `int`)
-            (member y `int`)
-            (member z `int`))
          (declaration inner~4 `struct Inner~0 complete`
             (braced
                1
                2
                3))
-         (struct Outer~1
-            (member x `int`)
-            (member inner `struct Inner~0 complete`)
-            (member y `int`))
          (declaration outer~5 `struct Outer~1 complete`
             (braced
                42

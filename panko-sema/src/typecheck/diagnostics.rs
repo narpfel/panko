@@ -578,7 +578,7 @@ pub(super) enum Diagnostic<'a> {
         kind = kind.fg(Red),
     )]
     IncompleteOrNonObjectStructMember {
-        at: Token<'a>,
+        at: scope::Member<'a>,
         ty: QualifiedType<'a>,
     },
 
@@ -613,7 +613,7 @@ pub(super) enum Diagnostic<'a> {
         width(colour = Blue, label = "bitfield declaration here"),
     )]
     NonintegralBitfield {
-        at: Token<'a>,
+        at: scope::Member<'a>,
         ty: QualifiedType<'a>,
         width: TypedExpression<'a>,
     },
@@ -632,8 +632,22 @@ pub(super) enum Diagnostic<'a> {
         at: TypedExpression<'a>,
         width: u64,
         ty: QualifiedType<'a>,
-        name: Token<'a>,
+        name: scope::Member<'a>,
     },
+
+    #[error("zero-width bitfields must be unnamed")]
+    #[diagnostics(
+        at(colour = Red, label = "this bitfield must not have a name"),
+        width(colour = Blue, label = "declared as zero-width here"),
+    )]
+    NamedZeroWidthBitfield {
+        at: Token<'a>,
+        width: TypedExpression<'a>,
+    },
+
+    #[error("struct member declared with an abstract declarator")]
+    #[diagnostics(at(colour = Red, label = "in this declaration"))]
+    MemberWithAbstractDeclarator { at: QualifiedType<'a> },
 }
 
 fn describe_ty_completeness(ty: &QualifiedType) -> (&'static str, &'static str, &'static str) {

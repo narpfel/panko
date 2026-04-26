@@ -27,8 +27,6 @@ exit_code: 0
    (function-definition
       main~5 `fn() -> int`
       (compound-statement
-         (struct Struct~1
-            (member string `array<char; 11>`))
          (declaration value~7 `struct Struct~1 complete`
             (braced
                (string "0123456789")))

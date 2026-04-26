@@ -23,16 +23,10 @@ exit_code: 0
    (function-definition
       main~3 `fn() -> int`
       (compound-statement
-         (union IntInt~0
-            (member i `int`)
-            (member u `unsigned int`))
          (declaration int_int~5 `union IntInt~0 complete`
             (braced
                1
                2))
-         (union IntStruct~2
-            (member x `int`)
-            (member t `struct T~1 complete`))
          (declaration int_struct~6 `union IntStruct~2 complete`
             (braced
                1

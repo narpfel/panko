@@ -31,9 +31,6 @@ exit_code: 0
             (braced
                123
                (name t~3 `struct T~2 complete`)))
-         (struct U~4
-            (member x `int`)
-            (member t `struct T~2 complete`))
          (declaration p~6 `ptr<struct U~4 complete>` (addressof (name a~5 `struct U~4 complete`)))
          (expression
             (assign

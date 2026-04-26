@@ -14,9 +14,6 @@ exit_code: 0
    (struct T~0
       (member x `int`)
       (member y `int`))
-   (struct T~0
-      (member x `int`)
-      (member y `int`))
    (declaration static_struct~1 `struct T~0 complete`
       (braced
          42

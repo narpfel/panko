@@ -3,6 +3,7 @@ use std::path::Path;
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
 use ariadne::Fmt as _;
+use itertools::Either;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
@@ -31,6 +32,7 @@ use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
 use crate::scope::scopes::Scopes;
 use crate::ty;
+use crate::ty::Complete;
 use crate::ty::ParameterDeclaration;
 
 mod as_sexpr;
@@ -87,9 +89,27 @@ pub(crate) enum Diagnostic<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Member<'a> {
-    pub(crate) name: &'a Token<'a>,
+    pub(crate) name: Option<&'a Token<'a>>,
     pub(crate) bitfield_width: Option<BitfieldWidth<'a>>,
     pub(crate) ty: QualifiedType<'a>,
+}
+
+impl<'a> Member<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
+        let Self { name, bitfield_width: _, ty } = *self;
+        match name {
+            Some(name) => name.loc(),
+            None => ty.loc(),
+        }
+    }
+
+    pub(crate) fn slice(&self) -> String {
+        let Self { name, bitfield_width: _, ty } = self;
+        match name {
+            Some(name) => name.slice().to_string(),
+            None => format!("<unnamed struct member of type `{ty}`>"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -128,7 +148,7 @@ pub struct TranslationUnit<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum ExternalDeclaration<'a> {
-    StructDecl(Type<'a>),
+    StructDecl(Complete<'a, Scope>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -250,11 +270,12 @@ pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 
 // TODO: this is a hack required by the `variant_types` derive macro
 type MaybeExpr<'a> = Option<Expression<'a>>;
+type CompleteStruct<'a> = Complete<'a, Scope>;
 
 #[variant_types::derive_variant_types]
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
-    StructDecl(Type<'a>),
+    StructDecl(CompleteStruct<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(MaybeExpr<'a>),
@@ -742,18 +763,26 @@ fn resolve_struct<'a>(scopes: &mut Scopes<'a>, r#struct: &Struct<'a>) -> Type<'a
 
 fn resolve_struct_members<'a>(
     scopes: &mut Scopes<'a>,
-    members: &'a [ast::Member<'a>],
+    members: &'a [Either<TypeDeclaration<'a>, ast::Member<'a>>],
 ) -> &'a [NoHashEq<Member<'a>>] {
     let sess = scopes.sess;
-    sess.alloc_slice_fill_iter(members.iter().map(|member| {
-        let ast::Member { name, bitfield_width, ty } = member;
-        let bitfield_width = try {
-            BitfieldWidth {
-                width: resolve_expr(scopes, bitfield_width.as_ref()?),
-            }
-        };
-        let ty = resolve_ty(scopes, ty);
-        NoHashEq(Member { name, bitfield_width, ty })
+    sess.alloc_slice_collect(members.iter().filter_map(|member| match member {
+        Either::Left(type_decl) => {
+            resolve_type_declaration(scopes, type_decl, |_| ());
+            // TODO: don’t ignore
+            None
+        }
+        Either::Right(member) => {
+            let ast::Member { name, bitfield_width, ty } = member;
+            let name = name.as_ref();
+            let bitfield_width = try {
+                BitfieldWidth {
+                    width: resolve_expr(scopes, bitfield_width.as_ref()?),
+                }
+            };
+            let ty = resolve_ty(scopes, ty);
+            Some(NoHashEq(Member { name, bitfield_width, ty }))
+        }
     }))
 }
 
@@ -832,34 +861,25 @@ fn resolve_function_definition<'a>(
         )
         .expect("`return` is a keyword, so there are no types with that name");
 
-    let params = scopes.sess.alloc_slice_copy(
-        &params
-            .iter()
-            .enumerate()
-            .map(|(i, param)| {
-                let name = param.name.map_or_else(
-                    || {
-                        scopes
-                            .sess
-                            .alloc_str(&format!("{}.unnamed_parameter.{i}", name.slice()))
-                    },
-                    |name| name.slice(),
-                );
-                let maybe_reference = scopes.add(
-                    name,
-                    param.loc,
-                    param.ty,
-                    StorageDuration::Automatic,
-                    IsParameter::Yes,
-                    IsInGlobalScope::No,
-                );
-                match maybe_reference {
-                    Ok(reference) => reference,
-                    Err(_ty) => todo!("emit error"),
-                }
-            })
-            .collect_vec(),
-    );
+    let sess = scopes.sess;
+    let params = sess.alloc_slice_collect(params.iter().enumerate().map(|(i, param)| {
+        let name = param.name.map_or_else(
+            || sess.alloc_str(&format!("{}.unnamed_parameter.{i}", name.slice())),
+            |name| name.slice(),
+        );
+        let maybe_reference = scopes.add(
+            name,
+            param.loc,
+            param.ty,
+            StorageDuration::Automatic,
+            IsParameter::Yes,
+            IsInGlobalScope::No,
+        );
+        match maybe_reference {
+            Ok(reference) => reference,
+            Err(ty) => error_todo!(ty, "typedef redeclared as value in parameter list"),
+        }
+    }));
 
     let body = resolve_compound_statement(scopes, body, OpenNewScope::No);
     scopes.pop();
@@ -885,7 +905,7 @@ fn resolve_compound_statement<'a>(
     let stmts = CompoundStatement(
         scopes
             .sess
-            .alloc_slice_fill_iter(stmts.0.iter().map(|stmt| resolve_stmt(scopes, stmt))),
+            .alloc_slice_collect(stmts.0.iter().filter_map(|stmt| resolve_stmt(scopes, stmt))),
     );
     if let OpenNewScope::Yes = open_new_scope {
         scopes.exit_scope();
@@ -1054,10 +1074,24 @@ fn resolve_declaration<'a>(
     })
 }
 
-fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Statement<'a> {
-    match stmt {
-        ast::Statement::TypeDeclaration(TypeDeclaration::Struct(r#struct)) =>
-            Statement::StructDecl(resolve_struct(scopes, r#struct)),
+fn resolve_type_declaration<'a, T>(
+    scopes: &mut Scopes<'a>,
+    TypeDeclaration::Struct(r#struct): &TypeDeclaration<'a>,
+    f: impl FnOnce(Complete<'a, Scope>) -> T,
+) -> Option<T> {
+    let resolved_struct = resolve_struct(scopes, r#struct);
+    match (r#struct, resolved_struct) {
+        (Struct::Complete { .. }, Type::Struct(ty::Struct::Complete(complete))) =>
+            Some(f(complete)),
+        (Struct::Complete { .. }, _) => unreachable!(),
+        (Struct::Incomplete { .. }, _) => None,
+    }
+}
+
+fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Option<Statement<'a>> {
+    Some(match stmt {
+        ast::Statement::TypeDeclaration(type_decl) =>
+            resolve_type_declaration(scopes, type_decl, Statement::StructDecl)?,
         ast::Statement::Declaration(decl) => match resolve_declaration(scopes, decl) {
             DeclarationOrTypedef::Declaration(declaration) => Statement::Declaration(declaration),
             DeclarationOrTypedef::Typedef(typedef) => Statement::Typedef(typedef),
@@ -1071,7 +1105,7 @@ fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> State
             return_: *return_,
             expr: try { resolve_expr(scopes, expr.as_ref()?) },
         },
-    }
+    })
 }
 
 fn resolve_assoc<'a>(
@@ -1248,10 +1282,10 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
 fn resolve_external_declaration<'a>(
     scopes: &mut Scopes<'a>,
     decl: &ast::ExternalDeclaration<'a>,
-) -> ExternalDeclaration<'a> {
-    match decl {
-        ast::ExternalDeclaration::TypeDeclaration(TypeDeclaration::Struct(r#struct)) =>
-            ExternalDeclaration::StructDecl(resolve_struct(scopes, r#struct)),
+) -> Option<ExternalDeclaration<'a>> {
+    Some(match decl {
+        ast::ExternalDeclaration::TypeDeclaration(type_decl) =>
+            resolve_type_declaration(scopes, type_decl, ExternalDeclaration::StructDecl)?,
         ast::ExternalDeclaration::FunctionDefinition(def) =>
             resolve_function_definition(scopes, def),
         ast::ExternalDeclaration::Declaration(decl) => match resolve_declaration(scopes, decl) {
@@ -1262,7 +1296,7 @@ fn resolve_external_declaration<'a>(
                 ExternalDeclaration::Redeclared(redeclared),
         },
         ast::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
-    }
+    })
 }
 
 pub fn resolve_names<'a>(
@@ -1273,10 +1307,10 @@ pub fn resolve_names<'a>(
     let ast::TranslationUnit { filename, decls } = translation_unit;
     TranslationUnit {
         filename,
-        decls: sess.alloc_slice_fill_iter(
+        decls: sess.alloc_slice_collect(
             decls
                 .iter()
-                .map(|decl| resolve_external_declaration(scopes, decl)),
+                .filter_map(|decl| resolve_external_declaration(scopes, decl)),
         ),
     }
 }

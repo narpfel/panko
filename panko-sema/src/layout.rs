@@ -52,7 +52,7 @@ pub struct TranslationUnit<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub enum ExternalDeclaration<'a> {
-    StructDecl(Type<'a>),
+    StructDecl(Complete<'a, Layout>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -116,7 +116,7 @@ pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
 
 #[derive(Debug, Clone, Copy)]
 pub enum Statement<'a> {
-    StructDecl(Type<'a>),
+    StructDecl(Complete<'a, Layout>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<LayoutedExpression<'a>>),
@@ -293,6 +293,17 @@ fn layout_member<'a>(
     Member { name, ty, offset, kind }
 }
 
+fn layout_complete_struct<'a>(
+    stack: &mut Stack<'a>,
+    bump: &'a Bump,
+    complete: &Complete<'a, Typeck>,
+) -> Complete<'a, Layout> {
+    let Complete { name, id, kind, members } = *complete;
+    let members = members.iter().map(|m| layout_member(stack, bump, m));
+    let members = bump.alloc_slice_fill_iter(members);
+    Complete { name, id, kind, members }
+}
+
 fn layout_ty_unqual<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
@@ -322,13 +333,9 @@ fn layout_ty_unqual<'a>(
         ty::Type::Nullptr => Type::Nullptr,
         ty::Type::Struct(Struct::Incomplete { name, id, kind }) =>
             Type::Struct(Struct::Incomplete { name, id, kind }),
-        ty::Type::Struct(Struct::Complete(Complete { name, id, kind, members })) => {
-            let members = bump.alloc_slice_fill_iter(
-                members
-                    .iter()
-                    .map(|member| layout_member(stack, bump, member)),
-            );
-            Type::Struct(Struct::Complete(Complete { name, id, kind, members }))
+        ty::Type::Struct(Struct::Complete(complete)) => {
+            let complete = layout_complete_struct(stack, bump, &complete);
+            Type::Struct(Struct::Complete(complete))
         }
     }
 }
@@ -452,8 +459,8 @@ fn layout_statement<'a>(
     stmt: &typecheck::Statement<'a>,
 ) -> Statement<'a> {
     match stmt {
-        typecheck::Statement::StructDecl(ty) =>
-            Statement::StructDecl(layout_ty(stack, bump, ty.unqualified()).ty),
+        typecheck::Statement::StructDecl(complete) =>
+            Statement::StructDecl(layout_complete_struct(stack, bump, complete)),
         typecheck::Statement::Declaration(decl) =>
             Statement::Declaration(layout_declaration(stack, bump, decl)),
         typecheck::Statement::Typedef(typedef) => Statement::Typedef(*typedef),
@@ -691,9 +698,12 @@ pub fn layout<'a>(
         filename,
         decls: bump.alloc_slice_fill_iter(decls.iter().map(|decl| match decl {
             // TODO: declarations in the global scope should not get a stack
-            typecheck::ExternalDeclaration::StructDecl(ty) => ExternalDeclaration::StructDecl(
-                layout_ty(&mut Stack::default(), bump, ty.unqualified()).ty,
-            ),
+            typecheck::ExternalDeclaration::StructDecl(complete) =>
+                ExternalDeclaration::StructDecl(layout_complete_struct(
+                    &mut Stack::default(),
+                    bump,
+                    complete,
+                )),
             typecheck::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(layout_function_definition(bump, def)),
             typecheck::ExternalDeclaration::Declaration(decl) =>

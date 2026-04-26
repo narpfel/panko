@@ -44,20 +44,11 @@ exit_code: 0
                   (deref `struct Inner~1 complete` @void (p~6 `ptr<struct Inner~1 complete>` @0)))
                (member `int` @40 z +8
                   (deref `struct Inner~1 complete` @void (p~6 `ptr<struct Inner~1 complete>` @0)))))))
-   (struct Inner~1
-      (member x @0 `int`)
-      (member y @4 `int`)
-      (member z @8 `int`))
    (definition external (inner~7 `struct Inner~1 complete` (static inner))
       (braced
          (subobject +0 (1 `int` (static inner +0)))
          (subobject +4 (2 `int` (static inner +4)))
          (subobject +8 (3 `int` (static inner +8)))))
-   (struct Outer~3
-      (member x @0 `int`)
-      (member middle @4 `struct Middle~2 complete`)
-      (member inner @32 `struct Inner~1 complete`)
-      (member y @44 `int`))
    (definition external (outer~8 `struct Outer~3 complete` (static outer))
       (braced
          (subobject +0 (42 `int` (static outer +0)))
@@ -89,10 +80,6 @@ exit_code: 0
                   (member `struct Inner~1 complete` @8 inner2 +16
                      (member `struct Middle~2 complete` @void middle +4
                         (outer~8 `struct Outer~3 complete` (static outer)))))))
-         (struct Inner~1
-            (member x @0 `int`)
-            (member y @4 `int`)
-            (member z @8 `int`))
          (definition (inner_read_from_struct~11 `struct Inner~1 complete` @0)
             (member `struct Inner~1 complete` @0 inner2 +16
                (member `struct Middle~2 complete` @void middle +4

@@ -19,8 +19,6 @@ exit_code: 0
       (params
          value~4 `int`)
       (compound-statement
-         (struct Size4~1
-            (member x `int`))
          (declaration s~5 `struct Size4~1 complete`
             (braced
                (name value~4 `int`)))
@@ -30,8 +28,6 @@ exit_code: 0
    (function-definition
       make_size7~7 `fn() -> struct Size7~6 complete`
       (compound-statement
-         (struct Size7~6
-            (member string `array<char; 7>`))
          (declaration value~9 `struct Size7~6 complete`
             (braced
                (string "size 7")))
@@ -41,8 +37,6 @@ exit_code: 0
    (function-definition
       make_size8~11 `fn() -> struct Size8~10 complete`
       (compound-statement
-         (struct Size8~10
-            (member x `long`))
          (declaration value~13 `struct Size8~10 complete` (braced ∅))
          (expression
             (assign
@@ -57,13 +51,9 @@ exit_code: 0
       (params
          use_numbers~17 `bool`)
       (compound-statement
-         (struct Size11~14
-            (member string `array<char; 11>`))
          (declaration numbers~18 `struct Size11~14 complete`
             (braced
                (string "0123456789")))
-         (struct Size11~14
-            (member string `array<char; 11>`))
          (declaration letters~19 `struct Size11~14 complete`
             (braced
                (string "abcdefghij")))
@@ -81,9 +71,6 @@ exit_code: 0
          x~23 `long`
          y~24 `long`)
       (compound-statement
-         (struct Size16~20
-            (member x `long`)
-            (member y `long`))
          (declaration value~25 `struct Size16~20 complete`
             (braced
                (name x~23 `long`)
@@ -94,8 +81,6 @@ exit_code: 0
    (function-definition
       make_size27~27 `fn() -> struct Size27~26 complete`
       (compound-statement
-         (struct Size27~26
-            (member string `array<char; 27>`))
          (declaration value~29 `struct Size27~26 complete`
             (braced
                (string "abcdefghijklmnopqrstuvwxyz")))
@@ -103,8 +88,6 @@ exit_code: 0
    (function-definition
       main~30 `fn() -> int`
       (compound-statement
-         (struct Size4~1
-            (member x `int`))
          (declaration size4~32 `struct Size4~1 complete`
             (call (name make_size4~2 `fn(value: int) -> struct Size4~1 complete`)
                42))
@@ -113,24 +96,18 @@ exit_code: 0
                (string "%d\n")
                (dot x
                   (name size4~32 `struct Size4~1 complete`))))
-         (struct Size7~6
-            (member string `array<char; 7>`))
          (declaration size7~33 `struct Size7~6 complete` (call (name make_size7~7 `fn() -> struct Size7~6 complete`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%s\n")
                (dot string
                   (name size7~33 `struct Size7~6 complete`))))
-         (struct Size8~10
-            (member x `long`))
          (declaration size8~34 `struct Size8~10 complete` (call (name make_size8~11 `fn() -> struct Size8~10 complete`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%ld\n")
                (dot x
                   (name size8~34 `struct Size8~10 complete`))))
-         (struct Size11~14
-            (member string `array<char; 11>`))
          (declaration numbers~35 `struct Size11~14 complete`
             (call (name make_size11~15 `fn(use_numbers: bool) -> struct Size11~14 complete`)
                true))
@@ -144,9 +121,6 @@ exit_code: 0
                   (name numbers~35 `struct Size11~14 complete`))
                (dot string
                   (name letters~36 `struct Size11~14 complete`))))
-         (struct Size16~20
-            (member x `long`)
-            (member y `long`))
          (declaration size16~37 `struct Size16~20 complete`
             (call (name make_size16~21 `fn(x: long, y: long) -> struct Size16~20 complete`)
                42
@@ -158,8 +132,6 @@ exit_code: 0
                   (name size16~37 `struct Size16~20 complete`))
                (dot y
                   (name size16~37 `struct Size16~20 complete`))))
-         (struct Size27~26
-            (member string `array<char; 27>`))
          (declaration size27~38 `struct Size27~26 complete` (call (name make_size27~27 `fn() -> struct Size27~26 complete`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)

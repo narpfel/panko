@@ -70,26 +70,15 @@ exit_code: 0
                   (large~8 `struct Large~3 complete`))
                (member `long` z +16
                   (large~8 `struct Large~3 complete`))))))
-   (struct Small~1
-      (member x @0 `int`)
-      (member y @4 `int`))
    (definition external small~9 `struct Small~1 complete`
       (braced
          (subobject +0 (42 `int`))
          (subobject +4 (27 `int`))))
-   (struct Medium~2
-      (member x @0 `int`)
-      (member y @4 `int`)
-      (member z @8 `int`))
    (definition external medium~10 `struct Medium~2 complete`
       (braced
          (subobject +0 (1 `int`))
          (subobject +4 (2 `int`))
          (subobject +8 (3 `int`))))
-   (struct Large~3
-      (member x @0 `long`)
-      (member y @8 `long`)
-      (member z @16 `long`))
    (definition external large~11 `struct Large~3 complete`
       (braced
          (subobject +0 (4l `long`))

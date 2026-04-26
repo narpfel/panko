@@ -1,0 +1,66 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_define_struct_in_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_define_struct_in_struct.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct T~1
+      (member x @0 `int`)
+      (member inner @4 `struct Inner~2 complete`))
+   (function-definition external
+      main~3 `fn() -> int`
+      (compound-statement
+         (definition t~5 `struct T~1 complete` ∅)
+         (expression
+            (assign `int`
+               (member `int` x +0
+                  (t~5 `struct T~1 complete`))
+               (42 `int`)))
+         (definition inner~6 `struct Inner~2 complete`
+            (braced
+               (subobject +0 (27 `int`))))
+         (expression
+            (assign `struct Inner~2 complete`
+               (member `struct Inner~2 complete` inner +4
+                  (t~5 `struct T~1 complete`))
+               (inner~6 `struct Inner~2 complete`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (member `int` x +0
+                  (t~5 `struct T~1 complete`))
+               (member `int` y +0
+                  (member `struct Inner~2 complete` inner +4
+                     (t~5 `struct T~1 complete`)))))
+         (definition t2~7 `struct T~1 complete`
+            (braced
+               (subobject +0 (123 `int`))
+               (subobject +4 (456 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (member `int` x +0
+                  (t2~7 `struct T~1 complete`))
+               (member `int` y +0
+                  (member `struct Inner~2 complete` inner +4
+                     (t2~7 `struct T~1 complete`))))))))
+
+----- stderr -----

@@ -67,10 +67,6 @@ exit_code: 0
                      (addressof `ptr<array<char; 5>>` @16
                         (string `array<char; 5>` @void "%zu\n\0"))))
                (12 `unsigned long` @24)))
-         (struct T~1
-            (member c1 @0 `char`)
-            (member x @4 `int`)
-            (member c2 @8 `char`))
          (definition (value~6 `struct T~1 complete` @0) ∅)
          (expression
             (call `int` @12

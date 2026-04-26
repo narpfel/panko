@@ -46,8 +46,6 @@ exit_code: 0
                            (sign-extend `unsigned long` @48 (1024 `int` @56)))
                         (sign-extend `unsigned long` @48 (1024 `int` @56)))
                      (sign-extend `unsigned long` @48 (1024 `int` @56))))))
-         (struct Large~2
-            (member ten_gb @0 `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
          (definition (p~5 `ptr<struct Large~2 complete>` @0)
             (noop-type-conversion `ptr<struct Large~2 complete>` @0
                (call `ptr<void>` @0
@@ -56,8 +54,6 @@ exit_code: 0
                   (multiply `unsigned long` @16
                      (sign-extend `unsigned long` @16 (20 `int` @24))
                      (10737418240 `unsigned long` @32)))))
-         (struct Large~2
-            (member ten_gb @0 `array<array<array<array<char; 10>; 1024>; 1024>; 1024>`))
          (definition (third~6 `ptr<struct Large~2 complete>` @8)
             (ptr-add `ptr<struct Large~2 complete>` @8
                (p~5 `ptr<struct Large~2 complete>` @0)

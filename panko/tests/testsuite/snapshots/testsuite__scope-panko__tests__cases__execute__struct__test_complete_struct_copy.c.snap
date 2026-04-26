@@ -18,17 +18,11 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (struct T~1
-            (member xs `array<int; 3>`)
-            (member x `long`))
          (declaration t~4 `struct T~1 complete` ∅)
          (declaration xs~5 `ptr<typeof(`array<int; 3>`)>` (cast `ptr<typeof(`array<int; 3>`)>` (addressof (name t~4 `struct T~1 complete`))))
          (expression (assign (subscript (deref (name xs~5 `ptr<typeof(`array<int; 3>`)>`)) 0) 42))
          (expression (assign (subscript (deref (name xs~5 `ptr<typeof(`array<int; 3>`)>`)) 1) 27))
          (expression (assign (subscript (deref (name xs~5 `ptr<typeof(`array<int; 3>`)>`)) 2) 123))
-         (struct T~1
-            (member xs `array<int; 3>`)
-            (member x `long`))
          (declaration copy~6 `struct T~1 complete` (name t~4 `struct T~1 complete`))
          (expression (assign (name xs~5 `ptr<typeof(`array<int; 3>`)>`) (cast `ptr<typeof(`array<int; 3>`)>` (addressof (name copy~6 `struct T~1 complete`)))))
          (expression
@@ -38,9 +32,6 @@ exit_code: 0
                (subscript (deref (name xs~5 `ptr<typeof(`array<int; 3>`)>`)) 1)
                (subscript (deref (name xs~5 `ptr<typeof(`array<int; 3>`)>`)) 2)))
          (expression (assign (subscript (deref (name xs~5 `ptr<typeof(`array<int; 3>`)>`)) 1) 5))
-         (struct T~1
-            (member xs `array<int; 3>`)
-            (member x `long`))
          (declaration another_copy~7 `struct T~1 complete` ∅)
          (expression (assign (name another_copy~7 `struct T~1 complete`) (name copy~6 `struct T~1 complete`)))
          (expression (assign (name xs~5 `ptr<typeof(`array<int; 3>`)>`) (cast `ptr<typeof(`array<int; 3>`)>` (addressof (name another_copy~7 `struct T~1 complete`)))))

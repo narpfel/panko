@@ -1,0 +1,18 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/struct/test_error_struct_member_with_abstract_declarator.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/struct/test_error_struct_member_with_abstract_declarator.c"
+   (struct Invalid~0
+      (member ∅ `ptr<int>`)
+      (member ∅ `fn() -> int`)))
+
+----- stderr -----

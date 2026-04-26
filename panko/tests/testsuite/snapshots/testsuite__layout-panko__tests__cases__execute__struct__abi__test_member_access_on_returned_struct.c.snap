@@ -16,8 +16,6 @@ exit_code: 0
    (function-definition external stack-size=24
       (make_struct~1 `fn() -> struct Struct~0 complete` (static make_struct))
       (compound-statement
-         (struct Struct~0
-            (member value @0 `int`))
          (definition (value~3 `struct Struct~0 complete` @0)
             (braced
                (subobject +0 (42 `int` @0))))

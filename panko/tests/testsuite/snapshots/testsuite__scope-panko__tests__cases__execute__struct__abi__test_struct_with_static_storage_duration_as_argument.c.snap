@@ -55,26 +55,15 @@ exit_code: 0
                   (name large~8 `struct Large~3 complete`))
                (dot z
                   (name large~8 `struct Large~3 complete`))))))
-   (struct Small~1
-      (member x `int`)
-      (member y `int`))
    (declaration small~9 `struct Small~1 complete`
       (braced
          42
          27))
-   (struct Medium~2
-      (member x `int`)
-      (member y `int`)
-      (member z `int`))
    (declaration medium~10 `struct Medium~2 complete`
       (braced
          1
          2
          3))
-   (struct Large~3
-      (member x `long`)
-      (member y `long`)
-      (member z `long`))
    (declaration large~11 `struct Large~3 complete`
       (braced
          4l

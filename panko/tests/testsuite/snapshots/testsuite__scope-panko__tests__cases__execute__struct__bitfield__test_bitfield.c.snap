@@ -16,10 +16,6 @@ exit_code: 0
       (member x (bitfield-width 20) `unsigned int`)
       (member y (bitfield-width 20) `long`)
       (member z (bitfield-width 20) `unsigned int`))
-   (struct T~1
-      (member x (bitfield-width 20) `unsigned int`)
-      (member y (bitfield-width 20) `long`)
-      (member z (bitfield-width 20) `unsigned int`))
    (declaration static_t~2 `struct T~1 complete`
       (braced
          (designation ((member x)) 0x12345u)
@@ -113,10 +109,6 @@ exit_code: 0
                   (name u~7 `union ∅~6 complete`))
                (name uty~14 `int`)
                (name postincrement_result~15 `int`)))
-         (struct T~1
-            (member x (bitfield-width 20) `unsigned int`)
-            (member y (bitfield-width 20) `long`)
-            (member z (bitfield-width 20) `unsigned int`))
          (declaration ptr~19 `ptr<struct T~1 complete>`
             (addressof
                (dot t

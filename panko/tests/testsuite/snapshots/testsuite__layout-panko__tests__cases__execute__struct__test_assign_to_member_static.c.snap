@@ -26,20 +26,11 @@ exit_code: 0
       (member middle @4 `struct Middle~3 complete`)
       (member inner @32 `struct Inner~2 complete`)
       (member y @44 `int`))
-   (struct Inner~2
-      (member x @0 `int`)
-      (member y @4 `int`)
-      (member z @8 `int`))
    (definition external (inner~5 `struct Inner~2 complete` (static inner))
       (braced
          (subobject +0 (1 `int` (static inner +0)))
          (subobject +4 (2 `int` (static inner +4)))
          (subobject +8 (3 `int` (static inner +8)))))
-   (struct Outer~4
-      (member x @0 `int`)
-      (member middle @4 `struct Middle~3 complete`)
-      (member inner @32 `struct Inner~2 complete`)
-      (member y @44 `int`))
    (definition external (outer~6 `struct Outer~4 complete` (static outer))
       (braced
          (subobject +0 (42 `int` (static outer +0)))
@@ -105,10 +96,6 @@ exit_code: 0
                (member `int` @48 x +0
                   (outer~6 `struct Outer~4 complete` (static outer)))
                (4660 `int` @48)))
-         (struct Middle~3
-            (member y @0 `int`)
-            (member inner @4 `struct Inner~2 complete`)
-            (member inner2 @16 `struct Inner~2 complete`))
          (definition (new_middle~10 `struct Middle~3 complete` @48)
             (braced
                (subobject +0
@@ -230,10 +217,6 @@ exit_code: 0
                (member `int` @152 y +0
                   (member `struct Middle~3 complete` @void middle +4
                      (outer~6 `struct Outer~4 complete` (static outer))))))
-         (struct Middle~3
-            (member y @0 `int`)
-            (member inner @4 `struct Inner~2 complete`)
-            (member inner2 @16 `struct Inner~2 complete`))
          (definition (p~12 `ptr<struct Middle~3 complete>` @128)
             (addressof `ptr<struct Middle~3 complete>` @128
                (member `struct Middle~3 complete` @128 middle +4

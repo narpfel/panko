@@ -1,0 +1,39 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/struct/test_error_struct_member_with_abstract_declarator.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: struct member declared with an abstract declarator
+   ╭─[panko/tests/cases/struct/test_error_struct_member_with_abstract_declarator.c:2:5]
+   │
+ 2 │     int*;
+   │     ──┬─  
+   │       ╰─── in this declaration
+───╯
+
+Error: function struct member `<unnamed struct member of type `fn() -> int`>` of type `fn() -> int`
+   ╭─[panko/tests/cases/struct/test_error_struct_member_with_abstract_declarator.c:3:5]
+   │
+ 3 │     int();
+   │     ──┬──  
+   │       ╰──── `fn() -> int` is a function, but members must be of complete object type
+   │       │    
+   │       ╰──── in this member declaration
+───╯
+
+Error: struct member declared with an abstract declarator
+   ╭─[panko/tests/cases/struct/test_error_struct_member_with_abstract_declarator.c:3:5]
+   │
+ 3 │     int();
+   │     ──┬──  
+   │       ╰──── in this declaration
+───╯

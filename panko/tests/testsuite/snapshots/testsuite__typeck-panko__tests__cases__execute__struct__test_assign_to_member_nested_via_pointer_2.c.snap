@@ -31,9 +31,6 @@ exit_code: 0
             (braced
                (subobject +0 (123 `int`))
                (subobject +4 (t~3 `struct T~2 complete`))))
-         (struct U~4
-            (member x @0 `int`)
-            (member t @4 `struct T~2 complete`))
          (definition p~6 `ptr<struct U~4 complete>`
             (addressof `ptr<struct U~4 complete>`
                (a~5 `struct U~4 complete`)))

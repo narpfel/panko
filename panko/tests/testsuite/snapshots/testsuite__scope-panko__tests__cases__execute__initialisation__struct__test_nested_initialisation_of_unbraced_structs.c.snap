@@ -23,10 +23,6 @@ exit_code: 0
    (function-definition
       main~4 `fn() -> int`
       (compound-statement
-         (struct U~3
-            (member x `int`)
-            (member t `struct T~2 complete`)
-            (member y `int`))
          (declaration u~6 `struct U~3 complete`
             (braced
                1
@@ -48,9 +44,6 @@ exit_code: 0
                   (addressof (name u~6 `struct U~3 complete`))
                   (name ints~7 `array<int; ∅>`)
                   (sizeof (name u~6 `struct U~3 complete`)))))
-         (struct T~2
-            (member x `int`)
-            (member y `int`))
          (declaration ts~8 `array<struct T~2 complete; ∅>`
             (braced
                1

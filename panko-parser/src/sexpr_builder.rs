@@ -44,14 +44,6 @@ impl<'a> SExpr<'a> {
         }
     }
 
-    fn empty() -> Self {
-        Self {
-            name: "".into(),
-            params: vec![],
-            parenthesise_if_empty: false,
-        }
-    }
-
     pub fn display(value: &dyn fmt::Display) -> Self {
         Self {
             name: format!("`{value}`").into(),
@@ -336,13 +328,5 @@ impl AsSExpr for ! {
 impl AsSExpr for &Path {
     fn as_sexpr(&self) -> SExpr {
         SExpr::string(format!("{self:?}").cyan().bold().to_string())
-    }
-}
-
-pub struct Discard;
-
-impl AsSExpr for Discard {
-    fn as_sexpr(&self) -> SExpr {
-        SExpr::empty()
     }
 }

@@ -20,36 +20,21 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (struct Struct~0
-            (member member `int`)
-            (member another_member `char`))
          (declaration s~4 `struct Struct~0 complete`
             (braced
                (designation ((member member)) 42)
                (designation ((member this_does_not_exist)) 123)))
-         (struct Struct~0
-            (member member `int`)
-            (member another_member `char`))
          (declaration s2~5 `struct Struct~0 complete`
             (braced
                (designation ((member member) (member submember)) 0)))
-         (union Union~1
-            (member union_member `int`)
-            (member also_member `char`))
          (declaration u~6 `union Union~1 complete`
             (braced
                (designation ((member union_member)) 42)
                27))
-         (union Union~1
-            (member union_member `int`)
-            (member also_member `char`))
          (declaration u2~7 `union Union~1 complete`
             (braced
                (designation ((member union_member)) 42)
                (designation ((member also_does_not_exist)) 123)))
-         (union Union~1
-            (member union_member `int`)
-            (member also_member `char`))
          (declaration u3~8 `union Union~1 complete`
             (braced
                (designation ((member union_member) (member wrong) (member member)) 123))))))

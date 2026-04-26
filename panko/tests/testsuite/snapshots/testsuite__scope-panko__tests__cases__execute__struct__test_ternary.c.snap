@@ -27,13 +27,9 @@ exit_code: 0
    (function-definition
       main~5 `fn() -> int`
       (compound-statement
-         (struct Struct~1
-            (member x `long`))
          (declaration value~7 `struct Struct~1 complete`
             (braced
                42))
-         (struct Struct~1
-            (member x `long`))
          (declaration other~8 `struct Struct~1 complete`
             (braced
                27))

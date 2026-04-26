@@ -14,9 +14,6 @@ exit_code: 0
    (struct T~0
       (member x @0 `int`)
       (member y @4 `int`))
-   (struct T~0
-      (member x @0 `int`)
-      (member y @4 `int`))
    (definition external (static_struct~1 `struct T~0 complete` (static static_struct))
       (braced
          (subobject +0 (42 `int` (static static_struct +0)))

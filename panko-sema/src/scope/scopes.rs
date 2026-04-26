@@ -2,10 +2,12 @@ use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::collections::hash_map::OccupiedEntry;
 
+use itertools::Either;
 use panko_lex::Loc;
 use panko_parser::StructKind;
 use panko_parser::ast;
 use panko_parser::ast::Session;
+use panko_parser::ast::TypeDeclaration;
 use panko_parser::nonempty;
 
 use super::Id;
@@ -249,16 +251,14 @@ impl<'a> Scopes<'a> {
         &mut self,
         name: Option<&'a str>,
         kind: StructKind,
-        members: &'a [ast::Member<'a>],
+        members: &'a [Either<TypeDeclaration<'a>, ast::Member<'a>>],
     ) -> (Type<'a>, Option<Type<'a>>) {
         let previous_definition = try { self.lookup_struct(name?)? };
 
         // forward declare so that `name` is available in the body
         let forward_decl = try { self.lookup_or_add_struct(name?, kind) };
 
-        self.open_new_scope();
         let members = super::resolve_struct_members(self, members);
-        self.exit_scope();
 
         let id = match forward_decl {
             Some(Type::Struct(r#struct)) => r#struct.id(),

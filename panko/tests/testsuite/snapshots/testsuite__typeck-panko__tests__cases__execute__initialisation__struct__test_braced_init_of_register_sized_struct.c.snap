@@ -18,9 +18,6 @@ exit_code: 0
    (function-definition external
       main~2 `fn() -> int`
       (compound-statement
-         (struct T~1
-            (member c1 @0 `char`)
-            (member c2 @1 `char`))
          (definition t~4 `struct T~1 complete`
             (braced
                (subobject +0 (truncate `char` ('a' `int`)))))

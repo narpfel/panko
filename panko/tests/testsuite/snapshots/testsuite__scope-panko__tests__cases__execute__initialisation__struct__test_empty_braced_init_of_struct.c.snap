@@ -19,10 +19,6 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (struct T~1
-            (member x `int`)
-            (member cs `array<char; 4>`)
-            (member y `int`))
          (declaration zeroed_t~4 `struct T~1 complete` (braced ∅))
          (declaration zeros~5 `array<char; (sizeof (name zeroed_t~4 `struct T~1 complete`))>` (braced ∅))
          (return

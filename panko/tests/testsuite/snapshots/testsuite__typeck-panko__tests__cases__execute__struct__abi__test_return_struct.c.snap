@@ -19,8 +19,6 @@ exit_code: 0
       (params
          value~4 `int`)
       (compound-statement
-         (struct Size4~1
-            (member x @0 `int`))
          (definition s~5 `struct Size4~1 complete`
             (braced
                (subobject +0 (value~4 `int`))))
@@ -30,8 +28,6 @@ exit_code: 0
    (function-definition external
       make_size7~7 `fn() -> struct Size7~6 complete`
       (compound-statement
-         (struct Size7~6
-            (member string @0 `array<char; 7>`))
          (definition value~9 `struct Size7~6 complete`
             (braced
                (subobject +0 (string `array<char; 7>` "size 7\0"))))
@@ -41,8 +37,6 @@ exit_code: 0
    (function-definition external
       make_size8~11 `fn() -> struct Size8~10 complete`
       (compound-statement
-         (struct Size8~10
-            (member x @0 `long`))
          (definition value~13 `struct Size8~10 complete` (braced ∅))
          (expression
             (assign `long`
@@ -57,13 +51,9 @@ exit_code: 0
       (params
          use_numbers~17 `bool`)
       (compound-statement
-         (struct Size11~14
-            (member string @0 `array<char; 11>`))
          (definition numbers~18 `struct Size11~14 complete`
             (braced
                (subobject +0 (string `array<char; 11>` "0123456789\0"))))
-         (struct Size11~14
-            (member string @0 `array<char; 11>`))
          (definition letters~19 `struct Size11~14 complete`
             (braced
                (subobject +0 (string `array<char; 11>` "abcdefghij\0"))))
@@ -81,9 +71,6 @@ exit_code: 0
          x~23 `long`
          y~24 `long`)
       (compound-statement
-         (struct Size16~20
-            (member x @0 `long`)
-            (member y @8 `long`))
          (definition value~25 `struct Size16~20 complete`
             (braced
                (subobject +0 (x~23 `long`))
@@ -94,8 +81,6 @@ exit_code: 0
    (function-definition external
       make_size27~27 `fn() -> struct Size27~26 complete`
       (compound-statement
-         (struct Size27~26
-            (member string @0 `array<char; 27>`))
          (definition value~29 `struct Size27~26 complete`
             (braced
                (subobject +0 (string `array<char; 27>` "abcdefghijklmnopqrstuvwxyz\0"))))
@@ -103,8 +88,6 @@ exit_code: 0
    (function-definition external
       main~30 `fn() -> int`
       (compound-statement
-         (struct Size4~1
-            (member x @0 `int`))
          (definition size4~32 `struct Size4~1 complete`
             (call `struct Size4~1 complete`
                (addressof `ptr<fn(value: int) -> struct Size4~1 complete>`
@@ -120,8 +103,6 @@ exit_code: 0
                         (string `array<char; 4>` "%d\n\0"))))
                (member `int` x +0
                   (size4~32 `struct Size4~1 complete`))))
-         (struct Size7~6
-            (member string @0 `array<char; 7>`))
          (definition size7~33 `struct Size7~6 complete`
             (call `struct Size7~6 complete`
                (addressof `ptr<fn() -> struct Size7~6 complete>`
@@ -138,8 +119,6 @@ exit_code: 0
                   (addressof `ptr<array<char; 7>>`
                      (member `array<char; 7>` string +0
                         (size7~33 `struct Size7~6 complete`))))))
-         (struct Size8~10
-            (member x @0 `long`))
          (definition size8~34 `struct Size8~10 complete`
             (call `struct Size8~10 complete`
                (addressof `ptr<fn() -> struct Size8~10 complete>`
@@ -154,8 +133,6 @@ exit_code: 0
                         (string `array<char; 5>` "%ld\n\0"))))
                (member `long` x +0
                   (size8~34 `struct Size8~10 complete`))))
-         (struct Size11~14
-            (member string @0 `array<char; 11>`))
          (definition numbers~35 `struct Size11~14 complete`
             (call `struct Size11~14 complete`
                (addressof `ptr<fn(use_numbers: bool) -> struct Size11~14 complete>`
@@ -182,9 +159,6 @@ exit_code: 0
                   (addressof `ptr<array<char; 11>>`
                      (member `array<char; 11>` string +0
                         (letters~36 `struct Size11~14 complete`))))))
-         (struct Size16~20
-            (member x @0 `long`)
-            (member y @8 `long`))
          (definition size16~37 `struct Size16~20 complete`
             (call `struct Size16~20 complete`
                (addressof `ptr<fn(x: long, y: long) -> struct Size16~20 complete>`
@@ -203,8 +177,6 @@ exit_code: 0
                   (size16~37 `struct Size16~20 complete`))
                (member `long` y +8
                   (size16~37 `struct Size16~20 complete`))))
-         (struct Size27~26
-            (member string @0 `array<char; 27>`))
          (definition size27~38 `struct Size27~26 complete`
             (call `struct Size27~26 complete`
                (addressof `ptr<fn() -> struct Size27~26 complete>`

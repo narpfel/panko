@@ -1291,7 +1291,7 @@ fn parse_macro_arguments<'a>(
             true => matches!(token.kind, TokenKind::RParen),
             false => matches!(token.kind, TokenKind::RParen | TokenKind::Comma),
         });
-        arguments.push(sess.alloc_slice_copy(&argument.map(Replacement::Literal).collect_vec()));
+        arguments.push(sess.alloc_slice_collect(argument.map(Replacement::Literal)));
 
         match tokens.next() {
             Some(token) if token.kind == TokenKind::RParen => break,

@@ -1,0 +1,34 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_define_struct_in_struct_no_declarator.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_define_struct_in_struct_no_declarator.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (struct ∅~2
+      (member x @0 `int`))
+   (function-definition external stack-size=40
+      (main~3 `fn() -> int` (static main))
+      (compound-statement
+         (definition (s~5 `struct NoDeclarator~1 complete` @0)
+            (braced
+               (subobject +0 (2 `int` @0))))
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (member `int` @0 y +0
+                  (s~5 `struct NoDeclarator~1 complete` @0)))))))
+
+----- stderr -----

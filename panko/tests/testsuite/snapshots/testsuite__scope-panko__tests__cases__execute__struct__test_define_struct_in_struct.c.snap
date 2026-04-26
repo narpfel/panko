@@ -1,0 +1,56 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_define_struct_in_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_define_struct_in_struct.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct T~1
+      (member x `int`)
+      (member inner `struct Inner~2 complete`))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (declaration t~5 `struct T~1 complete` ∅)
+         (expression
+            (assign
+               (dot x
+                  (name t~5 `struct T~1 complete`))
+               42))
+         (declaration inner~6 `struct Inner~2 complete`
+            (braced
+               (designation ((member y)) 27)))
+         (expression
+            (assign
+               (dot inner
+                  (name t~5 `struct T~1 complete`))
+               (name inner~6 `struct Inner~2 complete`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (dot x
+                  (name t~5 `struct T~1 complete`))
+               (dot y
+                  (dot inner
+                     (name t~5 `struct T~1 complete`)))))
+         (declaration t2~7 `struct T~1 complete`
+            (braced
+               (designation ((member x)) 123)
+               (designation ((member inner) (member y)) 456)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (dot x
+                  (name t2~7 `struct T~1 complete`))
+               (dot y
+                  (dot inner
+                     (name t2~7 `struct T~1 complete`))))))))
+
+----- stderr -----

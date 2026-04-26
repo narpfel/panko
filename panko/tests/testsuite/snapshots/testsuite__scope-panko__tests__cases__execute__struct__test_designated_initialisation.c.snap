@@ -31,9 +31,6 @@ exit_code: 0
    (function-definition
       main~7 `fn() -> int`
       (compound-statement
-         (union IntInt~2
-            (member i `int`)
-            (member u `unsigned int`))
          (declaration int_int~9 `union IntInt~2 complete`
             (braced
                (designation ((member u)) 0xffff'ffff)))
@@ -53,9 +50,6 @@ exit_code: 0
                      (dot u
                         (name int_int~9 `union IntInt~2 complete`)))
                   0xffff'ffffLL)))
-         (union StructInt~4
-            (member t `struct T~3 complete`)
-            (member x `int`))
          (declaration struct_int~10 `union StructInt~4 complete`
             (braced
                (designation ((member t) (member x)) 0xffff'ffff)
@@ -86,10 +80,6 @@ exit_code: 0
                      (dot x
                         (name struct_int~10 `union StructInt~4 complete`)))
                   (negate 1LL))))
-         (struct ContainsUnion~5
-            (member x `int`)
-            (member struct_int `union StructInt~4 complete`)
-            (member y `int`))
          (declaration contains_union~11 `struct ContainsUnion~5 complete`
             (braced
                (designation ((member x)) 2)
@@ -132,10 +122,6 @@ exit_code: 0
                         (dot struct_int
                            (name contains_union~11 `struct ContainsUnion~5 complete`))))
                   (negate 1LL))))
-         (struct ContainsUnion~5
-            (member x `int`)
-            (member struct_int `union StructInt~4 complete`)
-            (member y `int`))
          (declaration contains_union_2~12 `struct ContainsUnion~5 complete`
             (braced
                2
@@ -153,8 +139,6 @@ exit_code: 0
                   (addressof (name contains_union~11 `struct ContainsUnion~5 complete`))
                   (addressof (name contains_union_2~12 `struct ContainsUnion~5 complete`))
                   (sizeof (name contains_union~11 `struct ContainsUnion~5 complete`)))))
-         (struct ContainsArray~6
-            (member ts `array<struct T~3 complete; 3>`))
          (declaration contains_array~13 `struct ContainsArray~6 complete`
             (braced
                (designation ((member ts) (index 0) (member x)) 42)

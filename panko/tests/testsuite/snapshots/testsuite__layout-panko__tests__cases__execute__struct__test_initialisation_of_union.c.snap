@@ -29,9 +29,6 @@ exit_code: 0
    (function-definition external stack-size=120
       (main~6 `fn() -> int` (static main))
       (compound-statement
-         (union IntInt~2
-            (member i @0 `int`)
-            (member u @0 `unsigned int`))
          (definition (int_int~8 `union IntInt~2 complete` @0)
             (braced
                (subobject +0 (negate `int` @0 (1 `int` @0)))))
@@ -63,9 +60,6 @@ exit_code: 0
                         (member `unsigned int` @0 u +0
                            (int_int~8 `union IntInt~2 complete` @0))))
                   (4294967295 `long long` @40))))
-         (union StructInt~4
-            (member t @0 `struct T~3 complete`)
-            (member x @0 `int`))
          (definition (struct_int~9 `union StructInt~4 complete` @4)
             (braced
                (subobject +0 (4294967295 `unsigned int` @4))
@@ -114,10 +108,6 @@ exit_code: 0
                         (member `int` @4 x +0
                            (struct_int~9 `union StructInt~4 complete` @4))))
                   (negate `long long` @48 (1 `long long` @48)))))
-         (struct ContainsUnion~5
-            (member x @0 `int`)
-            (member struct_int @4 `union StructInt~4 complete`)
-            (member y @12 `int`))
          (definition (contains_union~10 `struct ContainsUnion~5 complete` @12)
             (braced
                (subobject +0 (2 `int` @12))
@@ -183,10 +173,6 @@ exit_code: 0
                            (member `union StructInt~4 complete` @16 struct_int +4
                               (contains_union~10 `struct ContainsUnion~5 complete` @12)))))
                   (negate `long long` @64 (1 `long long` @64)))))
-         (struct ContainsUnion~5
-            (member x @0 `int`)
-            (member struct_int @4 `union StructInt~4 complete`)
-            (member y @12 `int`))
          (definition (contains_union_2~11 `struct ContainsUnion~5 complete` @28)
             (braced
                (subobject +0 (2 `int` @28))

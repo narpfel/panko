@@ -31,9 +31,6 @@ exit_code: 0
                (member `int` @0 x +0
                   (t~1 `struct T~0 complete` (static t)))
                (27 `int` @0)))
-         (struct U~2
-            (member x @0 `int`)
-            (member t @4 `struct T~0 complete`))
          (definition (p~6 `ptr<struct U~2 complete>` @0)
             (addressof `ptr<struct U~2 complete>` @0
                (a~3 `struct U~2 complete` (static a))))

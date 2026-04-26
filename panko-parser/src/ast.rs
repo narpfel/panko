@@ -34,7 +34,6 @@ use crate::TypeQualifierKind;
 use crate::TypeSpecifierQualifier::Qualifier;
 use crate::TypeSpecifierQualifier::Specifier;
 use crate::UnlabeledStatement;
-use crate::error_todo;
 use crate::sexpr_builder::AsSExpr as _;
 
 mod as_sexpr;
@@ -133,6 +132,15 @@ impl<'a> Session<'a> {
         self.bump.alloc_slice_fill_iter(value)
     }
 
+    pub fn alloc_slice_collect<I, T>(&self, values: I) -> &'a [T]
+    where
+        I: IntoIterator<Item = T>,
+        T: Copy,
+    {
+        let values = values.into_iter().collect_vec();
+        self.alloc_slice_copy(&values)
+    }
+
     pub fn alloc_slice_copy<T>(&self, values: &[T]) -> &'a [T]
     where
         T: Copy,
@@ -211,6 +219,15 @@ impl<'a> FromError<'a> for ExternalDeclaration<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+struct MaybeUnnamedDeclaration<'a> {
+    ty: QualifiedType<'a>,
+    bitfield_width: Option<Expression<'a>>,
+    initialiser: Option<Initialiser<'a>>,
+    storage_class: Option<cst::StorageClassSpecifier<'a>>,
+    function_specifiers: FunctionSpecifiers<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct Declaration<'a> {
     pub ty: QualifiedType<'a>,
     pub name: Token<'a>,
@@ -261,22 +278,6 @@ pub enum Type<'a> {
     },
     Struct(Struct<'a>),
     // TODO
-}
-
-impl<'a> Type<'a> {
-    fn as_type_decl(&self) -> Option<TypeDeclaration<'a>> {
-        match self {
-            Self::Arithmetic(_)
-            | Self::Pointer(_)
-            | Self::Array(_)
-            | Self::Function(_)
-            | Self::Void
-            | Self::Typedef(_)
-            | Self::Typeof { unqual: _, expr: _ }
-            | Self::TypeofTy { unqual: _, ty: _ } => None,
-            Type::Struct(r#struct) => Some(TypeDeclaration::Struct(*r#struct)),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -337,13 +338,13 @@ pub enum Struct<'a> {
     Complete {
         name: Option<Token<'a>>,
         kind: StructKind,
-        members: &'a [Member<'a>],
+        members: &'a [Either<TypeDeclaration<'a>, Member<'a>>],
     },
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Member<'a> {
-    pub name: Token<'a>,
+    pub name: Option<Token<'a>>,
     pub bitfield_width: Option<Expression<'a>>,
     pub ty: QualifiedType<'a>,
 }
@@ -352,43 +353,32 @@ impl<'a> Member<'a> {
     fn parse(
         sess: &'a Session<'a>,
         member: &'a cst::Declaration<'a>,
-    ) -> impl Iterator<Item = Self> {
-        let (type_decl, member_decls) = Declaration::from_parse_tree(sess, member);
-        assert_matches!(
-            type_decl,
-            None | Some(TypeDeclaration::Struct(Struct::Incomplete {
-                name: _,
-                kind: _,
-            })),
-            "TODO: structs in structs (also special-case unnamed structs here)",
-        );
-        member_decls.map(|member| {
-            let Declaration {
-                ty,
-                name,
-                bitfield_width,
-                initialiser,
-                storage_class,
-                function_specifiers,
-            } = member.unwrap_or_else(|ty| {
-                error_todo!(
+    ) -> impl Iterator<Item = Either<TypeDeclaration<'a>, Self>> {
+        Declaration::from_parse_tree(sess, member).map(|member| match member {
+            DeclarationKind::Value { name, decl }
+            | DeclarationKind::MaybeAnonymousStruct { name, decl } => {
+                let MaybeUnnamedDeclaration {
                     ty,
-                    "struct member declared with an abstract declarator \
-                    (TODO: bitfields can have abstract declarators)",
-                )
-            });
-            assert_matches!(
-                initialiser,
-                None,
-                "TODO: error message for initialiser in struct member",
-            );
-            assert_matches!(
-                storage_class,
-                None,
-                "TODO: error message for storage_class in struct member",
-            );
-            reject_function_specifiers(sess, &function_specifiers, name.loc(), "struct member");
-            Member { name, bitfield_width, ty }
+                    bitfield_width,
+                    initialiser,
+                    storage_class,
+                    function_specifiers,
+                } = decl;
+                assert_matches!(
+                    initialiser,
+                    None,
+                    "TODO: error message for initialiser in struct member",
+                );
+                assert_matches!(
+                    storage_class,
+                    None,
+                    "TODO: error message for storage_class in struct member",
+                );
+                let loc = try { name?.loc() }.unwrap_or_else(|| ty.loc());
+                reject_function_specifiers(sess, &function_specifiers, loc, "struct member");
+                Either::Right(Member { name, bitfield_width, ty })
+            }
+            DeclarationKind::Type(type_decl) => Either::Left(type_decl),
         })
     }
 }
@@ -425,16 +415,19 @@ impl<'a> ExternalDeclaration<'a> {
                 Either::Left(once(ExternalDeclaration::FunctionDefinition(
                     FunctionDefinition::from_parse_tree(sess, def),
                 ))),
-            cst::ExternalDeclaration::Declaration(decl) => Either::Right({
-                let (type_decl, value_decls) = Declaration::from_parse_tree(sess, decl);
-                type_decl
-                    .map(ExternalDeclaration::TypeDeclaration)
-                    .into_iter()
-                    .chain(value_decls.map(|parsed| match parsed {
-                        Ok(decl) => ExternalDeclaration::Declaration(decl),
-                        Err(ty) => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl, ty }),
-                    }))
-            }),
+            cst::ExternalDeclaration::Declaration(decl) => Either::Right(
+                Declaration::from_parse_tree(sess, decl).filter_map(|parsed| {
+                    Some(match parsed {
+                        DeclarationKind::Type(type_decl) =>
+                            ExternalDeclaration::TypeDeclaration(type_decl),
+                        DeclarationKind::Value { name: Some(name), decl } =>
+                            ExternalDeclaration::Declaration(decl.with_name(name)),
+                        DeclarationKind::Value { name: None, decl: parsed } => sess
+                            .emit(Diagnostic::DeclarationWithoutName { at: *decl, ty: parsed.ty }),
+                        DeclarationKind::MaybeAnonymousStruct { .. } => return None,
+                    })
+                }),
+            ),
         }
     }
 }
@@ -552,36 +545,76 @@ impl fmt::Display for FunctionType<'_> {
     }
 }
 
+impl<'a> MaybeUnnamedDeclaration<'a> {
+    fn with_name(self, name: Token<'a>) -> Declaration<'a> {
+        let Self {
+            ty,
+            bitfield_width,
+            initialiser,
+            storage_class,
+            function_specifiers,
+        } = self;
+        Declaration {
+            ty,
+            name,
+            bitfield_width,
+            initialiser,
+            storage_class,
+            function_specifiers,
+        }
+    }
+}
+
+enum DeclarationKind<'a> {
+    Type(TypeDeclaration<'a>),
+    Value {
+        name: Option<Token<'a>>,
+        decl: MaybeUnnamedDeclaration<'a>,
+    },
+    MaybeAnonymousStruct {
+        name: Option<Token<'a>>,
+        decl: MaybeUnnamedDeclaration<'a>,
+    },
+}
+
 impl<'a> Declaration<'a> {
-    fn from_parse_tree(
+    gen fn from_parse_tree(
         sess: &'a Session<'a>,
         decl: &'a cst::Declaration<'a>,
-    ) -> (
-        Option<TypeDeclaration<'a>>,
-        impl Iterator<Item = Result<Self, QualifiedType<'a>>> + 'a,
-    ) {
+    ) -> DeclarationKind<'a> {
         let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
             parse_declaration_specifiers(sess, decl.specifiers);
 
-        let type_decl = ty.ty.as_type_decl();
-        let value_decls = decl.init_declarator_list.iter().map(
-            move |&InitDeclarator { declarator, bitfield_width, initialiser }| {
-                let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
-                match name {
-                    Some(name) => Ok(Self {
+        if let Type::Struct(r#struct) = ty.ty {
+            yield DeclarationKind::Type(TypeDeclaration::Struct(r#struct));
+            if decl.init_declarator_list.is_empty()
+                && let Struct::Complete { name: None, .. } = r#struct
+            {
+                yield DeclarationKind::MaybeAnonymousStruct {
+                    name: None,
+                    decl: MaybeUnnamedDeclaration {
                         ty,
-                        name,
-                        bitfield_width,
-                        initialiser,
+                        bitfield_width: None,
+                        initialiser: None,
                         storage_class,
                         function_specifiers,
-                    }),
-                    None => Err(ty),
+                    },
                 }
-            },
-        );
+            }
+        }
 
-        (type_decl, value_decls)
+        for init_declarator in decl.init_declarator_list {
+            let &InitDeclarator { declarator, bitfield_width, initialiser } = init_declarator;
+            let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
+            let decl = MaybeUnnamedDeclaration {
+                ty,
+                bitfield_width,
+                initialiser,
+                storage_class,
+                function_specifiers,
+            };
+            yield DeclarationKind::Value { name, decl }
+        }
     }
 }
 
@@ -607,12 +640,10 @@ impl<'a> TypeQualifier<'a> {
 impl<'a> CompoundStatement<'a> {
     fn from_parse_tree(sess: &'a Session<'a>, stmt: &cst::CompoundStatement<'a>) -> Self {
         Self(
-            sess.alloc_slice_copy(
-                &stmt
-                    .0
+            sess.alloc_slice_collect(
+                stmt.0
                     .iter()
-                    .flat_map(|stmt| Statement::from_parse_tree(sess, stmt))
-                    .collect_vec(),
+                    .flat_map(|stmt| Statement::from_parse_tree(sess, stmt)),
             ),
         )
     }
@@ -624,16 +655,18 @@ impl<'a> Statement<'a> {
         item: &'a BlockItem<'a>,
     ) -> impl Iterator<Item = Self> + 'a {
         match item {
-            BlockItem::Declaration(decl) => Either::Left({
-                let (type_decl, value_decls) = Declaration::from_parse_tree(sess, decl);
-                type_decl
-                    .map(Self::TypeDeclaration)
-                    .into_iter()
-                    .chain(value_decls.map(|maybe_decl| match maybe_decl {
-                        Ok(decl) => Self::Declaration(decl),
-                        Err(ty) => sess.emit(Diagnostic::DeclarationWithoutName { at: *decl, ty }),
-                    }))
-            }),
+            BlockItem::Declaration(decl) => Either::Left(
+                Declaration::from_parse_tree(sess, decl).filter_map(|parsed| {
+                    Some(match parsed {
+                        DeclarationKind::Type(type_decl) => Self::TypeDeclaration(type_decl),
+                        DeclarationKind::Value { name: Some(name), decl } =>
+                            Self::Declaration(decl.with_name(name)),
+                        DeclarationKind::Value { name: None, decl: parsed } => sess
+                            .emit(Diagnostic::DeclarationWithoutName { at: *decl, ty: parsed.ty }),
+                        DeclarationKind::MaybeAnonymousStruct { .. } => return None,
+                    })
+                }),
+            ),
             BlockItem::UnlabeledStatement(stmt) =>
                 Either::Right(once(Self::from_unlabeled_statement(sess, stmt))),
         }
@@ -812,11 +845,10 @@ impl<'a> ParsedSpecifiers<'a> {
                 Type::Struct(Struct::Complete {
                     name,
                     kind,
-                    members: sess.alloc_slice_copy(
-                        &members
+                    members: sess.alloc_slice_collect(
+                        members
                             .iter()
-                            .flat_map(|member| Member::parse(sess, member))
-                            .collect_vec(),
+                            .flat_map(|member| Member::parse(sess, member)),
                     ),
                 }),
         }
@@ -1035,11 +1067,10 @@ pub(crate) fn from_parse_tree<'a>(
     let cst::TranslationUnit { filename, decls } = parse_tree;
     TranslationUnit {
         filename,
-        decls: sess.alloc_slice_copy(
-            &decls
+        decls: sess.alloc_slice_collect(
+            decls
                 .iter()
-                .flat_map(|decl| ExternalDeclaration::from_parse_tree(sess, decl))
-                .collect_vec(),
+                .flat_map(|decl| ExternalDeclaration::from_parse_tree(sess, decl)),
         ),
     }
 }

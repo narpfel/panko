@@ -1,0 +1,83 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_anonymous_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_anonymous_struct.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (struct WithAnonymousStruct~1
+      (member x @0 `int`)
+      (member y @8 `int`)
+      (member l @16 `long`))
+   (struct PropagatesQualifiers~4
+      (member x @0 `int`)
+      (member y @8 `int const`)
+      (member l @16 `long const`))
+   (struct WithStructName~7
+      (member x @0 `int`))
+   (struct WithMemberName~9
+      (member x @0 `int`)
+      (member s @8 `struct ∅~11 complete`))
+   (function-definition external stack-size=72
+      (main~12 `fn() -> int` (static main))
+      (compound-statement
+         (definition (value~14 `struct WithAnonymousStruct~1 complete` @0)
+            (braced
+               (subobject +0 (42 `int` @0))
+               (subobject +8 (27 `int` @8))
+               (subobject +16 (sign-extend `long` @16 (123 `int` @24)))))
+         (expression
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 11>>` @40
+                        (string `array<char; 11>` @void "%d %d %ld\n\0"))))
+               (member `int` @0 x +0
+                  (value~14 `struct WithAnonymousStruct~1 complete` @0))
+               (member `int` @8 y +8
+                  (value~14 `struct WithAnonymousStruct~1 complete` @0))
+               (member `long` @16 l +16
+                  (value~14 `struct WithAnonymousStruct~1 complete` @0))))
+         (expression
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 9>>` @40
+                        (string `array<char; 9>` @void "%zu %zu\n\0"))))
+               (24 `unsigned long` @48)
+               (8 `unsigned long` @56)))
+         (expression
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 9>>` @40
+                        (string `array<char; 9>` @void "%zu %zu\n\0"))))
+               (4 `unsigned long` @48)
+               (4 `unsigned long` @56)))
+         (expression
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 9>>` @40
+                        (string `array<char; 9>` @void "%zu %zu\n\0"))))
+               (24 `unsigned long` @48)
+               (8 `unsigned long` @56)))
+         (struct ∅~15
+            (member test_maybe_anonymous_struct_at_block_scope @0 `int`)))))
+
+----- stderr -----

@@ -29,10 +29,6 @@ exit_code: 0
    (function-definition external
       main~5 `fn() -> int`
       (compound-statement
-         (struct Inner~2
-            (member x @0 `int`)
-            (member y @4 `int`)
-            (member z @8 `int`))
          (definition inner~7 `struct Inner~2 complete`
             (braced
                (subobject +0 (1 `int`))
@@ -60,20 +56,11 @@ exit_code: 0
                      (member `int` z +8
                         (inner2~8 `struct Inner~2 complete`))
                      (30 `int`)))))
-         (struct Middle~3
-            (member y @0 `int`)
-            (member inner @4 `struct Inner~2 complete`)
-            (member inner2 @16 `struct Inner~2 complete`))
          (definition middle~10 `struct Middle~3 complete`
             (braced
                (subobject +0 (2742 `int`))
                (subobject +4 (inner~7 `struct Inner~2 complete`))
                (subobject +16 (inner2~8 `struct Inner~2 complete`))))
-         (struct Outer~4
-            (member x @0 `int`)
-            (member middle @4 `struct Middle~3 complete`)
-            (member inner @32 `struct Inner~2 complete`)
-            (member y @44 `int`))
          (definition outer~11 `struct Outer~4 complete`
             (braced
                (subobject +0 (42 `int`))
@@ -128,10 +115,6 @@ exit_code: 0
                (member `int` x +0
                   (outer~11 `struct Outer~4 complete`))
                (0x1234 `int`)))
-         (struct Middle~3
-            (member y @0 `int`)
-            (member inner @4 `struct Inner~2 complete`)
-            (member inner2 @16 `struct Inner~2 complete`))
          (definition new_middle~13 `struct Middle~3 complete`
             (braced
                (subobject +0
@@ -253,10 +236,6 @@ exit_code: 0
                (member `int` y +0
                   (member `struct Middle~3 complete` middle +4
                      (outer~11 `struct Outer~4 complete`)))))
-         (struct Middle~3
-            (member y @0 `int`)
-            (member inner @4 `struct Inner~2 complete`)
-            (member inner2 @16 `struct Inner~2 complete`))
          (definition p~15 `ptr<struct Middle~3 complete>`
             (addressof `ptr<struct Middle~3 complete>`
                (member `struct Middle~3 complete` middle +4

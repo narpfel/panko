@@ -19,10 +19,6 @@ exit_code: 0
    (function-definition
       make_struct~2 `fn() -> struct Struct~1 complete`
       (compound-statement
-         (struct Struct~1
-            (member x `int`)
-            (member y `int const`)
-            (member z `int`))
          (declaration value~4 `struct Struct~1 complete`
             (braced
                1
@@ -46,10 +42,6 @@ exit_code: 0
    (function-definition
       main~8 `fn() -> int`
       (compound-statement
-         (struct Struct~1
-            (member x `int`)
-            (member y `int const`)
-            (member z `int`))
          (declaration value~10 `struct Struct~1 complete` (call (name make_struct~2 `fn() -> struct Struct~1 complete`)))
          (expression
             (assign

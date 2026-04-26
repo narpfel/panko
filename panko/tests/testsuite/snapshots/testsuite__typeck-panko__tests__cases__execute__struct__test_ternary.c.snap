@@ -32,13 +32,9 @@ exit_code: 0
    (function-definition external
       main~5 `fn() -> int`
       (compound-statement
-         (struct Struct~1
-            (member x @0 `long`))
          (definition value~7 `struct Struct~1 complete`
             (braced
                (subobject +0 (sign-extend `long` (42 `int`)))))
-         (struct Struct~1
-            (member x @0 `long`))
          (definition other~8 `struct Struct~1 complete`
             (braced
                (subobject +0 (sign-extend `long` (27 `int`)))))

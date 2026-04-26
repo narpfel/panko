@@ -20,11 +20,6 @@ exit_code: 0
    (function-definition external stack-size=88
       (main~2 `fn() -> int` (static main))
       (compound-statement
-         (struct T~1
-            (member x @0 `int`)
-            (member cs @4 `array<char; 4>`)
-            (member y @8 `int`)
-            (member z @12 `int`))
          (definition (t~4 `struct T~1 complete` @0)
             (braced
                (subobject +0 (305419896 `int` @0))

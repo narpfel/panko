@@ -1,0 +1,117 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/bitfield/test_unnamed_bitfield_members.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/bitfield/test_unnamed_bitfield_members.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (struct ZeroLengthBool~1
+      (member x @0[0:2] `int`)
+      (member y @0[8:10] `int`))
+   (struct ZeroLengthChar~2
+      (member x @0[0:2] `int`)
+      (member y @0[8:10] `int`))
+   (struct ZeroLengthShort~3
+      (member x @0[0:2] `int`)
+      (member y @0[16:18] `int`))
+   (struct ZeroLengthInt~4
+      (member x @0[0:2] `int`)
+      (member y @4[0:2] `int`))
+   (struct ZeroLengthLong~5
+      (member x @0[0:2] `int`)
+      (member y @8[0:2] `int`))
+   (struct UnnamedNonzeroLengthBitfield~6
+      (member x @0[0:7] `int`)
+      (member y @0[14:21] `int`))
+   (function-definition external stack-size=40
+      (main~7 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (4 `unsigned long` @24)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (4 `unsigned long` @24)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (4 `unsigned long` @24)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (8 `unsigned long` @24)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (12 `unsigned long` @24)))
+         (union ∅~9
+            (member s @0 `struct UnnamedNonzeroLengthBitfield~6 complete`)
+            (member as_int @0 `int`))
+         (definition (u~11 `union ∅~10 complete` @0)
+            (braced
+               (subobject +0[0:7] (111 `int` @4))
+               (subobject +0[14:21] (119 `int` @4))))
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (4 `unsigned long` @24)))
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (4 `unsigned long` @24)))
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 9>>` @16
+                        (string `array<char; 9>` @void "0b%032b\n\0"))))
+               (member `int` @0 as_int +0
+                  (u~11 `union ∅~10 complete` @0)))))))
+
+----- stderr -----
