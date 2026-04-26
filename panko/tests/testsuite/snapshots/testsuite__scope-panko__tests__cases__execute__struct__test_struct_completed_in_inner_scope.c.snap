@@ -17,7 +17,7 @@ exit_code: 0
          (compound-statement
             (struct T~2
                (member x `int`)))
-         (declaration incomplete_here~3 `struct T~2 complete`
+         (declaration incomplete_here~3 `struct T~2`
             (braced
                (designation ((member x)) 42))))))
 

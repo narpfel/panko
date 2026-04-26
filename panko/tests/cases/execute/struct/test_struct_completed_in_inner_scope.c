@@ -1,5 +1,3 @@
-// [[known-bug]]
-
 int main() {
     struct T;
     {

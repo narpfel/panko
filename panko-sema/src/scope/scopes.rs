@@ -269,7 +269,7 @@ impl<'a> Scopes<'a> {
 
         if let Some(name) = name {
             // complete the forward declaration
-            self.struct_entry(name).unwrap().insert(ty);
+            self.lookup_struct_innermost(name).insert_entry(ty);
         }
 
         (ty, previous_definition)

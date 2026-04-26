@@ -7,18 +7,27 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/struct/test_struct_completed_in_inner_scope.c
 ---
-success: true
-exit_code: 0
+success: false
+exit_code: 1
 ----- stdout -----
-(translation-unit "panko/tests/cases/execute/struct/test_struct_completed_in_inner_scope.c"
-   (function-definition external stack-size=24
-      (main~0 `fn() -> int` (static main))
-      (compound-statement
-         (compound-statement
-            (struct T~2
-               (member x @0 `int`)))
-         (definition (incomplete_here~3 `struct T~2 complete` @0)
-            (braced
-               (subobject +0 (42 `int` @0)))))))
 
 ----- stderr -----
+Error: cannot declare variable `incomplete_here` with incomplete type `struct T~2`
+   ╭─[panko/tests/cases/execute/struct/test_struct_completed_in_inner_scope.c:9:14]
+   │
+ 9 │     struct T incomplete_here = {.x = 42};
+   │              ───────┬───────  
+   │                     ╰───────── declared here
+───╯
+
+Error: cannot initialise variable of incomplete type `struct T~2`
+   ╭─[panko/tests/cases/execute/struct/test_struct_completed_in_inner_scope.c:9:32]
+   │
+ 9 │     struct T incomplete_here = {.x = 42};
+   │     ────┬─── ───────┬───────   ────┬────  
+   │         │           │              ╰────── cannot initialise variable of incomplete type
+   │         │           │                     
+   │         │           ╰───────────────────── while defining this variable
+   │         │                                 
+   │         ╰───────────────────────────────── `struct T~2` is incomplete
+───╯
