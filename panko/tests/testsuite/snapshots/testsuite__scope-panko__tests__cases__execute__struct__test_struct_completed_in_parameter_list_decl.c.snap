@@ -14,11 +14,12 @@ exit_code: 0
    (function-definition
       main~0 `fn() -> int`
       (compound-statement
-         (declaration f~3 `fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2 complete>` ∅)
+         (declaration f~3 `fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2>` ∅)
          (expression
             (sizeof
                (deref
-                  (call (name f~3 `fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2 complete>`)
-                     nullptr)))))))
+                  (call (name f~3 `fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2>`)
+                     nullptr))))
+         (declaration incomplete_here~4 `struct X~2` (braced ∅)))))
 
 ----- stderr -----

@@ -1,0 +1,33 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_struct_completed_in_inner_scope.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot declare variable `incomplete_here` with incomplete type `struct T~2`
+   ╭─[panko/tests/cases/execute/struct/test_struct_completed_in_inner_scope.c:9:14]
+   │
+ 9 │     struct T incomplete_here = {.x = 42};
+   │              ───────┬───────  
+   │                     ╰───────── declared here
+───╯
+
+Error: cannot initialise variable of incomplete type `struct T~2`
+   ╭─[panko/tests/cases/execute/struct/test_struct_completed_in_inner_scope.c:9:32]
+   │
+ 9 │     struct T incomplete_here = {.x = 42};
+   │     ────┬─── ───────┬───────   ────┬────  
+   │         │           │              ╰────── cannot initialise variable of incomplete type
+   │         │           │                     
+   │         │           ╰───────────────────── while defining this variable
+   │         │                                 
+   │         ╰───────────────────────────────── `struct T~2` is incomplete
+───╯

@@ -7,14 +7,43 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/struct/test_struct_completed_in_parameter_list_decl.c
 ---
-success: true
-exit_code: 0
+success: false
+exit_code: 1
 ----- stdout -----
-(translation-unit "panko/tests/cases/execute/struct/test_struct_completed_in_parameter_list_decl.c"
-   (function-definition external stack-size=24
-      (main~0 `fn() -> int` (static main))
-      (compound-statement
-         (declaration external (f~3 `fn(p: ptr<struct X~2 complete>) -> ptr<struct X~2 complete>` (static f)) ∅)
-         (expression (4 `unsigned long` @0)))))
 
 ----- stderr -----
+Error: invalid application of `sizeof` to incomplete type `struct X~2`
+   ╭─[panko/tests/cases/execute/struct/test_struct_completed_in_parameter_list_decl.c:4:5]
+   │
+ 4 │     sizeof *f(nullptr);
+   │     ─────────┬────────  
+   │              ╰────────── in this expression
+───╯
+
+Error: dereference of pointer to incomplete type `struct X~2`
+   ╭─[panko/tests/cases/execute/struct/test_struct_completed_in_parameter_list_decl.c:4:13]
+   │
+ 4 │     sizeof *f(nullptr);
+   │             ─────┬────  
+   │                  ╰────── this expression has type `ptr<struct X~2>`
+───╯
+
+Error: cannot declare variable `incomplete_here` with incomplete type `struct X~2`
+   ╭─[panko/tests/cases/execute/struct/test_struct_completed_in_parameter_list_decl.c:7:14]
+   │
+ 7 │     struct X incomplete_here = {};
+   │              ───────┬───────  
+   │                     ╰───────── declared here
+───╯
+
+Error: cannot initialise variable of incomplete type `struct X~2`
+   ╭─[panko/tests/cases/execute/struct/test_struct_completed_in_parameter_list_decl.c:7:32]
+   │
+ 7 │     struct X incomplete_here = {};
+   │     ────┬─── ───────┬───────   ─┬  
+   │         │           │           ╰── cannot initialise variable of incomplete type
+   │         │           │              
+   │         │           ╰────────────── while defining this variable
+   │         │                          
+   │         ╰────────────────────────── `struct X~2` is incomplete
+───╯
