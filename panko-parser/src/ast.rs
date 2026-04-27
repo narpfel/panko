@@ -104,11 +104,11 @@ type Diagnostics<'a> = RefCell<Vec<&'a dyn Report>>;
 pub struct Session<'a> {
     bump: &'a Bump,
     diagnostics: Diagnostics<'a>,
-    treat_error_as_bug: bool,
+    treat_error_as_bug: Option<usize>,
 }
 
 impl<'a> Session<'a> {
-    pub fn new(bump: &'a Bump, treat_error_as_bug: bool) -> Self {
+    pub fn new(bump: &'a Bump, treat_error_as_bug: Option<usize>) -> Self {
         Self {
             bump,
             diagnostics: Diagnostics::default(),
@@ -158,7 +158,9 @@ impl<'a> Session<'a> {
         T: Report + 'a,
         Expr: FromError<'a>,
     {
-        if self.treat_error_as_bug {
+        if let Some(treat_error_as_bug) = self.treat_error_as_bug
+            && self.diagnostics.borrow().len() == treat_error_as_bug.saturating_sub(1)
+        {
             diagnostic.print();
             panic!("error treated as bug");
         }

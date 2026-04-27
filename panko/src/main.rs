@@ -59,9 +59,9 @@ struct Args {
     /// emit debug info
     #[arg(short('g'), long)]
     debug: bool,
-    /// panic whenever a diagnostic is emitted
-    #[arg(long)]
-    treat_error_as_bug: bool,
+    /// panic when the nth diagnostic is emitted (defaults to n = 1 if specified)
+    #[arg(long, default_missing_value = "1", require_equals = true, num_args = 0..=1, id = "N")]
+    treat_error_as_bug: Option<usize>,
     #[clap(flatten)]
     include_paths: IncludePaths,
     #[arg(long, default_value = "ld")]
@@ -72,7 +72,7 @@ struct CompileArgs {
     stop_after: Option<Step>,
     print: Vec<Step>,
     debug: bool,
-    treat_error_as_bug: bool,
+    treat_error_as_bug: Option<usize>,
     include_paths: IncludePaths,
 }
 
