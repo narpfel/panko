@@ -21,7 +21,14 @@ impl IncludePaths {
                 .unwrap()
                 .join("sysroot/include"),
         );
-        bracketed.extend(["/usr/local/include", "/usr/include"].map(PathBuf::from));
+        bracketed.extend(
+            [
+                "/usr/local/include",
+                "/usr/include",
+                "/usr/include/x86_64-linux-gnu",
+            ]
+            .map(PathBuf::from),
+        );
         Self { quoted, bracketed }
     }
 
