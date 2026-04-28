@@ -668,7 +668,12 @@ fn typeck_array_ty<'a>(
     let length = length
         .map(|length| {
             ArrayLength::try_from(sess.alloc(typeck_expression(sess, length, Context::Default)))
-                .unwrap_or_else(|_| todo!("variable length array"))
+                .unwrap_or_else(|expr| {
+                    error_todo!(
+                        expr,
+                        "constexpr evaluation not implemented or variable length array",
+                    )
+                })
         })
         .unwrap_or(ArrayLength::Unknown);
     let length = if let Some(reference) = reference
