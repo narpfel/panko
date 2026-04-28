@@ -1,5 +1,4 @@
 // [[nosnapshot]]
-// [[known-bug]]
 // [[return: 8]]
 
 #include <limits.h>

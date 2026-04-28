@@ -1340,6 +1340,7 @@ pub fn preprocess<'a>(
             ("__LINE__", Macro::Line),
             ("__FILE__", Macro::File),
             predefined_macro(sess, "__x86_64__", "1"),
+            predefined_macro(sess, "__STDC_VERSION__", "202311L"),
         ]),
         expander: Expander {
             sess,
