@@ -1318,6 +1318,16 @@ fn parse_macro_arguments<'a>(
     sess.alloc_slice_copy(&arguments)
 }
 
+fn predefined_macro<'a>(
+    sess: &Session<'a>,
+    name: &'a str,
+    expansion: &'a str,
+) -> (&'a str, Macro<'a>) {
+    let filename = alloc_path(sess.bump(), format!("<predefined macro `{name}`>"));
+    let replacement = sess.alloc_slice_collect(panko_lex::lex(sess.bump(), filename, expansion));
+    (name, Macro::Object { name, replacement })
+}
+
 pub fn preprocess<'a>(
     sess: &'a Session<'a>,
     tokens: panko_lex::TokenIter<'a>,
@@ -1326,7 +1336,11 @@ pub fn preprocess<'a>(
     Preprocessor {
         sess,
         tokens: nonempty::Vec::new(UnpreprocessedTokens::new(tokens)),
-        macros: HashMap::from_iter([("__LINE__", Macro::Line), ("__FILE__", Macro::File)]),
+        macros: HashMap::from_iter([
+            ("__LINE__", Macro::Line),
+            ("__FILE__", Macro::File),
+            predefined_macro(sess, "__x86_64__", "1"),
+        ]),
         expander: Expander {
             sess,
             hidden: HashSet::default(),
