@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_error_offsetof_bitfield.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_error_offsetof_bitfield.c"
+   (typedef ptrdiff_t `long`)
+   (typedef size_t `unsigned long`)
+   (typedef max_align_t `long long`)
+   (typedef wchar_t `int`)
+   (typedef nullptr_t `nullptr_t`)
+   (struct T~0
+      (member x @0[0:20] `int`)
+      (member y @4 `int`))
+   (function-definition external stack-size=24
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (expression (0 `unsigned long` @0))
+         (expression (4 `unsigned long` @0)))))
+
+----- stderr -----
