@@ -583,15 +583,14 @@ pub(super) enum Diagnostic<'a> {
     },
 
     #[error("member access on {kind} type `{ty}`")]
-    #[with(ty = at.ty)]
+    #[with(ty = ty.fg(Red))]
     #[diagnostics(
         at(colour = Red, label = "this expression has {kind} type `{ty}`"),
-        op(colour = Magenta),
         member(colour = Blue),
     )]
     MemberAccessOnIncompleteOrNonStruct {
-        at: TypedExpression<'a>,
-        op: Token<'a>,
+        at: Loc<'a>,
+        ty: QualifiedType<'a>,
         member: Token<'a>,
         kind: &'a str,
     },
@@ -648,6 +647,17 @@ pub(super) enum Diagnostic<'a> {
     #[error("struct member declared with an abstract declarator")]
     #[diagnostics(at(colour = Red, label = "in this declaration"))]
     MemberWithAbstractDeclarator { at: QualifiedType<'a> },
+
+    #[error("cannot apply `{offsetof}` to bitfield member `{at}`")]
+    #[diagnostics(
+        at(colour = Red, label = "`{at}` is a bitfield member of `{ty}`"),
+        ty(colour = Magenta),
+    )]
+    #[with(offsetof = "offsetof".fg(Blue))]
+    OffsetofBitfield {
+        at: Token<'a>,
+        ty: QualifiedType<'a>,
+    },
 }
 
 fn describe_ty_completeness(ty: &QualifiedType) -> (&'static str, &'static str, &'static str) {

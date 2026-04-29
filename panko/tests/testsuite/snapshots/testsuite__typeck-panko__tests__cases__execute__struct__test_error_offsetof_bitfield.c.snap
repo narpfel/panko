@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_error_offsetof_bitfield.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot apply `offsetof` to bitfield member `x`
+    ╭─[panko/tests/cases/execute/struct/test_error_offsetof_bitfield.c:11:24]
+    │
+ 11 │     offsetof(struct T, x);
+    │              ────────  ┬  
+    │                        ╰── `x` is a bitfield member of `struct T~0 complete`
+────╯

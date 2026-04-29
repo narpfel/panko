@@ -14,6 +14,6 @@ typedef typeof(nullptr) nullptr_t;
 
 #define NULL nullptr
 #define unreachable() ((void)*(char*)nullptr)
-// TODO: #define offsetof(__type, __member_designator)
+#define offsetof(__type, __member_designator) __builtin_offsetof(__type, __member_designator)
 
 #endif

@@ -1094,6 +1094,12 @@ pub enum Expression<'a> {
         op: MemberAccessOp<'a>,
         member: Token<'a>,
     },
+    BuiltinOffsetof {
+        builtin_offsetof: Token<'a>,
+        ty: QualifiedType<'a>,
+        member: Token<'a>,
+        close_paren: Token<'a>,
+    },
 }
 
 impl<'a> Expression<'a> {
@@ -1134,6 +1140,12 @@ impl<'a> Expression<'a> {
             Self::Comma { lhs, rhs } => lhs.loc().until(rhs.loc()),
             Self::Increment { operator, operand, fixity: _ } => operator.loc().until(operand.loc()),
             Self::MemberAccess { lhs, op: _, member } => lhs.loc().until(member.loc()),
+            Self::BuiltinOffsetof {
+                builtin_offsetof,
+                ty: _,
+                member: _,
+                close_paren,
+            } => builtin_offsetof.loc().until(close_paren.loc()),
         }
     }
 }

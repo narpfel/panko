@@ -332,6 +332,12 @@ impl AsSExpr for Expression<'_> {
                 .as_sexpr()
                 .inline_string(member.slice().to_owned())
                 .inherit(lhs),
+            Expression::BuiltinOffsetof {
+                builtin_offsetof: _,
+                ty,
+                member,
+                close_paren: _,
+            } => SExpr::new("offsetof").inherit(ty).inherit(member),
         }
     }
 }

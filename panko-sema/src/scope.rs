@@ -384,6 +384,12 @@ pub(crate) enum Expression<'a> {
         op: MemberAccessOp<'a>,
         member: Token<'a>,
     },
+    BuiltinOffsetof {
+        builtin_offsetof: Token<'a>,
+        ty: QualifiedType<'a>,
+        member: Token<'a>,
+        close_paren: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -595,6 +601,12 @@ impl<'a> Expression<'a> {
                 reference: _,
             } => operator.loc().until(operand.loc()),
             Expression::MemberAccess { lhs, op: _, member } => lhs.loc().until(member.loc()),
+            Expression::BuiltinOffsetof {
+                builtin_offsetof,
+                ty: _,
+                member: _,
+                close_paren,
+            } => builtin_offsetof.loc().until(close_paren.loc()),
         }
     }
 }
@@ -1277,6 +1289,17 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             lhs: scopes.sess.alloc(resolve_expr(scopes, lhs)),
             op: *op,
             member: *member,
+        },
+        ast::Expression::BuiltinOffsetof {
+            builtin_offsetof,
+            ty,
+            member,
+            close_paren,
+        } => Expression::BuiltinOffsetof {
+            builtin_offsetof: *builtin_offsetof,
+            ty: resolve_ty(scopes, ty),
+            member: *member,
+            close_paren: *close_paren,
         },
     }
 }

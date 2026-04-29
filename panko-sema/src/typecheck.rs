@@ -5,6 +5,7 @@ use std::hash::Hash;
 use std::path::Path;
 
 use indexmap::IndexMap;
+use itertools::Either;
 use itertools::EitherOrBoth;
 use itertools::Itertools as _;
 use panko_lex::Integer;
@@ -2057,6 +2058,38 @@ fn desugar_postfix_increment<'a>(
     }
 }
 
+fn lookup_member<'a, Error>(
+    sess: &Session<'a>,
+    ty: &QualifiedType<'a>,
+    member: &Token<'a>,
+    loc: impl FnOnce() -> Loc<'a>,
+) -> Either<Member<'a, Typeck>, Error>
+where
+    Error: FromError<'a>,
+{
+    let name = member.slice();
+    match ty.ty {
+        Type::Struct(Struct::Complete(Complete { name: _, id: _, kind: _, members })) =>
+            Either::Left(
+                members
+                    .iter()
+                    .find(|member| member.name == name)
+                    .copied()
+                    .unwrap_or_else(|| error_todo!(loc(), "no such member {}", name)),
+            ),
+        _ => Either::Right(sess.emit(Diagnostic::MemberAccessOnIncompleteOrNonStruct {
+            at: loc(),
+            ty: *ty,
+            member: *member,
+            kind: match ty.ty {
+                Type::Struct(r#struct) =>
+                    sess.alloc_str(&format!("incomplete {}", r#struct.kind())),
+                _ => "non-struct-or-union",
+            },
+        })),
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 enum Context {
     Default,
@@ -2560,34 +2593,37 @@ fn typeck_expression<'a>(
                 },
             };
             let lhs = sess.alloc(typeck_expression(sess, lhs, Context::Default));
-            let name = member_tok.slice();
-            let member = match lhs.ty.ty {
-                Type::Struct(Struct::Complete(Complete { name: _, id: _, kind: _, members })) =>
-                    members
-                        .iter()
-                        .find(|member| member.name == name)
-                        .copied()
-                        .unwrap_or_else(|| error_todo!(lhs, "no such member {}", name)),
-                ty =>
-                    return sess.emit(Diagnostic::MemberAccessOnIncompleteOrNonStruct {
-                        at: *lhs,
-                        op: token,
-                        member: *member_tok,
-                        kind: match ty {
-                            Type::Struct(r#struct) =>
-                                sess.alloc_str(&format!("incomplete {}", r#struct.kind())),
-                            _ => "non-struct-or-union",
-                        },
-                    }),
-            };
-            TypedExpression {
-                ty: member.ty.merge_qualifiers(&lhs.ty),
-                expr: Expression::MemberAccess {
-                    lhs,
-                    member,
-                    member_loc: member_tok.loc(),
-                },
-            }
+            lookup_member(sess, &lhs.ty, member_tok, || lhs.loc())
+                .map_left(|member| TypedExpression {
+                    ty: member.ty.merge_qualifiers(&lhs.ty),
+                    expr: Expression::MemberAccess {
+                        lhs,
+                        member,
+                        member_loc: member_tok.loc(),
+                    },
+                })
+                .into_inner()
+        }
+        scope::Expression::BuiltinOffsetof {
+            builtin_offsetof,
+            ty,
+            member: member_tok,
+            close_paren: _,
+        } => {
+            let ty = typeck_ty(sess, *ty, IsParameter::No);
+            let expr = lookup_member(sess, &ty, member_tok, || ty.loc())
+                .map_left(|member| match member.kind {
+                    MemberKind::Normal => Expression::Integer {
+                        value: member.offset,
+                        // TODO: this shows `__builtin_offsetof` as the `Integer` expr’s value in
+                        // the typeck sexpr repr
+                        token: *builtin_offsetof,
+                    },
+                    MemberKind::Bitfield(_) =>
+                        sess.emit(Diagnostic::OffsetofBitfield { at: *member_tok, ty }),
+                })
+                .into_inner();
+            TypedExpression { ty: Type::size_t().unqualified(), expr }
         }
     };
 

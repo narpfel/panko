@@ -503,5 +503,6 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
             }),
         Expression::MemberAccess { lhs: _, op: _, member: _ } =>
             sess.emit(Diagnostic::InvalidExpression { at: *expr, kind: "member access" }),
+        Expression::BuiltinOffsetof { .. } => unreachable!("starts with an identifier"),
     }
 }

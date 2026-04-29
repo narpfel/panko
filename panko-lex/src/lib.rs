@@ -171,7 +171,8 @@ impl<'a> Token<'a> {
             | TokenKind::Generic
             | TokenKind::Imaginary
             | TokenKind::Noreturn
-            | TokenKind::Lengthof => true,
+            | TokenKind::Lengthof
+            | TokenKind::BuiltinOffsetof => true,
         }
     }
 }
@@ -766,6 +767,9 @@ pub enum TokenKind {
 
     #[token("_Lengthof")]
     Lengthof,
+
+    #[token("__builtin_offsetof")]
+    BuiltinOffsetof,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]

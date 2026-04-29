@@ -135,6 +135,8 @@ extern {
         "false" => Token { kind: TokenKind::False, .. },
         "nullptr" => Token { kind: TokenKind::Nullptr, .. },
 
+        "__builtin_offsetof" => Token { kind: TokenKind::BuiltinOffsetof, .. },
+
         Identifier => Token { kind: TokenKind::Identifier, .. },
         TypedefName => Token { kind: TokenKind::TypeIdentifier, .. },
         Integer => Token { kind: TokenKind::Integer(_), .. },
@@ -695,6 +697,10 @@ PrimaryExpression: ast::Expression<'a> = {
         <selector:Bump<AssignmentExpression>> ","
         <assocs:GenericAssocList>
         <close_paren:")"> => ast::Expression::Generic { <> },
+    <builtin_offsetof:"__builtin_offsetof"> "("
+        <ty:TypeName> ","
+        <member:AnyIdentifier>
+        <close_paren:")"> => ast::Expression::BuiltinOffsetof { <> },
 }
 
 GenericAssocList: ast::GenericAssocList<'a> = {

@@ -1,0 +1,43 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_offsetof.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_offsetof.c"
+   (typedef ptrdiff_t `long`)
+   (typedef size_t `unsigned long`)
+   (typedef max_align_t `long long`)
+   (typedef wchar_t `int`)
+   (typedef nullptr_t `nullptr_t`)
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct T~1
+      (member x @0 `int`)
+      (member y @8 `int`)
+      (member l @16 `long`)
+      (member nested_struct @24 `struct ∅~5 complete`))
+   (typedef TypeName `struct T~1 complete`)
+   (function-definition external
+      main~6 `fn() -> int`
+      (compound-statement
+         (definition t~8 `struct T~1 complete` ∅)
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 17>>`
+                        (string `array<char; 17>` "%zu %zu %zu %zu\n\0"))))
+               (__builtin_offsetof `unsigned long`)
+               (__builtin_offsetof `unsigned long`)
+               (__builtin_offsetof `unsigned long`)
+               (__builtin_offsetof `unsigned long`))))))
+
+----- stderr -----

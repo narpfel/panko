@@ -1,0 +1,43 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_offsetof.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_offsetof.c"
+   (typedef ptrdiff_t `long`)
+   (typedef size_t `unsigned long`)
+   (typedef max_align_t `long long`)
+   (typedef wchar_t `int`)
+   (typedef nullptr_t `nullptr_t`)
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (struct T~1
+      (member x @0 `int`)
+      (member y @8 `int`)
+      (member l @16 `long`)
+      (member nested_struct @24 `struct ∅~5 complete`))
+   (typedef TypeName `struct T~1 complete`)
+   (function-definition external stack-size=104
+      (main~6 `fn() -> int` (static main))
+      (compound-statement
+         (definition (t~8 `struct T~1 complete` @0) ∅)
+         (expression
+            (call `int` @32
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 17>>` @48
+                        (string `array<char; 17>` @void "%zu %zu %zu %zu\n\0"))))
+               (0 `unsigned long` @56)
+               (8 `unsigned long` @64)
+               (16 `unsigned long` @72)
+               (24 `unsigned long` @80))))))
+
+----- stderr -----

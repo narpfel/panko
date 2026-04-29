@@ -24,7 +24,7 @@ Error: member access on incomplete struct type `struct Incomplete~2`
    ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_or_non_struct.c:3:5]
    │
  3 │     value.member;
-   │     ──┬─────────  
+   │     ──┬── ──────  
    │       │           
    │       ╰─────────── this expression has incomplete struct type `struct Incomplete~2`
 ───╯
@@ -50,7 +50,7 @@ Error: member access on non-struct-or-union type `int`
    ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_or_non_struct.c:7:5]
    │
  7 │     x.member;
-   │     ┬───────  
+   │     ┬ ──────  
    │     │         
    │     ╰───────── this expression has non-struct-or-union type `int`
 ───╯
@@ -59,7 +59,7 @@ Error: member access on non-struct-or-union type `bool`
    ╭─[panko/tests/cases/struct/test_error_member_access_on_incomplete_or_non_struct.c:8:5]
    │
  8 │     true.member;
-   │     ──┬────────  
+   │     ──┬─ ──────  
    │       │          
    │       ╰────────── this expression has non-struct-or-union type `bool`
 ───╯
