@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/struct/test_error_offsetof.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: member access on non-struct-or-union type `int`
+   ╭─[panko/tests/cases/struct/test_error_offsetof.c:4:14]
+   │
+ 4 │     offsetof(int, n);
+   │              ─┬─  ─  
+   │               │      
+   │               ╰────── this expression has non-struct-or-union type `int`
+───╯
+
+Error: member access on incomplete struct type `struct Incomplete~2`
+   ╭─[panko/tests/cases/struct/test_error_offsetof.c:5:14]
+   │
+ 5 │     offsetof(struct Incomplete, member);
+   │              ────────┬────────  ──────  
+   │                      │                  
+   │                      ╰────────────────── this expression has incomplete struct type `struct Incomplete~2`
+───╯
