@@ -2607,16 +2607,20 @@ fn typeck_expression<'a>(
         scope::Expression::BuiltinOffsetof {
             builtin_offsetof,
             ty,
-            member,
+            member: member_tok,
             close_paren: _,
         } => {
             let ty = typeck_ty(sess, *ty, IsParameter::No);
-            let expr = lookup_member(sess, &ty, member, || ty.loc())
-                .map_left(|member| Expression::Integer {
-                    value: member.offset,
-                    // TODO: this shows `__builtin_offsetof` as the `Integer` expr’s value in the
-                    // typeck sexpr repr
-                    token: *builtin_offsetof,
+            let expr = lookup_member(sess, &ty, member_tok, || ty.loc())
+                .map_left(|member| match member.kind {
+                    MemberKind::Normal => Expression::Integer {
+                        value: member.offset,
+                        // TODO: this shows `__builtin_offsetof` as the `Integer` expr’s value in
+                        // the typeck sexpr repr
+                        token: *builtin_offsetof,
+                    },
+                    MemberKind::Bitfield(_) =>
+                        sess.emit(Diagnostic::OffsetofBitfield { at: *member_tok, ty }),
                 })
                 .into_inner();
             TypedExpression { ty: Type::size_t().unqualified(), expr }

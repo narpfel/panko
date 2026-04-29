@@ -1,5 +1,3 @@
-// [[known-bug]]
-
 #include <stddef.h>
 
 struct T {
