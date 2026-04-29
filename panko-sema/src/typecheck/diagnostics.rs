@@ -583,13 +583,14 @@ pub(super) enum Diagnostic<'a> {
     },
 
     #[error("member access on {kind} type `{ty}`")]
-    #[with(ty = at.ty)]
+    #[with(ty = ty.fg(Red))]
     #[diagnostics(
         at(colour = Red, label = "this expression has {kind} type `{ty}`"),
         member(colour = Blue),
     )]
     MemberAccessOnIncompleteOrNonStruct {
-        at: TypedExpression<'a>,
+        at: Loc<'a>,
+        ty: QualifiedType<'a>,
         member: Token<'a>,
         kind: &'a str,
     },
