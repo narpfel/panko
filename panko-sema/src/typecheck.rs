@@ -2614,6 +2614,8 @@ fn typeck_expression<'a>(
             let expr = lookup_member(sess, &ty, member, || ty.loc())
                 .map_left(|member| Expression::Integer {
                     value: member.offset,
+                    // TODO: this shows `__builtin_offsetof` as the `Integer` expr’s value in the
+                    // typeck sexpr repr
                     token: *builtin_offsetof,
                 })
                 .into_inner();
