@@ -2571,7 +2571,6 @@ fn typeck_expression<'a>(
                 ty =>
                     return sess.emit(Diagnostic::MemberAccessOnIncompleteOrNonStruct {
                         at: *lhs,
-                        op: token,
                         member: *member_tok,
                         kind: match ty {
                             Type::Struct(r#struct) =>

@@ -586,12 +586,10 @@ pub(super) enum Diagnostic<'a> {
     #[with(ty = at.ty)]
     #[diagnostics(
         at(colour = Red, label = "this expression has {kind} type `{ty}`"),
-        op(colour = Magenta),
         member(colour = Blue),
     )]
     MemberAccessOnIncompleteOrNonStruct {
         at: TypedExpression<'a>,
-        op: Token<'a>,
         member: Token<'a>,
         kind: &'a str,
     },
