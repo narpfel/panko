@@ -2063,7 +2063,7 @@ fn lookup_member<'a, Error>(
     ty: &QualifiedType<'a>,
     member: &Token<'a>,
     loc: impl FnOnce() -> Loc<'a>,
-) -> Either<Member<'a, Typeck>, Error>
+) -> Either<Error, Member<'a, Typeck>>
 where
     Error: FromError<'a>,
 {
@@ -2073,16 +2073,11 @@ where
             .iter()
             .find(|member| member.name == name)
             .copied()
-            .map(Either::Left)
+            .map(Either::Right)
             .unwrap_or_else(|| {
-                Either::Right(sess.emit(Diagnostic::NoSuchMember {
-                    at: *member,
-                    lhs: loc(),
-                    ty: *ty,
-                    kind,
-                }))
+                sess.emit(Diagnostic::NoSuchMember { at: *member, lhs: loc(), ty: *ty, kind })
             }),
-        _ => Either::Right(sess.emit(Diagnostic::MemberAccessOnIncompleteOrNonStruct {
+        _ => sess.emit(Diagnostic::MemberAccessOnIncompleteOrNonStruct {
             at: loc(),
             ty: *ty,
             member: *member,
@@ -2091,7 +2086,7 @@ where
                     sess.alloc_str(&format!("incomplete {}", r#struct.kind())),
                 _ => "non-struct-or-union",
             },
-        })),
+        }),
     }
 }
 
@@ -2599,7 +2594,7 @@ fn typeck_expression<'a>(
             };
             let lhs = sess.alloc(typeck_expression(sess, lhs, Context::Default));
             lookup_member(sess, &lhs.ty, member_tok, || lhs.loc())
-                .map_left(|member| TypedExpression {
+                .map_right(|member| TypedExpression {
                     ty: member.ty.merge_qualifiers(&lhs.ty),
                     expr: Expression::MemberAccess {
                         lhs,
@@ -2617,7 +2612,7 @@ fn typeck_expression<'a>(
         } => {
             let ty = typeck_ty(sess, *ty, IsParameter::No);
             let expr = lookup_member(sess, &ty, member_tok, || ty.loc())
-                .map_left(|member| match member.kind {
+                .map_right(|member| match member.kind {
                     MemberKind::Normal => Expression::Integer {
                         value: member.offset,
                         // TODO: this shows `__builtin_offsetof` as the `Integer` expr’s value in
