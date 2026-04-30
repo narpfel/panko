@@ -8,6 +8,7 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
 use panko_parser::BinOp;
+use panko_parser::StructKind;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
@@ -657,6 +658,19 @@ pub(super) enum Diagnostic<'a> {
     OffsetofBitfield {
         at: Token<'a>,
         ty: QualifiedType<'a>,
+    },
+
+    #[error("{kind} type `{ty}` does not have a member named `{at}`")]
+    #[diagnostics(
+        at(colour = Red, label = "this member does not exist"),
+        lhs(colour = Blue, label = "this expression has type `{ty}`"),
+    )]
+    #[with(ty = ty.fg(Blue))]
+    NoSuchMember {
+        at: Token<'a>,
+        lhs: Loc<'a>,
+        ty: QualifiedType<'a>,
+        kind: StructKind,
     },
 }
 

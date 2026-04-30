@@ -98,6 +98,15 @@ impl FromError<'_> for () {
     fn from_error(_error: &dyn Report) -> Self {}
 }
 
+impl<'a, T, E> FromError<'a> for Either<E, T>
+where
+    E: FromError<'a>,
+{
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Left(E::from_error(error))
+    }
+}
+
 type Diagnostics<'a> = RefCell<Vec<&'a dyn Report>>;
 
 #[derive(Debug)]
