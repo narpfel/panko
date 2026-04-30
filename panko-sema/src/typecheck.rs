@@ -2069,14 +2069,19 @@ where
 {
     let name = member.slice();
     match ty.ty {
-        Type::Struct(Struct::Complete(Complete { name: _, id: _, kind: _, members })) =>
-            Either::Left(
-                members
-                    .iter()
-                    .find(|member| member.name == name)
-                    .copied()
-                    .unwrap_or_else(|| error_todo!(loc(), "no such member {}", name)),
-            ),
+        Type::Struct(Struct::Complete(Complete { name: _, id: _, kind, members })) => members
+            .iter()
+            .find(|member| member.name == name)
+            .copied()
+            .map(Either::Left)
+            .unwrap_or_else(|| {
+                Either::Right(sess.emit(Diagnostic::NoSuchMember {
+                    at: *member,
+                    lhs: loc(),
+                    ty: *ty,
+                    kind,
+                }))
+            }),
         _ => Either::Right(sess.emit(Diagnostic::MemberAccessOnIncompleteOrNonStruct {
             at: loc(),
             ty: *ty,
