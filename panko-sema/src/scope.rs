@@ -881,18 +881,16 @@ fn resolve_function_definition<'a>(
             || sess.alloc_str(&format!("{}.unnamed_parameter.{i}", name.slice())),
             |name| name.slice(),
         );
-        let maybe_reference = scopes.add(
-            name,
-            param.loc,
-            param.ty,
-            StorageDuration::Automatic,
-            IsParameter::Yes,
-            IsInGlobalScope::No,
-        );
-        match maybe_reference {
-            Ok(reference) => reference,
-            Err(ty) => error_todo!(ty, "typedef redeclared as value in parameter list"),
-        }
+        scopes
+            .add(
+                name,
+                param.loc,
+                param.ty,
+                StorageDuration::Automatic,
+                IsParameter::Yes,
+                IsInGlobalScope::No,
+            )
+            .expect("duplicate parameter names are filtered out by `resolve_function_ty`")
     }));
 
     let body = resolve_compound_statement(scopes, body, OpenNewScope::No);
