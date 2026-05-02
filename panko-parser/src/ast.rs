@@ -87,6 +87,20 @@ enum Diagnostic<'a> {
         name: Loc<'a>,
         kind: &'a str,
     },
+
+    #[error(
+        "parameter `{name}` declared with storage class `{at}` (only `register` is allowed for parameters)"
+    )]
+    #[diagnostics(
+        at(colour = Red, label = "this storage class is not allowed for function parameters"),
+        parameter(colour = Blue, label = "in this parameter declaration"),
+    )]
+    #[with(name = name.fg(Blue))]
+    StorageClassInParameterDeclaration {
+        at: Token<'a>,
+        name: &'a str,
+        parameter: Loc<'a>,
+    },
 }
 
 // TODO: could this be `From<&'a dyn Report>`?
@@ -1034,24 +1048,32 @@ pub(crate) fn parse_declarator<'a>(
                 let params = parameter_type_list.parameter_list.iter().map(|param| {
                     let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
                         parse_declaration_specifiers(sess, param.declaration_specifiers);
-                    if let Some(storage_class) = storage_class {
-                        crate::error_todo!(
-                            storage_class,
-                            "parameter declared with storage class {:#?}",
-                            storage_class,
-                        );
-                    }
                     let (ty, name) = param.declarator.map_or((ty, None), |declarator| {
                         parse_declarator(sess, ty, declarator, IsParameter::Yes)
                     });
                     let loc =
                         name.map_or_else(|| param.declaration_specifiers.loc(), |name| name.loc());
+
+                    match storage_class {
+                        None => (),
+                        Some(storage_class)
+                            if let StorageClassSpecifierKind::Register = storage_class.kind =>
+                            todo!("register storage class in parameters"),
+                        Some(storage_class) =>
+                            sess.emit(Diagnostic::StorageClassInParameterDeclaration {
+                                at: storage_class.token,
+                                name: try { name?.slice() }.unwrap_or(NO_VALUE),
+                                parameter: loc,
+                            }),
+                    }
+
                     reject_function_specifiers(
                         sess,
                         &function_specifiers,
                         loc,
                         "function parameter",
                     );
+
                     ParameterDeclaration { loc, ty, name }
                 });
 

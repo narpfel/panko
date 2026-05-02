@@ -1,0 +1,73 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/functions/test_error_parameter_declared_with_storage_class.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: parameter `∅` declared with storage class `typedef` (only `register` is allowed for parameters)
+   ╭─[panko/tests/cases/functions/test_error_parameter_declared_with_storage_class.c:1:8]
+   │
+ 1 │ void f(typedef int);
+   │        ───┬─┬─────  
+   │           │ ╰─────── in this parameter declaration
+   │           │         
+   │           ╰───────── this storage class is not allowed for function parameters
+───╯
+
+Error: parameter `i` declared with storage class `typedef` (only `register` is allowed for parameters)
+   ╭─[panko/tests/cases/functions/test_error_parameter_declared_with_storage_class.c:2:8]
+   │
+ 2 │ void g(typedef int i);
+   │        ───┬───     ┬  
+   │           │        ╰── in this parameter declaration
+   │           │           
+   │           ╰─────────── this storage class is not allowed for function parameters
+───╯
+
+Error: parameter `i` declared with storage class `typedef` (only `register` is allowed for parameters)
+   ╭─[panko/tests/cases/functions/test_error_parameter_declared_with_storage_class.c:3:8]
+   │
+ 3 │ void h(typedef int i, int i);
+   │        ───┬───     ┬  
+   │           │        ╰── in this parameter declaration
+   │           │           
+   │           ╰─────────── this storage class is not allowed for function parameters
+───╯
+
+Error: duplicate definition for `i`
+   ╭─[panko/tests/cases/functions/test_error_parameter_declared_with_storage_class.c:3:27]
+   │
+ 3 │ void h(typedef int i, int i);
+   │                    ┬      ┬  
+   │                    │      ╰── duplicate definition
+   │                    │         
+   │                    ╰───────── previously defined here
+───╯
+
+Error: parameter `i` declared with storage class `typedef` (only `register` is allowed for parameters)
+   ╭─[panko/tests/cases/functions/test_error_parameter_declared_with_storage_class.c:5:8]
+   │
+ 5 │ void h(typedef int i, int i) {}
+   │        ───┬───     ┬  
+   │           │        ╰── in this parameter declaration
+   │           │           
+   │           ╰─────────── this storage class is not allowed for function parameters
+───╯
+
+Error: duplicate definition for `i`
+   ╭─[panko/tests/cases/functions/test_error_parameter_declared_with_storage_class.c:5:27]
+   │
+ 5 │ void h(typedef int i, int i) {}
+   │                    ┬      ┬  
+   │                    │      ╰── duplicate definition
+   │                    │         
+   │                    ╰───────── previously defined here
+───╯
