@@ -1394,37 +1394,23 @@ fn typeck_initialiser<'a>(
                     .alloc_slice_fill_iter(subobject_initialisers.values().copied()),
             }
         }
-        scope::Initialiser::Expression(initialiser) => {
-            let initialiser =
-                match initialiser {
-                    scope::Expression::String(_) if let Type::Array(array_ty) = reference.ty.ty =>
-                        match typeck_array_initialisation_with_string(
-                            sess,
-                            reference,
-                            &array_ty,
-                            initialiser,
-                        ) {
-                            Some(initialiser) => initialiser,
-                            None =>
-                                sess.emit(
-                                    Diagnostic::ArrayInitialisationByStringLiteralTypeMismatch {
-                                        at: *initialiser,
-                                        expected_tys: const {
-                                            &[Type::char(), Type::uchar(), Type::schar()]
-                                        },
-                                        actual_ty: array_ty,
-                                        kind: "character",
-                                    },
-                                ),
-                        },
-                    _ => convert_as_if_by_assignment(
-                        sess,
-                        reference.ty,
-                        typeck_expression(sess, initialiser, Context::Default),
-                    ),
-                };
-            Initialiser::Expression(initialiser)
-        }
+        scope::Initialiser::Expression(initialiser) => Initialiser::Expression(match initialiser {
+            scope::Expression::String(_) if let Type::Array(array_ty) = reference.ty.ty =>
+                typeck_array_initialisation_with_string(sess, reference, &array_ty, initialiser)
+                    .unwrap_or_else(|| {
+                        sess.emit(Diagnostic::ArrayInitialisationByStringLiteralTypeMismatch {
+                            at: *initialiser,
+                            expected_tys: const { &[Type::char(), Type::uchar(), Type::schar()] },
+                            actual_ty: array_ty,
+                            kind: "character",
+                        })
+                    }),
+            _ => convert_as_if_by_assignment(
+                sess,
+                reference.ty,
+                typeck_expression(sess, initialiser, Context::Default),
+            ),
+        }),
     }
 }
 
