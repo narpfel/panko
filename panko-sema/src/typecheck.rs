@@ -261,7 +261,7 @@ pub(crate) struct FunctionDefinition<'a> {
     pub(crate) params: ParamRefs<'a>,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
-    pub(crate) is_varargs: bool,
+    pub(crate) varargs: Option<Varargs<'a>>,
     pub(crate) body: CompoundStatement<'a>,
 }
 
@@ -274,6 +274,13 @@ pub(crate) enum Return<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct ParamRefs<'a>(pub(crate) &'a [Reference<'a>]);
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Varargs<'a> {
+    pub(crate) gp_offset: Reference<'a>,
+    pub(crate) overflow_arg_area: Reference<'a>,
+    pub(crate) reg_save_area: Reference<'a>,
+}
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
@@ -1124,7 +1131,7 @@ fn typeck_function_definition<'a>(
         params,
         inline,
         noreturn,
-        is_varargs,
+        varargs,
         body,
     } = *definition;
 
@@ -1152,13 +1159,29 @@ fn typeck_function_definition<'a>(
         ),
     };
 
+    let varargs = try {
+        let scope::Varargs {
+            gp_offset,
+            overflow_arg_area,
+            reg_save_area,
+        } = varargs?;
+        let gp_offset = typeck_reference(sess, gp_offset, NeedsInitialiser::No);
+        let overflow_arg_area = typeck_reference(sess, overflow_arg_area, NeedsInitialiser::No);
+        let reg_save_area = typeck_reference(sess, reg_save_area, NeedsInitialiser::No);
+        Varargs {
+            gp_offset,
+            overflow_arg_area,
+            reg_save_area,
+        }
+    };
+
     FunctionDefinition {
         reference,
         return_slot,
         params: ParamRefs(params),
         inline,
         noreturn,
-        is_varargs,
+        varargs,
         body: typeck_compound_statement(sess, &body, definition),
     }
 }

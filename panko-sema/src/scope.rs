@@ -258,12 +258,20 @@ pub(crate) struct FunctionDefinition<'a> {
     pub(crate) params: ParamRefs<'a>,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
-    pub(crate) is_varargs: bool,
+    pub(crate) varargs: Option<Varargs<'a>>,
     pub(crate) body: CompoundStatement<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct ParamRefs<'a>(pub(crate) &'a [Reference<'a>]);
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Varargs<'a> {
+    // TODO: `gp_offset` and `overflow_arg_area` should be builtins
+    pub(crate) gp_offset: Reference<'a>,
+    pub(crate) overflow_arg_area: Reference<'a>,
+    pub(crate) reg_save_area: Reference<'a>,
+}
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
@@ -875,6 +883,63 @@ fn resolve_function_definition<'a>(
         )
         .expect("`return` is a keyword, so there are no types with that name");
 
+    let varargs = is_varargs.then(|| {
+        let gp_offset = scopes
+            .add(
+                "__panko_gp_offset",
+                reference.decl_loc,
+                Type::size_t().unqualified(),
+                StorageDuration::Automatic,
+                IsParameter::No,
+                IsInGlobalScope::No,
+            )
+            .expect("__panko_gp_offset is a reserved name");
+        let void = scopes.sess.alloc(Type::Void.unqualified());
+        let overflow_arg_area = scopes
+            .add(
+                "__panko_overflow_arg_area",
+                reference.decl_loc,
+                Type::Pointer(void).unqualified(),
+                StorageDuration::Automatic,
+                IsParameter::No,
+                IsInGlobalScope::No,
+            )
+            .expect("`__panko_overflow_arg_area` is a reserved name");
+        let char = scopes.sess.alloc(Type::char().unqualified());
+        let length = NoHashEq(Some(scopes.sess.alloc(Expression::Integer {
+            value: "304",
+            token: Token::synthesised(
+                panko_lex::TokenKind::Integer(panko_lex::Integer {
+                    suffix: panko_lex::IntegerSuffix::None,
+                    suffix_len: 0,
+                    base: 10,
+                    prefix_len: 0,
+                }),
+                name.loc(),
+            ),
+        })));
+        let reg_save_area = scopes
+            .add(
+                "__panko_reg_save_area",
+                reference.decl_loc,
+                Type::Array(ArrayType {
+                    ty: char,
+                    length,
+                    loc: HashEqIgnored(reference.decl_loc),
+                })
+                .unqualified(),
+                StorageDuration::Automatic,
+                IsParameter::No,
+                IsInGlobalScope::No,
+            )
+            .expect("`__panko_reg_save_area` is a reserved name");
+        Varargs {
+            gp_offset,
+            overflow_arg_area,
+            reg_save_area,
+        }
+    });
+
     let sess = scopes.sess;
     let params = sess.alloc_slice_collect(params.iter().enumerate().map(|(i, param)| {
         let name = param.name.map_or_else(
@@ -901,7 +966,7 @@ fn resolve_function_definition<'a>(
         params: ParamRefs(params),
         inline: *inline,
         noreturn: *noreturn,
-        is_varargs,
+        varargs,
         body,
     })
 }

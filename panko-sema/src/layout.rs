@@ -88,6 +88,13 @@ pub struct Subobject<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct Varargs<'a> {
+    pub gp_offset: Reference<'a>,
+    pub overflow_arg_area: Reference<'a>,
+    pub reg_save_area: Reference<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct FunctionDefinition<'a> {
     pub reference: Reference<'a>,
     pub return_slot: Return<'a>,
@@ -95,7 +102,7 @@ pub struct FunctionDefinition<'a> {
     #[expect(unused)]
     inline: Option<cst::FunctionSpecifier<'a>>,
     pub noreturn: Option<cst::FunctionSpecifier<'a>>,
-    pub is_varargs: bool,
+    pub varargs: Option<Varargs<'a>>,
     pub stack_size: u64,
     pub argument_area_size: u64,
     pub body: CompoundStatement<'a>,
@@ -361,7 +368,7 @@ fn layout_function_definition<'a>(
         params,
         inline,
         noreturn,
-        is_varargs,
+        varargs,
         body,
     } = *def;
     let reference = stack.add(bump, reference);
@@ -369,6 +376,21 @@ fn layout_function_definition<'a>(
         typecheck::Return::Void => Return::Void,
         typecheck::Return::InRegisters(class) => Return::InRegisters(class),
         typecheck::Return::OnStack(reference) => Return::OnStack(stack.add(bump, reference)),
+    };
+    let varargs = try {
+        let typecheck::Varargs {
+            gp_offset,
+            overflow_arg_area,
+            reg_save_area,
+        } = varargs?;
+        let gp_offset = stack.add(bump, gp_offset);
+        let overflow_arg_area = stack.add(bump, overflow_arg_area);
+        let reg_save_area = stack.add(bump, reg_save_area);
+        Varargs {
+            gp_offset,
+            overflow_arg_area,
+            reg_save_area,
+        }
     };
     let params =
         ParamRefs(bump.alloc_slice_fill_iter(params.0.iter().map(|&param| stack.add(bump, param))));
@@ -385,7 +407,7 @@ fn layout_function_definition<'a>(
         noreturn,
         stack_size,
         argument_area_size,
-        is_varargs,
+        varargs,
         body,
     }
 }

@@ -38,6 +38,7 @@ use panko_sema::layout::Subobject;
 use panko_sema::layout::SubobjectInitialiser;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::Type;
+use panko_sema::layout::Varargs;
 use panko_sema::scope::Linkage;
 use panko_sema::scope::RefKind;
 use panko_sema::ty::ArrayType;
@@ -463,6 +464,28 @@ impl<'a> Codegen<'a> {
         match def.return_slot {
             Return::Void | Return::InRegisters(_) => (),
             Return::OnStack(reference) => self.emit_args("mov", &[&reference, &Rdi]),
+        }
+
+        if let Some(Varargs {
+            gp_offset,
+            overflow_arg_area,
+            reg_save_area,
+        }) = def.varargs
+        {
+            let gp_registers_used = register_parameters
+                .iter()
+                .map(|InRegisters { item: _, registers }| registers.len())
+                .sum::<usize>();
+            let gp_offset_value = 8 * u64::try_from(gp_registers_used).unwrap();
+            self.emit_args("mov", &[&gp_offset, &gp_offset_value]);
+            let first_param_passed_on_stack =
+                Operand::stack_parameter_eightbyte(Type::size_t(), 0, def.stack_size);
+            self.emit_args("lea", &[&Rax, &first_param_passed_on_stack]);
+            self.emit_args("mov", &[&overflow_arg_area, &Rax]);
+            for (i, register) in ARGUMENT_REGISTERS.iter().enumerate() {
+                let slot = reg_save_area.slot().offset(u64::try_from(i).unwrap() * 8);
+                self.emit_args("mov", &[&typed(slot, Type::size_t()), register]);
+            }
         }
 
         // Store the register-passed arguments first because copying the stack-passed ones clobbers
