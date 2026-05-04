@@ -11,6 +11,7 @@ use panko_parser::ast::Integral;
 use panko_report::Report;
 
 use crate::layout::stack::Stack;
+use crate::scope::BuiltinName;
 use crate::scope::Id;
 use crate::scope::Linkage;
 use crate::scope::RefKind;
@@ -89,8 +90,6 @@ pub struct Subobject<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Varargs<'a> {
-    pub gp_offset: Reference<'a>,
-    pub overflow_arg_area: Reference<'a>,
     pub reg_save_area: Reference<'a>,
 }
 
@@ -211,6 +210,7 @@ pub enum Expression<'a> {
         lhs: &'a LayoutedExpression<'a>,
         member: Member<'a, Layout>,
     },
+    BuiltinName(BuiltinName<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -378,19 +378,9 @@ fn layout_function_definition<'a>(
         typecheck::Return::OnStack(reference) => Return::OnStack(stack.add(bump, reference)),
     };
     let varargs = try {
-        let typecheck::Varargs {
-            gp_offset,
-            overflow_arg_area,
-            reg_save_area,
-        } = varargs?;
-        let gp_offset = stack.add(bump, gp_offset);
-        let overflow_arg_area = stack.add(bump, overflow_arg_area);
+        let typecheck::Varargs { reg_save_area } = varargs?;
         let reg_save_area = stack.add(bump, reg_save_area);
-        Varargs {
-            gp_offset,
-            overflow_arg_area,
-            reg_save_area,
-        }
+        Varargs { reg_save_area }
     };
     let params =
         ParamRefs(bump.alloc_slice_fill_iter(params.0.iter().map(|&param| stack.add(bump, param))));
@@ -707,6 +697,8 @@ fn layout_expression_in_slot<'a>(
             let member = layout_member(stack, bump, &member);
             (slot, Expression::MemberAccess { lhs, member })
         }
+        typecheck::Expression::BuiltinName(builtin_name) =>
+            (make_slot(), Expression::BuiltinName(builtin_name)),
     };
     LayoutedExpression { ty, slot, expr, loc }
 }

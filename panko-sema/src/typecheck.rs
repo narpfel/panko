@@ -39,6 +39,8 @@ use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
 use crate::scope;
 use crate::scope::BitfieldWidth;
+use crate::scope::BuiltinName;
+use crate::scope::BuiltinNameKind;
 use crate::scope::DesignatedInitialiser;
 use crate::scope::Designation;
 use crate::scope::Designator;
@@ -277,8 +279,6 @@ pub(crate) struct ParamRefs<'a>(pub(crate) &'a [Reference<'a>]);
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Varargs<'a> {
-    pub(crate) gp_offset: Reference<'a>,
-    pub(crate) overflow_arg_area: Reference<'a>,
     pub(crate) reg_save_area: Reference<'a>,
 }
 
@@ -435,6 +435,7 @@ pub(crate) enum Expression<'a> {
         member: Member<'a, Typeck>,
         member_loc: Loc<'a>,
     },
+    BuiltinName(BuiltinName<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -494,6 +495,14 @@ impl<'a> Reference<'a> {
     }
 }
 
+impl BuiltinNameKind {
+    fn is_lvalue(self) -> bool {
+        match self {
+            Self::GpOffset | Self::OverflowArgArea => false,
+        }
+    }
+}
+
 impl<'a> TypedExpression<'a> {
     pub(crate) fn loc(&self) -> Loc<'a> {
         self.expr.loc()
@@ -539,6 +548,7 @@ impl<'a> TypedExpression<'a> {
             | Expression::Combine { .. }
             | Expression::Logical { .. }
             | Expression::Conditional { .. } => false,
+            Expression::BuiltinName(BuiltinName { kind, loc: _ }) => kind.is_lvalue(),
         }
     }
 
@@ -611,6 +621,7 @@ impl<'a> Expression<'a> {
             Expression::Conditional { condition, then: _, or_else } =>
                 condition.loc().until(or_else.loc()),
             Expression::MemberAccess { lhs, member: _, member_loc } => lhs.loc().until(*member_loc),
+            Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
         }
     }
 
@@ -1160,19 +1171,9 @@ fn typeck_function_definition<'a>(
     };
 
     let varargs = try {
-        let scope::Varargs {
-            gp_offset,
-            overflow_arg_area,
-            reg_save_area,
-        } = varargs?;
-        let gp_offset = typeck_reference(sess, gp_offset, NeedsInitialiser::No);
-        let overflow_arg_area = typeck_reference(sess, overflow_arg_area, NeedsInitialiser::No);
+        let scope::Varargs { reg_save_area } = varargs?;
         let reg_save_area = typeck_reference(sess, reg_save_area, NeedsInitialiser::No);
-        Varargs {
-            gp_offset,
-            overflow_arg_area,
-            reg_save_area,
-        }
+        Varargs { reg_save_area }
     };
 
     FunctionDefinition {
@@ -2633,6 +2634,17 @@ fn typeck_expression<'a>(
                 })
                 .into_inner();
             TypedExpression { ty: Type::size_t().unqualified(), expr }
+        }
+        scope::Expression::BuiltinName(name @ BuiltinName { kind, loc: _ }) => {
+            let ty = match kind {
+                BuiltinNameKind::GpOffset => Type::size_t(),
+                BuiltinNameKind::OverflowArgArea =>
+                    Type::Pointer(sess.alloc(Type::Void.unqualified())),
+            };
+            TypedExpression {
+                ty: ty.as_const(),
+                expr: Expression::BuiltinName(*name),
+            }
         }
     };
 

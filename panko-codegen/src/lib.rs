@@ -39,6 +39,8 @@ use panko_sema::layout::SubobjectInitialiser;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::Type;
 use panko_sema::layout::Varargs;
+use panko_sema::scope::BuiltinName;
+use panko_sema::scope::BuiltinNameKind;
 use panko_sema::scope::Linkage;
 use panko_sema::scope::RefKind;
 use panko_sema::ty::ArrayType;
@@ -304,6 +306,7 @@ struct Codegen<'a> {
     deferred_definitions: IndexMap<&'a str, (Linkage, Type<'a>, Option<StaticInitialiser<'a>>)>,
     defined: IndexSet<&'a str>,
     current_function: Option<&'a FunctionDefinition<'a>>,
+    current_function_gp_offset: Option<u64>,
     code: String,
     // TODO: could use an `IndexSet` here to deduplicate
     strings: Vec<(StaticId, Cow<'a, ByteStr>)>,
@@ -461,27 +464,19 @@ impl<'a> Codegen<'a> {
         };
         let (register_parameters, memory_parameters) = compute_call_abi(return_ty, def.params.0);
 
+        let gp_registers_used = register_parameters
+            .iter()
+            .map(|InRegisters { item: _, registers }| registers.len())
+            .sum::<usize>();
+        let gp_offset = 8 * u64::try_from(gp_registers_used).unwrap();
+        self.current_function_gp_offset = Some(gp_offset);
+
         match def.return_slot {
             Return::Void | Return::InRegisters(_) => (),
             Return::OnStack(reference) => self.emit_args("mov", &[&reference, &Rdi]),
         }
 
-        if let Some(Varargs {
-            gp_offset,
-            overflow_arg_area,
-            reg_save_area,
-        }) = def.varargs
-        {
-            let gp_registers_used = register_parameters
-                .iter()
-                .map(|InRegisters { item: _, registers }| registers.len())
-                .sum::<usize>();
-            let gp_offset_value = 8 * u64::try_from(gp_registers_used).unwrap();
-            self.emit_args("mov", &[&gp_offset, &gp_offset_value]);
-            let first_param_passed_on_stack =
-                Operand::stack_parameter_eightbyte(Type::size_t(), 0, def.stack_size);
-            self.emit_args("lea", &[&Rax, &first_param_passed_on_stack]);
-            self.emit_args("mov", &[&overflow_arg_area, &Rax]);
+        if let Some(Varargs { reg_save_area }) = def.varargs {
             for (i, register) in ARGUMENT_REGISTERS.iter().enumerate() {
                 let slot = reg_save_area.slot().offset(u64::try_from(i).unwrap() * 8);
                 self.emit_args("mov", &[&typed(slot, Type::size_t()), register]);
@@ -584,6 +579,7 @@ impl<'a> Codegen<'a> {
                 Expression::Logical { .. } => todo!(),
                 Expression::Conditional { .. } => todo!(),
                 Expression::MemberAccess { .. } => todo!(),
+                Expression::BuiltinName(_) => todo!(),
             },
             Some(StaticInitialiser::Braced { subobject_initialisers }) => {
                 if subobject_initialisers.is_empty() {
@@ -1202,6 +1198,17 @@ impl<'a> Codegen<'a> {
                     MemberKind::Bitfield(bitfield) => self.bitfield_sign_extend(expr, bitfield),
                 }
             }
+            Expression::BuiltinName(BuiltinName { kind, loc: _ }) => match kind {
+                BuiltinNameKind::GpOffset =>
+                    self.emit_args("mov", &[expr, &self.current_function_gp_offset.unwrap()]),
+                BuiltinNameKind::OverflowArgArea => {
+                    let stack_size = self.current_function.unwrap().stack_size;
+                    let first_param_passed_on_stack =
+                        Operand::stack_parameter_eightbyte(Type::size_t(), 0, stack_size);
+                    self.emit_args("lea", &[&Rax, &first_param_passed_on_stack]);
+                    self.emit_args("mov", &[expr, &Rax]);
+                }
+            },
         }
     }
 

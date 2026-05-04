@@ -241,6 +241,7 @@ impl AsSExpr for Expression<'_> {
                 SExpr::new("conditional").lines([condition, then, or_else]),
             Expression::MemberAccess { lhs, member, member_loc: _ } =>
                 member.as_sexpr_without_ty("+").lines([lhs]),
+            Expression::BuiltinName(builtin_name) => builtin_name.as_sexpr(),
         }
     }
 }
