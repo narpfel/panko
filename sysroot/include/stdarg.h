@@ -1,16 +1,27 @@
-#ifndef __PANKO_STDARG_H
-#define __PANKO_STDARG_H
-
-#define __STDC_VERSION_STDARG_H__ 202311L
+#ifndef __GNUC_VA_LIST
+#define __GNUC_VA_LIST 1
 
 typedef struct __panko_va_list_impl {
     unsigned int gp_offset;
     unsigned int fp_offset;
     char* overflow_arg_area;
     char* reg_save_area;
-} va_list[1];
+} __gnuc_va_list[1];
 
-typedef va_list __gnuc_va_list;
+#endif
+
+#ifdef __need___va_list
+#undef __need___va_list
+#else
+
+#ifndef __PANKO_STDARG_H
+#define __PANKO_STDARG_H
+
+#define __STDC_VERSION_STDARG_H__ 202311L
+
+#ifndef _VA_LIST
+typedef __gnuc_va_list va_list;
+#endif
 
 #define va_start(ap, ...) ( \
     (ap)->gp_offset = __panko_gp_offset, \
@@ -40,5 +51,7 @@ typedef va_list __gnuc_va_list;
 )
 
 #define va_end(ap) ((void)0)
+
+#endif
 
 #endif
