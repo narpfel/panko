@@ -1,0 +1,40 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/functions/test_builtin_name___func__.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/test_builtin_name___func__.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      function~1 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%s %zu %d\n")
+               (builtin-name __func__)
+               (sizeof (builtin-name __func__))
+               (equal (builtin-name __func__) (builtin-name __func__))))))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (expression (call (name function~1 `fn() -> void`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%s %zu %d\n")
+               (builtin-name __func__)
+               (sizeof (builtin-name __func__))
+               (equal (builtin-name __func__) (builtin-name __func__))))
+         (declaration func~5 `ptr<char const>` (builtin-name __func__))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal (name func~5 `ptr<char const>`) (builtin-name __func__)))))))
+
+----- stderr -----

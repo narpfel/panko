@@ -1,0 +1,80 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/functions/test_builtin_name___func__.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/test_builtin_name___func__.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
+      function~1 `fn() -> void`
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 11>>`
+                        (string `array<char; 11>` "%s %zu %d\n\0"))))
+               (noop-type-conversion `ptr<char const>`
+                  (addressof `ptr<array<char const; 9>>`
+                     (builtin-name `array<char const; 9> const` __func__)))
+               (sizeof `unsigned long` 9 (builtin-name `array<char const; 9> const` __func__))
+               (ptr-equal `int`
+                  (noop-type-conversion `ptr<char const>`
+                     (addressof `ptr<array<char const; 9>>`
+                        (builtin-name `array<char const; 9> const` __func__)))
+                  (noop-type-conversion `ptr<char const>`
+                     (addressof `ptr<array<char const; 9>>`
+                        (builtin-name `array<char const; 9> const` __func__))))))))
+   (function-definition external
+      main~3 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (function~1 `fn() -> void`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 11>>`
+                        (string `array<char; 11>` "%s %zu %d\n\0"))))
+               (noop-type-conversion `ptr<char const>`
+                  (addressof `ptr<array<char const; 5>>`
+                     (builtin-name `array<char const; 5> const` __func__)))
+               (sizeof `unsigned long` 5 (builtin-name `array<char const; 5> const` __func__))
+               (ptr-equal `int`
+                  (noop-type-conversion `ptr<char const>`
+                     (addressof `ptr<array<char const; 5>>`
+                        (builtin-name `array<char const; 5> const` __func__)))
+                  (noop-type-conversion `ptr<char const>`
+                     (addressof `ptr<array<char const; 5>>`
+                        (builtin-name `array<char const; 5> const` __func__))))))
+         (definition func~5 `ptr<char const>`
+            (noop-type-conversion `ptr<char const>`
+               (addressof `ptr<array<char const; 5>>`
+                  (builtin-name `array<char const; 5> const` __func__))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (ptr-equal `int` (func~5 `ptr<char const>`)
+                  (noop-type-conversion `ptr<char const>`
+                     (addressof `ptr<array<char const; 5>>`
+                        (builtin-name `array<char const; 5> const` __func__)))))))))
+
+----- stderr -----
