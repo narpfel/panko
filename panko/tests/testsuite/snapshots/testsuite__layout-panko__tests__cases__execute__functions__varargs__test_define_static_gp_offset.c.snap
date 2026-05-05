@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external stack-size=40
+      (declare_static~1 `fn(∅: int, ∅: int, ∅: int) -> void` (static declare_static))
+      (params
+         (declare_static.unnamed_parameter.0~3 `int` @0)
+         (declare_static.unnamed_parameter.1~4 `int` @4)
+         (declare_static.unnamed_parameter.2~5 `int` @8))
+      (compound-statement
+         (definition (gp_offset~6 `unsigned long` (static gp_offset.6)) (builtin-name `unsigned long const` (static gp_offset.6) gp_offset))
+         (expression
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 5>>` @24
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (gp_offset~6 `unsigned long` (static gp_offset.6))))))
+   (function-definition external stack-size=40
+      (main~7 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn(∅: int, ∅: int, ∅: int) -> void>` @0
+                  (declare_static~1 `fn(∅: int, ∅: int, ∅: int) -> void` (static declare_static)))
+               (1 `int` @8)
+               (2 `int` @12)
+               (3 `int` @16)))
+         (definition (gp_offset~9 `unsigned long` (static gp_offset.9)) (builtin-name `unsigned long const` (static gp_offset.9) gp_offset))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (gp_offset~9 `unsigned long` (static gp_offset.9)))))))
+
+----- stderr -----

@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/functions/test_error_use_varargs_builtin_name_in_global_scope.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: use of undeclared identifier `__panko_gp_offset`
+   ╭─[panko/tests/cases/functions/test_error_use_varargs_builtin_name_in_global_scope.c:1:8]
+   │
+ 1 │ typeof(__panko_gp_offset) global_var = 42;
+   │        ────────┬────────  
+   │                ╰────────── this name has not been declared
+───╯
+
+Error: use of undeclared identifier `__panko_overflow_arg_area`
+   ╭─[panko/tests/cases/functions/test_error_use_varargs_builtin_name_in_global_scope.c:3:11]
+   │
+ 3 │ void* p = __panko_overflow_arg_area;
+   │           ────────────┬────────────  
+   │                       ╰────────────── this name has not been declared
+───╯

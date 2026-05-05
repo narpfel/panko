@@ -1,0 +1,111 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/functions/varargs/test_varargs_builtin_names.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/varargs/test_varargs_builtin_names.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
+      f~1 `fn() -> void`
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "%zu\n\0"))))
+               (builtin-name `unsigned long const` gp_offset)))))
+   (function-definition external
+      g~3 `fn(∅: int) -> void`
+      (params
+         g.unnamed_parameter.0~5 `int`)
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "%zu\n\0"))))
+               (builtin-name `unsigned long const` gp_offset)))))
+   (struct TwoRegs~6
+      (member x @0 `long`)
+      (member y @8 `long`))
+   (function-definition external
+      h~7 `fn(∅: struct TwoRegs~6 complete) -> void`
+      (params
+         h.unnamed_parameter.0~9 `struct TwoRegs~6 complete`)
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "%zu\n\0"))))
+               (builtin-name `unsigned long const` gp_offset)))))
+   (function-definition external
+      all_regs_used~10 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> void`
+      (params
+         all_regs_used.unnamed_parameter.0~12 `int`
+         all_regs_used.unnamed_parameter.1~13 `int`
+         all_regs_used.unnamed_parameter.2~14 `int`
+         all_regs_used.unnamed_parameter.3~15 `int`
+         all_regs_used.unnamed_parameter.4~16 `int`
+         all_regs_used.unnamed_parameter.5~17 `int`
+         all_regs_used.unnamed_parameter.6~18 `int`
+         all_regs_used.unnamed_parameter.7~19 `int`)
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "%zu\n\0"))))
+               (builtin-name `unsigned long const` gp_offset)))))
+   (function-definition external
+      main~20 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (f~1 `fn() -> void`))))
+         (expression
+            (call `void`
+               (addressof `ptr<fn(∅: int) -> void>`
+                  (g~3 `fn(∅: int) -> void`))
+               (0 `int`)))
+         (definition two_regs~22 `struct TwoRegs~6 complete` (braced ∅))
+         (expression
+            (call `void`
+               (addressof `ptr<fn(∅: struct TwoRegs~6 complete) -> void>`
+                  (h~7 `fn(∅: struct TwoRegs~6 complete) -> void`))
+               (two_regs~22 `struct TwoRegs~6 complete`)))
+         (expression
+            (call `void`
+               (addressof `ptr<fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> void>`
+                  (all_regs_used~10 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> void`))
+               (1 `int`)
+               (2 `int`)
+               (3 `int`)
+               (4 `int`)
+               (5 `int`)
+               (6 `int`)
+               (7 `int`)
+               (8 `int`)))
+         (expression (0 `int`)))))
+
+----- stderr -----

@@ -1,0 +1,85 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/functions/varargs/test_varargs_builtin_names.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/varargs/test_varargs_builtin_names.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      f~1 `fn() -> void`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (builtin-name gp_offset)))))
+   (function-definition
+      g~3 `fn(∅: int) -> void`
+      (params
+         g.unnamed_parameter.0~5 `int`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (builtin-name gp_offset)))))
+   (struct TwoRegs~6
+      (member x `long`)
+      (member y `long`))
+   (function-definition
+      h~7 `fn(∅: struct TwoRegs~6 complete) -> void`
+      (params
+         h.unnamed_parameter.0~9 `struct TwoRegs~6 complete`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (builtin-name gp_offset)))))
+   (function-definition
+      all_regs_used~10 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> void`
+      (params
+         all_regs_used.unnamed_parameter.0~12 `int`
+         all_regs_used.unnamed_parameter.1~13 `int`
+         all_regs_used.unnamed_parameter.2~14 `int`
+         all_regs_used.unnamed_parameter.3~15 `int`
+         all_regs_used.unnamed_parameter.4~16 `int`
+         all_regs_used.unnamed_parameter.5~17 `int`
+         all_regs_used.unnamed_parameter.6~18 `int`
+         all_regs_used.unnamed_parameter.7~19 `int`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (builtin-name gp_offset)))))
+   (function-definition
+      main~20 `fn() -> int`
+      (compound-statement
+         (expression (call (name f~1 `fn() -> void`)))
+         (expression
+            (call (name g~3 `fn(∅: int) -> void`)
+               0))
+         (declaration two_regs~22 `struct TwoRegs~6 complete` (braced ∅))
+         (expression
+            (call (name h~7 `fn(∅: struct TwoRegs~6 complete) -> void`)
+               (name two_regs~22 `struct TwoRegs~6 complete`)))
+         (expression
+            (call (name all_regs_used~10 `fn(∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int, ∅: int) -> void`)
+               1
+               2
+               3
+               4
+               5
+               6
+               7
+               8))
+         (expression
+            (generic
+               (builtin-name overflow_arg_area)
+               (assoc `ptr<void>` 0))))))
+
+----- stderr -----
