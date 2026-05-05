@@ -308,8 +308,7 @@ struct Codegen<'a> {
     current_function: Option<&'a FunctionDefinition<'a>>,
     current_function_gp_offset: Option<u64>,
     code: String,
-    // TODO: could use an `IndexSet` here to deduplicate
-    strings: Vec<(StaticId, Cow<'a, ByteStr>)>,
+    strings: IndexMap<Cow<'a, ByteStr>, StaticId>,
     next_label_id: u64,
     debug: bool,
     linenos: Linenos<'a>,
@@ -359,8 +358,7 @@ impl<'a> Codegen<'a> {
 
     fn string(&mut self, s: Cow<'a, ByteStr>) -> StaticId {
         let id = StaticId(self.strings.len().try_into().unwrap());
-        self.strings.push((id, s));
-        id
+        *self.strings.entry(s).or_insert(id)
     }
 
     fn new_label(&mut self) -> LabelId {
@@ -1067,6 +1065,13 @@ impl<'a> Codegen<'a> {
                         let member = self.member_pointer(member);
                         self.emit_args("lea", &[&Rax, &*member]);
                     }
+                    Expression::BuiltinName(BuiltinName {
+                        kind: BuiltinNameKind::Func(func),
+                        loc: _,
+                    }) => {
+                        let func = self.string(ByteStr::new(func).into());
+                        self.emit_args("lea", &[&Rax, &func]);
+                    }
                     _ => unreachable!(),
                 }
                 self.emit_args("mov", &[expr, &Rax]);
@@ -1208,6 +1213,7 @@ impl<'a> Codegen<'a> {
                     self.emit_args("lea", &[&Rax, &first_param_passed_on_stack]);
                     self.emit_args("mov", &[expr, &Rax]);
                 }
+                BuiltinNameKind::Func(_func) => unreachable!(),
             },
         }
     }
@@ -1427,7 +1433,7 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
         cg.object_definition(name, linkage, ty, initialiser);
     }
 
-    for (id, value) in mem::take(&mut cg.strings) {
+    for (value, id) in mem::take(&mut cg.strings) {
         cg.string_literal_definition(id, &value);
     }
 

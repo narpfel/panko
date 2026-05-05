@@ -495,10 +495,11 @@ impl<'a> Reference<'a> {
     }
 }
 
-impl BuiltinNameKind {
+impl BuiltinNameKind<'_> {
     fn is_lvalue(self) -> bool {
         match self {
             Self::GpOffset | Self::OverflowArgArea => false,
+            Self::Func(_) => true,
         }
     }
 }
@@ -2638,11 +2639,16 @@ fn typeck_expression<'a>(
                 .into_inner();
             TypedExpression { ty: Type::size_t().unqualified(), expr }
         }
-        scope::Expression::BuiltinName(name @ BuiltinName { kind, loc: _ }) => {
+        scope::Expression::BuiltinName(name @ BuiltinName { kind, loc }) => {
             let ty = match kind {
                 BuiltinNameKind::GpOffset => Type::size_t(),
                 BuiltinNameKind::OverflowArgArea =>
                     Type::Pointer(sess.alloc(Type::Void.unqualified())),
+                BuiltinNameKind::Func(func) => Type::Array(ArrayType {
+                    ty: sess.alloc(Type::char().as_const()),
+                    length: ArrayLength::Constant(u64::try_from(func.len()).unwrap() + 1),
+                    loc: HashEqIgnored(*loc),
+                }),
             };
             TypedExpression {
                 ty: ty.as_const(),

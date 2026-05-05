@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/functions/test_error___func___outside_function.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: use of undeclared identifier `__func__`
+   ╭─[panko/tests/cases/functions/test_error___func___outside_function.c:1:20]
+   │
+ 1 │ char const* func = __func__;
+   │                    ────┬───  
+   │                        ╰───── this name has not been declared
+───╯
