@@ -25,15 +25,15 @@ exit_code: 0
                         (string `array<char; 11>` "%s %zu %d\n\0"))))
                (noop-type-conversion `ptr<char const>`
                   (addressof `ptr<array<char const; 9>>`
-                     (builtin-name `array<char const; 9> const` __func__)))
-               (sizeof `unsigned long` 9 (builtin-name `array<char const; 9> const` __func__))
+                     (builtin-name `array<char const; 9> const` __func__ "function")))
+               (sizeof `unsigned long` 9 (builtin-name `array<char const; 9> const` __func__ "function"))
                (ptr-equal `int`
                   (noop-type-conversion `ptr<char const>`
                      (addressof `ptr<array<char const; 9>>`
-                        (builtin-name `array<char const; 9> const` __func__)))
+                        (builtin-name `array<char const; 9> const` __func__ "function")))
                   (noop-type-conversion `ptr<char const>`
                      (addressof `ptr<array<char const; 9>>`
-                        (builtin-name `array<char const; 9> const` __func__))))))))
+                        (builtin-name `array<char const; 9> const` __func__ "function"))))))))
    (function-definition external
       main~3 `fn() -> int`
       (compound-statement
@@ -51,19 +51,19 @@ exit_code: 0
                         (string `array<char; 11>` "%s %zu %d\n\0"))))
                (noop-type-conversion `ptr<char const>`
                   (addressof `ptr<array<char const; 5>>`
-                     (builtin-name `array<char const; 5> const` __func__)))
-               (sizeof `unsigned long` 5 (builtin-name `array<char const; 5> const` __func__))
+                     (builtin-name `array<char const; 5> const` __func__ "main")))
+               (sizeof `unsigned long` 5 (builtin-name `array<char const; 5> const` __func__ "main"))
                (ptr-equal `int`
                   (noop-type-conversion `ptr<char const>`
                      (addressof `ptr<array<char const; 5>>`
-                        (builtin-name `array<char const; 5> const` __func__)))
+                        (builtin-name `array<char const; 5> const` __func__ "main")))
                   (noop-type-conversion `ptr<char const>`
                      (addressof `ptr<array<char const; 5>>`
-                        (builtin-name `array<char const; 5> const` __func__))))))
+                        (builtin-name `array<char const; 5> const` __func__ "main"))))))
          (definition func~5 `ptr<char const>`
             (noop-type-conversion `ptr<char const>`
                (addressof `ptr<array<char const; 5>>`
-                  (builtin-name `array<char const; 5> const` __func__))))
+                  (builtin-name `array<char const; 5> const` __func__ "main"))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -75,6 +75,6 @@ exit_code: 0
                (ptr-equal `int` (func~5 `ptr<char const>`)
                   (noop-type-conversion `ptr<char const>`
                      (addressof `ptr<array<char const; 5>>`
-                        (builtin-name `array<char const; 5> const` __func__)))))))))
+                        (builtin-name `array<char const; 5> const` __func__ "main")))))))))
 
 ----- stderr -----

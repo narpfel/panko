@@ -501,9 +501,9 @@ pub enum BuiltinNameKind<'a> {
 impl fmt::Display for BuiltinNameKind<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
-            Self::GpOffset => "gp_offset",
-            Self::OverflowArgArea => "overflow_arg_area",
-            Self::Func(_) => "__func__",
+            Self::GpOffset => "gp_offset".to_owned(),
+            Self::OverflowArgArea => "overflow_arg_area".to_owned(),
+            Self::Func(func) => format!("__func__ {func:?}"),
         };
         write!(f, "{s}")
     }

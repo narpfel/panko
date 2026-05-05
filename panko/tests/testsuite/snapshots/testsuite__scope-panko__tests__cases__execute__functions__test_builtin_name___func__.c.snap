@@ -18,9 +18,9 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%s %zu %d\n")
-               (builtin-name __func__)
-               (sizeof (builtin-name __func__))
-               (equal (builtin-name __func__) (builtin-name __func__))))))
+               (builtin-name __func__ "function")
+               (sizeof (builtin-name __func__ "function"))
+               (equal (builtin-name __func__ "function") (builtin-name __func__ "function"))))))
    (function-definition
       main~3 `fn() -> int`
       (compound-statement
@@ -28,13 +28,13 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%s %zu %d\n")
-               (builtin-name __func__)
-               (sizeof (builtin-name __func__))
-               (equal (builtin-name __func__) (builtin-name __func__))))
-         (declaration func~5 `ptr<char const>` (builtin-name __func__))
+               (builtin-name __func__ "main")
+               (sizeof (builtin-name __func__ "main"))
+               (equal (builtin-name __func__ "main") (builtin-name __func__ "main"))))
+         (declaration func~5 `ptr<char const>` (builtin-name __func__ "main"))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (equal (name func~5 `ptr<char const>`) (builtin-name __func__)))))))
+               (equal (name func~5 `ptr<char const>`) (builtin-name __func__ "main")))))))
 
 ----- stderr -----
