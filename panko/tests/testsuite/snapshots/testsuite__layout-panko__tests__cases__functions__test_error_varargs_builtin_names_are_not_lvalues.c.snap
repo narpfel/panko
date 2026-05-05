@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/functions/test_error_varargs_builtin_names_are_not_lvalues.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot take address of this expression because it is not an lvalue
+   ╭─[panko/tests/cases/functions/test_error_varargs_builtin_names_are_not_lvalues.c:2:6]
+   │
+ 2 │     &__panko_gp_offset;
+   │      ────────┬────────  
+   │              ╰────────── this expression is not an lvalue
+───╯
+
+Error: cannot take address of this expression because it is not an lvalue
+   ╭─[panko/tests/cases/functions/test_error_varargs_builtin_names_are_not_lvalues.c:3:7]
+   │
+ 3 │     & __panko_overflow_arg_area;
+   │       ────────────┬────────────  
+   │                   ╰────────────── this expression is not an lvalue
+───╯
