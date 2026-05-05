@@ -1065,6 +1065,13 @@ impl<'a> Codegen<'a> {
                         let member = self.member_pointer(member);
                         self.emit_args("lea", &[&Rax, &*member]);
                     }
+                    Expression::BuiltinName(BuiltinName {
+                        kind: BuiltinNameKind::Func(func),
+                        loc: _,
+                    }) => {
+                        let func = self.string(ByteStr::new(func).into());
+                        self.emit_args("lea", &[&Rax, &func]);
+                    }
                     _ => unreachable!(),
                 }
                 self.emit_args("mov", &[expr, &Rax]);
@@ -1206,6 +1213,7 @@ impl<'a> Codegen<'a> {
                     self.emit_args("lea", &[&Rax, &first_param_passed_on_stack]);
                     self.emit_args("mov", &[expr, &Rax]);
                 }
+                BuiltinNameKind::Func(_func) => unreachable!(),
             },
         }
     }

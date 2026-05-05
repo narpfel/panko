@@ -487,21 +487,23 @@ pub(crate) enum Typeof<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct BuiltinName<'a> {
-    pub kind: BuiltinNameKind,
+    pub kind: BuiltinNameKind<'a>,
     pub loc: Loc<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum BuiltinNameKind {
+pub enum BuiltinNameKind<'a> {
     GpOffset,
     OverflowArgArea,
+    Func(&'a str),
 }
 
-impl fmt::Display for BuiltinNameKind {
+impl fmt::Display for BuiltinNameKind<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             Self::GpOffset => "gp_offset",
             Self::OverflowArgArea => "overflow_arg_area",
+            Self::Func(_) => "__func__",
         };
         write!(f, "{s}")
     }
@@ -870,7 +872,7 @@ fn resolve_function_definition<'a>(
                 kind: "function",
             }),
     };
-    scopes.push();
+    scopes.push(name.slice());
 
     let FunctionType { params, return_type, is_varargs } = match ty {
         QualifiedType {

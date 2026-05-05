@@ -29,9 +29,17 @@ struct Scope<'a> {
     names: nonempty::Vec<HashMap<&'a str, Reference<'a>>>,
     type_names: nonempty::Vec<HashMap<&'a str, QualifiedType<'a>>>,
     structs: nonempty::Vec<HashMap<&'a str, Type<'a>>>,
+    function_name: Option<&'a str>,
 }
 
 impl<'a> Scope<'a> {
+    fn function(function_name: &'a str) -> Scope<'a> {
+        Self {
+            function_name: Some(function_name),
+            ..Self::default()
+        }
+    }
+
     fn lookup(&self, name: &'a str) -> Option<Reference<'a>> {
         self.names
             .iter()
@@ -71,14 +79,24 @@ impl<'a> Scope<'a> {
     }
 
     fn push(&mut self) {
-        let Self { names, type_names, structs } = self;
+        let Self {
+            names,
+            type_names,
+            structs,
+            function_name: _,
+        } = self;
         names.push(HashMap::default());
         type_names.push(HashMap::default());
         structs.push(HashMap::default());
     }
 
     fn pop(&mut self) {
-        let Self { names, type_names, structs } = self;
+        let Self {
+            names,
+            type_names,
+            structs,
+            function_name: _,
+        } = self;
         names.pop();
         type_names.pop();
         structs.pop();
@@ -217,6 +235,11 @@ impl<'a> Scopes<'a> {
                     kind: BuiltinNameKind::OverflowArgArea,
                     loc,
                 })),
+            "__func__" if let IsInGlobalScope::No = self.is_in_global_scope() =>
+                Some(Either::Right(BuiltinName {
+                    kind: BuiltinNameKind::Func(self.scopes.last().function_name.unwrap()),
+                    loc,
+                })),
             _ => self
                 .scopes
                 .iter()
@@ -294,8 +317,8 @@ impl<'a> Scopes<'a> {
         (ty, previous_definition)
     }
 
-    pub(super) fn push(&mut self) {
-        self.scopes.push(Scope::default());
+    pub(super) fn push(&mut self, function_name: &'a str) {
+        self.scopes.push(Scope::function(function_name));
         assert!(self.scopes.len() <= 2);
     }
 
