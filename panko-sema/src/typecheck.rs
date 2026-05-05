@@ -2472,6 +2472,9 @@ fn typeck_expression<'a>(
                             (Type::Void, _) | (_, Type::Void) => Type::Void,
                             _ => then_pointee.ty,
                         },
+                        // TODO: this should use the `loc` of one of `then.ty` or `or_else.ty`;
+                        // if they’re equal, it doesn’t matter, otherwise it should be the `ty`’s
+                        // `loc` that’s equal to `return_ty`
                         loc: HashEqIgnored(Loc::synthesised()),
                     })),
 
