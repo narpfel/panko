@@ -35,6 +35,11 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (equal (name func~5 `ptr<char const>`) (builtin-name __func__ "main")))))))
+               (equal (name func~5 `ptr<char const>`) (builtin-name __func__ "main"))))
+         (declaration ptr_to_func~6 `ptr<typeof(`array<char const; (sizeof (builtin-name __func__ "main"))>`)>` (addressof (builtin-name __func__ "main")))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal (deref (name ptr_to_func~6 `ptr<typeof(`array<char const; (sizeof (builtin-name __func__ "main"))>`)>`)) (name func~5 `ptr<char const>`)))))))
 
 ----- stderr -----

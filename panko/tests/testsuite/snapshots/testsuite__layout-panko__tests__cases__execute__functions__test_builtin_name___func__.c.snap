@@ -76,6 +76,23 @@ exit_code: 0
                   (func~5 `ptr<char const>` @0)
                   (noop-type-conversion `ptr<char const>` @40
                      (addressof `ptr<array<char const; 5>>` @40
-                        (builtin-name `array<char const; 5> const` @40 __func__ "main")))))))))
+                        (builtin-name `array<char const; 5> const` @40 __func__ "main"))))))
+         (definition (ptr_to_func~6 `ptr<array<char const; 5>>` @8)
+            (noop-type-conversion `ptr<array<char const; 5>>` @8
+               (addressof `ptr<array<char const; 5> const>` @8
+                  (builtin-name `array<char const; 5> const` @8 __func__ "main"))))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 4>>` @32
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (ptr-equal `int` @40
+                  (noop-type-conversion `ptr<char const>` @48
+                     (addressof `ptr<array<char const; 5>>` @48
+                        (deref `array<char const; 5>` @48 (ptr_to_func~6 `ptr<array<char const; 5>>` @8))))
+                  (func~5 `ptr<char const>` @0)))))))
 
 ----- stderr -----

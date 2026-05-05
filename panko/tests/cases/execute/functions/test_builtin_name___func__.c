@@ -16,4 +16,8 @@ int main() {
     char const* func = __func__;
     // [[print: 1]]
     printf("%d\n", func == __func__);
+
+    typeof(char const[sizeof __func__])* ptr_to_func = &__func__;
+    // [[print: 1]]
+    printf("%d\n", *ptr_to_func == func);
 }
