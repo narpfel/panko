@@ -10,6 +10,7 @@ use panko_parser::ast::Session;
 use panko_parser::ast::TypeDeclaration;
 use panko_parser::nonempty;
 
+use super::BuiltinNameKind;
 use super::Id;
 use super::IsInGlobalScope;
 use super::IsParameter;
@@ -19,6 +20,7 @@ use super::RefInitialiser;
 use super::Reference;
 use super::StorageDuration;
 use super::Type;
+use crate::scope::BuiltinName;
 use crate::ty::Complete;
 use crate::ty::Struct;
 
@@ -199,12 +201,29 @@ impl<'a> Scopes<'a> {
         }
     }
 
-    pub(super) fn lookup(&self, name: &'a str, loc: Loc<'a>) -> Option<Reference<'a>> {
-        self.scopes
-            .iter()
-            .rev()
-            .find_map(|scope| scope.lookup(name))
-            .map(|reference| reference.at(loc))
+    pub(super) fn lookup(
+        &self,
+        name: &'a str,
+        loc: Loc<'a>,
+    ) -> Option<Either<Reference<'a>, BuiltinName<'a>>> {
+        match name {
+            "__panko_gp_offset" if let IsInGlobalScope::No = self.is_in_global_scope() =>
+                Some(Either::Right(BuiltinName {
+                    kind: BuiltinNameKind::GpOffset,
+                    loc,
+                })),
+            "__panko_overflow_arg_area" if let IsInGlobalScope::No = self.is_in_global_scope() =>
+                Some(Either::Right(BuiltinName {
+                    kind: BuiltinNameKind::OverflowArgArea,
+                    loc,
+                })),
+            _ => self
+                .scopes
+                .iter()
+                .rev()
+                .find_map(|scope| scope.lookup(name))
+                .map(|reference| Either::Left(reference.at(loc))),
+        }
     }
 
     fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Reference<'a>> {

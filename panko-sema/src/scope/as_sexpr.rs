@@ -23,6 +23,7 @@ use super::TranslationUnit;
 use super::Typedef;
 use super::Typeof;
 use crate::scope::BitfieldWidth;
+use crate::scope::BuiltinName;
 use crate::scope::Member;
 
 impl AsSExpr for Member<'_> {
@@ -226,6 +227,7 @@ impl AsSExpr for Expression<'_> {
                 member,
                 close_paren: _,
             } => SExpr::new("offsetof").inherit(ty).inherit(member),
+            Expression::BuiltinName(builtin_name) => builtin_name.as_sexpr(),
         }
     }
 }
@@ -252,5 +254,12 @@ impl AsSExpr for Typeof<'_> {
             Self::Expr(expr) => expr.as_sexpr(),
             Self::Ty(ty) => ty.as_sexpr(),
         }
+    }
+}
+
+impl AsSExpr for BuiltinName<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { kind, loc: _ } = self;
+        SExpr::new("builtin-name").inline_string(kind.to_string())
     }
 }

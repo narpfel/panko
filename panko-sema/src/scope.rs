@@ -1,3 +1,4 @@
+use std::fmt;
 use std::path::Path;
 
 use ariadne::Color::Blue;
@@ -258,12 +259,17 @@ pub(crate) struct FunctionDefinition<'a> {
     pub(crate) params: ParamRefs<'a>,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
-    pub(crate) is_varargs: bool,
+    pub(crate) varargs: Option<Varargs<'a>>,
     pub(crate) body: CompoundStatement<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct ParamRefs<'a>(pub(crate) &'a [Reference<'a>]);
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Varargs<'a> {
+    pub(crate) reg_save_area: Reference<'a>,
+}
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
@@ -390,6 +396,7 @@ pub(crate) enum Expression<'a> {
         member: Token<'a>,
         close_paren: Token<'a>,
     },
+    BuiltinName(BuiltinName<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -476,6 +483,28 @@ pub(crate) enum GenericAssociation<'a> {
 pub(crate) enum Typeof<'a> {
     Expr(&'a Expression<'a>),
     Ty(&'a QualifiedType<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct BuiltinName<'a> {
+    pub kind: BuiltinNameKind,
+    pub loc: Loc<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum BuiltinNameKind {
+    GpOffset,
+    OverflowArgArea,
+}
+
+impl fmt::Display for BuiltinNameKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::GpOffset => "gp_offset",
+            Self::OverflowArgArea => "overflow_arg_area",
+        };
+        write!(f, "{s}")
+    }
 }
 
 impl<'a> Typedef<'a> {
@@ -607,6 +636,7 @@ impl<'a> Expression<'a> {
                 member: _,
                 close_paren,
             } => builtin_offsetof.loc().until(close_paren.loc()),
+            Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
         }
     }
 }
@@ -875,6 +905,38 @@ fn resolve_function_definition<'a>(
         )
         .expect("`return` is a keyword, so there are no types with that name");
 
+    let varargs = is_varargs.then(|| {
+        let char = scopes.sess.alloc(Type::char().unqualified());
+        let length = NoHashEq(Some(scopes.sess.alloc(Expression::Integer {
+            value: "304",
+            token: Token::synthesised(
+                panko_lex::TokenKind::Integer(panko_lex::Integer {
+                    suffix: panko_lex::IntegerSuffix::None,
+                    suffix_len: 0,
+                    base: 10,
+                    prefix_len: 0,
+                }),
+                name.loc(),
+            ),
+        })));
+        let reg_save_area = scopes
+            .add(
+                "__panko_reg_save_area",
+                reference.decl_loc,
+                Type::Array(ArrayType {
+                    ty: char,
+                    length,
+                    loc: HashEqIgnored(reference.decl_loc),
+                })
+                .unqualified(),
+                StorageDuration::Automatic,
+                IsParameter::No,
+                IsInGlobalScope::No,
+            )
+            .expect("`__panko_reg_save_area` is a reserved name");
+        Varargs { reg_save_area }
+    });
+
     let sess = scopes.sess;
     let params = sess.alloc_slice_collect(params.iter().enumerate().map(|(i, param)| {
         let name = param.name.map_or_else(
@@ -901,7 +963,7 @@ fn resolve_function_definition<'a>(
         params: ParamRefs(params),
         inline: *inline,
         noreturn: *noreturn,
-        is_varargs,
+        varargs,
         body,
     })
 }
@@ -1139,10 +1201,14 @@ fn resolve_assoc<'a>(
 fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expression<'a> {
     match expr {
         ast::Expression::Error(error) => Expression::Error(*error),
-        ast::Expression::Name(name) => scopes
-            .lookup(name.slice(), name.loc())
-            .map(Expression::Name)
-            .unwrap_or_else(|| scopes.sess.emit(Diagnostic::UndeclaredName { at: *name })),
+        ast::Expression::Name(name) => try {
+            scopes
+                .lookup(name.slice(), name.loc())?
+                .map_left(Expression::Name)
+                .map_right(Expression::BuiltinName)
+                .into_inner()
+        }
+        .unwrap_or_else(|| scopes.sess.emit(Diagnostic::UndeclaredName { at: *name })),
         ast::Expression::Integer(token) =>
             Expression::Integer { value: token.slice(), token: *token },
         ast::Expression::CharConstant(char) => Expression::CharConstant(*char),

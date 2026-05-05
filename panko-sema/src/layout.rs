@@ -11,6 +11,7 @@ use panko_parser::ast::Integral;
 use panko_report::Report;
 
 use crate::layout::stack::Stack;
+use crate::scope::BuiltinName;
 use crate::scope::Id;
 use crate::scope::Linkage;
 use crate::scope::RefKind;
@@ -88,6 +89,11 @@ pub struct Subobject<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct Varargs<'a> {
+    pub reg_save_area: Reference<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct FunctionDefinition<'a> {
     pub reference: Reference<'a>,
     pub return_slot: Return<'a>,
@@ -95,7 +101,7 @@ pub struct FunctionDefinition<'a> {
     #[expect(unused)]
     inline: Option<cst::FunctionSpecifier<'a>>,
     pub noreturn: Option<cst::FunctionSpecifier<'a>>,
-    pub is_varargs: bool,
+    pub varargs: Option<Varargs<'a>>,
     pub stack_size: u64,
     pub argument_area_size: u64,
     pub body: CompoundStatement<'a>,
@@ -204,6 +210,7 @@ pub enum Expression<'a> {
         lhs: &'a LayoutedExpression<'a>,
         member: Member<'a, Layout>,
     },
+    BuiltinName(BuiltinName<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -361,7 +368,7 @@ fn layout_function_definition<'a>(
         params,
         inline,
         noreturn,
-        is_varargs,
+        varargs,
         body,
     } = *def;
     let reference = stack.add(bump, reference);
@@ -369,6 +376,11 @@ fn layout_function_definition<'a>(
         typecheck::Return::Void => Return::Void,
         typecheck::Return::InRegisters(class) => Return::InRegisters(class),
         typecheck::Return::OnStack(reference) => Return::OnStack(stack.add(bump, reference)),
+    };
+    let varargs = try {
+        let typecheck::Varargs { reg_save_area } = varargs?;
+        let reg_save_area = stack.add(bump, reg_save_area);
+        Varargs { reg_save_area }
     };
     let params =
         ParamRefs(bump.alloc_slice_fill_iter(params.0.iter().map(|&param| stack.add(bump, param))));
@@ -385,7 +397,7 @@ fn layout_function_definition<'a>(
         noreturn,
         stack_size,
         argument_area_size,
-        is_varargs,
+        varargs,
         body,
     }
 }
@@ -685,6 +697,8 @@ fn layout_expression_in_slot<'a>(
             let member = layout_member(stack, bump, &member);
             (slot, Expression::MemberAccess { lhs, member })
         }
+        typecheck::Expression::BuiltinName(builtin_name) =>
+            (make_slot(), Expression::BuiltinName(builtin_name)),
     };
     LayoutedExpression { ty, slot, expr, loc }
 }

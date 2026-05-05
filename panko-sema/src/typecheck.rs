@@ -39,6 +39,8 @@ use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
 use crate::scope;
 use crate::scope::BitfieldWidth;
+use crate::scope::BuiltinName;
+use crate::scope::BuiltinNameKind;
 use crate::scope::DesignatedInitialiser;
 use crate::scope::Designation;
 use crate::scope::Designator;
@@ -261,7 +263,7 @@ pub(crate) struct FunctionDefinition<'a> {
     pub(crate) params: ParamRefs<'a>,
     pub(crate) inline: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
-    pub(crate) is_varargs: bool,
+    pub(crate) varargs: Option<Varargs<'a>>,
     pub(crate) body: CompoundStatement<'a>,
 }
 
@@ -274,6 +276,11 @@ pub(crate) enum Return<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct ParamRefs<'a>(pub(crate) &'a [Reference<'a>]);
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Varargs<'a> {
+    pub(crate) reg_save_area: Reference<'a>,
+}
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
@@ -428,6 +435,7 @@ pub(crate) enum Expression<'a> {
         member: Member<'a, Typeck>,
         member_loc: Loc<'a>,
     },
+    BuiltinName(BuiltinName<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -487,6 +495,14 @@ impl<'a> Reference<'a> {
     }
 }
 
+impl BuiltinNameKind {
+    fn is_lvalue(self) -> bool {
+        match self {
+            Self::GpOffset | Self::OverflowArgArea => false,
+        }
+    }
+}
+
 impl<'a> TypedExpression<'a> {
     pub(crate) fn loc(&self) -> Loc<'a> {
         self.expr.loc()
@@ -532,6 +548,7 @@ impl<'a> TypedExpression<'a> {
             | Expression::Combine { .. }
             | Expression::Logical { .. }
             | Expression::Conditional { .. } => false,
+            Expression::BuiltinName(BuiltinName { kind, loc: _ }) => kind.is_lvalue(),
         }
     }
 
@@ -604,6 +621,7 @@ impl<'a> Expression<'a> {
             Expression::Conditional { condition, then: _, or_else } =>
                 condition.loc().until(or_else.loc()),
             Expression::MemberAccess { lhs, member: _, member_loc } => lhs.loc().until(*member_loc),
+            Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
         }
     }
 
@@ -1124,7 +1142,7 @@ fn typeck_function_definition<'a>(
         params,
         inline,
         noreturn,
-        is_varargs,
+        varargs,
         body,
     } = *definition;
 
@@ -1152,13 +1170,19 @@ fn typeck_function_definition<'a>(
         ),
     };
 
+    let varargs = try {
+        let scope::Varargs { reg_save_area } = varargs?;
+        let reg_save_area = typeck_reference(sess, reg_save_area, NeedsInitialiser::No);
+        Varargs { reg_save_area }
+    };
+
     FunctionDefinition {
         reference,
         return_slot,
         params: ParamRefs(params),
         inline,
         noreturn,
-        is_varargs,
+        varargs,
         body: typeck_compound_statement(sess, &body, definition),
     }
 }
@@ -2448,6 +2472,9 @@ fn typeck_expression<'a>(
                             (Type::Void, _) | (_, Type::Void) => Type::Void,
                             _ => then_pointee.ty,
                         },
+                        // TODO: this should use the `loc` of one of `then.ty` or `or_else.ty`;
+                        // if they’re equal, it doesn’t matter, otherwise it should be the `ty`’s
+                        // `loc` that’s equal to `return_ty`
                         loc: HashEqIgnored(Loc::synthesised()),
                     })),
 
@@ -2610,6 +2637,17 @@ fn typeck_expression<'a>(
                 })
                 .into_inner();
             TypedExpression { ty: Type::size_t().unqualified(), expr }
+        }
+        scope::Expression::BuiltinName(name @ BuiltinName { kind, loc: _ }) => {
+            let ty = match kind {
+                BuiltinNameKind::GpOffset => Type::size_t(),
+                BuiltinNameKind::OverflowArgArea =>
+                    Type::Pointer(sess.alloc(Type::Void.unqualified())),
+            };
+            TypedExpression {
+                ty: ty.as_const(),
+                expr: Expression::BuiltinName(*name),
+            }
         }
     };
 

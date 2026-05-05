@@ -322,6 +322,13 @@ impl<'a, T: Step> Type<'a, T> {
         }
     }
 
+    pub(crate) fn as_const(&self) -> QualifiedType<'a, T>
+    where
+        T: Copy,
+    {
+        QualifiedType { is_const: true, ..self.unqualified() }
+    }
+
     // TODO: this is a temporary hack until the `Report` derive macro handles stringification
     // better
     pub fn slice(&self) -> String {

@@ -1,0 +1,41 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      declare_static~1 `fn(∅: int, ∅: int, ∅: int) -> void`
+      (params
+         declare_static.unnamed_parameter.0~3 `int`
+         declare_static.unnamed_parameter.1~4 `int`
+         declare_static.unnamed_parameter.2~5 `int`)
+      (compound-statement
+         (declaration gp_offset~6 `typeof((sizeof 0))` (builtin-name gp_offset))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (name gp_offset~6 `typeof((sizeof 0))`)))))
+   (function-definition
+      main~7 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name declare_static~1 `fn(∅: int, ∅: int, ∅: int) -> void`)
+               1
+               2
+               3))
+         (declaration gp_offset~9 `typeof((sizeof 0))` (builtin-name gp_offset))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (name gp_offset~9 `typeof((sizeof 0))`))))))
+
+----- stderr -----
