@@ -6,7 +6,6 @@ use std::cell::RefCell;
 use std::iter::once;
 use std::ops::Range;
 use std::path::Path;
-use std::path::PathBuf;
 use std::sync::LazyLock;
 
 use logos::Lexer;
@@ -14,9 +13,11 @@ use logos::Logos;
 use logos::Skip;
 
 pub use crate::bump::Bump;
+use crate::constable_path::ConstablePath;
 pub use crate::typedef_names::TypedefNames;
 
 mod bump;
+mod constable_path;
 pub mod typedef_names;
 
 #[derive(Clone, Copy)]
@@ -32,7 +33,7 @@ impl<'a> Token<'a> {
             loc: Loc {
                 span: Span { start: 0, end: s.len() },
                 source_file: bump.alloc(SourceFile {
-                    file: Path::new("<scratch area>"),
+                    file: ConstablePath::from_str("<scratch area>"),
                     physical_src: s,
                     logical_src: s,
                     chunk_starts: &[0],
@@ -185,7 +186,7 @@ impl std::fmt::Debug for Token<'_> {
 
 #[derive(Clone, Copy)]
 struct SourceFile<'a> {
-    file: &'a Path,
+    file: ConstablePath<'a>,
     physical_src: &'a str,
     logical_src: &'a str,
     chunk_starts: &'a [usize],
@@ -210,14 +211,13 @@ impl std::fmt::Debug for Loc<'_> {
 }
 
 impl<'a> Loc<'a> {
-    pub fn synthesised() -> Self {
-        static PATH: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from("<synthesised>"));
-        static SOURCE_FILE: LazyLock<SourceFile> = LazyLock::new(|| SourceFile {
-            file: &PATH,
+    pub const fn synthesised() -> Self {
+        const SOURCE_FILE: SourceFile = SourceFile {
+            file: ConstablePath::from_str("<synthesised>"),
             physical_src: "<synthesised>",
             logical_src: "<synthesised>",
             chunk_starts: &[0],
-        });
+        };
 
         Self {
             span: Span { start: 0, end: 0 },
@@ -226,7 +226,7 @@ impl<'a> Loc<'a> {
     }
 
     pub fn file(&self) -> &'a Path {
-        self.source_file.file
+        self.source_file.file.as_ref()
     }
 
     pub fn src(&self) -> &'a str {
@@ -794,7 +794,7 @@ pub fn lex<'a>(bump: &'a Bump, filename: &'a Path, physical_src: &str) -> TokenI
     let logical_src = bump.alloc_str(&logical_src);
     let chunk_starts = bump.alloc_slice_copy(&chunk_starts);
     let source_file = bump.alloc(SourceFile {
-        file: filename,
+        file: ConstablePath::new(filename),
         physical_src: bump.alloc_str(physical_src),
         logical_src,
         chunk_starts,
