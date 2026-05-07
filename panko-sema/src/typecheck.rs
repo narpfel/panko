@@ -2643,9 +2643,9 @@ fn typeck_expression<'a>(
             let ty = match kind {
                 BuiltinNameKind::GpOffset => Type::size_t(),
                 BuiltinNameKind::OverflowArgArea =>
-                    Type::Pointer(sess.alloc(Type::Void.unqualified())),
+                    Type::Pointer(const { &Type::Void.unqualified() }),
                 BuiltinNameKind::Func(func) => Type::Array(ArrayType {
-                    ty: sess.alloc(Type::char().as_const()),
+                    ty: const { &Type::char().as_const() },
                     length: ArrayLength::Constant(u64::try_from(func.len()).unwrap() + 1),
                     loc: HashEqIgnored(*loc),
                 }),

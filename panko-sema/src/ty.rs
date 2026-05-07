@@ -310,7 +310,7 @@ impl<'a, T: Step> Type<'a, T> {
         }
     }
 
-    pub fn unqualified(&self) -> QualifiedType<'a, T>
+    pub const fn unqualified(&self) -> QualifiedType<'a, T>
     where
         T: Copy,
     {
@@ -322,7 +322,7 @@ impl<'a, T: Step> Type<'a, T> {
         }
     }
 
-    pub(crate) fn as_const(&self) -> QualifiedType<'a, T>
+    pub(crate) const fn as_const(&self) -> QualifiedType<'a, T>
     where
         T: Copy,
     {
