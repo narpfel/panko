@@ -268,7 +268,7 @@ pub(super) fn typeck_string_literal<'a>(
     let string = parse_string_literal(sess, tokens);
     TypedExpression {
         ty: Type::Array(ArrayType {
-            ty: sess.alloc(Type::char().unqualified()),
+            ty: const { &Type::char().unqualified() },
             length: ArrayLength::Constant(string.len()),
             loc: HashEqIgnored(string.loc()),
         })

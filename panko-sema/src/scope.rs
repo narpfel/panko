@@ -908,7 +908,6 @@ fn resolve_function_definition<'a>(
         .expect("`return` is a keyword, so there are no types with that name");
 
     let varargs = is_varargs.then(|| {
-        let char = scopes.sess.alloc(Type::char().unqualified());
         let length = NoHashEq(Some(scopes.sess.alloc(Expression::Integer {
             value: "304",
             token: Token::synthesised(
@@ -926,7 +925,7 @@ fn resolve_function_definition<'a>(
                 "__panko_reg_save_area",
                 reference.decl_loc,
                 Type::Array(ArrayType {
-                    ty: char,
+                    ty: const { &Type::char().unqualified() },
                     length,
                     loc: HashEqIgnored(reference.decl_loc),
                 })
