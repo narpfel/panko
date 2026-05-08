@@ -198,7 +198,7 @@ FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = 
 }
 
 NonAbstractInitDeclarator: Option<ast::InitDeclarator<'a>> = {
-    InitDeclarator<MaybeAbstractDeclarator> => Some(<>),
+    InitDeclaratorNoInitialiser<MaybeAbstractDeclarator> => Some(<>),
 }
 
 FunctionBody = { CompoundStatement<DontPushTypedefScope> }
@@ -303,6 +303,22 @@ DeclarationSpecifier: ast::DeclarationSpecifier<'a> = {
 
 InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
     CommaSep<InitDeclarator<Declarator<AnyIdentifier, AnyIdentifier>>>,
+}
+
+InitDeclaratorNoInitialiser<Declarator>: ast::InitDeclarator<'a> = {
+    <declarator:Declarator>
+    => {
+        if let Some(name) = declarator.direct_declarator.name() {
+            let kind = if *is_in_typedef.borrow().last() {
+                TokenKind::TypeIdentifier
+            }
+            else {
+                TokenKind::Identifier
+            };
+            typedef_names.borrow_mut().insert(name, kind);
+        }
+        ast::InitDeclarator { <>, bitfield_width: None, initialiser: None }
+    },
 }
 
 InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
@@ -492,9 +508,13 @@ FunctionAbstractDeclarator: ast::FunctionDeclarator<'a> = {
 }
 
 Initialiser: ast::Initialiser<'a> = {
+    BracedInitialiser,
+    AssignmentExpression => ast::Initialiser::Expression(<>),
+}
+
+BracedInitialiser: ast::Initialiser<'a> = {
     <open_brace:"{"> <initialiser_list:CommaSepWithTrailingComma<DesignatedInitialiser>>
         <close_brace:"}"> => ast::Initialiser::Braced { <> },
-    AssignmentExpression => ast::Initialiser::Expression(<>),
 }
 
 DesignatedInitialiser: ast::DesignatedInitialiser<'a> = {
@@ -732,9 +752,15 @@ PostfixExpression: ast::Expression<'a> = {
         ast::Expression::MemberAccess { <> },
     <operand:Bump<PostfixExpression>> <operator:IncrementOperator> =>
         ast::Expression::Increment { <>, fixity: ast::IncrementFixity::Postfix },
+    CompoundLiteral,
 }
 
 ArgumentExpressionList = { CommaSep<AssignmentExpression> }
+
+CompoundLiteral: ast::Expression<'a> = {
+    <open_paren:"("> <storage_class_specifiers:Many<StorageClassSpecifier>> <ty:TypeName> ")"
+        <initialiser:Bump<BracedInitialiser>> => ast::Expression::CompoundLiteral { <> },
+}
 
 UnaryOperator: ast::UnaryOp<'a> = {
     "&" => ast::UnaryOp { kind: ast::UnaryOpKind::Addressof, token: <> },
@@ -945,6 +971,7 @@ Some<T>: &'a [T] = {
     T+ => sess.alloc_slice_copy(&<>),
 }
 
+#[inline]
 Many<T>: &'a [T] = {
     T* => sess.alloc_slice_copy(&<>),
 }

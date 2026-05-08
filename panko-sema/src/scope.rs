@@ -86,6 +86,10 @@ pub(crate) enum Diagnostic<'a> {
         reference: Reference<'a>,
         kind: &'a str,
     },
+
+    #[error("TODO: compound literals are not implemented")]
+    #[diagnostics(at(colour = Red))]
+    TodoCompoundLiteralsNotImplemented { at: ast::Expression<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1366,6 +1370,9 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             member: *member,
             close_paren: *close_paren,
         },
+        ast::Expression::CompoundLiteral { .. } => scopes
+            .sess
+            .emit(Diagnostic::TodoCompoundLiteralsNotImplemented { at: *expr }),
     }
 }
 

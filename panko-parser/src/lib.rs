@@ -1100,10 +1100,16 @@ pub enum Expression<'a> {
         member: Token<'a>,
         close_paren: Token<'a>,
     },
+    CompoundLiteral {
+        open_paren: Token<'a>,
+        storage_class_specifiers: &'a [StorageClassSpecifier<'a>],
+        ty: QualifiedType<'a>,
+        initialiser: &'a Initialiser<'a>,
+    },
 }
 
 impl<'a> Expression<'a> {
-    fn loc(&self) -> Loc<'a> {
+    pub fn loc(&self) -> Loc<'a> {
         match self {
             Self::Error(report) => report.location(),
             Self::Name(token) => token.loc(),
@@ -1146,6 +1152,12 @@ impl<'a> Expression<'a> {
                 member: _,
                 close_paren,
             } => builtin_offsetof.loc().until(close_paren.loc()),
+            Self::CompoundLiteral {
+                open_paren,
+                storage_class_specifiers: _,
+                ty: _,
+                initialiser,
+            } => open_paren.loc().until(initialiser.loc()),
         }
     }
 }

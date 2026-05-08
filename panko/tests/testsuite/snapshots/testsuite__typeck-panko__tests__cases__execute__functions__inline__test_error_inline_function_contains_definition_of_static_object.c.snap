@@ -12,10 +12,9 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: unexpected token `{` of kind `LBrace`
-   ╭─[panko/tests/cases/execute/functions/inline/test_error_inline_function_contains_definition_of_static_object.c:4:20]
+Error: TODO: compound literals are not implemented
+   ╭─[panko/tests/cases/execute/functions/inline/test_error_inline_function_contains_definition_of_static_object.c:4:15]
    │
  4 │ inline typeof((int){0}) g() {
-   │                    ┬  
-   │                    ╰── expected one of the following token kinds: ["*", "(", "_Generic", "sizeof", "_Lengthof", "alignof", "+", "-", "~", "!", "&", "++", "--", "true", "false", "nullptr", "__builtin_offsetof", Identifier, Integer, MaybeUnterminatedCharConstant, MaybeUnterminatedString]
+   │               ────────  
 ───╯
