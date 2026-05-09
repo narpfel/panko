@@ -822,10 +822,10 @@ impl<'a> DirectDeclarator<'a> {
         }
     }
 
-    fn name(&self) -> Option<&'a str> {
+    fn name(&self) -> Option<Token<'a>> {
         match self {
             DirectDeclarator::Abstract => None,
-            DirectDeclarator::Identifier(token) => Some(token.slice()),
+            DirectDeclarator::Identifier(token) => Some(*token),
             DirectDeclarator::Parenthesised { declarator, close_paren: _ } =>
                 declarator.direct_declarator.name(),
             DirectDeclarator::ArrayDeclarator(array_declarator) =>
@@ -854,7 +854,7 @@ impl<'a> DirectDeclarator<'a> {
                         else {
                             TokenKind::Identifier
                         };
-                        Some((param.declarator?.direct_declarator.name()?, kind))
+                        Some((param.declarator?.direct_declarator.name()?.slice(), kind))
                     }),
             ),
         }
@@ -1409,16 +1409,71 @@ fn handle_parse_error<'a, T: FromError<'a>>(
     }
 }
 
+struct TypedefTracker<'a, 'b> {
+    typedef_names: &'b RefCell<TypedefNames<'a>>,
+    is_in_typedef: nonempty::Vec<bool>,
+}
+
+impl<'a, 'b> TypedefTracker<'a, 'b> {
+    fn declare_name(&mut self, name: Token<'a>) {
+        let kind = match self.is_in_typedef.last() {
+            true => TokenKind::TypeIdentifier,
+            false => TokenKind::Identifier,
+        };
+        self.typedef_names.borrow_mut().insert(name.slice(), kind);
+    }
+
+    fn is_in_typedef(&mut self) {
+        *self.is_in_typedef.last_mut() = true;
+    }
+
+    fn is_not_in_typedef(&mut self) {
+        *self.is_in_typedef.last_mut() = false;
+    }
+
+    fn push_is_in_typedef(&mut self, is_in_typedef: bool) {
+        self.is_in_typedef.push(is_in_typedef)
+    }
+
+    fn pop_is_in_typedef(&mut self) {
+        self.is_in_typedef
+            .pop()
+            .expect("should be correctly paired with a `push`");
+    }
+
+    fn push_scope(&mut self) {
+        self.typedef_names.borrow_mut().push_scope();
+    }
+
+    fn pop_scope(&mut self) {
+        self.typedef_names.borrow_mut().pop_scope();
+    }
+
+    fn enter_function(&mut self, declarator: &Declarator<'a>) {
+        self.push_scope();
+        // while parameters cannot be declared with a storage class (i. e. as a
+        // `typedef` declaration), it’s important for error recovery that we
+        // can parse this case
+        let mut typedef_names = self.typedef_names.borrow_mut();
+        for (name, kind) in declarator.direct_declarator.parameter_names() {
+            typedef_names.insert(name, kind);
+        }
+    }
+}
+
 pub fn parse<'a>(
     sess: &'a ast::Session<'a>,
     filename: &'a Path,
     typedef_names: &'a RefCell<TypedefNames<'a>>,
-    is_in_typedef: &'a RefCell<nonempty::Vec<bool>>,
     tokens: LexerHacked<'a, impl Iterator<Item = Token<'a>>>,
 ) -> Option<ast::TranslationUnit<'a>> {
     let parser = grammar::TranslationUnitParser::new();
+    let typedef_tracker = &mut TypedefTracker {
+        typedef_names,
+        is_in_typedef: nonempty::Vec::default(),
+    };
     let parse_tree = parser
-        .parse(sess, typedef_names, is_in_typedef, filename, tokens)
+        .parse(sess, typedef_tracker, filename, tokens)
         .map_err(handle_parse_error::<()>(sess))
         .ok()?;
     Some(ast::from_parse_tree(sess, parse_tree))

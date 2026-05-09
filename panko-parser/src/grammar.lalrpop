@@ -1,18 +1,16 @@
-use std::cell::RefCell;
 use std::path::Path;
 
 use panko_lex::Token;
 use panko_lex::TokenKind;
-use panko_lex::TypedefNames;
 
 use crate as ast;
 use crate::ast::IsParameter;
 use crate::ast::Session;
+use crate::TypedefTracker;
 
-grammar<'a, 'b>(
+grammar<'a, 'b, 'c>(
     sess: &'a Session<'a>,
-    typedef_names: &'b RefCell<TypedefNames<'a>>,
-    is_in_typedef: &'b RefCell<crate::nonempty::Vec<bool>>,
+    typedef_tracker: &'c mut TypedefTracker<'a, 'b>,
     filename: &'a Path,
 );
 
@@ -185,14 +183,7 @@ FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = 
             initialiser.is_none(),
             "TODO: generate a good error message; e. g. `int a() = 42 {{}}`",
         );
-        let mut typedef_names = typedef_names.borrow_mut();
-        typedef_names.push_scope();
-        // while parameters cannot be declared with a storage class (i. e. as a
-        // `typedef` declaration), it’s important for error recovery that we
-        // can parse this case
-        for (name, kind) in declarator.direct_declarator.parameter_names() {
-            typedef_names.insert(name, kind);
-        }
+        typedef_tracker.enter_function(&declarator);
         (declaration_specifiers, declarator)
     },
 }
@@ -216,7 +207,7 @@ Declaration: ast::Declaration<'a> = {
                 sess.alloc_slice_copy(&init_declarator_list)
             }
         };
-        *is_in_typedef.borrow_mut().last_mut() = false;
+        typedef_tracker.is_not_in_typedef();
         ast::Declaration { specifiers, init_declarator_list, semi }
     },
     // attribute-specifier-sequence declaration-specifiers init_declarator_list ";"
@@ -238,16 +229,6 @@ DeclarationHead<IsAbstractDeclaratorAllowed, MaybeInitDeclarator>: (
 ) = {
     <is_abstract_declarator_allowed:IsAbstractDeclaratorAllowed>
     <specifiers:DeclarationSpecifiers> <declarator:MaybeInitDeclarator> => {
-        let add_typedef_name = |name: Token<'a>| {
-            let kind = if *is_in_typedef.borrow().last() {
-                TokenKind::TypeIdentifier
-            }
-            else {
-                TokenKind::Identifier
-            };
-            typedef_names.borrow_mut().insert(name.slice(), kind);
-        };
-
         if let ast::DeclarationSpecifiers([specifiers @ .., specifier]) = specifiers
             && !specifiers.is_empty()
             && let ast::DeclarationSpecifier::TypeSpecifierQualifier(
@@ -261,7 +242,7 @@ DeclarationHead<IsAbstractDeclaratorAllowed, MaybeInitDeclarator>: (
                     pointers: None,
                     direct_declarator: ast::DirectDeclarator::Identifier(name),
                 };
-                add_typedef_name(name);
+                typedef_tracker.declare_name(name);
                 return (
                     ast::DeclarationSpecifiers(specifiers),
                     Some(ast::InitDeclarator { declarator, bitfield_width: None, initialiser: None }),
@@ -273,7 +254,7 @@ DeclarationHead<IsAbstractDeclaratorAllowed, MaybeInitDeclarator>: (
                 && let Some(direct_declarator) = direct_declarator.with_name(sess, name)
             {
                 let declarator = ast::Declarator { pointers, direct_declarator };
-                add_typedef_name(name);
+                typedef_tracker.declare_name(name);
                 return (
                     ast::DeclarationSpecifiers(specifiers),
                     Some(ast::InitDeclarator { declarator, bitfield_width, initialiser }),
@@ -284,7 +265,7 @@ DeclarationHead<IsAbstractDeclaratorAllowed, MaybeInitDeclarator>: (
             && let Some(ast::InitDeclarator { declarator, bitfield_width, initialiser }) = declarator
             && let Some((name, declarator)) = declarator.reinterpret_as_concrete(sess)
         {
-            add_typedef_name(name);
+            typedef_tracker.declare_name(name);
             return (specifiers, Some(ast::InitDeclarator { declarator, bitfield_width, initialiser }));
         }
         (specifiers, declarator)
@@ -306,16 +287,9 @@ InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
 }
 
 InitDeclaratorNoInitialiser<Declarator>: ast::InitDeclarator<'a> = {
-    <declarator:Declarator>
-    => {
+    <declarator:Declarator> => {
         if let Some(name) = declarator.direct_declarator.name() {
-            let kind = if *is_in_typedef.borrow().last() {
-                TokenKind::TypeIdentifier
-            }
-            else {
-                TokenKind::Identifier
-            };
-            typedef_names.borrow_mut().insert(name, kind);
+            typedef_tracker.declare_name(name);
         }
         ast::InitDeclarator { <>, bitfield_width: None, initialiser: None }
     },
@@ -327,13 +301,7 @@ InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
         <initialiser:("=" <Initialiser>)?>
     => {
         if let Some(name) = declarator.direct_declarator.name() {
-            let kind = if *is_in_typedef.borrow().last() {
-                TokenKind::TypeIdentifier
-            }
-            else {
-                TokenKind::Identifier
-            };
-            typedef_names.borrow_mut().insert(name, kind);
+            typedef_tracker.declare_name(name)
         }
         ast::InitDeclarator { <> }
     },
@@ -544,7 +512,7 @@ StorageClassSpecifierToken = {
     "static",
     "thread_local",
     "typedef" => {
-        *is_in_typedef.borrow_mut().last_mut() = true;
+        typedef_tracker.is_in_typedef();
         <>
     },
 }
@@ -586,13 +554,13 @@ AtomicTypeSpecifier: () = {}
 
 PushIsInTypedef: () = {
     () => {
-        is_in_typedef.borrow_mut().push(false);
+        typedef_tracker.push_is_in_typedef(false);
     },
 }
 
 PopIsInTypedef: () = {
     () => {
-        is_in_typedef.borrow_mut().pop().expect("should be correctly paired with a `push`");
+        typedef_tracker.pop_is_in_typedef();
     },
 }
 
@@ -659,7 +627,7 @@ CompoundStatement<PushTypedefScope>: ast::CompoundStatement<'a> = {
 
 PushTypedefScope: () = {
     () => {
-        typedef_names.borrow_mut().push_scope();
+        typedef_tracker.push_scope();
     },
 }
 
@@ -667,7 +635,7 @@ DontPushTypedefScope: () = { () => () }
 
 PopTypedefScope: () = {
     () => {
-        typedef_names.borrow_mut().pop_scope();
+        typedef_tracker.pop_scope();
     },
 }
 

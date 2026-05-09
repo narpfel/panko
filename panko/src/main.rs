@@ -163,7 +163,6 @@ fn compile(
 ) -> Result<Result<PathBuf, ()>> {
     let bump = &Bump::new();
     let typedef_names = RefCell::default();
-    let is_in_typedef = RefCell::default();
     let tokens = panko_lex::lex(
         bump,
         filename,
@@ -187,8 +186,7 @@ fn compile(
 
     let tokens = panko_lex::apply_lexer_hack(tokens, &typedef_names);
 
-    let translation_unit =
-        panko_parser::parse(session, filename, &typedef_names, &is_in_typedef, tokens);
+    let translation_unit = panko_parser::parse(session, filename, &typedef_names, tokens);
     let translation_unit = match translation_unit {
         Some(translation_unit) => translation_unit,
         None => {
