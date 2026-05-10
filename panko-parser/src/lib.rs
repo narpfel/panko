@@ -1451,9 +1451,9 @@ impl<'a, 'b> TypedefTracker<'a, 'b> {
 
     fn enter_function(&mut self, declarator: &Declarator<'a>) {
         self.push_scope();
-        // while parameters cannot be declared with a storage class (i. e. as a
-        // `typedef` declaration), it’s important for error recovery that we
-        // can parse this case
+        // Parsing a function declarator pushes and then pops a typedef scope for the parameter
+        // list. We have to copy the identifier kinds from the parameter list’s scope to the body’s
+        // scope here so that parameter decls correctly shadow outer decls in the body.
         let mut typedef_names = self.typedef_names.borrow_mut();
         for (name, kind) in declarator.direct_declarator.parameter_names() {
             typedef_names.insert(name, kind);
