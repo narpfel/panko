@@ -12,10 +12,32 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: unexpected token `{` of kind `LBrace`
-   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:1:20]
+Error: bitfields can only be struct or union members, not parameters
+   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:1:29]
    │
- 1 │ int function():123 {
-   │                    ┬  
-   │                    ╰── expected one of the following token kinds: [";", ",", "=", "*", "(", "[", "+", "-", "/", "%", "==", "!=", "<", "<=", ">", ">=", "&", "^", "|", "<<", ">>", "&&", "||", "?", "++", "--", ".", "->"]
+ 1 │ int f(int x, bool parameter:1, int y) {
+   │              ───────┬────── ┬  
+   │                     │       ╰── bitfields are not allowed here
+   │                     │          
+   │                     ╰────────── in this parameter
+───╯
+
+Error: bitfields can only be struct or union members, not global variables
+   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:5:12]
+   │
+ 5 │ int global:10 = 10;
+   │ ─────┬──── ─┬  
+   │      │      ╰── bitfields are not allowed here
+   │      │         
+   │      ╰───────── in this global variable
+───╯
+
+Error: bitfields can only be struct or union members, not local variables
+   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:8:15]
+   │
+ 8 │     int local:20 = 20;
+   │     ────┬──── ─┬  
+   │         │      ╰── bitfields are not allowed here
+   │         │         
+   │         ╰───────── in this local variable
 ───╯
