@@ -287,12 +287,8 @@ InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
 }
 
 InitDeclaratorNoInitialiser<Declarator>: ast::InitDeclarator<'a> = {
-    <declarator:Declarator> => {
-        if let Some(name) = declarator.direct_declarator.name() {
-            typedef_tracker.declare_name(name);
-        }
-        ast::InitDeclarator { <>, bitfield_width: None, initialiser: None }
-    },
+    <declarator:Declarator> =>
+        ast::InitDeclarator { <>, bitfield_width: None, initialiser: None },
 }
 
 InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
@@ -300,9 +296,6 @@ InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
         <bitfield_width:(":" <ConstantExpression>)?>
         <initialiser:("=" <Initialiser>)?>
     => {
-        if let Some(name) = declarator.direct_declarator.name() {
-            typedef_tracker.declare_name(name)
-        }
         ast::InitDeclarator { <> }
     },
     <bitfield_width:(":" <ConstantExpression>)?> "=" <initialiser:Initialiser> => {
@@ -350,7 +343,10 @@ Pointer: ast::Pointer<'a> = {
 }
 
 DirectDeclarator<NonambiguousIdent, ParenthesisedIdent>: ast::DirectDeclarator<'a> = {
-    <NonambiguousIdent> AttributeSpecifierSequence? => ast::DirectDeclarator::Identifier(<>),
+    <name:NonambiguousIdent> AttributeSpecifierSequence? => {
+        typedef_tracker.declare_name(name);
+        ast::DirectDeclarator::Identifier(name)
+    },
     "(" <declarator:Bump<Declarator<ParenthesisedIdent, ParenthesisedIdent>>> <close_paren:")"> =>
         ast::DirectDeclarator::Parenthesised { <> },
     <ArrayDeclarator<NonambiguousIdent, ParenthesisedIdent>> AttributeSpecifierSequence? =>
