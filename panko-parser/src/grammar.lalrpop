@@ -166,7 +166,7 @@ FunctionDefinition: ast::FunctionDefinition<'a> = {
 FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = {
     AttributeSpecifierSequence? <head:DeclarationHead<
         AbstractDeclaratorDisallowed,
-        NonAbstractInitDeclarator
+        InitDeclaratorNoInitialiser,
     >> => {
         let (declaration_specifiers, declarator) = head;
         let ast::InitDeclarator { declarator, bitfield_width, initialiser }
@@ -188,8 +188,9 @@ FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = 
     },
 }
 
-NonAbstractInitDeclarator: Option<ast::InitDeclarator<'a>> = {
-    InitDeclaratorNoInitialiser<MaybeAbstractDeclarator> => Some(<>),
+InitDeclaratorNoInitialiser: Option<ast::InitDeclarator<'a>> = {
+    <declarator:MaybeAbstractDeclarator> =>
+        Some(ast::InitDeclarator { <>, bitfield_width: None, initialiser: None }),
 }
 
 FunctionBody = { CompoundStatement<DontPushTypedefScope> }
@@ -284,11 +285,6 @@ DeclarationSpecifier: ast::DeclarationSpecifier<'a> = {
 
 InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
     CommaSep<InitDeclarator<Declarator<AnyIdentifier, AnyIdentifier>>>,
-}
-
-InitDeclaratorNoInitialiser<Declarator>: ast::InitDeclarator<'a> = {
-    <declarator:Declarator> =>
-        ast::InitDeclarator { <>, bitfield_width: None, initialiser: None },
 }
 
 InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
