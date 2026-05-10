@@ -170,19 +170,9 @@ FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = 
     >> => {
         let (declaration_specifiers, declarator) = head;
         let ast::InitDeclarator { declarator, bitfield_width, initialiser }
-            = declarator.expect("`NonAbstractInitDeclarator` always returns `Some(init_declarator)`");
-
-        if let Some(bitfield_width) = bitfield_width {
-            sess.emit(ast::BitfieldDiagnostic::NonStructMemberBitfield {
-                at: bitfield_width,
-                decl_loc: declarator.loc_with(declaration_specifiers),
-                kind: "function",
-            })
-        }
-        assert!(
-            initialiser.is_none(),
-            "TODO: generate a good error message; e. g. `int a() = 42 {{}}`",
-        );
+            = declarator.expect("`InitDeclaratorNoInitialiser` always returns `Some(init_declarator)`");
+        std::assert_matches!(bitfield_width, None, "`InitDeclaratorNoInitialiser` does not allow bitfield decls");
+        std::assert_matches!(initialiser, None, "`InitDeclaratorNoInitialiser` does not allow initialisers");
         typedef_tracker.enter_function(&declarator);
         (declaration_specifiers, declarator)
     },
