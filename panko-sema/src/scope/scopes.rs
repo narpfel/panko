@@ -1,3 +1,4 @@
+use std::bstr::ByteStr;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::collections::hash_map::OccupiedEntry;
@@ -237,7 +238,9 @@ impl<'a> Scopes<'a> {
                 })),
             "__func__" if let IsInGlobalScope::No = self.is_in_global_scope() =>
                 Some(Either::Right(BuiltinName {
-                    kind: BuiltinNameKind::Func(self.scopes.last().function_name.unwrap()),
+                    kind: BuiltinNameKind::Func(ByteStr::new(
+                        self.scopes.last().function_name.unwrap(),
+                    )),
                     loc,
                 })),
             _ => self

@@ -1055,7 +1055,11 @@ impl<'a> Codegen<'a> {
                         self.expr(operand);
                         self.emit_args("mov", &[&Rax.typed(operand), operand]);
                     }
-                    Expression::String(string) => {
+                    Expression::String(string)
+                    | Expression::BuiltinName(BuiltinName {
+                        kind: BuiltinNameKind::Func(string),
+                        loc: _,
+                    }) => {
                         let id = self.string(Cow::Borrowed(string));
                         self.emit_args("lea", &[&Rax, &id]);
                     }
@@ -1064,13 +1068,6 @@ impl<'a> Codegen<'a> {
                         let member = self.member_access_lvalue(lhs, member);
                         let member = self.member_pointer(member);
                         self.emit_args("lea", &[&Rax, &*member]);
-                    }
-                    Expression::BuiltinName(BuiltinName {
-                        kind: BuiltinNameKind::Func(func),
-                        loc: _,
-                    }) => {
-                        let func = self.string(ByteStr::new(func).into());
-                        self.emit_args("lea", &[&Rax, &func]);
                     }
                     _ => unreachable!(),
                 }

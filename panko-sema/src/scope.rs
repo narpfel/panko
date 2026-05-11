@@ -1,3 +1,4 @@
+use std::bstr::ByteStr;
 use std::fmt;
 use std::path::Path;
 
@@ -495,7 +496,7 @@ pub struct BuiltinName<'a> {
 pub enum BuiltinNameKind<'a> {
     GpOffset,
     OverflowArgArea,
-    Func(&'a str),
+    Func(&'a ByteStr),
 }
 
 impl fmt::Display for BuiltinNameKind<'_> {
