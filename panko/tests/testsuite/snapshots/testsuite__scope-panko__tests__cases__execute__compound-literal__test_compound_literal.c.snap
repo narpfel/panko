@@ -1,0 +1,79 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/compound-literal/test_compound_literal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/compound-literal/test_compound_literal.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      print~1 `fn(x: int) -> int`
+      (params
+         x~3 `int`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d ")
+               (name x~3 `int`)))
+         (return (name x~3 `int`))))
+   (function-definition
+      static_compound_literal~4 `fn() -> ptr<int>`
+      (compound-statement
+         (return (addressof (compound-literal (declaration compound_literal.6~7 `int` (braced ∅)))))))
+   (function-definition
+      main~8 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (compound-literal
+                  (declaration compound_literal.10~11 `int`
+                     (braced
+                        (add
+                           (compound-literal
+                              (declaration compound_literal.12~13 `int`
+                                 (braced
+                                    (call (name print~1 `fn(x: int) -> int`)
+                                       10))))
+                           (compound-literal
+                              (declaration compound_literal.14~15 `int`
+                                 (braced
+                                    (call (name print~1 `fn(x: int) -> int`)
+                                       5))))))))))
+         (declaration p~16 `ptr<int>` (call (name static_compound_literal~4 `fn() -> ptr<int>`)))
+         (declaration q~17 `ptr<int>` (call (name static_compound_literal~4 `fn() -> ptr<int>`)))
+         (expression (assign (deref (name p~16 `ptr<int>`)) 42))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (deref (name q~17 `ptr<int>`))
+               (equal (name p~16 `ptr<int>`) (name q~17 `ptr<int>`))))
+         (struct T~18
+            (member x `int`)
+            (member y `int`))
+         (declaration i1~19 `int` (braced ∅))
+         (declaration ptr_to_local~20 `ptr<struct T~18 complete>`
+            (addressof
+               (compound-literal
+                  (declaration compound_literal.21~22 `struct T~18 complete`
+                     (braced
+                        (designation ((member x)) 123)
+                        (designation ((member y)) 456))))))
+         (declaration i2~23 `int` (braced ∅))
+         (expression (assign (name i1~19 `int`) 789))
+         (expression (assign (name i2~23 `int`) 987))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (arrow x
+                  (name ptr_to_local~20 `ptr<struct T~18 complete>`))
+               (arrow y
+                  (name ptr_to_local~20 `ptr<struct T~18 complete>`)))))))
+
+----- stderr -----
