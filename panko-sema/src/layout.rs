@@ -211,6 +211,9 @@ pub enum Expression<'a> {
         member: Member<'a, Layout>,
     },
     BuiltinName(BuiltinName<'a>),
+    CompoundLiteral {
+        decl: &'a Declaration<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -470,6 +473,10 @@ fn layout_statement<'a>(
     bump: &'a Bump,
     stmt: &typecheck::Statement<'a>,
 ) -> Statement<'a> {
+    for reference in stmt.compound_literal_refs() {
+        stack.add(bump, *reference);
+    }
+
     match stmt {
         typecheck::Statement::StructDecl(complete) =>
             Statement::StructDecl(layout_complete_struct(stack, bump, complete)),
@@ -699,6 +706,10 @@ fn layout_expression_in_slot<'a>(
         }
         typecheck::Expression::BuiltinName(builtin_name) =>
             (make_slot(), Expression::BuiltinName(builtin_name)),
+        typecheck::Expression::CompoundLiteral { open_paren: _, decl } => {
+            let decl = bump.alloc(layout_declaration(stack, bump, decl));
+            (decl.reference.slot(), Expression::CompoundLiteral { decl })
+        }
     };
     LayoutedExpression { ty, slot, expr, loc }
 }

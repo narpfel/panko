@@ -334,7 +334,7 @@ impl<'a> Scopes<'a> {
         self.scopes.last_mut().pop();
     }
 
-    fn id(&mut self) -> Id {
+    pub(super) fn id(&mut self) -> Id {
         let id = Id(self.next_id);
         self.next_id += 1;
         id

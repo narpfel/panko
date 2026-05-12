@@ -7,14 +7,13 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/functions/inline/test_error_inline_function_contains_definition_of_static_object.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/inline/test_error_inline_function_contains_definition_of_static_object.c"
+   (function-definition inline
+      g~2 `fn() -> int`
+      (compound-statement
+         (return (0 `int`)))))
 
 ----- stderr -----
-Error: TODO: compound literals are not implemented
-   ╭─[panko/tests/cases/execute/functions/inline/test_error_inline_function_contains_definition_of_static_object.c:4:15]
-   │
- 4 │ inline typeof((int){0}) g() {
-   │               ────────  
-───╯

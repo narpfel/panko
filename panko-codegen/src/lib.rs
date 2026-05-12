@@ -578,6 +578,7 @@ impl<'a> Codegen<'a> {
                 Expression::Conditional { .. } => todo!(),
                 Expression::MemberAccess { .. } => todo!(),
                 Expression::BuiltinName(_) => todo!(),
+                Expression::CompoundLiteral { .. } => todo!(),
             },
             Some(StaticInitialiser::Braced { subobject_initialisers }) => {
                 if subobject_initialisers.is_empty() {
@@ -662,6 +663,20 @@ impl<'a> Codegen<'a> {
         }
     }
 
+    fn declaration(&mut self, decl: &'a Declaration<'a>) {
+        let Declaration { reference, initialiser } = decl;
+        match reference.slot() {
+            Slot::Automatic(_) => self.initialise(reference, initialiser.as_ref()),
+            Slot::Static(name) if reference.ty.ty.is_object() => {
+                let initialiser = try { StaticInitialiser::from(initialiser.as_ref()?) };
+                let deferred = (reference.linkage(), reference.ty.ty, initialiser);
+                self.deferred_definitions.insert(name, deferred);
+            }
+            Slot::Static(_) => (),
+            Slot::Void | Slot::StaticWithOffset { .. } => unreachable!(),
+        }
+    }
+
     fn compound_statement(&mut self, stmts: CompoundStatement<'a>) {
         for stmt in stmts.0 {
             self.stmt(stmt);
@@ -673,17 +688,7 @@ impl<'a> Codegen<'a> {
             Statement::StructDecl(_) => {
                 // struct decls don’t generate code (they don’t contain VMT refs)
             }
-            Statement::Declaration(Declaration { reference, initialiser }) =>
-                match reference.slot() {
-                    Slot::Automatic(_) => self.initialise(reference, initialiser.as_ref()),
-                    Slot::Static(name) if reference.ty.ty.is_object() => {
-                        let initialiser = try { StaticInitialiser::from(initialiser.as_ref()?) };
-                        let deferred = (reference.linkage(), reference.ty.ty, initialiser);
-                        self.deferred_definitions.insert(name, deferred);
-                    }
-                    Slot::Static(_) => (),
-                    Slot::Void | Slot::StaticWithOffset { .. } => unreachable!(),
-                },
+            Statement::Declaration(decl) => self.declaration(decl),
             Statement::Typedef(_) => {
                 // TODO: emit the type in case of a VMT
             }
@@ -1047,8 +1052,8 @@ impl<'a> Codegen<'a> {
             }
             Expression::Addressof(operand) => {
                 match operand.expr {
-                    Expression::Name(_reference) => {
-                        // `_reference` is already in memory, just load the address
+                    Expression::Name(_) | Expression::CompoundLiteral { decl: _ } => {
+                        self.expr(operand);
                         self.emit_args("lea", &[&Rax, operand]);
                     }
                     Expression::Deref(operand) => {
@@ -1215,6 +1220,7 @@ impl<'a> Codegen<'a> {
                 }
                 BuiltinNameKind::Func(_func) => unreachable!(),
             },
+            Expression::CompoundLiteral { decl } => self.declaration(decl),
         }
     }
 

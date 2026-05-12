@@ -86,10 +86,6 @@ pub(crate) enum Diagnostic<'a> {
         reference: Reference<'a>,
         kind: &'a str,
     },
-
-    #[error("TODO: compound literals are not implemented")]
-    #[diagnostics(at(colour = Red))]
-    TodoCompoundLiteralsNotImplemented { at: ast::Expression<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -401,6 +397,10 @@ pub(crate) enum Expression<'a> {
         close_paren: Token<'a>,
     },
     BuiltinName(BuiltinName<'a>),
+    CompoundLiteral {
+        open_paren: Token<'a>,
+        decl: Declaration<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -643,6 +643,8 @@ impl<'a> Expression<'a> {
                 close_paren,
             } => builtin_offsetof.loc().until(close_paren.loc()),
             Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
+            Expression::CompoundLiteral { open_paren, decl } =>
+                open_paren.loc().until(decl.initialiser.unwrap().loc()),
         }
     }
 }
@@ -1370,9 +1372,37 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             member: *member,
             close_paren: *close_paren,
         },
-        ast::Expression::CompoundLiteral { .. } => scopes
-            .sess
-            .emit(Diagnostic::TodoCompoundLiteralsNotImplemented { at: *expr }),
+        ast::Expression::CompoundLiteral {
+            open_paren,
+            storage_class_specifiers,
+            ty,
+            initialiser,
+        } => {
+            if storage_class_specifiers.len() > 1 {
+                error_todo!(
+                    expr,
+                    "multiple storage class specifiers not implemented for compound literals",
+                )
+            }
+            // TODO: reject invalid storage class specifiers
+            let storage_class = storage_class_specifiers.first().copied();
+            let name = format!("compound_literal.{}", scopes.id().0);
+            let name = scopes.sess.alloc_str(&name);
+            let decl = ast::Declaration {
+                ty: *ty,
+                name: Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name),
+                bitfield_width: None,
+                initialiser: Some(**initialiser),
+                storage_class,
+                function_specifiers: FunctionSpecifiers { inline: None, noreturn: None },
+            };
+            let decl = match resolve_declaration(scopes, &decl) {
+                DeclarationOrTypedef::Declaration(declaration) => declaration,
+                DeclarationOrTypedef::Typedef(_) => unreachable!(),
+                DeclarationOrTypedef::Redeclared(_) => unreachable!(),
+            };
+            Expression::CompoundLiteral { open_paren: *open_paren, decl }
+        }
     }
 }
 
