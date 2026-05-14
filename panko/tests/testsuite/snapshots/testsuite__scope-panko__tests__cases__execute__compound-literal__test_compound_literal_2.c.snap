@@ -1,0 +1,146 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/compound-literal/test_compound_literal_2.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/compound-literal/test_compound_literal_2.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      print~1 `fn(x: int) -> int`
+      (params
+         x~3 `int`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d ")
+               (name x~3 `int`)))
+         (return (name x~3 `int`))))
+   (function-definition
+      f~4 `fn() -> void`
+      (compound-statement
+         (declaration p1~6 `ptr<int>` nullptr)
+         (declaration p2~7 `ptr<int>` nullptr)
+         (declaration p3~8 `ptr<int>` nullptr)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (comma
+                  (assign (name p3~8 `ptr<int>`)
+                     (addressof
+                        (compound-literal
+                           (declaration compound_literal.9~10 `int`
+                              (braced
+                                 (add
+                                    (comma
+                                       (assign (name p1~6 `ptr<int>`)
+                                          (addressof
+                                             (compound-literal
+                                                (declaration compound_literal.11~12 `int`
+                                                   (braced
+                                                      (call (name print~1 `fn(x: int) -> int`)
+                                                         10))))))
+                                       (deref (name p1~6 `ptr<int>`)))
+                                    (comma
+                                       (assign (name p2~7 `ptr<int>`)
+                                          (addressof
+                                             (compound-literal
+                                                (declaration compound_literal.13~14 `int`
+                                                   (braced
+                                                      (call (name print~1 `fn(x: int) -> int`)
+                                                         5))))))
+                                       (deref (name p2~7 `ptr<int>`)))))))))
+                  (deref (name p3~8 `ptr<int>`)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (deref (name p1~6 `ptr<int>`))
+               (deref (name p2~7 `ptr<int>`))
+               (deref (name p3~8 `ptr<int>`))))
+         (declaration a~15 `int` 10)
+         (declaration b~16 `int` 20)
+         (declaration c~17 `int` 30)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (name a~15 `int`)
+               (name b~16 `int`)
+               (name c~17 `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (deref (name p1~6 `ptr<int>`))
+               (deref (name p2~7 `ptr<int>`))
+               (deref (name p3~8 `ptr<int>`))))))
+   (function-definition
+      g~18 `fn() -> void`
+      (compound-statement
+         (declaration p1~20 `ptr<int>` nullptr)
+         (declaration p2~21 `ptr<int>` nullptr)
+         (declaration p3~22 `ptr<int>` nullptr)
+         (declaration x~23 `int` 1)
+         (declaration y~24 `int` 2)
+         (declaration z~25 `int` 3)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (comma
+                  (assign (name p3~22 `ptr<int>`)
+                     (addressof
+                        (compound-literal
+                           (declaration compound_literal.26~27 `int`
+                              (braced
+                                 (add
+                                    (comma
+                                       (assign (name p1~20 `ptr<int>`)
+                                          (addressof
+                                             (compound-literal
+                                                (declaration compound_literal.28~29 `int`
+                                                   (braced
+                                                      (call (name print~1 `fn(x: int) -> int`)
+                                                         10))))))
+                                       (deref (name p1~20 `ptr<int>`)))
+                                    (comma
+                                       (assign (name p2~21 `ptr<int>`)
+                                          (addressof
+                                             (compound-literal
+                                                (declaration compound_literal.30~31 `int`
+                                                   (braced
+                                                      (call (name print~1 `fn(x: int) -> int`)
+                                                         5))))))
+                                       (deref (name p2~21 `ptr<int>`)))))))))
+                  (deref (name p3~22 `ptr<int>`)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (name x~23 `int`)
+               (name y~24 `int`)
+               (name z~25 `int`)))
+         (expression (assign (name x~23 `int`) 4))
+         (expression (assign (name y~24 `int`) 5))
+         (expression (assign (name z~25 `int`) 6))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (name x~23 `int`)
+               (name y~24 `int`)
+               (name z~25 `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (deref (name p1~20 `ptr<int>`))
+               (deref (name p2~21 `ptr<int>`))
+               (deref (name p3~22 `ptr<int>`))))))
+   (function-definition
+      main~32 `fn() -> int`
+      (compound-statement
+         (expression (call (name f~4 `fn() -> void`)))
+         (expression (call (name g~18 `fn() -> void`))))))
+
+----- stderr -----
