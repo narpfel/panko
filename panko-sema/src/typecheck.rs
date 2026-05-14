@@ -293,42 +293,7 @@ pub(crate) enum Statement<'a> {
     Expression(Option<TypedExpression<'a>>),
     Compound(CompoundStatement<'a>),
     Return(Option<TypedExpression<'a>>),
-}
-
-macro_rules! yield_from {
-    ($($e:expr),+ $(,)?) => {{
-        $(
-            for reference in Box::new($e.compound_literal_refs()) {
-                yield reference
-            }
-        )+
-    }};
-}
-
-impl<'a> Statement<'a> {
-    pub(crate) gen fn compound_literal_refs(&self) -> &Reference<'a> {
-        match self {
-            Self::StructDecl(_) | Self::Typedef(_) => {
-                // TODO: look into `Type`s for VLAs
-            }
-            Self::Declaration(Declaration { reference: _, initialiser }) =>
-                match initialiser.as_ref() {
-                    None => (),
-                    Some(Initialiser::Expression(expr)) => yield_from!(expr),
-                    Some(Initialiser::Braced { subobject_initialisers }) =>
-                        for SubobjectInitialiser { subobject: _, initialiser } in
-                            *subobject_initialisers
-                        {
-                            yield_from!(initialiser)
-                        },
-                },
-            Self::Expression(expr) | Self::Return(expr) =>
-                if let Some(expr) = expr {
-                    yield_from!(expr)
-                },
-            Self::Compound(_) => (),
-        }
-    }
+    HoistedCompoundLiteral(Reference<'a>),
 }
 
 impl<'a> FromError<'a> for Statement<'a> {
@@ -605,10 +570,6 @@ impl<'a> TypedExpression<'a> {
     fn is_modifiable(&self) -> bool {
         self.ty.is_modifiable()
     }
-
-    gen fn compound_literal_refs(&self) -> &Reference<'a> {
-        yield_from!(self.expr)
-    }
 }
 
 impl<'a> Expression<'a> {
@@ -678,65 +639,6 @@ impl<'a> Expression<'a> {
             Expression::Parenthesised { open_paren: _, expr, close_paren: _ } =>
                 expr.expr.unwrap_parens(),
             _ => self,
-        }
-    }
-
-    gen fn compound_literal_refs(&self) -> &Reference<'a> {
-        match self {
-            Self::Error(_)
-            | Self::Name(_)
-            | Self::Integer { .. }
-            | Self::String(_)
-            | Self::Nullptr(_)
-            | Self::BuiltinName(_) => (),
-            Self::NoopTypeConversion(expr)
-            | Self::Truncate(expr)
-            | Self::SignExtend(expr)
-            | Self::ZeroExtend(expr)
-            | Self::VoidCast(expr)
-            | Self::BoolCast(expr)
-            | Self::Parenthesised { open_paren: _, expr, close_paren: _ }
-            | Self::Addressof { ampersand: _, operand: expr }
-            | Self::Deref { star: _, operand: expr }
-            | Self::Negate { minus: _, operand: expr }
-            | Self::Compl { compl: _, operand: expr }
-            | Self::Not { not: _, operand: expr }
-            | Self::Sizeof { sizeof: _, operand: expr, size: _ }
-            | Self::Lengthof { lengthof: _, operand: expr, length: _ }
-            | Self::MemberAccess { lhs: expr, member: _, member_loc: _ } => yield_from!(expr),
-            Self::Assign { target: lhs, value: rhs }
-            | Self::IntegralBinOp { ty: _, lhs, op: _, rhs }
-            | Self::PtrAdd {
-                pointer: lhs,
-                integral: rhs,
-                pointee_size: _,
-                order: _,
-            }
-            | Self::PtrSub {
-                pointer: lhs,
-                integral: rhs,
-                pointee_size: _,
-            }
-            | Self::PtrDiff { lhs, rhs, pointee_size: _ }
-            | Self::PtrCmp { lhs, kind: _, rhs }
-            | Self::Combine { first: lhs, second: rhs }
-            | Self::Logical { lhs, op: _, rhs } => yield_from!(lhs, rhs),
-            Self::Call {
-                callee,
-                args,
-                is_varargs: _,
-                close_paren: _,
-            } => {
-                yield_from!(callee);
-                for arg in *args {
-                    yield_from!(arg)
-                }
-            }
-            Self::Conditional { condition, then, or_else } => yield_from!(condition, then, or_else),
-            Self::CompoundLiteral { open_paren: _, decl } => yield &decl.reference,
-            Self::SizeofTy { .. } | Self::LengthofTy { .. } | Self::Alignof { .. } => {
-                // TODO: look into `Type`s for VLAs
-            }
         }
     }
 }
@@ -1695,6 +1597,9 @@ fn typeck_statement<'a>(
             }
         }
         scope::Statement::Redeclared(redeclared) => typeck_redeclaration_error(sess, redeclared),
+        scope::Statement::HoistedCompoundLiteral(reference) => Statement::HoistedCompoundLiteral(
+            typeck_reference(sess, *reference, NeedsInitialiser::No),
+        ),
     }
 }
 

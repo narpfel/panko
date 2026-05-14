@@ -28,6 +28,9 @@ exit_code: 0
          (declaration p1~6 `ptr<int>` nullptr)
          (declaration p2~7 `ptr<int>` nullptr)
          (declaration p3~8 `ptr<int>` nullptr)
+         (hoisted-compound-literal compound_literal.11~12 `int`)
+         (hoisted-compound-literal compound_literal.13~14 `int`)
+         (hoisted-compound-literal compound_literal.9~10 `int`)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
@@ -87,6 +90,9 @@ exit_code: 0
          (declaration x~23 `int` 1)
          (declaration y~24 `int` 2)
          (declaration z~25 `int` 3)
+         (hoisted-compound-literal compound_literal.28~29 `int`)
+         (hoisted-compound-literal compound_literal.30~31 `int`)
+         (hoisted-compound-literal compound_literal.26~27 `int`)
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")

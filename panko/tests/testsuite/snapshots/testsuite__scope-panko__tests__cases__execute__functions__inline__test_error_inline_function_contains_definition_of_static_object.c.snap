@@ -17,6 +17,7 @@ exit_code: 0
       (braced
          0))))`
       (compound-statement
+         (hoisted-compound-literal compound_literal.0~1 `int`)
          (return 0))))
 
 ----- stderr -----

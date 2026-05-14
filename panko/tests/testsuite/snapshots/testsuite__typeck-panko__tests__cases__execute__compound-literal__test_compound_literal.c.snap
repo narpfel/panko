@@ -30,12 +30,16 @@ exit_code: 0
    (function-definition external
       static_compound_literal~4 `fn() -> ptr<int>`
       (compound-statement
+         (hoisted-compound-literal compound_literal.6~7 `int`)
          (return
             (addressof `ptr<int>`
                (compound-literal `int` (definition compound_literal.6~7 `int` (braced ∅)))))))
    (function-definition external
       main~8 `fn() -> int`
       (compound-statement
+         (hoisted-compound-literal compound_literal.12~13 `int`)
+         (hoisted-compound-literal compound_literal.14~15 `int`)
+         (hoisted-compound-literal compound_literal.10~11 `int`)
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -88,6 +92,7 @@ exit_code: 0
             (member x @0 `int`)
             (member y @4 `int`))
          (definition i1~19 `int` (braced ∅))
+         (hoisted-compound-literal compound_literal.21~22 `struct T~18 complete`)
          (definition ptr_to_local~20 `ptr<struct T~18 complete>`
             (addressof `ptr<struct T~18 complete>`
                (compound-literal `struct T~18 complete`

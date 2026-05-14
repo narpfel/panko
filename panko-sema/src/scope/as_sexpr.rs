@@ -164,6 +164,8 @@ impl AsSExpr for Statement<'_> {
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),
             Statement::Return { return_: _, expr } => SExpr::new("return").inherit(expr),
             Statement::Redeclared(redeclared) => redeclared.as_sexpr(),
+            Statement::HoistedCompoundLiteral(reference) =>
+                SExpr::new("hoisted-compound-literal").inherit(reference),
         }
     }
 }

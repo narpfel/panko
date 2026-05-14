@@ -14,6 +14,7 @@ exit_code: 0
    (function-definition inline
       g~2 `fn() -> int`
       (compound-statement
+         (hoisted-compound-literal compound_literal.0~1 `int`)
          (return (0 `int`)))))
 
 ----- stderr -----

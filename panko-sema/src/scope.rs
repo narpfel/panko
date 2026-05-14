@@ -291,6 +291,7 @@ pub(crate) enum Statement<'a> {
         expr: MaybeExpr<'a>,
     },
     Redeclared(Redeclared<'a>),
+    HoistedCompoundLiteral(Reference<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -572,6 +573,7 @@ impl<'a> Statement<'a> {
                 }
             }
             Statement::Redeclared(redeclared) => redeclared.loc(),
+            Statement::HoistedCompoundLiteral(reference) => reference.loc(),
         }
     }
 
@@ -983,11 +985,15 @@ fn resolve_compound_statement<'a>(
     if let OpenNewScope::Yes = open_new_scope {
         scopes.open_new_scope();
     }
-    let stmts = CompoundStatement(
-        scopes
-            .sess
-            .alloc_slice_collect(stmts.0.iter().filter_map(|stmt| resolve_stmt(scopes, stmt))),
-    );
+    let sess = scopes.sess;
+    let stmts = gen {
+        for stmt in stmts.0 {
+            for stmt in resolve_stmt(scopes, stmt) {
+                yield stmt;
+            }
+        }
+    };
+    let stmts = CompoundStatement(sess.alloc_slice_collect(stmts));
     if let OpenNewScope::Yes = open_new_scope {
         scopes.exit_scope();
     }
@@ -1169,24 +1175,33 @@ fn resolve_type_declaration<'a, T>(
     }
 }
 
-fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Option<Statement<'a>> {
-    Some(match stmt {
-        ast::Statement::TypeDeclaration(type_decl) =>
-            resolve_type_declaration(scopes, type_decl, Statement::StructDecl)?,
-        ast::Statement::Declaration(decl) => match resolve_declaration(scopes, decl) {
-            DeclarationOrTypedef::Declaration(declaration) => Statement::Declaration(declaration),
-            DeclarationOrTypedef::Typedef(typedef) => Statement::Typedef(typedef),
-            DeclarationOrTypedef::Redeclared(redeclared) => Statement::Redeclared(redeclared),
-        },
-        ast::Statement::Expression(expr) =>
-            Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
-        ast::Statement::Compound(stmts) =>
-            Statement::Compound(resolve_compound_statement(scopes, stmts, OpenNewScope::Yes)),
-        ast::Statement::Return { return_, expr } => Statement::Return {
-            return_: *return_,
-            expr: try { resolve_expr(scopes, expr.as_ref()?) },
-        },
-    })
+gen fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Statement<'a> {
+    let stmt = try {
+        match stmt {
+            ast::Statement::TypeDeclaration(type_decl) =>
+                resolve_type_declaration(scopes, type_decl, Statement::StructDecl)?,
+            ast::Statement::Declaration(decl) => match resolve_declaration(scopes, decl) {
+                DeclarationOrTypedef::Declaration(declaration) =>
+                    Statement::Declaration(declaration),
+                DeclarationOrTypedef::Typedef(typedef) => Statement::Typedef(typedef),
+                DeclarationOrTypedef::Redeclared(redeclared) => Statement::Redeclared(redeclared),
+            },
+            ast::Statement::Expression(expr) =>
+                Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
+            ast::Statement::Compound(stmts) =>
+                Statement::Compound(resolve_compound_statement(scopes, stmts, OpenNewScope::Yes)),
+            ast::Statement::Return { return_, expr } => Statement::Return {
+                return_: *return_,
+                expr: try { resolve_expr(scopes, expr.as_ref()?) },
+            },
+        }
+    };
+    for hoisted_ref in scopes.take_hoisted_compound_literals() {
+        yield Statement::HoistedCompoundLiteral(hoisted_ref);
+    }
+    if let Some(stmt) = stmt {
+        yield stmt;
+    }
 }
 
 fn resolve_assoc<'a>(
@@ -1401,6 +1416,7 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
                 DeclarationOrTypedef::Typedef(_) => unreachable!(),
                 DeclarationOrTypedef::Redeclared(_) => unreachable!(),
             };
+            scopes.hoist_compound_literal(decl.reference);
             Expression::CompoundLiteral { open_paren: *open_paren, decl }
         }
     }
