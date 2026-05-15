@@ -13,6 +13,22 @@ exit_code: 1
 
 ----- stderr -----
 Error: empty arrays are not allowed
+   ╭─[<scratch area>:1:1]
+   │
+ 1 │ compound_literal.5
+   │ ─────────┬────────  
+   │          ╰────────── this array is declared as empty
+───╯
+
+Error: empty arrays are not allowed
+   ╭─[<scratch area>:1:1]
+   │
+ 1 │ compound_literal.7
+   │ ─────────┬────────  
+   │          ╰────────── this array is declared as empty
+───╯
+
+Error: empty arrays are not allowed
    ╭─[panko/tests/cases/initialisation/test_empty_array.c:2:9]
    │
  2 │     int empty_1[0];
