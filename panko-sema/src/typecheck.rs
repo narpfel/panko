@@ -1598,7 +1598,7 @@ fn typeck_statement<'a>(
         }
         scope::Statement::Redeclared(redeclared) => typeck_redeclaration_error(sess, redeclared),
         scope::Statement::HoistedCompoundLiteral(reference) => Statement::HoistedCompoundLiteral(
-            typeck_reference(sess, *reference, NeedsInitialiser::No),
+            typeck_reference(sess, *reference, NeedsInitialiser::Yes),
         ),
     }
 }

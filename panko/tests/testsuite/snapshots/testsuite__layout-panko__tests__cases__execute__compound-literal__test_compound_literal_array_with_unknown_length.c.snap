@@ -7,14 +7,31 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/compound-literal/test_compound_literal_array_with_unknown_length.c
 ---
-success: false
-exit_code: 101
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/compound-literal/test_compound_literal_array_with_unknown_length.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external stack-size=104
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @44
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @48
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @56
+                  (noop-type-conversion `ptr<char>` @56
+                     (addressof `ptr<array<char; 5>>` @56
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (11 `unsigned long` @64)))
+         (expression
+            (call `int` @56
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @64
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @72
+                  (noop-type-conversion `ptr<char>` @72
+                     (addressof `ptr<array<char; 5>>` @72
+                        (string `array<char; 5>` @void "%zu\n\0"))))
+               (12 `unsigned long` @80))))))
 
 ----- stderr -----
-[31mThe application panicked (crashed).[0m
-Message:  [36minternal error: entered unreachable code: arrays without a length are incomplete types and don’t have a size[0m
-Location: [35mpanko-sema/src/ty.rs[0m:[35m372[0m
-
-Backtrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.
-Run with RUST_BACKTRACE=full to include source snippets.

@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
-         (hoisted-compound-literal compound_literal.3~4 `array<int; ∅>`)
+         (hoisted-compound-literal compound_literal.3~4 `array<int; 11>`)
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -29,7 +29,7 @@ exit_code: 0
                      (definition compound_literal.3~4 `array<int; 11>`
                         (braced
                            (subobject +40 (42 `int`))))))))
-         (hoisted-compound-literal compound_literal.5~6 `array<char; ∅>`)
+         (hoisted-compound-literal compound_literal.5~6 `array<char; 12>`)
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
