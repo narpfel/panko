@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c"
+   (function-definition external
+      f~0 `fn() -> void`
+      (compound-statement))
+   (function-definition external
+      g~3 `fn() -> void`
+      (compound-statement
+         (struct U~5
+            (member x @0 `int`)
+            (member y @4 `int`))
+         (definition value~6 `struct U~5 complete` ∅)))
+   (function-definition external
+      h~7 `fn() -> void`
+      (compound-statement
+         (union V~9
+            (member x @0 `int`)
+            (member y @0 `unsigned int`))
+         (struct V~9
+            (member x @0 `int`)
+            (member y @4 `unsigned int`))))
+   (function-definition external
+      main~10 `fn() -> int`
+      (compound-statement)))
+
+----- stderr -----

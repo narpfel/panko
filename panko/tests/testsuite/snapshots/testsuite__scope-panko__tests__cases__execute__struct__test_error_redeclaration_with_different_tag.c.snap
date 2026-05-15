@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c"
+   (function-definition
+      f~0 `fn() -> void`
+      (compound-statement))
+   (function-definition
+      g~3 `fn() -> void`
+      (compound-statement
+         (struct U~5
+            (member x `int`)
+            (member y `int`))
+         (declaration value~6 `struct U~5 complete` ∅)))
+   (function-definition
+      h~7 `fn() -> void`
+      (compound-statement
+         (union V~9
+            (member x `int`)
+            (member y `unsigned int`))
+         (struct V~9
+            (member x `int`)
+            (member y `unsigned int`))))
+   (function-definition
+      main~10 `fn() -> int`
+      (compound-statement)))
+
+----- stderr -----
