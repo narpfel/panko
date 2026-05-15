@@ -1531,7 +1531,7 @@ fn typeck_declaration<'a>(
     }) = reference.ty.ty
     {
         // TODO: use this error
-        sess.emit(Diagnostic::EmptyArray { at: reference })
+        sess.emit(Diagnostic::EmptyArray { at: reference.ty })
     }
 
     if !reference.ty.ty.is_function() {
