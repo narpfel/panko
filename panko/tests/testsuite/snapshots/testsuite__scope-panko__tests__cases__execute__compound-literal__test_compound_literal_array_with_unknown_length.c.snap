@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/compound-literal/test_compound_literal_array_with_unknown_length.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/compound-literal/test_compound_literal_array_with_unknown_length.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.3~4 `array<int; ∅>`)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (lengthof
+                  (compound-literal
+                     (declaration compound_literal.3~4 `array<int; ∅>`
+                        (braced
+                           (designation ((index 10)) 42)))))))
+         (hoisted-compound-literal compound_literal.5~6 `array<char; ∅>`)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (sizeof
+                  (compound-literal
+                     (declaration compound_literal.5~6 `array<char; ∅>`
+                        (braced
+                           (string "hello world"))))))))))
+
+----- stderr -----
