@@ -1,0 +1,19 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/compound-literal/test_error_invalid_storage_class_specifier.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/compound-literal/test_error_invalid_storage_class_specifier.c"
+   (function-definition external stack-size=8
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (expression (compound-literal `int` (static compound_literal.2) (definition external (compound_literal.2~3 `int` (static compound_literal.2)) (braced ∅)))))))
+
+----- stderr -----
