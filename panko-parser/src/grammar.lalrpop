@@ -1,18 +1,16 @@
-use std::cell::RefCell;
 use std::path::Path;
 
 use panko_lex::Token;
 use panko_lex::TokenKind;
-use panko_lex::TypedefNames;
 
 use crate as ast;
 use crate::ast::IsParameter;
 use crate::ast::Session;
+use crate::TypedefTracker;
 
-grammar<'a, 'b>(
+grammar<'a, 'b, 'c>(
     sess: &'a Session<'a>,
-    typedef_names: &'b RefCell<TypedefNames<'a>>,
-    is_in_typedef: &'b RefCell<crate::nonempty::Vec<bool>>,
+    typedef_tracker: &'c mut TypedefTracker<'a, 'b>,
     filename: &'a Path,
 );
 
@@ -168,37 +166,21 @@ FunctionDefinition: ast::FunctionDefinition<'a> = {
 FunctionDefinitionHead: (ast::DeclarationSpecifiers<'a>, ast::Declarator<'a>) = {
     AttributeSpecifierSequence? <head:DeclarationHead<
         AbstractDeclaratorDisallowed,
-        NonAbstractInitDeclarator
+        InitDeclaratorNoInitialiser,
     >> => {
         let (declaration_specifiers, declarator) = head;
         let ast::InitDeclarator { declarator, bitfield_width, initialiser }
-            = declarator.expect("`NonAbstractInitDeclarator` always returns `Some(init_declarator)`");
-
-        if let Some(bitfield_width) = bitfield_width {
-            sess.emit(ast::BitfieldDiagnostic::NonStructMemberBitfield {
-                at: bitfield_width,
-                decl_loc: declarator.loc_with(declaration_specifiers),
-                kind: "function",
-            })
-        }
-        assert!(
-            initialiser.is_none(),
-            "TODO: generate a good error message; e. g. `int a() = 42 {{}}`",
-        );
-        let mut typedef_names = typedef_names.borrow_mut();
-        typedef_names.push_scope();
-        // while parameters cannot be declared with a storage class (i. e. as a
-        // `typedef` declaration), it’s important for error recovery that we
-        // can parse this case
-        for (name, kind) in declarator.direct_declarator.parameter_names() {
-            typedef_names.insert(name, kind);
-        }
+            = declarator.expect("`InitDeclaratorNoInitialiser` always returns `Some(init_declarator)`");
+        std::assert_matches!(bitfield_width, None, "`InitDeclaratorNoInitialiser` does not allow bitfield decls");
+        std::assert_matches!(initialiser, None, "`InitDeclaratorNoInitialiser` does not allow initialisers");
+        typedef_tracker.enter_function(&declarator);
         (declaration_specifiers, declarator)
     },
 }
 
-NonAbstractInitDeclarator: Option<ast::InitDeclarator<'a>> = {
-    InitDeclarator<MaybeAbstractDeclarator> => Some(<>),
+InitDeclaratorNoInitialiser: Option<ast::InitDeclarator<'a>> = {
+    <declarator:MaybeAbstractDeclarator> =>
+        Some(ast::InitDeclarator { <>, bitfield_width: None, initialiser: None }),
 }
 
 FunctionBody = { CompoundStatement<DontPushTypedefScope> }
@@ -216,7 +198,7 @@ Declaration: ast::Declaration<'a> = {
                 sess.alloc_slice_copy(&init_declarator_list)
             }
         };
-        *is_in_typedef.borrow_mut().last_mut() = false;
+        typedef_tracker.is_not_in_typedef();
         ast::Declaration { specifiers, init_declarator_list, semi }
     },
     // attribute-specifier-sequence declaration-specifiers init_declarator_list ";"
@@ -238,16 +220,6 @@ DeclarationHead<IsAbstractDeclaratorAllowed, MaybeInitDeclarator>: (
 ) = {
     <is_abstract_declarator_allowed:IsAbstractDeclaratorAllowed>
     <specifiers:DeclarationSpecifiers> <declarator:MaybeInitDeclarator> => {
-        let add_typedef_name = |name: Token<'a>| {
-            let kind = if *is_in_typedef.borrow().last() {
-                TokenKind::TypeIdentifier
-            }
-            else {
-                TokenKind::Identifier
-            };
-            typedef_names.borrow_mut().insert(name.slice(), kind);
-        };
-
         if let ast::DeclarationSpecifiers([specifiers @ .., specifier]) = specifiers
             && !specifiers.is_empty()
             && let ast::DeclarationSpecifier::TypeSpecifierQualifier(
@@ -261,7 +233,7 @@ DeclarationHead<IsAbstractDeclaratorAllowed, MaybeInitDeclarator>: (
                     pointers: None,
                     direct_declarator: ast::DirectDeclarator::Identifier(name),
                 };
-                add_typedef_name(name);
+                typedef_tracker.declare_name(name);
                 return (
                     ast::DeclarationSpecifiers(specifiers),
                     Some(ast::InitDeclarator { declarator, bitfield_width: None, initialiser: None }),
@@ -273,7 +245,7 @@ DeclarationHead<IsAbstractDeclaratorAllowed, MaybeInitDeclarator>: (
                 && let Some(direct_declarator) = direct_declarator.with_name(sess, name)
             {
                 let declarator = ast::Declarator { pointers, direct_declarator };
-                add_typedef_name(name);
+                typedef_tracker.declare_name(name);
                 return (
                     ast::DeclarationSpecifiers(specifiers),
                     Some(ast::InitDeclarator { declarator, bitfield_width, initialiser }),
@@ -284,7 +256,7 @@ DeclarationHead<IsAbstractDeclaratorAllowed, MaybeInitDeclarator>: (
             && let Some(ast::InitDeclarator { declarator, bitfield_width, initialiser }) = declarator
             && let Some((name, declarator)) = declarator.reinterpret_as_concrete(sess)
         {
-            add_typedef_name(name);
+            typedef_tracker.declare_name(name);
             return (specifiers, Some(ast::InitDeclarator { declarator, bitfield_width, initialiser }));
         }
         (specifiers, declarator)
@@ -310,15 +282,6 @@ InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
         <bitfield_width:(":" <ConstantExpression>)?>
         <initialiser:("=" <Initialiser>)?>
     => {
-        if let Some(name) = declarator.direct_declarator.name() {
-            let kind = if *is_in_typedef.borrow().last() {
-                TokenKind::TypeIdentifier
-            }
-            else {
-                TokenKind::Identifier
-            };
-            typedef_names.borrow_mut().insert(name, kind);
-        }
         ast::InitDeclarator { <> }
     },
     <bitfield_width:(":" <ConstantExpression>)?> "=" <initialiser:Initialiser> => {
@@ -366,7 +329,10 @@ Pointer: ast::Pointer<'a> = {
 }
 
 DirectDeclarator<NonambiguousIdent, ParenthesisedIdent>: ast::DirectDeclarator<'a> = {
-    <NonambiguousIdent> AttributeSpecifierSequence? => ast::DirectDeclarator::Identifier(<>),
+    <name:NonambiguousIdent> AttributeSpecifierSequence? => {
+        typedef_tracker.declare_name(name);
+        ast::DirectDeclarator::Identifier(name)
+    },
     "(" <declarator:Bump<Declarator<ParenthesisedIdent, ParenthesisedIdent>>> <close_paren:")"> =>
         ast::DirectDeclarator::Parenthesised { <> },
     <ArrayDeclarator<NonambiguousIdent, ParenthesisedIdent>> AttributeSpecifierSequence? =>
@@ -492,9 +458,13 @@ FunctionAbstractDeclarator: ast::FunctionDeclarator<'a> = {
 }
 
 Initialiser: ast::Initialiser<'a> = {
+    BracedInitialiser,
+    AssignmentExpression => ast::Initialiser::Expression(<>),
+}
+
+BracedInitialiser: ast::Initialiser<'a> = {
     <open_brace:"{"> <initialiser_list:CommaSepWithTrailingComma<DesignatedInitialiser>>
         <close_brace:"}"> => ast::Initialiser::Braced { <> },
-    AssignmentExpression => ast::Initialiser::Expression(<>),
 }
 
 DesignatedInitialiser: ast::DesignatedInitialiser<'a> = {
@@ -524,7 +494,7 @@ StorageClassSpecifierToken = {
     "static",
     "thread_local",
     "typedef" => {
-        *is_in_typedef.borrow_mut().last_mut() = true;
+        typedef_tracker.is_in_typedef();
         <>
     },
 }
@@ -566,13 +536,13 @@ AtomicTypeSpecifier: () = {}
 
 PushIsInTypedef: () = {
     () => {
-        is_in_typedef.borrow_mut().push(false);
+        typedef_tracker.push_is_in_typedef(false);
     },
 }
 
 PopIsInTypedef: () = {
     () => {
-        is_in_typedef.borrow_mut().pop().expect("should be correctly paired with a `push`");
+        typedef_tracker.pop_is_in_typedef();
     },
 }
 
@@ -639,7 +609,7 @@ CompoundStatement<PushTypedefScope>: ast::CompoundStatement<'a> = {
 
 PushTypedefScope: () = {
     () => {
-        typedef_names.borrow_mut().push_scope();
+        typedef_tracker.push_scope();
     },
 }
 
@@ -647,7 +617,7 @@ DontPushTypedefScope: () = { () => () }
 
 PopTypedefScope: () = {
     () => {
-        typedef_names.borrow_mut().pop_scope();
+        typedef_tracker.pop_scope();
     },
 }
 
@@ -732,9 +702,15 @@ PostfixExpression: ast::Expression<'a> = {
         ast::Expression::MemberAccess { <> },
     <operand:Bump<PostfixExpression>> <operator:IncrementOperator> =>
         ast::Expression::Increment { <>, fixity: ast::IncrementFixity::Postfix },
+    CompoundLiteral,
 }
 
 ArgumentExpressionList = { CommaSep<AssignmentExpression> }
+
+CompoundLiteral: ast::Expression<'a> = {
+    <open_paren:"("> <storage_class_specifiers:Many<StorageClassSpecifier>> <ty:TypeName> ")"
+        <initialiser:Bump<BracedInitialiser>> => ast::Expression::CompoundLiteral { <> },
+}
 
 UnaryOperator: ast::UnaryOp<'a> = {
     "&" => ast::UnaryOp { kind: ast::UnaryOpKind::Addressof, token: <> },
@@ -945,6 +921,7 @@ Some<T>: &'a [T] = {
     T+ => sess.alloc_slice_copy(&<>),
 }
 
+#[inline]
 Many<T>: &'a [T] = {
     T* => sess.alloc_slice_copy(&<>),
 }

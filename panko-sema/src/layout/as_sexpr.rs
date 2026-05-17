@@ -192,6 +192,7 @@ impl AsSExpr for Expression<'_> {
             Expression::MemberAccess { lhs, member } =>
                 member.as_sexpr_without_ty("+").lines([lhs]),
             Expression::BuiltinName(builtin_name) => builtin_name.as_sexpr(),
+            Expression::CompoundLiteral { decl } => SExpr::new("compound-literal").inherit(decl),
         }
     }
 }

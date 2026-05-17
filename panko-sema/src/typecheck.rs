@@ -293,6 +293,7 @@ pub(crate) enum Statement<'a> {
     Expression(Option<TypedExpression<'a>>),
     Compound(CompoundStatement<'a>),
     Return(Option<TypedExpression<'a>>),
+    HoistedCompoundLiteral(Reference<'a>),
 }
 
 impl<'a> FromError<'a> for Statement<'a> {
@@ -436,6 +437,10 @@ pub(crate) enum Expression<'a> {
         member_loc: Loc<'a>,
     },
     BuiltinName(BuiltinName<'a>),
+    CompoundLiteral {
+        open_paren: Token<'a>,
+        decl: &'a Declaration<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -550,6 +555,7 @@ impl<'a> TypedExpression<'a> {
             | Expression::Logical { .. }
             | Expression::Conditional { .. } => false,
             Expression::BuiltinName(BuiltinName { kind, loc: _ }) => kind.is_lvalue(),
+            Expression::CompoundLiteral { .. } => true,
         }
     }
 
@@ -623,6 +629,8 @@ impl<'a> Expression<'a> {
                 condition.loc().until(or_else.loc()),
             Expression::MemberAccess { lhs, member: _, member_loc } => lhs.loc().until(*member_loc),
             Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
+            Expression::CompoundLiteral { open_paren, decl } =>
+                open_paren.loc().until(decl.reference.loc()),
         }
     }
 
@@ -1523,7 +1531,7 @@ fn typeck_declaration<'a>(
     }) = reference.ty.ty
     {
         // TODO: use this error
-        sess.emit(Diagnostic::EmptyArray { at: reference })
+        sess.emit(Diagnostic::EmptyArray { at: reference.ty })
     }
 
     if !reference.ty.ty.is_function() {
@@ -1589,6 +1597,9 @@ fn typeck_statement<'a>(
             }
         }
         scope::Statement::Redeclared(redeclared) => typeck_redeclaration_error(sess, redeclared),
+        scope::Statement::HoistedCompoundLiteral(reference) => Statement::HoistedCompoundLiteral(
+            typeck_reference(sess, *reference, NeedsInitialiser::Yes),
+        ),
     }
 }
 
@@ -2654,6 +2665,14 @@ fn typeck_expression<'a>(
                 ty: ty.as_const(),
                 expr: Expression::BuiltinName(*name),
             }
+        }
+        scope::Expression::CompoundLiteral { open_paren, decl } => {
+            let decl = typeck_declaration(sess, decl);
+            let expr = Expression::CompoundLiteral {
+                open_paren: *open_paren,
+                decl: sess.alloc(decl),
+            };
+            TypedExpression { ty: decl.reference.ty, expr }
         }
     };
 

@@ -12,19 +12,24 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/typedef/test_use_globally_typedefd_name_as_parameter_name.c"
    (typedef a `int`)
+   (typedef b `int`)
    (function-definition external
-      f~0 `fn(a: int) -> int`
+      f~0 `fn(a: int, b: ptr<int>) -> int`
       (params
-         a~2 `int`)
+         a~2 `int`
+         b~3 `ptr<int>`)
       (compound-statement
-         (return (a~2 `int`))))
+         (return (add `int` (a~2 `int`) (deref `int` (b~3 `ptr<int>`))))))
    (function-definition external
-      main~3 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
+         (definition x~6 `int` (2 `int`))
          (return
             (call `int`
-               (addressof `ptr<fn(a: int) -> int>`
-                  (f~0 `fn(a: int) -> int`))
-               (42 `int`))))))
+               (addressof `ptr<fn(a: int, b: ptr<int>) -> int>`
+                  (f~0 `fn(a: int, b: ptr<int>) -> int`))
+               (40 `int`)
+               (addressof `ptr<int>`
+                  (x~6 `int`)))))))
 
 ----- stderr -----

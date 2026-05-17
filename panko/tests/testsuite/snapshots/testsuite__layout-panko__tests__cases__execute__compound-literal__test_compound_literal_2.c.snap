@@ -1,0 +1,226 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/compound-literal/test_compound_literal_2.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/compound-literal/test_compound_literal_2.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external stack-size=40
+      (print~1 `fn(x: int) -> int` (static print))
+      (params
+         (x~3 `int` @0))
+      (compound-statement
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d \0"))))
+               (x~3 `int` @0)))
+         (return (x~3 `int` @0))))
+   (function-definition external stack-size=104
+      (f~4 `fn() -> void` (static f))
+      (compound-statement
+         (definition (p1~6 `ptr<int>` @0) (noop-type-conversion `ptr<int>` @0 (nullptr `nullptr_t` @0)))
+         (definition (p2~7 `ptr<int>` @8) (noop-type-conversion `ptr<int>` @8 (nullptr `nullptr_t` @8)))
+         (definition (p3~8 `ptr<int>` @16) (noop-type-conversion `ptr<int>` @16 (nullptr `nullptr_t` @16)))
+         (expression
+            (call `int` @36
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 4>>` @48
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (combine `int` @56
+                  (assign `ptr<int>` @16
+                     (p3~8 `ptr<int>` @16)
+                     (addressof `ptr<int>` @16
+                        (compound-literal `int` @32
+                           (definition (compound_literal.9~10 `int` @32)
+                              (braced
+                                 (subobject +0
+                                    (add `int` @32
+                                       (combine `int` @32
+                                          (assign `ptr<int>` @0
+                                             (p1~6 `ptr<int>` @0)
+                                             (addressof `ptr<int>` @0
+                                                (compound-literal `int` @24
+                                                   (definition (compound_literal.11~12 `int` @24)
+                                                      (braced
+                                                         (subobject +0
+                                                            (call `int` @24
+                                                               (addressof `ptr<fn(x: int) -> int>` @64
+                                                                  (print~1 `fn(x: int) -> int` (static print)))
+                                                               (10 `int` @72))))))))
+                                          (deref `int` @32 (p1~6 `ptr<int>` @0)))
+                                       (combine `int` @60
+                                          (assign `ptr<int>` @8
+                                             (p2~7 `ptr<int>` @8)
+                                             (addressof `ptr<int>` @8
+                                                (compound-literal `int` @28
+                                                   (definition (compound_literal.13~14 `int` @28)
+                                                      (braced
+                                                         (subobject +0
+                                                            (call `int` @28
+                                                               (addressof `ptr<fn(x: int) -> int>` @64
+                                                                  (print~1 `fn(x: int) -> int` (static print)))
+                                                               (5 `int` @72))))))))
+                                          (deref `int` @60 (p2~7 `ptr<int>` @8))))))))))
+                  (deref `int` @56 (p3~8 `ptr<int>` @16)))))
+         (expression
+            (call `int` @36
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 10>>` @48
+                        (string `array<char; 10>` @void "%d %d %d\n\0"))))
+               (deref `int` @56 (p1~6 `ptr<int>` @0))
+               (deref `int` @60 (p2~7 `ptr<int>` @8))
+               (deref `int` @64 (p3~8 `ptr<int>` @16))))
+         (definition (a~15 `int` @36) (10 `int` @36))
+         (definition (b~16 `int` @40) (20 `int` @40))
+         (definition (c~17 `int` @44) (30 `int` @44))
+         (expression
+            (call `int` @48
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @64
+                  (noop-type-conversion `ptr<char>` @64
+                     (addressof `ptr<array<char; 10>>` @64
+                        (string `array<char; 10>` @void "%d %d %d\n\0"))))
+               (a~15 `int` @36)
+               (b~16 `int` @40)
+               (c~17 `int` @44)))
+         (expression
+            (call `int` @48
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @64
+                  (noop-type-conversion `ptr<char>` @64
+                     (addressof `ptr<array<char; 10>>` @64
+                        (string `array<char; 10>` @void "%d %d %d\n\0"))))
+               (deref `int` @72 (p1~6 `ptr<int>` @0))
+               (deref `int` @76 (p2~7 `ptr<int>` @8))
+               (deref `int` @80 (p3~8 `ptr<int>` @16))))))
+   (function-definition external stack-size=104
+      (g~18 `fn() -> void` (static g))
+      (compound-statement
+         (definition (p1~20 `ptr<int>` @0) (noop-type-conversion `ptr<int>` @0 (nullptr `nullptr_t` @0)))
+         (definition (p2~21 `ptr<int>` @8) (noop-type-conversion `ptr<int>` @8 (nullptr `nullptr_t` @8)))
+         (definition (p3~22 `ptr<int>` @16) (noop-type-conversion `ptr<int>` @16 (nullptr `nullptr_t` @16)))
+         (definition (x~23 `int` @24) (1 `int` @24))
+         (definition (y~24 `int` @28) (2 `int` @28))
+         (definition (z~25 `int` @32) (3 `int` @32))
+         (expression
+            (call `int` @48
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @64
+                  (noop-type-conversion `ptr<char>` @64
+                     (addressof `ptr<array<char; 4>>` @64
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (combine `int` @72
+                  (assign `ptr<int>` @16
+                     (p3~22 `ptr<int>` @16)
+                     (addressof `ptr<int>` @16
+                        (compound-literal `int` @44
+                           (definition (compound_literal.26~27 `int` @44)
+                              (braced
+                                 (subobject +0
+                                    (add `int` @44
+                                       (combine `int` @44
+                                          (assign `ptr<int>` @0
+                                             (p1~20 `ptr<int>` @0)
+                                             (addressof `ptr<int>` @0
+                                                (compound-literal `int` @36
+                                                   (definition (compound_literal.28~29 `int` @36)
+                                                      (braced
+                                                         (subobject +0
+                                                            (call `int` @36
+                                                               (addressof `ptr<fn(x: int) -> int>` @80
+                                                                  (print~1 `fn(x: int) -> int` (static print)))
+                                                               (10 `int` @88))))))))
+                                          (deref `int` @44 (p1~20 `ptr<int>` @0)))
+                                       (combine `int` @76
+                                          (assign `ptr<int>` @8
+                                             (p2~21 `ptr<int>` @8)
+                                             (addressof `ptr<int>` @8
+                                                (compound-literal `int` @40
+                                                   (definition (compound_literal.30~31 `int` @40)
+                                                      (braced
+                                                         (subobject +0
+                                                            (call `int` @40
+                                                               (addressof `ptr<fn(x: int) -> int>` @80
+                                                                  (print~1 `fn(x: int) -> int` (static print)))
+                                                               (5 `int` @88))))))))
+                                          (deref `int` @76 (p2~21 `ptr<int>` @8))))))))))
+                  (deref `int` @72 (p3~22 `ptr<int>` @16)))))
+         (expression
+            (call `int` @48
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @64
+                  (noop-type-conversion `ptr<char>` @64
+                     (addressof `ptr<array<char; 10>>` @64
+                        (string `array<char; 10>` @void "%d %d %d\n\0"))))
+               (x~23 `int` @24)
+               (y~24 `int` @28)
+               (z~25 `int` @32)))
+         (expression
+            (assign `int` @24
+               (x~23 `int` @24)
+               (4 `int` @24)))
+         (expression
+            (assign `int` @28
+               (y~24 `int` @28)
+               (5 `int` @28)))
+         (expression
+            (assign `int` @32
+               (z~25 `int` @32)
+               (6 `int` @32)))
+         (expression
+            (call `int` @48
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @64
+                  (noop-type-conversion `ptr<char>` @64
+                     (addressof `ptr<array<char; 10>>` @64
+                        (string `array<char; 10>` @void "%d %d %d\n\0"))))
+               (x~23 `int` @24)
+               (y~24 `int` @28)
+               (z~25 `int` @32)))
+         (expression
+            (call `int` @48
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @56
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @64
+                  (noop-type-conversion `ptr<char>` @64
+                     (addressof `ptr<array<char; 10>>` @64
+                        (string `array<char; 10>` @void "%d %d %d\n\0"))))
+               (deref `int` @72 (p1~20 `ptr<int>` @0))
+               (deref `int` @76 (p2~21 `ptr<int>` @8))
+               (deref `int` @80 (p3~22 `ptr<int>` @16))))))
+   (function-definition external stack-size=24
+      (main~32 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (f~4 `fn() -> void` (static f)))))
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn() -> void>` @0
+                  (g~18 `fn() -> void` (static g))))))))
+
+----- stderr -----

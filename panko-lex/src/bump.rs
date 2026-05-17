@@ -34,4 +34,13 @@ impl Bump {
         }
         self.0.alloc_slice_fill_iter(iter)
     }
+
+    pub fn alloc_slice_collect<I, T>(&self, values: I) -> &[T]
+    where
+        I: IntoIterator<Item = T>,
+        T: Copy,
+    {
+        let values = values.into_iter().collect::<Vec<_>>();
+        self.alloc_slice_copy(&values)
+    }
 }

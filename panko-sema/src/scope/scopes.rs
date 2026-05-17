@@ -2,6 +2,7 @@ use std::bstr::ByteStr;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::collections::hash_map::OccupiedEntry;
+use std::vec::Drain;
 
 use itertools::Either;
 use panko_lex::Loc;
@@ -110,6 +111,7 @@ pub(super) struct Scopes<'a> {
     /// at most two elements: the global scope and a function scope
     scopes: nonempty::Vec<Scope<'a>>,
     next_id: u64,
+    hoisted_compound_literal_decls: Vec<Reference<'a>>,
 }
 
 impl<'a> Scopes<'a> {
@@ -118,6 +120,7 @@ impl<'a> Scopes<'a> {
             sess,
             scopes: nonempty::Vec::default(),
             next_id: 0,
+            hoisted_compound_literal_decls: vec![],
         }
     }
 
@@ -337,7 +340,7 @@ impl<'a> Scopes<'a> {
         self.scopes.last_mut().pop();
     }
 
-    fn id(&mut self) -> Id {
+    pub(super) fn id(&mut self) -> Id {
         let id = Id(self.next_id);
         self.next_id += 1;
         id
@@ -360,5 +363,13 @@ impl<'a> Scopes<'a> {
             Entry::Occupied(mut entry) => entry.get_mut().initialiser = initialiser,
             Entry::Vacant(_) => unreachable!(),
         }
+    }
+
+    pub(crate) fn hoist_compound_literal(&mut self, reference: Reference<'a>) {
+        self.hoisted_compound_literal_decls.push(reference)
+    }
+
+    pub(crate) fn take_hoisted_compound_literals(&mut self) -> Drain<Reference<'a>> {
+        self.hoisted_compound_literal_decls.drain(..)
     }
 }

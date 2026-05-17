@@ -160,8 +160,7 @@ impl<'a> Session<'a> {
         I: IntoIterator<Item = T>,
         T: Copy,
     {
-        let values = values.into_iter().collect_vec();
-        self.alloc_slice_copy(&values)
+        self.bump.alloc_slice_collect(values)
     }
 
     pub fn alloc_slice_copy<T>(&self, values: &[T]) -> &'a [T]

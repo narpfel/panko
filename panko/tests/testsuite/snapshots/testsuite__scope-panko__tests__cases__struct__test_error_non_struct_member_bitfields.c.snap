@@ -12,20 +12,10 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: bitfields can only be struct or union members, not functions
-   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:1:16]
-   │
- 1 │ int function():123 {
-   │ ───────┬────── ─┬─  
-   │        │        ╰─── bitfields are not allowed here
-   │        │            
-   │        ╰──────────── in this function
-───╯
-
 Error: bitfields can only be struct or union members, not parameters
-   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:5:29]
+   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:1:29]
    │
- 5 │ int f(int x, bool parameter:1, int y) {
+ 1 │ int f(int x, bool parameter:1, int y) {
    │              ───────┬────── ┬  
    │                     │       ╰── bitfields are not allowed here
    │                     │          
@@ -33,9 +23,9 @@ Error: bitfields can only be struct or union members, not parameters
 ───╯
 
 Error: bitfields can only be struct or union members, not global variables
-   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:9:12]
+   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:5:12]
    │
- 9 │ int global:10 = 10;
+ 5 │ int global:10 = 10;
    │ ─────┬──── ─┬  
    │      │      ╰── bitfields are not allowed here
    │      │         
@@ -43,11 +33,11 @@ Error: bitfields can only be struct or union members, not global variables
 ───╯
 
 Error: bitfields can only be struct or union members, not local variables
-    ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:12:15]
-    │
- 12 │     int local:20 = 20;
-    │     ────┬──── ─┬  
-    │         │      ╰── bitfields are not allowed here
-    │         │         
-    │         ╰───────── in this local variable
-────╯
+   ╭─[panko/tests/cases/struct/test_error_non_struct_member_bitfields.c:8:15]
+   │
+ 8 │     int local:20 = 20;
+   │     ────┬──── ─┬  
+   │         │      ╰── bitfields are not allowed here
+   │         │         
+   │         ╰───────── in this local variable
+───╯

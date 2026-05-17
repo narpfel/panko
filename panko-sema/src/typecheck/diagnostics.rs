@@ -375,7 +375,7 @@ pub(super) enum Diagnostic<'a> {
     #[diagnostics(
         at(colour = Red, label = "this array is declared as empty"),
     )]
-    EmptyArray { at: Reference<'a> },
+    EmptyArray { at: QualifiedType<'a> },
 
     #[error("excess element in {kind} initialiser")]
     #[with(

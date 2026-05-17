@@ -158,6 +158,8 @@ impl AsSExpr for Statement<'_> {
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),
             Statement::Return(expr) => SExpr::new("return").inherit(expr),
+            Statement::HoistedCompoundLiteral(reference) =>
+                SExpr::new("hoisted-compound-literal").inherit(reference),
         }
     }
 }
@@ -242,6 +244,8 @@ impl AsSExpr for Expression<'_> {
             Expression::MemberAccess { lhs, member, member_loc: _ } =>
                 member.as_sexpr_without_ty("+").lines([lhs]),
             Expression::BuiltinName(builtin_name) => builtin_name.as_sexpr(),
+            Expression::CompoundLiteral { open_paren: _, decl } =>
+                SExpr::new("compound-literal").inherit(decl),
         }
     }
 }

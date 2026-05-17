@@ -16,6 +16,10 @@ exit_code: 0
       (compound-statement
          (declaration empty_1~2 `array<int; 0>` ∅)
          (declaration empty_2~3 `array<int; 0>` (braced ∅))
-         (declaration empty_3~4 `array<int; ∅>` (braced ∅)))))
+         (declaration empty_3~4 `array<int; ∅>` (braced ∅))
+         (hoisted-compound-literal compound_literal.5~6 `array<int; 0>`)
+         (expression (compound-literal (declaration compound_literal.5~6 `array<int; 0>` (braced ∅))))
+         (hoisted-compound-literal compound_literal.7~8 `array<long; ∅>`)
+         (expression (compound-literal (declaration compound_literal.7~8 `array<long; ∅>` (braced ∅)))))))
 
 ----- stderr -----

@@ -1,0 +1,119 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/compound-literal/test_compound_literal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/compound-literal/test_compound_literal.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
+      print~1 `fn(x: int) -> int`
+      (params
+         x~3 `int`)
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d \0"))))
+               (x~3 `int`)))
+         (return (x~3 `int`))))
+   (function-definition external
+      static_compound_literal~4 `fn() -> ptr<int>`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.6~7 `int`)
+         (return
+            (addressof `ptr<int>`
+               (compound-literal `int` (definition compound_literal.6~7 `int` (braced ∅)))))))
+   (function-definition external
+      main~8 `fn() -> int`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.12~13 `int`)
+         (hoisted-compound-literal compound_literal.14~15 `int`)
+         (hoisted-compound-literal compound_literal.10~11 `int`)
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (compound-literal `int`
+                  (definition compound_literal.10~11 `int`
+                     (braced
+                        (subobject +0
+                           (add `int`
+                              (compound-literal `int`
+                                 (definition compound_literal.12~13 `int`
+                                    (braced
+                                       (subobject +0
+                                          (call `int`
+                                             (addressof `ptr<fn(x: int) -> int>`
+                                                (print~1 `fn(x: int) -> int`))
+                                             (10 `int`))))))
+                              (compound-literal `int`
+                                 (definition compound_literal.14~15 `int`
+                                    (braced
+                                       (subobject +0
+                                          (call `int`
+                                             (addressof `ptr<fn(x: int) -> int>`
+                                                (print~1 `fn(x: int) -> int`))
+                                             (5 `int`)))))))))))))
+         (definition p~16 `ptr<int>`
+            (call `ptr<int>`
+               (addressof `ptr<fn() -> ptr<int>>`
+                  (static_compound_literal~4 `fn() -> ptr<int>`))))
+         (definition q~17 `ptr<int>`
+            (call `ptr<int>`
+               (addressof `ptr<fn() -> ptr<int>>`
+                  (static_compound_literal~4 `fn() -> ptr<int>`))))
+         (expression (assign `int` (deref `int` (p~16 `ptr<int>`)) (42 `int`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (deref `int` (q~17 `ptr<int>`))
+               (ptr-equal `int` (p~16 `ptr<int>`) (q~17 `ptr<int>`))))
+         (struct T~18
+            (member x @0 `int`)
+            (member y @4 `int`))
+         (definition i1~19 `int` (braced ∅))
+         (hoisted-compound-literal compound_literal.21~22 `struct T~18 complete`)
+         (definition ptr_to_local~20 `ptr<struct T~18 complete>`
+            (addressof `ptr<struct T~18 complete>`
+               (compound-literal `struct T~18 complete`
+                  (definition compound_literal.21~22 `struct T~18 complete`
+                     (braced
+                        (subobject +0 (123 `int`))
+                        (subobject +4 (456 `int`)))))))
+         (definition i2~23 `int` (braced ∅))
+         (expression (assign `int` (i1~19 `int`) (789 `int`)))
+         (expression (assign `int` (i2~23 `int`) (987 `int`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (member `int` x +0
+                  (deref `struct T~18 complete` (ptr_to_local~20 `ptr<struct T~18 complete>`)))
+               (member `int` y +4
+                  (deref `struct T~18 complete` (ptr_to_local~20 `ptr<struct T~18 complete>`))))))))
+
+----- stderr -----

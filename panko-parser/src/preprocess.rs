@@ -21,6 +21,7 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
 
+use crate::TypedefTracker;
 use crate::ast::Session;
 use crate::handle_parse_error;
 use crate::nonempty;
@@ -879,11 +880,14 @@ impl<'a> Preprocessor<'a> {
             true => zero_or_one_from_bool(sess, token.slice() == "true"),
             false => token,
         });
-        let typedef_names = RefCell::default();
-        let is_in_typedef = RefCell::default();
+        let typedef_names = &RefCell::default();
+        let typedef_tracker = &mut TypedefTracker {
+            typedef_names,
+            is_in_typedef: nonempty::Vec::default(),
+        };
         let parser = crate::grammar::ConstantExpressionParser::new();
         let expr = parser
-            .parse(sess, &typedef_names, &is_in_typedef, Path::new(""), tokens)
+            .parse(sess, typedef_tracker, Path::new(""), tokens)
             .unwrap_or_else(handle_parse_error(sess));
         eval(sess, &expr).into_bool().unwrap_or_else(|reports| {
             for report in reports {

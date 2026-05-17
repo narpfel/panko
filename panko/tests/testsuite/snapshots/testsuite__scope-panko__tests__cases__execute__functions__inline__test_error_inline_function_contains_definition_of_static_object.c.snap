@@ -7,15 +7,17 @@ info:
     - "--stop-after=scopes"
     - panko/tests/cases/execute/functions/inline/test_error_inline_function_contains_definition_of_static_object.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/functions/inline/test_error_inline_function_contains_definition_of_static_object.c"
+   (function-definition
+      g~2 `fn() -> typeof((compound-literal
+   (declaration compound_literal.0~1 `int`
+      (braced
+         0))))`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.0~1 `int`)
+         (return 0))))
 
 ----- stderr -----
-Error: unexpected token `{` of kind `LBrace`
-   ╭─[panko/tests/cases/execute/functions/inline/test_error_inline_function_contains_definition_of_static_object.c:4:20]
-   │
- 4 │ inline typeof((int){0}) g() {
-   │                    ┬  
-   │                    ╰── expected one of the following token kinds: ["*", "(", "_Generic", "sizeof", "_Lengthof", "alignof", "+", "-", "~", "!", "&", "++", "--", "true", "false", "nullptr", "__builtin_offsetof", Identifier, Integer, MaybeUnterminatedCharConstant, MaybeUnterminatedString]
-───╯

@@ -1,11 +1,13 @@
 // [[return: 42]]
 
 typedef int a;
+typedef int b;
 
-int f(int a) {
-    return a;
+int f(int a, int (*b)) {
+    return a + *b;
 }
 
 int main() {
-    return f(42);
+    int x = 2;
+    return f(40, &x);
 }

@@ -12,19 +12,27 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/typedef/test_use_globally_typedefd_name_as_parameter_name.c"
    (typedef a `int`)
-   (function-definition external stack-size=24
-      (f~0 `fn(a: int) -> int` (static f))
-      (params
-         (a~2 `int` @0))
-      (compound-statement
-         (return (a~2 `int` @0))))
+   (typedef b `int`)
    (function-definition external stack-size=40
-      (main~3 `fn() -> int` (static main))
+      (f~0 `fn(a: int, b: ptr<int>) -> int` (static f))
+      (params
+         (a~2 `int` @0)
+         (b~3 `ptr<int>` @8))
       (compound-statement
          (return
-            (call `int` @0
-               (addressof `ptr<fn(a: int) -> int>` @8
-                  (f~0 `fn(a: int) -> int` (static f)))
-               (42 `int` @16))))))
+            (add `int` @16
+               (a~2 `int` @0)
+               (deref `int` @20 (b~3 `ptr<int>` @8))))))
+   (function-definition external stack-size=40
+      (main~4 `fn() -> int` (static main))
+      (compound-statement
+         (definition (x~6 `int` @0) (2 `int` @0))
+         (return
+            (call `int` @4
+               (addressof `ptr<fn(a: int, b: ptr<int>) -> int>` @8
+                  (f~0 `fn(a: int, b: ptr<int>) -> int` (static f)))
+               (40 `int` @16)
+               (addressof `ptr<int>` @24
+                  (x~6 `int` @0)))))))
 
 ----- stderr -----

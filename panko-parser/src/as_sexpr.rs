@@ -338,6 +338,15 @@ impl AsSExpr for Expression<'_> {
                 member,
                 close_paren: _,
             } => SExpr::new("offsetof").inherit(ty).inherit(member),
+            Expression::CompoundLiteral {
+                open_paren: _,
+                storage_class_specifiers,
+                ty,
+                initialiser,
+            } => SExpr::new("compound-literal")
+                .inherit_many(*storage_class_specifiers)
+                .lines([ty])
+                .lines([*initialiser]),
         }
     }
 }

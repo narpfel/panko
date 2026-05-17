@@ -211,6 +211,9 @@ pub enum Expression<'a> {
         member: Member<'a, Layout>,
     },
     BuiltinName(BuiltinName<'a>),
+    CompoundLiteral {
+        decl: &'a Declaration<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -455,11 +458,11 @@ fn layout_compound_statement<'a>(
     stmts: typecheck::CompoundStatement<'a>,
 ) -> CompoundStatement<'a> {
     let stmts = stack.with_block(|stack| {
-        bump.alloc_slice_fill_iter(
+        bump.alloc_slice_collect(
             stmts
                 .0
                 .iter()
-                .map(|stmt| layout_statement(stack, bump, stmt)),
+                .filter_map(|stmt| layout_statement(stack, bump, stmt)),
         )
     });
     CompoundStatement(stmts)
@@ -469,8 +472,8 @@ fn layout_statement<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
     stmt: &typecheck::Statement<'a>,
-) -> Statement<'a> {
-    match stmt {
+) -> Option<Statement<'a>> {
+    Some(match stmt {
         typecheck::Statement::StructDecl(complete) =>
             Statement::StructDecl(layout_complete_struct(stack, bump, complete)),
         typecheck::Statement::Declaration(decl) =>
@@ -484,7 +487,11 @@ fn layout_statement<'a>(
         typecheck::Statement::Return(expr) => stack.with_block(|stack| {
             Statement::Return(try { layout_expression(stack, bump, expr.as_ref()?) })
         }),
-    }
+        typecheck::Statement::HoistedCompoundLiteral(reference) => {
+            stack.add(bump, *reference);
+            return None;
+        }
+    })
 }
 
 fn layout_expression<'a>(
@@ -699,6 +706,10 @@ fn layout_expression_in_slot<'a>(
         }
         typecheck::Expression::BuiltinName(builtin_name) =>
             (make_slot(), Expression::BuiltinName(builtin_name)),
+        typecheck::Expression::CompoundLiteral { open_paren: _, decl } => {
+            let decl = bump.alloc(layout_declaration(stack, bump, decl));
+            (decl.reference.slot(), Expression::CompoundLiteral { decl })
+        }
     };
     LayoutedExpression { ty, slot, expr, loc }
 }
