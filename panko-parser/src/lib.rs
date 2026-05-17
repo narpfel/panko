@@ -822,10 +822,10 @@ impl<'a> DirectDeclarator<'a> {
         }
     }
 
-    fn name(&self) -> Option<Token<'a>> {
+    fn name(&self) -> Option<&Token<'a>> {
         match self {
             DirectDeclarator::Abstract => None,
-            DirectDeclarator::Identifier(token) => Some(*token),
+            DirectDeclarator::Identifier(token) => Some(token),
             DirectDeclarator::Parenthesised { declarator, close_paren: _ } =>
                 declarator.direct_declarator.name(),
             DirectDeclarator::ArrayDeclarator(array_declarator) =>
