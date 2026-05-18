@@ -13,6 +13,7 @@ use itertools::Itertools as _;
 use panko_lex::Bump;
 use panko_lex::Loc;
 use panko_lex::Token;
+use panko_lex::TokenKind;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
@@ -101,6 +102,10 @@ enum Diagnostic<'a> {
         name: &'a str,
         parameter: Loc<'a>,
     },
+
+    #[error("function defined without a name")]
+    #[diagnostics(at(colour = Red, label = "this definition lacks a name"))]
+    FunctionDefinedWithoutName { at: QualifiedType<'a> },
 }
 
 // TODO: could this be `From<&'a dyn Report>`?
@@ -468,8 +473,11 @@ impl<'a> FunctionDefinition<'a> {
             None => None,
         };
         let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
-        let name =
-            name.unwrap_or_else(|| unreachable!("[parser] syntax error: declaration without name"));
+        let name = name.unwrap_or_else(|| {
+            let () = sess.emit(Diagnostic::FunctionDefinedWithoutName { at: ty });
+            // TODO: this should be a unique name for each function for error recovery
+            Token::from_str(sess.bump, TokenKind::Identifier, "unnamed.function")
+        });
         Self {
             name,
             storage_class,
