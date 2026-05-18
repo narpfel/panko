@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/functions/test_error_function_defined_with_invalid_storage_class.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid storage class `typedef` applied to definition of function `f`
+   ╭─[panko/tests/cases/functions/test_error_function_defined_with_invalid_storage_class.c:1:1]
+   │
+ 1 │ typedef int f() {
+   │ ───┬───     ┬  
+   │    │        ╰── in the definition of function `f`
+   │    │           
+   │    ╰─────────── `typedef` is invalid for functions
+───╯
