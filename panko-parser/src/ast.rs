@@ -103,6 +103,13 @@ enum Diagnostic<'a> {
         parameter: Loc<'a>,
     },
 
+    #[error("invalid storage class `{at}` applied to definition of function `{function}`")]
+    #[diagnostics(
+        at(colour = Red, label = "`{at}` is invalid for functions"),
+        function(colour = Blue, label = "in the definition of function `{function}`"),
+    )]
+    InvalidStorageClassForFunctionDefinition { at: Token<'a>, function: Token<'a> },
+
     #[error("function defined without a name")]
     #[diagnostics(at(colour = Red, label = "this definition lacks a name"))]
     FunctionDefinedWithoutName { at: QualifiedType<'a> },
@@ -115,6 +122,13 @@ pub trait FromError<'a> {
 
 impl FromError<'_> for () {
     fn from_error(_error: &dyn Report) -> Self {}
+}
+
+impl<'a, T> FromError<'a> for Option<T> {
+    fn from_error(_error: &'a dyn Report) -> Self {
+        // TODO: use this error (or check that all usages should really ignore the error)
+        None
+    }
 }
 
 impl<'a, T, E> FromError<'a> for Either<E, T>
@@ -466,18 +480,21 @@ impl<'a> FunctionDefinition<'a> {
         let cst::FunctionDefinition { declaration_specifiers, declarator, body } = *def;
         let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
             parse_declaration_specifiers(sess, declaration_specifiers);
-        let storage_class = match try { storage_class?.kind } {
-            Some(StorageClassSpecifierKind::Extern) => storage_class,
-            Some(StorageClassSpecifierKind::Static) => storage_class,
-            Some(storage_class) => todo!("handle storage_class {storage_class:?}"),
-            None => None,
-        };
         let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
         let name = name.unwrap_or_else(|| {
             let () = sess.emit(Diagnostic::FunctionDefinedWithoutName { at: ty });
             // TODO: this should be a unique name for each function for error recovery
             Token::from_str(sess.bump, TokenKind::Identifier, "unnamed.function")
         });
+        let storage_class = match try { storage_class?.kind } {
+            Some(StorageClassSpecifierKind::Extern) | Some(StorageClassSpecifierKind::Static) =>
+                storage_class,
+            Some(_) => sess.emit(Diagnostic::InvalidStorageClassForFunctionDefinition {
+                at: storage_class.unwrap().token,
+                function: name,
+            }),
+            None => None,
+        };
         Self {
             name,
             storage_class,
