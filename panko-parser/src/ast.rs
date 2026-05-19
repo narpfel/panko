@@ -286,9 +286,15 @@ pub enum TypeDeclaration<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub enum FunctionStorageClass {
+    Extern,
+    Static,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct FunctionDefinition<'a> {
     pub name: Token<'a>,
-    pub storage_class: Option<cst::StorageClassSpecifier<'a>>,
+    pub storage_class: Option<FunctionStorageClass>,
     pub inline: Option<cst::FunctionSpecifier<'a>>,
     pub noreturn: Option<cst::FunctionSpecifier<'a>>,
     pub ty: QualifiedType<'a>,
@@ -487,8 +493,8 @@ impl<'a> FunctionDefinition<'a> {
             Token::from_str(sess.bump, TokenKind::Identifier, "unnamed.function")
         });
         let storage_class = match try { storage_class?.kind } {
-            Some(StorageClassSpecifierKind::Extern) | Some(StorageClassSpecifierKind::Static) =>
-                storage_class,
+            Some(StorageClassSpecifierKind::Extern) => Some(FunctionStorageClass::Extern),
+            Some(StorageClassSpecifierKind::Static) => Some(FunctionStorageClass::Static),
             Some(_) => sess.emit(Diagnostic::InvalidStorageClassForFunctionDefinition {
                 at: storage_class.unwrap().token,
                 function: name,

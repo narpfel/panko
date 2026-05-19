@@ -21,6 +21,7 @@ use panko_parser::UnaryOpKind;
 use panko_parser::ast;
 use panko_parser::ast::FromError;
 use panko_parser::ast::FunctionSpecifiers;
+use panko_parser::ast::FunctionStorageClass;
 use panko_parser::ast::Session;
 use panko_parser::ast::Struct;
 use panko_parser::ast::TypeDeclaration;
@@ -854,18 +855,13 @@ fn resolve_function_definition<'a>(
         body,
     } = def;
     let ty = resolve_ty(scopes, ty);
-    let linkage = match try { storage_class.as_ref()?.kind } {
+    let linkage = match storage_class {
         None => match inline {
             Some(_) => Linkage::Inline,
             None => Linkage::External,
         },
-        Some(StorageClassSpecifierKind::Extern) => Linkage::External,
-        Some(StorageClassSpecifierKind::Static) => Linkage::Internal,
-        Some(kind) => error_todo!(
-            storage_class.unwrap(),
-            "invalid or unimplemented StorageClassSpecifierKind {:?}",
-            kind,
-        ),
+        Some(FunctionStorageClass::Extern) => Linkage::External,
+        Some(FunctionStorageClass::Static) => Linkage::Internal,
     };
     let maybe_reference = scopes.add_function(name.slice(), name.loc(), ty, linkage);
     let reference = match maybe_reference {
