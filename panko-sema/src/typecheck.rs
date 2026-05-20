@@ -1282,7 +1282,7 @@ fn typeck_initialiser_list<'a>(
                     subobjects: &mut Subobjects<'a>,
                     designator: &Designator<'a>,
                 ) {
-                    let goto_result = match designator {
+                    match designator {
                         Designator::Bracketed { open_bracket: _, index, close_bracket: _ } => {
                             let index = typeck_expression(sess, index, Context::Default);
                             // TODO: constexpr evaluate
@@ -1294,15 +1294,14 @@ fn typeck_initialiser_list<'a>(
                         }
                         Designator::Identifier { dot: _, ident } =>
                             subobjects.goto_member(ident.slice()),
-                    };
-                    match goto_result {
-                        Ok(()) => (),
-                        Err(iterator) => sess.emit(Diagnostic::NoSuchSubobject {
+                    }
+                    .unwrap_or_else(|iterator| {
+                        sess.emit(Diagnostic::NoSuchSubobject {
                             at: *designator,
                             reference: *reference,
                             iterator,
-                        }),
-                    }
+                        })
+                    })
                 }
 
                 while subobjects.try_leave_subobject(AllowExplicit::No) {}
