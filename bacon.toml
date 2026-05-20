@@ -33,6 +33,7 @@ command = [
 ]
 background = false
 need_stdout = true
+show_command_error_code = true
 env.PANKO_COMPILETEST_USE_LINKER = "mold"
 
 [jobs.covtest]
@@ -75,6 +76,7 @@ command = [
 need_stdout = true
 allow_warnings = true
 background = true
+show_command_error_code = true
 watch = ["../c"]
 env.CLICOLOR_FORCE = "1"
 
