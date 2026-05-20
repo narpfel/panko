@@ -787,10 +787,7 @@ fn resolve_function_ty<'a>(
         .filter_map(|param| Some((param.name?.slice(), param)))
         .into_group_map();
     for params in params_by_name.values() {
-        let [param, duplicates @ ..] = &params[..]
-        else {
-            unreachable!()
-        };
+        let (param, duplicates) = params.split_first().expect("`params` is nonempty");
         for duplicate in duplicates {
             scopes.sess.emit(Diagnostic::AlreadyDefined {
                 at: duplicate.loc(),
