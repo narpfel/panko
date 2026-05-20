@@ -1276,12 +1276,7 @@ fn typeck_initialiser_list<'a>(
         match designation {
             Some(Designation([])) => unreachable!(),
             Some(Designation([designator, rest @ ..])) => {
-                fn apply_designator<'a>(
-                    sess: &'a Session<'a>,
-                    reference: &Reference<'a>,
-                    subobjects: &mut Subobjects<'a>,
-                    designator: &Designator<'a>,
-                ) {
+                let apply = |subobjects: &mut Subobjects<'a>, designator: &Designator<'a>| {
                     match designator {
                         Designator::Bracketed { open_bracket: _, index, close_bracket: _ } => {
                             let index = typeck_expression(sess, index, Context::Default);
@@ -1302,15 +1297,15 @@ fn typeck_initialiser_list<'a>(
                             iterator,
                         })
                     })
-                }
+                };
 
                 while subobjects.try_leave_subobject(AllowExplicit::No) {}
-                apply_designator(sess, reference, subobjects, designator);
+                apply(subobjects, designator);
                 for designator in rest {
                     subobjects.enter_subobject_implicit().1.unwrap_or_else(|_| {
                         unreachable!("only reachable for nested braced initialisation")
                     });
-                    apply_designator(sess, reference, subobjects, designator);
+                    apply(subobjects, designator);
                 }
             }
             None => (),
