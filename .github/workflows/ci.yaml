@@ -13,6 +13,12 @@ env:
 
 jobs:
   ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        profile:
+          - dev
+          - release
     runs-on: ubuntu-24.04
     env:
       WILD_VERSION: "0.8.0"
@@ -49,6 +55,7 @@ jobs:
             export PANKO_COMPILETEST_USE_LINKER=$linker
             echo -e "\x1b1m\x1b[31mtesting with linker $PANKO_COMPILETEST_USE_LINKER\x1b[m"
             cargo insta test \
+              --profile=${{ matrix.profile }} \
               --unreferenced=reject \
               -- \
               --color=always

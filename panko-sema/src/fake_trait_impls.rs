@@ -52,7 +52,8 @@ pub(crate) struct NoHashEq<T>(pub(crate) T);
 
 impl<T> PartialEq for NoHashEq<T> {
     fn eq(&self, _other: &Self) -> bool {
-        const { panic!("this impl can’t be used") }
+        const { panic!("this impl can’t be used") };
+        panic!("this impl can’t be used")
     }
 }
 
