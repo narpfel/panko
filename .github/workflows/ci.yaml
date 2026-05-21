@@ -35,7 +35,7 @@ jobs:
           components: rustc-codegen-cranelift
       - name: Install `wild`
         run: |
-          wget https://github.com/davidlattimore/wild/releases/download/$WILD_VERSION/wild-linker-$WILD_VERSION-x86_64-unknown-linux-gnu.tar.gz
+          wget https://github.com/wild-linker/wild/releases/download/$WILD_VERSION/wild-linker-$WILD_VERSION-x86_64-unknown-linux-gnu.tar.gz
           sha256sum -c <<<"$WILD_SHA256SUM wild-linker-$WILD_VERSION-x86_64-unknown-linux-gnu.tar.gz"
           tar xzf wild-linker-$WILD_VERSION-x86_64-unknown-linux-gnu.tar.gz
       - name: Install `mold`
