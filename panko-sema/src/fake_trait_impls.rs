@@ -53,7 +53,7 @@ pub(crate) struct NoHashEq<T>(pub(crate) T);
 impl<T> PartialEq for NoHashEq<T> {
     fn eq(&self, _other: &Self) -> bool {
         const { panic!("this impl can’t be used") };
-        panic!("this impl can’t be used")
+        unreachable!()
     }
 }
 
@@ -61,7 +61,8 @@ impl<T> Eq for NoHashEq<T> {}
 
 impl<T> Hash for NoHashEq<T> {
     fn hash<H: std::hash::Hasher>(&self, _state: &mut H) {
-        const { panic!("this impl can’t be used") }
+        const { panic!("this impl can’t be used") };
+        unreachable!()
     }
 }
 
