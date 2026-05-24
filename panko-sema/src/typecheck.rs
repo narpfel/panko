@@ -70,6 +70,7 @@ use crate::typecheck::literal::StringLiteral;
 pub(crate) use crate::typecheck::ptr::PtrAddOrder;
 
 mod as_sexpr;
+mod constexpr;
 mod diagnostics;
 mod literal;
 mod ptr;
@@ -92,15 +93,12 @@ impl<Expression> ArrayLength<Expression> {
 impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a>> {
     type Error = &'a TypedExpression<'a>;
 
-    fn try_from(value: &'a TypedExpression<'a>) -> Result<Self, Self::Error> {
-        // TODO: constexpr evaluate `value` here
-        match value.expr {
-            Expression::Integer { value, token: _ } => Ok(Self::Constant(value)),
-            Expression::Sizeof { sizeof: _, operand: _, size }
-            | Expression::SizeofTy { sizeof: _, ty: _, size, close_paren: _ } =>
-                Ok(Self::Constant(size)),
-            _ => Err(value),
-        }
+    fn try_from(expr: &'a TypedExpression<'a>) -> Result<Self, Self::Error> {
+        let value = match constexpr::eval(expr).into_integral() {
+            constexpr::Integral::Signed(value) => u64::try_from(value).map_err(|_| expr)?,
+            constexpr::Integral::Unsigned(value) => value,
+        };
+        Ok(Self::Constant(value))
     }
 }
 
