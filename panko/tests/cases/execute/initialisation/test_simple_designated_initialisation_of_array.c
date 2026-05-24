@@ -49,4 +49,15 @@ int main(int, char** argv) {
     printf(s, xs[41]);
     // [[print: 2]]
     printf(s, xs[42]);
+
+    // [[print: 200]]
+    // [[print: 100]]
+    // [[print: 400]]
+    int ys[] = {
+        [sizeof(short)] = f(100),
+        [sizeof(char)] = f(200),
+        [sizeof(int)] = f(400),
+    };
+    // [[print: {0, 200, 100, 0, 400}]]
+    printf("{%d, %d, %d, %d, %d}\n", ys[0], ys[1], ys[2], ys[3], ys[4]);
 }

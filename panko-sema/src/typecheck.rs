@@ -1278,10 +1278,15 @@ fn typeck_initialiser_list<'a>(
                     match designator {
                         Designator::Bracketed { open_bracket: _, index, close_bracket: _ } => {
                             let index = typeck_expression(sess, index, Context::Default);
-                            // TODO: constexpr evaluate
-                            let index = match index.expr {
-                                Expression::Integer { value, token: _ } => value,
-                                _ => todo!(),
+                            let index = match constexpr::eval(&index).into_integral() {
+                                constexpr::Integral::Signed(value) => u64::try_from(value)
+                                    .unwrap_or_else(|_| {
+                                        error_todo!(
+                                            index,
+                                            "negative index in designated initialiser",
+                                        )
+                                    }),
+                                constexpr::Integral::Unsigned(value) => value,
                             };
                             subobjects.goto_index(index)
                         }
