@@ -139,6 +139,8 @@ exit_code: 0
                (string "0x%016lx\n")
                (dot x
                   (name u_with_static~9 `union ∅~8 complete`))))
+         (struct BitfieldWithConstexprWidth~25
+            (member x (bitfield-width (sizeof `int`)) `int`))
          (return (sizeof `struct T~1 complete`)))))
 
 ----- stderr -----

@@ -788,10 +788,10 @@ fn typeck_struct_members<'a>(
             let (width_expr, bitfield_width) = try {
                 let BitfieldWidth { width } = bitfield_width.as_ref()?;
                 let width = typeck_expression(sess, width, Context::Default);
-                // TODO: constexpr evaluate
-                let value = match width.expr {
-                    Expression::Integer { value, token: _ } => value,
-                    expr => error_todo!(expr),
+                let value = match constexpr::eval(&width).into_integral() {
+                    constexpr::Integral::Signed(value) => u64::try_from(value)
+                        .unwrap_or_else(|_| error_todo!(width, "negative bitfield width")),
+                    constexpr::Integral::Unsigned(value) => value,
                 };
                 (width, value)
             }
