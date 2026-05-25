@@ -95,7 +95,8 @@ impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a
 
     fn try_from(expr: &'a TypedExpression<'a>) -> Result<Self, Self::Error> {
         let value = match constexpr::eval(expr).into_integral() {
-            constexpr::Integral::Signed(value) => u64::try_from(value).map_err(|_| expr)?,
+            constexpr::Integral::Signed(value) => u64::try_from(value)
+                .map_err(|_| error_todo!(expr, "negative array length `{}`", value))?,
             constexpr::Integral::Unsigned(value) => value,
         };
         Ok(Self::Constant(value))
