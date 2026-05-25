@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/constexpr/test_constexpr_array_lengths.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/constexpr/test_constexpr_array_lengths.c"
+   (declaration a~0 `array<int; 42>` ∅)
+   (declaration b~1 `array<int; (sizeof 1)>` ∅)
+   (declaration c~2 `array<int; (lengthof (name b~1 `array<int; (sizeof 1)>`))>` ∅)
+   (declaration d~3 `array<int; (sizeof `typeof((name c~2 `array<int; (lengthof (name b~1 `array<int; (sizeof 1)>`))>`))`)>` ∅)
+   (declaration e~4 `array<int; (lengthof `typeof((name d~3 `array<int; (sizeof `typeof((name c~2 `array<int; (lengthof (name b~1 `array<int; (sizeof 1)>`))>`))`)>`))`)>` ∅)
+   (declaration f~5 `array<int; (alignof `long`)>` ∅))
+
+----- stderr -----
