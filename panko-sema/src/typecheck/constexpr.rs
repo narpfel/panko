@@ -104,11 +104,27 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     let TypedExpression { ty, expr } = typed_expr;
 
     match expr {
-        Expression::Integer { value, token: _ } => Value::int(*value, ty.ty),
-
-        Expression::Sizeof { sizeof: _, operand: _, size }
-        | Expression::SizeofTy { sizeof: _, ty: _, size, close_paren: _ } =>
-            Value::int(*size, ty.ty),
+        Expression::Integer { value, token: _ }
+        | Expression::Sizeof { sizeof: _, operand: _, size: value }
+        | Expression::Lengthof { lengthof: _, operand: _, length: value }
+        | Expression::SizeofTy {
+            sizeof: _,
+            ty: _,
+            size: value,
+            close_paren: _,
+        }
+        | Expression::LengthofTy {
+            lengthof: _,
+            ty: _,
+            length: value,
+            close_paren: _,
+        }
+        | Expression::Alignof {
+            alignof: _,
+            ty: _,
+            align: value,
+            close_paren: _,
+        } => Value::int(*value, ty.ty),
 
         _ => error_todo!(typed_expr, "unimplemented constexpr eval"),
     }
