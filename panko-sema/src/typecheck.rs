@@ -574,6 +574,8 @@ impl<'a> TypedExpression<'a> {
 impl<'a> Expression<'a> {
     fn loc(&self) -> Loc<'a> {
         match self {
+            // TODO: this uses the location of the `Diagnostic`’s `at` member, which is confusing
+            // because it typically isn’t the whole `loc` of the erroring expression
             Expression::Error(error) => error.location(),
             Expression::Name(reference) => reference.loc(),
             Expression::Integer { value: _, token } => token.loc(),
