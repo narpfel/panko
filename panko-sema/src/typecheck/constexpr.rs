@@ -76,9 +76,10 @@ impl<'a> Value<'a> {
         if let Repr::Error = repr {
             return Self { ty: new_ty, repr };
         }
+        type Kind = ConversionKind;
         match kind {
-            ConversionKind::Noop => Self { ty: new_ty, repr },
-            _ => match ty {
+            Kind::Noop => Self { ty: new_ty, repr },
+            Kind::Truncate | Kind::ZeroExtend | Kind::SignExtend => match ty {
                 Type::Arithmetic(Arithmetic::Integral(integral)) => {
                     let mut bytes = repr
                         .bytes()
