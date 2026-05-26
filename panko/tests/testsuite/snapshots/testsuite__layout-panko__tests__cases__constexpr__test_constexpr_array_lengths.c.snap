@@ -16,6 +16,10 @@ exit_code: 0
    (tentative-definition external (c~2 `array<int; 4>` (static c)) ∅)
    (tentative-definition external (d~3 `array<int; 16>` (static d)) ∅)
    (tentative-definition external (e~4 `array<int; 16>` (static e)) ∅)
-   (tentative-definition external (f~5 `array<int; 8>` (static f)) ∅))
+   (tentative-definition external (f~5 `array<int; 8>` (static f)) ∅)
+   (tentative-definition external (g~6 `array<int; 123>` (static g)) ∅)
+   (tentative-definition external (h~7 `array<int; 2>` (static h)) ∅)
+   (tentative-definition external (i~8 `array<int; 255>` (static i)) ∅)
+   (tentative-definition external (j~9 `array<int; 42>` (static j)) ∅))
 
 ----- stderr -----

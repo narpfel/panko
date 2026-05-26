@@ -6,7 +6,6 @@ use super::Expression;
 use crate::typecheck::Type;
 use crate::typecheck::TypedExpression;
 
-#[expect(unused)]
 enum ConversionKind {
     Truncate,
     ZeroExtend,
@@ -142,6 +141,11 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             align: value,
             close_paren: _,
         } => Value::int(*value, ty.ty),
+
+        Expression::NoopTypeConversion(expr) => eval(expr).convert(ty.ty, ConversionKind::Noop),
+        Expression::Truncate(expr) => eval(expr).convert(ty.ty, ConversionKind::Truncate),
+        Expression::SignExtend(expr) => eval(expr).convert(ty.ty, ConversionKind::SignExtend),
+        Expression::ZeroExtend(expr) => eval(expr).convert(ty.ty, ConversionKind::ZeroExtend),
 
         _ => error_todo!(typed_expr, "unimplemented constexpr eval"),
     }

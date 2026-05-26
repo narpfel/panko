@@ -4,3 +4,8 @@ int c[_Lengthof b];
 int d[sizeof(typeof(c))];
 int e[_Lengthof(typeof(d))];
 int f[alignof(long)];
+
+int g[(unsigned)123];
+int h[(unsigned char)0x102];
+int i[(unsigned long)(unsigned char)0xff];
+int j[(long)42];
