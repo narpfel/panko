@@ -20,6 +20,7 @@ exit_code: 0
    (tentative-definition external g~6 `array<int; 123>` ∅)
    (tentative-definition external h~7 `array<int; 2>` ∅)
    (tentative-definition external i~8 `array<int; 255>` ∅)
-   (tentative-definition external j~9 `array<int; 42>` ∅))
+   (tentative-definition external j~9 `array<int; 42>` ∅)
+   (tentative-definition external k~10 `array<int; 1>` ∅))
 
 ----- stderr -----

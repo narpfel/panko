@@ -9,3 +9,4 @@ int g[(unsigned)123];
 int h[(unsigned char)0x102];
 int i[(unsigned long)(unsigned char)0xff];
 int j[(long)42];
+int k[(bool)42];

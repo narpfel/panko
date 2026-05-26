@@ -11,6 +11,7 @@ enum ConversionKind {
     ZeroExtend,
     SignExtend,
     Noop,
+    Bool,
 }
 
 pub(super) struct Errors;
@@ -79,6 +80,15 @@ impl<'a> Value<'a> {
         type Kind = ConversionKind;
         match kind {
             Kind::Noop => Self { ty: new_ty, repr },
+            Kind::Bool => {
+                let is_nonzero = repr
+                    .bytes()
+                    .unwrap_or_else(|_| todo!("error recovery"))
+                    .iter()
+                    .any(|&b| b != 0);
+                let byte = if is_nonzero { 1 } else { 0 };
+                Self::int(byte, new_ty)
+            }
             Kind::Truncate | Kind::ZeroExtend | Kind::SignExtend => match ty {
                 Type::Arithmetic(Arithmetic::Integral(integral)) => {
                     let mut bytes = repr
@@ -147,6 +157,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         Expression::Truncate(expr) => eval(expr).convert(ty.ty, ConversionKind::Truncate),
         Expression::SignExtend(expr) => eval(expr).convert(ty.ty, ConversionKind::SignExtend),
         Expression::ZeroExtend(expr) => eval(expr).convert(ty.ty, ConversionKind::ZeroExtend),
+        Expression::BoolCast(expr) => eval(expr).convert(ty.ty, ConversionKind::Bool),
 
         _ => error_todo!(typed_expr, "unimplemented constexpr eval"),
     }

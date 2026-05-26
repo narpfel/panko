@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/constexpr/test_constexpr_bitfield_widths.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/constexpr/test_constexpr_bitfield_widths.c"
+   (struct T~0
+      (member x (bitfield-width 1) `int`)
+      (member ∅ (bitfield-width (cast `bool` 0)) `int`)
+      (member y (bitfield-width 1) `int`)
+      (member z (bitfield-width (cast `bool` 10)) `int`)
+      (member w (bitfield-width 1) `int`)))
+
+----- stderr -----
