@@ -14,6 +14,8 @@ enum ConversionKind {
     Noop,
 }
 
+pub(super) struct Errors;
+
 pub(super) enum Integral {
     Signed(i64),
     Unsigned(u64),
@@ -32,26 +34,30 @@ enum Repr<'a> {
         name: &'a str,
         offset: u64,
     },
+    Error,
 }
 
 impl<'a> Value<'a> {
-    pub(super) fn into_integral(self) -> Integral {
+    pub(super) fn into_integral(self) -> Result<Integral, Errors> {
         let Self { ty, repr: _ } = &self;
         let signedness = match ty {
             Type::Arithmetic(Arithmetic::Integral(integral)) => integral.signedness,
-            _ => todo!(),
+            _ => return Err(Errors),
         };
         let ty = match signedness {
             Signedness::Unsigned => Type::ULONG,
             Signedness::Signed => Type::LONG,
         };
         let Value { ty: _, repr } = self.convert(ty, ConversionKind::SignExtend);
-        let bytes = repr.bytes();
+        let bytes = repr.bytes()?[..].try_into().unwrap();
         match signedness {
-            Signedness::Signed => Integral::Signed(i64::from_le_bytes(bytes.try_into().unwrap())),
-            Signedness::Unsigned =>
-                Integral::Unsigned(u64::from_le_bytes(bytes.try_into().unwrap())),
+            Signedness::Signed => Ok(Integral::Signed(i64::from_le_bytes(bytes))),
+            Signedness::Unsigned => Ok(Integral::Unsigned(u64::from_le_bytes(bytes))),
         }
+    }
+
+    fn error(ty: Type<'a>) -> Value<'a> {
+        Self { ty, repr: Repr::Error }
     }
 
     fn int(value: u64, ty: Type<'a>) -> Self {
@@ -68,11 +74,19 @@ impl<'a> Value<'a> {
 
     fn convert(self, new_ty: Type<'a>, kind: ConversionKind) -> Self {
         let Self { ty, repr } = self;
+        if let Repr::Error = repr {
+            return Self { ty: new_ty, repr };
+        }
         match kind {
             ConversionKind::Noop => Self { ty: new_ty, repr },
             _ => match ty {
                 Type::Arithmetic(Arithmetic::Integral(integral)) => {
-                    let mut bytes = repr.bytes().to_owned();
+                    let mut bytes = repr
+                        .bytes()
+                        .unwrap_or_else(|_| {
+                            todo!("this is possible when converting the result of a ptr2int cast")
+                        })
+                        .to_vec();
                     let fill_value = match integral.signedness {
                         Signedness::Signed if let ConversionKind::SignExtend = kind =>
                             match bytes.last().unwrap().cast_signed() < 0 {
@@ -92,10 +106,11 @@ impl<'a> Value<'a> {
 }
 
 impl<'a> Repr<'a> {
-    fn bytes(&self) -> &[u8] {
+    fn bytes(self) -> Result<Box<[u8]>, Errors> {
         match self {
-            Self::Bytes(bytes) => bytes,
-            Self::Address { .. } => unreachable!(),
+            Self::Bytes(bytes) => Ok(bytes),
+            Self::Address { .. } => Err(Errors),
+            Self::Error => Err(Errors),
         }
     }
 }
@@ -104,6 +119,8 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     let TypedExpression { ty, expr } = typed_expr;
 
     match expr {
+        Expression::Error(_) => Value::error(ty.ty),
+
         Expression::Integer { value, token: _ }
         | Expression::Sizeof { sizeof: _, operand: _, size: value }
         | Expression::Lengthof { lengthof: _, operand: _, length: value }

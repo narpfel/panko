@@ -65,6 +65,7 @@ use crate::ty::subobjects::Subobject;
 use crate::ty::subobjects::SubobjectIterator;
 use crate::ty::subobjects::SubobjectKey;
 use crate::ty::subobjects::Subobjects;
+use crate::typecheck::constexpr::Errors;
 use crate::typecheck::diagnostics::Diagnostic;
 use crate::typecheck::literal::StringLiteral;
 pub(crate) use crate::typecheck::ptr::PtrAddOrder;
@@ -95,9 +96,10 @@ impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a
 
     fn try_from(expr: &'a TypedExpression<'a>) -> Result<Self, Self::Error> {
         let value = match constexpr::eval(expr).into_integral() {
-            constexpr::Integral::Signed(value) => u64::try_from(value)
+            Ok(constexpr::Integral::Signed(value)) => u64::try_from(value)
                 .map_err(|_| error_todo!(expr, "negative array length `{}`", value))?,
-            constexpr::Integral::Unsigned(value) => value,
+            Ok(constexpr::Integral::Unsigned(value)) => value,
+            Err(Errors) => error_todo!(expr, "error in constexpr evaluation"),
         };
         Ok(Self::Constant(value))
     }
@@ -792,9 +794,10 @@ fn typeck_struct_members<'a>(
                 let BitfieldWidth { width } = bitfield_width.as_ref()?;
                 let width = typeck_expression(sess, width, Context::Default);
                 let value = match constexpr::eval(&width).into_integral() {
-                    constexpr::Integral::Signed(value) => u64::try_from(value)
+                    Ok(constexpr::Integral::Signed(value)) => u64::try_from(value)
                         .unwrap_or_else(|_| error_todo!(width, "negative bitfield width")),
-                    constexpr::Integral::Unsigned(value) => value,
+                    Ok(constexpr::Integral::Unsigned(value)) => value,
+                    Err(Errors) => None?,
                 };
                 (width, value)
             }
@@ -1282,14 +1285,15 @@ fn typeck_initialiser_list<'a>(
                         Designator::Bracketed { open_bracket: _, index, close_bracket: _ } => {
                             let index = typeck_expression(sess, index, Context::Default);
                             let index = match constexpr::eval(&index).into_integral() {
-                                constexpr::Integral::Signed(value) => u64::try_from(value)
+                                Ok(constexpr::Integral::Signed(value)) => u64::try_from(value)
                                     .unwrap_or_else(|_| {
                                         error_todo!(
                                             index,
                                             "negative index in designated initialiser",
                                         )
                                     }),
-                                constexpr::Integral::Unsigned(value) => value,
+                                Ok(constexpr::Integral::Unsigned(value)) => value,
+                                Err(Errors) => error_todo!(index, "error in constexpr evaluation"),
                             };
                             subobjects.goto_index(index)
                         }
