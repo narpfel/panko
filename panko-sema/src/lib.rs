@@ -1,6 +1,7 @@
 #![feature(bstr)]
 #![feature(cmp_minmax)]
 #![feature(gen_blocks)]
+#![feature(macro_metavar_expr_concat)]
 #![feature(never_type)]
 #![feature(stmt_expr_attributes)]
 #![feature(try_blocks)]

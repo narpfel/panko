@@ -6,6 +6,8 @@ use super::Expression;
 use crate::typecheck::Type;
 use crate::typecheck::TypedExpression;
 
+mod arithmetic;
+
 enum ConversionKind {
     Truncate,
     ZeroExtend,
@@ -49,7 +51,7 @@ impl<'a> Value<'a> {
             Signedness::Signed => Type::LONG,
         };
         let Value { ty: _, repr } = self.convert(ty, ConversionKind::SignExtend);
-        let bytes = repr.bytes()?[..].try_into().unwrap();
+        let bytes = repr.into_bytes()?[..].try_into().unwrap();
         match signedness {
             Signedness::Signed => Ok(Integral::Signed(i64::from_le_bytes(bytes))),
             Signedness::Unsigned => Ok(Integral::Unsigned(u64::from_le_bytes(bytes))),
@@ -82,7 +84,7 @@ impl<'a> Value<'a> {
             Kind::Noop => Self { ty: new_ty, repr },
             Kind::Bool => {
                 let is_nonzero = repr
-                    .bytes()
+                    .into_bytes()
                     .unwrap_or_else(|_| todo!("error recovery"))
                     .iter()
                     .any(|&b| b != 0);
@@ -92,7 +94,7 @@ impl<'a> Value<'a> {
             Kind::Truncate | Kind::ZeroExtend | Kind::SignExtend => match ty {
                 Type::Arithmetic(Arithmetic::Integral(integral)) => {
                     let mut bytes = repr
-                        .bytes()
+                        .into_bytes()
                         .unwrap_or_else(|_| {
                             todo!("this is possible when converting the result of a ptr2int cast")
                         })
@@ -113,14 +115,54 @@ impl<'a> Value<'a> {
             },
         }
     }
+
+    fn as_u64(&self) -> Option<u64> {
+        let Self { ty, repr } = self;
+        match *ty {
+            Type::ULONG => Some(u64::from_le_bytes(repr.bytes().ok()?.try_into().unwrap())),
+            _ => None,
+        }
+    }
+
+    fn as_i64(&self) -> Option<i64> {
+        let Self { ty, repr } = self;
+        match *ty {
+            Type::LONG => Some(i64::from_le_bytes(repr.bytes().ok()?.try_into().unwrap())),
+            _ => None,
+        }
+    }
+
+    fn as_u32(&self) -> Option<u32> {
+        let Self { ty, repr } = self;
+        match *ty {
+            Type::UINT => Some(u32::from_le_bytes(repr.bytes().ok()?.try_into().unwrap())),
+            _ => None,
+        }
+    }
+
+    fn as_i32(&self) -> Option<i32> {
+        let Self { ty, repr } = self;
+        match *ty {
+            Type::INT => Some(i32::from_le_bytes(repr.bytes().ok()?.try_into().unwrap())),
+            _ => None,
+        }
+    }
 }
 
 impl<'a> Repr<'a> {
-    fn bytes(self) -> Result<Box<[u8]>, Errors> {
+    fn into_bytes(self) -> Result<Box<[u8]>, Errors> {
         match self {
             Self::Bytes(bytes) => Ok(bytes),
             Self::Address { .. } => Err(Errors),
             Self::Error => Err(Errors),
+        }
+    }
+
+    fn bytes(&self) -> Result<&[u8], &Errors> {
+        match self {
+            Self::Bytes(bytes) => Ok(bytes),
+            Self::Address { .. } => Err(&Errors),
+            Self::Error => Err(&Errors),
         }
     }
 }
@@ -128,6 +170,24 @@ impl<'a> Repr<'a> {
 pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     let TypedExpression { ty, expr } = typed_expr;
     let ty = ty.ty;
+
+    macro_rules! unary {
+        ($operand:expr, $meth:ident, $($t:ident),*) => {{
+            let operand = $operand;
+            match () {
+                $(
+                    () if let Some(operand) = operand.${concat(as_, $t)}() => {
+                        let repr = arithmetic::C::$meth(operand).map_or_else(
+                            || error_todo!(typed_expr, "arithmetic error"),
+                            |op| Repr::Bytes(Box::new(op.to_le_bytes())),
+                        );
+                        Value { ty, repr }
+                    }
+                )*
+                () => todo!(),
+            }
+        }};
+    }
 
     match expr {
         Expression::Error(_) => Value::error(ty),
@@ -159,6 +219,14 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         Expression::SignExtend(expr) => eval(expr).convert(ty, ConversionKind::SignExtend),
         Expression::ZeroExtend(expr) => eval(expr).convert(ty, ConversionKind::ZeroExtend),
         Expression::BoolCast(expr) => eval(expr).convert(ty, ConversionKind::Bool),
+
+        Expression::Negate { minus: _, operand } => unary!(eval(operand), neg, u32, i32, u64, i64),
+        Expression::Compl { compl: _, operand } => unary!(eval(operand), compl, u32, i32, u64, i64),
+        Expression::Not { not: _, operand } => {
+            assert_eq!(ty, Type::int());
+            let operand = eval(operand).convert(ty, ConversionKind::Bool);
+            unary!(operand, not, i32)
+        }
 
         _ => error_todo!(typed_expr, "unimplemented constexpr eval"),
     }
