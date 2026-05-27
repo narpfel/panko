@@ -169,7 +169,10 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                     () if let Some(operand) = operand.${concat(as_, $t)}() => {
                         let repr = arithmetic::C::$meth(operand).map_or_else(
                             || error_todo!(typed_expr, "arithmetic error"),
-                            |op| Repr::Bytes(Box::new(op.to_le_bytes())),
+                            |operand| {
+                                assert!(ty.can_represent(operand));
+                                Repr::Bytes(Box::new(operand.to_le_bytes()))
+                            },
                         );
                         Value { ty, repr }
                     }
