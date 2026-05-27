@@ -115,38 +115,28 @@ impl<'a> Value<'a> {
             },
         }
     }
+}
 
-    fn as_u64(&self) -> Option<u64> {
-        let Self { ty, repr } = self;
-        match *ty {
-            Type::ULONG => Some(u64::from_le_bytes(repr.bytes().ok()?.try_into().unwrap())),
-            _ => None,
+macro_rules! impl_as_ty {
+    ($name:ident => $t:ident) => {
+        fn ${concat(as_, $t)}(&self) -> Option<$t> {
+            let Self { ty, repr } = self;
+            match *ty {
+                Type::$name => Some($t::from_le_bytes(repr.bytes().ok()?.try_into().unwrap())),
+                _ => None,
+            }
         }
-    }
+    };
+}
 
-    fn as_i64(&self) -> Option<i64> {
-        let Self { ty, repr } = self;
-        match *ty {
-            Type::LONG => Some(i64::from_le_bytes(repr.bytes().ok()?.try_into().unwrap())),
-            _ => None,
-        }
-    }
+impl Value<'_> {
+    impl_as_ty!(ULONG => u64);
 
-    fn as_u32(&self) -> Option<u32> {
-        let Self { ty, repr } = self;
-        match *ty {
-            Type::UINT => Some(u32::from_le_bytes(repr.bytes().ok()?.try_into().unwrap())),
-            _ => None,
-        }
-    }
+    impl_as_ty!(LONG => i64);
 
-    fn as_i32(&self) -> Option<i32> {
-        let Self { ty, repr } = self;
-        match *ty {
-            Type::INT => Some(i32::from_le_bytes(repr.bytes().ok()?.try_into().unwrap())),
-            _ => None,
-        }
-    }
+    impl_as_ty!(UINT => u32);
+
+    impl_as_ty!(INT => i32);
 }
 
 impl<'a> Repr<'a> {
