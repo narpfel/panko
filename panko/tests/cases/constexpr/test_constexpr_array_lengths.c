@@ -10,3 +10,8 @@ int h[(unsigned char)0x102];
 int i[(unsigned long)(unsigned char)0xff];
 int j[(long)42];
 int k[(bool)42];
+
+int l[-0xffff'fff0];
+int m[~-4];
+int n[!false];
+int o[!!42u];

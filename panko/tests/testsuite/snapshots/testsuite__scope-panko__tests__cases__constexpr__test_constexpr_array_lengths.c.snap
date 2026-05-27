@@ -21,6 +21,10 @@ exit_code: 0
    (declaration h~7 `array<int; (cast `unsigned char` 0x102)>` ∅)
    (declaration i~8 `array<int; (cast `unsigned long` (cast `unsigned char` 0xff))>` ∅)
    (declaration j~9 `array<int; (cast `long` 42)>` ∅)
-   (declaration k~10 `array<int; (cast `bool` 42)>` ∅))
+   (declaration k~10 `array<int; (cast `bool` 42)>` ∅)
+   (declaration l~11 `array<int; (negate 0xffff'fff0)>` ∅)
+   (declaration m~12 `array<int; (compl (negate 4))>` ∅)
+   (declaration n~13 `array<int; (not false)>` ∅)
+   (declaration o~14 `array<int; (not (not 42u))>` ∅))
 
 ----- stderr -----
