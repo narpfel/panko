@@ -65,7 +65,6 @@ use crate::ty::subobjects::Subobject;
 use crate::ty::subobjects::SubobjectIterator;
 use crate::ty::subobjects::SubobjectKey;
 use crate::ty::subobjects::Subobjects;
-use crate::typecheck::constexpr::Errors;
 use crate::typecheck::diagnostics::Diagnostic;
 use crate::typecheck::literal::StringLiteral;
 pub(crate) use crate::typecheck::ptr::PtrAddOrder;
@@ -99,7 +98,10 @@ impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a
             Ok(constexpr::Integral::Signed(value)) => u64::try_from(value)
                 .map_err(|_| error_todo!(expr, "negative array length `{}`", value))?,
             Ok(constexpr::Integral::Unsigned(value)) => value,
-            Err(Errors) => error_todo!(expr, "error in constexpr evaluation"),
+            Err(_errors) => {
+                // TODO: emit `_errors`
+                error_todo!(expr, "error in constexpr evaluation")
+            }
         };
         Ok(Self::Constant(value))
     }
@@ -797,7 +799,10 @@ fn typeck_struct_members<'a>(
                     Ok(constexpr::Integral::Signed(value)) => u64::try_from(value)
                         .unwrap_or_else(|_| error_todo!(width, "negative bitfield width")),
                     Ok(constexpr::Integral::Unsigned(value)) => value,
-                    Err(Errors) => None?,
+                    Err(errors) => {
+                        sess.emit_many(errors);
+                        None?
+                    }
                 };
                 (width, value)
             }
@@ -1293,7 +1298,10 @@ fn typeck_initialiser_list<'a>(
                                         )
                                     }),
                                 Ok(constexpr::Integral::Unsigned(value)) => value,
-                                Err(Errors) => error_todo!(index, "error in constexpr evaluation"),
+                                Err(errors) => {
+                                    sess.emit_many(errors);
+                                    error_todo!(index, "error in constexpr evaluation")
+                                }
                             };
                             subobjects.goto_index(index)
                         }

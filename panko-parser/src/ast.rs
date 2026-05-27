@@ -194,6 +194,17 @@ impl<'a> Session<'a> {
     }
 
     #[track_caller]
+    pub fn emit_many<I, T>(&self, diagnostics: I)
+    where
+        I: IntoIterator<Item = T>,
+        T: Report + 'a,
+    {
+        for diagnostic in diagnostics {
+            self.emit(diagnostic)
+        }
+    }
+
+    #[track_caller]
     pub fn emit<T, Expr>(&self, diagnostic: T) -> Expr
     where
         T: Report + 'a,

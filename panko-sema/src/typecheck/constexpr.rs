@@ -1,12 +1,16 @@
+use std::collections::LinkedList;
+
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Signedness;
 use panko_parser::error_todo;
 
-use super::Expression;
+use crate::typecheck::Expression;
 use crate::typecheck::Type;
 use crate::typecheck::TypedExpression;
+use crate::typecheck::constexpr::diagnostics::Diagnostic;
 
 mod arithmetic;
+mod diagnostics;
 
 enum ConversionKind {
     Truncate,
@@ -16,7 +20,24 @@ enum ConversionKind {
     Bool,
 }
 
-pub(super) struct Errors;
+#[derive(Debug, Default)]
+pub(super) struct Errors<'a>(LinkedList<Diagnostic<'a>>);
+
+impl<'a> Errors<'a> {
+    fn new(diagnostic: Diagnostic<'a>) -> Self {
+        Self(LinkedList::from_iter([diagnostic]))
+    }
+}
+
+impl<'a> IntoIterator for Errors<'a> {
+    type IntoIter = std::collections::linked_list::IntoIter<Self::Item>;
+    type Item = Diagnostic<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let Self(errors) = self;
+        errors.into_iter()
+    }
+}
 
 pub(super) enum Integral {
     Signed(i64),
@@ -36,15 +57,15 @@ enum Repr<'a> {
         name: &'a str,
         offset: u64,
     },
-    Error,
+    Error(Errors<'a>),
 }
 
 impl<'a> Value<'a> {
-    pub(super) fn into_integral(self) -> Result<Integral, Errors> {
+    pub(super) fn into_integral(self) -> Result<Integral, Errors<'a>> {
         let Self { ty, repr: _ } = &self;
         let signedness = match ty {
             Type::Arithmetic(Arithmetic::Integral(integral)) => integral.signedness,
-            _ => return Err(Errors),
+            _ => todo!("type error"),
         };
         let ty = match signedness {
             Signedness::Unsigned => Type::ULONG,
@@ -58,8 +79,8 @@ impl<'a> Value<'a> {
         }
     }
 
-    fn error(ty: Type<'a>) -> Value<'a> {
-        Self { ty, repr: Repr::Error }
+    fn error(ty: Type<'a>) -> Self {
+        Self { ty, repr: Repr::Error(Errors::default()) }
     }
 
     fn int(value: u64, ty: Type<'a>) -> Self {
@@ -76,7 +97,7 @@ impl<'a> Value<'a> {
 
     fn convert(self, new_ty: Type<'a>, kind: ConversionKind) -> Self {
         let Self { ty, repr } = self;
-        if let Repr::Error = repr {
+        if let Repr::Error(_) = repr {
             return Self { ty: new_ty, repr };
         }
         type Kind = ConversionKind;
@@ -140,19 +161,23 @@ impl Value<'_> {
 }
 
 impl<'a> Repr<'a> {
-    fn into_bytes(self) -> Result<Box<[u8]>, Errors> {
+    fn error(diagnostic: Diagnostic<'a>) -> Self {
+        Self::Error(Errors::new(diagnostic))
+    }
+
+    fn into_bytes(self) -> Result<Box<[u8]>, Errors<'a>> {
         match self {
             Self::Bytes(bytes) => Ok(bytes),
-            Self::Address { .. } => Err(Errors),
-            Self::Error => Err(Errors),
+            Self::Address { .. } => todo!(),
+            Self::Error(errors) => Err(errors),
         }
     }
 
-    fn bytes(&self) -> Result<&[u8], &Errors> {
+    fn bytes(&self) -> Result<&[u8], &Errors<'a>> {
         match self {
             Self::Bytes(bytes) => Ok(bytes),
-            Self::Address { .. } => Err(&Errors),
-            Self::Error => Err(&Errors),
+            Self::Address { .. } => todo!(),
+            Self::Error(errors) => Err(errors),
         }
     }
 }
@@ -168,7 +193,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                 $(
                     () if let Some(operand) = operand.${concat(as_, $t)}() => {
                         let repr = arithmetic::C::$meth(operand).map_or_else(
-                            || error_todo!(typed_expr, "arithmetic error"),
+                            || Repr::error(Diagnostic::SignedOverflow { at: *typed_expr }),
                             |operand| {
                                 assert!(ty.can_represent(operand));
                                 Repr::Bytes(Box::new(operand.to_le_bytes()))

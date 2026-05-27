@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/constexpr/test_error_constexpr_error_in_bitfield_width.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: signed overflow in constant expression
+   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_bitfield_width.c:2:11]
+   │
+ 2 │     int x:-(int)0x8000'0000;
+   │           ────────┬────────  
+   │                   ╰────────── this expression overflows its type `int`
+───╯
+
+Error: signed overflow in constant expression
+   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_bitfield_width.c:3:11]
+   │
+ 3 │     int y:-(int)0x8000'0000;
+   │           ────────┬────────  
+   │                   ╰────────── this expression overflows its type `int`
+───╯
