@@ -127,9 +127,10 @@ impl<'a> Repr<'a> {
 
 pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     let TypedExpression { ty, expr } = typed_expr;
+    let ty = ty.ty;
 
     match expr {
-        Expression::Error(_) => Value::error(ty.ty),
+        Expression::Error(_) => Value::error(ty),
 
         Expression::Integer { value, token: _ }
         | Expression::Sizeof { sizeof: _, operand: _, size: value }
@@ -151,13 +152,13 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             ty: _,
             align: value,
             close_paren: _,
-        } => Value::int(*value, ty.ty),
+        } => Value::int(*value, ty),
 
-        Expression::NoopTypeConversion(expr) => eval(expr).convert(ty.ty, ConversionKind::Noop),
-        Expression::Truncate(expr) => eval(expr).convert(ty.ty, ConversionKind::Truncate),
-        Expression::SignExtend(expr) => eval(expr).convert(ty.ty, ConversionKind::SignExtend),
-        Expression::ZeroExtend(expr) => eval(expr).convert(ty.ty, ConversionKind::ZeroExtend),
-        Expression::BoolCast(expr) => eval(expr).convert(ty.ty, ConversionKind::Bool),
+        Expression::NoopTypeConversion(expr) => eval(expr).convert(ty, ConversionKind::Noop),
+        Expression::Truncate(expr) => eval(expr).convert(ty, ConversionKind::Truncate),
+        Expression::SignExtend(expr) => eval(expr).convert(ty, ConversionKind::SignExtend),
+        Expression::ZeroExtend(expr) => eval(expr).convert(ty, ConversionKind::ZeroExtend),
+        Expression::BoolCast(expr) => eval(expr).convert(ty, ConversionKind::Bool),
 
         _ => error_todo!(typed_expr, "unimplemented constexpr eval"),
     }
