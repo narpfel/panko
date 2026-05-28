@@ -51,3 +51,11 @@ Error: error while evaluating constant expression: NegativeShiftRhs
    │      ────┬───  
    │          ╰───── while evaluating this expression
 ───╯
+
+Error: error while evaluating constant expression: SignedOverflow
+    ╭─[panko/tests/cases/preprocessor/test_error_left_shift_in_if_condition.c:10:5]
+    │
+ 10 │ #if 1 << 63
+    │     ───┬───  
+    │        ╰───── while evaluating this expression
+────╯

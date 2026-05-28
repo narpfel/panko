@@ -16,7 +16,6 @@ exit_code: 0
 
 
 
-int should_error;
 
 
 int okay;

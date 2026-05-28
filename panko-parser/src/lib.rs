@@ -1,5 +1,6 @@
 #![feature(closure_track_caller)]
 #![feature(coverage_attribute)]
+#![feature(exact_bitshifts)]
 #![feature(gen_blocks)]
 #![feature(never_type)]
 #![feature(stmt_expr_attributes)]
