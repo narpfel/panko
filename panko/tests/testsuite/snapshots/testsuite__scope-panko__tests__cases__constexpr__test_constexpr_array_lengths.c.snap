@@ -25,6 +25,7 @@ exit_code: 0
    (declaration l~11 `array<int; (negate 0xffff'fff0)>` ∅)
    (declaration m~12 `array<int; (compl (negate 4))>` ∅)
    (declaration n~13 `array<int; (not false)>` ∅)
-   (declaration o~14 `array<int; (not (not 42u))>` ∅))
+   (declaration o~14 `array<int; (not (not 42u))>` ∅)
+   (declaration p~15 `array<int; (negate (negate 42))>` ∅))
 
 ----- stderr -----

@@ -15,3 +15,5 @@ int l[-0xffff'fff0];
 int m[~-4];
 int n[!false];
 int o[!!42u];
+
+int p[-(-(42))];

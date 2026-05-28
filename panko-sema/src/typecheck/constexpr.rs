@@ -211,6 +211,8 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     match expr {
         Expression::Error(_) => Value::error(ty),
 
+        Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => eval(expr),
+
         Expression::Integer { value, token: _ }
         | Expression::Sizeof { sizeof: _, operand: _, size: value }
         | Expression::Lengthof { lengthof: _, operand: _, length: value }

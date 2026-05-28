@@ -25,6 +25,7 @@ exit_code: 0
    (tentative-definition external (l~11 `array<int; 16>` (static l)) ∅)
    (tentative-definition external (m~12 `array<int; 3>` (static m)) ∅)
    (tentative-definition external (n~13 `array<int; 1>` (static n)) ∅)
-   (tentative-definition external (o~14 `array<int; 1>` (static o)) ∅))
+   (tentative-definition external (o~14 `array<int; 1>` (static o)) ∅)
+   (tentative-definition external (p~15 `array<int; 42>` (static p)) ∅))
 
 ----- stderr -----
