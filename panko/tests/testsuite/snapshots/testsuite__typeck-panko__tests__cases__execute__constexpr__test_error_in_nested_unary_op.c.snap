@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/constexpr/test_error_in_nested_unary_op.c
+---
+success: false
+exit_code: 101
+----- stdout -----
+
+----- stderr -----
+[31mThe application panicked (crashed).[0m
+Message:  [36mnot yet implemented[0m
+Location: [35mpanko-sema/src/typecheck/constexpr.rs[0m:[35m242[0m
+
+Backtrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.
+Run with RUST_BACKTRACE=full to include source snippets.
