@@ -16,6 +16,12 @@ exit_code: 0
 
 
 
+int should_error;
+
+
+int okay;
+
+
 int main() {}
 
 ----- stderr -----
