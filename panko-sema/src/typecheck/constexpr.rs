@@ -189,21 +189,22 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     macro_rules! unary {
         ($operand:expr, $meth:ident, $($t:ident),*) => {{
             let operand = $operand;
-            match () {
+            let repr = match () {
+                () if let Repr::Error(_) = operand.repr => operand.repr,
                 $(
                     () if let Some(operand) = operand.${concat(as_, $t)}() => {
-                        let repr = arithmetic::C::$meth(operand).map_or_else(
+                        arithmetic::C::$meth(operand).map_or_else(
                             || Repr::error(Diagnostic::SignedOverflow { at: *typed_expr }),
                             |operand| {
                                 assert!(ty.can_represent(operand));
                                 Repr::Bytes(Box::new(operand.to_le_bytes()))
                             },
-                        );
-                        Value { ty, repr }
+                        )
                     }
                 )*
                 () => todo!(),
-            }
+            };
+            Value { ty, repr }
         }};
     }
 
