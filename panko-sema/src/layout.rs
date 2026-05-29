@@ -236,19 +236,16 @@ pub enum Slot<'a> {
     Static(&'a str),
     Automatic(u64),
     Void,
-    // TODO: this is unused everywhere except in static initialisers, where it is ignored.
-    // It should be removed when static initialisers are properly constexpr evaluated.
-    StaticWithOffset { name: &'a str, offset: u64 },
 }
 
 impl<'a> Slot<'a> {
     pub fn offset(&self, offset: u64) -> Slot<'a> {
         match self {
-            Slot::Static(name) => Self::StaticWithOffset { name, offset },
+            Slot::Static(_name) => unreachable!(
+                "`static` slots have static initialisers, which don’t use slots for subobjects",
+            ),
             Slot::Automatic(slot) => Self::Automatic(slot + offset),
             Slot::Void => unreachable!("`void` slots have no subobjects"),
-            Slot::StaticWithOffset { name, offset: self_offset } =>
-                Self::StaticWithOffset { name, offset: self_offset + offset },
         }
     }
 }

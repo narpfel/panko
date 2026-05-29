@@ -594,7 +594,7 @@ impl<'a> Codegen<'a> {
                 self.deferred_definitions.insert(name, deferred);
             }
             Slot::Static(_) => (),
-            Slot::Void | Slot::StaticWithOffset { .. } => unreachable!(),
+            Slot::Void => unreachable!(),
         }
     }
 
@@ -1212,7 +1212,6 @@ impl<'a> Codegen<'a> {
                         ty,
                     }),
                     Slot::Void => unreachable!("structs don’t have `void` slots"),
-                    Slot::StaticWithOffset { name: _, offset: _ } => todo!(),
                 }
             }
         };
