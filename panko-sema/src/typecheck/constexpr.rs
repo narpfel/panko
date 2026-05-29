@@ -91,6 +91,10 @@ impl<'a> Value<'a> {
         Self { ty, repr: Repr::Error(Errors::default()) }
     }
 
+    fn with_error(ty: Type<'a>, error: Diagnostic<'a>) -> Self {
+        Value { ty, repr: Repr::error(error) }
+    }
+
     fn int(value: u64, ty: Type<'a>) -> Self {
         assert!(ty.can_represent(value));
         match ty {
@@ -264,6 +268,9 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             let operand = eval(operand).convert(ty, ConversionKind::Bool);
             unary!(operand, not, i32)
         }
+
+        Expression::BuiltinName(_) =>
+            Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
 
         _ => error_todo!(typed_expr, "unimplemented constexpr eval"),
     }

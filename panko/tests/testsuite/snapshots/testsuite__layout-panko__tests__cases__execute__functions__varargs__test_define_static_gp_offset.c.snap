@@ -8,19 +8,20 @@ info:
     - panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c
 ---
 success: false
-exit_code: 101
+exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: TODO: unimplemented error: unimplemented constexpr eval
+Error: constexpr evaluation not implemented yet
    ╭─[panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c:6:41]
    │
  6 │     static typeof(sizeof 0) gp_offset = __panko_gp_offset;
    │                                         ─────────────────  
 ───╯
-[31mThe application panicked (crashed).[0m
-Message:  [36mnot yet implemented: unimplemented error: unimplemented constexpr eval[0m
-Location: [35mpanko-sema/src/typecheck/constexpr.rs[0m:[35m268[0m
 
-Backtrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.
-Run with RUST_BACKTRACE=full to include source snippets.
+Error: constexpr evaluation not implemented yet
+    ╭─[panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c:14:41]
+    │
+ 14 │     static typeof(sizeof 0) gp_offset = __panko_gp_offset;
+    │                                         ─────────────────  
+────╯

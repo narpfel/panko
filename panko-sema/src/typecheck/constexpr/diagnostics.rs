@@ -10,4 +10,8 @@ pub(crate) enum Diagnostic<'a> {
     #[diagnostics(at(label = "this expression overflows its type `{ty}`", colour = Red))]
     #[with(ty = at.ty.ty)]
     SignedOverflow { at: TypedExpression<'a> },
+
+    #[error("constexpr evaluation not implemented yet")]
+    #[diagnostics(at(colour = Red))]
+    NotImplementedYet { at: TypedExpression<'a> },
 }
