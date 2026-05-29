@@ -1,10 +1,18 @@
 use std::collections::LinkedList;
 
+use itertools::zip_eq;
 use panko_parser::ast::Arithmetic;
+use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::error_todo;
 
+use crate::ty::subobjects::Subobject;
+use crate::typecheck::Bitfield;
 use crate::typecheck::Expression;
+use crate::typecheck::Initialiser;
+use crate::typecheck::InitialiserRef;
+use crate::typecheck::MemberKind;
+use crate::typecheck::SubobjectInitialiser;
 use crate::typecheck::Type;
 use crate::typecheck::TypedExpression;
 use crate::typecheck::constexpr::diagnostics::Diagnostic;
@@ -136,6 +144,14 @@ impl<'a> Value<'a> {
             },
         }
     }
+
+    fn bytes(&self) -> &[u8] {
+        match &self.repr {
+            Repr::Bytes(bytes) => bytes,
+            Repr::Address { .. } => todo!(),
+            Repr::Error(_errors) => todo!(),
+        }
+    }
 }
 
 macro_rules! impl_as_ty {
@@ -250,5 +266,70 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         }
 
         _ => error_todo!(typed_expr, "unimplemented constexpr eval"),
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum PersistedValue<'a> {
+    Bytes(&'a [u8]),
+}
+
+pub(super) fn run_static_initialiser<'a>(
+    sess: &Session<'a>,
+    ty: &Type<'a>,
+    initialiser: &'a Initialiser<'a>,
+) -> Initialiser<'a> {
+    match initialiser {
+        Initialiser::Braced { subobject_initialisers: [] } =>
+            Initialiser::Braced { subobject_initialisers: &[] },
+        Initialiser::Braced { subobject_initialisers } => {
+            let mut bytes = vec![0; usize::try_from(ty.size()).unwrap()].into_boxed_slice();
+            for SubobjectInitialiser { subobject, initialiser } in *subobject_initialisers {
+                let Subobject { ty, offset, kind } = *subobject;
+                let subobject_size = usize::try_from(ty.size()).unwrap();
+                let offset = usize::try_from(offset).unwrap();
+                let value = eval(initialiser);
+                match kind {
+                    MemberKind::Normal =>
+                        bytes[offset..][..subobject_size].copy_from_slice(value.bytes()),
+                    MemberKind::Bitfield(Bitfield { offset: bitfield_offset, width: _ }) => {
+                        let value = match value.into_integral() {
+                            Ok(Integral::Signed(value)) => value.cast_unsigned(),
+                            Ok(Integral::Unsigned(value)) => value,
+                            Err(errors) => {
+                                sess.emit_many(errors);
+                                continue;
+                            }
+                        };
+                        for (tgt_byte, src_byte) in zip_eq(
+                            &mut bytes[offset..][..subobject_size],
+                            &(value << bitfield_offset).to_le_bytes()[..subobject_size],
+                        ) {
+                            *tgt_byte |= src_byte;
+                        }
+                    }
+                }
+            }
+            let value = PersistedValue::Bytes(sess.alloc_slice_copy(&bytes));
+            Initialiser::Static {
+                initialiser: InitialiserRef(initialiser),
+                value,
+            }
+        }
+        Initialiser::Expression(expr) => {
+            let value = match eval(expr).repr {
+                Repr::Bytes(bytes) => PersistedValue::Bytes(sess.alloc_slice_copy(&bytes)),
+                Repr::Address { .. } => todo!(),
+                Repr::Error(errors) => {
+                    sess.emit_many(errors);
+                    return Initialiser::Braced { subobject_initialisers: &[] };
+                }
+            };
+            Initialiser::Static {
+                initialiser: InitialiserRef(initialiser),
+                value,
+            }
+        }
+        Initialiser::Static { initialiser: _, value: _ } => unreachable!(),
     }
 }

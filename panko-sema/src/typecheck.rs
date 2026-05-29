@@ -65,6 +65,7 @@ use crate::ty::subobjects::Subobject;
 use crate::ty::subobjects::SubobjectIterator;
 use crate::ty::subobjects::SubobjectKey;
 use crate::ty::subobjects::Subobjects;
+pub use crate::typecheck::constexpr::PersistedValue as Value;
 use crate::typecheck::diagnostics::Diagnostic;
 use crate::typecheck::literal::StringLiteral;
 pub(crate) use crate::typecheck::ptr::PtrAddOrder;
@@ -212,11 +213,18 @@ pub(crate) struct Declaration<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct InitialiserRef<'a>(pub(crate) &'a Initialiser<'a>);
+
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum Initialiser<'a> {
     Braced {
         subobject_initialisers: &'a [SubobjectInitialiser<'a>],
     },
     Expression(TypedExpression<'a>),
+    Static {
+        initialiser: InitialiserRef<'a>,
+        value: Value<'a>,
+    },
 }
 
 impl Initialiser<'_> {
@@ -243,6 +251,7 @@ impl Initialiser<'_> {
             Self::Expression(TypedExpression { ty: _, expr: Expression::String(value) }) =>
                 Some(value.len()),
             Self::Expression(_) => None,
+            Self::Static { initialiser, value: _ } => initialiser.0.array_length(element_ty),
         }
     }
 }
@@ -1409,7 +1418,7 @@ fn typeck_initialiser<'a>(
     initialiser: &scope::Initialiser<'a>,
     reference: &Reference<'a>,
 ) -> Initialiser<'a> {
-    match initialiser {
+    let initialiser = match initialiser {
         scope::Initialiser::Braced {
             open_brace: _,
             initialiser_list,
@@ -1456,6 +1465,11 @@ fn typeck_initialiser<'a>(
                 typeck_expression(sess, initialiser, Context::Default),
             ),
         }),
+    };
+    match reference.storage_duration {
+        StorageDuration::Static(_) =>
+            constexpr::run_static_initialiser(sess, &reference.ty.ty, sess.alloc(initialiser)),
+        StorageDuration::Automatic => initialiser,
     }
 }
 

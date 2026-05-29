@@ -14,13 +14,13 @@ exit_code: 0
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (definition external (xs~1 `array<int; 100>` (static xs))
       (braced
-         (subobject +0 (42 `int` (static xs +0)))
-         (subobject +4 (27 `int` (static xs +4)))
-         (subobject +8 (5 `int` (static xs +8)))
-         (subobject +12 (2147483647 `int` (static xs +12)))))
+         (subobject +0 (42 `int`))
+         (subobject +4 (27 `int`))
+         (subobject +8 (5 `int`))
+         (subobject +12 (2147483647 `int`))))
    (definition external (value~2 `int` (static value))
       (braced
-         (subobject +0 (123 `int` (static value +0)))))
+         (subobject +0 (123 `int`))))
    (function-definition external stack-size=184
       (main~3 `fn(∅: int, ∅: ptr<ptr<char>>) -> int` (static main))
       (params

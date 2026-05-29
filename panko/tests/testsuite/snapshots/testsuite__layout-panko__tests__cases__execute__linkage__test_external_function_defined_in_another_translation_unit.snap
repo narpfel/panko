@@ -59,6 +59,6 @@ exit_code: 0
                      (f~1 `fn(∅: int) -> int` (static f)))
                   (123 `int` @40)))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_external_function_defined_in_another_translation_unit/x.c"
-   (definition external (x~0 `int` (static x)) (5 `int` (static x))))
+   (definition external (x~0 `int` (static x)) (5 `int`)))
 
 ----- stderr -----

@@ -16,6 +16,6 @@ exit_code: 0
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (return (x~0 `int` (static x)))))
-   (definition internal (x~0 `int` (static x)) (42 `int` (static x))))
+   (definition internal (x~0 `int` (static x)) (42 `int`)))
 
 ----- stderr -----

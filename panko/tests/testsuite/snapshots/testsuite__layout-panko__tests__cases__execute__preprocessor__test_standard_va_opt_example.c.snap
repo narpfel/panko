@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/preprocessor/test_standard_va_opt_example.c"
-   (definition external (x~0 `int` (static x)) (42 `int` (static x)))
+   (definition external (x~0 `int` (static x)) (42 `int`))
    (function-definition external stack-size=8
       (main~1 `fn() -> int` (static main))
       (compound-statement

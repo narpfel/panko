@@ -18,7 +18,7 @@ exit_code: 0
          (a~2 `int` @0))
       (compound-statement
          (return (a~2 `int` @0))))
-   (definition external (global_value~3 `int` (static global_value)) (42 `int` (static global_value)))
+   (definition external (global_value~3 `int` (static global_value)) (42 `int`))
    (function-definition external stack-size=24
       (main~4 `fn() -> int` (static main))
       (compound-statement

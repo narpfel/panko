@@ -34,6 +34,6 @@ exit_code: 0
                      (addressof `ptr<array<char; 4>>` @16
                         (string `array<char; 4>` @void "%d\n\0"))))
                (x~4 `int` (static x))))))
-   (definition external (x~5 `int` (static x)) (42 `int` (static x))))
+   (definition external (x~5 `int` (static x)) (42 `int`)))
 
 ----- stderr -----

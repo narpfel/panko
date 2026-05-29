@@ -126,6 +126,7 @@ impl AsSExpr for Initialiser<'_> {
             Self::Braced { subobject_initialisers } =>
                 SExpr::new("braced").lines_explicit_empty(*subobject_initialisers),
             Self::Expression(expr) => expr.as_sexpr(),
+            Self::Static { initialiser, value: _ } => initialiser.0.as_sexpr(),
         }
     }
 }

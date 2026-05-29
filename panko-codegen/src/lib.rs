@@ -14,7 +14,6 @@ use std::mem;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use itertools::Itertools as _;
-use itertools::zip_eq;
 use panko_lex::Loc;
 use panko_parser::BinOpKind;
 use panko_parser::Comparison;
@@ -52,6 +51,7 @@ use panko_sema::typecheck::ArrayLength;
 use panko_sema::typecheck::Bitfield;
 use panko_sema::typecheck::Member;
 use panko_sema::typecheck::MemberKind;
+use panko_sema::typecheck::Value;
 
 use crate::Register::*;
 use crate::lineno::Linenos;
@@ -197,27 +197,17 @@ impl<'a> SubobjectAtReference<'a> {
 
 #[derive(Debug)]
 enum StaticInitialiser<'a> {
-    Braced {
-        subobject_initialisers: Vec<SubobjectInitialiser<'a, &'a Expression<'a>>>,
-    },
-    Expression(&'a Expression<'a>),
+    Empty,
+    Value(Value<'a>),
 }
 
 impl<'a> From<&'a Initialiser<'a>> for StaticInitialiser<'a> {
     fn from(initialiser: &'a Initialiser<'a>) -> Self {
         match initialiser {
-            Initialiser::Braced { subobject_initialisers } => Self::Braced {
-                subobject_initialisers: subobject_initialisers
-                    .iter()
-                    .map(
-                        |SubobjectInitialiser { subobject, initialiser }| SubobjectInitialiser {
-                            subobject: *subobject,
-                            initialiser: &initialiser.expr,
-                        },
-                    )
-                    .collect(),
-            },
-            Initialiser::Expression(expr) => Self::Expression(&expr.expr),
+            Initialiser::Braced { subobject_initialisers: [] } => Self::Empty,
+            Initialiser::Static { initialiser: _, value } => Self::Value(*value),
+            Initialiser::Braced { subobject_initialisers: _ } | Initialiser::Expression(_) =>
+                unreachable!(),
         }
     }
 }
@@ -546,77 +536,8 @@ impl<'a> Codegen<'a> {
         self.directive("align", &[&ty.align()]);
         self.label(name);
         match initialiser {
-            Some(StaticInitialiser::Expression(initialiser)) => match initialiser {
-                Expression::Error(_) => todo!("ICE?"),
-                Expression::Name(_) => todo!(),
-                Expression::Integer(value) =>
-                    self.constant(&value.to_le_bytes()[..usize::try_from(size).unwrap()]),
-                Expression::String(_string) => unreachable!(
-                    "either contained in a `noop-type-conversion` or in an initialiser",
-                ),
-                Expression::Nullptr => self.zero(ty.size()),
-                Expression::NoopTypeConversion(_) => todo!(),
-                Expression::Truncate(_) => todo!(),
-                Expression::SignExtend(_) => todo!(),
-                Expression::ZeroExtend(_) => todo!(),
-                Expression::VoidCast(_) => todo!(),
-                Expression::BoolCast(_) => todo!(),
-                Expression::Assign { .. } => todo!(),
-                Expression::IntegralBinOp { .. } => todo!(),
-                Expression::PtrAdd { .. } => todo!(),
-                Expression::PtrSub { .. } => todo!(),
-                Expression::PtrDiff { .. } => todo!(),
-                Expression::PtrCmp { .. } => todo!(),
-                Expression::Addressof(_) => todo!(),
-                Expression::Deref(_) => todo!(),
-                Expression::Call { .. } => todo!(),
-                Expression::Negate(_) => todo!(),
-                Expression::Compl(_) => todo!(),
-                Expression::Not(_) => todo!(),
-                Expression::Combine { .. } => todo!(),
-                Expression::Logical { .. } => todo!(),
-                Expression::Conditional { .. } => todo!(),
-                Expression::MemberAccess { .. } => todo!(),
-                Expression::BuiltinName(_) => todo!(),
-                Expression::CompoundLiteral { .. } => todo!(),
-            },
-            Some(StaticInitialiser::Braced { subobject_initialisers }) => {
-                if subobject_initialisers.is_empty() {
-                    self.zero(size);
-                }
-                else {
-                    // TODO: this can be made a lot more efficient for sparse initialisers
-                    let mut bytes = vec![0; usize::try_from(size).unwrap()];
-                    for SubobjectInitialiser { subobject, initialiser } in subobject_initialisers {
-                        let Subobject { ty, offset, kind } = subobject;
-                        let subobject_size = usize::try_from(ty.size()).unwrap();
-                        let offset = usize::try_from(offset).unwrap();
-                        match kind {
-                            MemberKind::Normal => match initialiser {
-                                Expression::Integer(value) => bytes[offset..][..subobject_size]
-                                    .copy_from_slice(&value.to_le_bytes()[..subobject_size]),
-                                _ => todo!(),
-                            },
-                            MemberKind::Bitfield(Bitfield {
-                                offset: bitfield_offset,
-                                width: _,
-                            }) => match initialiser {
-                                Expression::Integer(value) => {
-                                    for (tgt_byte, src_byte) in zip_eq(
-                                        &mut bytes[offset..][..subobject_size],
-                                        &(value << bitfield_offset).to_le_bytes()[..subobject_size],
-                                    ) {
-                                        *tgt_byte |= src_byte;
-                                    }
-                                }
-                                _ => todo!(),
-                            },
-                        }
-                    }
-                    self.constant(&bytes);
-                }
-            }
-            None => self.zero(size),
+            Some(StaticInitialiser::Value(Value::Bytes(bytes))) => self.constant(bytes),
+            Some(StaticInitialiser::Empty) | None => self.zero(size),
         }
     }
 
@@ -788,6 +709,7 @@ impl<'a> Codegen<'a> {
                     },
                 );
             }
+            Some(Initialiser::Static { initialiser: _, value: _ }) => todo!(),
             None => (),
         }
     }

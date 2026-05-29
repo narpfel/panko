@@ -28,6 +28,7 @@ use crate::typecheck::MemberKind;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::Typeck;
 use crate::typecheck::Typedef;
+use crate::typecheck::Value;
 
 mod as_sexpr;
 mod stack;
@@ -73,6 +74,10 @@ pub enum Initialiser<'a> {
         subobject_initialisers: &'a [SubobjectInitialiser<'a, LayoutedExpression<'a>>],
     },
     Expression(LayoutedExpression<'a>),
+    Static {
+        initialiser: typecheck::InitialiserRef<'a>,
+        value: Value<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -447,6 +452,8 @@ fn layout_declaration<'a>(
             typecheck::Initialiser::Expression(initialiser) => Initialiser::Expression(
                 layout_expression_in_slot(stack, bump, &initialiser, Some(reference.slot)),
             ),
+            typecheck::Initialiser::Static { initialiser, value } =>
+                Initialiser::Static { initialiser, value },
         }
     });
     Declaration { reference, initialiser }
