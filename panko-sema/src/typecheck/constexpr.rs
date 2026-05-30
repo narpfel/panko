@@ -1,6 +1,7 @@
 use std::collections::LinkedList;
 
 use itertools::zip_eq;
+use panko_parser::BinOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
@@ -35,6 +36,12 @@ pub(super) struct Errors<'a>(LinkedList<Diagnostic<'a>>);
 impl<'a> Errors<'a> {
     fn new(diagnostic: Diagnostic<'a>) -> Self {
         Self(LinkedList::from_iter([diagnostic]))
+    }
+
+    fn chain(self, Self(mut other_errors): Self) -> Self {
+        let Self(mut errors) = self;
+        errors.append(&mut other_errors);
+        Self(errors)
     }
 }
 
@@ -88,12 +95,23 @@ impl<'a> Value<'a> {
         }
     }
 
+    fn into_unsigned(self) -> Option<u64> {
+        match self.into_integral().ok()? {
+            Integral::Unsigned(value) => Some(value),
+            Integral::Signed(value) => Some(u64::try_from(value).ok()?),
+        }
+    }
+
     fn error(ty: Type<'a>) -> Self {
         Self { ty, repr: Repr::Error(Errors::default()) }
     }
 
     fn with_error(ty: Type<'a>, error: Diagnostic<'a>) -> Self {
         Value { ty, repr: Repr::error(error) }
+    }
+
+    fn with_errors(ty: Type<'a>, errors: Errors<'a>) -> Self {
+        Self { ty, repr: Repr::Error(errors) }
     }
 
     fn int(value: u64, ty: Type<'a>) -> Self {
@@ -155,6 +173,19 @@ impl<'a> Value<'a> {
             Repr::Bytes(bytes) => bytes,
             Repr::Address { .. } => todo!(),
             Repr::Error(_errors) => todo!(),
+        }
+    }
+
+    fn is_error(&self) -> bool {
+        matches!(self.repr, Repr::Error(_))
+    }
+
+    fn into_errors(self) -> Errors<'a> {
+        let Self { ty: _, repr } = self;
+        match repr {
+            Repr::Bytes(_) => Errors::default(),
+            Repr::Address { .. } => Errors::default(),
+            Repr::Error(errors) => errors,
         }
     }
 }
@@ -253,6 +284,56 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         Expression::SignExtend(expr) => eval(expr).convert(ty, ConversionKind::SignExtend),
         Expression::ZeroExtend(expr) => eval(expr).convert(ty, ConversionKind::ZeroExtend),
         Expression::BoolCast(expr) => eval(expr).convert(ty, ConversionKind::Bool),
+
+        Expression::IntegralBinOp { ty: _, lhs, op, rhs } => {
+            let lhs = eval(lhs);
+            let rhs = eval(rhs);
+            macro_rules! binary {
+                ($($t:ident),*) => {
+                    match () {
+                        () if lhs.is_error() || rhs.is_error() =>
+                            Value::with_errors(ty, lhs.into_errors().chain(rhs.into_errors())),
+                        $(
+                            ()
+                                if let BinOpKind::LeftShift | BinOpKind::RightShift = op.kind
+                                && let Some(lhs) = lhs.${concat(as_, $t)}() => {
+                                    let result = try {
+                                        let rhs = u32::try_from(rhs.into_unsigned()?).ok()?;
+                                        match op.kind {
+                                            BinOpKind::LeftShift => lhs.shl(rhs)?,
+                                            BinOpKind::RightShift => lhs.shr(rhs)?,
+                                            _ => unreachable!(),
+                                        }
+                                    };
+                                    C::into_value(result, typed_expr)
+                                }
+                        )*
+                        $(
+                            ()
+                                if let Some(lhs) = lhs.${concat(as_, $t)}()
+                                && let Some(rhs) = rhs.${concat(as_, $t)}() => {
+                                    let result = match op.kind {
+                                        BinOpKind::Multiply => lhs.mul(rhs),
+                                        BinOpKind::Divide => lhs.div(rhs),
+                                        BinOpKind::Modulo => lhs.rem(rhs),
+                                        BinOpKind::Add => lhs.add(rhs),
+                                        BinOpKind::Subtract => lhs.sub(rhs),
+                                        BinOpKind::LeftShift | BinOpKind::RightShift => unreachable!(),
+                                        BinOpKind::BitAnd => lhs.and(rhs),
+                                        BinOpKind::BitXor => lhs.xor(rhs),
+                                        BinOpKind::BitOr => lhs.or(rhs),
+                                        BinOpKind::Comparison(_comparison) =>
+                                            error_todo!(typed_expr, "unimplemented comparison binop"),
+                                    };
+                                    C::into_value(result, typed_expr)
+                                }
+                        )*
+                        () => todo!(),
+                    }
+                };
+            }
+            binary!(u64, i64, u32, i32)
+        }
 
         Expression::Negate { minus: _, operand } => unary!(eval(operand), neg, u32, i32, u64, i64),
         Expression::Compl { compl: _, operand } => unary!(eval(operand), compl, u32, i32, u64, i64),

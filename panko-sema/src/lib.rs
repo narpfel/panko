@@ -1,5 +1,6 @@
 #![feature(bstr)]
 #![feature(cmp_minmax)]
+#![feature(exact_bitshifts)]
 #![feature(gen_blocks)]
 #![feature(macro_metavar_expr_concat)]
 #![feature(never_type)]
