@@ -21,6 +21,8 @@ exit_code: 0
 int okay;
 
 
+
+
 int main() {}
 
 ----- stderr -----

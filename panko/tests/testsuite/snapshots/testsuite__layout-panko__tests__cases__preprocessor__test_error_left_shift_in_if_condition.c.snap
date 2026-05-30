@@ -59,3 +59,11 @@ Error: error while evaluating constant expression: SignedOverflow
     │     ───┬───  
     │        ╰───── while evaluating this expression
 ────╯
+
+Error: error while evaluating constant expression: ShiftRhsTooLarge
+    ╭─[panko/tests/cases/preprocessor/test_error_left_shift_in_if_condition.c:18:5]
+    │
+ 18 │ #if 0 << 64u
+    │     ────┬───  
+    │         ╰───── while evaluating this expression
+────╯

@@ -15,4 +15,8 @@ int should_error;
 int okay;
 #endif
 
+#if 0 << 64u
+int should_error;
+#endif
+
 int main() {}
