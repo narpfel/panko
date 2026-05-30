@@ -15,6 +15,7 @@ use crate::typecheck::MemberKind;
 use crate::typecheck::SubobjectInitialiser;
 use crate::typecheck::Type;
 use crate::typecheck::TypedExpression;
+use crate::typecheck::constexpr::arithmetic::C;
 use crate::typecheck::constexpr::diagnostics::Diagnostic;
 
 mod arithmetic;
@@ -209,22 +210,14 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     macro_rules! unary {
         ($operand:expr, $meth:ident, $($t:ident),*) => {{
             let operand = $operand;
-            let repr = match () {
-                () if let Repr::Error(_) = operand.repr => operand.repr,
+            match () {
+                () if let Repr::Error(_) = operand.repr => operand,
                 $(
-                    () if let Some(operand) = operand.${concat(as_, $t)}() => {
-                        arithmetic::C::$meth(operand).map_or_else(
-                            || Repr::error(Diagnostic::SignedOverflow { at: *typed_expr }),
-                            |operand| {
-                                assert!(ty.can_represent(operand));
-                                Repr::Bytes(Box::new(operand.to_le_bytes()))
-                            },
-                        )
-                    }
+                    () if let Some(operand) = operand.${concat(as_, $t)}() =>
+                        C::into_value(operand.$meth(), typed_expr),
                 )*
                 () => todo!(),
-            };
-            Value { ty, repr }
+            }
         }};
     }
 
