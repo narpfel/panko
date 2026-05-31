@@ -10,3 +10,7 @@ static int h = (-0x7fff'ffff - 1) / -1;
 
 static int i = 1 % 0;
 static int j = (-0x7fff'ffff - 1) % -1;
+
+// TODO: this should error for both lhs and rhs
+static int k = (0x7fff'ffff + 1) << 0x1'0000'0000;
+static int l = (0x7fff'ffff + 1) << 100;

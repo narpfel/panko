@@ -91,3 +91,19 @@ Error: signed overflow in constant expression
     │                ───────────┬───────────  
     │                           ╰───────────── in this expression of type `int`
 ────╯
+
+Error: signed overflow in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:15:17]
+    │
+ 15 │ static int k = (0x7fff'ffff + 1) << 0x1'0000'0000;
+    │                 ───────┬───────  
+    │                        ╰───────── in this expression of type `int`
+────╯
+
+Error: signed overflow in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:16:17]
+    │
+ 16 │ static int l = (0x7fff'ffff + 1) << 100;
+    │                 ───────┬───────  
+    │                        ╰───────── in this expression of type `int`
+────╯
