@@ -70,7 +70,7 @@ exit_code: 0
                      (combine `int`
                         (assign `ptr<int>` (unnamed-temporary~14 `ptr<int>`)
                            (addressof `ptr<int>`
-                              (deref `int` `int`
+                              (deref `int`
                                  (call `ptr<int>`
                                     (addressof `ptr<fn(p: ptr<int>) -> ptr<int>>`
                                        (f~2 `fn(p: ptr<int>) -> ptr<int>`))

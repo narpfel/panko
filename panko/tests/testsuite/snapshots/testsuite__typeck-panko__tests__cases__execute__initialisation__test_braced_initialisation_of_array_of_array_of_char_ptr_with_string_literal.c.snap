@@ -41,6 +41,6 @@ exit_code: 0
                                        (s~3 `array<array<ptr<char const>; 1>; 1>`)))
                                  (sign-extend `unsigned long` (0 `int`))))))
                      (sign-extend `unsigned long` (0 `int`))))))
-         (return (truncate `int` (lengthof `unsigned long` 1 (s~3 `array<array<ptr<char const>; 1>; 1>` `array<array<ptr<char const>; 1>; 1>`)))))))
+         (return (truncate `int` (lengthof `unsigned long` 1 (s~3 `array<array<ptr<char const>; 1>; 1>`)))))))
 
 ----- stderr -----

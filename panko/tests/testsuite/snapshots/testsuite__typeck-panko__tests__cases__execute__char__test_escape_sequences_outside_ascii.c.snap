@@ -167,6 +167,6 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (equal `int` (L'\xffffffff' `int`) (negate `int` `int` (1 `int`))))))))
+               (equal `int` (L'\xffffffff' `int`) (negate `int` (1 `int`))))))))
 
 ----- stderr -----

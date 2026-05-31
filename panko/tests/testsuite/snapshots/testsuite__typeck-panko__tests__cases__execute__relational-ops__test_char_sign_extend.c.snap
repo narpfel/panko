@@ -16,6 +16,6 @@ exit_code: 0
       (compound-statement
          (definition c~2 `char` (truncate `char` (128 `int`)))
          (definition x~3 `unsigned int` (noop-type-conversion `unsigned int` (200 `int`)))
-         (return (add `int` (less `int` `int` (sign-extend `int` (c~2 `char`)) (0 `int`)) (greater `int` `int` (sign-extend `unsigned int` (c~2 `char`)) (x~3 `unsigned int`)))))))
+         (return (add `int` (less `int` (sign-extend `int` (c~2 `char`)) (0 `int`)) (greater `int` (sign-extend `unsigned int` (c~2 `char`)) (x~3 `unsigned int`)))))))
 
 ----- stderr -----

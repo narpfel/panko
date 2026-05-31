@@ -36,6 +36,6 @@ exit_code: 0
                         (addressof `ptr<array<ptr<char const>; 1>>`
                            (s~3 `array<ptr<char const>; 1>`)))
                      (sign-extend `unsigned long` (0 `int`))))))
-         (return (truncate `int` (lengthof `unsigned long` 1 (s~3 `array<ptr<char const>; 1>` `array<ptr<char const>; 1>`)))))))
+         (return (truncate `int` (lengthof `unsigned long` 1 (s~3 `array<ptr<char const>; 1>`)))))))
 
 ----- stderr -----

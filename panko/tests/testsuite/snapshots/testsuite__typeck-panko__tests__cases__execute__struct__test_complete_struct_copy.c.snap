@@ -27,7 +27,7 @@ exit_code: 0
             (assign `int`
                (deref `int`
                   (ptr-add `ptr<int>`
-                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 3>>`
                            (deref `array<int; 3>` (xs~5 `ptr<array<int; 3>>`))))
                      (sign-extend `unsigned long` (0 `int`))))
@@ -36,7 +36,7 @@ exit_code: 0
             (assign `int`
                (deref `int`
                   (ptr-add `ptr<int>`
-                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 3>>`
                            (deref `array<int; 3>` (xs~5 `ptr<array<int; 3>>`))))
                      (sign-extend `unsigned long` (1 `int`))))
@@ -45,7 +45,7 @@ exit_code: 0
             (assign `int`
                (deref `int`
                   (ptr-add `ptr<int>`
-                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 3>>`
                            (deref `array<int; 3>` (xs~5 `ptr<array<int; 3>>`))))
                      (sign-extend `unsigned long` (2 `int`))))
@@ -66,19 +66,19 @@ exit_code: 0
                         (string `array<char; 10>` "%d %d %d\n\0"))))
                (deref `int`
                   (ptr-add `ptr<int>`
-                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 3>>`
                            (deref `array<int; 3>` (xs~5 `ptr<array<int; 3>>`))))
                      (sign-extend `unsigned long` (0 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
-                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 3>>`
                            (deref `array<int; 3>` (xs~5 `ptr<array<int; 3>>`))))
                      (sign-extend `unsigned long` (1 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
-                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 3>>`
                            (deref `array<int; 3>` (xs~5 `ptr<array<int; 3>>`))))
                      (sign-extend `unsigned long` (2 `int`))))))
@@ -86,7 +86,7 @@ exit_code: 0
             (assign `int`
                (deref `int`
                   (ptr-add `ptr<int>`
-                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 3>>`
                            (deref `array<int; 3>` (xs~5 `ptr<array<int; 3>>`))))
                      (sign-extend `unsigned long` (1 `int`))))
@@ -108,19 +108,19 @@ exit_code: 0
                         (string `array<char; 10>` "%d %d %d\n\0"))))
                (deref `int`
                   (ptr-add `ptr<int>`
-                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 3>>`
                            (deref `array<int; 3>` (xs~5 `ptr<array<int; 3>>`))))
                      (sign-extend `unsigned long` (0 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
-                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 3>>`
                            (deref `array<int; 3>` (xs~5 `ptr<array<int; 3>>`))))
                      (sign-extend `unsigned long` (1 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
-                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 3>>`
                            (deref `array<int; 3>` (xs~5 `ptr<array<int; 3>>`))))
                      (sign-extend `unsigned long` (2 `int`)))))))))

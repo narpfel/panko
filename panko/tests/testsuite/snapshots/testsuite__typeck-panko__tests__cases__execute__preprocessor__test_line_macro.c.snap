@@ -30,7 +30,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 23>>`
                         (string `array<char; 23>` "%zu %d %d %d %d %d %d\n\0"))))
-               (lengthof `unsigned long` 6 (xs~3 `array<int; 6>` `array<int; 6>`))
+               (lengthof `unsigned long` 6 (xs~3 `array<int; 6>`))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`

@@ -24,6 +24,6 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (equal `int` (n~3 `unsigned int`) (left-shift `unsigned int` `unsigned int` (1u `unsigned int`) (31 `int`))))))))
+               (equal `int` (n~3 `unsigned int`) (left-shift `unsigned int` (1u `unsigned int`) (31 `int`))))))))
 
 ----- stderr -----

@@ -187,7 +187,8 @@ impl AsSExpr for Expression<'_> {
             Expression::ZeroExtend(zero_extend) => SExpr::new("zero-extend").inherit(zero_extend),
             Expression::VoidCast(expr) => SExpr::new("void-cast").inherit(expr),
             Expression::BoolCast(expr) => SExpr::new("bool-cast").inherit(expr),
-            Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => expr.as_sexpr(),
+            Expression::Parenthesised { open_paren: _, expr, close_paren: _ } =>
+                expr.expr.as_sexpr(),
             Expression::Assign { target, value } =>
                 SExpr::new("assign").inherit(target).inherit(value),
             Expression::IntegralBinOp { ty: _, lhs, op, rhs } =>
