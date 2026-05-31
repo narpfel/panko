@@ -18,6 +18,8 @@ exit_code: 0
    (declaration e~4 `int` (left-shift 1 31))
    (declaration f~5 `int` (left-shift 1 0x1'0000'0000))
    (declaration g~6 `int` (divide 1 0))
-   (declaration h~7 `int` (divide (subtract (negate 0x7fff'ffff) 1) (negate 1))))
+   (declaration h~7 `int` (divide (subtract (negate 0x7fff'ffff) 1) (negate 1)))
+   (declaration i~8 `int` (modulo 1 0))
+   (declaration j~9 `int` (modulo (subtract (negate 0x7fff'ffff) 1) (negate 1))))
 
 ----- stderr -----
