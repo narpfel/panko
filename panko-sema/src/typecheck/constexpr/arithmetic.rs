@@ -2,35 +2,39 @@ use crate::typecheck::TypedExpression;
 use crate::typecheck::constexpr::Repr;
 use crate::typecheck::constexpr::Value;
 use crate::typecheck::constexpr::diagnostics::Diagnostic;
+use crate::typecheck::constexpr::diagnostics::Kind;
+use crate::typecheck::constexpr::diagnostics::Kind::*;
+
+type Result<T, E = Kind> = std::result::Result<T, E>;
 
 pub(super) trait C where
     Self: Sized,
 {
-    fn into_value<'a>(value: Option<Self>, at: &TypedExpression<'a>) -> Value<'a>;
+    fn into_value<'a>(value: Result<Self>, at: &TypedExpression<'a>) -> Value<'a>;
 
-    fn neg(self) -> Option<Self>;
-    fn compl(self) -> Option<Self>;
-    fn not(self) -> Option<i32>;
+    fn neg(self) -> Result<Self>;
+    fn compl(self) -> Result<Self>;
+    fn not(self) -> Result<i32>;
 
-    fn mul(self, rhs: Self) -> Option<Self>;
-    fn div(self, rhs: Self) -> Option<Self>;
-    fn rem(self, rhs: Self) -> Option<Self>;
-    fn add(self, rhs: Self) -> Option<Self>;
-    fn sub(self, rhs: Self) -> Option<Self>;
-    fn shl(self, rhs: u32) -> Option<Self>;
-    fn shr(self, rhs: u32) -> Option<Self>;
-    fn and(self, rhs: Self) -> Option<Self>;
-    fn xor(self, rhs: Self) -> Option<Self>;
-    fn or(self, rhs: Self) -> Option<Self>;
+    fn mul(self, rhs: Self) -> Result<Self>;
+    fn div(self, rhs: Self) -> Result<Self>;
+    fn rem(self, rhs: Self) -> Result<Self>;
+    fn add(self, rhs: Self) -> Result<Self>;
+    fn sub(self, rhs: Self) -> Result<Self>;
+    fn shl(self, rhs: u32) -> Result<Self>;
+    fn shr(self, rhs: u32) -> Result<Self>;
+    fn and(self, rhs: Self) -> Result<Self>;
+    fn xor(self, rhs: Self) -> Result<Self>;
+    fn or(self, rhs: Self) -> Result<Self>;
 }
 
 macro_rules! int_impl {
     (impl C for $t:ident with $prefix:ident { $( $meth:ident ),* } and $shl:ident) => {
         impl C for $t {
-            fn into_value<'a>(value: Option<Self>, at: &TypedExpression<'a>) -> Value<'a> {
+            fn into_value<'a>(value: Result<Self>, at: &TypedExpression<'a>) -> Value<'a> {
                 let ty = at.ty.ty;
                 value.map_or_else(
-                    || Value::with_error(ty, Diagnostic::SignedOverflow { at: *at }),
+                    |kind| Value::with_error(ty, Diagnostic::ArithmeticError { at: *at, kind }),
                     |value| {
                         assert!(ty.can_represent(value));
                         let repr = Repr::Bytes(Box::new(value.to_le_bytes()));
@@ -39,52 +43,52 @@ macro_rules! int_impl {
                 )
             }
 
-            fn neg(self) -> Option<Self> {
-                Option::from(self.${concat($prefix, _neg)}())
+            fn neg(self) -> Result<Self> {
+                Option::from(self.${concat($prefix, _neg)}()).ok_or(SignedOverflow)
             }
 
-            fn compl(self) -> Option<Self> {
-                Some(!self)
+            fn compl(self) -> Result<Self> {
+                Ok(!self)
             }
 
-            fn not(self) -> Option<i32> {
-                Some((self == 0).into())
+            fn not(self) -> Result<i32> {
+                Ok((self == 0).into())
             }
 
             $(
-                fn $meth(self, rhs: Self) -> Option<Self> {
-                    Option::from(self.${concat($prefix, _, $meth)}(rhs))
+                fn $meth(self, rhs: Self) -> Result<Self> {
+                    Option::from(self.${concat($prefix, _, $meth)}(rhs)).ok_or(SignedOverflow)
                 }
             )*
 
-            fn shl(self, rhs: u32) -> Option<Self> {
+            fn shl(self, rhs: u32) -> Result<Self> {
                 #[allow(unused_comparisons, reason = "this macro is used for signed and unsigned types")]
                 if self < 0 {
-                    return None;
+                    return Err(NegativeShiftLhs);
                 }
                 if rhs >= $t::BITS {
-                    return None;
+                    return Err(ShiftRhsOutOfRange);
                 }
-                Option::from(self.$shl(rhs))
+                Option::from(self.$shl(rhs)).ok_or(SignedOverflow)
             }
 
-            fn shr(self, rhs: u32) -> Option<Self> {
+            fn shr(self, rhs: u32) -> Result<Self> {
                 if rhs >= $t::BITS {
-                    return None;
+                    return Err(ShiftRhsOutOfRange);
                 }
-                Some(self.wrapping_shr(rhs))
+                Ok(self.wrapping_shr(rhs))
             }
 
-            fn and(self, rhs: Self) -> Option<Self> {
-                Some(self & rhs)
+            fn and(self, rhs: Self) -> Result<Self> {
+                Ok(self & rhs)
             }
 
-            fn xor(self, rhs: Self) -> Option<Self> {
-                Some(self ^ rhs)
+            fn xor(self, rhs: Self) -> Result<Self> {
+                Ok(self ^ rhs)
             }
 
-            fn or(self, rhs: Self) -> Option<Self> {
-                Some(self | rhs)
+            fn or(self, rhs: Self) -> Result<Self> {
+                Ok(self | rhs)
             }
         }
     };

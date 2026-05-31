@@ -17,7 +17,7 @@ Error: signed overflow in constant expression
    │
  2 │     int x:-(int)0x8000'0000;
    │           ────────┬────────  
-   │                   ╰────────── this expression overflows its type `int`
+   │                   ╰────────── in this expression of type `int`
 ───╯
 
 Error: signed overflow in constant expression
@@ -25,5 +25,5 @@ Error: signed overflow in constant expression
    │
  3 │     int y:-(int)0x8000'0000;
    │           ────────┬────────  
-   │                   ╰────────── this expression overflows its type `int`
+   │                   ╰────────── in this expression of type `int`
 ───╯

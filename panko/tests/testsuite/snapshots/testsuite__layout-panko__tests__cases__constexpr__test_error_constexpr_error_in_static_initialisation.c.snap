@@ -12,36 +12,36 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: signed overflow in constant expression
+Error: left shift of negative value in constant expression
    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:1:16]
    │
  1 │ static int a = -1 << 1;
    │                ───┬───  
-   │                   ╰───── this expression overflows its type `int`
+   │                   ╰───── in this expression of type `int`
 ───╯
 
-Error: signed overflow in constant expression
+Error: shift count negative in constant expression
    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:2:16]
    │
  2 │ static int b = 1 << -1;
    │                ───┬───  
-   │                   ╰───── this expression overflows its type `int`
+   │                   ╰───── in this expression of type `int`
 ───╯
 
-Error: signed overflow in constant expression
+Error: shift count negative in constant expression
    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:3:16]
    │
  3 │ static int c = 1 >> -1;
    │                ───┬───  
-   │                   ╰───── this expression overflows its type `int`
+   │                   ╰───── in this expression of type `int`
 ───╯
 
-Error: signed overflow in constant expression
+Error: shift count exceeds size of shifted type in constant expression
    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:4:16]
    │
  4 │ static int d = 1 << 32;
    │                ───┬───  
-   │                   ╰───── this expression overflows its type `int`
+   │                   ╰───── in this expression of type `int`
 ───╯
 
 Error: signed overflow in constant expression
@@ -49,13 +49,13 @@ Error: signed overflow in constant expression
    │
  5 │ static int e = 1 << 31;
    │                ───┬───  
-   │                   ╰───── this expression overflows its type `int`
+   │                   ╰───── in this expression of type `int`
 ───╯
 
-Error: signed overflow in constant expression
+Error: shift count exceeds size of shifted type in constant expression
    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:6:16]
    │
  6 │ static int f = 1 << 0x1'0000'0000;
    │                ─────────┬────────  
-   │                         ╰────────── this expression overflows its type `int`
+   │                         ╰────────── in this expression of type `int`
 ───╯

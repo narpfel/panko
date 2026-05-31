@@ -1,17 +1,40 @@
+use std::fmt;
+
 use ariadne::Color::Red;
 use panko_report::Report;
+use panko_report::Sliced as _;
 
 use crate::typecheck::TypedExpression;
 
 #[derive(Debug, Report)]
 #[exit_code(1)]
 pub(crate) enum Diagnostic<'a> {
-    #[error("signed overflow in constant expression")]
-    #[diagnostics(at(label = "this expression overflows its type `{ty}`", colour = Red))]
+    #[error("{kind} in constant expression")]
+    #[diagnostics(at(label = "in this expression of type `{ty}`", colour = Red))]
     #[with(ty = at.ty.ty)]
-    SignedOverflow { at: TypedExpression<'a> },
+    ArithmeticError { at: TypedExpression<'a>, kind: Kind },
 
     #[error("constexpr evaluation not implemented yet")]
     #[diagnostics(at(colour = Red))]
     NotImplementedYet { at: TypedExpression<'a> },
+}
+
+#[derive(Debug)]
+pub(crate) enum Kind {
+    SignedOverflow,
+    NegativeShiftLhs,
+    NegativeShiftRhs,
+    ShiftRhsOutOfRange,
+}
+
+impl fmt::Display for Kind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::SignedOverflow => "signed overflow",
+            Self::NegativeShiftLhs => "left shift of negative value",
+            Self::NegativeShiftRhs => "shift count negative",
+            Self::ShiftRhsOutOfRange => "shift count exceeds size of shifted type",
+        };
+        write!(f, "{s}")
+    }
 }

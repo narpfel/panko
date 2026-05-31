@@ -18,6 +18,7 @@ use crate::typecheck::Type;
 use crate::typecheck::TypedExpression;
 use crate::typecheck::constexpr::arithmetic::C;
 use crate::typecheck::constexpr::diagnostics::Diagnostic;
+use crate::typecheck::constexpr::diagnostics::Kind::*;
 
 mod arithmetic;
 mod diagnostics;
@@ -298,7 +299,8 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                                 if let BinOpKind::LeftShift | BinOpKind::RightShift = op.kind
                                 && let Some(lhs) = lhs.${concat(as_, $t)}() => {
                                     let result = try {
-                                        let rhs = u32::try_from(rhs.into_unsigned()?).ok()?;
+                                        let rhs = rhs.into_unsigned().ok_or(NegativeShiftRhs)?;
+                                        let rhs = rhs.try_into().map_err(|_| ShiftRhsOutOfRange)?;
                                         match op.kind {
                                             BinOpKind::LeftShift => lhs.shl(rhs)?,
                                             BinOpKind::RightShift => lhs.shr(rhs)?,
