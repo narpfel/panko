@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c"
+   (declaration a~0 `int` (left-shift (negate 1) 1))
+   (declaration b~1 `int` (left-shift 1 (negate 1)))
+   (declaration c~2 `int` (right-shift 1 (negate 1)))
+   (declaration d~3 `int` (left-shift 1 32))
+   (declaration e~4 `int` (left-shift 1 31))
+   (declaration f~5 `int` (left-shift 1 0x1'0000'0000)))
+
+----- stderr -----

@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/constexpr/test_constexpr_eval.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/constexpr/test_constexpr_eval.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition external
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition n~3 `unsigned int` (left-shift `unsigned int` (1u `unsigned int`) (31 `int`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (equal `int` (n~3 `unsigned int`) (left-shift `unsigned int` `unsigned int` (1u `unsigned int`) (31 `int`))))))))
+
+----- stderr -----
