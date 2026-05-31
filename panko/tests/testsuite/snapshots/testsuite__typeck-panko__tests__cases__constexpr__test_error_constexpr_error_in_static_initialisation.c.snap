@@ -59,3 +59,19 @@ Error: shift count exceeds size of shifted type in constant expression
    │                ─────────┬────────  
    │                         ╰────────── in this expression of type `int`
 ───╯
+
+Error: signed overflow in constant expression
+   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:8:16]
+   │
+ 8 │ static int g = 1 / 0;
+   │                ──┬──  
+   │                  ╰──── in this expression of type `int`
+───╯
+
+Error: signed overflow in constant expression
+   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:9:16]
+   │
+ 9 │ static int h = (-0x7fff'ffff - 1) / -1;
+   │                ───────────┬───────────  
+   │                           ╰───────────── in this expression of type `int`
+───╯
