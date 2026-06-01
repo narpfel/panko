@@ -28,6 +28,46 @@ exit_code: 0
                   (n~3 `unsigned int` (static n.3))
                   (left-shift `unsigned int` @28
                      (1 `unsigned int` @28)
-                     (31 `int` @32))))))))
+                     (31 `int` @32)))))
+         (definition (a~4 `int` (static a.4)) (right-shift `int` (0x12345 `int`) (4 `int`)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 6>>` @16
+                        (string `array<char; 6>` @void "0x%x\n\0"))))
+               (a~4 `int` (static a.4))))
+         (definition (b~5 `int` (static b.5)) (bit-and `int` (0b101010 `int`) (0b111 `int`)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 6>>` @16
+                        (string `array<char; 6>` @void "0b%b\n\0"))))
+               (b~5 `int` (static b.5))))
+         (definition (c~6 `int` (static c.6)) (bit-or `int` (0b101010 `int`) (0b111 `int`)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 6>>` @16
+                        (string `array<char; 6>` @void "0b%b\n\0"))))
+               (c~6 `int` (static c.6))))
+         (definition (d~7 `int` (static d.7)) (bit-xor `int` (0b101010 `int`) (0b111 `int`)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 6>>` @16
+                        (string `array<char; 6>` @void "0b%b\n\0"))))
+               (d~7 `int` (static d.7)))))))
 
 ----- stderr -----

@@ -19,6 +19,26 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (equal (name n~3 `unsigned int`) (left-shift 1u 31)))))))
+               (equal (name n~3 `unsigned int`) (left-shift 1u 31))))
+         (declaration a~4 `int` (right-shift 0x12345 4))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%x\n")
+               (name a~4 `int`)))
+         (declaration b~5 `int` (bit-and 0b101010 0b111))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0b%b\n")
+               (name b~5 `int`)))
+         (declaration c~6 `int` (bit-or 0b101010 0b111))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0b%b\n")
+               (name c~6 `int`)))
+         (declaration d~7 `int` (bit-xor 0b101010 0b111))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0b%b\n")
+               (name d~7 `int`))))))
 
 ----- stderr -----
