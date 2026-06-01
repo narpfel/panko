@@ -26,6 +26,8 @@ pub(super) trait C where
     fn and(self, rhs: Self) -> Result<Self>;
     fn xor(self, rhs: Self) -> Result<Self>;
     fn or(self, rhs: Self) -> Result<Self>;
+
+    fn nonzero(self) -> Result<Self>;
 }
 
 macro_rules! int_impl {
@@ -89,6 +91,13 @@ macro_rules! int_impl {
 
             fn or(self, rhs: Self) -> Result<Self> {
                 Ok(self | rhs)
+            }
+
+            fn nonzero(self) -> Result<Self> {
+                match self {
+                    0 => Err(IsZero),
+                    _ => Ok(self),
+                }
             }
         }
     };

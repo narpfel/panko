@@ -25,6 +25,7 @@ pub(crate) enum Kind {
     NegativeShiftLhs,
     NegativeShiftRhs,
     ShiftRhsOutOfRange,
+    IsZero,
 }
 
 impl fmt::Display for Kind {
@@ -34,6 +35,7 @@ impl fmt::Display for Kind {
             Self::NegativeShiftLhs => "left shift of negative value",
             Self::NegativeShiftRhs => "shift count negative",
             Self::ShiftRhsOutOfRange => "shift count exceeds size of shifted type",
+            Self::IsZero => "division by zero",
         };
         write!(f, "{s}")
     }

@@ -314,18 +314,21 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                             ()
                                 if let Some(lhs) = lhs.${concat(as_, $t)}()
                                 && let Some(rhs) = rhs.${concat(as_, $t)}() => {
-                                    let result = match op.kind {
-                                        BinOpKind::Multiply => lhs.mul(rhs),
-                                        BinOpKind::Divide => lhs.div(rhs),
-                                        BinOpKind::Modulo => lhs.rem(rhs),
-                                        BinOpKind::Add => lhs.add(rhs),
-                                        BinOpKind::Subtract => lhs.sub(rhs),
-                                        BinOpKind::LeftShift | BinOpKind::RightShift => unreachable!(),
-                                        BinOpKind::BitAnd => lhs.and(rhs),
-                                        BinOpKind::BitXor => lhs.xor(rhs),
-                                        BinOpKind::BitOr => lhs.or(rhs),
-                                        BinOpKind::Comparison(_comparison) =>
-                                            error_todo!(typed_expr, "unimplemented comparison binop"),
+                                    let result = try {
+                                        match op.kind {
+                                            BinOpKind::Multiply => lhs.mul(rhs),
+                                            BinOpKind::Divide => lhs.div(rhs.nonzero()?),
+                                            BinOpKind::Modulo => lhs.rem(rhs.nonzero()?),
+                                            BinOpKind::Add => lhs.add(rhs),
+                                            BinOpKind::Subtract => lhs.sub(rhs),
+                                            BinOpKind::LeftShift | BinOpKind::RightShift =>
+                                                unreachable!(),
+                                            BinOpKind::BitAnd => lhs.and(rhs),
+                                            BinOpKind::BitXor => lhs.xor(rhs),
+                                            BinOpKind::BitOr => lhs.or(rhs),
+                                            BinOpKind::Comparison(_comparison) =>
+                                                error_todo!(typed_expr, "unimplemented comparison binop"),
+                                        }?
                                     };
                                     C::into_value(result, typed_expr)
                                 }

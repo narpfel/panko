@@ -60,7 +60,7 @@ Error: shift count exceeds size of shifted type in constant expression
    │                         ╰────────── in this expression of type `int`
 ───╯
 
-Error: signed overflow in constant expression
+Error: division by zero in constant expression
    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:8:16]
    │
  8 │ static int g = 1 / 0;
@@ -76,7 +76,7 @@ Error: signed overflow in constant expression
    │                           ╰───────────── in this expression of type `int`
 ───╯
 
-Error: signed overflow in constant expression
+Error: division by zero in constant expression
     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:11:16]
     │
  11 │ static int i = 1 % 0;
@@ -106,4 +106,20 @@ Error: signed overflow in constant expression
  16 │ static int l = (0x7fff'ffff + 1) << 100;
     │                 ───────┬───────  
     │                        ╰───────── in this expression of type `int`
+────╯
+
+Error: division by zero in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:18:21]
+    │
+ 18 │ static unsigned m = 1u / 0u;
+    │                     ───┬───  
+    │                        ╰───── in this expression of type `unsigned int`
+────╯
+
+Error: division by zero in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:19:21]
+    │
+ 19 │ static unsigned n = 1u % 0u;
+    │                     ───┬───  
+    │                        ╰───── in this expression of type `unsigned int`
 ────╯

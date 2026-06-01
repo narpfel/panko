@@ -22,6 +22,8 @@ exit_code: 0
    (declaration i~8 `int` (modulo 1 0))
    (declaration j~9 `int` (modulo (subtract (negate 0x7fff'ffff) 1) (negate 1)))
    (declaration k~10 `int` (left-shift (add 0x7fff'ffff 1) 0x1'0000'0000))
-   (declaration l~11 `int` (left-shift (add 0x7fff'ffff 1) 100)))
+   (declaration l~11 `int` (left-shift (add 0x7fff'ffff 1) 100))
+   (declaration m~12 `unsigned int` (divide 1u 0u))
+   (declaration n~13 `unsigned int` (modulo 1u 0u)))
 
 ----- stderr -----
