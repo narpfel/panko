@@ -1,6 +1,5 @@
 int printf(char const*, ...);
 
-
 int main() {
     static unsigned n = 1u << 31;
     // [[print: 1]]
