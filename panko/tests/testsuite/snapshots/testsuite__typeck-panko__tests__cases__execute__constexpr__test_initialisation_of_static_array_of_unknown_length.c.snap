@@ -7,14 +7,18 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/constexpr/test_initialisation_of_static_array_of_unknown_length.c
 ---
-success: false
-exit_code: 101
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/constexpr/test_initialisation_of_static_array_of_unknown_length.c"
+   (definition internal xs~0 `array<int; 3>`
+      (braced
+         (subobject +0 (1 `int`))
+         (subobject +4 (2 `int`))
+         (subobject +8 (3 `int`))))
+   (function-definition external
+      main~1 `fn() -> int`
+      (compound-statement
+         (return (truncate `int` (lengthof `unsigned long` 3 (xs~0 `array<int; 3>`)))))))
 
 ----- stderr -----
-[31mThe application panicked (crashed).[0m
-Message:  [36minternal error: entered unreachable code: arrays without a length are incomplete types and don’t have a size[0m
-Location: [35mpanko-sema/src/ty.rs[0m:[35m376[0m
-
-Backtrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it.
-Run with RUST_BACKTRACE=full to include source snippets.

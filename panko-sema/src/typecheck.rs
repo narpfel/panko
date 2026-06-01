@@ -1418,7 +1418,7 @@ fn typeck_initialiser<'a>(
     initialiser: &scope::Initialiser<'a>,
     reference: &Reference<'a>,
 ) -> Initialiser<'a> {
-    let initialiser = match initialiser {
+    match initialiser {
         scope::Initialiser::Braced {
             open_brace: _,
             initialiser_list,
@@ -1465,11 +1465,6 @@ fn typeck_initialiser<'a>(
                 typeck_expression(sess, initialiser, Context::Default),
             ),
         }),
-    };
-    match reference.storage_duration {
-        StorageDuration::Static(_) =>
-            constexpr::run_static_initialiser(sess, &reference.ty.ty, sess.alloc(initialiser)),
-        StorageDuration::Automatic => initialiser,
     }
 }
 
@@ -1539,7 +1534,14 @@ fn typeck_declaration<'a>(
         initialiser,
     } = *declaration;
     let reference = typeck_reference_declaration(sess, reference, NeedsInitialiser::Yes);
-    let initialiser = try { typeck_initialiser(sess, initialiser?, &reference) };
+    let initialiser = try {
+        let initialiser = typeck_initialiser(sess, initialiser?, &reference);
+        match reference.storage_duration {
+            StorageDuration::Static(_) =>
+                constexpr::run_static_initialiser(sess, &reference.ty.ty, sess.alloc(initialiser)),
+            StorageDuration::Automatic => initialiser,
+        }
+    };
     let reference =
         if matches!(reference.kind, RefKind::Definition) && !reference.ty.ty.is_complete() {
             // TODO: use this error
