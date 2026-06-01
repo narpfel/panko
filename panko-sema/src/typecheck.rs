@@ -251,7 +251,8 @@ impl Initialiser<'_> {
             Self::Expression(TypedExpression { ty: _, expr: Expression::String(value) }) =>
                 Some(value.len()),
             Self::Expression(_) => None,
-            Self::Static { initialiser, value: _ } => initialiser.0.array_length(element_ty),
+            Self::Static { .. } =>
+                unreachable!("only called on initialisers before constexpr evaluation"),
         }
     }
 }
