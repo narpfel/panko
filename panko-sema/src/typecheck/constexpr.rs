@@ -324,9 +324,9 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                                             BinOpKind::Subtract => lhs.sub(rhs),
                                             BinOpKind::LeftShift | BinOpKind::RightShift =>
                                                 unreachable!(),
-                                            BinOpKind::BitAnd => lhs.and(rhs),
-                                            BinOpKind::BitXor => lhs.xor(rhs),
-                                            BinOpKind::BitOr => lhs.or(rhs),
+                                            BinOpKind::BitAnd => Ok(lhs & rhs),
+                                            BinOpKind::BitXor => Ok(lhs ^ rhs),
+                                            BinOpKind::BitOr => Ok(lhs | rhs),
                                             BinOpKind::Comparison(comparison) => {
                                                 let result = Ok(i32::from(match comparison {
                                                     Comparison::Equal => lhs == rhs,

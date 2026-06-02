@@ -23,9 +23,6 @@ pub(super) trait C where
     fn sub(self, rhs: Self) -> Result<Self>;
     fn shl(self, rhs: u32) -> Result<Self>;
     fn shr(self, rhs: u32) -> Result<Self>;
-    fn and(self, rhs: Self) -> Result<Self>;
-    fn xor(self, rhs: Self) -> Result<Self>;
-    fn or(self, rhs: Self) -> Result<Self>;
 
     fn nonzero(self) -> Result<Self>;
 }
@@ -79,18 +76,6 @@ macro_rules! int_impl {
                     return Err(ShiftRhsOutOfRange);
                 }
                 Ok(self.wrapping_shr(rhs))
-            }
-
-            fn and(self, rhs: Self) -> Result<Self> {
-                Ok(self & rhs)
-            }
-
-            fn xor(self, rhs: Self) -> Result<Self> {
-                Ok(self ^ rhs)
-            }
-
-            fn or(self, rhs: Self) -> Result<Self> {
-                Ok(self | rhs)
             }
 
             fn nonzero(self) -> Result<Self> {
