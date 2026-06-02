@@ -49,6 +49,36 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%llu\n")
-               (name ull~9 `unsigned long long`))))))
+               (name ull~9 `unsigned long long`)))
+         (declaration e~10 `int` (equal 1ll 0))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name e~10 `int`)))
+         (declaration f~11 `int` (not-equal 1 0u))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name f~11 `int`)))
+         (declaration g~12 `int` (less 1 0))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name g~12 `int`)))
+         (declaration h~13 `int` (less-equal 0u 0))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name h~13 `int`)))
+         (declaration i~14 `int` (greater 1 0))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name i~14 `int`)))
+         (declaration j~15 `int` (greater-equal 42 42))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name j~15 `int`))))))
 
 ----- stderr -----

@@ -28,4 +28,28 @@ int main() {
     static unsigned long long ull = 123ull + 456;
     // [[print: 579]]
     printf("%llu\n", ull);
+
+    static int e = 1ll == 0;
+    // [[print: 0]]
+    printf("%d\n", e);
+
+    static int f = 1 != 0u;
+    // [[print: 1]]
+    printf("%d\n", f);
+
+    static int g = 1 < 0;
+    // [[print: 0]]
+    printf("%d\n", g);
+
+    static int h = 0u <= 0;
+    // [[print: 1]]
+    printf("%d\n", h);
+
+    static int i = 1 > 0;
+    // [[print: 1]]
+    printf("%d\n", i);
+
+    static int j = 42 >= 42;
+    // [[print: 1]]
+    printf("%d\n", j);
 }

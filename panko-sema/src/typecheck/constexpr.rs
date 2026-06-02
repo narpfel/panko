@@ -2,6 +2,7 @@ use std::collections::LinkedList;
 
 use itertools::zip_eq;
 use panko_parser::BinOpKind;
+use panko_parser::Comparison;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
@@ -326,8 +327,17 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                                             BinOpKind::BitAnd => lhs.and(rhs),
                                             BinOpKind::BitXor => lhs.xor(rhs),
                                             BinOpKind::BitOr => lhs.or(rhs),
-                                            BinOpKind::Comparison(_comparison) =>
-                                                error_todo!(typed_expr, "unimplemented comparison binop"),
+                                            BinOpKind::Comparison(comparison) => {
+                                                let result = Ok(i32::from(match comparison {
+                                                    Comparison::Equal => lhs == rhs,
+                                                    Comparison::NotEqual => lhs != rhs,
+                                                    Comparison::Less => lhs < rhs,
+                                                    Comparison::LessEqual => lhs <= rhs,
+                                                    Comparison::Greater => lhs > rhs,
+                                                    Comparison::GreaterEqual => lhs >= rhs,
+                                                }));
+                                                return C::into_value(result, typed_expr);
+                                            }
                                         }?
                                     };
                                     C::into_value(result, typed_expr)
