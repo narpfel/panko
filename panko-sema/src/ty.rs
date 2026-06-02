@@ -189,8 +189,10 @@ pub enum Type<'a, T: Step> {
 impl<'a, T: Step> Type<'a, T> {
     pub(crate) const BOOL: Self = Self::bool();
     pub(crate) const INT: Self = Self::int();
+    pub(crate) const LLONG: Self = Self::llong();
     pub(crate) const LONG: Self = Self::long();
     pub(crate) const UINT: Self = Self::uint();
+    pub(crate) const ULLONG: Self = Self::ullong();
     pub(crate) const ULONG: Self = Self::ulong();
 
     pub(crate) const fn bool() -> Self {
@@ -263,6 +265,20 @@ impl<'a, T: Step> Type<'a, T> {
         Self::Arithmetic(Arithmetic::Integral(Integral {
             signedness: Signedness::Unsigned,
             kind: IntegralKind::Long,
+        }))
+    }
+
+    const fn llong() -> Self {
+        Self::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Signed,
+            kind: IntegralKind::LongLong,
+        }))
+    }
+
+    const fn ullong() -> Self {
+        Self::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::LongLong,
         }))
     }
 

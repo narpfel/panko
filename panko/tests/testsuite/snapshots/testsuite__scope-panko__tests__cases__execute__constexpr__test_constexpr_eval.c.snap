@@ -39,6 +39,16 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "0b%b\n")
-               (name d~7 `int`))))))
+               (name d~7 `int`)))
+         (declaration ll~8 `long long` (subtract 123ll 456))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%lld\n")
+               (name ll~8 `long long`)))
+         (declaration ull~9 `unsigned long long` (add 123ull 456))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%llu\n")
+               (name ull~9 `unsigned long long`))))))
 
 ----- stderr -----

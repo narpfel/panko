@@ -64,6 +64,26 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 6>>`
                         (string `array<char; 6>` "0b%b\n\0"))))
-               (d~7 `int`))))))
+               (d~7 `int`)))
+         (definition ll~8 `long long` (subtract `long long` (123ll `long long`) (sign-extend `long long` (456 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 6>>`
+                        (string `array<char; 6>` "%lld\n\0"))))
+               (ll~8 `long long`)))
+         (definition ull~9 `unsigned long long` (add `unsigned long long` (123ull `unsigned long long`) (sign-extend `unsigned long long` (456 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 6>>`
+                        (string `array<char; 6>` "%llu\n\0"))))
+               (ull~9 `unsigned long long`))))))
 
 ----- stderr -----

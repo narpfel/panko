@@ -68,6 +68,26 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 6>>` @16
                         (string `array<char; 6>` @void "0b%b\n\0"))))
-               (d~7 `int` (static d.7)))))))
+               (d~7 `int` (static d.7))))
+         (definition (ll~8 `long long` (static ll.8)) (subtract `long long` (123ll `long long`) (sign-extend `long long` (456 `int`))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 6>>` @16
+                        (string `array<char; 6>` @void "%lld\n\0"))))
+               (ll~8 `long long` (static ll.8))))
+         (definition (ull~9 `unsigned long long` (static ull.9)) (add `unsigned long long` (123ull `unsigned long long`) (sign-extend `unsigned long long` (456 `int`))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 6>>` @16
+                        (string `array<char; 6>` @void "%llu\n\0"))))
+               (ull~9 `unsigned long long` (static ull.9)))))))
 
 ----- stderr -----

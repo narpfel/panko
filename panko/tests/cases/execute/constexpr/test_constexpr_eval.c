@@ -20,4 +20,12 @@ int main() {
     static int d = 0b101010 ^ 0b111;
     // [[print: 0b101101]]
     printf("0b%b\n", d);
+
+    static long long ll = 123ll - 456;
+    // [[print: -333]]
+    printf("%lld\n", ll);
+
+    static unsigned long long ull = 123ull + 456;
+    // [[print: 579]]
+    printf("%llu\n", ull);
 }

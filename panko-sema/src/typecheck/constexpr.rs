@@ -192,11 +192,11 @@ impl<'a> Value<'a> {
 }
 
 macro_rules! impl_as_ty {
-    ($name:ident => $t:ident) => {
+    ($( $name:ident )|+ => $t:ident) => {
         fn ${concat(as_, $t)}(&self) -> Option<$t> {
             let Self { ty, repr } = self;
             match *ty {
-                Type::$name => Some($t::from_le_bytes(repr.bytes().ok()?.try_into().unwrap())),
+                $(| Type::$name)+ => Some($t::from_le_bytes(repr.bytes().ok()?.try_into().unwrap())),
                 _ => None,
             }
         }
@@ -204,9 +204,9 @@ macro_rules! impl_as_ty {
 }
 
 impl Value<'_> {
-    impl_as_ty!(ULONG => u64);
+    impl_as_ty!(ULLONG | ULONG => u64);
 
-    impl_as_ty!(LONG => i64);
+    impl_as_ty!(LLONG | LONG => i64);
 
     impl_as_ty!(UINT => u32);
 
