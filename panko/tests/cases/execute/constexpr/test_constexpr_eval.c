@@ -52,4 +52,8 @@ int main() {
     static int j = 42 >= 42;
     // [[print: 1]]
     printf("%d\n", j);
+
+    static int* k = nullptr;
+    // [[print: 0 1]]
+    printf("%zu %d\n", (typeof(sizeof 0))k, k == nullptr);
 }

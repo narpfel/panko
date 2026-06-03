@@ -79,6 +79,12 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (name j~15 `int`))))))
+               (name j~15 `int`)))
+         (declaration k~16 `ptr<int>` nullptr)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu %d\n")
+               (cast `typeof((sizeof 0))` (name k~16 `ptr<int>`))
+               (equal (name k~16 `ptr<int>`) nullptr))))))
 
 ----- stderr -----

@@ -144,6 +144,17 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (j~15 `int`))))))
+               (j~15 `int`)))
+         (definition k~16 `ptr<int>` (noop-type-conversion `ptr<int>` (nullptr `nullptr_t`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 8>>`
+                        (string `array<char; 8>` "%zu %d\n\0"))))
+               (noop-type-conversion `unsigned long` (k~16 `ptr<int>`))
+               (ptr-equal `int` (k~16 `ptr<int>`) (nullptr `nullptr_t`)))))))
 
 ----- stderr -----
