@@ -315,6 +315,8 @@ impl<'a> FromError<'a> for Statement<'a> {
     }
 }
 
+// TODO: add a field for the `scope::Expression` that `expr` is created from; use that to compute
+// `loc`
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct TypedExpression<'a> {
     pub(crate) ty: QualifiedType<'a>,
