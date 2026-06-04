@@ -79,14 +79,10 @@ struct CompileArgs {
 }
 
 fn main() -> Result<()> {
-    let enable_colours = if env::var_os("NO_COLOR").is_some() {
-        false
-    }
-    else if env::var_os("CLICOLOR_FORCE").is_some() {
-        true
-    }
-    else {
-        Condition::stdouterr_are_tty()
+    let enable_colours = match () {
+        () if env::var_os("NO_COLOR").is_some() => false,
+        () if env::var_os("CLICOLOR_FORCE").is_some() => true,
+        () => Condition::stdouterr_are_tty(),
     };
 
     match enable_colours {
