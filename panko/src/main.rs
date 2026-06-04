@@ -12,6 +12,8 @@ use std::process::Command;
 use clap::Parser;
 use clap::ValueEnum;
 use color_eyre::Result;
+use color_eyre::config::HookBuilder;
+use color_eyre::config::Theme;
 use color_eyre::eyre::Context;
 use color_eyre::eyre::eyre;
 use panko_lex::Bump;
@@ -77,8 +79,6 @@ struct CompileArgs {
 }
 
 fn main() -> Result<()> {
-    color_eyre::install()?;
-
     let enable_colours = if env::var_os("NO_COLOR").is_some() {
         false
     }
@@ -88,6 +88,12 @@ fn main() -> Result<()> {
     else {
         Condition::stdouterr_are_tty()
     };
+
+    match enable_colours {
+        true => color_eyre::install()?,
+        false => HookBuilder::default().theme(Theme::new()).install()?,
+    }
+
     yansi::whenever(Condition::cached(enable_colours));
 
     let Args {
