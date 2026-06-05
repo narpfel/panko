@@ -303,30 +303,28 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                             ()
                                 if let Some(lhs) = lhs.${concat(as_, $t)}()
                                 && let Some(rhs) = rhs.${concat(as_, $t)}() => {
-                                    let result = try {
-                                        match op.kind {
-                                            BinOpKind::Multiply => lhs.mul(rhs, typed_expr),
-                                            BinOpKind::Divide => lhs.div(rhs.nonzero(rhs_expr), typed_expr),
-                                            BinOpKind::Modulo => lhs.rem(rhs.nonzero(rhs_expr), typed_expr),
-                                            BinOpKind::Add => lhs.add(rhs, typed_expr),
-                                            BinOpKind::Subtract => lhs.sub(rhs, typed_expr),
-                                            BinOpKind::LeftShift | BinOpKind::RightShift =>
-                                                unreachable!(),
-                                            BinOpKind::BitAnd => lhs.bitand(rhs),
-                                            BinOpKind::BitXor => lhs.bitxor(rhs),
-                                            BinOpKind::BitOr => lhs.bitor(rhs),
-                                            BinOpKind::Comparison(comparison) => {
-                                                let result = match comparison {
-                                                    Comparison::Equal => lhs.eq(rhs),
-                                                    Comparison::NotEqual => lhs.ne(rhs),
-                                                    Comparison::Less => lhs.lt(rhs),
-                                                    Comparison::LessEqual => lhs.le(rhs),
-                                                    Comparison::Greater => lhs.gt(rhs),
-                                                    Comparison::GreaterEqual => lhs.ge(rhs),
-                                                };
-                                                return result.map(i32::from).into_value(ty);
-                                            }
-                                        }?
+                                    let result = match op.kind {
+                                        BinOpKind::Multiply => lhs.mul(rhs, typed_expr),
+                                        BinOpKind::Divide => lhs.div(rhs.nonzero(rhs_expr), typed_expr),
+                                        BinOpKind::Modulo => lhs.rem(rhs.nonzero(rhs_expr), typed_expr),
+                                        BinOpKind::Add => lhs.add(rhs, typed_expr),
+                                        BinOpKind::Subtract => lhs.sub(rhs, typed_expr),
+                                        BinOpKind::LeftShift | BinOpKind::RightShift =>
+                                            unreachable!(),
+                                        BinOpKind::BitAnd => lhs.bitand(rhs),
+                                        BinOpKind::BitXor => lhs.bitxor(rhs),
+                                        BinOpKind::BitOr => lhs.bitor(rhs),
+                                        BinOpKind::Comparison(comparison) => {
+                                            let result = match comparison {
+                                                Comparison::Equal => lhs.eq(rhs),
+                                                Comparison::NotEqual => lhs.ne(rhs),
+                                                Comparison::Less => lhs.lt(rhs),
+                                                Comparison::LessEqual => lhs.le(rhs),
+                                                Comparison::Greater => lhs.gt(rhs),
+                                                Comparison::GreaterEqual => lhs.ge(rhs),
+                                            };
+                                            return result.map(i32::from).into_value(ty);
+                                        }
                                     };
                                     result.into_value(ty)
                                 }
