@@ -35,7 +35,7 @@ macro_rules! int_impl {
                 value.map_or_else(
                     |kind| Value::with_error(ty, Diagnostic::ArithmeticError { at: *at, kind }),
                     |value| {
-                        assert!(ty.can_represent(value));
+                        assert!(ty.can_represent(value), "`{ty}`.can_represent({value})");
                         let repr = Repr::Bytes(Box::new(value.to_le_bytes()));
                         Value { ty, repr }
                     },

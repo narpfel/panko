@@ -117,7 +117,7 @@ impl<'a> Value<'a> {
     }
 
     fn int(value: u64, ty: Type<'a>) -> Self {
-        assert!(ty.can_represent(value));
+        assert!(ty.can_represent(value), "`{ty}`.can_represent({value})");
         match ty {
             Type::Arithmetic(Arithmetic::Integral(integral)) => {
                 let size = usize::try_from(integral.size()).unwrap();
