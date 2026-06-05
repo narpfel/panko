@@ -2,6 +2,7 @@ use std::ops::BitAnd as _;
 use std::ops::BitOr as _;
 use std::ops::BitXor as _;
 
+use crate::typecheck::Type;
 use crate::typecheck::TypedExpression;
 use crate::typecheck::constexpr::Errors;
 use crate::typecheck::constexpr::Repr;
@@ -14,7 +15,7 @@ pub(super) trait C<'a>
 where
     Self: Sized,
 {
-    fn into_value(self, at: &TypedExpression<'a>) -> Value<'a>;
+    fn into_value(self, ty: Type<'a>) -> Value<'a>;
 
     fn neg(self, expr: &TypedExpression<'a>) -> Self;
     fn compl(self, expr: &TypedExpression<'a>) -> Self;
@@ -72,8 +73,7 @@ macro_rules! infallible {
 macro_rules! int_impl {
     (impl C for $t:ident with $prefix:ident { $( $meth:ident ),* } and $shl:ident) => {
         impl<'a> C<'a> for Result<'a, $t> {
-            fn into_value(self, at: &TypedExpression<'a>) -> Value<'a> {
-                let ty = at.ty.ty;
+            fn into_value(self, ty: Type<'a>) -> Value<'a> {
                 self.map_or_else(
                     |errors| Value::with_errors(ty, errors),
                     |value| {

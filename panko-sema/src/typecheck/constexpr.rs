@@ -229,7 +229,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             match () {
                 $(
                     () if let Some(operand) = operand.${concat(as_, $t)}() =>
-                        operand.$meth(typed_expr).into_value(typed_expr),
+                        operand.$meth(typed_expr).into_value(ty),
                 )*
                 () => todo!(),
             }
@@ -296,7 +296,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                                         BinOpKind::RightShift => lhs.shr(rhs),
                                         _ => unreachable!(),
                                     };
-                                    result.into_value(typed_expr)
+                                    result.into_value(ty)
                                 }
                         )*
                         $(
@@ -324,11 +324,11 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                                                     Comparison::Greater => lhs.gt(rhs),
                                                     Comparison::GreaterEqual => lhs.ge(rhs),
                                                 };
-                                                return result.map(i32::from).into_value(typed_expr);
+                                                return result.map(i32::from).into_value(ty);
                                             }
                                         }?
                                     };
-                                    result.into_value(typed_expr)
+                                    result.into_value(ty)
                                 }
                         )*
                         () => todo!(),
