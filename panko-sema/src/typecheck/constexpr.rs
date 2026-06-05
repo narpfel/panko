@@ -32,7 +32,7 @@ enum ConversionKind {
     Bool,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub(super) struct Errors<'a>(LinkedList<Diagnostic<'a>>);
 
 impl<'a> Errors<'a> {
@@ -97,10 +97,10 @@ impl<'a> Value<'a> {
         }
     }
 
-    fn into_unsigned(self) -> Option<u64> {
-        match self.into_integral().ok()? {
-            Integral::Unsigned(value) => Some(value),
-            Integral::Signed(value) => Some(u64::try_from(value).ok()?),
+    fn into_unsigned(self) -> Result<Option<u64>, Errors<'a>> {
+        match self.into_integral()? {
+            Integral::Unsigned(value) => Ok(Some(value)),
+            Integral::Signed(value) => Ok(try { u64::try_from(value).ok()? }),
         }
     }
 
@@ -177,41 +177,32 @@ impl<'a> Value<'a> {
             Repr::Error(_errors) => todo!(),
         }
     }
-
-    fn is_error(&self) -> bool {
-        matches!(self.repr, Repr::Error(_))
-    }
-
-    fn into_errors(self) -> Errors<'a> {
-        let Self { ty: _, repr } = self;
-        match repr {
-            Repr::Bytes(_) => Errors::default(),
-            Repr::Address { .. } => Errors::default(),
-            Repr::Error(errors) => errors,
-        }
-    }
 }
 
 macro_rules! impl_as_ty {
-    ($( $name:ident )|+ => $t:ident) => {
-        fn ${concat(as_, $t)}(&self) -> Option<$t> {
+    ($( $name:ident )|+ => $t:ident + $l:lifetime) => {
+        fn ${concat(as_, $t)}(&self) -> Option<Result<$t, Errors<$l>>> {
             let Self { ty, repr } = self;
             match *ty {
-                $(| Type::$name)+ => Some($t::from_le_bytes(repr.bytes().ok()?.try_into().unwrap())),
+                $(| Type::$name)+ => Some(match repr {
+                    Repr::Bytes(bytes) => Ok($t::from_le_bytes(bytes[..].try_into().unwrap())),
+                    Repr::Address { .. } => todo!(),
+                    Repr::Error(errors) => Err(errors.clone()),
+                }),
                 _ => None,
             }
         }
     };
 }
 
-impl Value<'_> {
-    impl_as_ty!(ULLONG | ULONG => u64);
+impl<'a> Value<'a> {
+    impl_as_ty!(ULLONG | ULONG => u64 + 'a);
 
-    impl_as_ty!(LLONG | LONG => i64);
+    impl_as_ty!(LLONG | LONG => i64 + 'a);
 
-    impl_as_ty!(UINT => u32);
+    impl_as_ty!(UINT => u32 + 'a);
 
-    impl_as_ty!(INT => i32);
+    impl_as_ty!(INT => i32 + 'a);
 }
 
 impl<'a> Repr<'a> {
@@ -220,14 +211,6 @@ impl<'a> Repr<'a> {
     }
 
     fn into_bytes(self) -> Result<Box<[u8]>, Errors<'a>> {
-        match self {
-            Self::Bytes(bytes) => Ok(bytes),
-            Self::Address { .. } => todo!(),
-            Self::Error(errors) => Err(errors),
-        }
-    }
-
-    fn bytes(&self) -> Result<&[u8], &Errors<'a>> {
         match self {
             Self::Bytes(bytes) => Ok(bytes),
             Self::Address { .. } => todo!(),
@@ -244,10 +227,9 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         ($operand:expr, $meth:ident, $($t:ident),*) => {{
             let operand = $operand;
             match () {
-                () if let Repr::Error(_) = operand.repr => operand,
                 $(
                     () if let Some(operand) = operand.${concat(as_, $t)}() =>
-                        C::into_value(operand.$meth(), typed_expr),
+                        operand.$meth(typed_expr).into_value(typed_expr),
                 )*
                 () => todo!(),
             }
@@ -289,28 +271,32 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         Expression::ZeroExtend(expr) => eval(expr).convert(ty, ConversionKind::ZeroExtend),
         Expression::BoolCast(expr) => eval(expr).convert(ty, ConversionKind::Bool),
 
-        Expression::IntegralBinOp { ty: _, lhs, op, rhs } => {
+        Expression::IntegralBinOp { ty: _, lhs, op, rhs: rhs_expr } => {
             let lhs = eval(lhs);
-            let rhs = eval(rhs);
+            let rhs = eval(rhs_expr);
             macro_rules! binary {
                 ($($t:ident),*) => {
                     match () {
-                        () if lhs.is_error() || rhs.is_error() =>
-                            Value::with_errors(ty, lhs.into_errors().chain(rhs.into_errors())),
                         $(
                             ()
                                 if let BinOpKind::LeftShift | BinOpKind::RightShift = op.kind
                                 && let Some(lhs) = lhs.${concat(as_, $t)}() => {
-                                    let result = try {
-                                        let rhs = rhs.into_unsigned().ok_or(NegativeShiftRhs)?;
-                                        let rhs = rhs.try_into().map_err(|_| ShiftRhsOutOfRange)?;
-                                        match op.kind {
-                                            BinOpKind::LeftShift => lhs.shl(rhs)?,
-                                            BinOpKind::RightShift => lhs.shr(rhs)?,
-                                            _ => unreachable!(),
-                                        }
+                                    let rhs = try {
+                                        let rhs = rhs.into_unsigned()?;
+                                        let rhs = rhs.ok_or_else(|| NegativeShiftRhs.at(rhs_expr))?;
+                                        rhs.try_into().map_err(|_| ShiftRhsOutOfRange.at(rhs_expr))?
                                     };
-                                    C::into_value(result, typed_expr)
+                                    let rhs = match rhs {
+                                        Ok(value @ 0..$t::BITS) => Ok(value),
+                                        Ok(_) => Err(ShiftRhsOutOfRange.at(rhs_expr)),
+                                        Err(errors) => Err(errors),
+                                    };
+                                    let result = match op.kind {
+                                        BinOpKind::LeftShift => lhs.shl(rhs, typed_expr),
+                                        BinOpKind::RightShift => lhs.shr(rhs),
+                                        _ => unreachable!(),
+                                    };
+                                    result.into_value(typed_expr)
                                 }
                         )*
                         $(
@@ -319,30 +305,30 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                                 && let Some(rhs) = rhs.${concat(as_, $t)}() => {
                                     let result = try {
                                         match op.kind {
-                                            BinOpKind::Multiply => lhs.mul(rhs),
-                                            BinOpKind::Divide => lhs.div(rhs.nonzero()?),
-                                            BinOpKind::Modulo => lhs.rem(rhs.nonzero()?),
-                                            BinOpKind::Add => lhs.add(rhs),
-                                            BinOpKind::Subtract => lhs.sub(rhs),
+                                            BinOpKind::Multiply => lhs.mul(rhs, typed_expr),
+                                            BinOpKind::Divide => lhs.div(rhs.nonzero(rhs_expr), typed_expr),
+                                            BinOpKind::Modulo => lhs.rem(rhs.nonzero(rhs_expr), typed_expr),
+                                            BinOpKind::Add => lhs.add(rhs, typed_expr),
+                                            BinOpKind::Subtract => lhs.sub(rhs, typed_expr),
                                             BinOpKind::LeftShift | BinOpKind::RightShift =>
                                                 unreachable!(),
-                                            BinOpKind::BitAnd => Ok(lhs & rhs),
-                                            BinOpKind::BitXor => Ok(lhs ^ rhs),
-                                            BinOpKind::BitOr => Ok(lhs | rhs),
+                                            BinOpKind::BitAnd => lhs.bitand(rhs),
+                                            BinOpKind::BitXor => lhs.bitxor(rhs),
+                                            BinOpKind::BitOr => lhs.bitor(rhs),
                                             BinOpKind::Comparison(comparison) => {
-                                                let result = Ok(i32::from(match comparison {
-                                                    Comparison::Equal => lhs == rhs,
-                                                    Comparison::NotEqual => lhs != rhs,
-                                                    Comparison::Less => lhs < rhs,
-                                                    Comparison::LessEqual => lhs <= rhs,
-                                                    Comparison::Greater => lhs > rhs,
-                                                    Comparison::GreaterEqual => lhs >= rhs,
-                                                }));
-                                                return C::into_value(result, typed_expr);
+                                                let result = match comparison {
+                                                    Comparison::Equal => lhs.eq(rhs),
+                                                    Comparison::NotEqual => lhs.ne(rhs),
+                                                    Comparison::Less => lhs.lt(rhs),
+                                                    Comparison::LessEqual => lhs.le(rhs),
+                                                    Comparison::Greater => lhs.gt(rhs),
+                                                    Comparison::GreaterEqual => lhs.ge(rhs),
+                                                };
+                                                return result.map(i32::from).into_value(typed_expr);
                                             }
                                         }?
                                     };
-                                    C::into_value(result, typed_expr)
+                                    result.into_value(typed_expr)
                                 }
                         )*
                         () => todo!(),

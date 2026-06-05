@@ -5,8 +5,9 @@ use panko_report::Report;
 use panko_report::Sliced as _;
 
 use crate::typecheck::TypedExpression;
+use crate::typecheck::constexpr::Errors;
 
-#[derive(Debug, Report)]
+#[derive(Debug, Clone, Report)]
 #[exit_code(1)]
 pub(crate) enum Diagnostic<'a> {
     #[error("{kind} in constant expression")]
@@ -19,13 +20,19 @@ pub(crate) enum Diagnostic<'a> {
     NotImplementedYet { at: TypedExpression<'a> },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum Kind {
     SignedOverflow,
     NegativeShiftLhs,
     NegativeShiftRhs,
     ShiftRhsOutOfRange,
     IsZero,
+}
+
+impl Kind {
+    pub(super) fn at<'a>(self, expr: &TypedExpression<'a>) -> Errors<'a> {
+        Errors::new(Diagnostic::ArithmeticError { at: *expr, kind: self })
+    }
 }
 
 impl fmt::Display for Kind {

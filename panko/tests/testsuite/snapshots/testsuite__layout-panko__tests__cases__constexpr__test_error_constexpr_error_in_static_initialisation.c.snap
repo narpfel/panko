@@ -21,27 +21,27 @@ Error: left shift of negative value in constant expression
 ───╯
 
 Error: shift count negative in constant expression
-   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:2:16]
+   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:2:21]
    │
  2 │ static int b = 1 << -1;
-   │                ───┬───  
-   │                   ╰───── in this expression of type `int`
+   │                     ─┬  
+   │                      ╰── in this expression of type `int`
 ───╯
 
 Error: shift count negative in constant expression
-   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:3:16]
+   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:3:21]
    │
  3 │ static int c = 1 >> -1;
-   │                ───┬───  
-   │                   ╰───── in this expression of type `int`
+   │                     ─┬  
+   │                      ╰── in this expression of type `int`
 ───╯
 
 Error: shift count exceeds size of shifted type in constant expression
-   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:4:16]
+   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:4:21]
    │
  4 │ static int d = 1 << 32;
-   │                ───┬───  
-   │                   ╰───── in this expression of type `int`
+   │                     ─┬  
+   │                      ╰── in this expression of type `int`
 ───╯
 
 Error: signed overflow in constant expression
@@ -53,19 +53,19 @@ Error: signed overflow in constant expression
 ───╯
 
 Error: shift count exceeds size of shifted type in constant expression
-   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:6:16]
+   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:6:21]
    │
  6 │ static int f = 1 << 0x1'0000'0000;
-   │                ─────────┬────────  
-   │                         ╰────────── in this expression of type `int`
+   │                     ──────┬──────  
+   │                           ╰──────── in this expression of type `long`
 ───╯
 
 Error: division by zero in constant expression
-   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:8:16]
+   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:8:20]
    │
  8 │ static int g = 1 / 0;
-   │                ──┬──  
-   │                  ╰──── in this expression of type `int`
+   │                    ┬  
+   │                    ╰── in this expression of type `int`
 ───╯
 
 Error: signed overflow in constant expression
@@ -77,11 +77,11 @@ Error: signed overflow in constant expression
 ───╯
 
 Error: division by zero in constant expression
-    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:11:16]
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:11:20]
     │
  11 │ static int i = 1 % 0;
-    │                ──┬──  
-    │                  ╰──── in this expression of type `int`
+    │                    ┬  
+    │                    ╰── in this expression of type `int`
 ────╯
 
 Error: signed overflow in constant expression
@@ -100,6 +100,14 @@ Error: signed overflow in constant expression
     │                        ╰───────── in this expression of type `int`
 ────╯
 
+Error: shift count exceeds size of shifted type in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:15:37]
+    │
+ 15 │ static int k = (0x7fff'ffff + 1) << 0x1'0000'0000;
+    │                                     ──────┬──────  
+    │                                           ╰──────── in this expression of type `long`
+────╯
+
 Error: signed overflow in constant expression
     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:16:17]
     │
@@ -108,20 +116,28 @@ Error: signed overflow in constant expression
     │                        ╰───────── in this expression of type `int`
 ────╯
 
-Error: division by zero in constant expression
-    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:18:21]
+Error: shift count exceeds size of shifted type in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:16:37]
     │
- 18 │ static unsigned m = 1u / 0u;
-    │                     ───┬───  
-    │                        ╰───── in this expression of type `unsigned int`
+ 16 │ static int l = (0x7fff'ffff + 1) << 100;
+    │                                     ─┬─  
+    │                                      ╰─── in this expression of type `int`
 ────╯
 
 Error: division by zero in constant expression
-    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:19:21]
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:18:26]
+    │
+ 18 │ static unsigned m = 1u / 0u;
+    │                          ─┬  
+    │                           ╰── in this expression of type `unsigned int`
+────╯
+
+Error: division by zero in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:19:26]
     │
  19 │ static unsigned n = 1u % 0u;
-    │                     ───┬───  
-    │                        ╰───── in this expression of type `unsigned int`
+    │                          ─┬  
+    │                           ╰── in this expression of type `unsigned int`
 ────╯
 
 Error: signed overflow in constant expression
@@ -130,4 +146,12 @@ Error: signed overflow in constant expression
  22 │ static int o = (0x7fff'ffff + 1) / 0;
     │                 ───────┬───────  
     │                        ╰───────── in this expression of type `int`
+────╯
+
+Error: division by zero in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:22:36]
+    │
+ 22 │ static int o = (0x7fff'ffff + 1) / 0;
+    │                                    ┬  
+    │                                    ╰── in this expression of type `int`
 ────╯
