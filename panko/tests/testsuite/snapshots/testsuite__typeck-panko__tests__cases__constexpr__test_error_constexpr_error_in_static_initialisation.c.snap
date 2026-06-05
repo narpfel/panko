@@ -123,3 +123,11 @@ Error: division by zero in constant expression
     │                     ───┬───  
     │                        ╰───── in this expression of type `unsigned int`
 ────╯
+
+Error: signed overflow in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:22:17]
+    │
+ 22 │ static int o = (0x7fff'ffff + 1) / 0;
+    │                 ───────┬───────  
+    │                        ╰───────── in this expression of type `int`
+────╯

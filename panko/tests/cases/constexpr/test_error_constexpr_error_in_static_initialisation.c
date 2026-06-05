@@ -17,3 +17,6 @@ static int l = (0x7fff'ffff + 1) << 100;
 
 static unsigned m = 1u / 0u;
 static unsigned n = 1u % 0u;
+
+// TODO: this should error for both lhs and rhs
+static int o = (0x7fff'ffff + 1) / 0;
