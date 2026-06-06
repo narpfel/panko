@@ -155,3 +155,25 @@ Error: division by zero in constant expression
     │                                    ┬  
     │                                    ╰── in this expression of type `int`
 ────╯
+
+Error: not a constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:25:16]
+    │
+ 25 │ static int p = not_constexpr = 1 / 0;
+    │                ─────────────  
+────╯
+
+Error: not a constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:25:16]
+    │
+ 25 │ static int p = not_constexpr = 1 / 0;
+    │                ─────────────────────  
+────╯
+
+Error: division by zero in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:25:36]
+    │
+ 25 │ static int p = not_constexpr = 1 / 0;
+    │                                    ┬  
+    │                                    ╰── in this expression of type `int`
+────╯

@@ -20,3 +20,6 @@ static unsigned n = 1u % 0u;
 
 // TODO: this should error for both lhs and rhs
 static int o = (0x7fff'ffff + 1) / 0;
+
+static int not_constexpr = 42;
+static int p = not_constexpr = 1 / 0;

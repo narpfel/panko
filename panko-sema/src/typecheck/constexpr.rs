@@ -1,4 +1,5 @@
 use std::collections::LinkedList;
+use std::iter::once;
 
 use itertools::zip_eq;
 use panko_parser::BinOpKind;
@@ -219,6 +220,23 @@ impl<'a> Repr<'a> {
     }
 }
 
+fn gather_errors<'a>(values: impl IntoIterator<Item = Value<'a>>) -> Errors<'a> {
+    values
+        .into_iter()
+        .fold(Errors::default(), |errors, value| match value.repr {
+            Repr::Error(error) => errors.chain(error),
+            _ => errors,
+        })
+}
+
+fn not_constexpr<'a>(
+    expr: &TypedExpression<'a>,
+    values: impl IntoIterator<Item = Value<'a>>,
+) -> Value<'a> {
+    let errors = gather_errors(values).chain(Errors::new(Diagnostic::NotConstexpr { at: *expr }));
+    Value::with_errors(expr.ty.ty, errors)
+}
+
 pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     let TypedExpression { ty, expr } = typed_expr;
     let ty = ty.ty;
@@ -343,6 +361,19 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             let operand = eval(operand).convert(ty, ConversionKind::Bool);
             unary!(operand, not, i32)
         }
+
+        // TODO: `constexpr` storage class
+        Expression::Name(_) => not_constexpr(typed_expr, []),
+
+        Expression::Assign { target, value } =>
+            not_constexpr(typed_expr, [eval(target), eval(value)]),
+
+        Expression::Call {
+            callee,
+            args,
+            is_varargs: _,
+            close_paren: _,
+        } => not_constexpr(typed_expr, once(eval(callee)).chain(args.iter().map(eval))),
 
         Expression::BuiltinName(_) =>
             Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),

@@ -18,6 +18,10 @@ pub(crate) enum Diagnostic<'a> {
     #[error("constexpr evaluation not implemented yet")]
     #[diagnostics(at(colour = Red))]
     NotImplementedYet { at: TypedExpression<'a> },
+
+    #[error("not a constant expression")]
+    #[diagnostics(at(colour = Red))]
+    NotConstexpr { at: TypedExpression<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
