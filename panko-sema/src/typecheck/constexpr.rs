@@ -302,12 +302,10 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                                     let rhs = try {
                                         let rhs = rhs.into_unsigned()?;
                                         let rhs = rhs.ok_or_else(|| NegativeShiftRhs.at(rhs_expr))?;
-                                        rhs.try_into().map_err(|_| ShiftRhsOutOfRange.at(rhs_expr))?
-                                    };
-                                    let rhs = match rhs {
-                                        Ok(value @ 0..$t::BITS) => Ok(value),
-                                        Ok(_) => Err(ShiftRhsOutOfRange.at(rhs_expr)),
-                                        Err(errors) => Err(errors),
+                                        match rhs.try_into() {
+                                            Ok(rhs @ 0..$t::BITS) => rhs,
+                                            _ => Err(ShiftRhsOutOfRange.at(rhs_expr))?,
+                                        }
                                     };
                                     let result = match op.kind {
                                         BinOpKind::LeftShift => lhs.shl(rhs, typed_expr),
