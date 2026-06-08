@@ -60,4 +60,24 @@ int main() {
     static char l[] = "hello world";
     // [[print: hello world: 12]]
     printf("%s: %zu\n", l, sizeof l);
+
+    static int m = 42 && 27;
+    // [[print: 1]]
+    printf("%d\n", m);
+
+    static int o = 0 && 1 / 0;
+    // [[print: 0]]
+    printf("%d\n", o);
+
+    static int p = false || 123;
+    // [[print: 1]]
+    printf("%d\n", p);
+
+    static int q = 42 || 1 / 0;
+    // [[print: 1]]
+    printf("%d\n", q);
+
+    static int r = 0 || false;
+    // [[print: 0]]
+    printf("%d\n", r);
 }

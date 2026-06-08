@@ -174,6 +174,71 @@ exit_code: 0
                (noop-type-conversion `ptr<char>` @24
                   (addressof `ptr<array<char; 12>>` @24
                      (l~17 `array<char; 12>` (static l.17))))
-               (12 `unsigned long` @32))))))
+               (12 `unsigned long` @32)))
+         (definition (m~18 `int` (static m.18))
+            (logical-and `int`
+               (42 `int`)
+               (27 `int`)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (m~18 `int` (static m.18))))
+         (definition (o~19 `int` (static o.19))
+            (logical-and `int`
+               (0 `int`)
+               (divide `int` (1 `int`) (0 `int`))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (o~19 `int` (static o.19))))
+         (definition (p~20 `int` (static p.20))
+            (logical-or `int`
+               (false `bool`)
+               (123 `int`)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (p~20 `int` (static p.20))))
+         (definition (q~21 `int` (static q.21))
+            (logical-or `int`
+               (42 `int`)
+               (divide `int` (1 `int`) (0 `int`))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (q~21 `int` (static q.21))))
+         (definition (r~22 `int` (static r.22))
+            (logical-or `int`
+               (0 `int`)
+               (false `bool`)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (r~22 `int` (static r.22)))))))
 
 ----- stderr -----

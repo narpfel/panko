@@ -91,6 +91,46 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%s: %zu\n")
                (name l~17 `array<char; ∅>`)
-               (sizeof (name l~17 `array<char; ∅>`)))))))
+               (sizeof (name l~17 `array<char; ∅>`))))
+         (declaration m~18 `int`
+            (logical-and
+               42
+               27))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name m~18 `int`)))
+         (declaration o~19 `int`
+            (logical-and
+               0
+               (divide 1 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name o~19 `int`)))
+         (declaration p~20 `int`
+            (logical-or
+               false
+               123))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name p~20 `int`)))
+         (declaration q~21 `int`
+            (logical-or
+               42
+               (divide 1 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name q~21 `int`)))
+         (declaration r~22 `int`
+            (logical-or
+               0
+               false))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name r~22 `int`))))))
 
 ----- stderr -----

@@ -4,6 +4,7 @@ use std::iter::once;
 use itertools::zip_eq;
 use panko_parser::BinOpKind;
 use panko_parser::Comparison;
+use panko_parser::LogicalOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
@@ -237,6 +238,14 @@ fn not_constexpr<'a>(
     Value::with_errors(expr.ty.ty, errors)
 }
 
+fn as_bool<'a>(expr: &TypedExpression<'a>) -> Result<bool, Errors<'a>> {
+    let value = eval(expr).convert(Type::BOOL, ConversionKind::Bool);
+    value.into_integral().map(|integral| match integral {
+        Integral::Signed(value) => value != 0,
+        Integral::Unsigned(value) => value != 0,
+    })
+}
+
 pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     let TypedExpression { ty, expr } = typed_expr;
     let ty = ty.ty;
@@ -377,6 +386,14 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             is_varargs: _,
             close_paren: _,
         } => not_constexpr(typed_expr, once(eval(callee)).chain(args.iter().map(eval))),
+
+        Expression::Logical { lhs, op, rhs } => {
+            let result = match op.kind() {
+                LogicalOpKind::And => try { as_bool(lhs)? && as_bool(rhs)? },
+                LogicalOpKind::Or => try { as_bool(lhs)? || as_bool(rhs)? },
+            };
+            result.map(i32::from).into_value(ty)
+        }
 
         Expression::BuiltinName(_) =>
             Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
