@@ -56,4 +56,8 @@ int main() {
     static int* k = nullptr;
     // [[print: 0 1]]
     printf("%zu %d\n", (typeof(sizeof 0))k, k == nullptr);
+
+    static char l[] = "hello world";
+    // [[print: hello world: 12]]
+    printf("%s: %zu\n", l, sizeof l);
 }

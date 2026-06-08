@@ -85,6 +85,12 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %d\n")
                (cast `typeof((sizeof 0))` (name k~16 `ptr<int>`))
-               (equal (name k~16 `ptr<int>`) nullptr))))))
+               (equal (name k~16 `ptr<int>`) nullptr)))
+         (declaration l~17 `array<char; ∅>` (string "hello world"))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%s: %zu\n")
+               (name l~17 `array<char; ∅>`)
+               (sizeof (name l~17 `array<char; ∅>`)))))))
 
 ----- stderr -----

@@ -281,6 +281,11 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             close_paren: _,
         } => Value::int(*value, ty),
 
+        Expression::String(string_literal) => Value {
+            ty,
+            repr: Repr::Bytes(Box::from(&**string_literal.value())),
+        },
+
         Expression::Nullptr(_) => Value::int(0, Type::size_t()).convert(ty, ConversionKind::Noop),
 
         Expression::NoopTypeConversion(expr) => eval(expr).convert(ty, ConversionKind::Noop),

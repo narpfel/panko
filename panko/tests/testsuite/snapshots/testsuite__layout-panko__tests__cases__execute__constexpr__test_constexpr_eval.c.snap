@@ -161,6 +161,19 @@ exit_code: 0
                (noop-type-conversion `unsigned long` (static k.16) (k~16 `ptr<int>` (static k.16)))
                (ptr-equal `int` @24
                   (k~16 `ptr<int>` (static k.16))
-                  (nullptr `nullptr_t` @32)))))))
+                  (nullptr `nullptr_t` @32))))
+         (definition (l~17 `array<char; 12>` (static l.17)) (string `array<char; 12>` "hello world\0"))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 9>>` @16
+                        (string `array<char; 9>` @void "%s: %zu\n\0"))))
+               (noop-type-conversion `ptr<char>` @24
+                  (addressof `ptr<array<char; 12>>` @24
+                     (l~17 `array<char; 12>` (static l.17))))
+               (12 `unsigned long` @32))))))
 
 ----- stderr -----
