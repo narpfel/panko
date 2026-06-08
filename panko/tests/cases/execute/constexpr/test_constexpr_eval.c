@@ -92,4 +92,8 @@ int main() {
     static int u = (false, 42);
     // [[print: 42]]
     printf("%d\n", u);
+
+    static int v = ((void)0, 1234);
+    // [[print: 1234]]
+    printf("%d\n", v);
 }

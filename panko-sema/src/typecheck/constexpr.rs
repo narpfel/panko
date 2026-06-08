@@ -304,6 +304,14 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         Expression::ZeroExtend(expr) => eval(expr).convert(ty, ConversionKind::ZeroExtend),
         Expression::BoolCast(expr) => eval(expr).convert(ty, ConversionKind::Bool),
 
+        Expression::VoidCast(expr) => {
+            let errors = gather_errors([eval(expr)]);
+            match errors.0.is_empty() {
+                true => Value { ty, repr: Repr::Bytes(Box::new([])) },
+                false => Value::with_errors(ty, errors),
+            }
+        }
+
         Expression::IntegralBinOp { ty: _, lhs, op, rhs: rhs_expr } => {
             let lhs = eval(lhs);
             let rhs = eval(rhs_expr);

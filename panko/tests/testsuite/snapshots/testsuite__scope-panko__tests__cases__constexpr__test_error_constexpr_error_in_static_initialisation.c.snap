@@ -96,6 +96,10 @@ exit_code: 0
                (declaration compound_literal.38~39 `struct T~33 complete`
                   (braced
                      (designation ((member x)) 1)
-                     (designation ((member y)) (add 1 2)))))))))
+                     (designation ((member y)) (add 1 2))))))))
+   (declaration t~40 `int`
+      (comma
+         (cast `void` (divide 1 0))
+         42)))
 
 ----- stderr -----

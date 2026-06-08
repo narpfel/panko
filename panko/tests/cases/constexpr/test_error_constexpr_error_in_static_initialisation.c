@@ -51,3 +51,5 @@ void compound_literal() {
     static struct T a = (struct T){.x = 1, .y = 1 / 0};
     static struct T b = (struct T){.x = 1, .y = 1 + 2};
 }
+
+static int t = ((void)(1 / 0), 42);

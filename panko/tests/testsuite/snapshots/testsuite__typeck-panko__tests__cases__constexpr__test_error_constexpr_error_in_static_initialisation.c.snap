@@ -287,3 +287,11 @@ Error: not a constant expression
  52 │     static struct T b = (struct T){.x = 1, .y = 1 + 2};
     │                         ─  
 ────╯
+
+Error: division by zero in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:55:28]
+    │
+ 55 │ static int t = ((void)(1 / 0), 42);
+    │                            ┬  
+    │                            ╰── in this expression of type `int`
+────╯
