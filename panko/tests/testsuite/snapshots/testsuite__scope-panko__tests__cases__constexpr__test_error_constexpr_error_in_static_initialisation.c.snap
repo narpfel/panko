@@ -76,6 +76,26 @@ exit_code: 0
             (conditional
                (divide 1 0)
                (divide 1 0)
-               (divide 1 0))))))
+               (divide 1 0)))))
+   (function-definition
+      compound_literal~31 `fn() -> void`
+      (compound-statement
+         (struct T~33
+            (member x `int`)
+            (member y `int`))
+         (hoisted-compound-literal compound_literal.35~36 `struct T~33 complete`)
+         (declaration a~34 `struct T~33 complete`
+            (compound-literal
+               (declaration compound_literal.35~36 `struct T~33 complete`
+                  (braced
+                     (designation ((member x)) 1)
+                     (designation ((member y)) (divide 1 0))))))
+         (hoisted-compound-literal compound_literal.38~39 `struct T~33 complete`)
+         (declaration b~37 `struct T~33 complete`
+            (compound-literal
+               (declaration compound_literal.38~39 `struct T~33 complete`
+                  (braced
+                     (designation ((member x)) 1)
+                     (designation ((member y)) (add 1 2)))))))))
 
 ----- stderr -----

@@ -265,3 +265,25 @@ Error: division by zero in constant expression
     │                        ┬  
     │                        ╰── in this expression of type `int`
 ────╯
+
+Error: not a constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:51:25]
+    │
+ 51 │     static struct T a = (struct T){.x = 1, .y = 1 / 0};
+    │                         ─  
+────╯
+
+Error: division by zero in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:51:53]
+    │
+ 51 │     static struct T a = (struct T){.x = 1, .y = 1 / 0};
+    │                                                     ┬  
+    │                                                     ╰── in this expression of type `int`
+────╯
+
+Error: not a constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:52:25]
+    │
+ 52 │     static struct T b = (struct T){.x = 1, .y = 1 + 2};
+    │                         ─  
+────╯

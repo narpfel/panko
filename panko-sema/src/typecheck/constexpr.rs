@@ -12,6 +12,7 @@ use panko_parser::error_todo;
 
 use crate::ty::subobjects::Subobject;
 use crate::typecheck::Bitfield;
+use crate::typecheck::Declaration;
 use crate::typecheck::Expression;
 use crate::typecheck::Initialiser;
 use crate::typecheck::InitialiserRef;
@@ -410,6 +411,26 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             Ok(false) => eval(or_else),
             Err(errors) => Value::with_errors(ty, errors),
         },
+
+        // TODO: `constexpr` storage class
+        // TODO: clang (and gcc with a warning) accept compound literals without `constexpr` as
+        // constant expressions
+        Expression::CompoundLiteral { open_paren: _, decl } => {
+            let Declaration { reference: _, initialiser } = decl;
+            let exprs = gen {
+                match initialiser {
+                    Some(Initialiser::Braced { subobject_initialisers }) =>
+                        for SubobjectInitialiser { subobject: _, initialiser } in
+                            *subobject_initialisers
+                        {
+                            yield initialiser
+                        },
+                    Some(Initialiser::Expression(expr)) => yield expr,
+                    None | Some(Initialiser::Static { .. }) => (),
+                }
+            };
+            not_constexpr(typed_expr, exprs.map(eval))
+        }
 
         Expression::BuiltinName(_) =>
             Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),

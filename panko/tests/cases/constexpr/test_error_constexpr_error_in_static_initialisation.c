@@ -42,3 +42,12 @@ void conditional() {
 
     static int c = 1 / 0 ? 1 / 0 : 1 / 0;
 }
+
+void compound_literal() {
+    struct T {
+        int x;
+        int y;
+    };
+    static struct T a = (struct T){.x = 1, .y = 1 / 0};
+    static struct T b = (struct T){.x = 1, .y = 1 + 2};
+}
