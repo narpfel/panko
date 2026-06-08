@@ -23,3 +23,22 @@ static int o = (0x7fff'ffff + 1) / 0;
 
 static int not_constexpr = 42;
 static int p = not_constexpr = 1 / 0;
+
+static int q = (1 / 0, 0);
+static int r = (1, 1 / 0);
+static int s = (1 / 0, 1 / 0);
+
+void logical() {
+    static int a = 1 / 0 && 1 / 0;
+    static int b = 1 && 1 / 0;
+
+    static int c = 0 || 1 / 0;
+    static int d = 1 / 0 || 1 / 0;
+}
+
+void conditional() {
+    static int a = 1 ? 1 / 0 : 1 / 0;
+    static int b = 0 ? 1 / 0 : 1 / 0;
+
+    static int c = 1 / 0 ? 1 / 0 : 1 / 0;
+}

@@ -27,6 +27,55 @@ exit_code: 0
    (declaration n~13 `unsigned int` (modulo 1u 0u))
    (declaration o~14 `int` (divide (add 0x7fff'ffff 1) 0))
    (declaration not_constexpr~15 `int` 42)
-   (declaration p~16 `int` (assign (name not_constexpr~15 `int`) (divide 1 0))))
+   (declaration p~16 `int` (assign (name not_constexpr~15 `int`) (divide 1 0)))
+   (declaration q~17 `int`
+      (comma
+         (divide 1 0)
+         0))
+   (declaration r~18 `int`
+      (comma
+         1
+         (divide 1 0)))
+   (declaration s~19 `int`
+      (comma
+         (divide 1 0)
+         (divide 1 0)))
+   (function-definition
+      logical~20 `fn() -> void`
+      (compound-statement
+         (declaration a~22 `int`
+            (logical-and
+               (divide 1 0)
+               (divide 1 0)))
+         (declaration b~23 `int`
+            (logical-and
+               1
+               (divide 1 0)))
+         (declaration c~24 `int`
+            (logical-or
+               0
+               (divide 1 0)))
+         (declaration d~25 `int`
+            (logical-or
+               (divide 1 0)
+               (divide 1 0)))))
+   (function-definition
+      conditional~26 `fn() -> void`
+      (compound-statement
+         (declaration a~28 `int`
+            (conditional
+               1
+               (divide 1 0)
+               (divide 1 0)))
+         (declaration b~29 `int`
+            (conditional
+               0
+               (divide 1 0)
+               (divide 1 0)))
+         (declaration c~30 `int`
+            (conditional
+               (divide 1 0)
+               (divide 1 0)
+               (divide 1 0))))))
 
 ----- stderr -----
