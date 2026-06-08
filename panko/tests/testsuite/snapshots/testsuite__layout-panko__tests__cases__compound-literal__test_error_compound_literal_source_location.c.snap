@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/compound-literal/test_error_compound_literal_source_location.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid implicit conversion from `int` to `ptr<int>`
+   ╭─[panko/tests/cases/compound-literal/test_error_compound_literal_source_location.c:2:14]
+   │
+ 2 │     int* p = (int){1};
+   │              ┬  
+   │              ╰── this is of type `int`, which cannot be implicitly converted to `ptr<int>`
+───╯

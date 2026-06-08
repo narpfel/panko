@@ -646,6 +646,8 @@ impl<'a> Expression<'a> {
                 condition.loc().until(or_else.loc()),
             Expression::MemberAccess { lhs, member: _, member_loc } => lhs.loc().until(*member_loc),
             Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
+            // TODO: `reference` has a `<scratch area>` location, so this loc only shows the open
+            // paren
             Expression::CompoundLiteral { open_paren, decl } =>
                 open_paren.loc().until(decl.reference.loc()),
         }
