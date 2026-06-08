@@ -140,13 +140,12 @@ impl<'a> Value<'a> {
         match kind {
             Kind::Noop => Self { ty: new_ty, repr },
             Kind::Bool => {
-                let is_nonzero = repr
-                    .into_bytes()
-                    .unwrap_or_else(|_| todo!("error recovery"))
-                    .iter()
-                    .any(|&b| b != 0);
-                let byte = if is_nonzero { 1 } else { 0 };
-                Self::int(byte, new_ty)
+                let is_nonzero = match repr {
+                    Repr::Bytes(bytes) => bytes.iter().any(|&b| b != 0),
+                    Repr::Address { .. } => true,
+                    Repr::Error(_) => unreachable!(),
+                };
+                Self::int(is_nonzero.into(), new_ty)
             }
             Kind::Truncate | Kind::ZeroExtend | Kind::SignExtend => match ty {
                 Type::Arithmetic(Arithmetic::Integral(integral)) => {
