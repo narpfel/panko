@@ -387,6 +387,16 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             close_paren: _,
         } => not_constexpr(typed_expr, once(eval(callee)).chain(args.iter().map(eval))),
 
+        Expression::Combine { first, second } => {
+            let first = eval(first);
+            let second = eval(second);
+            let errors = gather_errors([first]);
+            match errors.0.is_empty() {
+                true => second,
+                false => Value::with_errors(ty, errors.chain(gather_errors([second]))),
+            }
+        }
+
         Expression::Logical { lhs, op, rhs } => {
             let result = match op.kind() {
                 LogicalOpKind::And => try { as_bool(lhs)? && as_bool(rhs)? },

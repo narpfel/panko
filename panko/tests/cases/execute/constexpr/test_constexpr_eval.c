@@ -88,4 +88,8 @@ int main() {
     static long t = 1234ul ? 5l : 42 / 0l;
     // [[print: 5]]
     printf("%ld\n", t);
+
+    static int u = (false, 42);
+    // [[print: 42]]
+    printf("%d\n", u);
 }

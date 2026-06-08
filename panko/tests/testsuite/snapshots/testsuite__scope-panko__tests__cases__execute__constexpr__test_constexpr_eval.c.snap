@@ -149,6 +149,14 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%ld\n")
-               (name t~24 `long`))))))
+               (name t~24 `long`)))
+         (declaration u~25 `int`
+            (comma
+               false
+               42))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name u~25 `int`))))))
 
 ----- stderr -----

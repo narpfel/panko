@@ -267,6 +267,19 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 5>>` @16
                         (string `array<char; 5>` @void "%ld\n\0"))))
-               (t~24 `long` (static t.24)))))))
+               (t~24 `long` (static t.24))))
+         (definition (u~25 `int` (static u.25))
+            (combine `int`
+               (false `bool`)
+               (42 `int`)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (u~25 `int` (static u.25)))))))
 
 ----- stderr -----
