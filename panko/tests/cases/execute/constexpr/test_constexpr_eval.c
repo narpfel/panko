@@ -80,4 +80,12 @@ int main() {
     static int r = 0 || false;
     // [[print: 0]]
     printf("%d\n", r);
+
+    static unsigned s = 0 ? 1 / 0u : 42;
+    // [[print: 42]]
+    printf("%u\n", s);
+
+    static long t = 1234ul ? 5l : 42 / 0l;
+    // [[print: 5]]
+    printf("%ld\n", t);
 }

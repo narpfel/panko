@@ -395,6 +395,12 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             result.map(i32::from).into_value(ty)
         }
 
+        Expression::Conditional { condition, then, or_else } => match as_bool(condition) {
+            Ok(true) => eval(then),
+            Ok(false) => eval(or_else),
+            Err(errors) => Value::with_errors(ty, errors),
+        },
+
         Expression::BuiltinName(_) =>
             Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
 

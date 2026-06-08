@@ -131,6 +131,24 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (name r~22 `int`))))))
+               (name r~22 `int`)))
+         (declaration s~23 `unsigned int`
+            (conditional
+               0
+               (divide 1 0u)
+               42))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%u\n")
+               (name s~23 `unsigned int`)))
+         (declaration t~24 `long`
+            (conditional
+               1234ul
+               5l
+               (divide 42 0l)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%ld\n")
+               (name t~24 `long`))))))
 
 ----- stderr -----

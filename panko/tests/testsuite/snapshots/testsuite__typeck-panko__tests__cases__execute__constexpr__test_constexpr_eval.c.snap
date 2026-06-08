@@ -233,6 +233,34 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (r~22 `int`))))))
+               (r~22 `int`)))
+         (definition s~23 `unsigned int`
+            (conditional `unsigned int`
+               (0 `int`)
+               (divide `unsigned int` (noop-type-conversion `unsigned int` (1 `int`)) (0u `unsigned int`))
+               (noop-type-conversion `unsigned int` (42 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%u\n\0"))))
+               (s~23 `unsigned int`)))
+         (definition t~24 `long`
+            (conditional `long`
+               (1234ul `unsigned long`)
+               (5l `long`)
+               (divide `long` (sign-extend `long` (42 `int`)) (0l `long`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "%ld\n\0"))))
+               (t~24 `long`))))))
 
 ----- stderr -----
