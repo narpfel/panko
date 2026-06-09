@@ -1,0 +1,42 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/constexpr/test_addressof_static_compound_literal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/constexpr/test_addressof_static_compound_literal.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct T~1
+      (member x @0 `int`)
+      (member y @4 `int`))
+   (function-definition external
+      main~2 `fn() -> int`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.5~6 `struct T~1 complete`)
+         (definition p~4 `ptr<struct T~1 complete>`
+            (addressof `ptr<struct T~1 complete>`
+               (compound-literal `struct T~1 complete`
+                  (definition compound_literal.5~6 `struct T~1 complete`
+                     (braced
+                        (subobject +0 (1 `int`))
+                        (subobject +4 (2 `int`)))))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (member `int` x +0
+                  (deref `struct T~1 complete` (p~4 `ptr<struct T~1 complete>`)))
+               (member `int` y +4
+                  (deref `struct T~1 complete` (p~4 `ptr<struct T~1 complete>`))))))))
+
+----- stderr -----
