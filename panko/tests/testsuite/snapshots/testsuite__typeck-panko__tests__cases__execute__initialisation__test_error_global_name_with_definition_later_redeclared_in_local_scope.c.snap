@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/initialisation/test_error_global_name_with_definition_later_redeclared_in_local_scope.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/initialisation/test_error_global_name_with_definition_later_redeclared_in_local_scope.c"
+   (definition external name~0 `int` (42 `int`))
+   (function-definition external
+      main~1 `fn() -> int`
+      (compound-statement
+         (definition name~3 `int` (27 `int`))
+         (compound-statement
+            (declaration external name~4 `int` ∅)
+            (return (name~4 `int`))))))
+
+----- stderr -----
