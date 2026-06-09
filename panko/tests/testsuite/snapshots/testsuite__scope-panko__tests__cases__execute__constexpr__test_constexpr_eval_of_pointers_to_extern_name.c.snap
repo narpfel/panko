@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/constexpr/test_constexpr_eval_of_pointers_to_extern_name.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/constexpr/test_constexpr_eval_of_pointers_to_extern_name.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration global_name~1 `int` 10)
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (declaration ptr~4 `ptr<int>` (addressof (name global_name~1 `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (deref (name ptr~4 `ptr<int>`))))
+         (expression (pre-increment (deref (name ptr~4 `ptr<int>`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name global_name~1 `int`))))))
+
+----- stderr -----

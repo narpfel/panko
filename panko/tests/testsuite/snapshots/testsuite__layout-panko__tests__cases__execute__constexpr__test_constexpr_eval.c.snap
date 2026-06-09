@@ -293,6 +293,40 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 4>>` @16
                         (string `array<char; 4>` @void "%d\n\0"))))
-               (v~26 `int` (static v.26)))))))
+               (v~26 `int` (static v.26))))
+         (compound-statement
+            (definition (a~27 `long` (static a.27)) (sign-extend `long` (negate `int` (20 `int`))))
+            (definition (b~28 `ptr<long>` (static b.28))
+               (addressof `ptr<long>`
+                  (a~27 `long`)))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 5>>` @16
+                           (string `array<char; 5>` @void "%ld\n\0"))))
+                  (deref `long` @24 (b~28 `ptr<long>` (static b.28)))))
+            (expression
+               (combine `long` @0
+                  (assign `ptr<long>` @8
+                     (unnamed-temporary~29 `ptr<long>` @8)
+                     (addressof `ptr<long>` @8
+                        (deref `long` @8 (b~28 `ptr<long>` (static b.28)))))
+                  (assign `long` @0
+                     (deref `long` @0 (unnamed-temporary~29 `ptr<long>` @8))
+                     (add `long` @16
+                        (deref `long` @16 (unnamed-temporary~29 `ptr<long>` @8))
+                        (sign-extend `long` @24 (1 `int` @32))))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 5>>` @16
+                           (string `array<char; 5>` @void "%ld\n\0"))))
+                  (a~27 `long` (static a.27))))))))
 
 ----- stderr -----

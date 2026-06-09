@@ -96,4 +96,15 @@ int main() {
     static int v = ((void)0, 1234);
     // [[print: 1234]]
     printf("%d\n", v);
+
+    // constexpr eval of pointers to values with static storage duration
+    {
+        static long a = -20;
+        static long* b = &a;
+        // [[print: -20]]
+        printf("%ld\n", *b);
+        ++*b;
+        // [[print: -19]]
+        printf("%ld\n", a);
+    }
 }

@@ -37,6 +37,7 @@ use panko_sema::layout::Subobject;
 use panko_sema::layout::SubobjectInitialiser;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::Type;
+use panko_sema::layout::Value;
 use panko_sema::layout::Varargs;
 use panko_sema::scope::BuiltinName;
 use panko_sema::scope::BuiltinNameKind;
@@ -51,7 +52,6 @@ use panko_sema::typecheck::ArrayLength;
 use panko_sema::typecheck::Bitfield;
 use panko_sema::typecheck::Member;
 use panko_sema::typecheck::MemberKind;
-use panko_sema::typecheck::Value;
 
 use crate::Register::*;
 use crate::lineno::Linenos;
@@ -537,6 +537,11 @@ impl<'a> Codegen<'a> {
         self.label(name);
         match initialiser {
             Some(StaticInitialiser::Value(Value::Bytes(bytes))) => self.constant(bytes),
+            Some(StaticInitialiser::Value(Value::Pointer { reference, offset })) =>
+                match reference.slot() {
+                    Slot::Static(name) => self.directive_with_sep("quad", " + ", &[&name, &offset]),
+                    Slot::Automatic(_) | Slot::Void => unreachable!(),
+                },
             Some(StaticInitialiser::Empty) | None => self.zero(size),
         }
     }

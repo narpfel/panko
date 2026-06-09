@@ -1,0 +1,47 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/constexpr/test_constexpr_eval_of_pointers_to_extern_name.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/constexpr/test_constexpr_eval_of_pointers_to_extern_name.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (definition external global_name~1 `int` (10 `int`))
+   (function-definition external
+      main~2 `fn() -> int`
+      (compound-statement
+         (definition ptr~4 `ptr<int>`
+            (addressof `ptr<int>`
+               (global_name~1 `int`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (deref `int` (ptr~4 `ptr<int>`))))
+         (expression
+            (combine `int`
+               (assign `ptr<int>` (unnamed-temporary~5 `ptr<int>`)
+                  (addressof `ptr<int>`
+                     (deref `int` (ptr~4 `ptr<int>`))))
+               (assign `int` (deref `int` (unnamed-temporary~5 `ptr<int>`)) (add `int` (deref `int` (unnamed-temporary~5 `ptr<int>`)) (++ `int`)))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (global_name~1 `int`))))))
+
+----- stderr -----

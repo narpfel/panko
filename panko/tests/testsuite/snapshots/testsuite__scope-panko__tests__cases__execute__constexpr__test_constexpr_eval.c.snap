@@ -165,6 +165,18 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (name v~26 `int`))))))
+               (name v~26 `int`)))
+         (compound-statement
+            (declaration a~27 `long` (negate 20))
+            (declaration b~28 `ptr<long>` (addressof (name a~27 `long`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%ld\n")
+                  (deref (name b~28 `ptr<long>`))))
+            (expression (pre-increment (deref (name b~28 `ptr<long>`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%ld\n")
+                  (name a~27 `long`)))))))
 
 ----- stderr -----

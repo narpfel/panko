@@ -28,7 +28,6 @@ use crate::typecheck::MemberKind;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::Typeck;
 use crate::typecheck::Typedef;
-use crate::typecheck::Value;
 
 mod as_sexpr;
 mod stack;
@@ -77,6 +76,15 @@ pub enum Initialiser<'a> {
     Static {
         initialiser: typecheck::InitialiserRef<'a>,
         value: Value<'a>,
+    },
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Value<'a> {
+    Bytes(&'a [u8]),
+    Pointer {
+        reference: Reference<'a>,
+        offset: u64,
     },
 }
 
@@ -449,8 +457,16 @@ fn layout_declaration<'a>(
             typecheck::Initialiser::Expression(initialiser) => Initialiser::Expression(
                 layout_expression_in_slot(stack, bump, &initialiser, Some(reference.slot)),
             ),
-            typecheck::Initialiser::Static { initialiser, value } =>
-                Initialiser::Static { initialiser, value },
+            typecheck::Initialiser::Static { initialiser, value } => Initialiser::Static {
+                initialiser,
+                value: match value {
+                    typecheck::Value::Bytes(bytes) => Value::Bytes(bytes),
+                    typecheck::Value::Pointer { reference, offset } => Value::Pointer {
+                        reference: stack.add(bump, *reference),
+                        offset,
+                    },
+                },
+            },
         }
     });
     Declaration { reference, initialiser }

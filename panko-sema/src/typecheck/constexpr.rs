@@ -10,6 +10,7 @@ use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::error_todo;
 
+use crate::scope::StorageDuration;
 use crate::ty::subobjects::Subobject;
 use crate::typecheck::Bitfield;
 use crate::typecheck::Declaration;
@@ -17,6 +18,7 @@ use crate::typecheck::Expression;
 use crate::typecheck::Initialiser;
 use crate::typecheck::InitialiserRef;
 use crate::typecheck::MemberKind;
+use crate::typecheck::Reference;
 use crate::typecheck::SubobjectInitialiser;
 use crate::typecheck::Type;
 use crate::typecheck::TypedExpression;
@@ -73,9 +75,8 @@ pub(super) struct Value<'a> {
 #[derive(Debug)]
 enum Repr<'a> {
     Bytes(Box<[u8]>),
-    #[expect(unused)]
     Address {
-        name: &'a str,
+        reference: &'a Reference<'a>,
         offset: u64,
     },
     Error(Errors<'a>),
@@ -382,6 +383,24 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             unary!(operand, not, i32)
         }
 
+        Expression::Addressof { ampersand: _, operand } => {
+            match &operand.expr {
+                // TODO: `constexpr` storage class
+                Expression::Name(reference)
+                | Expression::CompoundLiteral {
+                    open_paren: _,
+                    decl: Declaration { reference, initialiser: _ },
+                } => match reference.storage_duration {
+                    StorageDuration::Static(_) => Value {
+                        ty,
+                        repr: Repr::Address { reference, offset: 0 },
+                    },
+                    StorageDuration::Automatic => not_constexpr(typed_expr, []),
+                },
+                _ => Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
+            }
+        }
+
         // TODO: `constexpr` storage class
         Expression::Name(_) => not_constexpr(typed_expr, []),
 
@@ -447,8 +466,12 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum PersistedValue<'a> {
+pub(crate) enum PersistedValue<'a> {
     Bytes(&'a [u8]),
+    Pointer {
+        reference: &'a Reference<'a>,
+        offset: u64,
+    },
 }
 
 pub(super) fn run_static_initialiser<'a>(
@@ -496,7 +519,8 @@ pub(super) fn run_static_initialiser<'a>(
         Initialiser::Expression(expr) => {
             let value = match eval(expr).repr {
                 Repr::Bytes(bytes) => PersistedValue::Bytes(sess.alloc_slice_copy(&bytes)),
-                Repr::Address { .. } => todo!(),
+                Repr::Address { reference, offset } =>
+                    PersistedValue::Pointer { reference, offset },
                 Repr::Error(errors) => {
                     sess.emit_many(errors);
                     return Initialiser::Braced { subobject_initialisers: &[] };

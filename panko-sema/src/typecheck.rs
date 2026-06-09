@@ -65,7 +65,7 @@ use crate::ty::subobjects::Subobject;
 use crate::ty::subobjects::SubobjectIterator;
 use crate::ty::subobjects::SubobjectKey;
 use crate::ty::subobjects::Subobjects;
-pub use crate::typecheck::constexpr::PersistedValue as Value;
+pub(crate) use crate::typecheck::constexpr::PersistedValue as Value;
 use crate::typecheck::diagnostics::Diagnostic;
 use crate::typecheck::literal::StringLiteral;
 pub(crate) use crate::typecheck::ptr::PtrAddOrder;
