@@ -53,3 +53,9 @@ void compound_literal() {
 }
 
 static int t = ((void)(1 / 0), 42);
+
+void pointers() {
+    static int a;
+    static int* b = &a;
+    static int* c = &*b;
+}

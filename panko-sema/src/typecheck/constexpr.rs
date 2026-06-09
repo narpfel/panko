@@ -397,6 +397,14 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                     },
                     StorageDuration::Automatic => not_constexpr(typed_expr, []),
                 },
+                Expression::Deref { star: _, operand } => {
+                    let operand = eval(operand);
+                    match &operand.repr {
+                        Repr::Bytes(_) => todo!(),
+                        Repr::Address { .. } => todo!(),
+                        Repr::Error(_) => not_constexpr(typed_expr, [operand]),
+                    }
+                }
                 _ => Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
             }
         }
