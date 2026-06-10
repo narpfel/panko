@@ -316,6 +316,58 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 5>>`
                            (string `array<char; 5>` "%ld\n\0"))))
-                  (a~27 `long`)))))))
+                  (a~27 `long`))))
+         (compound-statement
+            (definition xs~30 `array<int; 10>`
+               (braced
+                  (subobject +0 (0 `int`))
+                  (subobject +4 (1 `int`))
+                  (subobject +8 (2 `int`))
+                  (subobject +12 (3 `int`))
+                  (subobject +16 (4 `int`))
+                  (subobject +20 (5 `int`))
+                  (subobject +24 (6 `int`))
+                  (subobject +28 (7 `int`))
+                  (subobject +32 (8 `int`))
+                  (subobject +36 (9 `int`))))
+            (definition p1~31 `ptr<int>`
+               (ptr-add `ptr<int>` (sign-extend `unsigned long` (1 `int`))
+                  (noop-type-conversion `ptr<int>`
+                     (addressof `ptr<array<int; 10>>`
+                        (xs~30 `array<int; 10>`)))))
+            (definition p2~32 `ptr<int>`
+               (ptr-sub `ptr<int>`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; 10>>`
+                           (xs~30 `array<int; 10>`)))
+                     (sign-extend `unsigned long` (5 `int`)))
+                  (sign-extend `unsigned long` (2 `int`))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 7>>`
+                           (string `array<char; 7>` "%d %d\n\0"))))
+                  (deref `int` (p1~31 `ptr<int>`))
+                  (deref `int` (p2~32 `ptr<int>`))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 9>>`
+                           (string `array<char; 9>` "%td %td\n\0"))))
+                  (ptr-diff `long` (p1~31 `ptr<int>`)
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; 10>>`
+                           (xs~30 `array<int; 10>`))))
+                  (ptr-diff `long` (p2~32 `ptr<int>`)
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; 10>>`
+                           (xs~30 `array<int; 10>`))))))))))
 
 ----- stderr -----

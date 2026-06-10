@@ -247,6 +247,27 @@ fn as_bool<'a>(expr: &TypedExpression<'a>) -> Result<bool, Errors<'a>> {
     })
 }
 
+fn eval_pointer_arithmetic<'a>(
+    ty: Type<'a>,
+    pointer: Value<'a>,
+    integral: Value<'a>,
+    pointee_size: u64,
+    op: impl FnOnce(u64, u64) -> u64,
+) -> Value<'a> {
+    let integral = integral.as_u64().expect("not a type error");
+    let repr = match (pointer.repr, integral) {
+        (Repr::Bytes(_), Ok(_)) => todo!(),
+        (Repr::Address { reference, offset }, Ok(integral)) => Repr::Address {
+            reference,
+            offset: op(offset, integral.strict_mul(pointee_size)),
+        },
+        (Repr::Error(errors), Ok(_)) | (Repr::Bytes(_) | Repr::Address { .. }, Err(errors)) =>
+            Repr::Error(errors),
+        (Repr::Error(errors), Err(integral_errors)) => Repr::Error(errors.chain(integral_errors)),
+    };
+    Value { ty, repr }
+}
+
 pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     let TypedExpression { ty, expr } = typed_expr;
     let ty = ty.ty;
@@ -408,6 +429,27 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                 _ => Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
             }
         }
+
+        Expression::PtrAdd {
+            pointer,
+            integral,
+            pointee_size,
+            order: _,
+        } => eval_pointer_arithmetic(
+            ty,
+            eval(pointer),
+            eval(integral),
+            *pointee_size,
+            u64::strict_add,
+        ),
+
+        Expression::PtrSub { pointer, integral, pointee_size } => eval_pointer_arithmetic(
+            ty,
+            eval(pointer),
+            eval(integral),
+            *pointee_size,
+            u64::strict_sub,
+        ),
 
         // TODO: `constexpr` storage class
         Expression::Name(_) => not_constexpr(typed_expr, []),

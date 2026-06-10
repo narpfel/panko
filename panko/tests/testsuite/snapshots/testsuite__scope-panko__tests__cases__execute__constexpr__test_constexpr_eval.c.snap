@@ -177,6 +177,31 @@ exit_code: 0
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%ld\n")
-                  (name a~27 `long`)))))))
+                  (name a~27 `long`))))
+         (compound-statement
+            (declaration xs~30 `array<int; 10>`
+               (braced
+                  0
+                  1
+                  2
+                  3
+                  4
+                  5
+                  6
+                  7
+                  8
+                  9))
+            (declaration p1~31 `ptr<int>` (add 1 (name xs~30 `array<int; 10>`)))
+            (declaration p2~32 `ptr<int>` (subtract (add (name xs~30 `array<int; 10>`) 5) 2))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d\n")
+                  (deref (name p1~31 `ptr<int>`))
+                  (deref (name p2~32 `ptr<int>`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%td %td\n")
+                  (subtract (name p1~31 `ptr<int>`) (name xs~30 `array<int; 10>`))
+                  (subtract (name p2~32 `ptr<int>`) (name xs~30 `array<int; 10>`))))))))
 
 ----- stderr -----

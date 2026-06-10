@@ -107,4 +107,15 @@ int main() {
         // [[print: -19]]
         printf("%ld\n", a);
     }
+
+    // constexpr eval of pointer arithmetic
+    {
+        static int xs[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        static int* p1 = 1 + xs;
+        static int* p2 = xs + 5 - 2;
+        // [[print: 1 3]]
+        printf("%d %d\n", *p1, *p2);
+        // [[print: 1 3]]
+        printf("%td %td\n", p1 - xs, p2 - xs);
+    }
 }
