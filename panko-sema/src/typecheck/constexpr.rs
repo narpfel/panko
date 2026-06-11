@@ -183,11 +183,11 @@ impl<'a> Value<'a> {
 }
 
 macro_rules! impl_as_ty {
-    ($( $name:ident )|+ => $t:ident + $l:lifetime) => {
+    ($pattern:pat => $t:ident + $l:lifetime) => {
         fn ${concat(as_, $t)}(&self) -> Option<Result<$t, Errors<$l>>> {
             let Self { ty, repr } = self;
             match *ty {
-                $(| Type::$name)+ => Some(match repr {
+                $pattern => Some(match repr {
                     Repr::Bytes(bytes) => Ok($t::from_le_bytes(bytes[..].try_into().unwrap())),
                     Repr::Address { .. } => todo!(),
                     Repr::Error(errors) => Err(errors.clone()),
@@ -199,13 +199,13 @@ macro_rules! impl_as_ty {
 }
 
 impl<'a> Value<'a> {
-    impl_as_ty!(ULLONG | ULONG => u64 + 'a);
+    impl_as_ty!(Type::ULLONG | Type::ULONG => u64 + 'a);
 
-    impl_as_ty!(LLONG | LONG => i64 + 'a);
+    impl_as_ty!(Type::LLONG | Type::LONG => i64 + 'a);
 
-    impl_as_ty!(UINT => u32 + 'a);
+    impl_as_ty!(Type::UINT => u32 + 'a);
 
-    impl_as_ty!(INT => i32 + 'a);
+    impl_as_ty!(Type::INT => i32 + 'a);
 }
 
 impl<'a> Repr<'a> {
