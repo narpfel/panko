@@ -198,6 +198,9 @@ macro_rules! impl_as_ty {
     };
 }
 
+#[expect(non_camel_case_types)]
+type ptr = u64;
+
 impl<'a> Value<'a> {
     impl_as_ty!(Type::ULLONG | Type::ULONG => u64 + 'a);
 
@@ -206,6 +209,8 @@ impl<'a> Value<'a> {
     impl_as_ty!(Type::UINT => u32 + 'a);
 
     impl_as_ty!(Type::INT => i32 + 'a);
+
+    impl_as_ty!(Type::Pointer(_) => ptr + 'a);
 }
 
 impl<'a> Repr<'a> {
@@ -450,6 +455,44 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             *pointee_size,
             u64::strict_sub,
         ),
+
+        Expression::PtrDiff { lhs, rhs, pointee_size } => {
+            let compute_difference = |lhs, rhs| {
+                let difference = arithmetic::binop(lhs, rhs, u64::checked_sub, || todo!());
+                let result: Result<u64, _> =
+                    arithmetic::binop(difference, Ok(*pointee_size), u64::div_exact, || todo!());
+                result.into_value(ty)
+            };
+
+            let lhs = eval(lhs);
+            let rhs = eval(rhs);
+
+            match (&lhs.repr, &rhs.repr) {
+                (Repr::Bytes(_), Repr::Bytes(_)) => {
+                    let lhs = lhs.as_ptr().unwrap();
+                    let rhs = rhs.as_ptr().unwrap();
+                    compute_difference(lhs, rhs)
+                }
+
+                (
+                    Repr::Address { reference, offset },
+                    Repr::Address { reference: rhs_ref, offset: rhs_offset },
+                ) => match reference.id == rhs_ref.id {
+                    true => compute_difference(Ok(*offset), Ok(*rhs_offset)),
+                    false => not_constexpr(typed_expr, []),
+                },
+
+                (Repr::Bytes(_), Repr::Address { .. }) | (Repr::Address { .. }, Repr::Bytes(_)) =>
+                    not_constexpr(typed_expr, []),
+
+                (Repr::Error(errors), Repr::Bytes(_) | Repr::Address { .. })
+                | (Repr::Bytes(_) | Repr::Address { .. }, Repr::Error(errors)) =>
+                    Value::with_errors(ty, errors.clone()),
+
+                (Repr::Error(errors), Repr::Error(rhs)) =>
+                    Value::with_errors(ty, errors.clone().chain(rhs.clone())),
+            }
+        }
 
         // TODO: `constexpr` storage class
         Expression::Name(_) => not_constexpr(typed_expr, []),

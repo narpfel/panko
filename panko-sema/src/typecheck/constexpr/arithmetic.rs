@@ -44,7 +44,7 @@ where
     fn nonzero(self, expr: &TypedExpression<'a>) -> Self;
 }
 
-fn binop<'a, T, U, F, R, Err, Res>(
+pub(super) fn binop<'a, T, U, F, R, Err, Res>(
     lhs: Result<'a, T>,
     rhs: Result<'a, U>,
     f: F,
