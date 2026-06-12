@@ -261,21 +261,15 @@ fn eval_pointer_arithmetic<'a>(
 ) -> Value<'a> {
     let integral = integral.as_u64().expect("not a type error");
     let integral = arithmetic::binop(integral, Ok(pointee_size), u64::checked_mul, || todo!());
-    let repr = match (&pointer.repr, integral) {
-        (Repr::Bytes(_), integral) => {
-            let pointer = pointer.as_ptr().unwrap();
-            let result = arithmetic::binop(pointer, integral, op, || todo!());
-            match result {
-                Ok(result) => Repr::Bytes(Box::new(result.to_le_bytes())),
-                Err(errors) => Repr::Error(errors),
-            }
-        }
-        (Repr::Address { reference, offset }, Ok(integral)) =>
-            Repr::Address { reference, offset: op(*offset, integral) },
-        (Repr::Error(errors), Ok(_)) => Repr::Error(errors.clone()),
-        (Repr::Address { .. }, Err(errors)) => Repr::Error(errors),
-        (Repr::Error(errors), Err(integral_errors)) =>
-            Repr::Error(errors.clone().chain(integral_errors)),
+    let repr = match pointer.repr {
+        Repr::Bytes(_) => arithmetic::binop(pointer.as_ptr().unwrap(), integral, op, || todo!())
+            .map_or_else(Repr::Error, |result| {
+                Repr::Bytes(Box::new(result.to_le_bytes()))
+            }),
+        Repr::Address { reference, offset } =>
+            arithmetic::binop(Ok(offset), integral, op, || todo!())
+                .map_or_else(Repr::Error, |offset| Repr::Address { reference, offset }),
+        Repr::Error(errors) => Repr::Error(errors),
     };
     Value { ty, repr }
 }
