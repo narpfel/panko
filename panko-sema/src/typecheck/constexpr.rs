@@ -7,7 +7,6 @@ use panko_parser::LogicalOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
-use panko_parser::error_todo;
 
 use crate::scope::StorageDuration;
 use crate::ty::subobjects::Subobject;
@@ -581,10 +580,8 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             }
         }
 
-        Expression::BuiltinName(_) =>
+        Expression::Deref { .. } | Expression::MemberAccess { .. } | Expression::BuiltinName(_) =>
             Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
-
-        _ => error_todo!(typed_expr, "unimplemented constexpr eval"),
     }
 }
 
