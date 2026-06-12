@@ -229,6 +229,14 @@ exit_code: 0
                   (string "%d %d %d\n")
                   (subscript (name p~35 `ptr<int>`) 0)
                   (subscript (name p~35 `ptr<int>`) 1)
-                  (subscript (name p~35 `ptr<int>`) 2)))))))
+                  (subscript (name p~35 `ptr<int>`) 2)))
+            (declaration p2~40 `ptr<int>`
+               (addressof
+                  (dot z
+                     (name t~34 `struct T~33 complete`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (equal (add (name p~35 `ptr<int>`) 2) (name p2~40 `ptr<int>`))))))))
 
 ----- stderr -----

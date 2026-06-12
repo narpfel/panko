@@ -439,6 +439,11 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
 
         Expression::Addressof { ampersand, operand } => {
             match &operand.expr {
+                Expression::Parenthesised { open_paren: _, expr, close_paren: _ } =>
+                    eval(&TypedExpression {
+                        expr: Expression::Addressof { ampersand: *ampersand, operand: expr },
+                        ..*typed_expr
+                    }),
                 // TODO: `constexpr` storage class
                 Expression::Name(reference)
                 | Expression::CompoundLiteral {

@@ -467,6 +467,23 @@ exit_code: 0
                   (deref `int` @56
                      (ptr-add `ptr<int>` @64
                         (p~35 `ptr<int>` (static p.35))
-                        (sign-extend `unsigned long` @72 (2 `int` @80))))))))))
+                        (sign-extend `unsigned long` @72 (2 `int` @80))))))
+            (definition (p2~40 `ptr<int>` (static p2.40))
+               (addressof `ptr<int>`
+                  (member `int` z +8
+                     (t~34 `struct T~33 complete`))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 4>>` @16
+                           (string `array<char; 4>` @void "%d\n\0"))))
+                  (ptr-equal `int` @24
+                     (ptr-add `ptr<int>` @32
+                        (p~35 `ptr<int>` (static p.35))
+                        (sign-extend `unsigned long` @40 (2 `int` @48)))
+                     (p2~40 `ptr<int>` (static p2.40)))))))))
 
 ----- stderr -----

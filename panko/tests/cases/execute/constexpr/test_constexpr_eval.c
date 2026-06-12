@@ -133,5 +133,9 @@ int main() {
         --*p--;
         // [[print: 10 19 30]]
         printf("%d %d %d\n", p[0], p[1], p[2]);
+
+        static int* p2 = &(t).z;
+        // [[print: 1]]
+        printf("%d\n", p + 2 == p2);
     }
 }
