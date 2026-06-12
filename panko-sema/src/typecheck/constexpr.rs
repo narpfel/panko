@@ -536,20 +536,26 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         // TODO: clang (and gcc with a warning) accept compound literals without `constexpr` as
         // constant expressions
         Expression::CompoundLiteral { open_paren: _, decl } => {
-            let Declaration { reference: _, initialiser } = decl;
-            let exprs = gen {
-                match initialiser {
-                    Some(Initialiser::Braced { subobject_initialisers }) =>
-                        for SubobjectInitialiser { subobject: _, initialiser } in
-                            *subobject_initialisers
-                        {
-                            yield initialiser
-                        },
-                    Some(Initialiser::Expression(expr)) => yield expr,
-                    None | Some(Initialiser::Static { .. }) => (),
+            let Declaration { reference, initialiser } = decl;
+            match reference.storage_duration {
+                StorageDuration::Static(_) =>
+                    Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
+                StorageDuration::Automatic => {
+                    let exprs = gen {
+                        match initialiser {
+                            Some(Initialiser::Braced { subobject_initialisers }) =>
+                                for SubobjectInitialiser { subobject: _, initialiser } in
+                                    *subobject_initialisers
+                                {
+                                    yield initialiser
+                                },
+                            Some(Initialiser::Expression(expr)) => yield expr,
+                            None | Some(Initialiser::Static { .. }) => (),
+                        }
+                    };
+                    not_constexpr(typed_expr, exprs.map(eval))
                 }
-            };
-            not_constexpr(typed_expr, exprs.map(eval))
+            }
         }
 
         Expression::BuiltinName(_) =>
