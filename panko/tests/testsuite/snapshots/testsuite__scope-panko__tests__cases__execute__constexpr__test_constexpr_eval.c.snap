@@ -202,6 +202,33 @@ exit_code: 0
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%td %td\n")
                   (subtract (name p1~31 `ptr<int>`) (name xs~30 `array<int; 10>`))
-                  (subtract (name p2~32 `ptr<int>`) (name xs~30 `array<int; 10>`))))))))
+                  (subtract (name p2~32 `ptr<int>`) (name xs~30 `array<int; 10>`)))))
+         (compound-statement
+            (struct T~33
+               (member x `int`)
+               (member y `int`)
+               (member z `int`))
+            (declaration t~34 `struct T~33 complete`
+               (braced
+                  10
+                  20
+                  30))
+            (declaration p~35 `ptr<int>`
+               (addressof
+                  (dot y
+                     (name t~34 `struct T~33 complete`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d %d\n")
+                  (subscript (name p~35 `ptr<int>`) (negate 1))
+                  (subscript (name p~35 `ptr<int>`) 0)
+                  (subscript (name p~35 `ptr<int>`) 1)))
+            (expression (pre-decrement (deref (post-decrement (name p~35 `ptr<int>`)))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d %d\n")
+                  (subscript (name p~35 `ptr<int>`) 0)
+                  (subscript (name p~35 `ptr<int>`) 1)
+                  (subscript (name p~35 `ptr<int>`) 2)))))))
 
 ----- stderr -----

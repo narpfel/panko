@@ -118,4 +118,20 @@ int main() {
         // [[print: 1 3]]
         printf("%td %td\n", p1 - xs, p2 - xs);
     }
+
+    // addressof of member access
+    {
+        struct T {
+            int x;
+            int y;
+            int z;
+        };
+        static struct T t = {10, 20, 30};
+        static int* p = &t.y;
+        // [[print: 10 20 30]]
+        printf("%d %d %d\n", p[-1], p[0], p[1]);
+        --*p--;
+        // [[print: 10 19 30]]
+        printf("%d %d %d\n", p[0], p[1], p[2]);
+    }
 }

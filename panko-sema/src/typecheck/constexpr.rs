@@ -437,7 +437,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             unary!(operand, not, i32)
         }
 
-        Expression::Addressof { ampersand: _, operand } => {
+        Expression::Addressof { ampersand, operand } => {
             match &operand.expr {
                 // TODO: `constexpr` storage class
                 Expression::Name(reference)
@@ -458,6 +458,21 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                         Repr::Address { .. } => todo!(),
                         Repr::Error(_) => not_constexpr(typed_expr, [operand]),
                     }
+                }
+                Expression::MemberAccess { lhs, member, member_loc: _ } => {
+                    let lhs = eval(&TypedExpression {
+                        ty: Type::Pointer(&lhs.ty).unqualified(),
+                        expr: Expression::Addressof { ampersand: *ampersand, operand: lhs },
+                    });
+                    let repr = match lhs.repr {
+                        Repr::Bytes(_) => todo!(),
+                        Repr::Address { reference, offset } => Repr::Address {
+                            reference,
+                            offset: offset.strict_add(member.offset),
+                        },
+                        Repr::Error(errors) => Repr::Error(errors),
+                    };
+                    Value { ty, repr }
                 }
                 _ => Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
             }

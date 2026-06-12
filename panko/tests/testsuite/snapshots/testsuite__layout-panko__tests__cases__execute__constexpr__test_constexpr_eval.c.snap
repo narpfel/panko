@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/constexpr/test_constexpr_eval.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (function-definition external stack-size=56
+   (function-definition external stack-size=104
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (definition (n~3 `unsigned int` (static n.3)) (left-shift `unsigned int` (1u `unsigned int`) (31 `int`)))
@@ -381,6 +381,92 @@ exit_code: 0
                      (p2~32 `ptr<int>` (static p2.32))
                      (noop-type-conversion `ptr<int>` @40
                         (addressof `ptr<array<int; 10>>` @40
-                           (xs~30 `array<int; 10>` (static xs.30)))))))))))
+                           (xs~30 `array<int; 10>` (static xs.30))))))))
+         (compound-statement
+            (struct T~33
+               (member x @0 `int`)
+               (member y @4 `int`)
+               (member z @8 `int`))
+            (definition (t~34 `struct T~33 complete` (static t.34))
+               (braced
+                  (subobject +0 (10 `int`))
+                  (subobject +4 (20 `int`))
+                  (subobject +8 (30 `int`))))
+            (definition (p~35 `ptr<int>` (static p.35))
+               (addressof `ptr<int>`
+                  (member `int` y +4
+                     (t~34 `struct T~33 complete`))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 10>>` @16
+                           (string `array<char; 10>` @void "%d %d %d\n\0"))))
+                  (deref `int` @24
+                     (ptr-add `ptr<int>` @32
+                        (p~35 `ptr<int>` (static p.35))
+                        (sign-extend `unsigned long` @40 (negate `int` @48 (1 `int` @48)))))
+                  (deref `int` @40
+                     (ptr-add `ptr<int>` @48
+                        (p~35 `ptr<int>` (static p.35))
+                        (sign-extend `unsigned long` @56 (0 `int` @64))))
+                  (deref `int` @56
+                     (ptr-add `ptr<int>` @64
+                        (p~35 `ptr<int>` (static p.35))
+                        (sign-extend `unsigned long` @72 (1 `int` @80))))))
+            (expression
+               (combine `int` @0
+                  (assign `ptr<int>` @8
+                     (unnamed-temporary~39 `ptr<int>` @8)
+                     (addressof `ptr<int>` @8
+                        (deref `int` @8
+                           (combine `ptr<int>` @24
+                              (combine `ptr<int>` @32
+                                 (combine `ptr<int>` @24
+                                    (assign `ptr<ptr<int>>` @56
+                                       (unnamed-temporary~37 `ptr<ptr<int>>` @56)
+                                       (addressof `ptr<ptr<int>>` @56
+                                          (p~35 `ptr<int>` (static p.35))))
+                                    (assign `ptr<int>` @24
+                                       (unnamed-temporary~38 `ptr<int>` @24)
+                                       (deref `ptr<int>` @24 (unnamed-temporary~37 `ptr<ptr<int>>` @56))))
+                                 (combine `ptr<int>` @32
+                                    (assign `ptr<ptr<int>>` @40
+                                       (unnamed-temporary~36 `ptr<ptr<int>>` @40)
+                                       (addressof `ptr<ptr<int>>` @40
+                                          (deref `ptr<int>` @40 (unnamed-temporary~37 `ptr<ptr<int>>` @56))))
+                                    (assign `ptr<int>` @32
+                                       (deref `ptr<int>` @32 (unnamed-temporary~36 `ptr<ptr<int>>` @40))
+                                       (ptr-sub `ptr<int>` @48
+                                          (deref `ptr<int>` @48 (unnamed-temporary~36 `ptr<ptr<int>>` @40))
+                                          (sign-extend `unsigned long` @56 (1 `int` @64))))))
+                              (unnamed-temporary~38 `ptr<int>` @24)))))
+                  (assign `int` @0
+                     (deref `int` @0 (unnamed-temporary~39 `ptr<int>` @8))
+                     (subtract `int` @16
+                        (deref `int` @16 (unnamed-temporary~39 `ptr<int>` @8))
+                        (1 `int` @24)))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 10>>` @16
+                           (string `array<char; 10>` @void "%d %d %d\n\0"))))
+                  (deref `int` @24
+                     (ptr-add `ptr<int>` @32
+                        (p~35 `ptr<int>` (static p.35))
+                        (sign-extend `unsigned long` @40 (0 `int` @48))))
+                  (deref `int` @40
+                     (ptr-add `ptr<int>` @48
+                        (p~35 `ptr<int>` (static p.35))
+                        (sign-extend `unsigned long` @56 (1 `int` @64))))
+                  (deref `int` @56
+                     (ptr-add `ptr<int>` @64
+                        (p~35 `ptr<int>` (static p.35))
+                        (sign-extend `unsigned long` @72 (2 `int` @80))))))))))
 
 ----- stderr -----
