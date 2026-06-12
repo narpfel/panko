@@ -260,15 +260,22 @@ fn eval_pointer_arithmetic<'a>(
     op: impl FnOnce(u64, u64) -> u64,
 ) -> Value<'a> {
     let integral = integral.as_u64().expect("not a type error");
-    let repr = match (pointer.repr, integral) {
-        (Repr::Bytes(_), Ok(_)) => todo!(),
-        (Repr::Address { reference, offset }, Ok(integral)) => Repr::Address {
-            reference,
-            offset: op(offset, integral.strict_mul(pointee_size)),
-        },
-        (Repr::Error(errors), Ok(_)) | (Repr::Bytes(_) | Repr::Address { .. }, Err(errors)) =>
-            Repr::Error(errors),
-        (Repr::Error(errors), Err(integral_errors)) => Repr::Error(errors.chain(integral_errors)),
+    let integral = arithmetic::binop(integral, Ok(pointee_size), u64::checked_mul, || todo!());
+    let repr = match (&pointer.repr, integral) {
+        (Repr::Bytes(_), integral) => {
+            let pointer = pointer.as_ptr().unwrap();
+            let result = arithmetic::binop(pointer, integral, op, || todo!());
+            match result {
+                Ok(result) => Repr::Bytes(Box::new(result.to_le_bytes())),
+                Err(errors) => Repr::Error(errors),
+            }
+        }
+        (Repr::Address { reference, offset }, Ok(integral)) =>
+            Repr::Address { reference, offset: op(*offset, integral) },
+        (Repr::Error(errors), Ok(_)) => Repr::Error(errors.clone()),
+        (Repr::Address { .. }, Err(errors)) => Repr::Error(errors),
+        (Repr::Error(errors), Err(integral_errors)) =>
+            Repr::Error(errors.clone().chain(integral_errors)),
     };
     Value { ty, repr }
 }
