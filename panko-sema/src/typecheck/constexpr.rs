@@ -273,6 +273,43 @@ fn eval_pointer_arithmetic<'a>(
     Value { ty, repr }
 }
 
+fn eval_pointer_binop<'a>(
+    typed_expr: &TypedExpression<'a>,
+    lhs: &TypedExpression<'a>,
+    rhs: &TypedExpression<'a>,
+    compute: impl FnOnce(Result<u64, Errors<'a>>, Result<u64, Errors<'a>>) -> Value<'a>,
+) -> Value<'a> {
+    let ty = typed_expr.ty.ty;
+    let lhs = eval(lhs);
+    let rhs = eval(rhs);
+
+    match (&lhs.repr, &rhs.repr) {
+        (Repr::Bytes(_), Repr::Bytes(_)) => {
+            let lhs = lhs.as_ptr().unwrap();
+            let rhs = rhs.as_ptr().unwrap();
+            compute(lhs, rhs)
+        }
+
+        (
+            Repr::Address { reference, offset },
+            Repr::Address { reference: rhs_ref, offset: rhs_offset },
+        ) => match reference.id == rhs_ref.id {
+            true => compute(Ok(*offset), Ok(*rhs_offset)),
+            false => not_constexpr(typed_expr, []),
+        },
+
+        (Repr::Bytes(_), Repr::Address { .. }) | (Repr::Address { .. }, Repr::Bytes(_)) =>
+            not_constexpr(typed_expr, []),
+
+        (Repr::Error(errors), Repr::Bytes(_) | Repr::Address { .. })
+        | (Repr::Bytes(_) | Repr::Address { .. }, Repr::Error(errors)) =>
+            Value::with_errors(ty, errors.clone()),
+
+        (Repr::Error(errors), Repr::Error(rhs)) =>
+            Value::with_errors(ty, errors.clone().chain(rhs.clone())),
+    }
+}
+
 pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     let TypedExpression { ty, expr } = typed_expr;
     let ty = ty.ty;
@@ -447,43 +484,18 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             u64::checked_sub,
         ),
 
-        Expression::PtrDiff { lhs, rhs, pointee_size } => {
-            let compute_difference = |lhs, rhs| {
+        Expression::PtrDiff { lhs, rhs, pointee_size } =>
+            eval_pointer_binop(typed_expr, lhs, rhs, |lhs, rhs| {
                 let difference = arithmetic::binop(lhs, rhs, u64::checked_sub, || todo!());
                 let result: Result<u64, _> =
                     arithmetic::binop(difference, Ok(*pointee_size), u64::div_exact, || todo!());
                 result.into_value(ty)
-            };
+            }),
 
-            let lhs = eval(lhs);
-            let rhs = eval(rhs);
-
-            match (&lhs.repr, &rhs.repr) {
-                (Repr::Bytes(_), Repr::Bytes(_)) => {
-                    let lhs = lhs.as_ptr().unwrap();
-                    let rhs = rhs.as_ptr().unwrap();
-                    compute_difference(lhs, rhs)
-                }
-
-                (
-                    Repr::Address { reference, offset },
-                    Repr::Address { reference: rhs_ref, offset: rhs_offset },
-                ) => match reference.id == rhs_ref.id {
-                    true => compute_difference(Ok(*offset), Ok(*rhs_offset)),
-                    false => not_constexpr(typed_expr, []),
-                },
-
-                (Repr::Bytes(_), Repr::Address { .. }) | (Repr::Address { .. }, Repr::Bytes(_)) =>
-                    not_constexpr(typed_expr, []),
-
-                (Repr::Error(errors), Repr::Bytes(_) | Repr::Address { .. })
-                | (Repr::Bytes(_) | Repr::Address { .. }, Repr::Error(errors)) =>
-                    Value::with_errors(ty, errors.clone()),
-
-                (Repr::Error(errors), Repr::Error(rhs)) =>
-                    Value::with_errors(ty, errors.clone().chain(rhs.clone())),
-            }
-        }
+        Expression::PtrCmp { lhs, kind, rhs } =>
+            eval_pointer_binop(typed_expr, lhs, rhs, |lhs, rhs| {
+                lhs.compare(*kind, rhs).into_value(ty)
+            }),
 
         // TODO: `constexpr` storage class
         Expression::Name(_) => not_constexpr(typed_expr, []),
