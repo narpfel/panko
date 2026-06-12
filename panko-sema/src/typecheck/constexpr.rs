@@ -138,6 +138,7 @@ impl<'a> Value<'a> {
         }
         type Kind = ConversionKind;
         match kind {
+            // TODO: check for illegal pointer conversions
             Kind::Noop => Self { ty: new_ty, repr },
             Kind::Bool => {
                 let is_nonzero = match repr {
