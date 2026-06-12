@@ -257,13 +257,13 @@ fn eval_pointer_arithmetic<'a>(
     pointer: Value<'a>,
     integral: Value<'a>,
     pointee_size: u64,
-    op: impl FnOnce(u64, u64) -> u64,
+    op: impl FnOnce(u64, u64) -> Option<u64>,
 ) -> Value<'a> {
     let integral = integral.as_u64().expect("not a type error");
     let integral = arithmetic::binop(integral, Ok(pointee_size), u64::checked_mul, || todo!());
     let repr = match pointer.repr {
         Repr::Bytes(_) => arithmetic::binop(pointer.as_ptr().unwrap(), integral, op, || todo!())
-            .map_or_else(Repr::Error, |result| {
+            .map_or_else(Repr::Error, |result: u64| {
                 Repr::Bytes(Box::new(result.to_le_bytes()))
             }),
         Repr::Address { reference, offset } =>
@@ -446,7 +446,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             eval(pointer),
             eval(integral),
             *pointee_size,
-            u64::strict_add,
+            u64::checked_add,
         ),
 
         Expression::PtrSub { pointer, integral, pointee_size } => eval_pointer_arithmetic(
@@ -454,7 +454,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             eval(pointer),
             eval(integral),
             *pointee_size,
-            u64::strict_sub,
+            u64::checked_sub,
         ),
 
         Expression::PtrDiff { lhs, rhs, pointee_size } => {
