@@ -2,6 +2,8 @@ use std::ops::BitAnd as _;
 use std::ops::BitOr as _;
 use std::ops::BitXor as _;
 
+use panko_parser::Comparison;
+
 use crate::typecheck::Type;
 use crate::typecheck::TypedExpression;
 use crate::typecheck::constexpr::Errors;
@@ -42,6 +44,18 @@ where
     fn ge(self, rhs: Self) -> Result<'a, bool>;
 
     fn nonzero(self, expr: &TypedExpression<'a>) -> Self;
+
+    fn compare(self, kind: Comparison, rhs: Self) -> Result<'a, i32> {
+        let result = match kind {
+            Comparison::Equal => self.eq(rhs),
+            Comparison::NotEqual => self.ne(rhs),
+            Comparison::Less => self.lt(rhs),
+            Comparison::LessEqual => self.le(rhs),
+            Comparison::Greater => self.gt(rhs),
+            Comparison::GreaterEqual => self.ge(rhs),
+        };
+        result.map(i32::from)
+    }
 }
 
 pub(super) fn binop<'a, T, U, F, R, Err, Res>(

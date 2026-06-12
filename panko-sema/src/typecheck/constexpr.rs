@@ -3,7 +3,6 @@ use std::iter::once;
 
 use itertools::zip_eq;
 use panko_parser::BinOpKind;
-use panko_parser::Comparison;
 use panko_parser::LogicalOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Session;
@@ -380,17 +379,8 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                                         BinOpKind::BitAnd => lhs.bitand(rhs),
                                         BinOpKind::BitXor => lhs.bitxor(rhs),
                                         BinOpKind::BitOr => lhs.bitor(rhs),
-                                        BinOpKind::Comparison(comparison) => {
-                                            let result = match comparison {
-                                                Comparison::Equal => lhs.eq(rhs),
-                                                Comparison::NotEqual => lhs.ne(rhs),
-                                                Comparison::Less => lhs.lt(rhs),
-                                                Comparison::LessEqual => lhs.le(rhs),
-                                                Comparison::Greater => lhs.gt(rhs),
-                                                Comparison::GreaterEqual => lhs.ge(rhs),
-                                            };
-                                            return result.map(i32::from).into_value(ty);
-                                        }
+                                        BinOpKind::Comparison(comparison) =>
+                                            return lhs.compare(comparison, rhs).into_value(ty),
                                     };
                                     result.into_value(ty)
                                 }
