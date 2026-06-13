@@ -75,6 +75,7 @@ enum Repr<'a> {
     Bytes(Box<[u8]>),
     Address {
         reference: &'a Reference<'a>,
+        // TODO: this should be bounded by the `reference`’s type’s size
         offset: u64,
     },
     Error(Errors<'a>),
