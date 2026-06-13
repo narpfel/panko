@@ -325,3 +325,10 @@ Error: division by zero in constant expression
     │                                    ┬  
     │                                    ╰── in this expression of type `int`
 ────╯
+
+Error: not a constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:70:36]
+    │
+ 70 │     static int comparison_result = &x < &y;
+    │                                    ───────  
+────╯

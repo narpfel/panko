@@ -110,6 +110,12 @@ exit_code: 0
    (function-definition
       error_in_bitshift_operands~46 `fn() -> void`
       (compound-statement
-         (declaration x~48 `int` (left-shift (divide 1 0) (divide 1 0))))))
+         (declaration x~48 `int` (left-shift (divide 1 0) (divide 1 0)))))
+   (function-definition
+      comparison_between_pointers_into_different_objects~49 `fn() -> void`
+      (compound-statement
+         (declaration x~51 `int` 42)
+         (declaration y~52 `int` 27)
+         (declaration comparison_result~53 `int` (less (addressof (name x~51 `int`)) (addressof (name y~52 `int`)))))))
 
 ----- stderr -----

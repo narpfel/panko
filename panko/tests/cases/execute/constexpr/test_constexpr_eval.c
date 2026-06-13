@@ -172,4 +172,25 @@ int main() {
         // [[print: 25]]
         printf("%td\n", a);
     }
+
+    // pointer comparison
+    {
+        struct T {
+            int x;
+            int y;
+            int z;
+        };
+        static struct T t;
+        static int pointer_to_first_member_equals_pointer_to_struct = (int*)&t == &t.x;
+        // [[print: 1]]
+        printf("%d\n", pointer_to_first_member_equals_pointer_to_struct);
+        static int members_are_ordered =
+            (&t.x < &t.y)
+            + (&t.x <= &t.x)
+            + (&t.z > &t.y)
+            + (&t.z >= &t.x)
+            + (&t.x != &t.y);
+        // [[print: 5]]
+        printf("%d\n", members_are_ordered);
+    }
 }

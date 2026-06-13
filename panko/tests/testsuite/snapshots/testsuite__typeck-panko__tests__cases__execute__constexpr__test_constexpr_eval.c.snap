@@ -511,6 +511,78 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 5>>`
                            (string `array<char; 5>` "%td\n\0"))))
-                  (a~49 `long`)))))))
+                  (a~49 `long`))))
+         (compound-statement
+            (struct T~50
+               (member x @0 `int`)
+               (member y @4 `int`)
+               (member z @8 `int`))
+            (definition t~51 `struct T~50 complete` ∅)
+            (definition pointer_to_first_member_equals_pointer_to_struct~52 `int`
+               (ptr-equal `int`
+                  (noop-type-conversion `ptr<int>`
+                     (addressof `ptr<struct T~50 complete>`
+                        (t~51 `struct T~50 complete`)))
+                  (addressof `ptr<int>`
+                     (member `int` x +0
+                        (t~51 `struct T~50 complete`)))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 4>>`
+                           (string `array<char; 4>` "%d\n\0"))))
+                  (pointer_to_first_member_equals_pointer_to_struct~52 `int`)))
+            (definition members_are_ordered~53 `int`
+               (add `int`
+                  (add `int`
+                     (add `int`
+                        (add `int`
+                           (ptr-less `int`
+                              (addressof `ptr<int>`
+                                 (member `int` x +0
+                                    (t~51 `struct T~50 complete`)))
+                              (addressof `ptr<int>`
+                                 (member `int` y +4
+                                    (t~51 `struct T~50 complete`))))
+                           (ptr-less-equal `int`
+                              (addressof `ptr<int>`
+                                 (member `int` x +0
+                                    (t~51 `struct T~50 complete`)))
+                              (addressof `ptr<int>`
+                                 (member `int` x +0
+                                    (t~51 `struct T~50 complete`)))))
+                        (ptr-greater `int`
+                           (addressof `ptr<int>`
+                              (member `int` z +8
+                                 (t~51 `struct T~50 complete`)))
+                           (addressof `ptr<int>`
+                              (member `int` y +4
+                                 (t~51 `struct T~50 complete`)))))
+                     (ptr-greater-equal `int`
+                        (addressof `ptr<int>`
+                           (member `int` z +8
+                              (t~51 `struct T~50 complete`)))
+                        (addressof `ptr<int>`
+                           (member `int` x +0
+                              (t~51 `struct T~50 complete`)))))
+                  (ptr-not-equal `int`
+                     (addressof `ptr<int>`
+                        (member `int` x +0
+                           (t~51 `struct T~50 complete`)))
+                     (addressof `ptr<int>`
+                        (member `int` y +4
+                           (t~51 `struct T~50 complete`))))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 4>>`
+                           (string `array<char; 4>` "%d\n\0"))))
+                  (members_are_ordered~53 `int`)))))))
 
 ----- stderr -----

@@ -63,3 +63,9 @@ void pointers() {
 void error_in_bitshift_operands() {
     static int x = (1 / 0) << (1 / 0);
 }
+
+void comparison_between_pointers_into_different_objects() {
+    static int x = 42;
+    static int y = 27;
+    static int comparison_result = &x < &y;
+}

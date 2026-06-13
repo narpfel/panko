@@ -284,6 +284,65 @@ exit_code: 0
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%td\n")
-                  (name a~49 `typeof((name positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`))`)))))))
+                  (name a~49 `typeof((name positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`))`))))
+         (compound-statement
+            (struct T~50
+               (member x `int`)
+               (member y `int`)
+               (member z `int`))
+            (declaration t~51 `struct T~50 complete` ∅)
+            (declaration pointer_to_first_member_equals_pointer_to_struct~52 `int`
+               (equal (cast `ptr<int>` (addressof (name t~51 `struct T~50 complete`)))
+                  (addressof
+                     (dot x
+                        (name t~51 `struct T~50 complete`)))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (name pointer_to_first_member_equals_pointer_to_struct~52 `int`)))
+            (declaration members_are_ordered~53 `int`
+               (add
+                  (add
+                     (add
+                        (add
+                           (less
+                              (addressof
+                                 (dot x
+                                    (name t~51 `struct T~50 complete`)))
+                              (addressof
+                                 (dot y
+                                    (name t~51 `struct T~50 complete`))))
+                           (less-equal
+                              (addressof
+                                 (dot x
+                                    (name t~51 `struct T~50 complete`)))
+                              (addressof
+                                 (dot x
+                                    (name t~51 `struct T~50 complete`)))))
+                        (greater
+                           (addressof
+                              (dot z
+                                 (name t~51 `struct T~50 complete`)))
+                           (addressof
+                              (dot y
+                                 (name t~51 `struct T~50 complete`)))))
+                     (greater-equal
+                        (addressof
+                           (dot z
+                              (name t~51 `struct T~50 complete`)))
+                        (addressof
+                           (dot x
+                              (name t~51 `struct T~50 complete`)))))
+                  (not-equal
+                     (addressof
+                        (dot x
+                           (name t~51 `struct T~50 complete`)))
+                     (addressof
+                        (dot y
+                           (name t~51 `struct T~50 complete`))))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (name members_are_ordered~53 `int`)))))))
 
 ----- stderr -----

@@ -559,6 +559,78 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>` @16
                         (addressof `ptr<array<char; 5>>` @16
                            (string `array<char; 5>` @void "%td\n\0"))))
-                  (a~49 `long` (static a.49))))))))
+                  (a~49 `long` (static a.49)))))
+         (compound-statement
+            (struct T~50
+               (member x @0 `int`)
+               (member y @4 `int`)
+               (member z @8 `int`))
+            (definition (t~51 `struct T~50 complete` (static t.51)) ∅)
+            (definition (pointer_to_first_member_equals_pointer_to_struct~52 `int` (static pointer_to_first_member_equals_pointer_to_struct.52))
+               (ptr-equal `int`
+                  (noop-type-conversion `ptr<int>`
+                     (addressof `ptr<struct T~50 complete>`
+                        (t~51 `struct T~50 complete`)))
+                  (addressof `ptr<int>`
+                     (member `int` x +0
+                        (t~51 `struct T~50 complete`)))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 4>>` @16
+                           (string `array<char; 4>` @void "%d\n\0"))))
+                  (pointer_to_first_member_equals_pointer_to_struct~52 `int` (static pointer_to_first_member_equals_pointer_to_struct.52))))
+            (definition (members_are_ordered~53 `int` (static members_are_ordered.53))
+               (add `int`
+                  (add `int`
+                     (add `int`
+                        (add `int`
+                           (ptr-less `int`
+                              (addressof `ptr<int>`
+                                 (member `int` x +0
+                                    (t~51 `struct T~50 complete`)))
+                              (addressof `ptr<int>`
+                                 (member `int` y +4
+                                    (t~51 `struct T~50 complete`))))
+                           (ptr-less-equal `int`
+                              (addressof `ptr<int>`
+                                 (member `int` x +0
+                                    (t~51 `struct T~50 complete`)))
+                              (addressof `ptr<int>`
+                                 (member `int` x +0
+                                    (t~51 `struct T~50 complete`)))))
+                        (ptr-greater `int`
+                           (addressof `ptr<int>`
+                              (member `int` z +8
+                                 (t~51 `struct T~50 complete`)))
+                           (addressof `ptr<int>`
+                              (member `int` y +4
+                                 (t~51 `struct T~50 complete`)))))
+                     (ptr-greater-equal `int`
+                        (addressof `ptr<int>`
+                           (member `int` z +8
+                              (t~51 `struct T~50 complete`)))
+                        (addressof `ptr<int>`
+                           (member `int` x +0
+                              (t~51 `struct T~50 complete`)))))
+                  (ptr-not-equal `int`
+                     (addressof `ptr<int>`
+                        (member `int` x +0
+                           (t~51 `struct T~50 complete`)))
+                     (addressof `ptr<int>`
+                        (member `int` y +4
+                           (t~51 `struct T~50 complete`))))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 4>>` @16
+                           (string `array<char; 4>` @void "%d\n\0"))))
+                  (members_are_ordered~53 `int` (static members_are_ordered.53))))))))
 
 ----- stderr -----
