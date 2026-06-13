@@ -469,6 +469,48 @@ exit_code: 0
                         (addressof `ptr<array<char; 7>>`
                            (string `array<char; 7>` "%d %d\n\0"))))
                   (zero-extend `int` (is_nonnull~43 `bool`))
-                  (zero-extend `int` (one_past_end_is_nonnull~44 `bool`))))))))
+                  (zero-extend `int` (one_past_end_is_nonnull~44 `bool`)))))
+         (compound-statement
+            (struct T~45
+               (member x @0 `int`)
+               (member y @4 `int`)
+               (member z @8 `int`))
+            (definition t~46 `struct T~45 complete` ∅)
+            (definition positive_diff~47 `long`
+               (ptr-diff `long`
+                  (addressof `ptr<int>`
+                     (member `int` y +4
+                        (t~46 `struct T~45 complete`)))
+                  (addressof `ptr<int>`
+                     (member `int` x +0
+                        (t~46 `struct T~45 complete`)))))
+            (definition negative_diff~48 `long`
+               (ptr-diff `long`
+                  (addressof `ptr<int>`
+                     (member `int` x +0
+                        (t~46 `struct T~45 complete`)))
+                  (addressof `ptr<int>`
+                     (member `int` y +4
+                        (t~46 `struct T~45 complete`)))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 9>>`
+                           (string `array<char; 9>` "%td %td\n\0"))))
+                  (positive_diff~47 `long`)
+                  (negative_diff~48 `long`)))
+            (definition a~49 `long` (ptr-diff `long` (sign-extend `ptr<int>` (200 `int`)) (sign-extend `ptr<int>` (100 `int`))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 5>>`
+                           (string `array<char; 5>` "%td\n\0"))))
+                  (a~49 `long`)))))))
 
 ----- stderr -----

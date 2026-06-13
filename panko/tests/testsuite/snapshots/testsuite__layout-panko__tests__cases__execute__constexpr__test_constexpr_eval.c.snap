@@ -517,6 +517,48 @@ exit_code: 0
                         (addressof `ptr<array<char; 7>>` @16
                            (string `array<char; 7>` @void "%d %d\n\0"))))
                   (zero-extend `int` @24 (is_nonnull~43 `bool` (static is_nonnull.43)))
-                  (zero-extend `int` @28 (one_past_end_is_nonnull~44 `bool` (static one_past_end_is_nonnull.44)))))))))
+                  (zero-extend `int` @28 (one_past_end_is_nonnull~44 `bool` (static one_past_end_is_nonnull.44))))))
+         (compound-statement
+            (struct T~45
+               (member x @0 `int`)
+               (member y @4 `int`)
+               (member z @8 `int`))
+            (definition (t~46 `struct T~45 complete` (static t.46)) ∅)
+            (definition (positive_diff~47 `long` (static positive_diff.47))
+               (ptr-diff `long`
+                  (addressof `ptr<int>`
+                     (member `int` y +4
+                        (t~46 `struct T~45 complete`)))
+                  (addressof `ptr<int>`
+                     (member `int` x +0
+                        (t~46 `struct T~45 complete`)))))
+            (definition (negative_diff~48 `long` (static negative_diff.48))
+               (ptr-diff `long`
+                  (addressof `ptr<int>`
+                     (member `int` x +0
+                        (t~46 `struct T~45 complete`)))
+                  (addressof `ptr<int>`
+                     (member `int` y +4
+                        (t~46 `struct T~45 complete`)))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 9>>` @16
+                           (string `array<char; 9>` @void "%td %td\n\0"))))
+                  (positive_diff~47 `long` (static positive_diff.47))
+                  (negative_diff~48 `long` (static negative_diff.48))))
+            (definition (a~49 `long` (static a.49)) (ptr-diff `long` (sign-extend `ptr<int>` (200 `int`)) (sign-extend `ptr<int>` (100 `int`))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 5>>` @16
+                           (string `array<char; 5>` @void "%td\n\0"))))
+                  (a~49 `long` (static a.49))))))))
 
 ----- stderr -----

@@ -252,6 +252,38 @@ exit_code: 0
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d %d\n")
                   (name is_nonnull~43 `bool`)
-                  (name one_past_end_is_nonnull~44 `bool`)))))))
+                  (name one_past_end_is_nonnull~44 `bool`))))
+         (compound-statement
+            (struct T~45
+               (member x `int`)
+               (member y `int`)
+               (member z `int`))
+            (declaration t~46 `struct T~45 complete` ∅)
+            (declaration positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`
+               (subtract
+                  (addressof
+                     (dot y
+                        (name t~46 `struct T~45 complete`)))
+                  (addressof
+                     (dot x
+                        (name t~46 `struct T~45 complete`)))))
+            (declaration negative_diff~48 `typeof((name positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`))`
+               (subtract
+                  (addressof
+                     (dot x
+                        (name t~46 `struct T~45 complete`)))
+                  (addressof
+                     (dot y
+                        (name t~46 `struct T~45 complete`)))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%td %td\n")
+                  (name positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`)
+                  (name negative_diff~48 `typeof((name positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`))`)))
+            (declaration a~49 `typeof((name positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`))` (subtract (cast `ptr<int>` 200) (cast `ptr<int>` 100)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%td\n")
+                  (name a~49 `typeof((name positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`))`)))))))
 
 ----- stderr -----

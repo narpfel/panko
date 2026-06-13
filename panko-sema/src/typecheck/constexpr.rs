@@ -504,9 +504,12 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
 
         Expression::PtrDiff { lhs, rhs, pointee_size } =>
             eval_pointer_binop(typed_expr, lhs, rhs, |lhs, rhs| {
-                let difference = arithmetic::binop(lhs, rhs, u64::checked_sub, || todo!());
-                let result: Result<u64, _> =
-                    arithmetic::binop(difference, Ok(*pointee_size), u64::div_exact, || todo!());
+                let difference = arithmetic::binop(lhs, rhs, u64::checked_signed_diff, || todo!());
+                let pointee_size = pointee_size
+                    .checked_cast_signed()
+                    .expect("TODO: object size larger than `i64::MAX`");
+                let result: Result<i64, _> =
+                    arithmetic::binop(difference, Ok(pointee_size), i64::div_exact, || todo!());
                 result.into_value(ty)
             }),
 

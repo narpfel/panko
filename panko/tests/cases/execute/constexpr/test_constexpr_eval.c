@@ -154,4 +154,22 @@ int main() {
         // [[print: 1 1]]
         printf("%d %d\n", is_nonnull, one_past_end_is_nonnull);
     }
+
+    // pointer difference
+    {
+        struct T {
+            int x;
+            int y;
+            int z;
+        };
+        static struct T t;
+        static typeof(&t - &t) positive_diff = &t.y - &t.x;
+        static typeof(positive_diff) negative_diff = &t.x - &t.y;
+        // [[print: 1 -1]]
+        printf("%td %td\n", positive_diff, negative_diff);
+
+        static typeof(positive_diff) a = (int*)200 - (int*)100;
+        // [[print: 25]]
+        printf("%td\n", a);
+    }
 }
