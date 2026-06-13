@@ -436,6 +436,17 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 4>>`
                            (string `array<char; 4>` "%d\n\0"))))
-                  (ptr-equal `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `unsigned long` (2 `int`))) (p2~40 `ptr<int>`))))))))
+                  (ptr-equal `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `unsigned long` (2 `int`))) (p2~40 `ptr<int>`)))))
+         (compound-statement
+            (definition x~41 `int` (left-shift `int` (0b11 `int`) (4u `unsigned int`)))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 6>>`
+                           (string `array<char; 6>` "0b%b\n\0"))))
+                  (x~41 `int`)))))))
 
 ----- stderr -----

@@ -106,6 +106,10 @@ exit_code: 0
       (compound-statement
          (declaration a~43 `int` ∅)
          (declaration b~44 `ptr<int>` (addressof (name a~43 `int`)))
-         (declaration c~45 `ptr<int>` (addressof (deref (name b~44 `ptr<int>`)))))))
+         (declaration c~45 `ptr<int>` (addressof (deref (name b~44 `ptr<int>`))))))
+   (function-definition
+      error_in_bitshift_operands~46 `fn() -> void`
+      (compound-statement
+         (declaration x~48 `int` (left-shift (divide 1 0) (divide 1 0))))))
 
 ----- stderr -----

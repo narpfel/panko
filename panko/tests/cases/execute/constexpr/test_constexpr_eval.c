@@ -138,4 +138,11 @@ int main() {
         // [[print: 1]]
         printf("%d\n", p + 2 == p2);
     }
+
+    // bitshift with unsigned rhs
+    {
+        static int x = 0b11 << 4u;
+        // [[print: 0b110000]]
+        printf("0b%b\n", x);
+    }
 }

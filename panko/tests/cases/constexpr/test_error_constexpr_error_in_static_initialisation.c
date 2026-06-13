@@ -59,3 +59,7 @@ void pointers() {
     static int* b = &a;
     static int* c = &*b;
 }
+
+void error_in_bitshift_operands() {
+    static int x = (1 / 0) << (1 / 0);
+}

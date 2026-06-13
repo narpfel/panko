@@ -237,6 +237,12 @@ exit_code: 0
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")
-                  (equal (add (name p~35 `ptr<int>`) 2) (name p2~40 `ptr<int>`))))))))
+                  (equal (add (name p~35 `ptr<int>`) 2) (name p2~40 `ptr<int>`)))))
+         (compound-statement
+            (declaration x~41 `int` (left-shift 0b11 4u))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "0b%b\n")
+                  (name x~41 `int`)))))))
 
 ----- stderr -----

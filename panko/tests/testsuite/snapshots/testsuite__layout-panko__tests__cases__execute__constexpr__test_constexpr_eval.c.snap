@@ -484,6 +484,17 @@ exit_code: 0
                      (ptr-add `ptr<int>` @32
                         (p~35 `ptr<int>` (static p.35))
                         (sign-extend `unsigned long` @40 (2 `int` @48)))
-                     (p2~40 `ptr<int>` (static p2.40)))))))))
+                     (p2~40 `ptr<int>` (static p2.40))))))
+         (compound-statement
+            (definition (x~41 `int` (static x.41)) (left-shift `int` (0b11 `int`) (4u `unsigned int`)))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 6>>` @16
+                           (string `array<char; 6>` @void "0b%b\n\0"))))
+                  (x~41 `int` (static x.41))))))))
 
 ----- stderr -----
