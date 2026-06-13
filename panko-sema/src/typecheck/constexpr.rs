@@ -246,10 +246,7 @@ fn not_constexpr<'a>(
 
 fn as_bool<'a>(expr: &TypedExpression<'a>) -> Result<bool, Errors<'a>> {
     let value = eval(expr).convert(Type::BOOL, ConversionKind::Bool);
-    value.into_integral().map(|integral| match integral {
-        Integral::Signed(value) => value != 0,
-        Integral::Unsigned(value) => value != 0,
-    })
+    Ok(value.into_unsigned()?.expect("`bool` is unsigned") != 0)
 }
 
 fn eval_pointer_arithmetic<'a>(
