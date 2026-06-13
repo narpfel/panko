@@ -243,6 +243,15 @@ exit_code: 0
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "0b%b\n")
-                  (name x~41 `int`)))))))
+                  (name x~41 `int`))))
+         (compound-statement
+            (declaration x~42 `int` ∅)
+            (declaration is_nonnull~43 `bool` (cast `bool` (addressof (name x~42 `int`))))
+            (declaration one_past_end_is_nonnull~44 `bool` (cast `bool` (add (addressof (name x~42 `int`)) 1)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d\n")
+                  (name is_nonnull~43 `bool`)
+                  (name one_past_end_is_nonnull~44 `bool`)))))))
 
 ----- stderr -----

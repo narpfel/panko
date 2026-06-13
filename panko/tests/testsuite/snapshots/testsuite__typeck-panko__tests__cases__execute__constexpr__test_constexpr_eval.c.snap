@@ -447,6 +447,28 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 6>>`
                            (string `array<char; 6>` "0b%b\n\0"))))
-                  (x~41 `int`)))))))
+                  (x~41 `int`))))
+         (compound-statement
+            (definition x~42 `int` ∅)
+            (definition is_nonnull~43 `bool`
+               (bool-cast `bool`
+                  (addressof `ptr<int>`
+                     (x~42 `int`))))
+            (definition one_past_end_is_nonnull~44 `bool`
+               (bool-cast `bool`
+                  (ptr-add `ptr<int>`
+                     (addressof `ptr<int>`
+                        (x~42 `int`))
+                     (sign-extend `unsigned long` (1 `int`)))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 7>>`
+                           (string `array<char; 7>` "%d %d\n\0"))))
+                  (zero-extend `int` (is_nonnull~43 `bool`))
+                  (zero-extend `int` (one_past_end_is_nonnull~44 `bool`))))))))
 
 ----- stderr -----

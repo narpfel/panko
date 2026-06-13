@@ -145,4 +145,13 @@ int main() {
         // [[print: 0b110000]]
         printf("0b%b\n", x);
     }
+
+    // convert pointer to bool
+    {
+        static int x;
+        static bool is_nonnull = (bool)&x;
+        static bool one_past_end_is_nonnull = (bool)(&x + 1);
+        // [[print: 1 1]]
+        printf("%d %d\n", is_nonnull, one_past_end_is_nonnull);
+    }
 }

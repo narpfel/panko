@@ -495,6 +495,28 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>` @16
                         (addressof `ptr<array<char; 6>>` @16
                            (string `array<char; 6>` @void "0b%b\n\0"))))
-                  (x~41 `int` (static x.41))))))))
+                  (x~41 `int` (static x.41)))))
+         (compound-statement
+            (definition (x~42 `int` (static x.42)) ∅)
+            (definition (is_nonnull~43 `bool` (static is_nonnull.43))
+               (bool-cast `bool`
+                  (addressof `ptr<int>`
+                     (x~42 `int`))))
+            (definition (one_past_end_is_nonnull~44 `bool` (static one_past_end_is_nonnull.44))
+               (bool-cast `bool`
+                  (ptr-add `ptr<int>`
+                     (addressof `ptr<int>`
+                        (x~42 `int`))
+                     (sign-extend `unsigned long` (1 `int`)))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 7>>` @16
+                           (string `array<char; 7>` @void "%d %d\n\0"))))
+                  (zero-extend `int` @24 (is_nonnull~43 `bool` (static is_nonnull.43)))
+                  (zero-extend `int` @28 (one_past_end_is_nonnull~44 `bool` (static one_past_end_is_nonnull.44)))))))))
 
 ----- stderr -----
