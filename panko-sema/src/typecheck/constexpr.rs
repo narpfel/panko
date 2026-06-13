@@ -254,10 +254,13 @@ fn eval_pointer_arithmetic<'a>(
     pointer: Value<'a>,
     integral: Value<'a>,
     pointee_size: u64,
-    op: impl FnOnce(u64, u64) -> Option<u64>,
+    op: impl FnOnce(u64, i64) -> Option<u64>,
 ) -> Value<'a> {
-    let integral = integral.as_u64().expect("not a type error");
-    let integral = arithmetic::binop(integral, Ok(pointee_size), u64::checked_mul, || todo!());
+    let integral = integral.as_i64().expect("not a type error");
+    let pointee_size = pointee_size
+        .checked_cast_signed()
+        .expect("TODO: object size larger than `i64::MAX`");
+    let integral = arithmetic::binop(integral, Ok(pointee_size), i64::checked_mul, || todo!());
     let repr = match pointer.repr {
         Repr::Bytes(_) => arithmetic::binop(pointer.as_ptr().unwrap(), integral, op, || todo!())
             .map_or_else(Repr::Error, |result: u64| {
@@ -491,7 +494,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             eval(pointer),
             eval(integral),
             *pointee_size,
-            u64::checked_add,
+            u64::checked_add_signed,
         ),
 
         Expression::PtrSub { pointer, integral, pointee_size } => eval_pointer_arithmetic(
@@ -499,7 +502,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             eval(pointer),
             eval(integral),
             *pointee_size,
-            u64::checked_sub,
+            u64::checked_sub_signed,
         ),
 
         Expression::PtrDiff { lhs, rhs, pointee_size } =>

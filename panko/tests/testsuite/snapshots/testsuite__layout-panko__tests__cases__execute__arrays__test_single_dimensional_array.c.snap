@@ -22,7 +22,7 @@ exit_code: 0
                      (noop-type-conversion `ptr<int>` @176
                         (addressof `ptr<array<int; 42>>` @176
                            (xs~2 `array<int; 42>` @0)))
-                     (sign-extend `unsigned long` @184 (0 `int` @192))))
+                     (sign-extend `long` @184 (0 `int` @192))))
                (1 `int` @184)))
          (expression
             (assign `int` @168
@@ -31,7 +31,7 @@ exit_code: 0
                      (noop-type-conversion `ptr<int>` @176
                         (addressof `ptr<array<int; 42>>` @176
                            (xs~2 `array<int; 42>` @0)))
-                     (sign-extend `unsigned long` @184 (1 `int` @192))))
+                     (sign-extend `long` @184 (1 `int` @192))))
                (2 `int` @184)))
          (expression
             (assign `int` @168
@@ -40,7 +40,7 @@ exit_code: 0
                      (noop-type-conversion `ptr<int>` @176
                         (addressof `ptr<array<int; 42>>` @176
                            (xs~2 `array<int; 42>` @0)))
-                     (sign-extend `unsigned long` @184 (41 `int` @192))))
+                     (sign-extend `long` @184 (41 `int` @192))))
                (3 `int` @184)))
          (return
             (add `int` @168
@@ -49,12 +49,12 @@ exit_code: 0
                      (noop-type-conversion `ptr<int>` @176
                         (addressof `ptr<array<int; 42>>` @176
                            (xs~2 `array<int; 42>` @0)))
-                     (sign-extend `unsigned long` @184 (1 `int` @192))))
+                     (sign-extend `long` @184 (1 `int` @192))))
                (deref `int` @184
                   (ptr-add `ptr<int>` @192
                      (noop-type-conversion `ptr<int>` @192
                         (addressof `ptr<array<int; 42>>` @192
                            (xs~2 `array<int; 42>` @0)))
-                     (sign-extend `unsigned long` @200 (41 `int` @208)))))))))
+                     (sign-extend `long` @200 (41 `int` @208)))))))))
 
 ----- stderr -----

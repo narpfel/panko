@@ -342,7 +342,7 @@ exit_code: 0
                   (subobject +32 (8 `int`))
                   (subobject +36 (9 `int`))))
             (definition (p1~31 `ptr<int>` (static p1.31))
-               (ptr-add `ptr<int>` (sign-extend `unsigned long` (1 `int`))
+               (ptr-add `ptr<int>` (sign-extend `long` (1 `int`))
                   (noop-type-conversion `ptr<int>`
                      (addressof `ptr<array<int; 10>>`
                         (xs~30 `array<int; 10>`)))))
@@ -352,8 +352,8 @@ exit_code: 0
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 10>>`
                            (xs~30 `array<int; 10>`)))
-                     (sign-extend `unsigned long` (5 `int`)))
-                  (sign-extend `unsigned long` (2 `int`))))
+                     (sign-extend `long` (5 `int`)))
+                  (sign-extend `long` (2 `int`))))
             (expression
                (call `int` @0
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
@@ -407,15 +407,15 @@ exit_code: 0
                   (deref `int` @24
                      (ptr-add `ptr<int>` @32
                         (p~35 `ptr<int>` (static p.35))
-                        (sign-extend `unsigned long` @40 (negate `int` @48 (1 `int` @48)))))
+                        (sign-extend `long` @40 (negate `int` @48 (1 `int` @48)))))
                   (deref `int` @40
                      (ptr-add `ptr<int>` @48
                         (p~35 `ptr<int>` (static p.35))
-                        (sign-extend `unsigned long` @56 (0 `int` @64))))
+                        (sign-extend `long` @56 (0 `int` @64))))
                   (deref `int` @56
                      (ptr-add `ptr<int>` @64
                         (p~35 `ptr<int>` (static p.35))
-                        (sign-extend `unsigned long` @72 (1 `int` @80))))))
+                        (sign-extend `long` @72 (1 `int` @80))))))
             (expression
                (combine `int` @0
                   (assign `ptr<int>` @8
@@ -441,7 +441,7 @@ exit_code: 0
                                        (deref `ptr<int>` @32 (unnamed-temporary~36 `ptr<ptr<int>>` @40))
                                        (ptr-sub `ptr<int>` @48
                                           (deref `ptr<int>` @48 (unnamed-temporary~36 `ptr<ptr<int>>` @40))
-                                          (sign-extend `unsigned long` @56 (1 `int` @64))))))
+                                          (sign-extend `long` @56 (1 `int` @64))))))
                               (unnamed-temporary~38 `ptr<int>` @24)))))
                   (assign `int` @0
                      (deref `int` @0 (unnamed-temporary~39 `ptr<int>` @8))
@@ -459,15 +459,15 @@ exit_code: 0
                   (deref `int` @24
                      (ptr-add `ptr<int>` @32
                         (p~35 `ptr<int>` (static p.35))
-                        (sign-extend `unsigned long` @40 (0 `int` @48))))
+                        (sign-extend `long` @40 (0 `int` @48))))
                   (deref `int` @40
                      (ptr-add `ptr<int>` @48
                         (p~35 `ptr<int>` (static p.35))
-                        (sign-extend `unsigned long` @56 (1 `int` @64))))
+                        (sign-extend `long` @56 (1 `int` @64))))
                   (deref `int` @56
                      (ptr-add `ptr<int>` @64
                         (p~35 `ptr<int>` (static p.35))
-                        (sign-extend `unsigned long` @72 (2 `int` @80))))))
+                        (sign-extend `long` @72 (2 `int` @80))))))
             (definition (p2~40 `ptr<int>` (static p2.40))
                (addressof `ptr<int>`
                   (member `int` z +8
@@ -483,7 +483,7 @@ exit_code: 0
                   (ptr-equal `int` @24
                      (ptr-add `ptr<int>` @32
                         (p~35 `ptr<int>` (static p.35))
-                        (sign-extend `unsigned long` @40 (2 `int` @48)))
+                        (sign-extend `long` @40 (2 `int` @48)))
                      (p2~40 `ptr<int>` (static p2.40))))))
          (compound-statement
             (definition (x~41 `int` (static x.41)) (left-shift `int` (0b11 `int`) (4u `unsigned int`)))
@@ -507,7 +507,7 @@ exit_code: 0
                   (ptr-add `ptr<int>`
                      (addressof `ptr<int>`
                         (x~42 `int`))
-                     (sign-extend `unsigned long` (1 `int`)))))
+                     (sign-extend `long` (1 `int`)))))
             (expression
                (call `int` @0
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8

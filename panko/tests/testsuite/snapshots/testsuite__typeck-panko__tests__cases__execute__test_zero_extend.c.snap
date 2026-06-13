@@ -22,7 +22,7 @@ exit_code: 0
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
                   (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
-               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `unsigned long` (1 `int`)))))
+               (noop-type-conversion `ptr<char const>` (deref `ptr<char>` (ptr-add `ptr<ptr<char>>` (argv~3 `ptr<ptr<char>>`) (sign-extend `long` (1 `int`)))))
                (l~4 `unsigned long`)))))
    (function-definition external
       main~5 `fn(∅: int, argv: ptr<ptr<char>>) -> int`

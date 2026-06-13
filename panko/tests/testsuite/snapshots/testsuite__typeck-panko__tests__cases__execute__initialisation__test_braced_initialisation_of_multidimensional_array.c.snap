@@ -37,7 +37,7 @@ exit_code: 0
                         (noop-type-conversion `ptr<array<int; 2>>`
                            (addressof `ptr<array<array<int; 2>; 3>>`
                               (xs~3 `array<array<int; 2>; 3>`)))
-                        (sign-extend `unsigned long` (0 `int`)))))))
+                        (sign-extend `long` (0 `int`)))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -55,8 +55,8 @@ exit_code: 0
                                  (noop-type-conversion `ptr<array<int; 2>>`
                                     (addressof `ptr<array<array<int; 2>; 3>>`
                                        (xs~3 `array<array<int; 2>; 3>`)))
-                                 (sign-extend `unsigned long` (0 `int`))))))
-                     (sign-extend `unsigned long` (0 `int`))))
+                                 (sign-extend `long` (0 `int`))))))
+                     (sign-extend `long` (0 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
@@ -66,8 +66,8 @@ exit_code: 0
                                  (noop-type-conversion `ptr<array<int; 2>>`
                                     (addressof `ptr<array<array<int; 2>; 3>>`
                                        (xs~3 `array<array<int; 2>; 3>`)))
-                                 (sign-extend `unsigned long` (0 `int`))))))
-                     (sign-extend `unsigned long` (1 `int`))))))
+                                 (sign-extend `long` (0 `int`))))))
+                     (sign-extend `long` (1 `int`))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -85,8 +85,8 @@ exit_code: 0
                                  (noop-type-conversion `ptr<array<int; 2>>`
                                     (addressof `ptr<array<array<int; 2>; 3>>`
                                        (xs~3 `array<array<int; 2>; 3>`)))
-                                 (sign-extend `unsigned long` (1 `int`))))))
-                     (sign-extend `unsigned long` (0 `int`))))
+                                 (sign-extend `long` (1 `int`))))))
+                     (sign-extend `long` (0 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
@@ -96,8 +96,8 @@ exit_code: 0
                                  (noop-type-conversion `ptr<array<int; 2>>`
                                     (addressof `ptr<array<array<int; 2>; 3>>`
                                        (xs~3 `array<array<int; 2>; 3>`)))
-                                 (sign-extend `unsigned long` (1 `int`))))))
-                     (sign-extend `unsigned long` (1 `int`))))))
+                                 (sign-extend `long` (1 `int`))))))
+                     (sign-extend `long` (1 `int`))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -115,8 +115,8 @@ exit_code: 0
                                  (noop-type-conversion `ptr<array<int; 2>>`
                                     (addressof `ptr<array<array<int; 2>; 3>>`
                                        (xs~3 `array<array<int; 2>; 3>`)))
-                                 (sign-extend `unsigned long` (2 `int`))))))
-                     (sign-extend `unsigned long` (0 `int`))))
+                                 (sign-extend `long` (2 `int`))))))
+                     (sign-extend `long` (0 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
@@ -126,7 +126,7 @@ exit_code: 0
                                  (noop-type-conversion `ptr<array<int; 2>>`
                                     (addressof `ptr<array<array<int; 2>; 3>>`
                                        (xs~3 `array<array<int; 2>; 3>`)))
-                                 (sign-extend `unsigned long` (2 `int`))))))
-                     (sign-extend `unsigned long` (1 `int`)))))))))
+                                 (sign-extend `long` (2 `int`))))))
+                     (sign-extend `long` (1 `int`)))))))))
 
 ----- stderr -----

@@ -244,7 +244,7 @@ impl<'a, T: Step> Type<'a, T> {
         }))
     }
 
-    pub(crate) fn ptrdiff_t() -> Self {
+    pub fn ptrdiff_t() -> Self {
         // TODO: this is platform dependent
         Self::long()
     }

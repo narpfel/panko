@@ -1,0 +1,86 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/pointers/test_pointer_arithmetic_with_negative_integral.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_pointer_arithmetic_with_negative_integral.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (struct T~1
+      (member x @0 `int`)
+      (member y @4 `int`)
+      (member z @8 `int`))
+   (function-definition external stack-size=56
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (definition (t~4 `struct T~1 complete` (static t.4))
+            (braced
+               (subobject +0 (10 `int`))
+               (subobject +4 (20 `int`))
+               (subobject +8 (30 `int`))))
+         (definition (p~5 `ptr<int>` (static p.5))
+            (ptr-add `ptr<int>`
+               (addressof `ptr<int>`
+                  (member `int` y +4
+                     (t~4 `struct T~1 complete`)))
+               (sign-extend `long` (negate `int` (1 `int`)))))
+         (definition (runtime_p~6 `ptr<int>` @0)
+            (ptr-add `ptr<int>` @0
+               (addressof `ptr<int>` @0
+                  (member `int` @0 y +4
+                     (t~4 `struct T~1 complete` (static t.4))))
+               (sign-extend `long` @8 (negate `int` @16 (1 `int` @16)))))
+         (definition (p2~7 `ptr<int>` (static p2.7))
+            (ptr-sub `ptr<int>`
+               (addressof `ptr<int>`
+                  (member `int` y +4
+                     (t~4 `struct T~1 complete`)))
+               (sign-extend `long` (negate `int` (1 `int`)))))
+         (definition (runtime_p2~8 `ptr<int>` @8)
+            (ptr-sub `ptr<int>` @8
+               (addressof `ptr<int>` @8
+                  (member `int` @8 y +4
+                     (t~4 `struct T~1 complete` (static t.4))))
+               (sign-extend `long` @16 (negate `int` @24 (1 `int` @24)))))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 7>>` @32
+                        (string `array<char; 7>` @void "%d %d\n\0"))))
+               (deref `int` @40 (p~5 `ptr<int>` (static p.5)))
+               (deref `int` @44 (p2~7 `ptr<int>` (static p2.7)))))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 7>>` @32
+                        (string `array<char; 7>` @void "%d %d\n\0"))))
+               (deref `int` @40 (runtime_p~6 `ptr<int>` @0))
+               (deref `int` @44 (runtime_p2~8 `ptr<int>` @8))))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 7>>` @32
+                        (string `array<char; 7>` @void "%d %d\n\0"))))
+               (ptr-equal `int` @40
+                  (p~5 `ptr<int>` (static p.5))
+                  (runtime_p~6 `ptr<int>` @0))
+               (ptr-equal `int` @44
+                  (p2~7 `ptr<int>` (static p2.7))
+                  (runtime_p2~8 `ptr<int>` @8)))))))
+
+----- stderr -----

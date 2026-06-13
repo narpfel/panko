@@ -40,7 +40,7 @@ exit_code: 0
                         (noop-type-conversion `ptr<char>`
                            (addressof `ptr<array<char; 2>>`
                               (string `array<char; 2>` "\xe4\0")))
-                        (sign-extend `unsigned long` (0 `int`)))))))
+                        (sign-extend `long` (0 `int`)))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -55,7 +55,7 @@ exit_code: 0
                         (noop-type-conversion `ptr<char>`
                            (addressof `ptr<array<char; 2>>`
                               (string `array<char; 2>` "\xe4\0")))
-                        (sign-extend `unsigned long` (1 `int`)))))))
+                        (sign-extend `long` (1 `int`)))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`
@@ -95,7 +95,7 @@ exit_code: 0
                         (noop-type-conversion `ptr<char>`
                            (addressof `ptr<array<char; 3>>`
                               (string `array<char; 3>` "ä\0")))
-                        (sign-extend `unsigned long` (0 `int`)))))))
+                        (sign-extend `long` (0 `int`)))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -110,7 +110,7 @@ exit_code: 0
                         (noop-type-conversion `ptr<char>`
                            (addressof `ptr<array<char; 3>>`
                               (string `array<char; 3>` "ä\0")))
-                        (sign-extend `unsigned long` (1 `int`)))))))
+                        (sign-extend `long` (1 `int`)))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -125,7 +125,7 @@ exit_code: 0
                         (noop-type-conversion `ptr<char>`
                            (addressof `ptr<array<char; 3>>`
                               (string `array<char; 3>` "ä\0")))
-                        (sign-extend `unsigned long` (2 `int`)))))))
+                        (sign-extend `long` (2 `int`)))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

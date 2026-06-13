@@ -331,7 +331,7 @@ exit_code: 0
                   (subobject +32 (8 `int`))
                   (subobject +36 (9 `int`))))
             (definition p1~31 `ptr<int>`
-               (ptr-add `ptr<int>` (sign-extend `unsigned long` (1 `int`))
+               (ptr-add `ptr<int>` (sign-extend `long` (1 `int`))
                   (noop-type-conversion `ptr<int>`
                      (addressof `ptr<array<int; 10>>`
                         (xs~30 `array<int; 10>`)))))
@@ -341,8 +341,8 @@ exit_code: 0
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 10>>`
                            (xs~30 `array<int; 10>`)))
-                     (sign-extend `unsigned long` (5 `int`)))
-                  (sign-extend `unsigned long` (2 `int`))))
+                     (sign-extend `long` (5 `int`)))
+                  (sign-extend `long` (2 `int`))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -391,9 +391,9 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 10>>`
                            (string `array<char; 10>` "%d %d %d\n\0"))))
-                  (deref `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `unsigned long` (negate `int` (1 `int`)))))
-                  (deref `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `unsigned long` (0 `int`))))
-                  (deref `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `unsigned long` (1 `int`))))))
+                  (deref `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `long` (negate `int` (1 `int`)))))
+                  (deref `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `long` (0 `int`))))
+                  (deref `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `long` (1 `int`))))))
             (expression
                (combine `int`
                   (assign `ptr<int>` (unnamed-temporary~39 `ptr<int>`)
@@ -410,7 +410,7 @@ exit_code: 0
                                     (assign `ptr<ptr<int>>` (unnamed-temporary~36 `ptr<ptr<int>>`)
                                        (addressof `ptr<ptr<int>>`
                                           (deref `ptr<int>` (unnamed-temporary~37 `ptr<ptr<int>>`))))
-                                    (assign `ptr<int>` (deref `ptr<int>` (unnamed-temporary~36 `ptr<ptr<int>>`)) (ptr-sub `ptr<int>` (deref `ptr<int>` (unnamed-temporary~36 `ptr<ptr<int>>`)) (sign-extend `unsigned long` (-- `int`))))))
+                                    (assign `ptr<int>` (deref `ptr<int>` (unnamed-temporary~36 `ptr<ptr<int>>`)) (ptr-sub `ptr<int>` (deref `ptr<int>` (unnamed-temporary~36 `ptr<ptr<int>>`)) (sign-extend `long` (-- `int`))))))
                               (unnamed-temporary~38 `ptr<int>`)))))
                   (assign `int` (deref `int` (unnamed-temporary~39 `ptr<int>`)) (subtract `int` (deref `int` (unnamed-temporary~39 `ptr<int>`)) (-- `int`)))))
             (expression
@@ -421,9 +421,9 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 10>>`
                            (string `array<char; 10>` "%d %d %d\n\0"))))
-                  (deref `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `unsigned long` (0 `int`))))
-                  (deref `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `unsigned long` (1 `int`))))
-                  (deref `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `unsigned long` (2 `int`))))))
+                  (deref `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `long` (0 `int`))))
+                  (deref `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `long` (1 `int`))))
+                  (deref `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `long` (2 `int`))))))
             (definition p2~40 `ptr<int>`
                (addressof `ptr<int>`
                   (member `int` z +8
@@ -436,7 +436,7 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 4>>`
                            (string `array<char; 4>` "%d\n\0"))))
-                  (ptr-equal `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `unsigned long` (2 `int`))) (p2~40 `ptr<int>`)))))
+                  (ptr-equal `int` (ptr-add `ptr<int>` (p~35 `ptr<int>`) (sign-extend `long` (2 `int`))) (p2~40 `ptr<int>`)))))
          (compound-statement
             (definition x~41 `int` (left-shift `int` (0b11 `int`) (4u `unsigned int`)))
             (expression
@@ -459,7 +459,7 @@ exit_code: 0
                   (ptr-add `ptr<int>`
                      (addressof `ptr<int>`
                         (x~42 `int`))
-                     (sign-extend `unsigned long` (1 `int`)))))
+                     (sign-extend `long` (1 `int`)))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

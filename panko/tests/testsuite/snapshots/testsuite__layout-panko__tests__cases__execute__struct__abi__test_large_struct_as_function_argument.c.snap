@@ -39,35 +39,35 @@ exit_code: 0
                         (addressof `ptr<array<int; 5>>` @72
                            (member `array<int; 5>` @16 xs +16
                               (large~4 `struct Large~1 complete` @0))))
-                     (sign-extend `unsigned long` @80 (0 `int` @88))))
+                     (sign-extend `long` @80 (0 `int` @88))))
                (deref `int` @80
                   (ptr-add `ptr<int>` @88
                      (noop-type-conversion `ptr<int>` @88
                         (addressof `ptr<array<int; 5>>` @88
                            (member `array<int; 5>` @16 xs +16
                               (large~4 `struct Large~1 complete` @0))))
-                     (sign-extend `unsigned long` @96 (1 `int` @104))))
+                     (sign-extend `long` @96 (1 `int` @104))))
                (deref `int` @96
                   (ptr-add `ptr<int>` @104
                      (noop-type-conversion `ptr<int>` @104
                         (addressof `ptr<array<int; 5>>` @104
                            (member `array<int; 5>` @16 xs +16
                               (large~4 `struct Large~1 complete` @0))))
-                     (sign-extend `unsigned long` @112 (2 `int` @120))))
+                     (sign-extend `long` @112 (2 `int` @120))))
                (deref `int` @112
                   (ptr-add `ptr<int>` @120
                      (noop-type-conversion `ptr<int>` @120
                         (addressof `ptr<array<int; 5>>` @120
                            (member `array<int; 5>` @16 xs +16
                               (large~4 `struct Large~1 complete` @0))))
-                     (sign-extend `unsigned long` @128 (3 `int` @136))))
+                     (sign-extend `long` @128 (3 `int` @136))))
                (deref `int` @128
                   (ptr-add `ptr<int>` @136
                      (noop-type-conversion `ptr<int>` @136
                         (addressof `ptr<array<int; 5>>` @136
                            (member `array<int; 5>` @16 xs +16
                               (large~4 `struct Large~1 complete` @0))))
-                     (sign-extend `unsigned long` @144 (4 `int` @152))))))))
+                     (sign-extend `long` @144 (4 `int` @152))))))))
    (function-definition external stack-size=104
       (main~5 `fn() -> int` (static main))
       (compound-statement

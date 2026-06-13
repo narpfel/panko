@@ -57,7 +57,7 @@ exit_code: 0
          (definition (third~6 `ptr<struct Large~2 complete>` @8)
             (ptr-add `ptr<struct Large~2 complete>` @8
                (p~5 `ptr<struct Large~2 complete>` @0)
-               (sign-extend `unsigned long` @16 (3 `int` @24))))
+               (sign-extend `long` @16 (3 `int` @24))))
          (definition (difference~7 `long` @16)
             (ptr-diff `long` @16
                (third~6 `ptr<struct Large~2 complete>` @8)

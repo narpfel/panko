@@ -27,8 +27,8 @@ exit_code: 0
                                  (noop-type-conversion `ptr<array<int; 30>>` @2416
                                     (addressof `ptr<array<array<int; 30>; 20>>` @2416
                                        (xss~3 `array<array<int; 30>; 20>` @0)))
-                                 (sign-extend `unsigned long` @2424 (2 `int` @2432))))))
-                     (sign-extend `unsigned long` @2424 (3 `int` @2432))))
+                                 (sign-extend `long` @2424 (2 `int` @2432))))))
+                     (sign-extend `long` @2424 (3 `int` @2432))))
                (42 `int` @2424)))
          (expression
             (call `int` @2400
@@ -47,8 +47,8 @@ exit_code: 0
                                  (noop-type-conversion `ptr<array<int; 30>>` @2440
                                     (addressof `ptr<array<array<int; 30>; 20>>` @2440
                                        (xss~3 `array<array<int; 30>; 20>` @0)))
-                                 (sign-extend `unsigned long` @2448 (2 `int` @2456))))))
-                     (sign-extend `unsigned long` @2448 (3 `int` @2456))))))
+                                 (sign-extend `long` @2448 (2 `int` @2456))))))
+                     (sign-extend `long` @2448 (3 `int` @2456))))))
          (expression
             (call `int` @2400
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @2408

@@ -101,7 +101,7 @@ exit_code: 0
                         (noop-type-conversion `ptr<int>` @96
                            (addressof `ptr<array<int; 5>>` @96
                               (xs~12 `array<int; 5>` @44)))
-                        (sign-extend `unsigned long` @104 (0 `int` @112)))))))))
+                        (sign-extend `long` @104 (0 `int` @112)))))))))
    (function-definition external stack-size=40
       (function~14 `fn(value: int) -> int` (static function))
       (params

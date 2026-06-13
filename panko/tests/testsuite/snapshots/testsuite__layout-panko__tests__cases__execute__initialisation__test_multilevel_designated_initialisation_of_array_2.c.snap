@@ -42,9 +42,9 @@ exit_code: 0
                                              (noop-type-conversion `ptr<array<array<int; 2>; 2>>` @80
                                                 (addressof `ptr<array<array<array<int; 2>; 2>; 2>>` @80
                                                    (xs~3 `array<array<array<int; 2>; 2>; 2>` @0)))
-                                             (sign-extend `unsigned long` @88 (0 `int` @96))))))
-                                 (sign-extend `unsigned long` @88 (0 `int` @96))))))
-                     (sign-extend `unsigned long` @88 (0 `int` @96))))
+                                             (sign-extend `long` @88 (0 `int` @96))))))
+                                 (sign-extend `long` @88 (0 `int` @96))))))
+                     (sign-extend `long` @88 (0 `int` @96))))
                (deref `int` @88
                   (ptr-add `ptr<int>` @96
                      (noop-type-conversion `ptr<int>` @96
@@ -58,9 +58,9 @@ exit_code: 0
                                              (noop-type-conversion `ptr<array<array<int; 2>; 2>>` @112
                                                 (addressof `ptr<array<array<array<int; 2>; 2>; 2>>` @112
                                                    (xs~3 `array<array<array<int; 2>; 2>; 2>` @0)))
-                                             (sign-extend `unsigned long` @120 (0 `int` @128))))))
-                                 (sign-extend `unsigned long` @120 (0 `int` @128))))))
-                     (sign-extend `unsigned long` @120 (1 `int` @128))))
+                                             (sign-extend `long` @120 (0 `int` @128))))))
+                                 (sign-extend `long` @120 (0 `int` @128))))))
+                     (sign-extend `long` @120 (1 `int` @128))))
                (deref `int` @120
                   (ptr-add `ptr<int>` @128
                      (noop-type-conversion `ptr<int>` @128
@@ -74,9 +74,9 @@ exit_code: 0
                                              (noop-type-conversion `ptr<array<array<int; 2>; 2>>` @144
                                                 (addressof `ptr<array<array<array<int; 2>; 2>; 2>>` @144
                                                    (xs~3 `array<array<array<int; 2>; 2>; 2>` @0)))
-                                             (sign-extend `unsigned long` @152 (0 `int` @160))))))
-                                 (sign-extend `unsigned long` @152 (1 `int` @160))))))
-                     (sign-extend `unsigned long` @152 (0 `int` @160))))
+                                             (sign-extend `long` @152 (0 `int` @160))))))
+                                 (sign-extend `long` @152 (1 `int` @160))))))
+                     (sign-extend `long` @152 (0 `int` @160))))
                (deref `int` @152
                   (ptr-add `ptr<int>` @160
                      (noop-type-conversion `ptr<int>` @160
@@ -90,9 +90,9 @@ exit_code: 0
                                              (noop-type-conversion `ptr<array<array<int; 2>; 2>>` @176
                                                 (addressof `ptr<array<array<array<int; 2>; 2>; 2>>` @176
                                                    (xs~3 `array<array<array<int; 2>; 2>; 2>` @0)))
-                                             (sign-extend `unsigned long` @184 (0 `int` @192))))))
-                                 (sign-extend `unsigned long` @184 (1 `int` @192))))))
-                     (sign-extend `unsigned long` @184 (1 `int` @192))))
+                                             (sign-extend `long` @184 (0 `int` @192))))))
+                                 (sign-extend `long` @184 (1 `int` @192))))))
+                     (sign-extend `long` @184 (1 `int` @192))))
                (deref `int` @184
                   (ptr-add `ptr<int>` @192
                      (noop-type-conversion `ptr<int>` @192
@@ -106,9 +106,9 @@ exit_code: 0
                                              (noop-type-conversion `ptr<array<array<int; 2>; 2>>` @208
                                                 (addressof `ptr<array<array<array<int; 2>; 2>; 2>>` @208
                                                    (xs~3 `array<array<array<int; 2>; 2>; 2>` @0)))
-                                             (sign-extend `unsigned long` @216 (1 `int` @224))))))
-                                 (sign-extend `unsigned long` @216 (0 `int` @224))))))
-                     (sign-extend `unsigned long` @216 (0 `int` @224))))
+                                             (sign-extend `long` @216 (1 `int` @224))))))
+                                 (sign-extend `long` @216 (0 `int` @224))))))
+                     (sign-extend `long` @216 (0 `int` @224))))
                (deref `int` @216
                   (ptr-add `ptr<int>` @224
                      (noop-type-conversion `ptr<int>` @224
@@ -122,9 +122,9 @@ exit_code: 0
                                              (noop-type-conversion `ptr<array<array<int; 2>; 2>>` @240
                                                 (addressof `ptr<array<array<array<int; 2>; 2>; 2>>` @240
                                                    (xs~3 `array<array<array<int; 2>; 2>; 2>` @0)))
-                                             (sign-extend `unsigned long` @248 (1 `int` @256))))))
-                                 (sign-extend `unsigned long` @248 (0 `int` @256))))))
-                     (sign-extend `unsigned long` @248 (1 `int` @256))))
+                                             (sign-extend `long` @248 (1 `int` @256))))))
+                                 (sign-extend `long` @248 (0 `int` @256))))))
+                     (sign-extend `long` @248 (1 `int` @256))))
                (deref `int` @248
                   (ptr-add `ptr<int>` @256
                      (noop-type-conversion `ptr<int>` @256
@@ -138,9 +138,9 @@ exit_code: 0
                                              (noop-type-conversion `ptr<array<array<int; 2>; 2>>` @272
                                                 (addressof `ptr<array<array<array<int; 2>; 2>; 2>>` @272
                                                    (xs~3 `array<array<array<int; 2>; 2>; 2>` @0)))
-                                             (sign-extend `unsigned long` @280 (1 `int` @288))))))
-                                 (sign-extend `unsigned long` @280 (1 `int` @288))))))
-                     (sign-extend `unsigned long` @280 (0 `int` @288))))
+                                             (sign-extend `long` @280 (1 `int` @288))))))
+                                 (sign-extend `long` @280 (1 `int` @288))))))
+                     (sign-extend `long` @280 (0 `int` @288))))
                (deref `int` @280
                   (ptr-add `ptr<int>` @288
                      (noop-type-conversion `ptr<int>` @288
@@ -154,8 +154,8 @@ exit_code: 0
                                              (noop-type-conversion `ptr<array<array<int; 2>; 2>>` @304
                                                 (addressof `ptr<array<array<array<int; 2>; 2>; 2>>` @304
                                                    (xs~3 `array<array<array<int; 2>; 2>; 2>` @0)))
-                                             (sign-extend `unsigned long` @312 (1 `int` @320))))))
-                                 (sign-extend `unsigned long` @312 (1 `int` @320))))))
-                     (sign-extend `unsigned long` @312 (1 `int` @320)))))))))
+                                             (sign-extend `long` @312 (1 `int` @320))))))
+                                 (sign-extend `long` @312 (1 `int` @320))))))
+                     (sign-extend `long` @312 (1 `int` @320)))))))))
 
 ----- stderr -----

@@ -1,0 +1,67 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/pointers/test_pointer_arithmetic_with_negative_integral.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_pointer_arithmetic_with_negative_integral.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct T~1
+      (member x `int`)
+      (member y `int`)
+      (member z `int`))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (declaration t~4 `struct T~1 complete`
+            (braced
+               10
+               20
+               30))
+         (declaration p~5 `ptr<int>`
+            (add
+               (addressof
+                  (dot y
+                     (name t~4 `struct T~1 complete`)))
+               (negate 1)))
+         (declaration runtime_p~6 `ptr<int>`
+            (add
+               (addressof
+                  (dot y
+                     (name t~4 `struct T~1 complete`)))
+               (negate 1)))
+         (declaration p2~7 `ptr<int>`
+            (subtract
+               (addressof
+                  (dot y
+                     (name t~4 `struct T~1 complete`)))
+               (negate 1)))
+         (declaration runtime_p2~8 `ptr<int>`
+            (subtract
+               (addressof
+                  (dot y
+                     (name t~4 `struct T~1 complete`)))
+               (negate 1)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (deref (name p~5 `ptr<int>`))
+               (deref (name p2~7 `ptr<int>`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (deref (name runtime_p~6 `ptr<int>`))
+               (deref (name runtime_p2~8 `ptr<int>`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (equal (name p~5 `ptr<int>`) (name runtime_p~6 `ptr<int>`))
+               (equal (name p2~7 `ptr<int>`) (name runtime_p2~8 `ptr<int>`)))))))
+
+----- stderr -----

@@ -28,7 +28,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @56 (1 `int` @64)))))
+                        (sign-extend `long` @56 (1 `int` @64)))))
                (i~6 `int` @20)))
          (definition (l~7 `unsigned long` @24) (sign-extend `unsigned long` @24 (42 `int` @32)))
          (definition (l2~8 `unsigned long` @32) (l~7 `unsigned long` @24))
@@ -40,7 +40,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (2 `int` @80)))))
+                        (sign-extend `long` @72 (2 `int` @80)))))
                (l2~8 `unsigned long` @32))))))
 
 ----- stderr -----

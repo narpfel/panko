@@ -38,7 +38,7 @@ exit_code: 0
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; ∅>>`
                            (deref `array<int; ∅>` (p~4 `ptr<array<int; ∅>>`))))
-                     (sign-extend `unsigned long` (27 `int`))))))
+                     (sign-extend `long` (27 `int`))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

@@ -27,7 +27,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
+                        (sign-extend `long` @48 (1 `int` @56)))))
                (not `int` @48 (i~5 `int` @16))))
          (expression
             (call `int` @20
@@ -37,7 +37,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
+                        (sign-extend `long` @48 (1 `int` @56)))))
                (not `int` @48 (not `int` @48 (i~5 `int` @16)))))
          (expression
             (call `int` @20
@@ -47,7 +47,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
+                        (sign-extend `long` @48 (1 `int` @56)))))
                (not `int` @48 (not `int` @48 (not `int` @48 (i~5 `int` @16))))))
          (definition (j~6 `int` @20) (not `int` @20 (i~5 `int` @16)))
          (definition (k~7 `int` @24) (not `int` @24 (not `int` @24 (i~5 `int` @16))))
@@ -60,7 +60,7 @@ exit_code: 0
                   (deref `ptr<char>` @48
                      (ptr-add `ptr<ptr<char>>` @56
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @64 (1 `int` @72)))))
+                        (sign-extend `long` @64 (1 `int` @72)))))
                (j~6 `int` @20)))
          (expression
             (call `int` @32
@@ -70,7 +70,7 @@ exit_code: 0
                   (deref `ptr<char>` @48
                      (ptr-add `ptr<ptr<char>>` @56
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @64 (1 `int` @72)))))
+                        (sign-extend `long` @64 (1 `int` @72)))))
                (k~7 `int` @24)))
          (expression
             (call `int` @32
@@ -80,7 +80,7 @@ exit_code: 0
                   (deref `ptr<char>` @48
                      (ptr-add `ptr<ptr<char>>` @56
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @64 (1 `int` @72)))))
+                        (sign-extend `long` @64 (1 `int` @72)))))
                (l~8 `int` @28)))
          (expression
             (call `int` @32
@@ -90,7 +90,7 @@ exit_code: 0
                   (deref `ptr<char>` @48
                      (ptr-add `ptr<ptr<char>>` @56
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @64 (1 `int` @72)))))
+                        (sign-extend `long` @64 (1 `int` @72)))))
                (not `int` @64 (0 `int` @64))))
          (definition (p~9 `ptr<int>` @32)
             (addressof `ptr<int>` @32
@@ -103,7 +103,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (1 `int` @80)))))
+                        (sign-extend `long` @72 (1 `int` @80)))))
                (not `int` @72 (p~9 `ptr<int>` @32))))
          (expression
             (call `int` @40
@@ -113,7 +113,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (1 `int` @80)))))
+                        (sign-extend `long` @72 (1 `int` @80)))))
                (not `int` @72 (not `int` @72 (p~9 `ptr<int>` @32)))))
          (expression
             (call `int` @40
@@ -123,7 +123,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (1 `int` @80)))))
+                        (sign-extend `long` @72 (1 `int` @80)))))
                (not `int` @72 (not `int` @72 (not `int` @72 (p~9 `ptr<int>` @32))))))
          (definition (c~10 `char` @40) (truncate `char` @40 (42 `int` @44)))
          (expression
@@ -134,7 +134,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (1 `int` @80)))))
+                        (sign-extend `long` @72 (1 `int` @80)))))
                (not `int` @72 (c~10 `char` @40))))
          (expression
             (call `int` @44
@@ -144,7 +144,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (1 `int` @80)))))
+                        (sign-extend `long` @72 (1 `int` @80)))))
                (not `int` @72 (not `int` @72 (c~10 `char` @40)))))
          (definition (c2~11 `char` @41) (truncate `char` @41 (0 `int` @44)))
          (expression
@@ -155,7 +155,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (1 `int` @80)))))
+                        (sign-extend `long` @72 (1 `int` @80)))))
                (not `int` @72 (c2~11 `char` @41))))
          (expression
             (call `int` @44
@@ -165,7 +165,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (1 `int` @80)))))
+                        (sign-extend `long` @72 (1 `int` @80)))))
                (not `int` @72 (not `int` @72 (c2~11 `char` @41)))))
          (definition (c3~12 `char` @42) (truncate `char` @42 (not `int` @44 (27 `int` @44))))
          (expression
@@ -176,7 +176,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (1 `int` @80)))))
+                        (sign-extend `long` @72 (1 `int` @80)))))
                (sign-extend `int` @72 (c3~12 `char` @42)))))))
 
 ----- stderr -----

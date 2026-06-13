@@ -44,7 +44,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~8 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
+                        (sign-extend `long` @48 (1 `int` @56)))))
                (combine `int` @48
                   (combine `int` @52
                      (combine `int` @48
@@ -74,7 +74,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~8 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
+                        (sign-extend `long` @48 (1 `int` @56)))))
                (x~9 `int` @16)))
          (expression
             (call `int` @20
@@ -84,7 +84,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~8 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
+                        (sign-extend `long` @48 (1 `int` @56)))))
                (combine `int` @48
                   (combine `int` @52
                      (combine `int` @48
@@ -119,7 +119,7 @@ exit_code: 0
                   (deref `ptr<char>` @32
                      (ptr-add `ptr<ptr<char>>` @40
                         (argv~8 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @48 (1 `int` @56)))))
+                        (sign-extend `long` @48 (1 `int` @56)))))
                (x~9 `int` @16)))
          (return (x~9 `int` @16)))))
 

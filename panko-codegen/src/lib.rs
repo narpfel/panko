@@ -402,7 +402,7 @@ impl<'a> Codegen<'a> {
         pointee_size: u64,
         integral: &LayoutedExpression,
     ) {
-        assert_eq!(integral.ty.ty, Type::size_t());
+        assert_eq!(integral.ty.ty, Type::ptrdiff_t());
         if pointee_size < MAX_IMUL_IMMEDIATE {
             self.emit_args("imul", &[&R10, integral, &pointee_size]);
         }
@@ -919,7 +919,7 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
             Expression::PtrAdd { pointer, integral, pointee_size, order } => {
-                assert_eq!(integral.ty.ty, Type::size_t());
+                assert_eq!(integral.ty.ty, Type::ptrdiff_t());
                 let (lhs, rhs) = order.select(pointer, integral);
                 self.expr(lhs);
                 self.expr(rhs);
