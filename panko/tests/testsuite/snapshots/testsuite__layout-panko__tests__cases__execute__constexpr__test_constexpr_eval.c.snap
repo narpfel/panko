@@ -631,6 +631,33 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>` @16
                         (addressof `ptr<array<char; 4>>` @16
                            (string `array<char; 4>` @void "%d\n\0"))))
-                  (members_are_ordered~53 `int` (static members_are_ordered.53))))))))
+                  (members_are_ordered~53 `int` (static members_are_ordered.53)))))
+         (compound-statement
+            (definition (xs~54 `array<int; 10>` (static xs.54)) ∅)
+            (definition (diff_between_pointers_into_array~55 `long` (static diff_between_pointers_into_array.55))
+               (ptr-diff `long`
+                  (addressof `ptr<int>`
+                     (deref `int`
+                        (ptr-add `ptr<int>`
+                           (noop-type-conversion `ptr<int>`
+                              (addressof `ptr<array<int; 10>>`
+                                 (xs~54 `array<int; 10>`)))
+                           (sign-extend `long` (5 `int`)))))
+                  (addressof `ptr<int>`
+                     (deref `int`
+                        (ptr-add `ptr<int>`
+                           (noop-type-conversion `ptr<int>`
+                              (addressof `ptr<array<int; 10>>`
+                                 (xs~54 `array<int; 10>`)))
+                           (sign-extend `long` (2 `int`)))))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 5>>` @16
+                           (string `array<char; 5>` @void "%td\n\0"))))
+                  (diff_between_pointers_into_array~55 `long` (static diff_between_pointers_into_array.55))))))))
 
 ----- stderr -----

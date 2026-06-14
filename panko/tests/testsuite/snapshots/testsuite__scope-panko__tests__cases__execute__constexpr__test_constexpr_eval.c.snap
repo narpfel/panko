@@ -343,6 +343,13 @@ exit_code: 0
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%d\n")
-                  (name members_are_ordered~53 `int`)))))))
+                  (name members_are_ordered~53 `int`))))
+         (compound-statement
+            (declaration xs~54 `array<int; 10>` ∅)
+            (declaration diff_between_pointers_into_array~55 `typeof((subtract (addressof (subscript (name xs~54 `array<int; 10>`) 0)) (addressof (subscript (name xs~54 `array<int; 10>`) 0))))` (subtract (addressof (subscript (name xs~54 `array<int; 10>`) 5)) (addressof (subscript (name xs~54 `array<int; 10>`) 2))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%td\n")
+                  (name diff_between_pointers_into_array~55 `typeof((subtract (addressof (subscript (name xs~54 `array<int; 10>`) 0)) (addressof (subscript (name xs~54 `array<int; 10>`) 0))))`)))))))
 
 ----- stderr -----

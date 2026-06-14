@@ -193,4 +193,12 @@ int main() {
         // [[print: 5]]
         printf("%d\n", members_are_ordered);
     }
+
+    // pointer difference between pointers into array (exercises addressof of deref exprs)
+    {
+        static int xs[10];
+        static typeof(&xs[0] - &xs[0]) diff_between_pointers_into_array = &xs[5] - &xs[2];
+        // [[print: 3]]
+        printf("%td\n", diff_between_pointers_into_array);
+    }
 }

@@ -583,6 +583,33 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 4>>`
                            (string `array<char; 4>` "%d\n\0"))))
-                  (members_are_ordered~53 `int`)))))))
+                  (members_are_ordered~53 `int`))))
+         (compound-statement
+            (definition xs~54 `array<int; 10>` ∅)
+            (definition diff_between_pointers_into_array~55 `long`
+               (ptr-diff `long`
+                  (addressof `ptr<int>`
+                     (deref `int`
+                        (ptr-add `ptr<int>`
+                           (noop-type-conversion `ptr<int>`
+                              (addressof `ptr<array<int; 10>>`
+                                 (xs~54 `array<int; 10>`)))
+                           (sign-extend `long` (5 `int`)))))
+                  (addressof `ptr<int>`
+                     (deref `int`
+                        (ptr-add `ptr<int>`
+                           (noop-type-conversion `ptr<int>`
+                              (addressof `ptr<array<int; 10>>`
+                                 (xs~54 `array<int; 10>`)))
+                           (sign-extend `long` (2 `int`)))))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 5>>`
+                           (string `array<char; 5>` "%td\n\0"))))
+                  (diff_between_pointers_into_array~55 `long`)))))))
 
 ----- stderr -----

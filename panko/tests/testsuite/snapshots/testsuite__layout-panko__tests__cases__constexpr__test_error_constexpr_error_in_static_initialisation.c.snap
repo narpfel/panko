@@ -297,13 +297,6 @@ Error: division by zero in constant expression
 ────╯
 
 Error: not a constant expression
-    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:60:21]
-    │
- 60 │     static int* c = &*b;
-    │                     ───  
-────╯
-
-Error: not a constant expression
     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:60:23]
     │
  60 │     static int* c = &*b;
