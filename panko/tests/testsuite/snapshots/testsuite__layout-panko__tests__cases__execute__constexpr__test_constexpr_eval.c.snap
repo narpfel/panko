@@ -658,6 +658,44 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>` @16
                         (addressof `ptr<array<char; 5>>` @16
                            (string `array<char; 5>` @void "%td\n\0"))))
-                  (diff_between_pointers_into_array~55 `long` (static diff_between_pointers_into_array.55))))))))
+                  (diff_between_pointers_into_array~55 `long` (static diff_between_pointers_into_array.55)))))
+         (compound-statement
+            (definition (a~56 `int` (static a.56)) (ptr-equal `int` (nullptr `nullptr_t`) (nullptr `nullptr_t`)))
+            (definition (b~57 `int` (static b.57))
+               (ptr-equal `int` (nullptr `nullptr_t`)
+                  (addressof `ptr<int>`
+                     (a~56 `int`))))
+            (definition (c~58 `int` (static c.58)) (ptr-not-equal `int` (nullptr `nullptr_t`) (nullptr `nullptr_t`)))
+            (definition (d~59 `int` (static d.59))
+               (ptr-not-equal `int`
+                  (addressof `ptr<int>`
+                     (a~56 `int`))
+                  (nullptr `nullptr_t`)))
+            (definition (e~60 `int` (static e.60))
+               (ptr-equal `int`
+                  (addressof `ptr<int>`
+                     (a~56 `int`))
+                  (addressof `ptr<int>`
+                     (c~58 `int`))))
+            (definition (f~61 `int` (static f.61))
+               (ptr-not-equal `int`
+                  (addressof `ptr<int>`
+                     (a~56 `int`))
+                  (addressof `ptr<int>`
+                     (c~58 `int`))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 19>>` @16
+                           (string `array<char; 19>` @void "%d %d %d %d %d %d\n\0"))))
+                  (a~56 `int` (static a.56))
+                  (b~57 `int` (static b.57))
+                  (c~58 `int` (static c.58))
+                  (d~59 `int` (static d.59))
+                  (e~60 `int` (static e.60))
+                  (f~61 `int` (static f.61))))))))
 
 ----- stderr -----

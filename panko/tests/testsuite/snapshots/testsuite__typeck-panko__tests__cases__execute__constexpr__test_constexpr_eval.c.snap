@@ -610,6 +610,44 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 5>>`
                            (string `array<char; 5>` "%td\n\0"))))
-                  (diff_between_pointers_into_array~55 `long`)))))))
+                  (diff_between_pointers_into_array~55 `long`))))
+         (compound-statement
+            (definition a~56 `int` (ptr-equal `int` (nullptr `nullptr_t`) (nullptr `nullptr_t`)))
+            (definition b~57 `int`
+               (ptr-equal `int` (nullptr `nullptr_t`)
+                  (addressof `ptr<int>`
+                     (a~56 `int`))))
+            (definition c~58 `int` (ptr-not-equal `int` (nullptr `nullptr_t`) (nullptr `nullptr_t`)))
+            (definition d~59 `int`
+               (ptr-not-equal `int`
+                  (addressof `ptr<int>`
+                     (a~56 `int`))
+                  (nullptr `nullptr_t`)))
+            (definition e~60 `int`
+               (ptr-equal `int`
+                  (addressof `ptr<int>`
+                     (a~56 `int`))
+                  (addressof `ptr<int>`
+                     (c~58 `int`))))
+            (definition f~61 `int`
+               (ptr-not-equal `int`
+                  (addressof `ptr<int>`
+                     (a~56 `int`))
+                  (addressof `ptr<int>`
+                     (c~58 `int`))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 19>>`
+                           (string `array<char; 19>` "%d %d %d %d %d %d\n\0"))))
+                  (a~56 `int`)
+                  (b~57 `int`)
+                  (c~58 `int`)
+                  (d~59 `int`)
+                  (e~60 `int`)
+                  (f~61 `int`)))))))
 
 ----- stderr -----

@@ -350,6 +350,22 @@ exit_code: 0
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%td\n")
-                  (name diff_between_pointers_into_array~55 `typeof((subtract (addressof (subscript (name xs~54 `array<int; 10>`) 0)) (addressof (subscript (name xs~54 `array<int; 10>`) 0))))`)))))))
+                  (name diff_between_pointers_into_array~55 `typeof((subtract (addressof (subscript (name xs~54 `array<int; 10>`) 0)) (addressof (subscript (name xs~54 `array<int; 10>`) 0))))`))))
+         (compound-statement
+            (declaration a~56 `int` (equal nullptr nullptr))
+            (declaration b~57 `int` (equal nullptr (addressof (name a~56 `int`))))
+            (declaration c~58 `int` (not-equal nullptr nullptr))
+            (declaration d~59 `int` (not-equal (addressof (name a~56 `int`)) nullptr))
+            (declaration e~60 `int` (equal (addressof (name a~56 `int`)) (addressof (name c~58 `int`))))
+            (declaration f~61 `int` (not-equal (addressof (name a~56 `int`)) (addressof (name c~58 `int`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d %d %d %d %d\n")
+                  (name a~56 `int`)
+                  (name b~57 `int`)
+                  (name c~58 `int`)
+                  (name d~59 `int`)
+                  (name e~60 `int`)
+                  (name f~61 `int`)))))))
 
 ----- stderr -----

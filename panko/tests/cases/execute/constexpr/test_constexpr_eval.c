@@ -201,4 +201,16 @@ int main() {
         // [[print: 3]]
         printf("%td\n", diff_between_pointers_into_array);
     }
+
+    // pointer equality comparisons between pointers to different objects
+    {
+        static int a = nullptr == nullptr;
+        static int b = nullptr == &a;
+        static int c = nullptr != nullptr;
+        static int d = &a != nullptr;
+        static int e = &a == &c;
+        static int f = &a != &c;
+        // [[print: 1 0 0 1 0 1]]
+        printf("%d %d %d %d %d %d\n", a, b, c, d, e, f);
+    }
 }

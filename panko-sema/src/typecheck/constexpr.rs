@@ -3,6 +3,7 @@ use std::iter::once;
 
 use itertools::zip_eq;
 use panko_parser::BinOpKind;
+use panko_parser::Comparison;
 use panko_parser::LogicalOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Session;
@@ -210,7 +211,7 @@ impl<'a> Value<'a> {
 
     impl_as_ty!(Type::INT => i32 + 'a);
 
-    impl_as_ty!(Type::Pointer(_) => ptr + 'a);
+    impl_as_ty!(Type::Pointer(_) | Type::Nullptr => ptr + 'a);
 }
 
 impl<'a> Repr<'a> {
@@ -274,8 +275,14 @@ fn eval_pointer_arithmetic<'a>(
     Value { ty, repr }
 }
 
+enum PointerBinopKind {
+    Equality,
+    Other,
+}
+
 fn eval_pointer_binop<'a>(
     typed_expr: &TypedExpression<'a>,
+    kind: PointerBinopKind,
     lhs: &TypedExpression<'a>,
     rhs: &TypedExpression<'a>,
     compute: impl FnOnce(Result<u64, Errors<'a>>, Result<u64, Errors<'a>>) -> Value<'a>,
@@ -294,13 +301,13 @@ fn eval_pointer_binop<'a>(
         (
             Repr::Address { reference, offset },
             Repr::Address { reference: rhs_ref, offset: rhs_offset },
-        ) => match reference.id == rhs_ref.id {
-            true => compute(Ok(*offset), Ok(*rhs_offset)),
-            false => not_constexpr(typed_expr, []),
-        },
+        ) if reference.id == rhs_ref.id => compute(Ok(*offset), Ok(*rhs_offset)),
 
-        (Repr::Bytes(_), Repr::Address { .. }) | (Repr::Address { .. }, Repr::Bytes(_)) =>
-            not_constexpr(typed_expr, []),
+        (Repr::Bytes(_) | Repr::Address { .. }, Repr::Bytes(_) | Repr::Address { .. }) =>
+            match kind {
+                PointerBinopKind::Equality => compute(Ok(0), Ok(1)),
+                PointerBinopKind::Other => not_constexpr(typed_expr, []),
+            },
 
         (Repr::Error(errors), Repr::Bytes(_) | Repr::Address { .. })
         | (Repr::Bytes(_) | Repr::Address { .. }, Repr::Error(errors)) =>
@@ -492,7 +499,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         ),
 
         Expression::PtrDiff { lhs, rhs, pointee_size } =>
-            eval_pointer_binop(typed_expr, lhs, rhs, |lhs, rhs| {
+            eval_pointer_binop(typed_expr, PointerBinopKind::Other, lhs, rhs, |lhs, rhs| {
                 let difference = arithmetic::binop(lhs, rhs, u64::checked_signed_diff, || todo!());
                 let pointee_size = pointee_size
                     .checked_cast_signed()
@@ -502,10 +509,15 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                 result.into_value(ty)
             }),
 
-        Expression::PtrCmp { lhs, kind, rhs } =>
-            eval_pointer_binop(typed_expr, lhs, rhs, |lhs, rhs| {
+        Expression::PtrCmp { lhs, kind, rhs } => {
+            let binop_kind = match kind {
+                Comparison::Equal | Comparison::NotEqual => PointerBinopKind::Equality,
+                _ => PointerBinopKind::Other,
+            };
+            eval_pointer_binop(typed_expr, binop_kind, lhs, rhs, |lhs, rhs| {
                 lhs.compare(*kind, rhs).into_value(ty)
-            }),
+            })
+        }
 
         // TODO: `constexpr` storage class
         Expression::Name(_) => not_constexpr(typed_expr, []),
