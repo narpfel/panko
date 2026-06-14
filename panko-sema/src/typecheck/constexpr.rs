@@ -466,19 +466,12 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                     }
                 }
                 Expression::MemberAccess { lhs, member, member_loc: _ } => {
-                    let lhs = eval(&TypedExpression {
+                    let pointer = TypedExpression {
                         ty: Type::Pointer(&lhs.ty).unqualified(),
                         expr: Expression::Addressof { ampersand: *ampersand, operand: lhs },
-                    });
-                    let repr = match lhs.repr {
-                        Repr::Bytes(_) => todo!(),
-                        Repr::Address { reference, offset } => Repr::Address {
-                            reference,
-                            offset: offset.strict_add(member.offset),
-                        },
-                        Repr::Error(errors) => Repr::Error(errors),
                     };
-                    Value { ty, repr }
+                    let offset = Value::int(member.offset, Type::ptrdiff_t());
+                    eval_pointer_arithmetic(ty, eval(&pointer), offset, 1, u64::checked_add_signed)
                 }
                 _ => Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
             }
