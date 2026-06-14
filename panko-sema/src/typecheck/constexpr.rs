@@ -169,7 +169,7 @@ impl<'a> Value<'a> {
                     let repr = Repr::Bytes(bytes.into_boxed_slice());
                     Self { ty: new_ty, repr }
                 }
-                _ => unreachable!(),
+                _ => todo!("error message, e. g. `static int x = (int)&static_var;`"),
             },
         }
     }
