@@ -696,6 +696,18 @@ exit_code: 0
                   (c~58 `int` (static c.58))
                   (d~59 `int` (static d.59))
                   (e~60 `int` (static e.60))
-                  (f~61 `int` (static f.61))))))))
+                  (f~61 `int` (static f.61)))))
+         (compound-statement
+            (typedef size_t `unsigned long`)
+            (definition (a~62 `unsigned long` (static a.62)) (noop-type-conversion `unsigned long` (ptr-sub `ptr<int>` (ptr-add `ptr<int>` (sign-extend `ptr<int>` (100 `int`)) (sign-extend `long` (10 `int`))) (sign-extend `long` (5 `int`)))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 5>>` @16
+                           (string `array<char; 5>` @void "%zu\n\0"))))
+                  (a~62 `unsigned long` (static a.62))))))))
 
 ----- stderr -----

@@ -213,4 +213,12 @@ int main() {
         // [[print: 1 0 0 1 0 1]]
         printf("%d %d %d %d %d %d\n", a, b, c, d, e, f);
     }
+
+    // pointer arithmetic with result from int2ptr cast
+    {
+        typedef typeof(sizeof 0) size_t;
+        static size_t a = (size_t)((int*)100 + 10 - 5);
+        // [[print: 120]]
+        printf("%zu\n", a);
+    }
 }

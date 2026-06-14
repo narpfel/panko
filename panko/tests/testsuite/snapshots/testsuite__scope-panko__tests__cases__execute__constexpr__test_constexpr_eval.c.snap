@@ -366,6 +366,13 @@ exit_code: 0
                   (name c~58 `int`)
                   (name d~59 `int`)
                   (name e~60 `int`)
-                  (name f~61 `int`)))))))
+                  (name f~61 `int`))))
+         (compound-statement
+            (typedef size_t `typeof((sizeof 0))`)
+            (declaration a~62 `typeof((sizeof 0))` (cast `typeof((sizeof 0))` (subtract (add (cast `ptr<int>` 100) 10) 5)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%zu\n")
+                  (name a~62 `typeof((sizeof 0))`)))))))
 
 ----- stderr -----
