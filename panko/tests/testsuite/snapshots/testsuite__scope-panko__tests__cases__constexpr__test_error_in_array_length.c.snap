@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/constexpr/test_error_in_array_length.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/constexpr/test_error_in_array_length.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration a~2 `array<int; (subtract 10 100)>`
+            (braced
+               1
+               2))
+         (declaration b~3 `array<int; (divide 1 0)>`
+            (braced
+               42))
+         (declaration c~4 `array<int; (left-shift 1 100)>` ∅))))
+
+----- stderr -----

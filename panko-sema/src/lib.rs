@@ -3,6 +3,7 @@
 #![feature(exact_bitshifts)]
 #![feature(exact_div)]
 #![feature(gen_blocks)]
+#![feature(impl_trait_in_assoc_type)]
 #![feature(integer_cast_extras)]
 #![feature(macro_metavar_expr_concat)]
 #![feature(never_type)]

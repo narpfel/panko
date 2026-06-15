@@ -92,17 +92,15 @@ impl<Expression> ArrayLength<Expression> {
 }
 
 impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a>> {
-    type Error = &'a TypedExpression<'a>;
+    type Error = Box<Either<impl Report, impl Iterator<Item = impl Report> + 'a>>;
 
     fn try_from(expr: &'a TypedExpression<'a>) -> Result<Self, Self::Error> {
         let value = match constexpr::eval(expr).into_integral() {
-            Ok(constexpr::Integral::Signed(value)) => u64::try_from(value)
-                .map_err(|_| error_todo!(expr, "negative array length `{}`", value))?,
+            Ok(constexpr::Integral::Signed(value)) => u64::try_from(value).map_err(|_| {
+                Either::Left(Diagnostic::ArrayLengthNegative { at: *expr, length: value })
+            })?,
             Ok(constexpr::Integral::Unsigned(value)) => value,
-            Err(_errors) => {
-                // TODO: emit `_errors`
-                error_todo!(expr, "error in constexpr evaluation")
-            }
+            Err(errors) => Err(Either::Right(errors.into_iter()))?,
         };
         Ok(Self::Constant(value))
     }
@@ -715,11 +713,12 @@ fn typeck_array_ty<'a>(
     let length = length
         .map(|length| {
             ArrayLength::try_from(sess.alloc(typeck_expression(sess, length, Context::Default)))
-                .unwrap_or_else(|expr| {
-                    error_todo!(
-                        expr,
-                        "constexpr evaluation not implemented or variable length array",
-                    )
+                .unwrap_or_else(|error| {
+                    match *error {
+                        Either::Left(error) => sess.emit(error),
+                        Either::Right(errors) => sess.emit_many(errors),
+                    }
+                    ArrayLength::Unknown
                 })
         })
         .unwrap_or(ArrayLength::Unknown);

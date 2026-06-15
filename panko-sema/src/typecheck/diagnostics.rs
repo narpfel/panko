@@ -377,6 +377,14 @@ pub(super) enum Diagnostic<'a> {
     )]
     EmptyArray { at: QualifiedType<'a> },
 
+    #[error("array with negative length")]
+    #[diagnostics(at(colour = Red, label = "this length is negative: `{length}`"))]
+    #[with(length = length.fg(Red))]
+    ArrayLengthNegative {
+        at: TypedExpression<'a>,
+        length: i64,
+    },
+
     #[error("excess element in {kind} initialiser")]
     #[with(
         name = reference.name.fg(Blue),
