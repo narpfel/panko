@@ -619,6 +619,8 @@ pub(super) fn run_static_initialiser<'a>(
                             Ok(Integral::Signed(value)) => value.cast_unsigned(),
                             Ok(Integral::Unsigned(value)) => value,
                             Err(errors) => {
+                                // TODO: all `emit_many` calls break `--defer-type-errors`; the
+                                // errors must be preserved
                                 sess.emit_many(errors);
                                 continue;
                             }
