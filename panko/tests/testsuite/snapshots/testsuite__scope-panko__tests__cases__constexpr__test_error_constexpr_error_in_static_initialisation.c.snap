@@ -116,6 +116,14 @@ exit_code: 0
       (compound-statement
          (declaration x~51 `int` 42)
          (declaration y~52 `int` 27)
-         (declaration comparison_result~53 `int` (less (addressof (name x~51 `int`)) (addressof (name y~52 `int`)))))))
+         (declaration comparison_result~53 `int` (less (addressof (name x~51 `int`)) (addressof (name y~52 `int`))))))
+   (function-definition
+      error_in_static_initialiser_of_bitfield_member~54 `fn() -> void`
+      (compound-statement
+         (struct T~56
+            (member bitfield (bitfield-width 10) `int`))
+         (declaration value~57 `struct T~56 complete`
+            (braced
+               (designation ((member bitfield)) (multiply (divide 1 0) (divide 1 0))))))))
 
 ----- stderr -----

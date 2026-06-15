@@ -69,3 +69,10 @@ void comparison_between_pointers_into_different_objects() {
     static int y = 27;
     static int comparison_result = &x < &y;
 }
+
+void error_in_static_initialiser_of_bitfield_member() {
+    struct T {
+        int bitfield:10;
+    };
+    static struct T value = {.bitfield = (1 / 0) * (1 / 0)};
+}

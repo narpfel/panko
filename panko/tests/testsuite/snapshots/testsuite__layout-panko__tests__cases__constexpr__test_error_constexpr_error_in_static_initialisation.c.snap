@@ -325,3 +325,19 @@ Error: not a constant expression
  70 │     static int comparison_result = &x < &y;
     │                                    ───────  
 ────╯
+
+Error: division by zero in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:77:47]
+    │
+ 77 │     static struct T value = {.bitfield = (1 / 0) * (1 / 0)};
+    │                                               ┬  
+    │                                               ╰── in this expression of type `int`
+────╯
+
+Error: division by zero in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:77:57]
+    │
+ 77 │     static struct T value = {.bitfield = (1 / 0) * (1 / 0)};
+    │                                                         ┬  
+    │                                                         ╰── in this expression of type `int`
+────╯
