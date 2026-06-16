@@ -33,6 +33,8 @@ pub(crate) enum Kind {
     IsZero,
     PointerDiffOverflow,
     UnalignedPointer,
+    PointerAdditionOverflow,
+    SizeOverflow,
 }
 
 impl Kind {
@@ -51,6 +53,8 @@ impl fmt::Display for Kind {
             Self::IsZero => "division by zero",
             Self::PointerDiffOverflow => "overflow in pointer difference",
             Self::UnalignedPointer => "arithmetic on unaligned pointer",
+            Self::PointerAdditionOverflow => "overflow in pointer addition",
+            Self::SizeOverflow => "overflow in object size calculation",
         };
         write!(f, "{s}")
     }

@@ -80,4 +80,15 @@ void error_in_static_initialiser_of_bitfield_member() {
 void error_in_pointer_arithmetic() {
     static long a = (int*)0xffff'ffff'ffff'fff0 - (int*)4;
     static long b = ((int*)25) - (int*)20;
+    static int xs[1l << 61];
+    static long c = &xs - &xs;
+}
+
+void error_in_pointer_addition() {
+    static int a;
+    static int* p = &a + 0x7fff'ffff'ffff'0000;
+    static int* p2 = &a - 1;
+    static int* p3 = (int*)20 - 10;
+    static int xs[1l << 61];
+    static int* p4 = &xs + 1;
 }

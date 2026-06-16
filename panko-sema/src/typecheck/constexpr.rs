@@ -251,8 +251,8 @@ fn as_bool<'a>(expr: &TypedExpression<'a>) -> Result<bool, Errors<'a>> {
 }
 
 fn eval_pointer_arithmetic<'a>(
-    ty: Type<'a>,
-    pointer: Value<'a>,
+    expr: &TypedExpression<'a>,
+    pointer: &TypedExpression<'a>,
     integral: Value<'a>,
     pointee_size: u64,
     op: impl FnOnce(u64, i64) -> Option<u64>,
@@ -260,18 +260,23 @@ fn eval_pointer_arithmetic<'a>(
     let integral = integral.as_i64().expect("not a type error");
     let pointee_size = pointee_size
         .checked_cast_signed()
-        .expect("TODO: object size larger than `i64::MAX`");
-    let integral = arithmetic::binop(integral, Ok(pointee_size), i64::checked_mul, || todo!());
+        .ok_or_else(|| SizeOverflow.at(pointer));
+    let integral = arithmetic::binop(integral, pointee_size, i64::checked_mul, || {
+        SizeOverflow.at(expr)
+    });
+    let pointer = eval(pointer);
+
+    let add = |base| arithmetic::binop(base, integral, op, || PointerAdditionOverflow.at(expr));
     let repr = match pointer.repr {
-        Repr::Bytes(_) => arithmetic::binop(pointer.as_ptr().unwrap(), integral, op, || todo!())
-            .map_or_else(Repr::Error, |result: u64| {
-                Repr::Bytes(Box::new(result.to_le_bytes()))
-            }),
+        Repr::Bytes(_) => add(pointer.as_ptr().unwrap()).map_or_else(Repr::Error, |result: u64| {
+            Repr::Bytes(Box::new(result.to_le_bytes()))
+        }),
         Repr::Address { reference, offset } =>
-            arithmetic::binop(Ok(offset), integral, op, || todo!())
-                .map_or_else(Repr::Error, |offset| Repr::Address { reference, offset }),
+            add(Ok(offset)).map_or_else(Repr::Error, |offset| Repr::Address { reference, offset }),
         Repr::Error(errors) => Repr::Error(errors),
     };
+
+    let ty = expr.ty.ty;
     Value { ty, repr }
 }
 
@@ -466,12 +471,12 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                 },
                 Expression::Deref { star: _, operand } => eval(operand),
                 Expression::MemberAccess { lhs, member, member_loc: _ } => {
-                    let pointer = TypedExpression {
+                    let pointer = &TypedExpression {
                         ty: Type::Pointer(&lhs.ty).unqualified(),
                         expr: Expression::Addressof { ampersand: *ampersand, operand: lhs },
                     };
                     let offset = Value::int(member.offset, Type::ptrdiff_t());
-                    eval_pointer_arithmetic(ty, eval(&pointer), offset, 1, u64::checked_add_signed)
+                    eval_pointer_arithmetic(typed_expr, pointer, offset, 1, u64::checked_add_signed)
                 }
                 _ => Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
             }
@@ -483,16 +488,16 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             pointee_size,
             order: _,
         } => eval_pointer_arithmetic(
-            ty,
-            eval(pointer),
+            typed_expr,
+            pointer,
             eval(integral),
             *pointee_size,
             u64::checked_add_signed,
         ),
 
         Expression::PtrSub { pointer, integral, pointee_size } => eval_pointer_arithmetic(
-            ty,
-            eval(pointer),
+            typed_expr,
+            pointer,
             eval(integral),
             *pointee_size,
             u64::checked_sub_signed,
@@ -505,11 +510,11 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                 });
                 let pointee_size = pointee_size
                     .checked_cast_signed()
-                    .expect("TODO: object size larger than `i64::MAX`");
+                    .ok_or_else(|| SizeOverflow.at(typed_expr));
                 // TODO: this does not catch cases where both pointers are misaligned by the same
                 // amount, e. g. `(int*)5 - (int*)1`
                 let result: Result<i64, _> =
-                    arithmetic::binop(difference, Ok(pointee_size), i64::div_exact, || {
+                    arithmetic::binop(difference, pointee_size, i64::div_exact, || {
                         UnalignedPointer.at(typed_expr)
                     });
                 result.into_value(ty)

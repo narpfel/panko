@@ -129,6 +129,17 @@ exit_code: 0
       error_in_pointer_arithmetic~58 `fn() -> void`
       (compound-statement
          (declaration a~60 `long` (subtract (cast `ptr<int>` 0xffff'ffff'ffff'fff0) (cast `ptr<int>` 4)))
-         (declaration b~61 `long` (subtract (cast `ptr<int>` 25) (cast `ptr<int>` 20))))))
+         (declaration b~61 `long` (subtract (cast `ptr<int>` 25) (cast `ptr<int>` 20)))
+         (declaration xs~62 `array<int; (left-shift 1l 61)>` ∅)
+         (declaration c~63 `long` (subtract (addressof (name xs~62 `array<int; (left-shift 1l 61)>`)) (addressof (name xs~62 `array<int; (left-shift 1l 61)>`))))))
+   (function-definition
+      error_in_pointer_addition~64 `fn() -> void`
+      (compound-statement
+         (declaration a~66 `int` ∅)
+         (declaration p~67 `ptr<int>` (add (addressof (name a~66 `int`)) 0x7fff'ffff'ffff'0000))
+         (declaration p2~68 `ptr<int>` (subtract (addressof (name a~66 `int`)) 1))
+         (declaration p3~69 `ptr<int>` (subtract (cast `ptr<int>` 20) 10))
+         (declaration xs~70 `array<int; (left-shift 1l 61)>` ∅)
+         (declaration p4~71 `ptr<int>` (add (addressof (name xs~70 `array<int; (left-shift 1l 61)>`)) 1)))))
 
 ----- stderr -----

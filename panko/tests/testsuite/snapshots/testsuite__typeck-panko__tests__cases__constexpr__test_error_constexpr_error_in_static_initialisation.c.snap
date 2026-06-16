@@ -357,3 +357,43 @@ Error: arithmetic on unaligned pointer in constant expression
     │                     ──────────┬──────────  
     │                               ╰──────────── in this expression of type `long`
 ────╯
+
+Error: overflow in object size calculation in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:84:21]
+    │
+ 84 │     static long c = &xs - &xs;
+    │                     ────┬────  
+    │                         ╰────── in this expression of type `long`
+────╯
+
+Error: overflow in object size calculation in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:89:21]
+    │
+ 89 │     static int* p = &a + 0x7fff'ffff'ffff'0000;
+    │                     ─────────────┬────────────  
+    │                                  ╰────────────── in this expression of type `ptr<int>`
+────╯
+
+Error: overflow in pointer addition in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:90:22]
+    │
+ 90 │     static int* p2 = &a - 1;
+    │                      ───┬──  
+    │                         ╰──── in this expression of type `ptr<int>`
+────╯
+
+Error: overflow in pointer addition in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:91:28]
+    │
+ 91 │     static int* p3 = (int*)20 - 10;
+    │                            ───┬───  
+    │                               ╰───── in this expression of type `ptr<int>`
+────╯
+
+Error: overflow in object size calculation in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:93:22]
+    │
+ 93 │     static int* p4 = &xs + 1;
+    │                      ─┬─  
+    │                       ╰─── in this expression of type `ptr<array<int; 2305843009213693952>>`
+────╯
