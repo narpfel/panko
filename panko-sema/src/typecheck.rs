@@ -809,8 +809,12 @@ fn typeck_struct_members<'a>(
                 let BitfieldWidth { width } = bitfield_width.as_ref()?;
                 let width = typeck_expression(sess, width, Context::Default);
                 let value = match constexpr::eval(&width).into_integral() {
-                    Ok(constexpr::Integral::Signed(value)) => u64::try_from(value)
-                        .unwrap_or_else(|_| error_todo!(width, "negative bitfield width")),
+                    Ok(constexpr::Integral::Signed(value)) => u64::try_from(value).map_or_else(
+                        |_| {
+                            sess.emit(Diagnostic::BitfieldWidthNegative { at: width, width: value })
+                        },
+                        Some,
+                    )?,
                     Ok(constexpr::Integral::Unsigned(value)) => value,
                     Err(errors) => {
                         sess.emit_many(errors);

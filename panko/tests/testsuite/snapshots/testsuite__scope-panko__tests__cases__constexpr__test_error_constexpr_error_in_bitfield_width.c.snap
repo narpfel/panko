@@ -13,6 +13,7 @@ exit_code: 0
 (translation-unit "panko/tests/cases/constexpr/test_error_constexpr_error_in_bitfield_width.c"
    (struct T~0
       (member x (bitfield-width (negate (cast `int` 0x8000'0000))) `int`)
-      (member y (bitfield-width (negate (cast `int` 0x8000'0000))) `int`)))
+      (member y (bitfield-width (negate (cast `int` 0x8000'0000))) `int`)
+      (member z (bitfield-width (subtract 10 20)) `int`)))
 
 ----- stderr -----

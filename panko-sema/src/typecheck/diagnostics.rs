@@ -643,6 +643,11 @@ pub(super) enum Diagnostic<'a> {
         name: scope::Member<'a>,
     },
 
+    #[error("negative bitfield width")]
+    #[diagnostics(at(colour = Red, label = "this width is negative: `{width}`"))]
+    #[with(width = width.fg(Red))]
+    BitfieldWidthNegative { at: TypedExpression<'a>, width: i64 },
+
     #[error("zero-width bitfields must be unnamed")]
     #[diagnostics(
         at(colour = Red, label = "this bitfield must not have a name"),

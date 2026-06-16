@@ -27,3 +27,11 @@ Error: signed overflow in constant expression
    │           ────────┬────────  
    │                   ╰────────── in this expression of type `int`
 ───╯
+
+Error: negative bitfield width
+   ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_bitfield_width.c:4:11]
+   │
+ 4 │     int z:10 - 20;
+   │           ───┬───  
+   │              ╰───── this width is negative: `-10`
+───╯
