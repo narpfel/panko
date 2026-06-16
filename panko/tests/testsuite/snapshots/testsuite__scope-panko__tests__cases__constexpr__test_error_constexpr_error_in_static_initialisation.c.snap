@@ -124,6 +124,11 @@ exit_code: 0
             (member bitfield (bitfield-width 10) `int`))
          (declaration value~57 `struct T~56 complete`
             (braced
-               (designation ((member bitfield)) (multiply (divide 1 0) (divide 1 0))))))))
+               (designation ((member bitfield)) (multiply (divide 1 0) (divide 1 0)))))))
+   (function-definition
+      error_in_pointer_arithmetic~58 `fn() -> void`
+      (compound-statement
+         (declaration a~60 `long` (subtract (cast `ptr<int>` 0xffff'ffff'ffff'fff0) (cast `ptr<int>` 4)))
+         (declaration b~61 `long` (subtract (cast `ptr<int>` 25) (cast `ptr<int>` 20))))))
 
 ----- stderr -----

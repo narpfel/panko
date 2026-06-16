@@ -31,6 +31,8 @@ pub(crate) enum Kind {
     NegativeShiftRhs,
     ShiftRhsOutOfRange,
     IsZero,
+    PointerDiffOverflow,
+    UnalignedPointer,
 }
 
 impl Kind {
@@ -47,6 +49,8 @@ impl fmt::Display for Kind {
             Self::NegativeShiftRhs => "shift count negative",
             Self::ShiftRhsOutOfRange => "shift count exceeds size of shifted type",
             Self::IsZero => "division by zero",
+            Self::PointerDiffOverflow => "overflow in pointer difference",
+            Self::UnalignedPointer => "arithmetic on unaligned pointer",
         };
         write!(f, "{s}")
     }

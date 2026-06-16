@@ -500,12 +500,18 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
 
         Expression::PtrDiff { lhs, rhs, pointee_size } =>
             eval_pointer_binop(typed_expr, PointerBinopKind::Other, lhs, rhs, |lhs, rhs| {
-                let difference = arithmetic::binop(lhs, rhs, u64::checked_signed_diff, || todo!());
+                let difference = arithmetic::binop(lhs, rhs, u64::checked_signed_diff, || {
+                    PointerDiffOverflow.at(typed_expr)
+                });
                 let pointee_size = pointee_size
                     .checked_cast_signed()
                     .expect("TODO: object size larger than `i64::MAX`");
+                // TODO: this does not catch cases where both pointers are misaligned by the same
+                // amount, e. g. `(int*)5 - (int*)1`
                 let result: Result<i64, _> =
-                    arithmetic::binop(difference, Ok(pointee_size), i64::div_exact, || todo!());
+                    arithmetic::binop(difference, Ok(pointee_size), i64::div_exact, || {
+                        UnalignedPointer.at(typed_expr)
+                    });
                 result.into_value(ty)
             }),
 

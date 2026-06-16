@@ -341,3 +341,19 @@ Error: division by zero in constant expression
     │                                                         ┬  
     │                                                         ╰── in this expression of type `int`
 ────╯
+
+Error: overflow in pointer difference in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:81:27]
+    │
+ 81 │     static long a = (int*)0xffff'ffff'ffff'fff0 - (int*)4;
+    │                           ───────────────┬───────────────  
+    │                                          ╰───────────────── in this expression of type `long`
+────╯
+
+Error: arithmetic on unaligned pointer in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:82:21]
+    │
+ 82 │     static long b = ((int*)25) - (int*)20;
+    │                     ──────────┬──────────  
+    │                               ╰──────────── in this expression of type `long`
+────╯

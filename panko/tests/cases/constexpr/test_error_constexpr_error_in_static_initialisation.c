@@ -76,3 +76,8 @@ void error_in_static_initialiser_of_bitfield_member() {
     };
     static struct T value = {.bitfield = (1 / 0) * (1 / 0)};
 }
+
+void error_in_pointer_arithmetic() {
+    static long a = (int*)0xffff'ffff'ffff'fff0 - (int*)4;
+    static long b = ((int*)25) - (int*)20;
+}
