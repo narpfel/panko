@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/constexpr/test_error_in_designator.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: division by zero in constant expression
+   ╭─[panko/tests/cases/constexpr/test_error_in_designator.c:4:14]
+   │
+ 4 │         [1 / 0] = 27,
+   │              ┬  
+   │              ╰── in this expression of type `int`
+───╯
+
+Error: negative index in designated initialiser
+   ╭─[panko/tests/cases/constexpr/test_error_in_designator.c:5:9]
+   │
+ 5 │         [123 - 456] = 123,
+   │         ─────┬─────  
+   │              ╰─────── this index expression evaluates to `-333`
+───╯

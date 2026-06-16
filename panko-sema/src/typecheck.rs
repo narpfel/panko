@@ -31,7 +31,6 @@ use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::reject_function_specifiers;
-use panko_parser::error_todo;
 use panko_report::Report;
 use variant_types::IntoVariant as _;
 
@@ -1307,18 +1306,17 @@ fn typeck_initialiser_list<'a>(
                         Designator::Bracketed { open_bracket: _, index, close_bracket: _ } => {
                             let index = typeck_expression(sess, index, Context::Default);
                             let index = match constexpr::eval(&index).into_integral() {
-                                Ok(constexpr::Integral::Signed(value)) => u64::try_from(value)
-                                    .unwrap_or_else(|_| {
-                                        error_todo!(
-                                            index,
-                                            "negative index in designated initialiser",
-                                        )
-                                    }),
+                                Ok(constexpr::Integral::Signed(value)) =>
+                                    match u64::try_from(value) {
+                                        Ok(value) => value,
+                                        Err(_) =>
+                                            return sess.emit(Diagnostic::NegativeSubobjectIndex {
+                                                at: *designator,
+                                                index: value,
+                                            }),
+                                    },
                                 Ok(constexpr::Integral::Unsigned(value)) => value,
-                                Err(errors) => {
-                                    sess.emit_many(errors);
-                                    error_todo!(index, "error in constexpr evaluation")
-                                }
+                                Err(errors) => return sess.emit_many(errors),
                             };
                             subobjects.goto_index(index)
                         }

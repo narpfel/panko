@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/constexpr/test_error_in_designator.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/constexpr/test_error_in_designator.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration xs~2 `array<int; 10>`
+            (braced
+               (designation ((index 1)) 42)
+               (designation ((index (divide 1 0))) 27)
+               (designation ((index (subtract 123 456))) 123))))))
+
+----- stderr -----

@@ -436,6 +436,11 @@ pub(super) enum Diagnostic<'a> {
         iterator: SubobjectIterator<'a>,
     },
 
+    #[error("negative index in designated initialiser")]
+    #[diagnostics(at(colour = Red, label = "this index expression evaluates to `{index}`"))]
+    #[with(index = index.fg(Red))]
+    NegativeSubobjectIndex { at: Designator<'a>, index: i64 },
+
     #[error("empty character constant")]
     #[diagnostics(at(colour = Red, label = "this character constant is empty"))]
     EmptyCharConstant { at: Token<'a> },
