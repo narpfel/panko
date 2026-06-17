@@ -33,15 +33,6 @@ impl fmt::Display for &dyn Report {
     }
 }
 
-impl<'a, T> From<T> for Box<dyn Report + 'a>
-where
-    T: Report + 'a,
-{
-    fn from(value: T) -> Self {
-        Box::new(value)
-    }
-}
-
 pub trait Sliced {
     fn slice(&self) -> String;
 }
