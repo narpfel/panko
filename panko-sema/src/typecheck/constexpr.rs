@@ -134,11 +134,9 @@ impl<'a> Value<'a> {
 
     fn convert(self, new_ty: Type<'a>, kind: ConversionKind) -> Self {
         let Self { ty, repr } = self;
-        if let Repr::Error(_) = repr {
-            return Self { ty: new_ty, repr };
-        }
         type Kind = ConversionKind;
         match kind {
+            _ if let Repr::Error(_) = repr => Self { ty: new_ty, repr },
             // TODO: check for illegal pointer conversions
             Kind::Noop => Self { ty: new_ty, repr },
             Kind::Bool => {
