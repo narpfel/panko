@@ -26,7 +26,7 @@ exit_code: 0
                (f~0 `fn(x: int) -> int`)))
          (return
             (call `int`
-               (addressof `ptr<fn(∅: int) -> int>` `ptr<fn(∅: int) -> int>`
+               (addressof `ptr<fn(∅: int) -> int>`
                   (deref `fn(∅: int) -> int`
                      (addressof `ptr<fn(∅: int) -> int>`
                         (deref `fn(∅: int) -> int`

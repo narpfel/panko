@@ -39,7 +39,7 @@ pub(crate) fn typeck_ptradd<'a>(
     assert_matches!(pointer.ty.ty, Type::Pointer(_));
     assert_matches!(integral.ty.ty, Type::Arithmetic(Arithmetic::Integral(_)));
     if pointee_ty.ty.is_complete() {
-        let integral = convert_as_if_by_assignment(sess, Type::size_t().unqualified(), integral);
+        let integral = convert_as_if_by_assignment(sess, Type::ptrdiff_t().unqualified(), integral);
         TypedExpression {
             ty: pointer.ty.make_unqualified(),
             expr: Expression::PtrAdd {
@@ -71,7 +71,7 @@ pub(crate) fn typeck_ptrsub<'a>(
     assert_matches!(pointer.ty.ty, Type::Pointer(_));
     assert_matches!(integral.ty.ty, Type::Arithmetic(Arithmetic::Integral(_)));
     if pointee_ty.ty.is_complete() {
-        let integral = convert_as_if_by_assignment(sess, Type::size_t().unqualified(), integral);
+        let integral = convert_as_if_by_assignment(sess, Type::ptrdiff_t().unqualified(), integral);
         TypedExpression {
             ty: pointer.ty.make_unqualified(),
             expr: Expression::PtrSub {

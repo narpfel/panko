@@ -27,6 +27,6 @@ exit_code: 0
                      (deref `ptr<char>` @40
                         (ptr-add `ptr<ptr<char>>` @48
                            (argv~4 `ptr<ptr<char>>` @8)
-                           (sign-extend `unsigned long` @56 (1 `int` @64)))))))))))
+                           (sign-extend `long` @56 (1 `int` @64)))))))))))
 
 ----- stderr -----

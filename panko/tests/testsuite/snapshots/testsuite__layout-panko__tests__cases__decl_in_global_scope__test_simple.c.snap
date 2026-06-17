@@ -12,6 +12,6 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/decl_in_global_scope/test_simple.c"
    (tentative-definition external (x~0 `int` (static x)) ∅)
-   (definition external (y~1 `int` (static y)) (42 `int` (static y))))
+   (definition external (y~1 `int` (static y)) (42 `int`)))
 
 ----- stderr -----

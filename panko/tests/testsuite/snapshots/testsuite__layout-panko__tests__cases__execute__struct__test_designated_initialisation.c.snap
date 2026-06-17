@@ -220,7 +220,7 @@ exit_code: 0
                            (addressof `ptr<array<struct T~3 complete; 3>>` @88
                               (member `array<struct T~3 complete; 3>` @44 ts +0
                                  (contains_array~13 `struct ContainsArray~6 complete` @44))))
-                        (sign-extend `unsigned long` @96 (0 `int` @104)))))
+                        (sign-extend `long` @96 (0 `int` @104)))))
                (member `unsigned int` @112 y +4
                   (deref `struct T~3 complete` @void
                      (ptr-add `ptr<struct T~3 complete>` @104
@@ -228,7 +228,7 @@ exit_code: 0
                            (addressof `ptr<array<struct T~3 complete; 3>>` @104
                               (member `array<struct T~3 complete; 3>` @44 ts +0
                                  (contains_array~13 `struct ContainsArray~6 complete` @44))))
-                        (sign-extend `unsigned long` @112 (0 `int` @120)))))
+                        (sign-extend `long` @112 (0 `int` @120)))))
                (member `unsigned int` @128 x +0
                   (deref `struct T~3 complete` @void
                      (ptr-add `ptr<struct T~3 complete>` @120
@@ -236,7 +236,7 @@ exit_code: 0
                            (addressof `ptr<array<struct T~3 complete; 3>>` @120
                               (member `array<struct T~3 complete; 3>` @44 ts +0
                                  (contains_array~13 `struct ContainsArray~6 complete` @44))))
-                        (sign-extend `unsigned long` @128 (1 `int` @136)))))
+                        (sign-extend `long` @128 (1 `int` @136)))))
                (member `unsigned int` @144 y +4
                   (deref `struct T~3 complete` @void
                      (ptr-add `ptr<struct T~3 complete>` @136
@@ -244,7 +244,7 @@ exit_code: 0
                            (addressof `ptr<array<struct T~3 complete; 3>>` @136
                               (member `array<struct T~3 complete; 3>` @44 ts +0
                                  (contains_array~13 `struct ContainsArray~6 complete` @44))))
-                        (sign-extend `unsigned long` @144 (1 `int` @152)))))
+                        (sign-extend `long` @144 (1 `int` @152)))))
                (member `unsigned int` @160 x +0
                   (deref `struct T~3 complete` @void
                      (ptr-add `ptr<struct T~3 complete>` @152
@@ -252,7 +252,7 @@ exit_code: 0
                            (addressof `ptr<array<struct T~3 complete; 3>>` @152
                               (member `array<struct T~3 complete; 3>` @44 ts +0
                                  (contains_array~13 `struct ContainsArray~6 complete` @44))))
-                        (sign-extend `unsigned long` @160 (2 `int` @168)))))
+                        (sign-extend `long` @160 (2 `int` @168)))))
                (member `unsigned int` @176 y +4
                   (deref `struct T~3 complete` @void
                      (ptr-add `ptr<struct T~3 complete>` @168
@@ -260,6 +260,6 @@ exit_code: 0
                            (addressof `ptr<array<struct T~3 complete; 3>>` @168
                               (member `array<struct T~3 complete; 3>` @44 ts +0
                                  (contains_array~13 `struct ContainsArray~6 complete` @44))))
-                        (sign-extend `unsigned long` @176 (2 `int` @184))))))))))
+                        (sign-extend `long` @176 (2 `int` @184))))))))))
 
 ----- stderr -----

@@ -22,8 +22,8 @@ exit_code: 0
                      (calloc~0 `fn(∅: unsigned long, ∅: unsigned long) -> ptr<void>`))
                   (sign-extend `unsigned long` (2 `int`))
                   (sizeof `unsigned long` 8 `long`))))
-         (expression (assign `long` (deref `long` (ptr-add `ptr<long>` (p~3 `ptr<long>`) (sign-extend `unsigned long` (0 `int`)))) (sign-extend `long` (42 `int`))))
-         (expression (assign `long` (deref `long` (ptr-add `ptr<long>` (p~3 `ptr<long>`) (sign-extend `unsigned long` (1 `int`)))) (sign-extend `long` (27 `int`))))
-         (return (truncate `int` (add `long` (deref `long` (ptr-add `ptr<long>` (p~3 `ptr<long>`) (sign-extend `unsigned long` (0 `int`)))) (deref `long` (ptr-add `ptr<long>` (sign-extend `unsigned long` (1 `int`)) (p~3 `ptr<long>`)))))))))
+         (expression (assign `long` (deref `long` (ptr-add `ptr<long>` (p~3 `ptr<long>`) (sign-extend `long` (0 `int`)))) (sign-extend `long` (42 `int`))))
+         (expression (assign `long` (deref `long` (ptr-add `ptr<long>` (p~3 `ptr<long>`) (sign-extend `long` (1 `int`)))) (sign-extend `long` (27 `int`))))
+         (return (truncate `int` (add `long` (deref `long` (ptr-add `ptr<long>` (p~3 `ptr<long>`) (sign-extend `long` (0 `int`)))) (deref `long` (ptr-add `ptr<long>` (sign-extend `long` (1 `int`)) (p~3 `ptr<long>`)))))))))
 
 ----- stderr -----

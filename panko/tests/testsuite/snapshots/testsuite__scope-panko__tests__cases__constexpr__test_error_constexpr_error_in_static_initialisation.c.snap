@@ -1,0 +1,145 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c"
+   (declaration a~0 `int` (left-shift (negate 1) 1))
+   (declaration b~1 `int` (left-shift 1 (negate 1)))
+   (declaration c~2 `int` (right-shift 1 (negate 1)))
+   (declaration d~3 `int` (left-shift 1 32))
+   (declaration e~4 `int` (left-shift 1 31))
+   (declaration f~5 `int` (left-shift 1 0x1'0000'0000))
+   (declaration g~6 `int` (divide 1 0))
+   (declaration h~7 `int` (divide (subtract (negate 0x7fff'ffff) 1) (negate 1)))
+   (declaration i~8 `int` (modulo 1 0))
+   (declaration j~9 `int` (modulo (subtract (negate 0x7fff'ffff) 1) (negate 1)))
+   (declaration k~10 `int` (left-shift (add 0x7fff'ffff 1) 0x1'0000'0000))
+   (declaration l~11 `int` (left-shift (add 0x7fff'ffff 1) 100))
+   (declaration m~12 `unsigned int` (divide 1u 0u))
+   (declaration n~13 `unsigned int` (modulo 1u 0u))
+   (declaration o~14 `int` (divide (add 0x7fff'ffff 1) 0))
+   (declaration not_constexpr~15 `int` 42)
+   (declaration p~16 `int` (assign (name not_constexpr~15 `int`) (divide 1 0)))
+   (declaration q~17 `int`
+      (comma
+         (divide 1 0)
+         0))
+   (declaration r~18 `int`
+      (comma
+         1
+         (divide 1 0)))
+   (declaration s~19 `int`
+      (comma
+         (divide 1 0)
+         (divide 1 0)))
+   (function-definition
+      logical~20 `fn() -> void`
+      (compound-statement
+         (declaration a~22 `int`
+            (logical-and
+               (divide 1 0)
+               (divide 1 0)))
+         (declaration b~23 `int`
+            (logical-and
+               1
+               (divide 1 0)))
+         (declaration c~24 `int`
+            (logical-or
+               0
+               (divide 1 0)))
+         (declaration d~25 `int`
+            (logical-or
+               (divide 1 0)
+               (divide 1 0)))))
+   (function-definition
+      conditional~26 `fn() -> void`
+      (compound-statement
+         (declaration a~28 `int`
+            (conditional
+               1
+               (divide 1 0)
+               (divide 1 0)))
+         (declaration b~29 `int`
+            (conditional
+               0
+               (divide 1 0)
+               (divide 1 0)))
+         (declaration c~30 `int`
+            (conditional
+               (divide 1 0)
+               (divide 1 0)
+               (divide 1 0)))))
+   (function-definition
+      compound_literal~31 `fn() -> void`
+      (compound-statement
+         (struct T~33
+            (member x `int`)
+            (member y `int`))
+         (hoisted-compound-literal compound_literal.35~36 `struct T~33 complete`)
+         (declaration a~34 `struct T~33 complete`
+            (compound-literal
+               (declaration compound_literal.35~36 `struct T~33 complete`
+                  (braced
+                     (designation ((member x)) 1)
+                     (designation ((member y)) (divide 1 0))))))
+         (hoisted-compound-literal compound_literal.38~39 `struct T~33 complete`)
+         (declaration b~37 `struct T~33 complete`
+            (compound-literal
+               (declaration compound_literal.38~39 `struct T~33 complete`
+                  (braced
+                     (designation ((member x)) 1)
+                     (designation ((member y)) (add 1 2))))))))
+   (declaration t~40 `int`
+      (comma
+         (cast `void` (divide 1 0))
+         42))
+   (function-definition
+      pointers~41 `fn() -> void`
+      (compound-statement
+         (declaration a~43 `int` ∅)
+         (declaration b~44 `ptr<int>` (addressof (name a~43 `int`)))
+         (declaration c~45 `ptr<int>` (addressof (deref (name b~44 `ptr<int>`))))))
+   (function-definition
+      error_in_bitshift_operands~46 `fn() -> void`
+      (compound-statement
+         (declaration x~48 `int` (left-shift (divide 1 0) (divide 1 0)))))
+   (function-definition
+      comparison_between_pointers_into_different_objects~49 `fn() -> void`
+      (compound-statement
+         (declaration x~51 `int` 42)
+         (declaration y~52 `int` 27)
+         (declaration comparison_result~53 `int` (less (addressof (name x~51 `int`)) (addressof (name y~52 `int`))))))
+   (function-definition
+      error_in_static_initialiser_of_bitfield_member~54 `fn() -> void`
+      (compound-statement
+         (struct T~56
+            (member bitfield (bitfield-width 10) `int`))
+         (declaration value~57 `struct T~56 complete`
+            (braced
+               (designation ((member bitfield)) (multiply (divide 1 0) (divide 1 0)))))))
+   (function-definition
+      error_in_pointer_arithmetic~58 `fn() -> void`
+      (compound-statement
+         (declaration a~60 `long` (subtract (cast `ptr<int>` 0xffff'ffff'ffff'fff0) (cast `ptr<int>` 4)))
+         (declaration b~61 `long` (subtract (cast `ptr<int>` 25) (cast `ptr<int>` 20)))
+         (declaration xs~62 `array<int; (left-shift 1l 61)>` ∅)
+         (declaration c~63 `long` (subtract (addressof (name xs~62 `array<int; (left-shift 1l 61)>`)) (addressof (name xs~62 `array<int; (left-shift 1l 61)>`))))))
+   (function-definition
+      error_in_pointer_addition~64 `fn() -> void`
+      (compound-statement
+         (declaration a~66 `int` ∅)
+         (declaration p~67 `ptr<int>` (add (addressof (name a~66 `int`)) 0x7fff'ffff'ffff'0000))
+         (declaration p2~68 `ptr<int>` (subtract (addressof (name a~66 `int`)) 1))
+         (declaration p3~69 `ptr<int>` (subtract (cast `ptr<int>` 20) 10))
+         (declaration xs~70 `array<int; (left-shift 1l 61)>` ∅)
+         (declaration p4~71 `ptr<int>` (add (addressof (name xs~70 `array<int; (left-shift 1l 61)>`)) 1)))))
+
+----- stderr -----

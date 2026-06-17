@@ -13,7 +13,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/f.c"
-   (definition internal (x~0 `int` (static x)) (27 `int` (static x)))
+   (definition internal (x~0 `int` (static x)) (27 `int`))
    (function-definition external stack-size=8
       (f~1 `fn() -> int` (static f))
       (compound-statement
@@ -35,7 +35,7 @@ exit_code: 0
                      (deref `int` @16 (unnamed-temporary~6 `ptr<int>` @8))
                      (y~5 `int` @0))))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_internal_linkage_variables_are_not_globally_visible/g.c"
-   (definition internal (x~0 `int` (static x)) (10 `int` (static x)))
+   (definition internal (x~0 `int` (static x)) (10 `int`))
    (function-definition external stack-size=8
       (g~1 `fn() -> int` (static g))
       (compound-statement
@@ -62,7 +62,7 @@ exit_code: 0
    (declaration external (add_f~2 `fn(∅: int) -> void` (static add_f)) ∅)
    (declaration external (g~3 `fn() -> int` (static g)) ∅)
    (declaration external (add_g~4 `fn(∅: int) -> void` (static add_g)) ∅)
-   (definition external (x~5 `int` (static x)) (42 `int` (static x)))
+   (definition external (x~5 `int` (static x)) (42 `int`))
    (function-definition external stack-size=56
       (print_variables~6 `fn() -> void` (static print_variables))
       (compound-statement

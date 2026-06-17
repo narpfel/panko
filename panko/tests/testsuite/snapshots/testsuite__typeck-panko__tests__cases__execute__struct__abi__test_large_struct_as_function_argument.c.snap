@@ -39,35 +39,35 @@ exit_code: 0
                         (addressof `ptr<array<int; 5>>`
                            (member `array<int; 5>` xs +16
                               (large~4 `struct Large~1 complete`))))
-                     (sign-extend `unsigned long` (0 `int`))))
+                     (sign-extend `long` (0 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 5>>`
                            (member `array<int; 5>` xs +16
                               (large~4 `struct Large~1 complete`))))
-                     (sign-extend `unsigned long` (1 `int`))))
+                     (sign-extend `long` (1 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 5>>`
                            (member `array<int; 5>` xs +16
                               (large~4 `struct Large~1 complete`))))
-                     (sign-extend `unsigned long` (2 `int`))))
+                     (sign-extend `long` (2 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 5>>`
                            (member `array<int; 5>` xs +16
                               (large~4 `struct Large~1 complete`))))
-                     (sign-extend `unsigned long` (3 `int`))))
+                     (sign-extend `long` (3 `int`))))
                (deref `int`
                   (ptr-add `ptr<int>`
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 5>>`
                            (member `array<int; 5>` xs +16
                               (large~4 `struct Large~1 complete`))))
-                     (sign-extend `unsigned long` (4 `int`))))))))
+                     (sign-extend `long` (4 `int`))))))))
    (function-definition external
       main~5 `fn() -> int`
       (compound-statement

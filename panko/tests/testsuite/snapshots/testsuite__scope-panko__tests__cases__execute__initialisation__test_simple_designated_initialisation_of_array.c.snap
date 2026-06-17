@@ -88,6 +88,25 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (name s~10 `ptr<char const>`)
-               (subscript (name xs~9 `array<int; ∅>`) 42))))))
+               (subscript (name xs~9 `array<int; ∅>`) 42)))
+         (declaration ys~11 `array<int; ∅>`
+            (braced
+               (designation ((index (sizeof `short`)))
+                  (call (name f~1 `fn(x: int) -> int`)
+                     100))
+               (designation ((index (sizeof `char`)))
+                  (call (name f~1 `fn(x: int) -> int`)
+                     200))
+               (designation ((index (sizeof `int`)))
+                  (call (name f~1 `fn(x: int) -> int`)
+                     400))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "{%d, %d, %d, %d, %d}\n")
+               (subscript (name ys~11 `array<int; ∅>`) 0)
+               (subscript (name ys~11 `array<int; ∅>`) 1)
+               (subscript (name ys~11 `array<int; ∅>`) 2)
+               (subscript (name ys~11 `array<int; ∅>`) 3)
+               (subscript (name ys~11 `array<int; ∅>`) 4))))))
 
 ----- stderr -----

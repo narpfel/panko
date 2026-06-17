@@ -1,0 +1,52 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/constexpr/test_constexpr_eval_of_pointers_to_extern_name.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/constexpr/test_constexpr_eval_of_pointers_to_extern_name.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (definition external (global_name~1 `int` (static global_name)) (10 `int`))
+   (function-definition external stack-size=40
+      (main~2 `fn() -> int` (static main))
+      (compound-statement
+         (definition (ptr~4 `ptr<int>` (static ptr.4))
+            (addressof `ptr<int>`
+               (global_name~1 `int`)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (deref `int` @24 (ptr~4 `ptr<int>` (static ptr.4)))))
+         (expression
+            (combine `int` @0
+               (assign `ptr<int>` @8
+                  (unnamed-temporary~5 `ptr<int>` @8)
+                  (addressof `ptr<int>` @8
+                     (deref `int` @8 (ptr~4 `ptr<int>` (static ptr.4)))))
+               (assign `int` @0
+                  (deref `int` @0 (unnamed-temporary~5 `ptr<int>` @8))
+                  (add `int` @16
+                     (deref `int` @16 (unnamed-temporary~5 `ptr<int>` @8))
+                     (1 `int` @24)))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (global_name~1 `int` (static global_name)))))))
+
+----- stderr -----

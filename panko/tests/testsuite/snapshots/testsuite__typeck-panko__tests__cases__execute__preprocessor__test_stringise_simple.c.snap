@@ -37,6 +37,6 @@ exit_code: 0
                (noop-type-conversion `ptr<char>`
                   (addressof `ptr<array<char; 10>>`
                      (string `array<char; 10>` "something\0")))))
-         (return (truncate `int` (lengthof `unsigned long` 6 (string `array<char; 6>` `array<char; 6>` "a b c\0")))))))
+         (return (truncate `int` (lengthof `unsigned long` 6 (string `array<char; 6>` "a b c\0")))))))
 
 ----- stderr -----

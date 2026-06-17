@@ -26,13 +26,13 @@ exit_code: 0
             (add `int`
                (add `int`
                   (add `int`
-                     (ptr-equal `int` `int` (p1~4 `ptr<int>`)
+                     (ptr-equal `int` (p1~4 `ptr<int>`)
                         (addressof `ptr<int>`
                            (i1~2 `int`)))
-                     (ptr-equal `int` `int` (p2~5 `ptr<int>`)
+                     (ptr-equal `int` (p2~5 `ptr<int>`)
                         (addressof `ptr<int>`
                            (i2~3 `int`))))
-                  (ptr-equal `int` `int` (ptr-add `ptr<int>` (p1~4 `ptr<int>`) (sign-extend `unsigned long` (1 `int`))) (p2~5 `ptr<int>`)))
-               (ptr-equal `int` `int` (ptr-sub `ptr<int>` (p2~5 `ptr<int>`) (sign-extend `unsigned long` (1 `int`))) (p1~4 `ptr<int>`)))))))
+                  (ptr-equal `int` (ptr-add `ptr<int>` (p1~4 `ptr<int>`) (sign-extend `long` (1 `int`))) (p2~5 `ptr<int>`)))
+               (ptr-equal `int` (ptr-sub `ptr<int>` (p2~5 `ptr<int>`) (sign-extend `long` (1 `int`))) (p1~4 `ptr<int>`)))))))
 
 ----- stderr -----

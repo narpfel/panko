@@ -101,7 +101,7 @@ exit_code: 0
                               (noop-type-conversion `ptr<array<char; 100>>`
                                  (addressof `ptr<array<array<char; 100>; 3>>`
                                     (strings~7 `array<array<char; 100>; 3>`)))
-                              (sign-extend `unsigned long` (0 `int`)))))))))
+                              (sign-extend `long` (0 `int`)))))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`
@@ -114,7 +114,7 @@ exit_code: 0
                               (noop-type-conversion `ptr<array<char; 100>>`
                                  (addressof `ptr<array<array<char; 100>; 3>>`
                                     (strings~7 `array<array<char; 100>; 3>`)))
-                              (sign-extend `unsigned long` (1 `int`)))))))))
+                              (sign-extend `long` (1 `int`)))))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`
@@ -127,7 +127,7 @@ exit_code: 0
                               (noop-type-conversion `ptr<array<char; 100>>`
                                  (addressof `ptr<array<array<char; 100>; 3>>`
                                     (strings~7 `array<array<char; 100>; 3>`)))
-                              (sign-extend `unsigned long` (2 `int`)))))))))
+                              (sign-extend `long` (2 `int`)))))))))
          (compound-statement
             (definition strings~8 `array<array<array<char; 100>; 5>; 3>`
                (braced
@@ -146,7 +146,7 @@ exit_code: 0
                                  (noop-type-conversion `ptr<array<array<char; 100>; 5>>`
                                     (addressof `ptr<array<array<array<char; 100>; 5>; 3>>`
                                        (strings~8 `array<array<array<char; 100>; 5>; 3>`)))
-                                 (sign-extend `unsigned long` (0 `int`)))))))))
+                                 (sign-extend `long` (0 `int`)))))))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>) -> int>`
@@ -159,7 +159,7 @@ exit_code: 0
                                  (noop-type-conversion `ptr<array<array<char; 100>; 5>>`
                                     (addressof `ptr<array<array<array<char; 100>; 5>; 3>>`
                                        (strings~8 `array<array<array<char; 100>; 5>; 3>`)))
-                                 (sign-extend `unsigned long` (1 `int`)))))))))
+                                 (sign-extend `long` (1 `int`)))))))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>) -> int>`
@@ -172,7 +172,7 @@ exit_code: 0
                                  (noop-type-conversion `ptr<array<array<char; 100>; 5>>`
                                     (addressof `ptr<array<array<array<char; 100>; 5>; 3>>`
                                        (strings~8 `array<array<array<char; 100>; 5>; 3>`)))
-                                 (sign-extend `unsigned long` (2 `int`))))))))))
+                                 (sign-extend `long` (2 `int`))))))))))
          (return
             (truncate `int`
                (add `unsigned long` (lengthof `unsigned long` 3 (strings~7 `array<array<char; 100>; 3>`))
@@ -182,6 +182,6 @@ exit_code: 0
                            (noop-type-conversion `ptr<array<char; 100>>`
                               (addressof `ptr<array<array<char; 100>; 3>>`
                                  (strings~7 `array<array<char; 100>; 3>`)))
-                           (sign-extend `unsigned long` (0 `int`)))))))))))
+                           (sign-extend `long` (0 `int`)))))))))))
 
 ----- stderr -----

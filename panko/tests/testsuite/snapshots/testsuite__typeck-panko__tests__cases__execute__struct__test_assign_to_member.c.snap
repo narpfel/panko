@@ -208,7 +208,7 @@ exit_code: 0
                      (member `struct Middle~3 complete` middle +4
                         (outer~11 `struct Outer~4 complete`))))
                (add `int`
-                  (assign `int` `int`
+                  (assign `int`
                      (member `int` z +8
                         (member `struct Inner~2 complete` inner +32
                            (outer~11 `struct Outer~4 complete`)))
@@ -263,7 +263,7 @@ exit_code: 0
                   (member `struct Inner~2 complete` inner +4
                      (deref `struct Middle~3 complete` (p~15 `ptr<struct Middle~3 complete>`))))
                (add `int`
-                  (assign `int` `int`
+                  (assign `int`
                      (member `int` y +4
                         (member `struct Inner~2 complete` inner2 +16
                            (deref `struct Middle~3 complete` (p~15 `ptr<struct Middle~3 complete>`))))

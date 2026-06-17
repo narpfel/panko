@@ -35,7 +35,7 @@ exit_code: 0
                      (noop-type-conversion `ptr<ptr<char const>>`
                         (addressof `ptr<array<ptr<char const>; 1>>`
                            (s~3 `array<ptr<char const>; 1>`)))
-                     (sign-extend `unsigned long` (0 `int`))))))
-         (return (truncate `int` (lengthof `unsigned long` 1 (s~3 `array<ptr<char const>; 1>` `array<ptr<char const>; 1>`)))))))
+                     (sign-extend `long` (0 `int`))))))
+         (return (truncate `int` (lengthof `unsigned long` 1 (s~3 `array<ptr<char const>; 1>`)))))))
 
 ----- stderr -----

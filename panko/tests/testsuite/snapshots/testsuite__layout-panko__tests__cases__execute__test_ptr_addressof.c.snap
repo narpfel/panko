@@ -37,12 +37,12 @@ exit_code: 0
                   (ptr-equal `int` @28
                      (ptr-add `ptr<int>` @32
                         (p1~4 `ptr<int>` @8)
-                        (sign-extend `unsigned long` @40 (1 `int` @48)))
+                        (sign-extend `long` @40 (1 `int` @48)))
                      (p2~5 `ptr<int>` @16)))
                (ptr-equal `int` @28
                   (ptr-sub `ptr<int>` @32
                      (p2~5 `ptr<int>` @16)
-                     (sign-extend `unsigned long` @40 (1 `int` @48)))
+                     (sign-extend `long` @40 (1 `int` @48)))
                   (p1~4 `ptr<int>` @8)))))))
 
 ----- stderr -----

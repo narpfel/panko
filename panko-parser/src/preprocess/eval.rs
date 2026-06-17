@@ -193,7 +193,7 @@ impl<'a> Value<'a> {
             (Self::Error(_), _) | (_, Self::Error(_)) => lhs.chain_errors(rhs),
             (Self::Signed(value), rhs) => Self::Signed(
                 value
-                    .checked_mul(1 << rhs.as_u64())
+                    .shl_exact(u32::try_from(rhs.as_u64()).unwrap())
                     .ok_or(EvalError::SignedOverflow)?,
             ),
             (Self::Unsigned(value), rhs) =>

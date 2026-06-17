@@ -28,7 +28,7 @@ exit_code: 0
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; 2>>`
                            (xs~3 `array<int; 2>`)))
-                     (sign-extend `unsigned long` (0 `int`))))))
+                     (sign-extend `long` (0 `int`))))))
          (definition p2~5 `ptr<int const>`
             (noop-type-conversion `ptr<int const>`
                (addressof `ptr<int>`
@@ -37,7 +37,7 @@ exit_code: 0
                         (noop-type-conversion `ptr<int>`
                            (addressof `ptr<array<int; 2>>`
                               (xs~3 `array<int; 2>`)))
-                        (sign-extend `unsigned long` (1 `int`)))))))
+                        (sign-extend `long` (1 `int`)))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`

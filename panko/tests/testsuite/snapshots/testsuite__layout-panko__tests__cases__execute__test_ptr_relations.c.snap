@@ -18,12 +18,12 @@ exit_code: 0
          (definition (b~3 `unsigned long long` @8) (sign-extend `unsigned long long` @8 (42 `int` @16)))
          (definition (p2~4 `ptr<long>` @16)
             (ptr-add `ptr<long>` @16
-               (noop-type-conversion `unsigned long` @8 (b~3 `unsigned long long` @8))
+               (noop-type-conversion `long` @8 (b~3 `unsigned long long` @8))
                (p1~2 `ptr<long>` @0)))
          (definition (p3~5 `ptr<long>` @24)
             (ptr-sub `ptr<long>` @24
                (p2~4 `ptr<long>` @16)
-               (noop-type-conversion `unsigned long` @8 (b~3 `unsigned long long` @8))))
+               (noop-type-conversion `long` @8 (b~3 `unsigned long long` @8))))
          (return
             (add `int` @32
                (add `int` @32

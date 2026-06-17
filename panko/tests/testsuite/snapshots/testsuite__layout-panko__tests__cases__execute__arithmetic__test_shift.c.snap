@@ -28,7 +28,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @56 (1 `int` @64)))))
+                        (sign-extend `long` @56 (1 `int` @64)))))
                (right-shift `int` @56
                   (i~5 `int` @16)
                   (0 `int` @60))))
@@ -40,7 +40,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @56 (1 `int` @64)))))
+                        (sign-extend `long` @56 (1 `int` @64)))))
                (right-shift `int` @56
                   (42 `int` @56)
                   (sign-extend `int` @60 (one~6 `char` @20)))))
@@ -52,7 +52,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @56 (1 `int` @64)))))
+                        (sign-extend `long` @56 (1 `int` @64)))))
                (right-shift `int` @56
                   (i~5 `int` @16)
                   (2 `int` @60))))
@@ -64,7 +64,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @56 (1 `int` @64)))))
+                        (sign-extend `long` @56 (1 `int` @64)))))
                (right-shift `int` @56
                   (i~5 `int` @16)
                   (10 `int` @60))))
@@ -76,7 +76,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @56 (1 `int` @64)))))
+                        (sign-extend `long` @56 (1 `int` @64)))))
                (left-shift `int` @56
                   (i~5 `int` @16)
                   (0 `int` @60))))
@@ -88,7 +88,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @56 (1 `int` @64)))))
+                        (sign-extend `long` @56 (1 `int` @64)))))
                (left-shift `int` @56
                   (i~5 `int` @16)
                   (sign-extend `int` @60 (one~6 `char` @20)))))
@@ -100,7 +100,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @56 (1 `int` @64)))))
+                        (sign-extend `long` @56 (1 `int` @64)))))
                (left-shift `int` @56
                   (i~5 `int` @16)
                   (10 `int` @60))))
@@ -113,7 +113,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @56 (2 `int` @64)))))
+                        (sign-extend `long` @56 (2 `int` @64)))))
                (left-shift `unsigned int` @56
                   (u~7 `unsigned int` @24)
                   (sign-extend `int` @60 (one~6 `char` @20)))))
@@ -125,7 +125,7 @@ exit_code: 0
                   (deref `ptr<char>` @40
                      (ptr-add `ptr<ptr<char>>` @48
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @56 (2 `int` @64)))))
+                        (sign-extend `long` @56 (2 `int` @64)))))
                (right-shift `unsigned int` @56
                   (u~7 `unsigned int` @24)
                   (sign-extend `int` @60 (one~6 `char` @20)))))
@@ -138,7 +138,7 @@ exit_code: 0
                   (deref `ptr<char>` @48
                      (ptr-add `ptr<ptr<char>>` @56
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @64 (2 `int` @72)))))
+                        (sign-extend `long` @64 (2 `int` @72)))))
                (left-shift `int` @64
                   (n~8 `int` @28)
                   (sign-extend `int` @68 (one~6 `char` @20)))))
@@ -150,7 +150,7 @@ exit_code: 0
                   (deref `ptr<char>` @48
                      (ptr-add `ptr<ptr<char>>` @56
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @64 (2 `int` @72)))))
+                        (sign-extend `long` @64 (2 `int` @72)))))
                (right-shift `int` @64
                   (n~8 `int` @28)
                   (sign-extend `int` @68 (one~6 `char` @20)))))
@@ -162,7 +162,7 @@ exit_code: 0
                   (deref `ptr<char>` @48
                      (ptr-add `ptr<ptr<char>>` @56
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @64 (2 `int` @72)))))
+                        (sign-extend `long` @64 (2 `int` @72)))))
                (left-shift `int` @64
                   (n~8 `int` @28)
                   (0 `int` @68))))
@@ -174,7 +174,7 @@ exit_code: 0
                   (deref `ptr<char>` @48
                      (ptr-add `ptr<ptr<char>>` @56
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @64 (2 `int` @72)))))
+                        (sign-extend `long` @64 (2 `int` @72)))))
                (right-shift `int` @64
                   (n~8 `int` @28)
                   (0 `int` @68))))
@@ -187,7 +187,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (3 `int` @80)))))
+                        (sign-extend `long` @72 (3 `int` @80)))))
                (left-shift `long` @72
                   (l~9 `long` @32)
                   (16 `int` @80))))
@@ -199,7 +199,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (3 `int` @80)))))
+                        (sign-extend `long` @72 (3 `int` @80)))))
                (right-shift `long` @72
                   (l~9 `long` @32)
                   (16 `int` @80))))
@@ -211,7 +211,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (3 `int` @80)))))
+                        (sign-extend `long` @72 (3 `int` @80)))))
                (right-shift `unsigned long` @72
                   (noop-type-conversion `unsigned long` @32 (l~9 `long` @32))
                   (16 `int` @80))))
@@ -223,7 +223,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (3 `int` @80)))))
+                        (sign-extend `long` @72 (3 `int` @80)))))
                (left-shift `long` @72
                   (l~9 `long` @32)
                   (0 `int` @80))))
@@ -235,7 +235,7 @@ exit_code: 0
                   (deref `ptr<char>` @56
                      (ptr-add `ptr<ptr<char>>` @64
                         (argv~4 `ptr<ptr<char>>` @8)
-                        (sign-extend `unsigned long` @72 (3 `int` @80)))))
+                        (sign-extend `long` @72 (3 `int` @80)))))
                (right-shift `long` @72
                   (l~9 `long` @32)
                   (0 `int` @80)))))))

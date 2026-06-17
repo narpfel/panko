@@ -14,7 +14,6 @@ use std::mem;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use itertools::Itertools as _;
-use itertools::zip_eq;
 use panko_lex::Loc;
 use panko_parser::BinOpKind;
 use panko_parser::Comparison;
@@ -38,6 +37,7 @@ use panko_sema::layout::Subobject;
 use panko_sema::layout::SubobjectInitialiser;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::Type;
+use panko_sema::layout::Value;
 use panko_sema::layout::Varargs;
 use panko_sema::scope::BuiltinName;
 use panko_sema::scope::BuiltinNameKind;
@@ -197,27 +197,20 @@ impl<'a> SubobjectAtReference<'a> {
 
 #[derive(Debug)]
 enum StaticInitialiser<'a> {
-    Braced {
-        subobject_initialisers: Vec<SubobjectInitialiser<'a, &'a Expression<'a>>>,
-    },
-    Expression(&'a Expression<'a>),
+    Empty,
+    Value(Value<'a>),
 }
 
-impl<'a> From<&'a Initialiser<'a>> for StaticInitialiser<'a> {
-    fn from(initialiser: &'a Initialiser<'a>) -> Self {
+impl<'a> From<&Initialiser<'a>> for StaticInitialiser<'a> {
+    fn from(initialiser: &Initialiser<'a>) -> Self {
         match initialiser {
-            Initialiser::Braced { subobject_initialisers } => Self::Braced {
-                subobject_initialisers: subobject_initialisers
-                    .iter()
-                    .map(
-                        |SubobjectInitialiser { subobject, initialiser }| SubobjectInitialiser {
-                            subobject: *subobject,
-                            initialiser: &initialiser.expr,
-                        },
-                    )
-                    .collect(),
+            Initialiser::Braced { subobject_initialisers: [] } => Self::Empty,
+            Initialiser::Static { initialiser: _, value } => match value {
+                Value::Bytes(bytes) if bytes.iter().all(|&b| b == 0) => Self::Empty,
+                _ => Self::Value(*value),
             },
-            Initialiser::Expression(expr) => Self::Expression(&expr.expr),
+            Initialiser::Braced { subobject_initialisers: _ } | Initialiser::Expression(_) =>
+                unreachable!(),
         }
     }
 }
@@ -412,7 +405,7 @@ impl<'a> Codegen<'a> {
         pointee_size: u64,
         integral: &LayoutedExpression,
     ) {
-        assert_eq!(integral.ty.ty, Type::size_t());
+        assert_eq!(integral.ty.ty, Type::ptrdiff_t());
         if pointee_size < MAX_IMUL_IMMEDIATE {
             self.emit_args("imul", &[&R10, integral, &pointee_size]);
         }
@@ -546,77 +539,13 @@ impl<'a> Codegen<'a> {
         self.directive("align", &[&ty.align()]);
         self.label(name);
         match initialiser {
-            Some(StaticInitialiser::Expression(initialiser)) => match initialiser {
-                Expression::Error(_) => todo!("ICE?"),
-                Expression::Name(_) => todo!(),
-                Expression::Integer(value) =>
-                    self.constant(&value.to_le_bytes()[..usize::try_from(size).unwrap()]),
-                Expression::String(_string) => unreachable!(
-                    "either contained in a `noop-type-conversion` or in an initialiser",
-                ),
-                Expression::Nullptr => self.zero(ty.size()),
-                Expression::NoopTypeConversion(_) => todo!(),
-                Expression::Truncate(_) => todo!(),
-                Expression::SignExtend(_) => todo!(),
-                Expression::ZeroExtend(_) => todo!(),
-                Expression::VoidCast(_) => todo!(),
-                Expression::BoolCast(_) => todo!(),
-                Expression::Assign { .. } => todo!(),
-                Expression::IntegralBinOp { .. } => todo!(),
-                Expression::PtrAdd { .. } => todo!(),
-                Expression::PtrSub { .. } => todo!(),
-                Expression::PtrDiff { .. } => todo!(),
-                Expression::PtrCmp { .. } => todo!(),
-                Expression::Addressof(_) => todo!(),
-                Expression::Deref(_) => todo!(),
-                Expression::Call { .. } => todo!(),
-                Expression::Negate(_) => todo!(),
-                Expression::Compl(_) => todo!(),
-                Expression::Not(_) => todo!(),
-                Expression::Combine { .. } => todo!(),
-                Expression::Logical { .. } => todo!(),
-                Expression::Conditional { .. } => todo!(),
-                Expression::MemberAccess { .. } => todo!(),
-                Expression::BuiltinName(_) => todo!(),
-                Expression::CompoundLiteral { .. } => todo!(),
-            },
-            Some(StaticInitialiser::Braced { subobject_initialisers }) => {
-                if subobject_initialisers.is_empty() {
-                    self.zero(size);
-                }
-                else {
-                    // TODO: this can be made a lot more efficient for sparse initialisers
-                    let mut bytes = vec![0; usize::try_from(size).unwrap()];
-                    for SubobjectInitialiser { subobject, initialiser } in subobject_initialisers {
-                        let Subobject { ty, offset, kind } = subobject;
-                        let subobject_size = usize::try_from(ty.size()).unwrap();
-                        let offset = usize::try_from(offset).unwrap();
-                        match kind {
-                            MemberKind::Normal => match initialiser {
-                                Expression::Integer(value) => bytes[offset..][..subobject_size]
-                                    .copy_from_slice(&value.to_le_bytes()[..subobject_size]),
-                                _ => todo!(),
-                            },
-                            MemberKind::Bitfield(Bitfield {
-                                offset: bitfield_offset,
-                                width: _,
-                            }) => match initialiser {
-                                Expression::Integer(value) => {
-                                    for (tgt_byte, src_byte) in zip_eq(
-                                        &mut bytes[offset..][..subobject_size],
-                                        &(value << bitfield_offset).to_le_bytes()[..subobject_size],
-                                    ) {
-                                        *tgt_byte |= src_byte;
-                                    }
-                                }
-                                _ => todo!(),
-                            },
-                        }
-                    }
-                    self.constant(&bytes);
-                }
-            }
-            None => self.zero(size),
+            Some(StaticInitialiser::Value(Value::Bytes(bytes))) => self.constant(bytes),
+            Some(StaticInitialiser::Value(Value::Pointer { reference, offset })) =>
+                match reference.slot() {
+                    Slot::Static(name) => self.directive_with_sep("quad", " + ", &[&name, &offset]),
+                    Slot::Automatic(_) | Slot::Void => unreachable!(),
+                },
+            Some(StaticInitialiser::Empty) | None => self.zero(size),
         }
     }
 
@@ -673,7 +602,7 @@ impl<'a> Codegen<'a> {
                 self.deferred_definitions.insert(name, deferred);
             }
             Slot::Static(_) => (),
-            Slot::Void | Slot::StaticWithOffset { .. } => unreachable!(),
+            Slot::Void => unreachable!(),
         }
     }
 
@@ -788,6 +717,7 @@ impl<'a> Codegen<'a> {
                     },
                 );
             }
+            Some(Initialiser::Static { initialiser: _, value: _ }) => todo!(),
             None => (),
         }
     }
@@ -992,7 +922,7 @@ impl<'a> Codegen<'a> {
                 self.emit_args("mov", &[expr, &Rax.typed(expr)]);
             }
             Expression::PtrAdd { pointer, integral, pointee_size, order } => {
-                assert_eq!(integral.ty.ty, Type::size_t());
+                assert_eq!(integral.ty.ty, Type::ptrdiff_t());
                 let (lhs, rhs) = order.select(pointer, integral);
                 self.expr(lhs);
                 self.expr(rhs);
@@ -1290,7 +1220,6 @@ impl<'a> Codegen<'a> {
                         ty,
                     }),
                     Slot::Void => unreachable!("structs don’t have `void` slots"),
-                    Slot::StaticWithOffset { name: _, offset: _ } => todo!(),
                 }
             }
         };

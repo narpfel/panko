@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/constexpr/test_constexpr_array_lengths.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/constexpr/test_constexpr_array_lengths.c"
+   (declaration a~0 `array<int; 42>` ∅)
+   (declaration b~1 `array<int; (sizeof 1)>` ∅)
+   (declaration c~2 `array<int; (lengthof (name b~1 `array<int; (sizeof 1)>`))>` ∅)
+   (declaration d~3 `array<int; (sizeof `typeof((name c~2 `array<int; (lengthof (name b~1 `array<int; (sizeof 1)>`))>`))`)>` ∅)
+   (declaration e~4 `array<int; (lengthof `typeof((name d~3 `array<int; (sizeof `typeof((name c~2 `array<int; (lengthof (name b~1 `array<int; (sizeof 1)>`))>`))`)>`))`)>` ∅)
+   (declaration f~5 `array<int; (alignof `long`)>` ∅)
+   (declaration g~6 `array<int; (cast `unsigned int` 123)>` ∅)
+   (declaration h~7 `array<int; (cast `unsigned char` 0x102)>` ∅)
+   (declaration i~8 `array<int; (cast `unsigned long` (cast `unsigned char` 0xff))>` ∅)
+   (declaration j~9 `array<int; (cast `long` 42)>` ∅)
+   (declaration k~10 `array<int; (cast `bool` 42)>` ∅)
+   (declaration l~11 `array<int; (negate 0xffff'fff0)>` ∅)
+   (declaration m~12 `array<int; (compl (negate 4))>` ∅)
+   (declaration n~13 `array<int; (not false)>` ∅)
+   (declaration o~14 `array<int; (not (not 42u))>` ∅)
+   (declaration p~15 `array<int; (negate (negate 42))>` ∅))
+
+----- stderr -----

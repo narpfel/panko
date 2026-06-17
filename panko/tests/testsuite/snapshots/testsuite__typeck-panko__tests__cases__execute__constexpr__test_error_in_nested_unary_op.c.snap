@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/constexpr/test_error_in_nested_unary_op.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: signed overflow in constant expression
+   ╭─[panko/tests/cases/execute/constexpr/test_error_in_nested_unary_op.c:3:12]
+   │
+ 3 │     int x:~-(int)0x8000'0000;
+   │            ────────┬────────  
+   │                    ╰────────── in this expression of type `int`
+───╯

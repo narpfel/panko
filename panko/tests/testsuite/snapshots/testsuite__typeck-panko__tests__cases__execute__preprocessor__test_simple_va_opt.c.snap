@@ -32,7 +32,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (add `int` (subtract `int` (3 `int` `int`) (2 `int`)) (5 `int`))))
+               (add `int` (subtract `int` (3 `int`) (2 `int`)) (5 `int`))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -41,6 +41,6 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (add `int` (subtract `int` (3 `int` `int`) (1 `int`)) (2 `int`)))))))
+               (add `int` (subtract `int` (3 `int`) (1 `int`)) (2 `int`)))))))
 
 ----- stderr -----

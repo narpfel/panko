@@ -50,5 +50,9 @@ int main() {
     // [[print: 0x0bcdef6789a12345]]
     printf("0x%016lx\n", u_with_static.x);
 
+    struct BitfieldWithConstexprWidth {
+        int x:sizeof(int);
+    };
+
     return sizeof(struct T);
 }

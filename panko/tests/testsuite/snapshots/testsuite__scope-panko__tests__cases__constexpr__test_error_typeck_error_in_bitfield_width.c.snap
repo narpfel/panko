@@ -1,0 +1,18 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/constexpr/test_error_typeck_error_in_bitfield_width.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/constexpr/test_error_typeck_error_in_bitfield_width.c"
+   (struct T~0
+      (member x (bitfield-width (sizeof `array<int; ∅>`)) `int`)
+      (member y (bitfield-width (lengthof `array<long; ∅>`)) `int`)))
+
+----- stderr -----

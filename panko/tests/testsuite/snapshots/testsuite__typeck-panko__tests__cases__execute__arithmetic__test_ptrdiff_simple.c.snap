@@ -26,9 +26,9 @@ exit_code: 0
             (noop-type-conversion `unsigned long`
                (ptr-diff `long`
                   (addressof `ptr<int>`
-                     (deref `int` (ptr-add `ptr<int>` (array~3 `ptr<int>`) (sign-extend `unsigned long` (10 `int`)))))
+                     (deref `int` (ptr-add `ptr<int>` (array~3 `ptr<int>`) (sign-extend `long` (10 `int`)))))
                   (addressof `ptr<int>`
-                     (deref `int` (ptr-add `ptr<int>` (array~3 `ptr<int>`) (sign-extend `unsigned long` (0 `int`))))))))
+                     (deref `int` (ptr-add `ptr<int>` (array~3 `ptr<int>`) (sign-extend `long` (0 `int`))))))))
          (return (truncate `int` (ptrdiff~4 `unsigned long`))))))
 
 ----- stderr -----

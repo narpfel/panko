@@ -23,9 +23,9 @@ exit_code: 0
             (expression (0 `int`)))
          (compound-statement
             (definition name~4 `array<int; 42>` ∅)
-            (expression (lengthof `unsigned long` 42 (name~4 `array<int; 42>` `array<int; 42>`))))
+            (expression (lengthof `unsigned long` 42 (name~4 `array<int; 42>`))))
          (compound-statement
             (definition name~5 `array<int; 42>` ∅)
-            (expression (lengthof `unsigned long` 42 (name~5 `array<int; 42>` `array<int; 42>`)))))))
+            (expression (lengthof `unsigned long` 42 (name~5 `array<int; 42>`)))))))
 
 ----- stderr -----

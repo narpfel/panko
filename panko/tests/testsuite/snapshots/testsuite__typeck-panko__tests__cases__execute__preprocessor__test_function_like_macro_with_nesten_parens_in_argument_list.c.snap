@@ -29,8 +29,8 @@ exit_code: 0
                         (f~0 `fn(x: int, y: int) -> int`))
                      (5 `int`)
                      (20 `int`))
-                  (add `int` `int` (1 `int`)
-                     (combine `int` `int`
+                  (add `int` (1 `int`)
+                     (combine `int`
                         (100 `int`)
                         (2 `int`))))
                (42 `int`))))))

@@ -235,6 +235,8 @@ exit_code: 0
                         (string `array<char; 10>` "0x%016lx\n\0"))))
                (member `long` x +0
                   (u_with_static~9 `union ∅~8 complete`))))
+         (struct BitfieldWithConstexprWidth~25
+            (member x @0[0:4] `int`))
          (return (truncate `int` (sizeof `unsigned long` 8 `struct T~1 complete`))))))
 
 ----- stderr -----

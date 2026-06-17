@@ -27,6 +27,6 @@ exit_code: 0
                         (string `array<char; 4>` @void "%d\n\0"))))
                (x~1 `int` (static x)))))))
 (translation-unit "panko/tests/cases/execute/linkage/test_external_defined_in_another_translation_unit/x.c"
-   (definition external (x~0 `int` (static x)) (42 `int` (static x))))
+   (definition external (x~0 `int` (static x)) (42 `int`)))
 
 ----- stderr -----

@@ -7,47 +7,21 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c
 ---
-success: true
-exit_code: 0
+success: false
+exit_code: 1
 ----- stdout -----
-(translation-unit "panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c"
-   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
-   (function-definition external
-      declare_static~1 `fn(∅: int, ∅: int, ∅: int) -> void`
-      (params
-         declare_static.unnamed_parameter.0~3 `int`
-         declare_static.unnamed_parameter.1~4 `int`
-         declare_static.unnamed_parameter.2~5 `int`)
-      (compound-statement
-         (definition gp_offset~6 `unsigned long` (builtin-name `unsigned long const` gp_offset))
-         (expression
-            (call `int`
-               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
-               (noop-type-conversion `ptr<char const>`
-                  (noop-type-conversion `ptr<char>`
-                     (addressof `ptr<array<char; 5>>`
-                        (string `array<char; 5>` "%zu\n\0"))))
-               (gp_offset~6 `unsigned long`)))))
-   (function-definition external
-      main~7 `fn() -> int`
-      (compound-statement
-         (expression
-            (call `void`
-               (addressof `ptr<fn(∅: int, ∅: int, ∅: int) -> void>`
-                  (declare_static~1 `fn(∅: int, ∅: int, ∅: int) -> void`))
-               (1 `int`)
-               (2 `int`)
-               (3 `int`)))
-         (definition gp_offset~9 `unsigned long` (builtin-name `unsigned long const` gp_offset))
-         (expression
-            (call `int`
-               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
-                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
-               (noop-type-conversion `ptr<char const>`
-                  (noop-type-conversion `ptr<char>`
-                     (addressof `ptr<array<char; 5>>`
-                        (string `array<char; 5>` "%zu\n\0"))))
-               (gp_offset~9 `unsigned long`))))))
 
 ----- stderr -----
+Error: TODO: constexpr evaluation not implemented yet
+   ╭─[panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c:6:41]
+   │
+ 6 │     static typeof(sizeof 0) gp_offset = __panko_gp_offset;
+   │                                         ─────────────────  
+───╯
+
+Error: TODO: constexpr evaluation not implemented yet
+    ╭─[panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c:14:41]
+    │
+ 14 │     static typeof(sizeof 0) gp_offset = __panko_gp_offset;
+    │                                         ─────────────────  
+────╯

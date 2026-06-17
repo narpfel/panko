@@ -35,10 +35,10 @@ exit_code: 0
                         (string `array<char; 4>` "%d\n\0"))))
                (deref `int`
                   (ptr-add `ptr<int>`
-                     (noop-type-conversion `ptr<int>` `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; ∅>>`
                            (deref `array<int; ∅>` (p~4 `ptr<array<int; ∅>>`))))
-                     (sign-extend `unsigned long` (27 `int`))))))
+                     (sign-extend `long` (27 `int`))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/constexpr/test_constexpr_array_lengths.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/constexpr/test_constexpr_array_lengths.c"
+   (tentative-definition external (a~0 `array<int; 42>` (static a)) ∅)
+   (tentative-definition external (b~1 `array<int; 4>` (static b)) ∅)
+   (tentative-definition external (c~2 `array<int; 4>` (static c)) ∅)
+   (tentative-definition external (d~3 `array<int; 16>` (static d)) ∅)
+   (tentative-definition external (e~4 `array<int; 16>` (static e)) ∅)
+   (tentative-definition external (f~5 `array<int; 8>` (static f)) ∅)
+   (tentative-definition external (g~6 `array<int; 123>` (static g)) ∅)
+   (tentative-definition external (h~7 `array<int; 2>` (static h)) ∅)
+   (tentative-definition external (i~8 `array<int; 255>` (static i)) ∅)
+   (tentative-definition external (j~9 `array<int; 42>` (static j)) ∅)
+   (tentative-definition external (k~10 `array<int; 1>` (static k)) ∅)
+   (tentative-definition external (l~11 `array<int; 16>` (static l)) ∅)
+   (tentative-definition external (m~12 `array<int; 3>` (static m)) ∅)
+   (tentative-definition external (n~13 `array<int; 1>` (static n)) ∅)
+   (tentative-definition external (o~14 `array<int; 1>` (static o)) ∅)
+   (tentative-definition external (p~15 `array<int; 42>` (static p)) ∅))
+
+----- stderr -----

@@ -22,7 +22,7 @@ exit_code: 0
                      (noop-type-conversion `ptr<int>`
                         (addressof `ptr<array<int; ∅>>`
                            (xs~0 `array<int; ∅>`)))
-                     (sign-extend `unsigned long` (0 `int`))))
+                     (sign-extend `long` (0 `int`))))
                (42 `int`)))
          (return
             (deref `int`
@@ -30,6 +30,6 @@ exit_code: 0
                   (noop-type-conversion `ptr<int>`
                      (addressof `ptr<array<int; ∅>>`
                         (xs~0 `array<int; ∅>`)))
-                  (sign-extend `unsigned long` (0 `int`))))))))
+                  (sign-extend `long` (0 `int`))))))))
 
 ----- stderr -----

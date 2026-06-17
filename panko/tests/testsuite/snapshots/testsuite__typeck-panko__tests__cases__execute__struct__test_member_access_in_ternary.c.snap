@@ -32,7 +32,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
                (member `int` x +0
-                  (conditional `struct Struct~1 complete` `struct Struct~1 complete`
+                  (conditional `struct Struct~1 complete`
                      (true `bool`)
                      (value~4 `struct Struct~1 complete`)
                      (other~5 `struct Struct~1 complete`)))))
@@ -45,7 +45,7 @@ exit_code: 0
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
                (member `int` x +0
-                  (conditional `struct Struct~1 complete` `struct Struct~1 complete`
+                  (conditional `struct Struct~1 complete`
                      (false `bool`)
                      (value~4 `struct Struct~1 complete`)
                      (other~5 `struct Struct~1 complete`))))))))

@@ -890,9 +890,7 @@ impl<'a> Preprocessor<'a> {
             .parse(sess, typedef_tracker, Path::new(""), tokens)
             .unwrap_or_else(handle_parse_error(sess));
         eval(sess, &expr).into_bool().unwrap_or_else(|reports| {
-            for report in reports {
-                self.sess.emit(report)
-            }
+            self.sess.emit_many(reports);
             false
         })
     }

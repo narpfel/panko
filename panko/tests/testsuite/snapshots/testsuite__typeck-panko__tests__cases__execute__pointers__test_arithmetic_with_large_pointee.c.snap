@@ -42,7 +42,7 @@ exit_code: 0
                   (addressof `ptr<fn(∅: unsigned long) -> ptr<void>>`
                      (malloc~1 `fn(∅: unsigned long) -> ptr<void>`))
                   (multiply `unsigned long` (sign-extend `unsigned long` (20 `int`)) (sizeof `unsigned long` 10737418240 `struct Large~2 complete`)))))
-         (definition third~6 `ptr<struct Large~2 complete>` (ptr-add `ptr<struct Large~2 complete>` (p~5 `ptr<struct Large~2 complete>`) (sign-extend `unsigned long` (3 `int`))))
+         (definition third~6 `ptr<struct Large~2 complete>` (ptr-add `ptr<struct Large~2 complete>` (p~5 `ptr<struct Large~2 complete>`) (sign-extend `long` (3 `int`))))
          (definition difference~7 `long` (ptr-diff `long` (third~6 `ptr<struct Large~2 complete>`) (p~5 `ptr<struct Large~2 complete>`)))
          (expression
             (call `int`

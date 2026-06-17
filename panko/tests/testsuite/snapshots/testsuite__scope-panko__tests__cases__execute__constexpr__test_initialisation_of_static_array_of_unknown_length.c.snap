@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/constexpr/test_initialisation_of_static_array_of_unknown_length.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/constexpr/test_initialisation_of_static_array_of_unknown_length.c"
+   (declaration xs~0 `array<int; ∅>`
+      (braced
+         1
+         2
+         3))
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (return (lengthof (name xs~0 `array<int; ∅>`))))))
+
+----- stderr -----

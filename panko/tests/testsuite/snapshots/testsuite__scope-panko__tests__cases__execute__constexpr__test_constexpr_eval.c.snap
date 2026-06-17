@@ -1,0 +1,378 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/constexpr/test_constexpr_eval.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/constexpr/test_constexpr_eval.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (declaration n~3 `unsigned int` (left-shift 1u 31))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal (name n~3 `unsigned int`) (left-shift 1u 31))))
+         (declaration a~4 `int` (right-shift 0x12345 4))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%x\n")
+               (name a~4 `int`)))
+         (declaration b~5 `int` (bit-and 0b101010 0b111))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0b%b\n")
+               (name b~5 `int`)))
+         (declaration c~6 `int` (bit-or 0b101010 0b111))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0b%b\n")
+               (name c~6 `int`)))
+         (declaration d~7 `int` (bit-xor 0b101010 0b111))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0b%b\n")
+               (name d~7 `int`)))
+         (declaration ll~8 `long long` (subtract 123ll 456))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%lld\n")
+               (name ll~8 `long long`)))
+         (declaration ull~9 `unsigned long long` (add 123ull 456))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%llu\n")
+               (name ull~9 `unsigned long long`)))
+         (declaration e~10 `int` (equal 1ll 0))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name e~10 `int`)))
+         (declaration f~11 `int` (not-equal 1 0u))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name f~11 `int`)))
+         (declaration g~12 `int` (less 1 0))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name g~12 `int`)))
+         (declaration h~13 `int` (less-equal 0u 0))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name h~13 `int`)))
+         (declaration i~14 `int` (greater 1 0))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name i~14 `int`)))
+         (declaration j~15 `int` (greater-equal 42 42))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name j~15 `int`)))
+         (declaration k~16 `ptr<int>` nullptr)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu %d\n")
+               (cast `typeof((sizeof 0))` (name k~16 `ptr<int>`))
+               (equal (name k~16 `ptr<int>`) nullptr)))
+         (declaration l~17 `array<char; ∅>` (string "hello world"))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%s: %zu\n")
+               (name l~17 `array<char; ∅>`)
+               (sizeof (name l~17 `array<char; ∅>`))))
+         (declaration m~18 `int`
+            (logical-and
+               42
+               27))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name m~18 `int`)))
+         (declaration o~19 `int`
+            (logical-and
+               0
+               (divide 1 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name o~19 `int`)))
+         (declaration p~20 `int`
+            (logical-or
+               false
+               123))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name p~20 `int`)))
+         (declaration q~21 `int`
+            (logical-or
+               42
+               (divide 1 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name q~21 `int`)))
+         (declaration r~22 `int`
+            (logical-or
+               0
+               false))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name r~22 `int`)))
+         (declaration s~23 `unsigned int`
+            (conditional
+               0
+               (divide 1 0u)
+               42))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%u\n")
+               (name s~23 `unsigned int`)))
+         (declaration t~24 `long`
+            (conditional
+               1234ul
+               5l
+               (divide 42 0l)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%ld\n")
+               (name t~24 `long`)))
+         (declaration u~25 `int`
+            (comma
+               false
+               42))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name u~25 `int`)))
+         (declaration v~26 `int`
+            (comma
+               (cast `void` 0)
+               1234))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (name v~26 `int`)))
+         (compound-statement
+            (declaration a~27 `long` (negate 20))
+            (declaration b~28 `ptr<long>` (addressof (name a~27 `long`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%ld\n")
+                  (deref (name b~28 `ptr<long>`))))
+            (expression (pre-increment (deref (name b~28 `ptr<long>`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%ld\n")
+                  (name a~27 `long`))))
+         (compound-statement
+            (declaration xs~30 `array<int; 10>`
+               (braced
+                  0
+                  1
+                  2
+                  3
+                  4
+                  5
+                  6
+                  7
+                  8
+                  9))
+            (declaration p1~31 `ptr<int>` (add 1 (name xs~30 `array<int; 10>`)))
+            (declaration p2~32 `ptr<int>` (subtract (add (name xs~30 `array<int; 10>`) 5) 2))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d\n")
+                  (deref (name p1~31 `ptr<int>`))
+                  (deref (name p2~32 `ptr<int>`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%td %td\n")
+                  (subtract (name p1~31 `ptr<int>`) (name xs~30 `array<int; 10>`))
+                  (subtract (name p2~32 `ptr<int>`) (name xs~30 `array<int; 10>`)))))
+         (compound-statement
+            (struct T~33
+               (member x `int`)
+               (member y `int`)
+               (member z `int`))
+            (declaration t~34 `struct T~33 complete`
+               (braced
+                  10
+                  20
+                  30))
+            (declaration p~35 `ptr<int>`
+               (addressof
+                  (dot y
+                     (name t~34 `struct T~33 complete`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d %d\n")
+                  (subscript (name p~35 `ptr<int>`) (negate 1))
+                  (subscript (name p~35 `ptr<int>`) 0)
+                  (subscript (name p~35 `ptr<int>`) 1)))
+            (expression (pre-decrement (deref (post-decrement (name p~35 `ptr<int>`)))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d %d\n")
+                  (subscript (name p~35 `ptr<int>`) 0)
+                  (subscript (name p~35 `ptr<int>`) 1)
+                  (subscript (name p~35 `ptr<int>`) 2)))
+            (declaration p2~40 `ptr<int>`
+               (addressof
+                  (dot z
+                     (name t~34 `struct T~33 complete`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (equal (add (name p~35 `ptr<int>`) 2) (name p2~40 `ptr<int>`)))))
+         (compound-statement
+            (declaration x~41 `int` (left-shift 0b11 4u))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "0b%b\n")
+                  (name x~41 `int`))))
+         (compound-statement
+            (declaration x~42 `int` ∅)
+            (declaration is_nonnull~43 `bool` (cast `bool` (addressof (name x~42 `int`))))
+            (declaration one_past_end_is_nonnull~44 `bool` (cast `bool` (add (addressof (name x~42 `int`)) 1)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d\n")
+                  (name is_nonnull~43 `bool`)
+                  (name one_past_end_is_nonnull~44 `bool`))))
+         (compound-statement
+            (struct T~45
+               (member x `int`)
+               (member y `int`)
+               (member z `int`))
+            (declaration t~46 `struct T~45 complete` ∅)
+            (declaration positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`
+               (subtract
+                  (addressof
+                     (dot y
+                        (name t~46 `struct T~45 complete`)))
+                  (addressof
+                     (dot x
+                        (name t~46 `struct T~45 complete`)))))
+            (declaration negative_diff~48 `typeof((name positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`))`
+               (subtract
+                  (addressof
+                     (dot x
+                        (name t~46 `struct T~45 complete`)))
+                  (addressof
+                     (dot y
+                        (name t~46 `struct T~45 complete`)))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%td %td\n")
+                  (name positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`)
+                  (name negative_diff~48 `typeof((name positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`))`)))
+            (declaration a~49 `typeof((name positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`))` (subtract (cast `ptr<int>` 200) (cast `ptr<int>` 100)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%td\n")
+                  (name a~49 `typeof((name positive_diff~47 `typeof((subtract (addressof (name t~46 `struct T~45 complete`)) (addressof (name t~46 `struct T~45 complete`))))`))`))))
+         (compound-statement
+            (struct T~50
+               (member x `int`)
+               (member y `int`)
+               (member z `int`))
+            (declaration t~51 `struct T~50 complete` ∅)
+            (declaration pointer_to_first_member_equals_pointer_to_struct~52 `int`
+               (equal (cast `ptr<int>` (addressof (name t~51 `struct T~50 complete`)))
+                  (addressof
+                     (dot x
+                        (name t~51 `struct T~50 complete`)))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (name pointer_to_first_member_equals_pointer_to_struct~52 `int`)))
+            (declaration members_are_ordered~53 `int`
+               (add
+                  (add
+                     (add
+                        (add
+                           (less
+                              (addressof
+                                 (dot x
+                                    (name t~51 `struct T~50 complete`)))
+                              (addressof
+                                 (dot y
+                                    (name t~51 `struct T~50 complete`))))
+                           (less-equal
+                              (addressof
+                                 (dot x
+                                    (name t~51 `struct T~50 complete`)))
+                              (addressof
+                                 (dot x
+                                    (name t~51 `struct T~50 complete`)))))
+                        (greater
+                           (addressof
+                              (dot z
+                                 (name t~51 `struct T~50 complete`)))
+                           (addressof
+                              (dot y
+                                 (name t~51 `struct T~50 complete`)))))
+                     (greater-equal
+                        (addressof
+                           (dot z
+                              (name t~51 `struct T~50 complete`)))
+                        (addressof
+                           (dot x
+                              (name t~51 `struct T~50 complete`)))))
+                  (not-equal
+                     (addressof
+                        (dot x
+                           (name t~51 `struct T~50 complete`)))
+                     (addressof
+                        (dot y
+                           (name t~51 `struct T~50 complete`))))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (name members_are_ordered~53 `int`))))
+         (compound-statement
+            (declaration xs~54 `array<int; 10>` ∅)
+            (declaration diff_between_pointers_into_array~55 `typeof((subtract (addressof (subscript (name xs~54 `array<int; 10>`) 0)) (addressof (subscript (name xs~54 `array<int; 10>`) 0))))` (subtract (addressof (subscript (name xs~54 `array<int; 10>`) 5)) (addressof (subscript (name xs~54 `array<int; 10>`) 2))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%td\n")
+                  (name diff_between_pointers_into_array~55 `typeof((subtract (addressof (subscript (name xs~54 `array<int; 10>`) 0)) (addressof (subscript (name xs~54 `array<int; 10>`) 0))))`))))
+         (compound-statement
+            (declaration a~56 `int` (equal nullptr nullptr))
+            (declaration b~57 `int` (equal nullptr (addressof (name a~56 `int`))))
+            (declaration c~58 `int` (not-equal nullptr nullptr))
+            (declaration d~59 `int` (not-equal (addressof (name a~56 `int`)) nullptr))
+            (declaration e~60 `int` (equal (addressof (name a~56 `int`)) (addressof (name c~58 `int`))))
+            (declaration f~61 `int` (not-equal (addressof (name a~56 `int`)) (addressof (name c~58 `int`))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d %d %d %d %d\n")
+                  (name a~56 `int`)
+                  (name b~57 `int`)
+                  (name c~58 `int`)
+                  (name d~59 `int`)
+                  (name e~60 `int`)
+                  (name f~61 `int`))))
+         (compound-statement
+            (typedef size_t `typeof((sizeof 0))`)
+            (declaration a~62 `typeof((sizeof 0))` (cast `typeof((sizeof 0))` (subtract (add (cast `ptr<int>` 100) 10) 5)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%zu\n")
+                  (name a~62 `typeof((sizeof 0))`)))))))
+
+----- stderr -----

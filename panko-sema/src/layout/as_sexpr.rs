@@ -83,6 +83,7 @@ impl AsSExpr for Initialiser<'_> {
             Self::Braced { subobject_initialisers } =>
                 SExpr::new("braced").lines_explicit_empty(*subobject_initialisers),
             Self::Expression(expr) => expr.as_sexpr(),
+            Self::Static { initialiser, value: _ } => initialiser.0.as_sexpr(),
         }
     }
 }
@@ -211,9 +212,6 @@ impl AsSExpr for Slot<'_> {
             Slot::Static(name) => SExpr::new("static").inline_string(name.to_string()),
             Slot::Automatic(offset) => SExpr::string(format!("@{offset}")),
             Self::Void => SExpr::string("@void"),
-            Self::StaticWithOffset { name, offset } => SExpr::new("static")
-                .inline_string(name.to_string())
-                .inline_string(format!("+{offset}")),
         }
     }
 }

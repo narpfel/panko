@@ -44,7 +44,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (combine `int` `int`
+               (combine `int`
                   (assign `ptr<int>` (p3~8 `ptr<int>`)
                      (addressof `ptr<int>`
                         (compound-literal `int`
@@ -52,7 +52,7 @@ exit_code: 0
                               (braced
                                  (subobject +0
                                     (add `int`
-                                       (combine `int` `int`
+                                       (combine `int`
                                           (assign `ptr<int>` (p1~6 `ptr<int>`)
                                              (addressof `ptr<int>`
                                                 (compound-literal `int`
@@ -64,7 +64,7 @@ exit_code: 0
                                                                   (print~1 `fn(x: int) -> int`))
                                                                (10 `int`))))))))
                                           (deref `int` (p1~6 `ptr<int>`)))
-                                       (combine `int` `int`
+                                       (combine `int`
                                           (assign `ptr<int>` (p2~7 `ptr<int>`)
                                              (addressof `ptr<int>`
                                                 (compound-literal `int`
@@ -133,7 +133,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 4>>`
                         (string `array<char; 4>` "%d\n\0"))))
-               (combine `int` `int`
+               (combine `int`
                   (assign `ptr<int>` (p3~22 `ptr<int>`)
                      (addressof `ptr<int>`
                         (compound-literal `int`
@@ -141,7 +141,7 @@ exit_code: 0
                               (braced
                                  (subobject +0
                                     (add `int`
-                                       (combine `int` `int`
+                                       (combine `int`
                                           (assign `ptr<int>` (p1~20 `ptr<int>`)
                                              (addressof `ptr<int>`
                                                 (compound-literal `int`
@@ -153,7 +153,7 @@ exit_code: 0
                                                                   (print~1 `fn(x: int) -> int`))
                                                                (10 `int`))))))))
                                           (deref `int` (p1~20 `ptr<int>`)))
-                                       (combine `int` `int`
+                                       (combine `int`
                                           (assign `ptr<int>` (p2~21 `ptr<int>`)
                                              (addressof `ptr<int>`
                                                 (compound-literal `int`

@@ -18,6 +18,6 @@ exit_code: 0
          (definition i2~3 `int` (27 `int`))
          (definition p1~4 `long` (sign-extend `long` (5 `int`)))
          (definition p2~5 `long` (sign-extend `long` (6 `int`)))
-         (return (add `int` (add `int` (add `int` (not-equal `int` `int` (p1~4 `long`) (sign-extend `long` (i1~2 `int`))) (not-equal `int` `int` (p2~5 `long`) (sign-extend `long` (i2~3 `int`)))) (equal `int` `int` (add `long` (p1~4 `long`) (sign-extend `long` (1 `int`))) (p2~5 `long`))) (equal `int` `int` (subtract `long` (p2~5 `long`) (sign-extend `long` (1 `int`))) (p1~4 `long`)))))))
+         (return (add `int` (add `int` (add `int` (not-equal `int` (p1~4 `long`) (sign-extend `long` (i1~2 `int`))) (not-equal `int` (p2~5 `long`) (sign-extend `long` (i2~3 `int`)))) (equal `int` (add `long` (p1~4 `long`) (sign-extend `long` (1 `int`))) (p2~5 `long`))) (equal `int` (subtract `long` (p2~5 `long`) (sign-extend `long` (1 `int`))) (p1~4 `long`)))))))
 
 ----- stderr -----

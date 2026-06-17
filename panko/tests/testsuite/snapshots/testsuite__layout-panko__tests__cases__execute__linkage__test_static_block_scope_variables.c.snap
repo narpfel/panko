@@ -14,7 +14,7 @@ exit_code: 0
    (function-definition external stack-size=40
       (f~0 `fn() -> int` (static f))
       (compound-statement
-         (definition (x~2 `int` (static x.2)) (42 `int` (static x.2)))
+         (definition (x~2 `int` (static x.2)) (42 `int`))
          (return
             (combine `int` @0
                (combine `int` @4
@@ -40,7 +40,7 @@ exit_code: 0
    (function-definition external stack-size=40
       (g~6 `fn() -> int` (static g))
       (compound-statement
-         (definition (x~8 `int` (static x.8)) (27 `int` (static x.8)))
+         (definition (x~8 `int` (static x.8)) (27 `int`))
          (return
             (combine `int` @0
                (combine `int` @4

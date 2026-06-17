@@ -377,6 +377,14 @@ pub(super) enum Diagnostic<'a> {
     )]
     EmptyArray { at: QualifiedType<'a> },
 
+    #[error("array with negative length")]
+    #[diagnostics(at(colour = Red, label = "this length is negative: `{length}`"))]
+    #[with(length = length.fg(Red))]
+    ArrayLengthNegative {
+        at: TypedExpression<'a>,
+        length: i64,
+    },
+
     #[error("excess element in {kind} initialiser")]
     #[with(
         name = reference.name.fg(Blue),
@@ -427,6 +435,11 @@ pub(super) enum Diagnostic<'a> {
         reference: Reference<'a>,
         iterator: SubobjectIterator<'a>,
     },
+
+    #[error("negative index in designated initialiser")]
+    #[diagnostics(at(colour = Red, label = "this index expression evaluates to `{index}`"))]
+    #[with(index = index.fg(Red))]
+    NegativeSubobjectIndex { at: Designator<'a>, index: i64 },
 
     #[error("empty character constant")]
     #[diagnostics(at(colour = Red, label = "this character constant is empty"))]
@@ -634,6 +647,11 @@ pub(super) enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
         name: scope::Member<'a>,
     },
+
+    #[error("negative bitfield width")]
+    #[diagnostics(at(colour = Red, label = "this width is negative: `{width}`"))]
+    #[with(width = width.fg(Red))]
+    BitfieldWidthNegative { at: TypedExpression<'a>, width: i64 },
 
     #[error("zero-width bitfields must be unnamed")]
     #[diagnostics(

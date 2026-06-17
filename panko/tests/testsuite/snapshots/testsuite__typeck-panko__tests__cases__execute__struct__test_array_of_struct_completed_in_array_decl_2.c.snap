@@ -41,7 +41,7 @@ exit_code: 0
                               (noop-type-conversion `ptr<ptr<fn() -> ptr<struct X~3 complete>>>`
                                  (addressof `ptr<array<ptr<fn() -> ptr<struct X~3 complete>>; 8>>`
                                     (funcs~4 `array<ptr<fn() -> ptr<struct X~3 complete>>; 8>`)))
-                              (sign-extend `unsigned long` (0 `int`)))))))))))
+                              (sign-extend `long` (0 `int`)))))))))))
    (function-definition external
       g~5 `fn() -> void`
       (compound-statement
@@ -71,7 +71,7 @@ exit_code: 0
                               (noop-type-conversion `ptr<ptr<fn() -> ptr<struct X~7 complete>>>`
                                  (addressof `ptr<array<ptr<fn() -> ptr<struct X~7 complete>>; 4>>`
                                     (funcs~8 `array<ptr<fn() -> ptr<struct X~7 complete>>; 4>`)))
-                              (sign-extend `unsigned long` (0 `int`)))))))))))
+                              (sign-extend `long` (0 `int`)))))))))))
    (function-definition external
       main~9 `fn() -> int`
       (compound-statement

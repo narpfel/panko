@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/constexpr/test_constexpr_array_lengths.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/constexpr/test_constexpr_array_lengths.c"
+   (tentative-definition external a~0 `array<int; 42>` ∅)
+   (tentative-definition external b~1 `array<int; 4>` ∅)
+   (tentative-definition external c~2 `array<int; 4>` ∅)
+   (tentative-definition external d~3 `array<int; 16>` ∅)
+   (tentative-definition external e~4 `array<int; 16>` ∅)
+   (tentative-definition external f~5 `array<int; 8>` ∅)
+   (tentative-definition external g~6 `array<int; 123>` ∅)
+   (tentative-definition external h~7 `array<int; 2>` ∅)
+   (tentative-definition external i~8 `array<int; 255>` ∅)
+   (tentative-definition external j~9 `array<int; 42>` ∅)
+   (tentative-definition external k~10 `array<int; 1>` ∅)
+   (tentative-definition external l~11 `array<int; 16>` ∅)
+   (tentative-definition external m~12 `array<int; 3>` ∅)
+   (tentative-definition external n~13 `array<int; 1>` ∅)
+   (tentative-definition external o~14 `array<int; 1>` ∅)
+   (tentative-definition external p~15 `array<int; 42>` ∅))
+
+----- stderr -----

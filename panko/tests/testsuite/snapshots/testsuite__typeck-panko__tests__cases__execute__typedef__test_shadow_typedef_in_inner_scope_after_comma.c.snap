@@ -96,7 +96,7 @@ exit_code: 0
                         (noop-type-conversion `ptr<int>`
                            (addressof `ptr<array<int; 5>>`
                               (xs~12 `array<int; 5>`)))
-                        (sign-extend `unsigned long` (0 `int`)))))))))
+                        (sign-extend `long` (0 `int`)))))))))
    (function-definition external
       function~14 `fn(value: int) -> int`
       (params

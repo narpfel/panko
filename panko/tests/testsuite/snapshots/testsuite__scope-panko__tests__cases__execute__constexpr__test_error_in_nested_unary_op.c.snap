@@ -1,0 +1,17 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/constexpr/test_error_in_nested_unary_op.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/constexpr/test_error_in_nested_unary_op.c"
+   (struct T~0
+      (member x (bitfield-width (compl (negate (cast `int` 0x8000'0000)))) `int`)))
+
+----- stderr -----

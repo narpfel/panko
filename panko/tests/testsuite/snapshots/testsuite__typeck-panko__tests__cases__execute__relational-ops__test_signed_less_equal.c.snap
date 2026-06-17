@@ -16,6 +16,6 @@ exit_code: 0
       (compound-statement
          (definition a~2 `int` (42 `int`))
          (definition b~3 `int` (27 `int`))
-         (return (add `int` (less-equal `int` `int` (b~3 `int`) (a~2 `int`)) (less-equal `int` `int` (b~3 `int`) (27 `int`)))))))
+         (return (add `int` (less-equal `int` (b~3 `int`) (a~2 `int`)) (less-equal `int` (b~3 `int`) (27 `int`)))))))
 
 ----- stderr -----

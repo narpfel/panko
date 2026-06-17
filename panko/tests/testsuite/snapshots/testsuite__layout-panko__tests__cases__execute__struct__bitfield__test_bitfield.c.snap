@@ -18,9 +18,9 @@ exit_code: 0
       (member z @4[8:28] `unsigned int`))
    (definition external (static_t~2 `struct T~1 complete` (static static_t))
       (braced
-         (subobject +0[0:20] (74565 `unsigned int` @0))
-         (subobject +0[20:40] (424090 `long` @0))
-         (subobject +4[8:28] (773615 `unsigned int` @0))))
+         (subobject +0[0:20] (0x12345u `unsigned int`))
+         (subobject +0[20:40] (0x6789al `long`))
+         (subobject +4[8:28] (0xbcdefu `unsigned int`))))
    (function-definition external stack-size=104
       (main~3 `fn() -> int` (static main))
       (compound-statement
@@ -244,6 +244,8 @@ exit_code: 0
                         (string `array<char; 10>` @void "0x%016lx\n\0"))))
                (member `long` @8 x +0
                   (u_with_static~9 `union ∅~8 complete` @8))))
+         (struct BitfieldWithConstexprWidth~25
+            (member x @0[0:4] `int`))
          (return (truncate `int` @48 (8 `unsigned long` @56))))))
 
 ----- stderr -----

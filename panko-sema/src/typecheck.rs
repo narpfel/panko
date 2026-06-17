@@ -31,7 +31,6 @@ use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::reject_function_specifiers;
-use panko_parser::error_todo;
 use panko_report::Report;
 use variant_types::IntoVariant as _;
 
@@ -65,11 +64,13 @@ use crate::ty::subobjects::Subobject;
 use crate::ty::subobjects::SubobjectIterator;
 use crate::ty::subobjects::SubobjectKey;
 use crate::ty::subobjects::Subobjects;
+pub(crate) use crate::typecheck::constexpr::PersistedValue as Value;
 use crate::typecheck::diagnostics::Diagnostic;
 use crate::typecheck::literal::StringLiteral;
 pub(crate) use crate::typecheck::ptr::PtrAddOrder;
 
 mod as_sexpr;
+mod constexpr;
 mod diagnostics;
 mod literal;
 mod ptr;
@@ -90,16 +91,16 @@ impl<Expression> ArrayLength<Expression> {
 }
 
 impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a>> {
-    type Error = &'a TypedExpression<'a>;
+    type Error = Box<Either<impl Report, impl Iterator<Item = impl Report> + 'a>>;
 
-    fn try_from(value: &'a TypedExpression<'a>) -> Result<Self, Self::Error> {
-        // TODO: constexpr evaluate `value` here
-        match value.expr {
-            Expression::Integer { value, token: _ } => Ok(Self::Constant(value)),
-            Expression::Sizeof { sizeof: _, operand: _, size }
-            | Expression::SizeofTy { sizeof: _, ty: _, size, close_paren: _ } =>
-                Ok(Self::Constant(size)),
-            _ => Err(value),
+    fn try_from(expr: &'a TypedExpression<'a>) -> Result<Self, Self::Error> {
+        match constexpr::eval(expr).into_unsigned() {
+            Ok(Ok(length)) => Ok(Self::Constant(length)),
+            Ok(Err(length)) => Err(Either::Left(Diagnostic::ArrayLengthNegative {
+                at: *expr,
+                length,
+            }))?,
+            Err(errors) => Err(Either::Right(errors.into_iter()))?,
         }
     }
 }
@@ -209,11 +210,18 @@ pub(crate) struct Declaration<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct InitialiserRef<'a>(pub(crate) &'a Initialiser<'a>);
+
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum Initialiser<'a> {
     Braced {
         subobject_initialisers: &'a [SubobjectInitialiser<'a>],
     },
     Expression(TypedExpression<'a>),
+    Static {
+        initialiser: InitialiserRef<'a>,
+        value: Value<'a>,
+    },
 }
 
 impl Initialiser<'_> {
@@ -240,6 +248,8 @@ impl Initialiser<'_> {
             Self::Expression(TypedExpression { ty: _, expr: Expression::String(value) }) =>
                 Some(value.len()),
             Self::Expression(_) => None,
+            Self::Static { .. } =>
+                unreachable!("only called on initialisers before constexpr evaluation"),
         }
     }
 }
@@ -302,6 +312,8 @@ impl<'a> FromError<'a> for Statement<'a> {
     }
 }
 
+// TODO: add a field for the `scope::Expression` that `expr` is created from; use that to compute
+// `loc`
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct TypedExpression<'a> {
     pub(crate) ty: QualifiedType<'a>,
@@ -575,6 +587,8 @@ impl<'a> TypedExpression<'a> {
 impl<'a> Expression<'a> {
     fn loc(&self) -> Loc<'a> {
         match self {
+            // TODO: this uses the location of the `Diagnostic`’s `at` member, which is confusing
+            // because it typically isn’t the whole `loc` of the erroring expression
             Expression::Error(error) => error.location(),
             Expression::Name(reference) => reference.loc(),
             Expression::Integer { value: _, token } => token.loc(),
@@ -629,6 +643,8 @@ impl<'a> Expression<'a> {
                 condition.loc().until(or_else.loc()),
             Expression::MemberAccess { lhs, member: _, member_loc } => lhs.loc().until(*member_loc),
             Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
+            // TODO: `reference` has a `<scratch area>` location, so this loc only shows the open
+            // paren
             Expression::CompoundLiteral { open_paren, decl } =>
                 open_paren.loc().until(decl.reference.loc()),
         }
@@ -696,11 +712,12 @@ fn typeck_array_ty<'a>(
     let length = length
         .map(|length| {
             ArrayLength::try_from(sess.alloc(typeck_expression(sess, length, Context::Default)))
-                .unwrap_or_else(|expr| {
-                    error_todo!(
-                        expr,
-                        "constexpr evaluation not implemented or variable length array",
-                    )
+                .unwrap_or_else(|error| {
+                    match *error {
+                        Either::Left(error) => sess.emit(error),
+                        Either::Right(errors) => sess.emit_many(errors),
+                    }
+                    ArrayLength::Unknown
                 })
         })
         .unwrap_or(ArrayLength::Unknown);
@@ -790,10 +807,18 @@ fn typeck_struct_members<'a>(
             let (width_expr, bitfield_width) = try {
                 let BitfieldWidth { width } = bitfield_width.as_ref()?;
                 let width = typeck_expression(sess, width, Context::Default);
-                // TODO: constexpr evaluate
-                let value = match width.expr {
-                    Expression::Integer { value, token: _ } => value,
-                    expr => error_todo!(expr),
+                let value = match constexpr::eval(&width).into_unsigned() {
+                    Ok(Ok(value)) => value,
+                    Ok(Err(value)) => {
+                        // TODO: use this error
+                        let () = sess
+                            .emit(Diagnostic::BitfieldWidthNegative { at: width, width: value });
+                        None?
+                    }
+                    Err(errors) => {
+                        sess.emit_many(errors);
+                        None?
+                    }
                 };
                 (width, value)
             }
@@ -1280,10 +1305,14 @@ fn typeck_initialiser_list<'a>(
                     match designator {
                         Designator::Bracketed { open_bracket: _, index, close_bracket: _ } => {
                             let index = typeck_expression(sess, index, Context::Default);
-                            // TODO: constexpr evaluate
-                            let index = match index.expr {
-                                Expression::Integer { value, token: _ } => value,
-                                _ => todo!(),
+                            let index = match constexpr::eval(&index).into_unsigned() {
+                                Ok(Ok(index)) => index,
+                                Ok(Err(index)) =>
+                                    return sess.emit(Diagnostic::NegativeSubobjectIndex {
+                                        at: *designator,
+                                        index,
+                                    }),
+                                Err(errors) => return sess.emit_many(errors),
                             };
                             subobjects.goto_index(index)
                         }
@@ -1507,7 +1536,14 @@ fn typeck_declaration<'a>(
         initialiser,
     } = *declaration;
     let reference = typeck_reference_declaration(sess, reference, NeedsInitialiser::Yes);
-    let initialiser = try { typeck_initialiser(sess, initialiser?, &reference) };
+    let initialiser = try {
+        let initialiser = typeck_initialiser(sess, initialiser?, &reference);
+        match reference.storage_duration {
+            StorageDuration::Static(_) =>
+                constexpr::run_static_initialiser(sess, &reference.ty.ty, sess.alloc(initialiser)),
+            StorageDuration::Automatic => initialiser,
+        }
+    };
     let reference =
         if matches!(reference.kind, RefKind::Definition) && !reference.ty.ty.is_complete() {
             // TODO: use this error

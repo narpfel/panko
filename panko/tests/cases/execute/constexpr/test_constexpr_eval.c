@@ -1,0 +1,224 @@
+int printf(char const*, ...);
+
+int main() {
+    static unsigned n = 1u << 31;
+    // [[print: 1]]
+    printf("%d\n", n == (1u << 31));
+
+    static int a = 0x12345 >> 4;
+    // [[print: 0x1234]]
+    printf("0x%x\n", a);
+
+    static int b = 0b101010 & 0b111;
+    // [[print: 0b10]]
+    printf("0b%b\n", b);
+
+    static int c = 0b101010 | 0b111;
+    // [[print: 0b101111]]
+    printf("0b%b\n", c);
+
+    static int d = 0b101010 ^ 0b111;
+    // [[print: 0b101101]]
+    printf("0b%b\n", d);
+
+    static long long ll = 123ll - 456;
+    // [[print: -333]]
+    printf("%lld\n", ll);
+
+    static unsigned long long ull = 123ull + 456;
+    // [[print: 579]]
+    printf("%llu\n", ull);
+
+    static int e = 1ll == 0;
+    // [[print: 0]]
+    printf("%d\n", e);
+
+    static int f = 1 != 0u;
+    // [[print: 1]]
+    printf("%d\n", f);
+
+    static int g = 1 < 0;
+    // [[print: 0]]
+    printf("%d\n", g);
+
+    static int h = 0u <= 0;
+    // [[print: 1]]
+    printf("%d\n", h);
+
+    static int i = 1 > 0;
+    // [[print: 1]]
+    printf("%d\n", i);
+
+    static int j = 42 >= 42;
+    // [[print: 1]]
+    printf("%d\n", j);
+
+    static int* k = nullptr;
+    // [[print: 0 1]]
+    printf("%zu %d\n", (typeof(sizeof 0))k, k == nullptr);
+
+    static char l[] = "hello world";
+    // [[print: hello world: 12]]
+    printf("%s: %zu\n", l, sizeof l);
+
+    static int m = 42 && 27;
+    // [[print: 1]]
+    printf("%d\n", m);
+
+    static int o = 0 && 1 / 0;
+    // [[print: 0]]
+    printf("%d\n", o);
+
+    static int p = false || 123;
+    // [[print: 1]]
+    printf("%d\n", p);
+
+    static int q = 42 || 1 / 0;
+    // [[print: 1]]
+    printf("%d\n", q);
+
+    static int r = 0 || false;
+    // [[print: 0]]
+    printf("%d\n", r);
+
+    static unsigned s = 0 ? 1 / 0u : 42;
+    // [[print: 42]]
+    printf("%u\n", s);
+
+    static long t = 1234ul ? 5l : 42 / 0l;
+    // [[print: 5]]
+    printf("%ld\n", t);
+
+    static int u = (false, 42);
+    // [[print: 42]]
+    printf("%d\n", u);
+
+    static int v = ((void)0, 1234);
+    // [[print: 1234]]
+    printf("%d\n", v);
+
+    // constexpr eval of pointers to values with static storage duration
+    {
+        static long a = -20;
+        static long* b = &a;
+        // [[print: -20]]
+        printf("%ld\n", *b);
+        ++*b;
+        // [[print: -19]]
+        printf("%ld\n", a);
+    }
+
+    // constexpr eval of pointer arithmetic
+    {
+        static int xs[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        static int* p1 = 1 + xs;
+        static int* p2 = xs + 5 - 2;
+        // [[print: 1 3]]
+        printf("%d %d\n", *p1, *p2);
+        // [[print: 1 3]]
+        printf("%td %td\n", p1 - xs, p2 - xs);
+    }
+
+    // addressof of member access
+    {
+        struct T {
+            int x;
+            int y;
+            int z;
+        };
+        static struct T t = {10, 20, 30};
+        static int* p = &t.y;
+        // [[print: 10 20 30]]
+        printf("%d %d %d\n", p[-1], p[0], p[1]);
+        --*p--;
+        // [[print: 10 19 30]]
+        printf("%d %d %d\n", p[0], p[1], p[2]);
+
+        static int* p2 = &(t).z;
+        // [[print: 1]]
+        printf("%d\n", p + 2 == p2);
+    }
+
+    // bitshift with unsigned rhs
+    {
+        static int x = 0b11 << 4u;
+        // [[print: 0b110000]]
+        printf("0b%b\n", x);
+    }
+
+    // convert pointer to bool
+    {
+        static int x;
+        static bool is_nonnull = (bool)&x;
+        static bool one_past_end_is_nonnull = (bool)(&x + 1);
+        // [[print: 1 1]]
+        printf("%d %d\n", is_nonnull, one_past_end_is_nonnull);
+    }
+
+    // pointer difference
+    {
+        struct T {
+            int x;
+            int y;
+            int z;
+        };
+        static struct T t;
+        static typeof(&t - &t) positive_diff = &t.y - &t.x;
+        static typeof(positive_diff) negative_diff = &t.x - &t.y;
+        // [[print: 1 -1]]
+        printf("%td %td\n", positive_diff, negative_diff);
+
+        static typeof(positive_diff) a = (int*)200 - (int*)100;
+        // [[print: 25]]
+        printf("%td\n", a);
+    }
+
+    // pointer comparison
+    {
+        struct T {
+            int x;
+            int y;
+            int z;
+        };
+        static struct T t;
+        static int pointer_to_first_member_equals_pointer_to_struct = (int*)&t == &t.x;
+        // [[print: 1]]
+        printf("%d\n", pointer_to_first_member_equals_pointer_to_struct);
+        static int members_are_ordered =
+            (&t.x < &t.y)
+            + (&t.x <= &t.x)
+            + (&t.z > &t.y)
+            + (&t.z >= &t.x)
+            + (&t.x != &t.y);
+        // [[print: 5]]
+        printf("%d\n", members_are_ordered);
+    }
+
+    // pointer difference between pointers into array (exercises addressof of deref exprs)
+    {
+        static int xs[10];
+        static typeof(&xs[0] - &xs[0]) diff_between_pointers_into_array = &xs[5] - &xs[2];
+        // [[print: 3]]
+        printf("%td\n", diff_between_pointers_into_array);
+    }
+
+    // pointer equality comparisons between pointers to different objects
+    {
+        static int a = nullptr == nullptr;
+        static int b = nullptr == &a;
+        static int c = nullptr != nullptr;
+        static int d = &a != nullptr;
+        static int e = &a == &c;
+        static int f = &a != &c;
+        // [[print: 1 0 0 1 0 1]]
+        printf("%d %d %d %d %d %d\n", a, b, c, d, e, f);
+    }
+
+    // pointer arithmetic with result from int2ptr cast
+    {
+        typedef typeof(sizeof 0) size_t;
+        static size_t a = (size_t)((int*)100 + 10 - 5);
+        // [[print: 120]]
+        printf("%zu\n", a);
+    }
+}

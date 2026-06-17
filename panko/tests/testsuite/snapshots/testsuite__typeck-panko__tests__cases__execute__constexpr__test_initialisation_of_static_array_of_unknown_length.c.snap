@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/constexpr/test_initialisation_of_static_array_of_unknown_length.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/constexpr/test_initialisation_of_static_array_of_unknown_length.c"
+   (definition internal xs~0 `array<int; 3>`
+      (braced
+         (subobject +0 (1 `int`))
+         (subobject +4 (2 `int`))
+         (subobject +8 (3 `int`))))
+   (function-definition external
+      main~1 `fn() -> int`
+      (compound-statement
+         (return (truncate `int` (lengthof `unsigned long` 3 (xs~0 `array<int; 3>`)))))))
+
+----- stderr -----
