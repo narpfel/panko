@@ -201,8 +201,8 @@ enum StaticInitialiser<'a> {
     Value(Value<'a>),
 }
 
-impl<'a> From<&'a Initialiser<'a>> for StaticInitialiser<'a> {
-    fn from(initialiser: &'a Initialiser<'a>) -> Self {
+impl<'a> From<&Initialiser<'a>> for StaticInitialiser<'a> {
+    fn from(initialiser: &Initialiser<'a>) -> Self {
         match initialiser {
             Initialiser::Braced { subobject_initialisers: [] } => Self::Empty,
             Initialiser::Static { initialiser: _, value } => match value {
