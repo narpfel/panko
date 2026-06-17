@@ -205,7 +205,10 @@ impl<'a> From<&'a Initialiser<'a>> for StaticInitialiser<'a> {
     fn from(initialiser: &'a Initialiser<'a>) -> Self {
         match initialiser {
             Initialiser::Braced { subobject_initialisers: [] } => Self::Empty,
-            Initialiser::Static { initialiser: _, value } => Self::Value(*value),
+            Initialiser::Static { initialiser: _, value } => match value {
+                Value::Bytes(bytes) if bytes.iter().all(|&b| b == 0) => Self::Empty,
+                _ => Self::Value(*value),
+            },
             Initialiser::Braced { subobject_initialisers: _ } | Initialiser::Expression(_) =>
                 unreachable!(),
         }
