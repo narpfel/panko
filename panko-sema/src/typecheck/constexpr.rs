@@ -61,7 +61,7 @@ impl<'a> IntoIterator for Errors<'a> {
     }
 }
 
-pub(super) enum Integral {
+enum Integral {
     Signed(i64),
     Unsigned(u64),
 }
@@ -83,7 +83,7 @@ enum Repr<'a> {
 }
 
 impl<'a> Value<'a> {
-    pub(super) fn into_integral(self) -> Result<Integral, Errors<'a>> {
+    fn into_integral(self) -> Result<Integral, Errors<'a>> {
         let Self { ty, repr: _ } = &self;
         let signedness = match ty {
             Type::Arithmetic(Arithmetic::Integral(integral)) => integral.signedness,
@@ -101,10 +101,10 @@ impl<'a> Value<'a> {
         }
     }
 
-    fn into_unsigned(self) -> Result<Option<u64>, Errors<'a>> {
+    pub(super) fn into_unsigned(self) -> Result<Result<u64, i64>, Errors<'a>> {
         match self.into_integral()? {
-            Integral::Unsigned(value) => Ok(Some(value)),
-            Integral::Signed(value) => Ok(try { u64::try_from(value).ok()? }),
+            Integral::Unsigned(value) => Ok(Ok(value)),
+            Integral::Signed(value) => Ok(u64::try_from(value).map_err(|_| value)),
         }
     }
 
@@ -400,7 +400,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                                 && let Some(lhs) = lhs.${concat(as_, $t)}() => {
                                     let rhs = try {
                                         let rhs = rhs.into_unsigned()?;
-                                        let rhs = rhs.ok_or_else(|| NegativeShiftRhs.at(rhs_expr))?;
+                                        let rhs = rhs.map_err(|_| NegativeShiftRhs.at(rhs_expr))?;
                                         match rhs.try_into() {
                                             Ok(rhs @ 0..$t::BITS) => rhs,
                                             _ => Err(ShiftRhsOutOfRange.at(rhs_expr))?,

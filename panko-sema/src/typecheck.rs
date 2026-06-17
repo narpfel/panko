@@ -94,14 +94,14 @@ impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a
     type Error = Box<Either<impl Report, impl Iterator<Item = impl Report> + 'a>>;
 
     fn try_from(expr: &'a TypedExpression<'a>) -> Result<Self, Self::Error> {
-        let value = match constexpr::eval(expr).into_integral() {
-            Ok(constexpr::Integral::Signed(value)) => u64::try_from(value).map_err(|_| {
-                Either::Left(Diagnostic::ArrayLengthNegative { at: *expr, length: value })
-            })?,
-            Ok(constexpr::Integral::Unsigned(value)) => value,
+        match constexpr::eval(expr).into_unsigned() {
+            Ok(Ok(length)) => Ok(Self::Constant(length)),
+            Ok(Err(length)) => Err(Either::Left(Diagnostic::ArrayLengthNegative {
+                at: *expr,
+                length,
+            }))?,
             Err(errors) => Err(Either::Right(errors.into_iter()))?,
-        };
-        Ok(Self::Constant(value))
+        }
     }
 }
 
@@ -807,14 +807,14 @@ fn typeck_struct_members<'a>(
             let (width_expr, bitfield_width) = try {
                 let BitfieldWidth { width } = bitfield_width.as_ref()?;
                 let width = typeck_expression(sess, width, Context::Default);
-                let value = match constexpr::eval(&width).into_integral() {
-                    Ok(constexpr::Integral::Signed(value)) => u64::try_from(value).map_or_else(
-                        |_| {
-                            sess.emit(Diagnostic::BitfieldWidthNegative { at: width, width: value })
-                        },
-                        Some,
-                    )?,
-                    Ok(constexpr::Integral::Unsigned(value)) => value,
+                let value = match constexpr::eval(&width).into_unsigned() {
+                    Ok(Ok(value)) => value,
+                    Ok(Err(value)) => {
+                        // TODO: use this error
+                        let () = sess
+                            .emit(Diagnostic::BitfieldWidthNegative { at: width, width: value });
+                        None?
+                    }
                     Err(errors) => {
                         sess.emit_many(errors);
                         None?
@@ -1305,17 +1305,13 @@ fn typeck_initialiser_list<'a>(
                     match designator {
                         Designator::Bracketed { open_bracket: _, index, close_bracket: _ } => {
                             let index = typeck_expression(sess, index, Context::Default);
-                            let index = match constexpr::eval(&index).into_integral() {
-                                Ok(constexpr::Integral::Signed(value)) =>
-                                    match u64::try_from(value) {
-                                        Ok(value) => value,
-                                        Err(_) =>
-                                            return sess.emit(Diagnostic::NegativeSubobjectIndex {
-                                                at: *designator,
-                                                index: value,
-                                            }),
-                                    },
-                                Ok(constexpr::Integral::Unsigned(value)) => value,
+                            let index = match constexpr::eval(&index).into_unsigned() {
+                                Ok(Ok(index)) => index,
+                                Ok(Err(index)) =>
+                                    return sess.emit(Diagnostic::NegativeSubobjectIndex {
+                                        at: *designator,
+                                        index,
+                                    }),
                                 Err(errors) => return sess.emit_many(errors),
                             };
                             subobjects.goto_index(index)
