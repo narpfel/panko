@@ -448,37 +448,34 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             unary!(operand, not, i32)
         }
 
-        Expression::Addressof { ampersand, operand } => {
-            match &operand.expr {
-                Expression::Parenthesised { open_paren: _, expr, close_paren: _ } =>
-                    eval(&TypedExpression {
-                        expr: Expression::Addressof { ampersand: *ampersand, operand: expr },
-                        ..*typed_expr
-                    }),
-                // TODO: `constexpr` storage class
-                Expression::Name(reference)
-                | Expression::CompoundLiteral {
-                    open_paren: _,
-                    decl: Declaration { reference, initialiser: _ },
-                } => match reference.storage_duration {
-                    StorageDuration::Static(_) => Value {
-                        ty,
-                        repr: Repr::Address { reference, offset: 0 },
-                    },
-                    StorageDuration::Automatic => not_constexpr(typed_expr, []),
+        Expression::Addressof { ampersand, operand } => match &operand.expr {
+            Expression::Parenthesised { open_paren: _, expr, close_paren: _ } =>
+                eval(&TypedExpression {
+                    expr: Expression::Addressof { ampersand: *ampersand, operand: expr },
+                    ..*typed_expr
+                }),
+            Expression::Name(reference)
+            | Expression::CompoundLiteral {
+                open_paren: _,
+                decl: Declaration { reference, initialiser: _ },
+            } => match reference.storage_duration {
+                StorageDuration::Static(_) => Value {
+                    ty,
+                    repr: Repr::Address { reference, offset: 0 },
                 },
-                Expression::Deref { star: _, operand } => eval(operand),
-                Expression::MemberAccess { lhs, member, member_loc: _ } => {
-                    let pointer = &TypedExpression {
-                        ty: Type::Pointer(&lhs.ty).unqualified(),
-                        expr: Expression::Addressof { ampersand: *ampersand, operand: lhs },
-                    };
-                    let offset = Value::int(member.offset, Type::ptrdiff_t());
-                    eval_pointer_arithmetic(typed_expr, pointer, offset, 1, u64::checked_add_signed)
-                }
-                _ => Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
+                StorageDuration::Automatic => not_constexpr(typed_expr, []),
+            },
+            Expression::Deref { star: _, operand } => eval(operand),
+            Expression::MemberAccess { lhs, member, member_loc: _ } => {
+                let pointer = &TypedExpression {
+                    ty: Type::Pointer(&lhs.ty).unqualified(),
+                    expr: Expression::Addressof { ampersand: *ampersand, operand: lhs },
+                };
+                let offset = Value::int(member.offset, Type::ptrdiff_t());
+                eval_pointer_arithmetic(typed_expr, pointer, offset, 1, u64::checked_add_signed)
             }
-        }
+            _ => Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
+        },
 
         Expression::PtrAdd {
             pointer,
