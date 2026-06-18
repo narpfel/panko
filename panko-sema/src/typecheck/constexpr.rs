@@ -130,6 +130,11 @@ fn write_address<'a>(Address { reference, offset }: Address<'a>) -> Repr<'a> {
     )
 }
 
+enum Pointer<'a> {
+    FromInt(Result<u64, Errors<'a>>),
+    Address(Address<'a>),
+}
+
 impl<'a> Value<'a> {
     fn into_integral(self) -> Result<Integral, Errors<'a>> {
         let Self { ty, repr: _ } = &self;
@@ -162,6 +167,17 @@ impl<'a> Value<'a> {
         match self.into_integral()? {
             Integral::Unsigned(value) => Ok(Ok(value)),
             Integral::Signed(value) => Ok(u64::try_from(value).map_err(|_| value)),
+        }
+    }
+
+    fn into_pointer(self) -> Pointer<'a> {
+        let Self { ty, repr } = self;
+        assert_matches!(ty, Type::Pointer(_) | Type::Nullptr);
+        match repr {
+            Repr::Bytes(bytes) if let Some(value) = read_u64(&bytes) => Pointer::FromInt(Ok(value)),
+            Repr::Bytes(bytes) if let Some(addr) = read_address(&bytes) => Pointer::Address(addr),
+            Repr::Bytes(_) => unreachable!("mixing `Literal` and `Address` bytes is invalid"),
+            Repr::Error(errors) => Pointer::FromInt(Err(errors)),
         }
     }
 
@@ -324,20 +340,16 @@ fn eval_pointer_arithmetic<'a>(
     });
     let pointer = eval(pointer);
 
-    let add = |base| arithmetic::binop(Ok(base), integral, op, || PointerAdditionOverflow.at(expr));
-    let repr = match pointer.repr {
-        Repr::Bytes(bytes) if let Some(val) = read_u64(&bytes) =>
-            add(val).map_or_else(Repr::Error, write_u64),
-        Repr::Bytes(bytes) if let Some(Address { reference, offset }) = read_address(&bytes) =>
-            add(offset).map_or_else(Repr::Error, |offset| {
+    let add = |base| arithmetic::binop(base, integral, op, || PointerAdditionOverflow.at(expr));
+    let repr = match pointer.into_pointer() {
+        Pointer::FromInt(pointer) => add(pointer).map_or_else(Repr::Error, write_u64),
+        Pointer::Address(Address { reference, offset }) => add(Ok(offset))
+            .map_or_else(Repr::Error, |offset| {
                 write_address(Address { reference, offset })
             }),
-        Repr::Bytes(_) => todo!(),
-        Repr::Error(errors) => Repr::Error(errors),
     };
 
-    let ty = expr.ty.ty;
-    Value { ty, repr }
+    Value { ty: expr.ty.ty, repr }
 }
 
 enum PointerBinopKind {
@@ -350,34 +362,23 @@ fn eval_pointer_binop<'a>(
     kind: PointerBinopKind,
     lhs: &TypedExpression<'a>,
     rhs: &TypedExpression<'a>,
-    compute: impl FnOnce(u64, u64) -> Value<'a>,
+    compute: impl FnOnce(Result<u64, Errors<'a>>, Result<u64, Errors<'a>>) -> Value<'a>,
 ) -> Value<'a> {
-    let ty = typed_expr.ty.ty;
     let lhs = eval(lhs);
     let rhs = eval(rhs);
 
-    match (lhs.repr, rhs.repr) {
-        (Repr::Bytes(lhs), Repr::Bytes(rhs))
-            if let Some(lhs) = read_u64(&lhs)
-                && let Some(rhs) = read_u64(&rhs) =>
-            compute(lhs, rhs),
+    match (lhs.into_pointer(), rhs.into_pointer()) {
+        (Pointer::FromInt(lhs), Pointer::FromInt(rhs)) => compute(lhs, rhs),
 
-        (Repr::Bytes(lhs), Repr::Bytes(rhs))
-            if let Some(Address { reference, offset }) = read_address(&lhs)
-                && let Some(Address { reference: rhs_ref, offset: rhs_offset }) =
-                    read_address(&rhs)
-                && reference.id == rhs_ref.id =>
-            compute(offset, rhs_offset),
+        (
+            Pointer::Address(Address { reference, offset }),
+            Pointer::Address(Address { reference: rhs_ref, offset: rhs_offset }),
+        ) if reference.id == rhs_ref.id => compute(Ok(offset), Ok(rhs_offset)),
 
-        (Repr::Bytes(_), Repr::Bytes(_)) => match kind {
-            PointerBinopKind::Equality => compute(0, 1),
+        _ => match kind {
+            PointerBinopKind::Equality => compute(Ok(0), Ok(1)),
             PointerBinopKind::Other => not_constexpr(typed_expr, []),
         },
-
-        (Repr::Error(errors), Repr::Bytes(_)) | (Repr::Bytes(_), Repr::Error(errors)) =>
-            Value::with_errors(ty, errors),
-
-        (Repr::Error(errors), Repr::Error(rhs)) => Value::with_errors(ty, errors.chain(rhs)),
     }
 }
 
@@ -567,10 +568,9 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
 
         Expression::PtrDiff { lhs, rhs, pointee_size } =>
             eval_pointer_binop(typed_expr, PointerBinopKind::Other, lhs, rhs, |lhs, rhs| {
-                let difference =
-                    arithmetic::binop(Ok(lhs), Ok(rhs), u64::checked_signed_diff, || {
-                        PointerDiffOverflow.at(typed_expr)
-                    });
+                let difference = arithmetic::binop(lhs, rhs, u64::checked_signed_diff, || {
+                    PointerDiffOverflow.at(typed_expr)
+                });
                 let pointee_size = pointee_size
                     .checked_cast_signed()
                     .ok_or_else(|| SizeOverflow.at(typed_expr));
@@ -589,7 +589,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                 _ => PointerBinopKind::Other,
             };
             eval_pointer_binop(typed_expr, binop_kind, lhs, rhs, |lhs, rhs| {
-                Ok(lhs).compare(*kind, Ok(rhs)).into_value(ty)
+                lhs.compare(*kind, rhs).into_value(ty)
             })
         }
 
