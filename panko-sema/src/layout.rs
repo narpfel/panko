@@ -1,7 +1,6 @@
 use std::bstr::ByteStr;
 use std::path::Path;
 
-use itertools::Either;
 use panko_lex::Bump;
 use panko_lex::Loc;
 use panko_parser as cst;
@@ -29,6 +28,7 @@ use crate::typecheck::MemberKind;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::Typeck;
 use crate::typecheck::Typedef;
+use crate::typecheck::Value;
 
 mod as_sexpr;
 mod stack;
@@ -76,19 +76,8 @@ pub enum Initialiser<'a> {
     Expression(LayoutedExpression<'a>),
     Static {
         initialiser: typecheck::InitialiserRef<'a>,
-        value: Value<'a>,
+        value: Value<'a, Reference<'a>>,
     },
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct Value<'a> {
-    pub chunks: &'a [Either<&'a [u8], Address<'a>>],
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct Address<'a> {
-    pub reference: Reference<'a>,
-    pub offset: u64,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -460,16 +449,10 @@ fn layout_declaration<'a>(
             typecheck::Initialiser::Expression(initialiser) => Initialiser::Expression(
                 layout_expression_in_slot(stack, bump, &initialiser, Some(reference.slot)),
             ),
-            typecheck::Initialiser::Static { initialiser, value } => {
-                let chunks = value.chunks.iter().map(|&chunk| match chunk {
-                    Either::Left(bytes) => Either::Left(bytes),
-                    Either::Right(typecheck::Address { reference, offset }) =>
-                        Either::Right(Address {
-                            reference: stack.add(bump, *reference),
-                            offset,
-                        }),
-                });
-                let value = Value { chunks: bump.alloc_slice_collect(chunks) };
+            typecheck::Initialiser::Static { initialiser, value: Value { chunks } } => {
+                let chunks = chunks.iter().map(|chunk| chunk.map(|r| stack.add(bump, r)));
+                let chunks = bump.alloc_slice_fill_iter(chunks);
+                let value = Value { chunks };
                 Initialiser::Static { initialiser, value }
             }
         }

@@ -64,8 +64,8 @@ use crate::ty::subobjects::Subobject;
 use crate::ty::subobjects::SubobjectIterator;
 use crate::ty::subobjects::SubobjectKey;
 use crate::ty::subobjects::Subobjects;
-pub(crate) use crate::typecheck::constexpr::Address;
-pub(crate) use crate::typecheck::constexpr::PersistedValue as Value;
+pub use crate::typecheck::constexpr::Chunk;
+pub use crate::typecheck::constexpr::PersistedValue as Value;
 use crate::typecheck::diagnostics::Diagnostic;
 use crate::typecheck::literal::StringLiteral;
 pub(crate) use crate::typecheck::ptr::PtrAddOrder;
@@ -221,7 +221,7 @@ pub(crate) enum Initialiser<'a> {
     Expression(TypedExpression<'a>),
     Static {
         initialiser: InitialiserRef<'a>,
-        value: Value<'a>,
+        value: Value<'a, Reference<'a>>,
     },
 }
 

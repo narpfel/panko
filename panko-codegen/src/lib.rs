@@ -13,7 +13,6 @@ use std::mem;
 
 use indexmap::IndexMap;
 use indexmap::IndexSet;
-use itertools::Either;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_parser::BinOpKind;
@@ -22,7 +21,6 @@ use panko_parser::LogicalOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Signedness;
 use panko_report::Report;
-use panko_sema::layout::Address;
 use panko_sema::layout::CompoundStatement;
 use panko_sema::layout::Declaration;
 use panko_sema::layout::Expression;
@@ -39,7 +37,6 @@ use panko_sema::layout::Subobject;
 use panko_sema::layout::SubobjectInitialiser;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::Type;
-use panko_sema::layout::Value;
 use panko_sema::layout::Varargs;
 use panko_sema::scope::BuiltinName;
 use panko_sema::scope::BuiltinNameKind;
@@ -52,8 +49,10 @@ use panko_sema::ty::PairKind;
 use panko_sema::ty::Struct;
 use panko_sema::typecheck::ArrayLength;
 use panko_sema::typecheck::Bitfield;
+use panko_sema::typecheck::Chunk;
 use panko_sema::typecheck::Member;
 use panko_sema::typecheck::MemberKind;
+use panko_sema::typecheck::Value;
 
 use crate::Register::*;
 use crate::lineno::Linenos;
@@ -200,7 +199,7 @@ impl<'a> SubobjectAtReference<'a> {
 #[derive(Debug)]
 enum StaticInitialiser<'a> {
     Empty,
-    Value(Value<'a>),
+    Value(Value<'a, Reference<'a>>),
 }
 
 impl<'a> From<&Initialiser<'a>> for StaticInitialiser<'a> {
@@ -210,7 +209,7 @@ impl<'a> From<&Initialiser<'a>> for StaticInitialiser<'a> {
             Initialiser::Static { initialiser: _, value } => match value {
                 Value { chunks }
                     if chunks.iter().all(|chunk| {
-                        matches!(chunk, Either::Left(bytes) if bytes.iter().all(|&b| b == 0))
+                        matches!(chunk, Chunk::Literal(bytes) if bytes.iter().all(|&b| b == 0))
                     }) => Self::Empty,
                 _ => Self::Value(*value),
             },
@@ -547,8 +546,8 @@ impl<'a> Codegen<'a> {
             Some(StaticInitialiser::Value(Value { chunks })) =>
                 for chunk in chunks {
                     match chunk {
-                        Either::Left(bytes) => self.constant(bytes),
-                        Either::Right(Address { reference, offset }) => match reference.slot() {
+                        Chunk::Literal(bytes) => self.constant(bytes),
+                        Chunk::Address { reference, offset } => match reference.slot() {
                             Slot::Static(name) =>
                                 writeln!(self.code, "    .quad {name} + {offset}").unwrap(),
                             Slot::Automatic(_) | Slot::Void => unreachable!(),

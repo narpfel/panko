@@ -2,7 +2,6 @@ use std::assert_matches;
 use std::collections::LinkedList;
 use std::iter::once;
 
-use itertools::Either;
 use itertools::Itertools as _;
 use itertools::zip_eq;
 use panko_parser::BinOpKind;
@@ -105,9 +104,9 @@ fn write_u64<'a>(value: u64) -> Repr<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct Address<'a> {
-    pub(crate) reference: &'a Reference<'a>,
-    pub(crate) offset: u64,
+struct Address<'a> {
+    reference: &'a Reference<'a>,
+    offset: u64,
 }
 
 fn read_address<'a>(bytes: &[Byte<'a>]) -> Option<Address<'a>> {
@@ -658,11 +657,30 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct PersistedValue<'a> {
-    pub(crate) chunks: &'a [Either<&'a [u8], Address<'a>>],
+pub struct PersistedValue<'a, Reference> {
+    pub chunks: &'a [Chunk<'a, Reference>],
 }
 
-fn persist<'a>(sess: &Session<'a>, bytes: Box<[Byte<'a>]>) -> PersistedValue<'a> {
+#[derive(Debug, Clone, Copy)]
+pub enum Chunk<'a, Reference> {
+    Literal(&'a [u8]),
+    Address { reference: Reference, offset: u64 },
+}
+
+impl<'a, Reference> Chunk<'a, Reference> {
+    pub(crate) fn map<F, R>(self, mut f: F) -> Chunk<'a, R>
+    where
+        F: FnMut(Reference) -> R,
+    {
+        match self {
+            Self::Literal(bytes) => Chunk::Literal(bytes),
+            Self::Address { reference, offset } =>
+                Chunk::Address { reference: f(reference), offset },
+        }
+    }
+}
+
+fn persist<'a>(sess: &Session<'a>, bytes: Box<[Byte<'a>]>) -> PersistedValue<'a, Reference<'a>> {
     let chunks = bytes
         .into_iter()
         .chunk_by(|t| matches!(t, Byte::Literal(_)));
@@ -670,7 +688,7 @@ fn persist<'a>(sess: &Session<'a>, bytes: Box<[Byte<'a>]>) -> PersistedValue<'a>
         for (is_literal, chunk) in &chunks {
             match is_literal {
                 true =>
-                    yield Either::Left(sess.alloc_slice_collect(chunk.map(|b| match b {
+                    yield Chunk::Literal(sess.alloc_slice_collect(chunk.map(|b| match b {
                         Byte::Literal(b) => b,
                         Byte::Address { .. } => unreachable!(),
                     }))),
@@ -679,7 +697,7 @@ fn persist<'a>(sess: &Session<'a>, bytes: Box<[Byte<'a>]>) -> PersistedValue<'a>
                     while let Some([Byte::Address { index: _, reference, offset }, ..]) =
                         chunks.next()
                     {
-                        yield Either::Right(Address { reference, offset })
+                        yield Chunk::Address { reference: *reference, offset }
                     }
                     assert_matches!(chunks.next(), None);
                     assert_matches!(chunks.into_remainder().next(), None);
