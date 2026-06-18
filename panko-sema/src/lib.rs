@@ -5,6 +5,7 @@
 #![feature(gen_blocks)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(integer_cast_extras)]
+#![feature(iter_array_chunks)]
 #![feature(macro_metavar_expr_concat)]
 #![feature(never_type)]
 #![feature(stmt_expr_attributes)]

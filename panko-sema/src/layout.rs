@@ -1,6 +1,7 @@
 use std::bstr::ByteStr;
 use std::path::Path;
 
+use itertools::Either;
 use panko_lex::Bump;
 use panko_lex::Loc;
 use panko_parser as cst;
@@ -80,12 +81,14 @@ pub enum Initialiser<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum Value<'a> {
-    Bytes(&'a [u8]),
-    Pointer {
-        reference: Reference<'a>,
-        offset: u64,
-    },
+pub struct Value<'a> {
+    pub chunks: &'a [Either<&'a [u8], Address<'a>>],
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Address<'a> {
+    pub reference: Reference<'a>,
+    pub offset: u64,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -457,16 +460,18 @@ fn layout_declaration<'a>(
             typecheck::Initialiser::Expression(initialiser) => Initialiser::Expression(
                 layout_expression_in_slot(stack, bump, &initialiser, Some(reference.slot)),
             ),
-            typecheck::Initialiser::Static { initialiser, value } => Initialiser::Static {
-                initialiser,
-                value: match value {
-                    typecheck::Value::Bytes(bytes) => Value::Bytes(bytes),
-                    typecheck::Value::Pointer { reference, offset } => Value::Pointer {
-                        reference: stack.add(bump, *reference),
-                        offset,
-                    },
-                },
-            },
+            typecheck::Initialiser::Static { initialiser, value } => {
+                let chunks = value.chunks.iter().map(|&chunk| match chunk {
+                    Either::Left(bytes) => Either::Left(bytes),
+                    Either::Right(typecheck::Address { reference, offset }) =>
+                        Either::Right(Address {
+                            reference: stack.add(bump, *reference),
+                            offset,
+                        }),
+                });
+                let value = Value { chunks: bump.alloc_slice_collect(chunks) };
+                Initialiser::Static { initialiser, value }
+            }
         }
     });
     Declaration { reference, initialiser }

@@ -6,6 +6,7 @@ use panko_parser::Comparison;
 
 use crate::typecheck::Type;
 use crate::typecheck::TypedExpression;
+use crate::typecheck::constexpr::Byte;
 use crate::typecheck::constexpr::Errors;
 use crate::typecheck::constexpr::Repr;
 use crate::typecheck::constexpr::Value;
@@ -92,7 +93,7 @@ macro_rules! int_impl {
                     |errors| Value::with_errors(ty, errors),
                     |value| {
                         assert!(ty.can_represent(value), "`{ty}`.can_represent({value})");
-                        let repr = Repr::Bytes(Box::new(value.to_le_bytes()));
+                        let repr = Repr::Bytes(Box::new(value.to_le_bytes().map(Byte::Literal)));
                         Value { ty, repr }
                     },
                 )
