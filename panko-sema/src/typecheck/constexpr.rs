@@ -726,7 +726,9 @@ pub(super) fn run_static_initialiser<'a>(
                         ) {
                             match tgt_byte {
                                 Byte::Literal(tgt_byte) => *tgt_byte |= src_byte,
-                                Byte::Address { .. } => todo!(),
+                                Byte::Address { .. } => unreachable!(
+                                    "bitfields can only overlap with other bitfields, which never have `Address` repr"
+                                ),
                             }
                         }
                     }
