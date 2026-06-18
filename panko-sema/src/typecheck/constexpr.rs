@@ -3,7 +3,6 @@ use std::collections::LinkedList;
 use std::iter::once;
 
 use itertools::Either;
-use itertools::EitherOrBoth;
 use itertools::Itertools as _;
 use itertools::zip_eq;
 use panko_parser::BinOpKind;
@@ -94,14 +93,11 @@ enum Byte<'a> {
 }
 
 fn read_u64(bytes: &[Byte]) -> Option<u64> {
-    let mut unpacked = [0; _];
-    for byte_unpacked in bytes.iter().zip_longest(&mut unpacked) {
-        match byte_unpacked {
-            EitherOrBoth::Both(Byte::Literal(byte), unpacked_byte) => *unpacked_byte = *byte,
-            _ => None?,
-        }
-    }
-    Some(u64::from_le_bytes(unpacked))
+    let bytes = bytes.iter().map(|b| match b {
+        Byte::Literal(b) => Some(*b),
+        Byte::Address { .. } => None,
+    });
+    Some(u64::from_le_bytes(bytes.collect_array()?.transpose()?))
 }
 
 fn write_u64<'a>(value: u64) -> Repr<'a> {

@@ -8,6 +8,7 @@
 #![feature(iter_array_chunks)]
 #![feature(macro_metavar_expr_concat)]
 #![feature(never_type)]
+#![feature(option_array_transpose)]
 #![feature(stmt_expr_attributes)]
 #![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
