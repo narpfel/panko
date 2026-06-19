@@ -333,16 +333,14 @@ fn eval_pointer_arithmetic<'a>(
     let integral = arithmetic::binop(integral, pointee_size, i64::checked_mul, || {
         SizeOverflow.at(expr)
     });
-    let pointer = eval(pointer);
-
     let add = |base| arithmetic::binop(base, integral, op, || PointerAdditionOverflow.at(expr));
-    let repr = match pointer.into_pointer() {
-        Pointer::FromInt(pointer) => add(pointer).map_or_else(Repr::Error, write_u64),
-        Pointer::Address(Address { reference, offset }) => add(Ok(offset))
-            .map_or_else(Repr::Error, |offset| {
-                write_address(Address { reference, offset })
-            }),
-    };
+
+    let repr = match eval(pointer).into_pointer() {
+        Pointer::FromInt(pointer) => add(pointer).map(write_u64),
+        Pointer::Address(Address { reference, offset }) =>
+            add(Ok(offset)).map(|offset| write_address(Address { reference, offset })),
+    }
+    .unwrap_or_else(Repr::Error);
 
     Value { ty: expr.ty.ty, repr }
 }
