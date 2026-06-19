@@ -99,6 +99,7 @@ impl<'a> Stack<'a> {
                 } = reference;
                 let ty = layout_ty(self, bump, ty);
                 let slot = match storage_duration {
+                    // TODO: move to function so that static initialisers don’t need a `Stack`
                     StorageDuration::Static(linkage) => match linkage {
                         Linkage::External | Linkage::Internal | Linkage::Inline =>
                             Slot::Static(reference.name()),
