@@ -130,6 +130,15 @@ enum Pointer<'a> {
     Address(Address<'a>),
 }
 
+impl<'a> Pointer<'a> {
+    fn with_value(self, value: u64) -> Result<u64, Errors<'a>> {
+        match self {
+            Self::FromInt(Ok(_)) | Self::Address(Address { .. }) => Ok(value),
+            Self::FromInt(Err(errors)) => Err(errors),
+        }
+    }
+}
+
 impl<'a> Value<'a> {
     fn into_integral(self) -> Result<Integral, Errors<'a>> {
         let Self { ty, repr: _ } = &self;
@@ -368,8 +377,8 @@ fn eval_pointer_binop<'a>(
             Pointer::Address(Address { reference: rhs_ref, offset: rhs_offset }),
         ) if reference.id == rhs_ref.id => compute(Ok(offset), Ok(rhs_offset)),
 
-        _ => match kind {
-            PointerBinopKind::Equality => compute(Ok(0), Ok(1)),
+        (lhs, rhs) => match kind {
+            PointerBinopKind::Equality => compute(lhs.with_value(0), rhs.with_value(1)),
             PointerBinopKind::Other => not_constexpr(typed_expr, []),
         },
     }
