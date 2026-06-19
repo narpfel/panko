@@ -660,6 +660,43 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 5>>`
                            (string `array<char; 5>` "%zu\n\0"))))
-                  (a~62 `unsigned long`)))))))
+                  (a~62 `unsigned long`))))
+         (compound-statement
+            (struct T~63
+               (member integral @0 `int`)
+               (member pointer @8 `ptr<int>`))
+            (definition values~64 `array<int; 10>`
+               (braced
+                  (subobject +0 (42 `int`))
+                  (subobject +4 (27 `int`))))
+            (definition t~65 `struct T~63 complete`
+               (braced
+                  (subobject +0 (123 `int`))
+                  (subobject +8
+                     (addressof `ptr<int>`
+                        (deref `int`
+                           (ptr-add `ptr<int>`
+                              (noop-type-conversion `ptr<int>`
+                                 (addressof `ptr<array<int; 10>>`
+                                    (values~64 `array<int; 10>`)))
+                              (sign-extend `long` (1 `int`))))))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 10>>`
+                           (string `array<char; 10>` "%d %d %d\n\0"))))
+                  (member `int` integral +0
+                     (t~65 `struct T~63 complete`))
+                  (deref `int`
+                     (member `ptr<int>` pointer +8
+                        (t~65 `struct T~63 complete`)))
+                  (deref `int`
+                     (ptr-add `ptr<int>`
+                        (member `ptr<int>` pointer +8
+                           (t~65 `struct T~63 complete`))
+                        (sign-extend `long` (negate `int` (1 `int`)))))))))))
 
 ----- stderr -----
