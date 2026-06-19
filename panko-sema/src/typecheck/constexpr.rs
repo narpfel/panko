@@ -317,6 +317,12 @@ impl<'a> IntoErrors<'a> for Pointer<'a> {
     }
 }
 
+impl<'a> IntoErrors<'a> for &TypedExpression<'a> {
+    fn into_errors(self) -> Option<Errors<'a>> {
+        eval(self).into_errors()
+    }
+}
+
 fn gather_errors<'a>(values: impl IntoIterator<Item = impl IntoErrors<'a>>) -> Errors<'a> {
     values
         .into_iter()
@@ -611,15 +617,14 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         // TODO: `constexpr` storage class
         Expression::Name(_) => not_constexpr(typed_expr, no_errors()),
 
-        Expression::Assign { target, value } =>
-            not_constexpr(typed_expr, [eval(target), eval(value)]),
+        Expression::Assign { target, value } => not_constexpr(typed_expr, [*target, *value]),
 
         Expression::Call {
             callee,
             args,
             is_varargs: _,
             close_paren: _,
-        } => not_constexpr(typed_expr, once(eval(callee)).chain(args.iter().map(eval))),
+        } => not_constexpr(typed_expr, once(*callee).chain(*args)),
 
         Expression::Combine { first, second } => {
             let first = eval(first);
@@ -666,7 +671,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                             None | Some(Initialiser::Static { .. }) => (),
                         }
                     };
-                    not_constexpr(typed_expr, exprs.map(eval))
+                    not_constexpr(typed_expr, exprs)
                 }
             }
         }
