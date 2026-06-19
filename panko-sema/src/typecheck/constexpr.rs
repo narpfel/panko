@@ -306,18 +306,44 @@ impl<'a> Repr<'a> {
     }
 }
 
-fn gather_errors<'a>(values: impl IntoIterator<Item = Value<'a>>) -> Errors<'a> {
+trait IntoErrors<'a> {
+    fn into_errors(self) -> Option<Errors<'a>>;
+}
+
+impl<'a> IntoErrors<'a> for Value<'a> {
+    fn into_errors(self) -> Option<Errors<'a>> {
+        match self.repr {
+            Repr::Error(errors) => Some(errors),
+            _ => None,
+        }
+    }
+}
+
+impl<'a> IntoErrors<'a> for Pointer<'a> {
+    fn into_errors(self) -> Option<Errors<'a>> {
+        match self {
+            Pointer::FromInt(Err(errors)) => Some(errors),
+            Pointer::FromInt(Ok(_)) | Pointer::Address(Address { .. }) => None,
+        }
+    }
+}
+
+fn gather_errors<'a>(values: impl IntoIterator<Item = impl IntoErrors<'a>>) -> Errors<'a> {
     values
         .into_iter()
-        .fold(Errors::default(), |errors, value| match value.repr {
-            Repr::Error(error) => errors.chain(error),
-            _ => errors,
+        .filter_map(IntoErrors::into_errors)
+        .fold(Errors::default(), |errors, more_errors| {
+            errors.chain(more_errors)
         })
+}
+
+fn no_errors<'a>() -> [Value<'a>; 0] {
+    []
 }
 
 fn not_constexpr<'a>(
     expr: &TypedExpression<'a>,
-    values: impl IntoIterator<Item = Value<'a>>,
+    values: impl IntoIterator<Item = impl IntoErrors<'a>>,
 ) -> Value<'a> {
     let errors = gather_errors(values).chain(Errors::new(Diagnostic::NotConstexpr { at: *expr }));
     Value::with_errors(expr.ty.ty, errors)
@@ -379,7 +405,7 @@ fn eval_pointer_binop<'a>(
 
         (lhs, rhs) => match kind {
             PointerBinopKind::Equality => compute(lhs.with_value(0), rhs.with_value(1)),
-            PointerBinopKind::Other => not_constexpr(typed_expr, []),
+            PointerBinopKind::Other => not_constexpr(typed_expr, [lhs, rhs]),
         },
     }
 }
@@ -533,7 +559,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                     ty,
                     repr: write_address(Address { reference, offset: 0 }),
                 },
-                StorageDuration::Automatic => not_constexpr(typed_expr, []),
+                StorageDuration::Automatic => not_constexpr(typed_expr, no_errors()),
             },
             Expression::Deref { star: _, operand } => eval(operand),
             Expression::MemberAccess { lhs, member, member_loc: _ } => {
@@ -596,7 +622,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         }
 
         // TODO: `constexpr` storage class
-        Expression::Name(_) => not_constexpr(typed_expr, []),
+        Expression::Name(_) => not_constexpr(typed_expr, no_errors()),
 
         Expression::Assign { target, value } =>
             not_constexpr(typed_expr, [eval(target), eval(value)]),

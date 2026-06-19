@@ -1,5 +1,4 @@
 // [[nosnapshot]]
-// [[known-bug]]
 
 int main() {
     static int a;
