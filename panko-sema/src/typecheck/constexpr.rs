@@ -91,12 +91,16 @@ enum Byte<'a> {
     },
 }
 
-fn read_u64(bytes: &[Byte]) -> Option<u64> {
+fn read_literal_bytes<const N: usize>(bytes: &[Byte]) -> Option<[u8; N]> {
     let bytes = bytes.iter().map(|b| match b {
         Byte::Literal(b) => Some(*b),
         Byte::Address { .. } => None,
     });
-    Some(u64::from_le_bytes(bytes.collect_array()?.transpose()?))
+    bytes.collect_array()?.transpose()
+}
+
+fn read_u64(bytes: &[Byte]) -> Option<u64> {
+    Some(u64::from_le_bytes(read_literal_bytes(bytes)?))
 }
 
 fn write_u64<'a>(value: u64) -> Repr<'a> {
@@ -271,10 +275,7 @@ macro_rules! impl_as_ty {
             let Self { ty, repr } = self;
             match *ty {
                 $pattern => Some(match repr {
-                    Repr::Bytes(bytes) => Ok($t::from_le_bytes(bytes.iter().map(|b| match b {
-                        Byte::Literal(b) => Some(*b),
-                        Byte::Address { .. } => None,
-                    }).collect::<Option<Vec<u8>>>()?.try_into().unwrap())),
+                    Repr::Bytes(bytes) => Ok($t::from_le_bytes(read_literal_bytes(bytes)?)),
                     Repr::Error(errors) => Err(errors.clone()),
                 }),
                 _ => None,
