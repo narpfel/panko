@@ -91,12 +91,15 @@ enum Byte<'a> {
     },
 }
 
-fn read_literal_bytes<const N: usize>(bytes: &[Byte]) -> Option<[u8; N]> {
-    let bytes = bytes.iter().map(|b| match b {
+fn iter_literal_bytes(bytes: &[Byte]) -> impl Iterator<Item = Option<u8>> {
+    bytes.iter().map(|b| match b {
         Byte::Literal(b) => Some(*b),
         Byte::Address { .. } => None,
-    });
-    bytes.collect_array()?.transpose()
+    })
+}
+
+fn read_literal_bytes<const N: usize>(bytes: &[Byte]) -> Option<[u8; N]> {
+    iter_literal_bytes(bytes).collect_array()?.transpose()
 }
 
 fn read_u64(bytes: &[Byte]) -> Option<u64> {
@@ -225,17 +228,10 @@ impl<'a> Value<'a> {
             }
             Kind::Truncate | Kind::ZeroExtend | Kind::SignExtend => match ty {
                 Type::Arithmetic(Arithmetic::Integral(integral)) => {
-                    let mut bytes = repr
-                        .into_bytes()
-                        .unwrap_or_else(|_| {
-                            todo!("this is possible when converting the result of a ptr2int cast")
-                        })
-                        .into_iter()
-                        .map(|b| match b {
-                            Byte::Literal(b) => b,
-                            Byte::Address { .. } => todo!("error message"),
-                        })
-                        .collect_vec();
+                    let mut bytes =
+                        iter_literal_bytes(&repr.into_bytes().expect("repr is not `Repr::Error`"))
+                            .collect::<Option<Vec<_>>>()
+                            .expect("TODO: error message: invalid ptr2int cast, e. g. `(int)(size_t)&static_var`");
                     let fill_value = match integral.signedness {
                         Signedness::Signed if let ConversionKind::SignExtend = kind =>
                             match bytes.last().unwrap().cast_signed() < 0 {
