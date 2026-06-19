@@ -37,7 +37,6 @@ use panko_sema::layout::Subobject;
 use panko_sema::layout::SubobjectInitialiser;
 use panko_sema::layout::TranslationUnit;
 use panko_sema::layout::Type;
-use panko_sema::layout::Value;
 use panko_sema::layout::Varargs;
 use panko_sema::scope::BuiltinName;
 use panko_sema::scope::BuiltinNameKind;
@@ -50,8 +49,10 @@ use panko_sema::ty::PairKind;
 use panko_sema::ty::Struct;
 use panko_sema::typecheck::ArrayLength;
 use panko_sema::typecheck::Bitfield;
+use panko_sema::typecheck::Chunk;
 use panko_sema::typecheck::Member;
 use panko_sema::typecheck::MemberKind;
+use panko_sema::typecheck::Value;
 
 use crate::Register::*;
 use crate::lineno::Linenos;
@@ -198,7 +199,7 @@ impl<'a> SubobjectAtReference<'a> {
 #[derive(Debug)]
 enum StaticInitialiser<'a> {
     Empty,
-    Value(Value<'a>),
+    Value(Value<'a, Reference<'a>>),
 }
 
 impl<'a> From<&Initialiser<'a>> for StaticInitialiser<'a> {
@@ -206,7 +207,10 @@ impl<'a> From<&Initialiser<'a>> for StaticInitialiser<'a> {
         match initialiser {
             Initialiser::Braced { subobject_initialisers: [] } => Self::Empty,
             Initialiser::Static { initialiser: _, value } => match value {
-                Value::Bytes(bytes) if bytes.iter().all(|&b| b == 0) => Self::Empty,
+                Value { chunks }
+                    if chunks.iter().all(|chunk| {
+                        matches!(chunk, Chunk::Literal(bytes) if bytes.iter().all(|&b| b == 0))
+                    }) => Self::Empty,
                 _ => Self::Value(*value),
             },
             Initialiser::Braced { subobject_initialisers: _ } | Initialiser::Expression(_) =>
@@ -539,11 +543,16 @@ impl<'a> Codegen<'a> {
         self.directive("align", &[&ty.align()]);
         self.label(name);
         match initialiser {
-            Some(StaticInitialiser::Value(Value::Bytes(bytes))) => self.constant(bytes),
-            Some(StaticInitialiser::Value(Value::Pointer { reference, offset })) =>
-                match reference.slot() {
-                    Slot::Static(name) => self.directive_with_sep("quad", " + ", &[&name, &offset]),
-                    Slot::Automatic(_) | Slot::Void => unreachable!(),
+            Some(StaticInitialiser::Value(Value { chunks })) =>
+                for chunk in chunks {
+                    match chunk {
+                        Chunk::Literal(bytes) => self.constant(bytes),
+                        Chunk::Address { reference, offset } => match reference.slot() {
+                            Slot::Static(name) =>
+                                writeln!(self.code, "    .quad {name} + {offset}").unwrap(),
+                            Slot::Automatic(_) | Slot::Void => unreachable!(),
+                        },
+                    }
                 },
             Some(StaticInitialiser::Empty) | None => self.zero(size),
         }

@@ -708,6 +708,43 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>` @16
                         (addressof `ptr<array<char; 5>>` @16
                            (string `array<char; 5>` @void "%zu\n\0"))))
-                  (a~62 `unsigned long` (static a.62))))))))
+                  (a~62 `unsigned long` (static a.62)))))
+         (compound-statement
+            (struct T~63
+               (member integral @0 `int`)
+               (member pointer @8 `ptr<int>`))
+            (definition (values~64 `array<int; 10>` (static values.64))
+               (braced
+                  (subobject +0 (42 `int`))
+                  (subobject +4 (27 `int`))))
+            (definition (t~65 `struct T~63 complete` (static t.65))
+               (braced
+                  (subobject +0 (123 `int`))
+                  (subobject +8
+                     (addressof `ptr<int>`
+                        (deref `int`
+                           (ptr-add `ptr<int>`
+                              (noop-type-conversion `ptr<int>`
+                                 (addressof `ptr<array<int; 10>>`
+                                    (values~64 `array<int; 10>`)))
+                              (sign-extend `long` (1 `int`))))))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 10>>` @16
+                           (string `array<char; 10>` @void "%d %d %d\n\0"))))
+                  (member `int` @24 integral +0
+                     (t~65 `struct T~63 complete` (static t.65)))
+                  (deref `int` @28
+                     (member `ptr<int>` @32 pointer +8
+                        (t~65 `struct T~63 complete` (static t.65))))
+                  (deref `int` @40
+                     (ptr-add `ptr<int>` @48
+                        (member `ptr<int>` @48 pointer +8
+                           (t~65 `struct T~63 complete` (static t.65)))
+                        (sign-extend `long` @56 (negate `int` @64 (1 `int` @64)))))))))))
 
 ----- stderr -----

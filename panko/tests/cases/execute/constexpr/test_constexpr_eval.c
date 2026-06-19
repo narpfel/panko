@@ -221,4 +221,19 @@ int main() {
         // [[print: 120]]
         printf("%zu\n", a);
     }
+
+    // initialisers that contain both integrals and pointers
+    {
+        struct T {
+            int integral;
+            int* pointer;
+        };
+        static int values[10] = {42, 27};
+        static struct T t = {
+            .integral = 123,
+            .pointer = &values[1],
+        };
+        // [[print: 123 27 42]]
+        printf("%d %d %d\n", t.integral, *t.pointer, t.pointer[-1]);
+    }
 }

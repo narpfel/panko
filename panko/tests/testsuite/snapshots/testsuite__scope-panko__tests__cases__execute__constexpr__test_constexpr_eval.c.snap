@@ -373,6 +373,30 @@ exit_code: 0
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%zu\n")
-                  (name a~62 `typeof((sizeof 0))`)))))))
+                  (name a~62 `typeof((sizeof 0))`))))
+         (compound-statement
+            (struct T~63
+               (member integral `int`)
+               (member pointer `ptr<int>`))
+            (declaration values~64 `array<int; 10>`
+               (braced
+                  42
+                  27))
+            (declaration t~65 `struct T~63 complete`
+               (braced
+                  (designation ((member integral)) 123)
+                  (designation ((member pointer)) (addressof (subscript (name values~64 `array<int; 10>`) 1)))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d %d\n")
+                  (dot integral
+                     (name t~65 `struct T~63 complete`))
+                  (deref
+                     (dot pointer
+                        (name t~65 `struct T~63 complete`)))
+                  (subscript
+                     (dot pointer
+                        (name t~65 `struct T~63 complete`))
+                     (negate 1))))))))
 
 ----- stderr -----
