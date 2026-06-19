@@ -321,9 +321,7 @@ fn gather_errors<'a>(values: impl IntoIterator<Item = impl IntoErrors<'a>>) -> E
     values
         .into_iter()
         .filter_map(IntoErrors::into_errors)
-        .fold(Errors::default(), |errors, more_errors| {
-            errors.chain(more_errors)
-        })
+        .fold(Errors::default(), Errors::chain)
 }
 
 fn no_errors<'a>() -> [Value<'a>; 0] {
