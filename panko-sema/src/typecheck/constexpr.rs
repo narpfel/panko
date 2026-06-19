@@ -83,7 +83,7 @@ enum Repr<'a> {
 enum Byte<'a> {
     Literal(u8),
     Address {
-        #[expect(unused)]
+        #[expect(unused, reason = "TODO: check for wellformedness while parsing")]
         index: u64,
         reference: &'a Reference<'a>,
         // TODO: this should be bounded by the `reference`’s type’s size
