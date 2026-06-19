@@ -155,16 +155,8 @@ impl<'a> Value<'a> {
             Signedness::Signed => Type::LONG,
         };
         let Value { ty: _, repr } = self.convert(ty, ConversionKind::SignExtend);
-        let bytes = repr
-            .into_bytes()?
-            .into_iter()
-            .map(|b| match b {
-                Byte::Literal(b) => b,
-                Byte::Address { .. } => todo!("error message"),
-            })
-            .collect_vec()
-            .try_into()
-            .unwrap();
+        let bytes = read_literal_bytes(&repr.into_bytes()?)
+            .expect("`convert` only generates `Repr`s that only contain `Literal`s");
         match signedness {
             Signedness::Signed => Ok(Integral::Signed(i64::from_le_bytes(bytes))),
             Signedness::Unsigned => Ok(Integral::Unsigned(u64::from_le_bytes(bytes))),
