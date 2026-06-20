@@ -92,3 +92,15 @@ void error_in_pointer_addition() {
     static int xs[1l << 61];
     static int* p4 = &xs + 1;
 }
+
+void errors_in_compound_literals() {
+    struct T {
+        int a;
+        int b;
+    };
+
+    static struct T t = (struct T){
+        .a = 1 / 0,
+        .b = 0x7fff'ffff + 1,
+    };
+}
