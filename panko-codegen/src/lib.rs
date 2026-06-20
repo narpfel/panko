@@ -197,22 +197,12 @@ impl<'a> SubobjectAtReference<'a> {
 }
 
 #[derive(Debug)]
-enum StaticInitialiser<'a> {
-    Empty,
-    Value(Value<'a, Reference<'a>>),
-}
+struct StaticInitialiser<'a>(Value<'a, Reference<'a>>);
 
 impl<'a> From<&Initialiser<'a>> for StaticInitialiser<'a> {
     fn from(initialiser: &Initialiser<'a>) -> Self {
         match initialiser {
-            Initialiser::Braced { subobject_initialisers: [] } => Self::Empty,
-            Initialiser::Static { initialiser: _, value } => match value {
-                Value { chunks }
-                    if chunks.iter().all(|chunk| {
-                        matches!(chunk, Chunk::Literal(bytes) if bytes.iter().all(|&b| b == 0))
-                    }) => Self::Empty,
-                _ => Self::Value(*value),
-            },
+            Initialiser::Static { initialiser: _, value } => Self(*value),
             Initialiser::Braced { subobject_initialisers: _ } | Initialiser::Expression(_) =>
                 unreachable!(),
         }
@@ -543,10 +533,13 @@ impl<'a> Codegen<'a> {
         self.directive("align", &[&ty.align()]);
         self.label(name);
         match initialiser {
-            Some(StaticInitialiser::Value(Value { chunks })) =>
+            Some(StaticInitialiser(Value { chunks })) =>
                 for chunk in chunks {
                     match chunk {
-                        Chunk::Literal(bytes) => self.constant(bytes),
+                        Chunk::Literal(bytes) => match bytes.iter().all(|&b| b == 0) {
+                            true => self.zero(bytes.len().try_into().unwrap()),
+                            false => self.constant(bytes),
+                        },
                         Chunk::Address { reference, offset } => match reference.slot() {
                             Slot::Static(name) =>
                                 writeln!(self.code, "    .quad {name} + {offset}").unwrap(),
@@ -554,7 +547,7 @@ impl<'a> Codegen<'a> {
                         },
                     }
                 },
-            Some(StaticInitialiser::Empty) | None => self.zero(size),
+            None => self.zero(size),
         }
     }
 
