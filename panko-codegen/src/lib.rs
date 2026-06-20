@@ -510,7 +510,7 @@ impl<'a> Codegen<'a> {
         name: &str,
         linkage: Linkage,
         ty: Type,
-        initialiser: Option<StaticInitialiser<'_>>,
+        initialiser: Option<StaticInitialiser<'a>>,
     ) {
         let size = match ty {
             // TODO: assert that this only happens in tentative definitions
@@ -533,7 +533,7 @@ impl<'a> Codegen<'a> {
         self.directive("align", &[&ty.align()]);
         self.label(name);
         match initialiser {
-            Some(StaticInitialiser(Value { chunks })) =>
+            Some(StaticInitialiser(Value::Chunks { chunks })) =>
                 for chunk in chunks {
                     match chunk {
                         Chunk::Literal(bytes) => match bytes.iter().all(|&b| b == 0) {
@@ -547,6 +547,8 @@ impl<'a> Codegen<'a> {
                         },
                     }
                 },
+            Some(StaticInitialiser(Value::Error(errors))) =>
+                self.global_errors.extend_from_slice(errors),
             None => self.zero(size),
         }
     }

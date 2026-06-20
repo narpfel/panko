@@ -1,5 +1,4 @@
 // [[nosnapshot]]
-// [[known-bug]]
 
 int main() {
     // [[compile-error: division by zero in constant expression]]

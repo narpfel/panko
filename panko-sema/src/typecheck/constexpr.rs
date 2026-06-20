@@ -11,6 +11,7 @@ use panko_parser::LogicalOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
+use panko_report::Report;
 
 use crate::scope::StorageDuration;
 use crate::ty::subobjects::Subobject;
@@ -40,11 +41,11 @@ enum ConversionKind {
 }
 
 #[derive(Debug, Clone, Default)]
-pub(super) struct Errors<'a>(LinkedList<Diagnostic<'a>>);
+pub(super) struct Errors<'a>(LinkedList<Either<Diagnostic<'a>, &'a dyn Report>>);
 
 impl<'a> Errors<'a> {
     fn new(diagnostic: Diagnostic<'a>) -> Self {
-        Self(LinkedList::from_iter([diagnostic]))
+        Self(LinkedList::from_iter([Either::Left(diagnostic)]))
     }
 
     fn chain(self, Self(mut other_errors): Self) -> Self {
@@ -56,7 +57,7 @@ impl<'a> Errors<'a> {
 
 impl<'a> IntoIterator for Errors<'a> {
     type IntoIter = std::collections::linked_list::IntoIter<Self::Item>;
-    type Item = Diagnostic<'a>;
+    type Item = Either<Diagnostic<'a>, &'a dyn Report>;
 
     fn into_iter(self) -> Self::IntoIter {
         let Self(errors) = self;
@@ -451,13 +452,21 @@ fn eval_static_initialiser<'a>(ty: Type<'a>, initialiser: &Initialiser<'a>) -> V
         }
         Initialiser::Expression(expr) => eval(expr),
         Initialiser::Static { initialiser: _, value } => {
-            let PersistedValue { chunks } = value;
-            let bytes = chunks.iter().flat_map(|chunk| match chunk {
-                Chunk::Literal(bytes) => Either::Left(bytes.iter().copied().map(Byte::Literal)),
-                Chunk::Address { reference, offset } =>
-                    Either::Right(Address { reference, offset: *offset }.into_bytes()),
-            });
-            Value { ty, repr: Repr::Bytes(bytes.collect()) }
+            let repr = match value {
+                PersistedValue::Chunks { chunks } => {
+                    let bytes = chunks.iter().flat_map(|chunk| match chunk {
+                        Chunk::Literal(bytes) =>
+                            Either::Left(bytes.iter().copied().map(Byte::Literal)),
+                        Chunk::Address { reference, offset } =>
+                            Either::Right(Address { reference, offset: *offset }.into_bytes()),
+                    });
+                    Repr::Bytes(bytes.collect())
+                }
+                PersistedValue::Error(reports) => Repr::Error(Errors(LinkedList::from_iter(
+                    reports.iter().copied().map(Either::Right),
+                ))),
+            };
+            Value { ty, repr }
         }
     }
 }
@@ -721,8 +730,9 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct PersistedValue<'a, Reference> {
-    pub chunks: &'a [Chunk<'a, Reference>],
+pub enum PersistedValue<'a, Reference> {
+    Chunks { chunks: &'a [Chunk<'a, Reference>] },
+    Error(&'a [&'a dyn Report]),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -769,7 +779,7 @@ fn persist<'a>(sess: &Session<'a>, bytes: Box<[Byte<'a>]>) -> PersistedValue<'a,
             }
         }
     };
-    PersistedValue { chunks: sess.alloc_slice_collect(chunks) }
+    PersistedValue::Chunks { chunks: sess.alloc_slice_collect(chunks) }
 }
 
 pub(super) fn run_static_initialiser<'a>(
@@ -781,8 +791,11 @@ pub(super) fn run_static_initialiser<'a>(
     let value = match value.repr {
         Repr::Bytes(bytes) => persist(sess, bytes),
         Repr::Error(errors) => {
-            sess.emit_many(errors);
-            PersistedValue { chunks: &[] }
+            let errors = sess.alloc_slice_fill_iter(errors.into_iter().map(|error| match error {
+                Either::Left(diagnostic) => sess.emit(diagnostic),
+                Either::Right(diagnostic) => diagnostic,
+            }));
+            PersistedValue::Error(errors)
         }
     };
     Initialiser::Static {
