@@ -236,4 +236,29 @@ int main() {
         // [[print: 123 27 42]]
         printf("%d %d %d\n", t.integral, *t.pointer, t.pointer[-1]);
     }
+
+    // compound literals
+    {
+        struct T {
+            int integral;
+            int* pointer;
+        };
+        static struct T t = (struct T){
+            .integral = 123,
+            .pointer = &t.integral,
+        };
+        // [[print: 123 123]]
+        printf("%d %d\n", t.integral, *t.pointer);
+        ++*t.pointer;
+        // [[print: 124 124]]
+        printf("%d %d\n", t.integral, *t.pointer);
+
+        static int a = (int)(long){42l};
+        // [[print: 42]]
+        printf("%d\n", a);
+
+        static int b = (int){1} + 2 * (int){2};
+        // [[print: 5]]
+        printf("%d\n", b);
+    }
 }

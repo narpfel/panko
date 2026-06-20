@@ -397,6 +397,69 @@ exit_code: 0
                   (subscript
                      (dot pointer
                         (name t~65 `struct T~63 complete`))
-                     (negate 1))))))))
+                     (negate 1)))))
+         (compound-statement
+            (struct T~66
+               (member integral `int`)
+               (member pointer `ptr<int>`))
+            (hoisted-compound-literal compound_literal.68~69 `struct T~66 complete`)
+            (declaration t~67 `struct T~66 complete`
+               (compound-literal
+                  (declaration compound_literal.68~69 `struct T~66 complete`
+                     (braced
+                        (designation ((member integral)) 123)
+                        (designation ((member pointer))
+                           (addressof
+                              (dot integral
+                                 (name t~67 `struct T~66 complete`))))))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d\n")
+                  (dot integral
+                     (name t~67 `struct T~66 complete`))
+                  (deref
+                     (dot pointer
+                        (name t~67 `struct T~66 complete`)))))
+            (expression
+               (pre-increment
+                  (deref
+                     (dot pointer
+                        (name t~67 `struct T~66 complete`)))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d\n")
+                  (dot integral
+                     (name t~67 `struct T~66 complete`))
+                  (deref
+                     (dot pointer
+                        (name t~67 `struct T~66 complete`)))))
+            (hoisted-compound-literal compound_literal.72~73 `long`)
+            (declaration a~71 `int`
+               (cast `int`
+                  (compound-literal
+                     (declaration compound_literal.72~73 `long`
+                        (braced
+                           42l)))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (name a~71 `int`)))
+            (hoisted-compound-literal compound_literal.75~76 `int`)
+            (hoisted-compound-literal compound_literal.77~78 `int`)
+            (declaration b~74 `int`
+               (add
+                  (compound-literal
+                     (declaration compound_literal.75~76 `int`
+                        (braced
+                           1)))
+                  (multiply 2
+                     (compound-literal
+                        (declaration compound_literal.77~78 `int`
+                           (braced
+                              2))))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (name b~74 `int`)))))))
 
 ----- stderr -----
