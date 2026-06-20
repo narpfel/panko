@@ -1345,6 +1345,11 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
         }
     }
 
+    for (name, (linkage, ty, initialiser)) in mem::take(&mut cg.deferred_definitions) {
+        assert!(!cg.defined.contains(&name));
+        cg.object_definition(name, linkage, ty, initialiser);
+    }
+
     if !cg.global_errors.is_empty() {
         let name = "__panko_emit_global_errors";
 
@@ -1362,11 +1367,6 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
         cg.directive("section", &[&".init_array", &r#""aw""#]);
         cg.directive("align", &[&8]);
         cg.directive("quad", &[&name]);
-    }
-
-    for (name, (linkage, ty, initialiser)) in mem::take(&mut cg.deferred_definitions) {
-        assert!(!cg.defined.contains(&name));
-        cg.object_definition(name, linkage, ty, initialiser);
     }
 
     for (value, id) in mem::take(&mut cg.strings) {
