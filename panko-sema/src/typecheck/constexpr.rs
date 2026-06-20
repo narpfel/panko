@@ -2,6 +2,7 @@ use std::assert_matches;
 use std::collections::LinkedList;
 use std::iter::once;
 
+use itertools::Either;
 use itertools::Itertools as _;
 use itertools::zip_eq;
 use panko_parser::BinOpKind;
@@ -116,6 +117,13 @@ struct Address<'a> {
     offset: u64,
 }
 
+impl<'a> Address<'a> {
+    fn into_bytes(self) -> impl Iterator<Item = Byte<'a>> {
+        let Self { reference, offset } = self;
+        (0..8).map(move |index| Byte::Address { index, reference, offset })
+    }
+}
+
 fn read_address<'a>(bytes: &[Byte<'a>]) -> Option<Address<'a>> {
     match bytes.first()? {
         Byte::Literal(_) => None,
@@ -124,12 +132,8 @@ fn read_address<'a>(bytes: &[Byte<'a>]) -> Option<Address<'a>> {
     }
 }
 
-fn write_address<'a>(Address { reference, offset }: Address<'a>) -> Repr<'a> {
-    Repr::Bytes(
-        (0..8)
-            .map(|index| Byte::Address { index, reference, offset })
-            .collect(),
-    )
+fn write_address<'a>(address: Address<'a>) -> Repr<'a> {
+    Repr::Bytes(address.into_bytes().collect())
 }
 
 enum Pointer<'a> {
@@ -446,7 +450,15 @@ fn eval_static_initialiser<'a>(ty: Type<'a>, initialiser: &Initialiser<'a>) -> V
             Value { ty, repr }
         }
         Initialiser::Expression(expr) => eval(expr),
-        Initialiser::Static { initialiser: _, value } => todo!("unpersist {value:#?}"),
+        Initialiser::Static { initialiser: _, value } => {
+            let PersistedValue { chunks } = value;
+            let bytes = chunks.iter().flat_map(|chunk| match chunk {
+                Chunk::Literal(bytes) => Either::Left(bytes.iter().copied().map(Byte::Literal)),
+                Chunk::Address { reference, offset } =>
+                    Either::Right(Address { reference, offset: *offset }.into_bytes()),
+            });
+            Value { ty, repr: Repr::Bytes(bytes.collect()) }
+        }
     }
 }
 

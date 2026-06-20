@@ -260,5 +260,21 @@ int main() {
         static int b = (int){1} + 2 * (int){2};
         // [[print: 5]]
         printf("%d\n", b);
+
+        // compound literals with static initialisers
+        static int c = (static int){27};
+        static int d = (static int){10} + 3 * (static int){5};
+        // [[print: 27 25]]
+        printf("%d %d\n", c, d);
+
+        static struct T e = (static struct T){
+            .integral = 20,
+            .pointer = &d,
+        };
+        // [[print: 20 25]]
+        printf("%d %d\n", e.integral, *e.pointer);
+        ++d;
+        // [[print: 20 26]]
+        printf("%d %d\n", e.integral, *e.pointer);
     }
 }
