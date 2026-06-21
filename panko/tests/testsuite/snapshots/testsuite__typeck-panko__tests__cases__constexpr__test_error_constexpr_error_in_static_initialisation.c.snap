@@ -266,26 +266,12 @@ Error: division by zero in constant expression
     │                        ╰── in this expression of type `int`
 ────╯
 
-Error: not a constant expression
-    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:51:25]
-    │
- 51 │     static struct T a = (struct T){.x = 1, .y = 1 / 0};
-    │                         ─  
-────╯
-
 Error: division by zero in constant expression
     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:51:53]
     │
  51 │     static struct T a = (struct T){.x = 1, .y = 1 / 0};
     │                                                     ┬  
     │                                                     ╰── in this expression of type `int`
-────╯
-
-Error: not a constant expression
-    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:52:25]
-    │
- 52 │     static struct T b = (struct T){.x = 1, .y = 1 + 2};
-    │                         ─  
 ────╯
 
 Error: division by zero in constant expression
@@ -397,3 +383,19 @@ Error: overflow in object size calculation in constant expression
     │                      ─┬─  
     │                       ╰─── in this expression of type `ptr<array<int; 2305843009213693952>>`
 ────╯
+
+Error: division by zero in constant expression
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:103:18]
+     │
+ 103 │         .a = 1 / 0,
+     │                  ┬  
+     │                  ╰── in this expression of type `int`
+─────╯
+
+Error: signed overflow in constant expression
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:104:14]
+     │
+ 104 │         .b = 0x7fff'ffff + 1,
+     │              ───────┬───────  
+     │                     ╰───────── in this expression of type `int`
+─────╯

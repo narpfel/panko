@@ -124,6 +124,12 @@ impl FromError<'_> for () {
     fn from_error(_error: &dyn Report) -> Self {}
 }
 
+impl<'a> FromError<'a> for &'a (dyn Report + 'a) {
+    fn from_error(error: &'a dyn Report) -> Self {
+        error
+    }
+}
+
 impl<'a, T> FromError<'a> for Option<T> {
     fn from_error(_error: &'a dyn Report) -> Self {
         // TODO: use this error (or check that all usages should really ignore the error)

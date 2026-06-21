@@ -2,6 +2,7 @@ use std::assert_matches;
 use std::collections::LinkedList;
 use std::iter::once;
 
+use itertools::Either;
 use itertools::Itertools as _;
 use itertools::zip_eq;
 use panko_parser::BinOpKind;
@@ -10,6 +11,7 @@ use panko_parser::LogicalOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
+use panko_report::Report;
 
 use crate::scope::StorageDuration;
 use crate::ty::subobjects::Subobject;
@@ -39,11 +41,11 @@ enum ConversionKind {
 }
 
 #[derive(Debug, Clone, Default)]
-pub(super) struct Errors<'a>(LinkedList<Diagnostic<'a>>);
+pub(super) struct Errors<'a>(LinkedList<Either<Diagnostic<'a>, &'a dyn Report>>);
 
 impl<'a> Errors<'a> {
     fn new(diagnostic: Diagnostic<'a>) -> Self {
-        Self(LinkedList::from_iter([diagnostic]))
+        Self(LinkedList::from_iter([Either::Left(diagnostic)]))
     }
 
     fn chain(self, Self(mut other_errors): Self) -> Self {
@@ -55,7 +57,7 @@ impl<'a> Errors<'a> {
 
 impl<'a> IntoIterator for Errors<'a> {
     type IntoIter = std::collections::linked_list::IntoIter<Self::Item>;
-    type Item = Diagnostic<'a>;
+    type Item = Either<Diagnostic<'a>, &'a dyn Report>;
 
     fn into_iter(self) -> Self::IntoIter {
         let Self(errors) = self;
@@ -116,6 +118,13 @@ struct Address<'a> {
     offset: u64,
 }
 
+impl<'a> Address<'a> {
+    fn into_bytes(self) -> impl Iterator<Item = Byte<'a>> {
+        let Self { reference, offset } = self;
+        (0..8).map(move |index| Byte::Address { index, reference, offset })
+    }
+}
+
 fn read_address<'a>(bytes: &[Byte<'a>]) -> Option<Address<'a>> {
     match bytes.first()? {
         Byte::Literal(_) => None,
@@ -124,12 +133,8 @@ fn read_address<'a>(bytes: &[Byte<'a>]) -> Option<Address<'a>> {
     }
 }
 
-fn write_address<'a>(Address { reference, offset }: Address<'a>) -> Repr<'a> {
-    Repr::Bytes(
-        (0..8)
-            .map(|index| Byte::Address { index, reference, offset })
-            .collect(),
-    )
+fn write_address<'a>(address: Address<'a>) -> Repr<'a> {
+    Repr::Bytes(address.into_bytes().collect())
 }
 
 enum Pointer<'a> {
@@ -248,13 +253,6 @@ impl<'a> Value<'a> {
             },
         }
     }
-
-    fn bytes(&self) -> &[Byte<'a>] {
-        match &self.repr {
-            Repr::Bytes(bytes) => bytes,
-            Repr::Error(_errors) => todo!(),
-        }
-    }
 }
 
 macro_rules! impl_as_ty {
@@ -283,6 +281,11 @@ impl<'a> Value<'a> {
 }
 
 impl<'a> Repr<'a> {
+    fn empty(ty: &Type<'a>) -> Self {
+        let bytes = vec![Byte::Literal(0); usize::try_from(ty.size()).unwrap()].into_boxed_slice();
+        Repr::Bytes(bytes)
+    }
+
     fn error(diagnostic: Diagnostic<'a>) -> Self {
         Self::Error(Errors::new(diagnostic))
     }
@@ -400,6 +403,71 @@ fn eval_pointer_binop<'a>(
             PointerBinopKind::Equality => compute(lhs.with_value(0), rhs.with_value(1)),
             PointerBinopKind::Other => not_constexpr(typed_expr, [lhs, rhs]),
         },
+    }
+}
+
+fn eval_static_initialiser<'a>(ty: Type<'a>, initialiser: &Initialiser<'a>) -> Value<'a> {
+    match initialiser {
+        Initialiser::Braced { subobject_initialisers } => {
+            let mut repr = Repr::empty(&ty);
+            for SubobjectInitialiser { subobject, initialiser } in *subobject_initialisers {
+                let Subobject { ty, offset, kind } = *subobject;
+                let subobject_size = usize::try_from(ty.size()).unwrap();
+                let offset = usize::try_from(offset).unwrap();
+                let value = eval(initialiser);
+                match &mut repr {
+                    Repr::Bytes(bytes) => match kind {
+                        MemberKind::Normal => match value.repr {
+                            Repr::Bytes(subobject) =>
+                                bytes[offset..][..subobject_size].copy_from_slice(&subobject),
+                            Repr::Error(errors) => repr = Repr::Error(errors),
+                        },
+                        MemberKind::Bitfield(Bitfield { offset: bitfield_offset, width: _ }) => {
+                            let value = match value.into_integral() {
+                                Ok(Integral::Signed(value)) => value.cast_unsigned(),
+                                Ok(Integral::Unsigned(value)) => value,
+                                Err(errors) => {
+                                    repr = Repr::Error(errors);
+                                    continue;
+                                }
+                            };
+                            for (tgt_byte, src_byte) in zip_eq(
+                                &mut bytes[offset..][..subobject_size],
+                                &(value << bitfield_offset).to_le_bytes()[..subobject_size],
+                            ) {
+                                match tgt_byte {
+                                    Byte::Literal(tgt_byte) => *tgt_byte |= src_byte,
+                                    Byte::Address { .. } => unreachable!(
+                                        "bitfields can only overlap with other bitfields, which never have `Address` repr"
+                                    ),
+                                }
+                            }
+                        }
+                    },
+                    Repr::Error(errors) =>
+                        repr = Repr::Error(std::mem::take(errors).chain(gather_errors([value]))),
+                }
+            }
+            Value { ty, repr }
+        }
+        Initialiser::Expression(expr) => eval(expr),
+        Initialiser::Static { initialiser: _, value } => {
+            let repr = match value {
+                PersistedValue::Chunks { chunks } => {
+                    let bytes = chunks.iter().flat_map(|chunk| match chunk {
+                        Chunk::Literal(bytes) =>
+                            Either::Left(bytes.iter().copied().map(Byte::Literal)),
+                        Chunk::Address { reference, offset } =>
+                            Either::Right(Address { reference, offset: *offset }.into_bytes()),
+                    });
+                    Repr::Bytes(bytes.collect())
+                }
+                PersistedValue::Error(reports) => Repr::Error(Errors(LinkedList::from_iter(
+                    reports.iter().copied().map(Either::Right),
+                ))),
+            };
+            Value { ty, repr }
+        }
     }
 }
 
@@ -650,30 +718,10 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             Err(errors) => Value::with_errors(ty, errors),
         },
 
-        // TODO: `constexpr` storage class
-        // TODO: clang (and gcc with a warning) accept compound literals without `constexpr` as
-        // constant expressions
         Expression::CompoundLiteral { open_paren: _, decl } => {
-            let Declaration { reference, initialiser } = decl;
-            match reference.storage_duration {
-                StorageDuration::Static(_) =>
-                    Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
-                StorageDuration::Automatic => {
-                    let exprs = gen {
-                        match initialiser {
-                            Some(Initialiser::Braced { subobject_initialisers }) =>
-                                for SubobjectInitialiser { subobject: _, initialiser } in
-                                    *subobject_initialisers
-                                {
-                                    yield initialiser
-                                },
-                            Some(Initialiser::Expression(expr)) => yield expr,
-                            None | Some(Initialiser::Static { .. }) => (),
-                        }
-                    };
-                    not_constexpr(typed_expr, exprs)
-                }
-            }
+            let Declaration { reference: _, initialiser } = decl;
+            let initialiser = initialiser.expect("compound literals always have initialisers");
+            eval_static_initialiser(ty, &initialiser)
         }
 
         Expression::Deref { .. } | Expression::MemberAccess { .. } | Expression::BuiltinName(_) =>
@@ -682,8 +730,9 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct PersistedValue<'a, Reference> {
-    pub chunks: &'a [Chunk<'a, Reference>],
+pub enum PersistedValue<'a, Reference> {
+    Chunks { chunks: &'a [Chunk<'a, Reference>] },
+    Error(&'a [&'a dyn Report]),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -730,7 +779,7 @@ fn persist<'a>(sess: &Session<'a>, bytes: Box<[Byte<'a>]>) -> PersistedValue<'a,
             }
         }
     };
-    PersistedValue { chunks: sess.alloc_slice_collect(chunks) }
+    PersistedValue::Chunks { chunks: sess.alloc_slice_collect(chunks) }
 }
 
 pub(super) fn run_static_initialiser<'a>(
@@ -738,64 +787,19 @@ pub(super) fn run_static_initialiser<'a>(
     ty: &Type<'a>,
     initialiser: &'a Initialiser<'a>,
 ) -> Initialiser<'a> {
-    match initialiser {
-        Initialiser::Braced { subobject_initialisers: [] } =>
-            Initialiser::Braced { subobject_initialisers: &[] },
-        Initialiser::Braced { subobject_initialisers } => {
-            let mut bytes =
-                vec![Byte::Literal(0); usize::try_from(ty.size()).unwrap()].into_boxed_slice();
-            for SubobjectInitialiser { subobject, initialiser } in *subobject_initialisers {
-                let Subobject { ty, offset, kind } = *subobject;
-                let subobject_size = usize::try_from(ty.size()).unwrap();
-                let offset = usize::try_from(offset).unwrap();
-                let value = eval(initialiser);
-                match kind {
-                    MemberKind::Normal =>
-                        bytes[offset..][..subobject_size].copy_from_slice(value.bytes()),
-                    MemberKind::Bitfield(Bitfield { offset: bitfield_offset, width: _ }) => {
-                        let value = match value.into_integral() {
-                            Ok(Integral::Signed(value)) => value.cast_unsigned(),
-                            Ok(Integral::Unsigned(value)) => value,
-                            Err(errors) => {
-                                // TODO: all `emit_many` calls break `--defer-type-errors`; the
-                                // errors must be preserved
-                                sess.emit_many(errors);
-                                continue;
-                            }
-                        };
-                        for (tgt_byte, src_byte) in zip_eq(
-                            &mut bytes[offset..][..subobject_size],
-                            &(value << bitfield_offset).to_le_bytes()[..subobject_size],
-                        ) {
-                            match tgt_byte {
-                                Byte::Literal(tgt_byte) => *tgt_byte |= src_byte,
-                                Byte::Address { .. } => unreachable!(
-                                    "bitfields can only overlap with other bitfields, which never have `Address` repr"
-                                ),
-                            }
-                        }
-                    }
-                }
-            }
-
-            Initialiser::Static {
-                initialiser: InitialiserRef(initialiser),
-                value: persist(sess, bytes),
-            }
+    let value = eval_static_initialiser(*ty, initialiser);
+    let value = match value.repr {
+        Repr::Bytes(bytes) => persist(sess, bytes),
+        Repr::Error(errors) => {
+            let errors = sess.alloc_slice_fill_iter(errors.into_iter().map(|error| match error {
+                Either::Left(diagnostic) => sess.emit(diagnostic),
+                Either::Right(diagnostic) => diagnostic,
+            }));
+            PersistedValue::Error(errors)
         }
-        Initialiser::Expression(expr) => {
-            let value = match eval(expr).repr {
-                Repr::Bytes(bytes) => persist(sess, bytes),
-                Repr::Error(errors) => {
-                    sess.emit_many(errors);
-                    return Initialiser::Braced { subobject_initialisers: &[] };
-                }
-            };
-            Initialiser::Static {
-                initialiser: InitialiserRef(initialiser),
-                value,
-            }
-        }
-        Initialiser::Static { initialiser: _, value: _ } => unreachable!(),
+    };
+    Initialiser::Static {
+        initialiser: InitialiserRef(initialiser),
+        value,
     }
 }

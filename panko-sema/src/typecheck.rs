@@ -92,7 +92,7 @@ impl<Expression> ArrayLength<Expression> {
 }
 
 impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a>> {
-    type Error = Box<Either<impl Report, impl Iterator<Item = impl Report> + 'a>>;
+    type Error = Box<Either<impl Report, impl Iterator<Item = impl Report>>>;
 
     fn try_from(expr: &'a TypedExpression<'a>) -> Result<Self, Self::Error> {
         match constexpr::eval(expr).into_unsigned() {
@@ -101,7 +101,7 @@ impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a
                 at: *expr,
                 length,
             }))?,
-            Err(errors) => Err(Either::Right(errors.into_iter()))?,
+            Err(errors) => Err(Either::Right(errors.into_iter().filter_map(Either::left)))?,
         }
     }
 }
@@ -817,7 +817,7 @@ fn typeck_struct_members<'a>(
                         None?
                     }
                     Err(errors) => {
-                        sess.emit_many(errors);
+                        sess.emit_many(errors.into_iter().filter_map(Either::left));
                         None?
                     }
                 };
@@ -1313,7 +1313,9 @@ fn typeck_initialiser_list<'a>(
                                         at: *designator,
                                         index,
                                     }),
-                                Err(errors) => return sess.emit_many(errors),
+                                Err(errors) =>
+                                    return sess
+                                        .emit_many(errors.into_iter().filter_map(Either::left)),
                             };
                             subobjects.goto_index(index)
                         }

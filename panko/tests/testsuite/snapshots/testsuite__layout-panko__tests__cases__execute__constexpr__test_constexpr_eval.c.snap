@@ -745,6 +745,164 @@ exit_code: 0
                      (ptr-add `ptr<int>` @48
                         (member `ptr<int>` @48 pointer +8
                            (t~65 `struct T~63 complete` (static t.65)))
-                        (sign-extend `long` @56 (negate `int` @64 (1 `int` @64)))))))))))
+                        (sign-extend `long` @56 (negate `int` @64 (1 `int` @64))))))))
+         (compound-statement
+            (struct T~66
+               (member integral @0 `int`)
+               (member pointer @8 `ptr<int>`))
+            (definition (t~67 `struct T~66 complete` (static t.67))
+               (compound-literal `struct T~66 complete`
+                  (definition compound_literal.68~69 `struct T~66 complete`
+                     (braced
+                        (subobject +0 (123 `int`))
+                        (subobject +8
+                           (addressof `ptr<int>`
+                              (member `int` integral +0
+                                 (t~67 `struct T~66 complete`))))))))
+            (expression
+               (call `int` @16
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @32
+                     (noop-type-conversion `ptr<char>` @32
+                        (addressof `ptr<array<char; 7>>` @32
+                           (string `array<char; 7>` @void "%d %d\n\0"))))
+                  (member `int` @40 integral +0
+                     (t~67 `struct T~66 complete` (static t.67)))
+                  (deref `int` @44
+                     (member `ptr<int>` @48 pointer +8
+                        (t~67 `struct T~66 complete` (static t.67))))))
+            (expression
+               (combine `int` @16
+                  (assign `ptr<int>` @24
+                     (unnamed-temporary~70 `ptr<int>` @24)
+                     (addressof `ptr<int>` @24
+                        (deref `int` @24
+                           (member `ptr<int>` @40 pointer +8
+                              (t~67 `struct T~66 complete` (static t.67))))))
+                  (assign `int` @16
+                     (deref `int` @16 (unnamed-temporary~70 `ptr<int>` @24))
+                     (add `int` @32
+                        (deref `int` @32 (unnamed-temporary~70 `ptr<int>` @24))
+                        (1 `int` @40)))))
+            (expression
+               (call `int` @16
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @32
+                     (noop-type-conversion `ptr<char>` @32
+                        (addressof `ptr<array<char; 7>>` @32
+                           (string `array<char; 7>` @void "%d %d\n\0"))))
+                  (member `int` @40 integral +0
+                     (t~67 `struct T~66 complete` (static t.67)))
+                  (deref `int` @44
+                     (member `ptr<int>` @48 pointer +8
+                        (t~67 `struct T~66 complete` (static t.67))))))
+            (definition (a~71 `int` (static a.71))
+               (truncate `int`
+                  (compound-literal `long`
+                     (definition compound_literal.72~73 `long`
+                        (braced
+                           (subobject +0 (42l `long`)))))))
+            (expression
+               (call `int` @24
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @40
+                     (noop-type-conversion `ptr<char>` @40
+                        (addressof `ptr<array<char; 4>>` @40
+                           (string `array<char; 4>` @void "%d\n\0"))))
+                  (a~71 `int` (static a.71))))
+            (definition (b~74 `int` (static b.74))
+               (add `int`
+                  (compound-literal `int`
+                     (definition compound_literal.75~76 `int`
+                        (braced
+                           (subobject +0 (1 `int`)))))
+                  (multiply `int` (2 `int`)
+                     (compound-literal `int`
+                        (definition compound_literal.77~78 `int`
+                           (braced
+                              (subobject +0 (2 `int`))))))))
+            (expression
+               (call `int` @32
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @48
+                     (noop-type-conversion `ptr<char>` @48
+                        (addressof `ptr<array<char; 4>>` @48
+                           (string `array<char; 4>` @void "%d\n\0"))))
+                  (b~74 `int` (static b.74))))
+            (definition (c~79 `int` (static c.79))
+               (compound-literal `int`
+                  (definition compound_literal.80~81 `int`
+                     (braced
+                        (subobject +0 (27 `int`))))))
+            (definition (d~82 `int` (static d.82))
+               (add `int`
+                  (compound-literal `int`
+                     (definition compound_literal.83~84 `int`
+                        (braced
+                           (subobject +0 (10 `int`)))))
+                  (multiply `int` (3 `int`)
+                     (compound-literal `int`
+                        (definition compound_literal.85~86 `int`
+                           (braced
+                              (subobject +0 (5 `int`))))))))
+            (expression
+               (call `int` @32
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @48
+                     (noop-type-conversion `ptr<char>` @48
+                        (addressof `ptr<array<char; 7>>` @48
+                           (string `array<char; 7>` @void "%d %d\n\0"))))
+                  (c~79 `int` (static c.79))
+                  (d~82 `int` (static d.82))))
+            (definition (e~87 `struct T~66 complete` (static e.87))
+               (compound-literal `struct T~66 complete`
+                  (definition compound_literal.88~89 `struct T~66 complete`
+                     (braced
+                        (subobject +0 (20 `int`))
+                        (subobject +8
+                           (addressof `ptr<int>`
+                              (d~82 `int`)))))))
+            (expression
+               (call `int` @32
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @48
+                     (noop-type-conversion `ptr<char>` @48
+                        (addressof `ptr<array<char; 7>>` @48
+                           (string `array<char; 7>` @void "%d %d\n\0"))))
+                  (member `int` @56 integral +0
+                     (e~87 `struct T~66 complete` (static e.87)))
+                  (deref `int` @60
+                     (member `ptr<int>` @64 pointer +8
+                        (e~87 `struct T~66 complete` (static e.87))))))
+            (expression
+               (combine `int` @32
+                  (assign `ptr<int>` @40
+                     (unnamed-temporary~90 `ptr<int>` @40)
+                     (addressof `ptr<int>` @40
+                        (d~82 `int` (static d.82))))
+                  (assign `int` @32
+                     (deref `int` @32 (unnamed-temporary~90 `ptr<int>` @40))
+                     (add `int` @48
+                        (deref `int` @48 (unnamed-temporary~90 `ptr<int>` @40))
+                        (1 `int` @56)))))
+            (expression
+               (call `int` @32
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @48
+                     (noop-type-conversion `ptr<char>` @48
+                        (addressof `ptr<array<char; 7>>` @48
+                           (string `array<char; 7>` @void "%d %d\n\0"))))
+                  (member `int` @56 integral +0
+                     (e~87 `struct T~66 complete` (static e.87)))
+                  (deref `int` @60
+                     (member `ptr<int>` @64 pointer +8
+                        (e~87 `struct T~66 complete` (static e.87))))))))))
 
 ----- stderr -----

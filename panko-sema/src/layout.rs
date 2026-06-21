@@ -449,10 +449,15 @@ fn layout_declaration<'a>(
             typecheck::Initialiser::Expression(initialiser) => Initialiser::Expression(
                 layout_expression_in_slot(stack, bump, &initialiser, Some(reference.slot)),
             ),
-            typecheck::Initialiser::Static { initialiser, value: Value { chunks } } => {
-                let chunks = chunks.iter().map(|chunk| chunk.map(|r| stack.add(bump, r)));
-                let chunks = bump.alloc_slice_fill_iter(chunks);
-                let value = Value { chunks };
+            typecheck::Initialiser::Static { initialiser, value } => {
+                let value = match value {
+                    Value::Chunks { chunks } => {
+                        let chunks = chunks.iter().map(|chunk| chunk.map(|r| stack.add(bump, r)));
+                        let chunks = bump.alloc_slice_fill_iter(chunks);
+                        Value::Chunks { chunks }
+                    }
+                    Value::Error(reports) => Value::Error(reports),
+                };
                 Initialiser::Static { initialiser, value }
             }
         }

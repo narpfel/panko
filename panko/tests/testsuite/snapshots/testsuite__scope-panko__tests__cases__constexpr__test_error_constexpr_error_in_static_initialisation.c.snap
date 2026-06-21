@@ -140,6 +140,19 @@ exit_code: 0
          (declaration p2~68 `ptr<int>` (subtract (addressof (name a~66 `int`)) 1))
          (declaration p3~69 `ptr<int>` (subtract (cast `ptr<int>` 20) 10))
          (declaration xs~70 `array<int; (left-shift 1l 61)>` ∅)
-         (declaration p4~71 `ptr<int>` (add (addressof (name xs~70 `array<int; (left-shift 1l 61)>`)) 1)))))
+         (declaration p4~71 `ptr<int>` (add (addressof (name xs~70 `array<int; (left-shift 1l 61)>`)) 1))))
+   (function-definition
+      errors_in_compound_literals~72 `fn() -> void`
+      (compound-statement
+         (struct T~74
+            (member a `int`)
+            (member b `int`))
+         (hoisted-compound-literal compound_literal.76~77 `struct T~74 complete`)
+         (declaration t~75 `struct T~74 complete`
+            (compound-literal
+               (declaration compound_literal.76~77 `struct T~74 complete`
+                  (braced
+                     (designation ((member a)) (divide 1 0))
+                     (designation ((member b)) (add 0x7fff'ffff 1)))))))))
 
 ----- stderr -----

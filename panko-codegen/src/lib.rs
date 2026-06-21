@@ -197,22 +197,12 @@ impl<'a> SubobjectAtReference<'a> {
 }
 
 #[derive(Debug)]
-enum StaticInitialiser<'a> {
-    Empty,
-    Value(Value<'a, Reference<'a>>),
-}
+struct StaticInitialiser<'a>(Value<'a, Reference<'a>>);
 
 impl<'a> From<&Initialiser<'a>> for StaticInitialiser<'a> {
     fn from(initialiser: &Initialiser<'a>) -> Self {
         match initialiser {
-            Initialiser::Braced { subobject_initialisers: [] } => Self::Empty,
-            Initialiser::Static { initialiser: _, value } => match value {
-                Value { chunks }
-                    if chunks.iter().all(|chunk| {
-                        matches!(chunk, Chunk::Literal(bytes) if bytes.iter().all(|&b| b == 0))
-                    }) => Self::Empty,
-                _ => Self::Value(*value),
-            },
+            Initialiser::Static { initialiser: _, value } => Self(*value),
             Initialiser::Braced { subobject_initialisers: _ } | Initialiser::Expression(_) =>
                 unreachable!(),
         }
@@ -520,7 +510,7 @@ impl<'a> Codegen<'a> {
         name: &str,
         linkage: Linkage,
         ty: Type,
-        initialiser: Option<StaticInitialiser<'_>>,
+        initialiser: Option<StaticInitialiser<'a>>,
     ) {
         let size = match ty {
             // TODO: assert that this only happens in tentative definitions
@@ -543,10 +533,13 @@ impl<'a> Codegen<'a> {
         self.directive("align", &[&ty.align()]);
         self.label(name);
         match initialiser {
-            Some(StaticInitialiser::Value(Value { chunks })) =>
+            Some(StaticInitialiser(Value::Chunks { chunks })) =>
                 for chunk in chunks {
                     match chunk {
-                        Chunk::Literal(bytes) => self.constant(bytes),
+                        Chunk::Literal(bytes) => match bytes.iter().all(|&b| b == 0) {
+                            true => self.zero(bytes.len().try_into().unwrap()),
+                            false => self.constant(bytes),
+                        },
                         Chunk::Address { reference, offset } => match reference.slot() {
                             Slot::Static(name) =>
                                 writeln!(self.code, "    .quad {name} + {offset}").unwrap(),
@@ -554,7 +547,9 @@ impl<'a> Codegen<'a> {
                         },
                     }
                 },
-            Some(StaticInitialiser::Empty) | None => self.zero(size),
+            Some(StaticInitialiser(Value::Error(errors))) =>
+                self.global_errors.extend_from_slice(errors),
+            None => self.zero(size),
         }
     }
 
@@ -1350,6 +1345,11 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
         }
     }
 
+    for (name, (linkage, ty, initialiser)) in mem::take(&mut cg.deferred_definitions) {
+        assert!(!cg.defined.contains(&name));
+        cg.object_definition(name, linkage, ty, initialiser);
+    }
+
     if !cg.global_errors.is_empty() {
         let name = "__panko_emit_global_errors";
 
@@ -1367,11 +1367,6 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
         cg.directive("section", &[&".init_array", &r#""aw""#]);
         cg.directive("align", &[&8]);
         cg.directive("quad", &[&name]);
-    }
-
-    for (name, (linkage, ty, initialiser)) in mem::take(&mut cg.deferred_definitions) {
-        assert!(!cg.defined.contains(&name));
-        cg.object_definition(name, linkage, ty, initialiser);
     }
 
     for (value, id) in mem::take(&mut cg.strings) {
