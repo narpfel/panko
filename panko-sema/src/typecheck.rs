@@ -92,9 +92,7 @@ impl<Expression> ArrayLength<Expression> {
 }
 
 impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a>> {
-    type Error = Box<
-        Either<impl Report, impl Iterator<Item = Either<impl Report, &'a (dyn Report + 'a)>> + 'a>,
-    >;
+    type Error = Box<Either<impl Report, impl Iterator<Item = impl Report>>>;
 
     fn try_from(expr: &'a TypedExpression<'a>) -> Result<Self, Self::Error> {
         match constexpr::eval(expr).into_unsigned() {
@@ -103,7 +101,7 @@ impl<'a> TryFrom<&'a TypedExpression<'a>> for ArrayLength<&'a TypedExpression<'a
                 at: *expr,
                 length,
             }))?,
-            Err(errors) => Err(Either::Right(errors.into_iter()))?,
+            Err(errors) => Err(Either::Right(errors.into_iter().filter_map(Either::left)))?,
         }
     }
 }
@@ -718,8 +716,7 @@ fn typeck_array_ty<'a>(
                 .unwrap_or_else(|error| {
                     match *error {
                         Either::Left(error) => sess.emit(error),
-                        Either::Right(errors) =>
-                            sess.emit_many(errors.into_iter().filter_map(Either::left)),
+                        Either::Right(errors) => sess.emit_many(errors),
                     }
                     ArrayLength::Unknown
                 })
