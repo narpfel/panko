@@ -31,7 +31,7 @@ jobs:
       - name: Install Rust nightly toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2026-05-01
+          toolchain: nightly-2026-06-22
           components: rustc-codegen-cranelift
       - name: Install `wild`
         run: |
