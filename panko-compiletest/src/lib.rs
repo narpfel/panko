@@ -2,7 +2,6 @@
 #![feature(exit_status_error)]
 #![feature(internal_output_capture)]
 #![feature(mpmc_channel)]
-#![feature(result_option_map_or_default)]
 #![feature(string_from_utf8_lossy_owned)]
 #![feature(unqualified_local_imports)]
 
