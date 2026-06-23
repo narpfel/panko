@@ -104,3 +104,12 @@ void errors_in_compound_literals() {
         .b = 0x7fff'ffff + 1,
     };
 }
+
+void error_in_member_access() {
+    struct T {
+        int x;
+        int y:20;
+    };
+    static int x = (struct T){.x = 1 / 0, .y = 1 >> 100}.x;
+    static int y = (struct T){.x = 1 / 0, .y = 1 >> 100}.y;
+}
