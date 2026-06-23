@@ -853,6 +853,121 @@ exit_code: 0
                      (e~87 `struct T~66 complete`))
                   (deref `int`
                      (member `ptr<int>` pointer +8
-                        (e~87 `struct T~66 complete`)))))))))
+                        (e~87 `struct T~66 complete`))))))
+         (compound-statement
+            (struct T~91
+               (member x @0 `int`)
+               (member l @8 `long`)
+               (member p @16 `ptr<int>`))
+            (hoisted-compound-literal compound_literal.93~94 `struct T~91 complete`)
+            (definition x~92 `int`
+               (member `int` x +0
+                  (compound-literal `struct T~91 complete`
+                     (definition compound_literal.93~94 `struct T~91 complete`
+                        (braced
+                           (subobject +0 (42 `int`))
+                           (subobject +8 (sign-extend `long` (123 `int`))))))))
+            (hoisted-compound-literal compound_literal.96~97 `struct T~91 complete`)
+            (definition l~95 `long`
+               (member `long` l +8
+                  (compound-literal `struct T~91 complete`
+                     (definition compound_literal.96~97 `struct T~91 complete`
+                        (braced
+                           (subobject +0 (42 `int`))
+                           (subobject +8 (sign-extend `long` (123 `int`))))))))
+            (hoisted-compound-literal compound_literal.99~100 `struct T~91 complete`)
+            (definition p~98 `ptr<int>`
+               (member `ptr<int>` p +16
+                  (compound-literal `struct T~91 complete`
+                     (definition compound_literal.99~100 `struct T~91 complete`
+                        (braced
+                           (subobject +0 (42 `int`))
+                           (subobject +8 (sign-extend `long` (123 `int`))))))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 11>>`
+                           (string `array<char; 11>` "%d %ld %d\n\0"))))
+                  (x~92 `int`)
+                  (l~95 `long`)
+                  (ptr-equal `int` (p~98 `ptr<int>`) (nullptr `nullptr_t`)))))
+         (compound-statement
+            (struct T~101
+               (member a @0[0:4] `char`)
+               (member b @0[4:9] `short`)
+               (member c @0[9:15] `unsigned int`)
+               (member d @0[15:22] `int`)
+               (member e @0[22:30] `long`))
+            (hoisted-compound-literal compound_literal.103~104 `struct T~101 complete`)
+            (definition a~102 `char`
+               (member `char` a +0[0:4]
+                  (compound-literal `struct T~101 complete`
+                     (definition compound_literal.103~104 `struct T~101 complete`
+                        (braced
+                           (subobject +0[0:4] (truncate `char` (0b1011 `int`)))
+                           (subobject +0[4:9] (truncate `short` (0b0'1111 `int`)))
+                           (subobject +0[9:15] (noop-type-conversion `unsigned int` (0b11'0011 `int`)))
+                           (subobject +0[15:22] (42 `int`))
+                           (subobject +0[22:30] (sign-extend `long` (123 `int`))))))))
+            (hoisted-compound-literal compound_literal.106~107 `struct T~101 complete`)
+            (definition b~105 `short`
+               (member `short` b +0[4:9]
+                  (compound-literal `struct T~101 complete`
+                     (definition compound_literal.106~107 `struct T~101 complete`
+                        (braced
+                           (subobject +0[0:4] (truncate `char` (0b1011 `int`)))
+                           (subobject +0[4:9] (truncate `short` (0b0'1111 `int`)))
+                           (subobject +0[9:15] (noop-type-conversion `unsigned int` (0b11'0011 `int`)))
+                           (subobject +0[15:22] (42 `int`))
+                           (subobject +0[22:30] (sign-extend `long` (123 `int`))))))))
+            (hoisted-compound-literal compound_literal.109~110 `struct T~101 complete`)
+            (definition c~108 `unsigned int`
+               (member `unsigned int` c +0[9:15]
+                  (compound-literal `struct T~101 complete`
+                     (definition compound_literal.109~110 `struct T~101 complete`
+                        (braced
+                           (subobject +0[0:4] (truncate `char` (0b1011 `int`)))
+                           (subobject +0[4:9] (truncate `short` (0b0'1111 `int`)))
+                           (subobject +0[9:15] (noop-type-conversion `unsigned int` (0b11'0011 `int`)))
+                           (subobject +0[15:22] (42 `int`))
+                           (subobject +0[22:30] (sign-extend `long` (123 `int`))))))))
+            (hoisted-compound-literal compound_literal.112~113 `struct T~101 complete`)
+            (definition d~111 `int`
+               (member `int` d +0[15:22]
+                  (compound-literal `struct T~101 complete`
+                     (definition compound_literal.112~113 `struct T~101 complete`
+                        (braced
+                           (subobject +0[0:4] (truncate `char` (0b1011 `int`)))
+                           (subobject +0[4:9] (truncate `short` (0b0'1111 `int`)))
+                           (subobject +0[9:15] (noop-type-conversion `unsigned int` (0b11'0011 `int`)))
+                           (subobject +0[15:22] (42 `int`))
+                           (subobject +0[22:30] (sign-extend `long` (123 `int`))))))))
+            (hoisted-compound-literal compound_literal.115~116 `struct T~101 complete`)
+            (definition e~114 `long`
+               (member `long` e +0[22:30]
+                  (compound-literal `struct T~101 complete`
+                     (definition compound_literal.115~116 `struct T~101 complete`
+                        (braced
+                           (subobject +0[0:4] (truncate `char` (0b1011 `int`)))
+                           (subobject +0[4:9] (truncate `short` (0b0'1111 `int`)))
+                           (subobject +0[9:15] (noop-type-conversion `unsigned int` (0b11'0011 `int`)))
+                           (subobject +0[15:22] (42 `int`))
+                           (subobject +0[22:30] (sign-extend `long` (123 `int`))))))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 17>>`
+                           (string `array<char; 17>` "%d %d %u %d %ld\n\0"))))
+                  (sign-extend `int` (a~102 `char`))
+                  (sign-extend `int` (b~105 `short`))
+                  (c~108 `unsigned int`)
+                  (d~111 `int`)
+                  (e~114 `long`)))))))
 
 ----- stderr -----

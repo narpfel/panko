@@ -399,3 +399,35 @@ Error: signed overflow in constant expression
      │              ───────┬───────  
      │                     ╰───────── in this expression of type `int`
 ─────╯
+
+Error: division by zero in constant expression
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:113:40]
+     │
+ 113 │     static int x = (struct T){.x = 1 / 0, .y = 1 >> 100}.x;
+     │                                        ┬  
+     │                                        ╰── in this expression of type `int`
+─────╯
+
+Error: shift count exceeds size of shifted type in constant expression
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:113:53]
+     │
+ 113 │     static int x = (struct T){.x = 1 / 0, .y = 1 >> 100}.x;
+     │                                                     ─┬─  
+     │                                                      ╰─── in this expression of type `int`
+─────╯
+
+Error: division by zero in constant expression
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:114:40]
+     │
+ 114 │     static int y = (struct T){.x = 1 / 0, .y = 1 >> 100}.y;
+     │                                        ┬  
+     │                                        ╰── in this expression of type `int`
+─────╯
+
+Error: shift count exceeds size of shifted type in constant expression
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:114:53]
+     │
+ 114 │     static int y = (struct T){.x = 1 / 0, .y = 1 >> 100}.y;
+     │                                                     ─┬─  
+     │                                                      ╰─── in this expression of type `int`
+─────╯

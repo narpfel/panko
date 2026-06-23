@@ -508,6 +508,111 @@ exit_code: 0
                      (name e~87 `struct T~66 complete`))
                   (deref
                      (dot pointer
-                        (name e~87 `struct T~66 complete`)))))))))
+                        (name e~87 `struct T~66 complete`))))))
+         (compound-statement
+            (struct T~91
+               (member x `int`)
+               (member l `long`)
+               (member p `ptr<int>`))
+            (hoisted-compound-literal compound_literal.93~94 `struct T~91 complete`)
+            (declaration x~92 `int`
+               (dot x
+                  (compound-literal
+                     (declaration compound_literal.93~94 `struct T~91 complete`
+                        (braced
+                           (designation ((member x)) 42)
+                           (designation ((member l)) 123))))))
+            (hoisted-compound-literal compound_literal.96~97 `struct T~91 complete`)
+            (declaration l~95 `long`
+               (dot l
+                  (compound-literal
+                     (declaration compound_literal.96~97 `struct T~91 complete`
+                        (braced
+                           (designation ((member x)) 42)
+                           (designation ((member l)) 123))))))
+            (hoisted-compound-literal compound_literal.99~100 `struct T~91 complete`)
+            (declaration p~98 `ptr<int>`
+               (dot p
+                  (compound-literal
+                     (declaration compound_literal.99~100 `struct T~91 complete`
+                        (braced
+                           (designation ((member x)) 42)
+                           (designation ((member l)) 123))))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %ld %d\n")
+                  (name x~92 `int`)
+                  (name l~95 `long`)
+                  (equal (name p~98 `ptr<int>`) nullptr))))
+         (compound-statement
+            (struct T~101
+               (member a (bitfield-width 4) `char`)
+               (member b (bitfield-width 5) `short`)
+               (member c (bitfield-width 6) `unsigned int`)
+               (member d (bitfield-width 7) `int`)
+               (member e (bitfield-width 8) `long`))
+            (hoisted-compound-literal compound_literal.103~104 `struct T~101 complete`)
+            (declaration a~102 `char`
+               (dot a
+                  (compound-literal
+                     (declaration compound_literal.103~104 `struct T~101 complete`
+                        (braced
+                           (designation ((member a)) 0b1011)
+                           (designation ((member b)) 0b0'1111)
+                           (designation ((member c)) 0b11'0011)
+                           (designation ((member d)) 42)
+                           (designation ((member e)) 123))))))
+            (hoisted-compound-literal compound_literal.106~107 `struct T~101 complete`)
+            (declaration b~105 `short`
+               (dot b
+                  (compound-literal
+                     (declaration compound_literal.106~107 `struct T~101 complete`
+                        (braced
+                           (designation ((member a)) 0b1011)
+                           (designation ((member b)) 0b0'1111)
+                           (designation ((member c)) 0b11'0011)
+                           (designation ((member d)) 42)
+                           (designation ((member e)) 123))))))
+            (hoisted-compound-literal compound_literal.109~110 `struct T~101 complete`)
+            (declaration c~108 `unsigned int`
+               (dot c
+                  (compound-literal
+                     (declaration compound_literal.109~110 `struct T~101 complete`
+                        (braced
+                           (designation ((member a)) 0b1011)
+                           (designation ((member b)) 0b0'1111)
+                           (designation ((member c)) 0b11'0011)
+                           (designation ((member d)) 42)
+                           (designation ((member e)) 123))))))
+            (hoisted-compound-literal compound_literal.112~113 `struct T~101 complete`)
+            (declaration d~111 `int`
+               (dot d
+                  (compound-literal
+                     (declaration compound_literal.112~113 `struct T~101 complete`
+                        (braced
+                           (designation ((member a)) 0b1011)
+                           (designation ((member b)) 0b0'1111)
+                           (designation ((member c)) 0b11'0011)
+                           (designation ((member d)) 42)
+                           (designation ((member e)) 123))))))
+            (hoisted-compound-literal compound_literal.115~116 `struct T~101 complete`)
+            (declaration e~114 `long`
+               (dot e
+                  (compound-literal
+                     (declaration compound_literal.115~116 `struct T~101 complete`
+                        (braced
+                           (designation ((member a)) 0b1011)
+                           (designation ((member b)) 0b0'1111)
+                           (designation ((member c)) 0b11'0011)
+                           (designation ((member d)) 42)
+                           (designation ((member e)) 123))))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d %u %d %ld\n")
+                  (name a~102 `char`)
+                  (name b~105 `short`)
+                  (name c~108 `unsigned int`)
+                  (name d~111 `int`)
+                  (name e~114 `long`)))))))
 
 ----- stderr -----
