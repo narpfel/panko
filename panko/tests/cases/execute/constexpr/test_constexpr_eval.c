@@ -277,4 +277,19 @@ int main() {
         // [[print: 20 26]]
         printf("%d %d\n", e.integral, *e.pointer);
     }
+
+    // member access
+    {
+        struct T {
+            int x;
+            long l;
+            int* p;
+        };
+        static int x = (struct T){.x = 42, .l = 123}.x;
+        static long l = (struct T){.x = 42, .l = 123}.l;
+        static int* p = (struct T){.x = 42, .l = 123}.p;
+
+        // [[print: 42 123 1]]
+        printf("%d %ld %d\n", x, l, p == nullptr);
+    }
 }

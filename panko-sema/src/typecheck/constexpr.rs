@@ -1,6 +1,7 @@
 use std::assert_matches;
 use std::collections::LinkedList;
 use std::iter::once;
+use std::ops::Range;
 
 use itertools::Either;
 use itertools::Itertools as _;
@@ -294,6 +295,15 @@ impl<'a> Repr<'a> {
         match self {
             Self::Bytes(bytes) => Ok(bytes),
             Self::Error(errors) => Err(errors),
+        }
+    }
+
+    fn get(self, indices: Range<u64>) -> Self {
+        let Range { start, end } = indices;
+        let indices = usize::try_from(start).unwrap()..usize::try_from(end).unwrap();
+        match self {
+            Self::Bytes(bytes) => Self::Bytes(bytes[indices].into()),
+            Self::Error(errors) => Self::Error(errors),
         }
     }
 }
@@ -724,7 +734,21 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             eval_static_initialiser(ty, &initialiser)
         }
 
-        Expression::Deref { .. } | Expression::MemberAccess { .. } | Expression::BuiltinName(_) =>
+        Expression::MemberAccess { lhs, member, member_loc: _ } => {
+            assert_eq!(ty, member.ty.ty);
+            let lhs = eval(lhs);
+            match member.kind {
+                MemberKind::Normal => {
+                    let indices = member.offset..member.offset.strict_add(ty.size());
+                    let repr = lhs.repr.get(indices);
+                    Value { ty, repr }
+                }
+                MemberKind::Bitfield(_bitfield) =>
+                    Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
+            }
+        }
+
+        Expression::Deref { .. } | Expression::BuiltinName(_) =>
             Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
     }
 }

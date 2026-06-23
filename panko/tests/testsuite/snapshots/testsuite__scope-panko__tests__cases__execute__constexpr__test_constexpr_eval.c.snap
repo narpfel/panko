@@ -508,6 +508,41 @@ exit_code: 0
                      (name e~87 `struct T~66 complete`))
                   (deref
                      (dot pointer
-                        (name e~87 `struct T~66 complete`)))))))))
+                        (name e~87 `struct T~66 complete`))))))
+         (compound-statement
+            (struct T~91
+               (member x `int`)
+               (member l `long`)
+               (member p `ptr<int>`))
+            (hoisted-compound-literal compound_literal.93~94 `struct T~91 complete`)
+            (declaration x~92 `int`
+               (dot x
+                  (compound-literal
+                     (declaration compound_literal.93~94 `struct T~91 complete`
+                        (braced
+                           (designation ((member x)) 42)
+                           (designation ((member l)) 123))))))
+            (hoisted-compound-literal compound_literal.96~97 `struct T~91 complete`)
+            (declaration l~95 `long`
+               (dot l
+                  (compound-literal
+                     (declaration compound_literal.96~97 `struct T~91 complete`
+                        (braced
+                           (designation ((member x)) 42)
+                           (designation ((member l)) 123))))))
+            (hoisted-compound-literal compound_literal.99~100 `struct T~91 complete`)
+            (declaration p~98 `ptr<int>`
+               (dot p
+                  (compound-literal
+                     (declaration compound_literal.99~100 `struct T~91 complete`
+                        (braced
+                           (designation ((member x)) 42)
+                           (designation ((member l)) 123))))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %ld %d\n")
+                  (name x~92 `int`)
+                  (name l~95 `long`)
+                  (equal (name p~98 `ptr<int>`) nullptr)))))))
 
 ----- stderr -----

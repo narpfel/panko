@@ -853,6 +853,46 @@ exit_code: 0
                      (e~87 `struct T~66 complete`))
                   (deref `int`
                      (member `ptr<int>` pointer +8
-                        (e~87 `struct T~66 complete`)))))))))
+                        (e~87 `struct T~66 complete`))))))
+         (compound-statement
+            (struct T~91
+               (member x @0 `int`)
+               (member l @8 `long`)
+               (member p @16 `ptr<int>`))
+            (hoisted-compound-literal compound_literal.93~94 `struct T~91 complete`)
+            (definition x~92 `int`
+               (member `int` x +0
+                  (compound-literal `struct T~91 complete`
+                     (definition compound_literal.93~94 `struct T~91 complete`
+                        (braced
+                           (subobject +0 (42 `int`))
+                           (subobject +8 (sign-extend `long` (123 `int`))))))))
+            (hoisted-compound-literal compound_literal.96~97 `struct T~91 complete`)
+            (definition l~95 `long`
+               (member `long` l +8
+                  (compound-literal `struct T~91 complete`
+                     (definition compound_literal.96~97 `struct T~91 complete`
+                        (braced
+                           (subobject +0 (42 `int`))
+                           (subobject +8 (sign-extend `long` (123 `int`))))))))
+            (hoisted-compound-literal compound_literal.99~100 `struct T~91 complete`)
+            (definition p~98 `ptr<int>`
+               (member `ptr<int>` p +16
+                  (compound-literal `struct T~91 complete`
+                     (definition compound_literal.99~100 `struct T~91 complete`
+                        (braced
+                           (subobject +0 (42 `int`))
+                           (subobject +8 (sign-extend `long` (123 `int`))))))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 11>>`
+                           (string `array<char; 11>` "%d %ld %d\n\0"))))
+                  (x~92 `int`)
+                  (l~95 `long`)
+                  (ptr-equal `int` (p~98 `ptr<int>`) (nullptr `nullptr_t`))))))))
 
 ----- stderr -----
