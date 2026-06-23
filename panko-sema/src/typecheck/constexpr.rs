@@ -737,14 +737,37 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         Expression::MemberAccess { lhs, member, member_loc: _ } => {
             assert_eq!(ty, member.ty.ty);
             let lhs = eval(lhs);
+            let size = ty.size();
+            let indices = member.offset..member.offset.strict_add(size);
+            let repr = lhs.repr.get(indices);
+            let result = Value { ty, repr };
             match member.kind {
-                MemberKind::Normal => {
-                    let indices = member.offset..member.offset.strict_add(ty.size());
-                    let repr = lhs.repr.get(indices);
-                    Value { ty, repr }
+                MemberKind::Normal => result,
+                MemberKind::Bitfield(Bitfield { offset, width }) => {
+                    let value = try {
+                        let size = 64_u64;
+                        let shl_amount =
+                            u32::try_from(size.strict_sub(width).strict_sub(offset)).unwrap();
+                        let shr_amount = u32::try_from(size.strict_sub(width)).unwrap();
+                        match result.into_integral()? {
+                            Integral::Signed(value) => value
+                                .strict_shl(shl_amount)
+                                .strict_shr(shr_amount)
+                                .cast_unsigned(),
+                            Integral::Unsigned(value) =>
+                                value.strict_shl(shl_amount).strict_shr(shr_amount),
+                        }
+                    };
+                    value.map_or_else(
+                        |errors| Value::with_errors(ty, errors),
+                        |value| {
+                            let size = usize::try_from(size).unwrap();
+                            let bytes = value.to_le_bytes().map(Byte::Literal)[..size].into();
+                            let repr = Repr::Bytes(bytes);
+                            Value { ty, repr }
+                        },
+                    )
                 }
-                MemberKind::Bitfield(_bitfield) =>
-                    Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
             }
         }
 

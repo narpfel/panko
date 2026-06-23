@@ -292,4 +292,24 @@ int main() {
         // [[print: 42 123 1]]
         printf("%d %ld %d\n", x, l, p == nullptr);
     }
+
+    // member access of bitfield members
+    {
+        struct T {
+            char a:4;
+            short b:5;
+            unsigned c:6;
+            int d:7;
+            long e:8;
+        };
+        #define LIT (struct T){.a = 0b1011, .b = 0b0'1111, .c = 0b11'0011, .d = 42, .e = 123 }
+        static char a = LIT.a;
+        static short b = LIT.b;
+        static unsigned c = LIT.c;
+        static int d = LIT.d;
+        static long e = LIT.e;
+        #undef LIT
+        // [[print: -5 15 51 42 123]]
+        printf("%d %d %u %d %ld\n", a, b, c, d, e);
+    }
 }
