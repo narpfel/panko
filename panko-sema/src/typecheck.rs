@@ -51,6 +51,7 @@ use crate::scope::IsInGlobalScope;
 use crate::scope::IsParameter;
 use crate::scope::Linkage;
 use crate::scope::Redeclared;
+use crate::scope::RefInitialiser;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
 use crate::ty;
@@ -724,7 +725,7 @@ fn typeck_array_ty<'a>(
         })
         .unwrap_or(ArrayLength::Unknown);
     let length = if let Some(reference) = reference
-        && let Some(scope::RefInitialiser::Initialiser(initialiser)) = reference.initialiser
+        && let Some(RefInitialiser::Initialiser(initialiser)) = reference.initialiser
         && let ArrayLength::Unknown = length
         && let reference = typeck_reference(sess, *reference, NeedsInitialiser::No)
         && let initialiser = typeck_initialiser(sess, initialiser, &reference)
@@ -1632,11 +1633,10 @@ fn typeck_statement<'a>(
         }
         scope::Statement::Redeclared(redeclared) => typeck_redeclaration_error(sess, redeclared),
         scope::Statement::HoistedCompoundLiteral(reference) => {
-            let initialiser = try {
-                match reference.initialiser? {
-                    scope::RefInitialiser::Initialiser(initialiser) => initialiser,
-                    scope::RefInitialiser::FunctionBody => None?,
-                }
+            let initialiser = match reference.initialiser {
+                Some(RefInitialiser::Initialiser(initialiser)) => Some(initialiser),
+                Some(RefInitialiser::FunctionBody) | None =>
+                    unreachable!("compound literals always have braced initialisers"),
             };
             let declaration = scope::Declaration {
                 function_specifiers: FunctionSpecifiers::default(),
