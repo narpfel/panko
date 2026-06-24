@@ -159,8 +159,8 @@ impl AsSExpr for Statement<'_> {
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),
             Statement::Return(expr) => SExpr::new("return").inherit(expr),
-            Statement::HoistedCompoundLiteral(reference) =>
-                SExpr::new("hoisted-compound-literal").inherit(reference),
+            Statement::HoistedCompoundLiteral(decl) =>
+                SExpr::new("hoisted-compound-literal").inherit(&decl.reference),
         }
     }
 }

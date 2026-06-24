@@ -26,6 +26,7 @@ use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::FromError;
+use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
@@ -50,6 +51,7 @@ use crate::scope::IsInGlobalScope;
 use crate::scope::IsParameter;
 use crate::scope::Linkage;
 use crate::scope::Redeclared;
+use crate::scope::RefInitialiser;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
 use crate::ty;
@@ -304,7 +306,7 @@ pub(crate) enum Statement<'a> {
     Expression(Option<TypedExpression<'a>>),
     Compound(CompoundStatement<'a>),
     Return(Option<TypedExpression<'a>>),
-    HoistedCompoundLiteral(Reference<'a>),
+    HoistedCompoundLiteral(Declaration<'a>),
 }
 
 impl<'a> FromError<'a> for Statement<'a> {
@@ -723,7 +725,7 @@ fn typeck_array_ty<'a>(
         })
         .unwrap_or(ArrayLength::Unknown);
     let length = if let Some(reference) = reference
-        && let Some(scope::RefInitialiser::Initialiser(initialiser)) = reference.initialiser
+        && let Some(RefInitialiser::Initialiser(initialiser)) = reference.initialiser
         && let ArrayLength::Unknown = length
         && let reference = typeck_reference(sess, *reference, NeedsInitialiser::No)
         && let initialiser = typeck_initialiser(sess, initialiser, &reference)
@@ -1630,9 +1632,19 @@ fn typeck_statement<'a>(
             }
         }
         scope::Statement::Redeclared(redeclared) => typeck_redeclaration_error(sess, redeclared),
-        scope::Statement::HoistedCompoundLiteral(reference) => Statement::HoistedCompoundLiteral(
-            typeck_reference(sess, *reference, NeedsInitialiser::Yes),
-        ),
+        scope::Statement::HoistedCompoundLiteral(reference) => {
+            let initialiser = match reference.initialiser {
+                Some(RefInitialiser::Initialiser(initialiser)) => Some(initialiser),
+                Some(RefInitialiser::FunctionBody) | None =>
+                    unreachable!("compound literals always have braced initialisers"),
+            };
+            let declaration = scope::Declaration {
+                function_specifiers: FunctionSpecifiers::default(),
+                reference: *reference,
+                initialiser,
+            };
+            Statement::HoistedCompoundLiteral(typeck_declaration(sess, &declaration))
+        }
     }
 }
 

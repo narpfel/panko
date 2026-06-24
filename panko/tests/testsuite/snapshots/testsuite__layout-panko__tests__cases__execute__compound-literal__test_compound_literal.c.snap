@@ -30,6 +30,7 @@ exit_code: 0
    (function-definition external stack-size=24
       (static_compound_literal~4 `fn() -> ptr<int>` (static static_compound_literal))
       (compound-statement
+         (definition (compound_literal.6~7 `int` (static compound_literal.6.7)) (braced ∅))
          (return
             (addressof `ptr<int>` @0
                (compound-literal `int` (static compound_literal.6.7) (definition (compound_literal.6~7 `int` (static compound_literal.6.7)) (braced ∅)))))))

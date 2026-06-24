@@ -15,6 +15,7 @@ use crate::scope::BuiltinName;
 use crate::scope::Id;
 use crate::scope::Linkage;
 use crate::scope::RefKind;
+use crate::scope::StorageDuration;
 use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::Class;
@@ -500,9 +501,13 @@ fn layout_statement<'a>(
         typecheck::Statement::Return(expr) => stack.with_block(|stack| {
             Statement::Return(try { layout_expression(stack, bump, expr.as_ref()?) })
         }),
-        typecheck::Statement::HoistedCompoundLiteral(reference) => {
-            stack.add(bump, *reference);
-            return None;
+        typecheck::Statement::HoistedCompoundLiteral(decl) => {
+            let storage_duration = decl.reference.storage_duration;
+            let decl = layout_declaration(stack, bump, decl);
+            match storage_duration {
+                StorageDuration::Static(_) => Statement::Declaration(decl),
+                StorageDuration::Automatic => return None,
+            }
         }
     })
 }

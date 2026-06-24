@@ -18,6 +18,10 @@ exit_code: 0
    (function-definition external stack-size=40
       (main~2 `fn() -> int` (static main))
       (compound-statement
+         (definition (compound_literal.5~6 `struct T~1 complete` (static compound_literal.5.6))
+            (braced
+               (subobject +0 (1 `int`))
+               (subobject +4 (2 `int`))))
          (definition (p~4 `ptr<struct T~1 complete>` (static p.4))
             (addressof `ptr<struct T~1 complete>`
                (compound-literal `struct T~1 complete`

@@ -833,11 +833,20 @@ exit_code: 0
                         (addressof `ptr<array<char; 4>>` @48
                            (string `array<char; 4>` @void "%d\n\0"))))
                   (b~74 `int` (static b.74))))
+            (definition (compound_literal.80~81 `int` (static compound_literal.80.81))
+               (braced
+                  (subobject +0 (27 `int`))))
             (definition (c~79 `int` (static c.79))
                (compound-literal `int`
                   (definition compound_literal.80~81 `int`
                      (braced
                         (subobject +0 (27 `int`))))))
+            (definition (compound_literal.83~84 `int` (static compound_literal.83.84))
+               (braced
+                  (subobject +0 (10 `int`))))
+            (definition (compound_literal.85~86 `int` (static compound_literal.85.86))
+               (braced
+                  (subobject +0 (5 `int`))))
             (definition (d~82 `int` (static d.82))
                (add `int`
                   (compound-literal `int`
@@ -859,6 +868,12 @@ exit_code: 0
                            (string `array<char; 7>` @void "%d %d\n\0"))))
                   (c~79 `int` (static c.79))
                   (d~82 `int` (static d.82))))
+            (definition (compound_literal.88~89 `struct T~66 complete` (static compound_literal.88.89))
+               (braced
+                  (subobject +0 (20 `int`))
+                  (subobject +8
+                     (addressof `ptr<int>`
+                        (d~82 `int`)))))
             (definition (e~87 `struct T~66 complete` (static e.87))
                (compound-literal `struct T~66 complete`
                   (definition compound_literal.88~89 `struct T~66 complete`

@@ -1,5 +1,3 @@
-// [[known-bug]]
-
 int printf(char const*, ...);
 
 struct T {
@@ -10,6 +8,6 @@ struct T {
 int main() {
     static struct T* p = &(static struct T){1, 2};
 
-    // [[print 1 2]]
+    // [[print: 1 2]]
     printf("%d %d\n", p->x, p->y);
 }
