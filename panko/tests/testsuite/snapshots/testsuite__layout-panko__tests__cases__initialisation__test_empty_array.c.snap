@@ -45,6 +45,22 @@ Error: empty arrays are not allowed
 ───╯
 
 Error: empty arrays are not allowed
+   ╭─[panko/tests/cases/initialisation/test_empty_array.c:5:6]
+   │
+ 5 │     (int[0]){};
+   │      ───┬──  
+   │         ╰──── this array is declared as empty
+───╯
+
+Error: empty arrays are not allowed
+   ╭─[panko/tests/cases/initialisation/test_empty_array.c:6:6]
+   │
+ 6 │     (long[]){};
+   │      ───┬──  
+   │         ╰──── this array is declared as empty
+───╯
+
+Error: empty arrays are not allowed
    ╭─[panko/tests/cases/initialisation/test_empty_array.c:6:6]
    │
  6 │     (long[]){};

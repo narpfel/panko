@@ -26,6 +26,7 @@ use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::FromError;
+use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
@@ -304,7 +305,7 @@ pub(crate) enum Statement<'a> {
     Expression(Option<TypedExpression<'a>>),
     Compound(CompoundStatement<'a>),
     Return(Option<TypedExpression<'a>>),
-    HoistedCompoundLiteral(Reference<'a>),
+    HoistedCompoundLiteral(Declaration<'a>),
 }
 
 impl<'a> FromError<'a> for Statement<'a> {
@@ -1630,9 +1631,20 @@ fn typeck_statement<'a>(
             }
         }
         scope::Statement::Redeclared(redeclared) => typeck_redeclaration_error(sess, redeclared),
-        scope::Statement::HoistedCompoundLiteral(reference) => Statement::HoistedCompoundLiteral(
-            typeck_reference(sess, *reference, NeedsInitialiser::Yes),
-        ),
+        scope::Statement::HoistedCompoundLiteral(reference) => {
+            let initialiser = try {
+                match reference.initialiser? {
+                    scope::RefInitialiser::Initialiser(initialiser) => initialiser,
+                    scope::RefInitialiser::FunctionBody => None?,
+                }
+            };
+            let declaration = scope::Declaration {
+                function_specifiers: FunctionSpecifiers::default(),
+                reference: *reference,
+                initialiser,
+            };
+            Statement::HoistedCompoundLiteral(typeck_declaration(sess, &declaration))
+        }
     }
 }
 
