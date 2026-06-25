@@ -547,8 +547,8 @@ impl<'a> Codegen<'a> {
                                     writeln!(self.code, "    .quad {name} + {offset}").unwrap(),
                                 Slot::Automatic(_) | Slot::Void => unreachable!(),
                             },
-                            Target::Value(value) => {
-                                let id = self.string(ByteStr::new(value).into());
+                            Target::String(string) => {
+                                let id = self.string(Cow::Borrowed(string));
                                 write!(self.code, "    .quad .L.{id} + {offset}").unwrap()
                             }
                         },

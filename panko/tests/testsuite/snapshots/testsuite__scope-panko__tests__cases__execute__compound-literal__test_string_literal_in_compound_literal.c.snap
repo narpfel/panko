@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/compound-literal/test_string_literal_in_compound_literal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/compound-literal/test_string_literal_in_compound_literal.c"
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.4~5 `ptr<char const>`)
+         (declaration s~3 `ptr<char const>`
+            (compound-literal
+               (declaration compound_literal.4~5 `ptr<char const>`
+                  (braced
+                     (string "hello world")))))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (name s~3 `ptr<char const>`))))))
+
+----- stderr -----
