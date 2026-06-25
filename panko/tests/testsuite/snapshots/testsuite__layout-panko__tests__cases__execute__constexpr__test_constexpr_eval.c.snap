@@ -1027,6 +1027,86 @@ exit_code: 0
                   (sign-extend `int` @68 (b~105 `short` (static b.105)))
                   (c~108 `unsigned int` (static c.108))
                   (d~111 `int` (static d.111))
-                  (e~114 `long` (static e.114))))))))
+                  (e~114 `long` (static e.114)))))
+         (compound-statement
+            (definition (a~117 `ptr<char const>` (static a.117))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 12>>`
+                        (string `array<char; 12>` "hello world\0")))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 4>>` @16
+                           (string `array<char; 4>` @void "%s\n\0"))))
+                  (a~117 `ptr<char const>` (static a.117))))
+            (struct T~118
+               (member s @0 `ptr<char const>`))
+            (definition (b~119 `struct T~118 complete` (static b.119))
+               (braced
+                  (subobject +0
+                     (noop-type-conversion `ptr<char const>`
+                        (noop-type-conversion `ptr<char>`
+                           (addressof `ptr<array<char; 7>>`
+                              (string `array<char; 7>` "string\0")))))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 4>>` @16
+                           (string `array<char; 4>` @void "%s\n\0"))))
+                  (member `ptr<char const>` @24 s +0
+                     (b~119 `struct T~118 complete` (static b.119)))))
+            (definition (c~120 `struct T~118 complete` (static c.120))
+               (compound-literal `struct T~118 complete`
+                  (definition compound_literal.121~122 `struct T~118 complete`
+                     (braced
+                        (subobject +0
+                           (noop-type-conversion `ptr<char const>`
+                              (noop-type-conversion `ptr<char>`
+                                 (addressof `ptr<array<char; 15>>`
+                                    (string `array<char; 15>` "another string\0")))))))))
+            (expression
+               (call `int` @8
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @24
+                     (noop-type-conversion `ptr<char>` @24
+                        (addressof `ptr<array<char; 4>>` @24
+                           (string `array<char; 4>` @void "%s\n\0"))))
+                  (member `ptr<char const>` @32 s +0
+                     (c~120 `struct T~118 complete` (static c.120)))))
+            (definition (compound_literal.124~125 `struct T~118 complete` (static compound_literal.124.125))
+               (braced
+                  (subobject +0
+                     (noop-type-conversion `ptr<char const>`
+                        (noop-type-conversion `ptr<char>`
+                           (addressof `ptr<array<char; 13>>`
+                              (string `array<char; 13>` "third string\0")))))))
+            (definition (d~123 `ptr<struct T~118 complete>` (static d.123))
+               (addressof `ptr<struct T~118 complete>`
+                  (compound-literal `struct T~118 complete`
+                     (definition compound_literal.124~125 `struct T~118 complete`
+                        (braced
+                           (subobject +0
+                              (noop-type-conversion `ptr<char const>`
+                                 (noop-type-conversion `ptr<char>`
+                                    (addressof `ptr<array<char; 13>>`
+                                       (string `array<char; 13>` "third string\0"))))))))))
+            (expression
+               (call `int` @8
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @24
+                     (noop-type-conversion `ptr<char>` @24
+                        (addressof `ptr<array<char; 4>>` @24
+                           (string `array<char; 4>` @void "%s\n\0"))))
+                  (member `ptr<char const>` @32 s +0
+                     (deref `struct T~118 complete` @void (d~123 `ptr<struct T~118 complete>` (static d.123))))))))))
 
 ----- stderr -----

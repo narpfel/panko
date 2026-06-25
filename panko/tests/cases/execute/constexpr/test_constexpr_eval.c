@@ -312,4 +312,25 @@ int main() {
         // [[print: -5 15 51 42 123]]
         printf("%d %d %u %d %ld\n", a, b, c, d, e);
     }
+
+    // string literals
+    {
+        static char const* a = "hello world";
+        // [[print: hello world]]
+        printf("%s\n", a);
+
+        struct T {
+            char const* s;
+        };
+        static struct T b = {.s = "string"};
+        // [[print: string]]
+        printf("%s\n", b.s);
+        static struct T c = (struct T){.s = "another string"};
+        // [[print: another string]]
+        printf("%s\n", c.s);
+
+        static struct T* d = &(static struct T){.s = "third string"};
+        // [[print: third string]]
+        printf("%s\n", d->s);
+    }
 }
