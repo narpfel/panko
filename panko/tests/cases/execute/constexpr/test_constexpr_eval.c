@@ -333,4 +333,22 @@ int main() {
         // [[print: third string]]
         printf("%s\n", d->s);
     }
+
+    // comparisons of string literals
+    {
+        static int a = "same" == "same";
+        static int b = "same" != "same";
+        static int c = "same" == "different";
+        static int d = "same" != "different";
+        // [[print: 1 0 0 1]]
+        printf("%d %d %d %d\n", a, b, c, d);
+
+        // should be the same when evaluated at runtime
+        int e = "same" == "same";
+        int f = "same" != "same";
+        int g = "same" == "different";
+        int h = "same" != "different";
+        // [[print: 1 0 0 1]]
+        printf("%d %d %d %d\n", e, f, g, h);
+    }
 }

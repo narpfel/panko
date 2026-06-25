@@ -1107,6 +1107,95 @@ exit_code: 0
                         (addressof `ptr<array<char; 4>>` @24
                            (string `array<char; 4>` @void "%s\n\0"))))
                   (member `ptr<char const>` @32 s +0
-                     (deref `struct T~118 complete` @void (d~123 `ptr<struct T~118 complete>` (static d.123))))))))))
+                     (deref `struct T~118 complete` @void (d~123 `ptr<struct T~118 complete>` (static d.123)))))))
+         (compound-statement
+            (definition (a~126 `int` (static a.126))
+               (ptr-equal `int`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "same\0")))
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "same\0")))))
+            (definition (b~127 `int` (static b.127))
+               (ptr-not-equal `int`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "same\0")))
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "same\0")))))
+            (definition (c~128 `int` (static c.128))
+               (ptr-equal `int`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "same\0")))
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "different\0")))))
+            (definition (d~129 `int` (static d.129))
+               (ptr-not-equal `int`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "same\0")))
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "different\0")))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 13>>` @16
+                           (string `array<char; 13>` @void "%d %d %d %d\n\0"))))
+                  (a~126 `int` (static a.126))
+                  (b~127 `int` (static b.127))
+                  (c~128 `int` (static c.128))
+                  (d~129 `int` (static d.129))))
+            (definition (e~130 `int` @0)
+               (ptr-equal `int` @0
+                  (noop-type-conversion `ptr<char>` @8
+                     (addressof `ptr<array<char; 5>>` @8
+                        (string `array<char; 5>` @void "same\0")))
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "same\0")))))
+            (definition (f~131 `int` @4)
+               (ptr-not-equal `int` @4
+                  (noop-type-conversion `ptr<char>` @8
+                     (addressof `ptr<array<char; 5>>` @8
+                        (string `array<char; 5>` @void "same\0")))
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "same\0")))))
+            (definition (g~132 `int` @8)
+               (ptr-equal `int` @8
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "same\0")))
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 10>>` @24
+                        (string `array<char; 10>` @void "different\0")))))
+            (definition (h~133 `int` @12)
+               (ptr-not-equal `int` @12
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 5>>` @16
+                        (string `array<char; 5>` @void "same\0")))
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 10>>` @24
+                        (string `array<char; 10>` @void "different\0")))))
+            (expression
+               (call `int` @16
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @32
+                     (noop-type-conversion `ptr<char>` @32
+                        (addressof `ptr<array<char; 13>>` @32
+                           (string `array<char; 13>` @void "%d %d %d %d\n\0"))))
+                  (e~130 `int` @0)
+                  (f~131 `int` @4)
+                  (g~132 `int` @8)
+                  (h~133 `int` @12)))))))
 
 ----- stderr -----

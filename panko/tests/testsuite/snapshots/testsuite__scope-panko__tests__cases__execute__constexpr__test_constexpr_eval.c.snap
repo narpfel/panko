@@ -652,6 +652,29 @@ exit_code: 0
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%s\n")
                   (arrow s
-                     (name d~123 `ptr<struct T~118 complete>`))))))))
+                     (name d~123 `ptr<struct T~118 complete>`)))))
+         (compound-statement
+            (declaration a~126 `int` (equal (string "same") (string "same")))
+            (declaration b~127 `int` (not-equal (string "same") (string "same")))
+            (declaration c~128 `int` (equal (string "same") (string "different")))
+            (declaration d~129 `int` (not-equal (string "same") (string "different")))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d %d %d\n")
+                  (name a~126 `int`)
+                  (name b~127 `int`)
+                  (name c~128 `int`)
+                  (name d~129 `int`)))
+            (declaration e~130 `int` (equal (string "same") (string "same")))
+            (declaration f~131 `int` (not-equal (string "same") (string "same")))
+            (declaration g~132 `int` (equal (string "same") (string "different")))
+            (declaration h~133 `int` (not-equal (string "same") (string "different")))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d %d %d\n")
+                  (name e~130 `int`)
+                  (name f~131 `int`)
+                  (name g~132 `int`)
+                  (name h~133 `int`)))))))
 
 ----- stderr -----
