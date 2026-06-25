@@ -52,6 +52,7 @@ use panko_sema::typecheck::Bitfield;
 use panko_sema::typecheck::Chunk;
 use panko_sema::typecheck::Member;
 use panko_sema::typecheck::MemberKind;
+use panko_sema::typecheck::Target;
 use panko_sema::typecheck::Value;
 
 use crate::Register::*;
@@ -540,10 +541,16 @@ impl<'a> Codegen<'a> {
                             true => self.zero(bytes.len().try_into().unwrap()),
                             false => self.constant(bytes),
                         },
-                        Chunk::Address { reference, offset } => match reference.slot() {
-                            Slot::Static(name) =>
-                                writeln!(self.code, "    .quad {name} + {offset}").unwrap(),
-                            Slot::Automatic(_) | Slot::Void => unreachable!(),
+                        Chunk::Address { target, offset } => match target {
+                            Target::Reference(reference) => match reference.slot() {
+                                Slot::Static(name) =>
+                                    writeln!(self.code, "    .quad {name} + {offset}").unwrap(),
+                                Slot::Automatic(_) | Slot::Void => unreachable!(),
+                            },
+                            Target::Value(value) => {
+                                let id = self.string(ByteStr::new(value).into());
+                                write!(self.code, "    .quad .L.{id} + {offset}").unwrap()
+                            }
                         },
                     }
                 },

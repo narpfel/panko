@@ -67,6 +67,7 @@ use crate::ty::subobjects::SubobjectIterator;
 use crate::ty::subobjects::SubobjectKey;
 use crate::ty::subobjects::Subobjects;
 pub use crate::typecheck::constexpr::Chunk;
+pub use crate::typecheck::constexpr::PersistedTarget as Target;
 pub use crate::typecheck::constexpr::PersistedValue as Value;
 use crate::typecheck::diagnostics::Diagnostic;
 use crate::typecheck::literal::StringLiteral;
