@@ -351,4 +351,12 @@ int main() {
         // [[print: 1 0 0 1]]
         printf("%d %d %d %d\n", e, f, g, h);
     }
+
+    // pointer arithmetic involving string literals
+    {
+        static typeof("a" - "b") a = "string" - &"string"[2];
+        static char const* b = "string" + 2;
+        // [[print: -2 ring]]
+        printf("%td %s\n", a, b);
+    }
 }

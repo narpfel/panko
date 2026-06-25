@@ -113,3 +113,8 @@ void error_in_member_access() {
     static int x = (struct T){.x = 1 / 0, .y = 1 >> 100}.x;
     static int y = (struct T){.x = 1 / 0, .y = 1 >> 100}.y;
 }
+
+void error_in_pointer_arithmetic_involving_string_literals() {
+    static typeof("a" - "b") a = "a" - "b";
+    static int b = "a" < "b";
+}

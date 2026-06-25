@@ -675,6 +675,14 @@ exit_code: 0
                   (name e~130 `int`)
                   (name f~131 `int`)
                   (name g~132 `int`)
-                  (name h~133 `int`)))))))
+                  (name h~133 `int`))))
+         (compound-statement
+            (declaration a~134 `typeof((subtract (string "a") (string "b")))` (subtract (string "string") (addressof (subscript (string "string") 2))))
+            (declaration b~135 `ptr<char const>` (add (string "string") 2))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%td %s\n")
+                  (name a~134 `typeof((subtract (string "a") (string "b")))`)
+                  (name b~135 `ptr<char const>`)))))))
 
 ----- stderr -----

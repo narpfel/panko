@@ -175,6 +175,11 @@ exit_code: 0
                   (declaration compound_literal.85~86 `struct T~80 complete`
                      (braced
                         (designation ((member x)) (divide 1 0))
-                        (designation ((member y)) (right-shift 1 100))))))))))
+                        (designation ((member y)) (right-shift 1 100)))))))))
+   (function-definition
+      error_in_pointer_arithmetic_involving_string_literals~87 `fn() -> void`
+      (compound-statement
+         (declaration a~89 `typeof((subtract (string "a") (string "b")))` (subtract (string "a") (string "b")))
+         (declaration b~90 `int` (less (string "a") (string "b"))))))
 
 ----- stderr -----
