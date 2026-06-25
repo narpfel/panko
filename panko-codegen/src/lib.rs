@@ -173,7 +173,7 @@ struct StaticId(u64);
 
 impl Display for StaticId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "static.{}", self.0)
+        write!(f, ".L.static.{}", self.0)
     }
 }
 
@@ -549,7 +549,7 @@ impl<'a> Codegen<'a> {
                             },
                             Target::String(string) => {
                                 let id = self.string(Cow::Borrowed(string));
-                                write!(self.code, "    .quad .L.{id} + {offset}").unwrap()
+                                write!(self.code, "    .quad {id} + {offset}").unwrap()
                             }
                         },
                     }
@@ -565,13 +565,12 @@ impl<'a> Codegen<'a> {
         let value = value.strip_suffix(b"\0").unwrap_or(value);
 
         self.block(2);
-        let name = format!(".L.{id}");
-        self.directive("local", &[&name]);
+        self.directive("local", &[&id]);
         self.directive("data", &[]);
-        self.directive("type", &[&name, &"@object"]);
-        self.directive("size", &[&name, &(value.len() + 1)]);
+        self.directive("type", &[&id, &"@object"]);
+        self.directive("size", &[&id, &(value.len() + 1)]);
         self.directive("align", &[&1]);
-        self.label(&name);
+        self.label(id);
         self.code.push_str(".asciz \"");
         for &byte in value {
             if byte.is_ascii_graphic() || byte == b' ' {
