@@ -431,3 +431,17 @@ Error: shift count exceeds size of shifted type in constant expression
      │                                                     ─┬─  
      │                                                      ╰─── in this expression of type `int`
 ─────╯
+
+Error: not a constant expression
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:118:34]
+     │
+ 118 │     static typeof("a" - "b") a = "a" - "b";
+     │                                  ─────────  
+─────╯
+
+Error: not a constant expression
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:119:20]
+     │
+ 119 │     static int b = "a" < "b";
+     │                    ─────────  
+─────╯

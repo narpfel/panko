@@ -312,4 +312,51 @@ int main() {
         // [[print: -5 15 51 42 123]]
         printf("%d %d %u %d %ld\n", a, b, c, d, e);
     }
+
+    // string literals
+    {
+        static char const* a = "hello world";
+        // [[print: hello world]]
+        printf("%s\n", a);
+
+        struct T {
+            char const* s;
+        };
+        static struct T b = {.s = "string"};
+        // [[print: string]]
+        printf("%s\n", b.s);
+        static struct T c = (struct T){.s = "another string"};
+        // [[print: another string]]
+        printf("%s\n", c.s);
+
+        static struct T* d = &(static struct T){.s = "third string"};
+        // [[print: third string]]
+        printf("%s\n", d->s);
+    }
+
+    // comparisons of string literals
+    {
+        static int a = "same" == "same";
+        static int b = "same" != "same";
+        static int c = "same" == "different";
+        static int d = "same" != "different";
+        // [[print: 1 0 0 1]]
+        printf("%d %d %d %d\n", a, b, c, d);
+
+        // should be the same when evaluated at runtime
+        int e = "same" == "same";
+        int f = "same" != "same";
+        int g = "same" == "different";
+        int h = "same" != "different";
+        // [[print: 1 0 0 1]]
+        printf("%d %d %d %d\n", e, f, g, h);
+    }
+
+    // pointer arithmetic involving string literals
+    {
+        static typeof("a" - "b") a = "string" - &"string"[2];
+        static char const* b = "string" + 2;
+        // [[print: -2 ring]]
+        printf("%td %s\n", a, b);
+    }
 }

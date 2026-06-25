@@ -1,4 +1,5 @@
 use std::assert_matches;
+use std::bstr::ByteStr;
 use std::collections::LinkedList;
 use std::iter::once;
 use std::ops::Range;
@@ -29,6 +30,7 @@ use crate::typecheck::TypedExpression;
 use crate::typecheck::constexpr::arithmetic::C;
 use crate::typecheck::constexpr::diagnostics::Diagnostic;
 use crate::typecheck::constexpr::diagnostics::Kind::*;
+use crate::typecheck::literal::StringLiteral;
 
 mod arithmetic;
 mod diagnostics;
@@ -71,6 +73,7 @@ enum Integral {
     Unsigned(u64),
 }
 
+#[derive(Debug)]
 pub(super) struct Value<'a> {
     ty: Type<'a>,
     repr: Repr<'a>,
@@ -88,10 +91,25 @@ enum Byte<'a> {
     Address {
         #[expect(unused, reason = "TODO: check for wellformedness while parsing")]
         index: u64,
-        reference: &'a Reference<'a>,
+        target: Target<'a>,
         // TODO: this should be bounded by the `reference`’s type’s size
         offset: u64,
     },
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Target<'a> {
+    Reference(&'a Reference<'a>),
+    String(&'a ByteStr),
+}
+
+impl<'a> Target<'a> {
+    fn persist(self) -> PersistedTarget<'a, Reference<'a>> {
+        match self {
+            Self::Reference(reference) => PersistedTarget::Reference(*reference),
+            Self::String(string) => PersistedTarget::String(string),
+        }
+    }
 }
 
 fn iter_literal_bytes(bytes: &[Byte]) -> impl Iterator<Item = Option<u8>> {
@@ -115,22 +133,22 @@ fn write_u64<'a>(value: u64) -> Repr<'a> {
 
 #[derive(Debug, Clone, Copy)]
 struct Address<'a> {
-    reference: &'a Reference<'a>,
+    target: Target<'a>,
     offset: u64,
 }
 
 impl<'a> Address<'a> {
     fn into_bytes(self) -> impl Iterator<Item = Byte<'a>> {
-        let Self { reference, offset } = self;
-        (0..8).map(move |index| Byte::Address { index, reference, offset })
+        let Self { target, offset } = self;
+        (0..8).map(move |index| Byte::Address { index, target, offset })
     }
 }
 
 fn read_address<'a>(bytes: &[Byte<'a>]) -> Option<Address<'a>> {
     match bytes.first()? {
         Byte::Literal(_) => None,
-        Byte::Address { index: _, reference, offset } =>
-            Some(Address { reference, offset: *offset }),
+        Byte::Address { index: _, target, offset } =>
+            Some(Address { target: *target, offset: *offset }),
     }
 }
 
@@ -252,6 +270,20 @@ impl<'a> Value<'a> {
                 }
                 _ => todo!("error message, e. g. `static int x = (int)&static_var;`"),
             },
+        }
+    }
+
+    fn persist(self, sess: &Session<'a>) -> PersistedValue<'a, Reference<'a>> {
+        match self.repr {
+            Repr::Bytes(bytes) => persist(sess, bytes),
+            Repr::Error(errors) => {
+                let errors =
+                    sess.alloc_slice_fill_iter(errors.into_iter().map(|error| match error {
+                        Either::Left(diagnostic) => sess.emit(diagnostic),
+                        Either::Right(diagnostic) => diagnostic,
+                    }));
+                PersistedValue::Error(errors)
+            }
         }
     }
 }
@@ -378,8 +410,8 @@ fn eval_pointer_arithmetic<'a>(
 
     let repr = match eval(pointer).into_pointer() {
         Pointer::FromInt(pointer) => add(pointer).map(write_u64),
-        Pointer::Address(Address { reference, offset }) =>
-            add(Ok(offset)).map(|offset| write_address(Address { reference, offset })),
+        Pointer::Address(Address { target, offset }) =>
+            add(Ok(offset)).map(|offset| write_address(Address { target, offset })),
     }
     .unwrap_or_else(Repr::Error);
 
@@ -405,9 +437,23 @@ fn eval_pointer_binop<'a>(
         (Pointer::FromInt(lhs), Pointer::FromInt(rhs)) => compute(lhs, rhs),
 
         (
-            Pointer::Address(Address { reference, offset }),
-            Pointer::Address(Address { reference: rhs_ref, offset: rhs_offset }),
+            Pointer::Address(Address {
+                target: Target::Reference(reference),
+                offset,
+            }),
+            Pointer::Address(Address {
+                target: Target::Reference(rhs_ref),
+                offset: rhs_offset,
+            }),
         ) if reference.id == rhs_ref.id => compute(Ok(offset), Ok(rhs_offset)),
+
+        (
+            Pointer::Address(Address { target: Target::String(string), offset }),
+            Pointer::Address(Address {
+                target: Target::String(rhs_string),
+                offset: rhs_offset,
+            }),
+        ) if string == rhs_string => compute(Ok(offset), Ok(rhs_offset)),
 
         (lhs, rhs) => match kind {
             PointerBinopKind::Equality => compute(lhs.with_value(0), rhs.with_value(1)),
@@ -467,8 +513,14 @@ fn eval_static_initialiser<'a>(ty: Type<'a>, initialiser: &Initialiser<'a>) -> V
                     let bytes = chunks.iter().flat_map(|chunk| match chunk {
                         Chunk::Literal(bytes) =>
                             Either::Left(bytes.iter().copied().map(Byte::Literal)),
-                        Chunk::Address { reference, offset } =>
-                            Either::Right(Address { reference, offset: *offset }.into_bytes()),
+                        Chunk::Address { target, offset } => {
+                            let target = match target {
+                                PersistedTarget::Reference(reference) =>
+                                    Target::Reference(reference),
+                                PersistedTarget::String(string) => Target::String(string),
+                            };
+                            Either::Right(Address { target, offset: *offset }.into_bytes())
+                        }
                     });
                     Repr::Bytes(bytes.collect())
                 }
@@ -478,6 +530,20 @@ fn eval_static_initialiser<'a>(ty: Type<'a>, initialiser: &Initialiser<'a>) -> V
             };
             Value { ty, repr }
         }
+    }
+}
+
+fn eval_string_literal<'a>(ty: Type<'a>, string_literal: &StringLiteral<'a>) -> Value<'a> {
+    Value {
+        ty,
+        repr: Repr::Bytes(
+            string_literal
+                .value()
+                .iter()
+                .copied()
+                .map(Byte::Literal)
+                .collect(),
+        ),
     }
 }
 
@@ -525,17 +591,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             close_paren: _,
         } => Value::int(*value, ty),
 
-        Expression::String(string_literal) => Value {
-            ty,
-            repr: Repr::Bytes(
-                string_literal
-                    .value()
-                    .iter()
-                    .copied()
-                    .map(Byte::Literal)
-                    .collect(),
-            ),
-        },
+        Expression::String(string_literal) => eval_string_literal(ty, string_literal),
 
         Expression::Nullptr(_) => Value::int(0, Type::size_t()).convert(ty, ConversionKind::Noop),
 
@@ -628,7 +684,10 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             } => match reference.storage_duration {
                 StorageDuration::Static(_) => Value {
                     ty,
-                    repr: write_address(Address { reference, offset: 0 }),
+                    repr: write_address(Address {
+                        target: Target::Reference(reference),
+                        offset: 0,
+                    }),
                 },
                 StorageDuration::Automatic => not_constexpr(typed_expr, no_errors()),
             },
@@ -640,6 +699,13 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                 };
                 let offset = Value::int(member.offset, Type::ptrdiff_t());
                 eval_pointer_arithmetic(typed_expr, pointer, offset, 1, u64::checked_add_signed)
+            }
+            Expression::String(string) => {
+                let repr = write_address(Address {
+                    target: Target::String(string.value()),
+                    offset: 0,
+                });
+                Value { ty, repr }
             }
             _ => Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
         },
@@ -785,7 +851,10 @@ pub enum PersistedValue<'a, Reference> {
 #[derive(Debug, Clone, Copy)]
 pub enum Chunk<'a, Reference> {
     Literal(&'a [u8]),
-    Address { reference: Reference, offset: u64 },
+    Address {
+        target: PersistedTarget<'a, Reference>,
+        offset: u64,
+    },
 }
 
 impl<'a, Reference> Chunk<'a, Reference> {
@@ -795,10 +864,22 @@ impl<'a, Reference> Chunk<'a, Reference> {
     {
         match self {
             Self::Literal(bytes) => Chunk::Literal(bytes),
-            Self::Address { reference, offset } =>
-                Chunk::Address { reference: f(reference), offset },
+            Self::Address { target, offset } => {
+                let target = match target {
+                    PersistedTarget::Reference(reference) =>
+                        PersistedTarget::Reference(f(reference)),
+                    PersistedTarget::String(value) => PersistedTarget::String(value),
+                };
+                Chunk::Address { target, offset }
+            }
         }
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum PersistedTarget<'a, Reference> {
+    Reference(Reference),
+    String(&'a ByteStr),
 }
 
 fn persist<'a>(sess: &Session<'a>, bytes: Box<[Byte<'a>]>) -> PersistedValue<'a, Reference<'a>> {
@@ -815,10 +896,9 @@ fn persist<'a>(sess: &Session<'a>, bytes: Box<[Byte<'a>]>) -> PersistedValue<'a,
                     }))),
                 false => {
                     let mut chunks = chunk.array_chunks::<8>();
-                    while let Some([Byte::Address { index: _, reference, offset }, ..]) =
-                        chunks.next()
+                    while let Some([Byte::Address { index: _, target, offset }, ..]) = chunks.next()
                     {
-                        yield Chunk::Address { reference: *reference, offset }
+                        yield Chunk::Address { target: target.persist(), offset }
                     }
                     assert_matches!(chunks.next(), None);
                     assert_matches!(chunks.into_remainder().next(), None);
@@ -835,18 +915,8 @@ pub(super) fn run_static_initialiser<'a>(
     initialiser: &'a Initialiser<'a>,
 ) -> Initialiser<'a> {
     let value = eval_static_initialiser(*ty, initialiser);
-    let value = match value.repr {
-        Repr::Bytes(bytes) => persist(sess, bytes),
-        Repr::Error(errors) => {
-            let errors = sess.alloc_slice_fill_iter(errors.into_iter().map(|error| match error {
-                Either::Left(diagnostic) => sess.emit(diagnostic),
-                Either::Right(diagnostic) => diagnostic,
-            }));
-            PersistedValue::Error(errors)
-        }
-    };
     Initialiser::Static {
         initialiser: InitialiserRef(initialiser),
-        value,
+        value: value.persist(sess),
     }
 }

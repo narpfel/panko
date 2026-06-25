@@ -613,6 +613,76 @@ exit_code: 0
                   (name b~105 `short`)
                   (name c~108 `unsigned int`)
                   (name d~111 `int`)
-                  (name e~114 `long`)))))))
+                  (name e~114 `long`))))
+         (compound-statement
+            (declaration a~117 `ptr<char const>` (string "hello world"))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%s\n")
+                  (name a~117 `ptr<char const>`)))
+            (struct T~118
+               (member s `ptr<char const>`))
+            (declaration b~119 `struct T~118 complete`
+               (braced
+                  (designation ((member s)) (string "string"))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%s\n")
+                  (dot s
+                     (name b~119 `struct T~118 complete`))))
+            (hoisted-compound-literal compound_literal.121~122 `struct T~118 complete`)
+            (declaration c~120 `struct T~118 complete`
+               (compound-literal
+                  (declaration compound_literal.121~122 `struct T~118 complete`
+                     (braced
+                        (designation ((member s)) (string "another string"))))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%s\n")
+                  (dot s
+                     (name c~120 `struct T~118 complete`))))
+            (hoisted-compound-literal compound_literal.124~125 `struct T~118 complete`)
+            (declaration d~123 `ptr<struct T~118 complete>`
+               (addressof
+                  (compound-literal
+                     (declaration compound_literal.124~125 `struct T~118 complete`
+                        (braced
+                           (designation ((member s)) (string "third string")))))))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%s\n")
+                  (arrow s
+                     (name d~123 `ptr<struct T~118 complete>`)))))
+         (compound-statement
+            (declaration a~126 `int` (equal (string "same") (string "same")))
+            (declaration b~127 `int` (not-equal (string "same") (string "same")))
+            (declaration c~128 `int` (equal (string "same") (string "different")))
+            (declaration d~129 `int` (not-equal (string "same") (string "different")))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d %d %d\n")
+                  (name a~126 `int`)
+                  (name b~127 `int`)
+                  (name c~128 `int`)
+                  (name d~129 `int`)))
+            (declaration e~130 `int` (equal (string "same") (string "same")))
+            (declaration f~131 `int` (not-equal (string "same") (string "same")))
+            (declaration g~132 `int` (equal (string "same") (string "different")))
+            (declaration h~133 `int` (not-equal (string "same") (string "different")))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d %d %d %d\n")
+                  (name e~130 `int`)
+                  (name f~131 `int`)
+                  (name g~132 `int`)
+                  (name h~133 `int`))))
+         (compound-statement
+            (declaration a~134 `typeof((subtract (string "a") (string "b")))` (subtract (string "string") (addressof (subscript (string "string") 2))))
+            (declaration b~135 `ptr<char const>` (add (string "string") 2))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%td %s\n")
+                  (name a~134 `typeof((subtract (string "a") (string "b")))`)
+                  (name b~135 `ptr<char const>`)))))))
 
 ----- stderr -----

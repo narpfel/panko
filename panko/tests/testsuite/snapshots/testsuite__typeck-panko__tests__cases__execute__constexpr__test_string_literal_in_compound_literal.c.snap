@@ -1,0 +1,34 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/constexpr/test_string_literal_in_compound_literal.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/constexpr/test_string_literal_in_compound_literal.c"
+   (declaration external puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (function-definition external
+      main~1 `fn() -> int`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.4~5 `ptr<char const>`)
+         (definition s~3 `ptr<char const>`
+            (compound-literal `ptr<char const>`
+               (definition compound_literal.4~5 `ptr<char const>`
+                  (braced
+                     (subobject +0
+                        (noop-type-conversion `ptr<char const>`
+                           (noop-type-conversion `ptr<char>`
+                              (addressof `ptr<array<char; 12>>`
+                                 (string `array<char; 12>` "hello world\0")))))))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>`
+                  (puts~0 `fn(∅: ptr<char const>) -> int`))
+               (s~3 `ptr<char const>`))))))
+
+----- stderr -----
