@@ -5,12 +5,12 @@ info:
   args:
     - "--print=scopes"
     - "--stop-after=scopes"
-    - panko/tests/cases/execute/compound-literal/test_string_literal_in_compound_literal.c
+    - panko/tests/cases/execute/constexpr/test_string_literal_in_compound_literal.c
 ---
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit "panko/tests/cases/execute/compound-literal/test_string_literal_in_compound_literal.c"
+(translation-unit "panko/tests/cases/execute/constexpr/test_string_literal_in_compound_literal.c"
    (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
    (function-definition
       main~1 `fn() -> int`
