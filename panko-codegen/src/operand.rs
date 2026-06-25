@@ -30,7 +30,7 @@ impl fmt::Display for Offset<'_> {
         match self {
             Offset::Immediate(immediate) => write!(f, "{immediate}"),
             Offset::Plt(name) => write!(f, "{name}@plt"),
-            Offset::Static(id) => write!(f, ".L.{id}"),
+            Offset::Static(id) => write!(f, "{id}"),
         }
     }
 }
