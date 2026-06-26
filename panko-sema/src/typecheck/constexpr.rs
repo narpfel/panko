@@ -15,6 +15,8 @@ use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_report::Report;
 
+use crate::scope::BuiltinName;
+use crate::scope::BuiltinNameKind;
 use crate::scope::StorageDuration;
 use crate::ty::subobjects::Subobject;
 use crate::typecheck::Bitfield;
@@ -547,6 +549,14 @@ fn eval_string_literal<'a>(ty: Type<'a>, string_literal: &StringLiteral<'a>) -> 
     }
 }
 
+fn pointer_to_string_literal<'a>(ty: Type<'a>, string: &'a ByteStr) -> Value<'a> {
+    let repr = write_address(Address {
+        target: Target::String(string),
+        offset: 0,
+    });
+    Value { ty, repr }
+}
+
 pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     let TypedExpression { ty, expr } = typed_expr;
     let ty = ty.ty;
@@ -700,14 +710,12 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                 let offset = Value::int(member.offset, Type::ptrdiff_t());
                 eval_pointer_arithmetic(typed_expr, pointer, offset, 1, u64::checked_add_signed)
             }
-            Expression::String(string) => {
-                let repr = write_address(Address {
-                    target: Target::String(string.value()),
-                    offset: 0,
-                });
-                Value { ty, repr }
-            }
-            _ => Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
+            Expression::String(string) => pointer_to_string_literal(ty, string.value()),
+            Expression::BuiltinName(BuiltinName {
+                kind: BuiltinNameKind::Func(name),
+                loc: _,
+            }) => pointer_to_string_literal(ty, name),
+            _ => unreachable!("there are no other expression kinds that are valid as lvalues"),
         },
 
         Expression::PtrAdd {
@@ -837,7 +845,14 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             }
         }
 
-        Expression::Deref { .. } | Expression::BuiltinName(_) =>
+        Expression::BuiltinName(builtin) => match builtin.kind {
+            // `__panko_gp_offset` could be constexpr evaluable, but it probably doesn’t need to be
+            BuiltinNameKind::GpOffset | BuiltinNameKind::OverflowArgArea =>
+                not_constexpr(typed_expr, no_errors()),
+            BuiltinNameKind::Func(_) => unreachable!(),
+        },
+
+        Expression::Deref { .. } =>
             Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
     }
 }

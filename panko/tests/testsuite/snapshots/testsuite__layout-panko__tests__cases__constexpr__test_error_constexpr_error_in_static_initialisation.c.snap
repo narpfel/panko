@@ -445,3 +445,17 @@ Error: not a constant expression
  119 │     static int b = "a" < "b";
      │                    ─────────  
 ─────╯
+
+Error: not a constant expression
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:123:20]
+     │
+ 123 │     static int a = __panko_gp_offset;
+     │                    ─────────────────  
+─────╯
+
+Error: not a constant expression
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:124:22]
+     │
+ 124 │     static void* b = __panko_overflow_arg_area;
+     │                      ─────────────────────────  
+─────╯

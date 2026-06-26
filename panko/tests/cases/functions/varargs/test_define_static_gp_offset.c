@@ -1,4 +1,4 @@
-// [[known-bug]]
+// `__panko_gp_offset` could be constexpr evaluable, but probably doesn’t need to
 
 int printf(char const*, ...);
 
@@ -8,10 +8,10 @@ void declare_static(int, int, int) {
 }
 
 int main() {
-    // [[print: 24]]
+    // this could // [[print: 24]]
     declare_static(1, 2, 3);
 
     static typeof(sizeof 0) gp_offset = __panko_gp_offset;
-    // [[print: 0]]
+    // this could // [[print: 0]]
     printf("%zu\n", gp_offset);
 }

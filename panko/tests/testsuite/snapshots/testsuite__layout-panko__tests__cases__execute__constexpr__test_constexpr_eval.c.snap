@@ -1226,6 +1226,27 @@ exit_code: 0
                         (addressof `ptr<array<char; 8>>` @16
                            (string `array<char; 8>` @void "%td %s\n\0"))))
                   (a~134 `long` (static a.134))
-                  (b~135 `ptr<char const>` (static b.135))))))))
+                  (b~135 `ptr<char const>` (static b.135)))))
+         (compound-statement
+            (definition (a~136 `ptr<char const>` (static a.136))
+               (noop-type-conversion `ptr<char const>`
+                  (addressof `ptr<array<char const; 5>>`
+                     (builtin-name `array<char const; 5> const` __func__ "main"))))
+            (definition (b~137 `ptr<array<char const; 5>>` (static b.137))
+               (noop-type-conversion `ptr<array<char const; 5>>`
+                  (addressof `ptr<array<char const; 5> const>`
+                     (builtin-name `array<char const; 5> const` __func__ "main"))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 7>>` @16
+                           (string `array<char; 7>` @void "%s %s\n\0"))))
+                  (a~136 `ptr<char const>` (static a.136))
+                  (noop-type-conversion `ptr<char const>` @24
+                     (addressof `ptr<array<char const; 5>>` @24
+                        (deref `array<char const; 5>` @24 (b~137 `ptr<array<char const; 5>>` (static b.137)))))))))))
 
 ----- stderr -----

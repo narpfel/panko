@@ -683,6 +683,14 @@ exit_code: 0
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%td %s\n")
                   (name a~134 `typeof((subtract (string "a") (string "b")))`)
-                  (name b~135 `ptr<char const>`)))))))
+                  (name b~135 `ptr<char const>`))))
+         (compound-statement
+            (declaration a~136 `ptr<char const>` (builtin-name __func__ "main"))
+            (declaration b~137 `ptr<typeof(`array<char const; 5>`)>` (addressof (builtin-name __func__ "main")))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%s %s\n")
+                  (name a~136 `ptr<char const>`)
+                  (deref (name b~137 `ptr<typeof(`array<char const; 5>`)>`))))))))
 
 ----- stderr -----

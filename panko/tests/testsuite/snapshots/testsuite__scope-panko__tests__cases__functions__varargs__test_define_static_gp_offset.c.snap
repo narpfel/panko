@@ -5,12 +5,12 @@ info:
   args:
     - "--print=scopes"
     - "--stop-after=scopes"
-    - panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c
+    - panko/tests/cases/functions/varargs/test_define_static_gp_offset.c
 ---
 success: true
 exit_code: 0
 ----- stdout -----
-(translation-unit "panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c"
+(translation-unit "panko/tests/cases/functions/varargs/test_define_static_gp_offset.c"
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (function-definition
       declare_static~1 `fn(∅: int, ∅: int, ∅: int) -> void`

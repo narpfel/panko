@@ -118,3 +118,8 @@ void error_in_pointer_arithmetic_involving_string_literals() {
     static typeof("a" - "b") a = "a" - "b";
     static int b = "a" < "b";
 }
+
+void non_constexpr_builtin_names() {
+    static int a = __panko_gp_offset;
+    static void* b = __panko_overflow_arg_area;
+}

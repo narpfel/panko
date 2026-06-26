@@ -3,24 +3,24 @@ source: panko/tests/testsuite/main.rs
 info:
   program: panko
   args:
-    - "--print=layout"
-    - "--stop-after=layout"
-    - panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/functions/varargs/test_define_static_gp_offset.c
 ---
 success: false
 exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: TODO: constexpr evaluation not implemented yet
-   ╭─[panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c:6:41]
+Error: not a constant expression
+   ╭─[panko/tests/cases/functions/varargs/test_define_static_gp_offset.c:6:41]
    │
  6 │     static typeof(sizeof 0) gp_offset = __panko_gp_offset;
    │                                         ─────────────────  
 ───╯
 
-Error: TODO: constexpr evaluation not implemented yet
-    ╭─[panko/tests/cases/execute/functions/varargs/test_define_static_gp_offset.c:14:41]
+Error: not a constant expression
+    ╭─[panko/tests/cases/functions/varargs/test_define_static_gp_offset.c:14:41]
     │
  14 │     static typeof(sizeof 0) gp_offset = __panko_gp_offset;
     │                                         ─────────────────  
