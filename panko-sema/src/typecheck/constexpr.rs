@@ -715,7 +715,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                 kind: BuiltinNameKind::Func(name),
                 loc: _,
             }) => pointer_to_string_literal(ty, name),
-            _ => Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
+            _ => unreachable!("there are no other expression kinds that are valid as lvalues"),
         },
 
         Expression::PtrAdd {
