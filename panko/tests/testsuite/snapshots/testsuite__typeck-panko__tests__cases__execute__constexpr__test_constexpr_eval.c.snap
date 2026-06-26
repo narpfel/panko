@@ -1162,6 +1162,27 @@ exit_code: 0
                         (addressof `ptr<array<char; 8>>`
                            (string `array<char; 8>` "%td %s\n\0"))))
                   (a~134 `long`)
-                  (b~135 `ptr<char const>`)))))))
+                  (b~135 `ptr<char const>`))))
+         (compound-statement
+            (definition a~136 `ptr<char const>`
+               (noop-type-conversion `ptr<char const>`
+                  (addressof `ptr<array<char const; 5>>`
+                     (builtin-name `array<char const; 5> const` __func__ "main"))))
+            (definition b~137 `ptr<array<char const; 5>>`
+               (noop-type-conversion `ptr<array<char const; 5>>`
+                  (addressof `ptr<array<char const; 5> const>`
+                     (builtin-name `array<char const; 5> const` __func__ "main"))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 7>>`
+                           (string `array<char; 7>` "%s %s\n\0"))))
+                  (a~136 `ptr<char const>`)
+                  (noop-type-conversion `ptr<char const>`
+                     (addressof `ptr<array<char const; 5>>`
+                        (deref `array<char const; 5>` (b~137 `ptr<array<char const; 5>>`))))))))))
 
 ----- stderr -----

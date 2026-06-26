@@ -359,4 +359,12 @@ int main() {
         // [[print: -2 ring]]
         printf("%td %s\n", a, b);
     }
+
+    // `__func__`
+    {
+        static char const* a = __func__;
+        static typeof(char const[5])* b = &__func__;
+        // [[print: main main]]
+        printf("%s %s\n", a, *b);
+    }
 }
