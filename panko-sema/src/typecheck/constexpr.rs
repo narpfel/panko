@@ -845,7 +845,14 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             }
         }
 
-        Expression::Deref { .. } | Expression::BuiltinName(_) =>
+        Expression::BuiltinName(builtin) => match builtin.kind {
+            // `__panko_gp_offset` could be constexpr evaluable, but it probably doesn’t need to be
+            BuiltinNameKind::GpOffset | BuiltinNameKind::OverflowArgArea =>
+                not_constexpr(typed_expr, no_errors()),
+            BuiltinNameKind::Func(_) => unreachable!(),
+        },
+
+        Expression::Deref { .. } =>
             Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
     }
 }

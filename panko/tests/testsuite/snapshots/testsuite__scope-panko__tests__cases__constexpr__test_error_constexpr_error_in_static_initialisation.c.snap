@@ -180,6 +180,11 @@ exit_code: 0
       error_in_pointer_arithmetic_involving_string_literals~87 `fn() -> void`
       (compound-statement
          (declaration a~89 `typeof((subtract (string "a") (string "b")))` (subtract (string "a") (string "b")))
-         (declaration b~90 `int` (less (string "a") (string "b"))))))
+         (declaration b~90 `int` (less (string "a") (string "b")))))
+   (function-definition
+      non_constexpr_builtin_names~91 `fn() -> void`
+      (compound-statement
+         (declaration a~93 `int` (builtin-name gp_offset))
+         (declaration b~94 `ptr<void>` (builtin-name overflow_arg_area)))))
 
 ----- stderr -----
