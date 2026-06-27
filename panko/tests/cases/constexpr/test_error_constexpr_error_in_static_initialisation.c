@@ -123,3 +123,7 @@ void non_constexpr_builtin_names() {
     static int a = __panko_gp_offset;
     static void* b = __panko_overflow_arg_area;
 }
+
+void out_of_bounds_in_deref_of_pointer_into_string_literal() {
+    static char a = "string"[1234];
+}

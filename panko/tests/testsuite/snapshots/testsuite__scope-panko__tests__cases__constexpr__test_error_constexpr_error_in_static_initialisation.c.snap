@@ -185,6 +185,10 @@ exit_code: 0
       non_constexpr_builtin_names~91 `fn() -> void`
       (compound-statement
          (declaration a~93 `int` (builtin-name gp_offset))
-         (declaration b~94 `ptr<void>` (builtin-name overflow_arg_area)))))
+         (declaration b~94 `ptr<void>` (builtin-name overflow_arg_area))))
+   (function-definition
+      out_of_bounds_in_deref_of_pointer_into_string_literal~95 `fn() -> void`
+      (compound-statement
+         (declaration a~97 `char` (subscript (string "string") 1234)))))
 
 ----- stderr -----

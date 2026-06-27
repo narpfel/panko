@@ -1200,6 +1200,22 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>`
                         (addressof `ptr<array<char; 4>>`
                            (string `array<char; 4>` "%c\n\0"))))
-                  (sign-extend `int` (a~138 `char`))))))))
+                  (sign-extend `int` (a~138 `char`))))
+            (definition b~139 `char`
+               (deref `char const`
+                  (ptr-add `ptr<char const>`
+                     (noop-type-conversion `ptr<char const>`
+                        (addressof `ptr<array<char const; 5>>`
+                           (builtin-name `array<char const; 5> const` __func__ "main")))
+                     (noop-type-conversion `long` (subtract `unsigned long` (lengthof `unsigned long` 5 (builtin-name `array<char const; 5> const` __func__ "main")) (sign-extend `unsigned long` (1 `int`)))))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 4>>`
+                           (string `array<char; 4>` "%d\n\0"))))
+                  (sign-extend `int` (b~139 `char`))))))))
 
 ----- stderr -----

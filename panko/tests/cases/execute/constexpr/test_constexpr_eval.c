@@ -373,5 +373,8 @@ int main() {
         static char a = "hello"[2];
         // [[print: l]]
         printf("%c\n", a);
+        static char b = __func__[_Lengthof __func__  - 1];
+        // [[print: 0]]
+        printf("%d\n", b);
     }
 }

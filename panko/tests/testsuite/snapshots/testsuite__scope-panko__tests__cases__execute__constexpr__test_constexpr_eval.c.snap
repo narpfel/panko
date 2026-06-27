@@ -697,6 +697,11 @@ exit_code: 0
             (expression
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%c\n")
-                  (name a~138 `char`)))))))
+                  (name a~138 `char`)))
+            (declaration b~139 `char` (subscript (builtin-name __func__ "main") (subtract (lengthof (builtin-name __func__ "main")) 1)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%d\n")
+                  (name b~139 `char`)))))))
 
 ----- stderr -----

@@ -1264,6 +1264,22 @@ exit_code: 0
                      (noop-type-conversion `ptr<char>` @16
                         (addressof `ptr<array<char; 4>>` @16
                            (string `array<char; 4>` @void "%c\n\0"))))
-                  (sign-extend `int` @24 (a~138 `char` (static a.138)))))))))
+                  (sign-extend `int` @24 (a~138 `char` (static a.138)))))
+            (definition (b~139 `char` (static b.139))
+               (deref `char const`
+                  (ptr-add `ptr<char const>`
+                     (noop-type-conversion `ptr<char const>`
+                        (addressof `ptr<array<char const; 5>>`
+                           (builtin-name `array<char const; 5> const` __func__ "main")))
+                     (noop-type-conversion `long` (subtract `unsigned long` (lengthof `unsigned long` 5 (builtin-name `array<char const; 5> const` __func__ "main")) (sign-extend `unsigned long` (1 `int`)))))))
+            (expression
+               (call `int` @0
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @16
+                     (noop-type-conversion `ptr<char>` @16
+                        (addressof `ptr<array<char; 4>>` @16
+                           (string `array<char; 4>` @void "%d\n\0"))))
+                  (sign-extend `int` @24 (b~139 `char` (static b.139)))))))))
 
 ----- stderr -----
