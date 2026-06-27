@@ -15,10 +15,6 @@ pub(crate) enum Diagnostic<'a> {
     #[with(ty = at.ty.ty)]
     ArithmeticError { at: TypedExpression<'a>, kind: Kind },
 
-    #[error("TODO: constexpr evaluation not implemented yet")]
-    #[diagnostics(at(colour = Red))]
-    NotImplementedYet { at: TypedExpression<'a> },
-
     #[error("not a constant expression")]
     #[diagnostics(at(colour = Red))]
     NotConstexpr { at: TypedExpression<'a> },

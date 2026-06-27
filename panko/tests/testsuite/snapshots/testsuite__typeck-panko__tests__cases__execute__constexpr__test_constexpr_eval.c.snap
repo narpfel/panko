@@ -1183,6 +1183,23 @@ exit_code: 0
                   (a~136 `ptr<char const>`)
                   (noop-type-conversion `ptr<char const>`
                      (addressof `ptr<array<char const; 5>>`
-                        (deref `array<char const; 5>` (b~137 `ptr<array<char const; 5>>`))))))))))
+                        (deref `array<char const; 5>` (b~137 `ptr<array<char const; 5>>`)))))))
+         (compound-statement
+            (definition a~138 `char`
+               (deref `char`
+                  (ptr-add `ptr<char>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 6>>`
+                           (string `array<char; 6>` "hello\0")))
+                     (sign-extend `long` (2 `int`)))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 4>>`
+                           (string `array<char; 4>` "%c\n\0"))))
+                  (sign-extend `int` (a~138 `char`))))))))
 
 ----- stderr -----

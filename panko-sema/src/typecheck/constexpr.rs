@@ -214,10 +214,6 @@ impl<'a> Value<'a> {
         Self { ty, repr: Repr::Error(Errors::default()) }
     }
 
-    fn with_error(ty: Type<'a>, error: Diagnostic<'a>) -> Self {
-        Value { ty, repr: Repr::error(error) }
-    }
-
     fn with_errors(ty: Type<'a>, errors: Errors<'a>) -> Self {
         Self { ty, repr: Repr::Error(errors) }
     }
@@ -319,10 +315,6 @@ impl<'a> Repr<'a> {
     fn empty(ty: &Type<'a>) -> Self {
         let bytes = vec![Byte::Literal(0); usize::try_from(ty.size()).unwrap()].into_boxed_slice();
         Repr::Bytes(bytes)
-    }
-
-    fn error(diagnostic: Diagnostic<'a>) -> Self {
-        Self::Error(Errors::new(diagnostic))
     }
 
     fn into_bytes(self) -> Result<Box<[Byte<'a>]>, Errors<'a>> {
@@ -852,8 +844,32 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             BuiltinNameKind::Func(_) => unreachable!(),
         },
 
-        Expression::Deref { .. } =>
-            Value::with_error(ty, Diagnostic::NotImplementedYet { at: *typed_expr }),
+        Expression::Deref { star: _, operand } => {
+            let operand = eval(operand);
+            let repr = match operand.repr {
+                Repr::Bytes(ref bytes) => {
+                    let address = read_address(bytes);
+                    match address {
+                        Some(Address { target, offset }) => match target {
+                            Target::Reference(_reference) =>
+                                todo!("`constexpr` and e. g. `static const`"),
+                            Target::String(byte_str) => {
+                                let index = usize::try_from(offset).unwrap();
+                                let c = match byte_str.get(index) {
+                                    Some(c) => *c,
+                                    None if index == byte_str.len() => 0,
+                                    None => return not_constexpr(typed_expr, [operand]),
+                                };
+                                Repr::Bytes([Byte::Literal(c)].into())
+                            }
+                        },
+                        None => todo!("error message"),
+                    }
+                }
+                Repr::Error(errors) => Repr::Error(errors),
+            };
+            Value { ty, repr }
+        }
     }
 }
 

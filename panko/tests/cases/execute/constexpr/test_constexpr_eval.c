@@ -367,4 +367,11 @@ int main() {
         // [[print: main main]]
         printf("%s %s\n", a, *b);
     }
+
+    // deref
+    {
+        static char a = "hello"[2];
+        // [[print: l]]
+        printf("%c\n", a);
+    }
 }

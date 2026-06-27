@@ -691,6 +691,12 @@ exit_code: 0
                (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                   (string "%s %s\n")
                   (name a~136 `ptr<char const>`)
-                  (deref (name b~137 `ptr<typeof(`array<char const; 5>`)>`))))))))
+                  (deref (name b~137 `ptr<typeof(`array<char const; 5>`)>`)))))
+         (compound-statement
+            (declaration a~138 `char` (subscript (string "hello") 2))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "%c\n")
+                  (name a~138 `char`)))))))
 
 ----- stderr -----
