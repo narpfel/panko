@@ -459,3 +459,10 @@ Error: not a constant expression
  124 │     static void* b = __panko_overflow_arg_area;
      │                      ─────────────────────────  
 ─────╯
+
+Error: not a constant expression
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:128:21]
+     │
+ 128 │     static char a = "string"[1234];
+     │                     ──────────────  
+─────╯
