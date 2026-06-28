@@ -584,10 +584,11 @@ impl<'a> Codegen<'a> {
     }
 
     fn external_declaration(&mut self, decl: &'a Declaration<'a>) {
-        let name = decl.reference.name();
-        let linkage = decl.reference.linkage();
-        let ty = decl.reference.ty.ty;
-        match decl.reference.kind() {
+        let Declaration { reference, initialiser } = decl;
+        let name = reference.name();
+        let linkage = reference.linkage();
+        let ty = reference.ty.ty;
+        match reference.kind() {
             RefKind::Declaration => (),
             RefKind::TentativeDefinition =>
                 if !self.defined.contains(name) {
@@ -596,7 +597,7 @@ impl<'a> Codegen<'a> {
             RefKind::Definition => {
                 self.deferred_definitions.shift_remove(name);
                 self.defined.insert(name);
-                let initialiser = try { StaticInitialiser::from(decl.initialiser.as_ref()?) };
+                let initialiser = try { StaticInitialiser::from(initialiser.as_ref()?) };
                 self.object_definition(name, linkage, ty, initialiser)
             }
         }
