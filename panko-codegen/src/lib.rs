@@ -573,7 +573,7 @@ impl<'a> Codegen<'a> {
         self.label(id);
         self.code.push_str(".asciz \"");
         for &byte in value {
-            if byte.is_ascii_graphic() || byte == b' ' {
+            if byte.is_ascii_graphic() || b" \n\r\t".contains(&byte) {
                 write!(&mut self.code, "{}", char::from(byte).escape_default()).unwrap();
             }
             else {
