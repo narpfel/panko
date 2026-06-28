@@ -844,32 +844,23 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             BuiltinNameKind::Func(_) => unreachable!(),
         },
 
-        Expression::Deref { star: _, operand } => {
-            let operand = eval(operand);
-            let repr = match operand.repr {
-                Repr::Bytes(ref bytes) => {
-                    let address = read_address(bytes);
-                    match address {
-                        Some(Address { target, offset }) => match target {
-                            Target::Reference(_reference) =>
-                                todo!("`constexpr` and e. g. `static const`"),
-                            Target::String(byte_str) => {
-                                let index = usize::try_from(offset).unwrap();
-                                let c = match byte_str.get(index) {
-                                    Some(c) => *c,
-                                    None if index == byte_str.len() => 0,
-                                    None => return not_constexpr(typed_expr, [operand]),
-                                };
-                                Repr::Bytes([Byte::Literal(c)].into())
-                            }
-                        },
-                        None => todo!("error message"),
-                    }
+        Expression::Deref { star: _, operand } => match eval(operand).into_pointer() {
+            Pointer::FromInt(Ok(_)) => not_constexpr(typed_expr, no_errors()),
+            Pointer::FromInt(Err(errors)) => Value::with_errors(ty, errors),
+            Pointer::Address(Address { target, offset }) => match target {
+                Target::Reference(_reference) => todo!("`constexpr` and e. g. `static const`"),
+                Target::String(byte_str) => {
+                    let index = usize::try_from(offset).unwrap();
+                    let c = match byte_str.get(index) {
+                        Some(c) => *c,
+                        None if index == byte_str.len() => 0,
+                        None => return not_constexpr(typed_expr, no_errors()),
+                    };
+                    let repr = Repr::Bytes([Byte::Literal(c)].into());
+                    Value { ty, repr }
                 }
-                Repr::Error(errors) => Repr::Error(errors),
-            };
-            Value { ty, repr }
-        }
+            },
+        },
     }
 }
 
