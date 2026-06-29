@@ -45,6 +45,7 @@ where
     fn ge(self, rhs: Self) -> Result<'a, bool>;
 
     fn nonzero(self, expr: &TypedExpression<'a>) -> Self;
+    fn nonnegative(self, on_negative: impl FnOnce() -> Errors<'a>) -> Self;
 
     fn compare(self, kind: Comparison, rhs: Self) -> Result<'a, i32> {
         let result = match kind {
@@ -118,13 +119,8 @@ macro_rules! int_impl {
             )*
 
             fn shl(self, rhs: Result<'a, u32>, expr: &TypedExpression<'a>) -> Self {
-                let lhs = match self {
-                    #[allow(unused_comparisons, reason = "this macro is used for signed and unsigned types")]
-                    Ok(lhs) if lhs < 0 => Err(NegativeShiftLhs.at(expr)),
-                    Ok(lhs) => Ok(lhs),
-                    Err(errs) => Err(errs),
-                };
-                binop(lhs, rhs, |lhs, rhs| lhs.$shl(rhs), || SignedOverflow.at(expr))
+                let lhs = self.nonnegative(|| NegativeShiftLhs.at(expr));
+                binop(lhs, rhs, $t::$shl, || SignedOverflow.at(expr))
             }
 
             fn shr(self, rhs: Result<'a, u32>) -> Self {
@@ -142,10 +138,17 @@ macro_rules! int_impl {
             infallible!(ge -> bool);
 
             fn nonzero(self, expr: &TypedExpression<'a>) -> Self {
-                match self {
-                    Ok(0) => Err(IsZero.at(expr)),
-                    Ok(value) => Ok(value),
-                    Err(errors) => Err(errors),
+                match self? {
+                    0 => Err(IsZero.at(expr)),
+                    value => Ok(value),
+                }
+            }
+
+            fn nonnegative(self, on_negative: impl FnOnce() -> Errors<'a>) -> Self {
+                match self? {
+                    #[allow(unused_comparisons, reason = "this macro is used for signed and unsigned types")]
+                    value if value < 0 => Err(on_negative()),
+                    value => Ok(value),
                 }
             }
         }
