@@ -27,6 +27,14 @@ exit_code: 0
          (expression
             (assign `nullptr_t` @0
                (a~2 `nullptr_t` @0)
+               (b~3 `nullptr_t` @8)))
+         (expression
+            (assign `nullptr_t` @8
+               (b~3 `nullptr_t` @8)
+               (noop-type-conversion `nullptr_t` @0 (a~2 `nullptr_t` @0))))
+         (expression
+            (assign `nullptr_t` @0
+               (a~2 `nullptr_t` @0)
                (sign-extend `nullptr_t` @0 (0 `int` @16))))
          (expression
             (assign `nullptr_t` @0

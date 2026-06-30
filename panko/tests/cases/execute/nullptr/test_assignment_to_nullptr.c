@@ -4,6 +4,9 @@ int main() {
     a = nullptr;
     b = (typeof(nullptr))nullptr;
 
+    a = b;
+    b = (typeof(nullptr))a;
+
     // conversion of null pointer constant to type `nullptr_t`
     a = 0;
     a = 2 * 0;
