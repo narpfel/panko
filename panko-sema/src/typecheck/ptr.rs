@@ -101,17 +101,15 @@ pub(crate) fn typeck_ptrcmp<'a>(
     rhs: TypedExpression<'a>,
 ) -> TypedExpression<'a> {
     // TODO: should check for type compatibility, not exact equality
-    let expr = if lhs.ty.ty != Type::Nullptr && rhs.ty.ty != Type::Nullptr && lhs.ty.ty != rhs.ty.ty
-    {
-        sess.emit(Diagnostic::IncompatibleTypesInPtrCmp { at: *op_token, lhs, rhs })
-    }
-    else {
-        Expression::PtrCmp {
-            lhs: sess.alloc(lhs),
-            kind,
-            rhs: sess.alloc(rhs),
-        }
-    };
+    let expr =
+        match lhs.ty.ty != Type::Nullptr && rhs.ty.ty != Type::Nullptr && lhs.ty.ty != rhs.ty.ty {
+            true => sess.emit(Diagnostic::IncompatibleTypesInPtrCmp { at: *op_token, lhs, rhs }),
+            false => Expression::PtrCmp {
+                lhs: sess.alloc(lhs),
+                kind,
+                rhs: sess.alloc(rhs),
+            },
+        };
     TypedExpression { ty: Type::int().unqualified(), expr }
 }
 
