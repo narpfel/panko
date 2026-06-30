@@ -1,0 +1,19 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/nullptr/test_error_conversion_of_non_null_pointer_constant_to_nullptr_t.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/nullptr/test_error_conversion_of_non_null_pointer_constant_to_nullptr_t.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration a~2 `typeof(nullptr)` (cast `ptr<void>` (cast `ptr<int>` 0))))))
+
+----- stderr -----
