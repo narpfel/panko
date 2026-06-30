@@ -1091,7 +1091,6 @@ fn convert<'a>(
     kind: ConversionKind,
 ) -> TypedExpression<'a> {
     // TODO: forbid ptr <=> float
-    // TODO: if target is nullptr_t, expr must be nullptr or a null pointer constant
     let target_ty = target.ty;
     let expr_ty = expr.ty.ty;
     let extend_kind = match expr_ty {
@@ -1131,6 +1130,8 @@ fn convert<'a>(
                 true => return expr,
                 false => convert(),
             },
+
+        (Type::Nullptr, _) if ptr::is_nullptr_constant(expr) => convert(),
 
         // TODO: clang (but not gcc) allows implicitly converting `Type::Function(_)` to
         // `Type::Pointer(_)` (with a warning).

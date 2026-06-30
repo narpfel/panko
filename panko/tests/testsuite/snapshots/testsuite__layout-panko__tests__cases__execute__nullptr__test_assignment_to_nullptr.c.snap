@@ -11,7 +11,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/nullptr/test_assignment_to_nullptr.c"
-   (function-definition external stack-size=24
+   (function-definition external stack-size=40
       (main~0 `fn() -> int` (static main))
       (compound-statement
          (definition (a~2 `nullptr_t` @0) (nullptr `nullptr_t` @0))
@@ -23,6 +23,36 @@ exit_code: 0
          (expression
             (assign `nullptr_t` @8
                (b~3 `nullptr_t` @8)
-               (noop-type-conversion `nullptr_t` @8 (nullptr `nullptr_t` @8)))))))
+               (noop-type-conversion `nullptr_t` @8 (nullptr `nullptr_t` @8))))
+         (expression
+            (assign `nullptr_t` @0
+               (a~2 `nullptr_t` @0)
+               (sign-extend `nullptr_t` @0 (0 `int` @16))))
+         (expression
+            (assign `nullptr_t` @0
+               (a~2 `nullptr_t` @0)
+               (sign-extend `nullptr_t` @0
+                  (multiply `int` @16
+                     (2 `int` @16)
+                     (0 `int` @20)))))
+         (expression
+            (assign `nullptr_t` @0
+               (a~2 `nullptr_t` @0)
+               (noop-type-conversion `nullptr_t` @0 (sign-extend `ptr<void>` @0 (0 `int` @16)))))
+         (expression
+            (assign `nullptr_t` @8
+               (b~3 `nullptr_t` @8)
+               (sign-extend `nullptr_t` @8 (0 `int` @16))))
+         (expression
+            (assign `nullptr_t` @8
+               (b~3 `nullptr_t` @8)
+               (sign-extend `nullptr_t` @8
+                  (multiply `int` @16
+                     (2 `int` @16)
+                     (0 `int` @20)))))
+         (expression
+            (assign `nullptr_t` @8
+               (b~3 `nullptr_t` @8)
+               (noop-type-conversion `nullptr_t` @8 (sign-extend `ptr<void>` @8 (0 `int` @16))))))))
 
 ----- stderr -----
