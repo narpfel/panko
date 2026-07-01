@@ -5,5 +5,6 @@ typeof(nullptr) f() {
 }
 
 int main() {
-    return f() == nullptr;
+    int* null = f();
+    return f() == nullptr && !null;
 }

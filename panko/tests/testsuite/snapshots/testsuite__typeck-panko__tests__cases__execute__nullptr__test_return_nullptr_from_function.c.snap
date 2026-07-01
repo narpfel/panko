@@ -18,11 +18,18 @@ exit_code: 0
    (function-definition external
       main~2 `fn() -> int`
       (compound-statement
-         (return
-            (ptr-equal `int`
+         (definition null~4 `ptr<int>`
+            (noop-type-conversion `ptr<int>`
                (call `nullptr_t`
                   (addressof `ptr<fn() -> nullptr_t>`
-                     (f~0 `fn() -> nullptr_t`)))
-               (nullptr `nullptr_t`))))))
+                     (f~0 `fn() -> nullptr_t`)))))
+         (return
+            (logical-and `int`
+               (ptr-equal `int`
+                  (call `nullptr_t`
+                     (addressof `ptr<fn() -> nullptr_t>`
+                        (f~0 `fn() -> nullptr_t`)))
+                  (nullptr `nullptr_t`))
+               (not `int` (null~4 `ptr<int>`)))))))
 
 ----- stderr -----

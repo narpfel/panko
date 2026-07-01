@@ -15,14 +15,21 @@ exit_code: 0
       (f~0 `fn() -> nullptr_t` (static f))
       (compound-statement
          (return (nullptr `nullptr_t` @0))))
-   (function-definition external stack-size=40
+   (function-definition external stack-size=56
       (main~2 `fn() -> int` (static main))
       (compound-statement
+         (definition (null~4 `ptr<int>` @0)
+            (noop-type-conversion `ptr<int>` @0
+               (call `nullptr_t` @0
+                  (addressof `ptr<fn() -> nullptr_t>` @8
+                     (f~0 `fn() -> nullptr_t` (static f))))))
          (return
-            (ptr-equal `int` @0
-               (call `nullptr_t` @8
-                  (addressof `ptr<fn() -> nullptr_t>` @16
-                     (f~0 `fn() -> nullptr_t` (static f))))
-               (nullptr `nullptr_t` @24))))))
+            (logical-and `int` @8
+               (ptr-equal `int` @8
+                  (call `nullptr_t` @16
+                     (addressof `ptr<fn() -> nullptr_t>` @24
+                        (f~0 `fn() -> nullptr_t` (static f))))
+                  (nullptr `nullptr_t` @32))
+               (not `int` @32 (null~4 `ptr<int>` @0)))))))
 
 ----- stderr -----
