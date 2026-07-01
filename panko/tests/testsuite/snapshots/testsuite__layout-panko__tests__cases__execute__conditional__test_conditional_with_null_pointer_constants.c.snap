@@ -1,0 +1,49 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/conditional/test_conditional_with_null_pointer_constants.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/conditional/test_conditional_with_null_pointer_constants.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external stack-size=72
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (definition (x~3 `int` @0) (42 `int` @0))
+         (definition (p~4 `ptr<int>` @8)
+            (addressof `ptr<int>` @8
+               (x~3 `int` @0)))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 4>>` @32
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (deref `int` @40
+                  (conditional `ptr<int>` @48
+                     (1 `int` @60)
+                     (p~4 `ptr<int>` @8)
+                     (sign-extend `ptr<int>` @48 (0 `int` @56))))))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 4>>` @32
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (deref `int` @40
+                  (conditional `ptr<int>` @48
+                     (0 `int` @56)
+                     (noop-type-conversion `ptr<int>` @48 (noop-type-conversion `ptr<void>` @48 (0 `long` @48)))
+                     (p~4 `ptr<int>` @8))))))))
+
+----- stderr -----

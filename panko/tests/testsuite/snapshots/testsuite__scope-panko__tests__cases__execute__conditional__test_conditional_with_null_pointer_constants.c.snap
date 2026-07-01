@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/conditional/test_conditional_with_null_pointer_constants.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/conditional/test_conditional_with_null_pointer_constants.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (declaration x~3 `int` 42)
+         (declaration p~4 `ptr<int>` (addressof (name x~3 `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (deref
+                  (conditional
+                     1
+                     (name p~4 `ptr<int>`)
+                     0))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (deref
+                  (conditional
+                     0
+                     (cast `ptr<void>` 0l)
+                     (name p~4 `ptr<int>`))))))))
+
+----- stderr -----

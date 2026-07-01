@@ -2535,6 +2535,9 @@ fn typeck_expression<'a>(
 
                 (Type::Void, Type::Void) => Type::Void,
 
+                (Type::Pointer(_), _) if ptr::is_nullptr_constant(or_else) => then.ty.ty,
+                (_, Type::Pointer(_)) if ptr::is_nullptr_constant(then) => or_else.ty.ty,
+
                 (Type::Pointer(then_pointee), Type::Pointer(or_else_pointee))
                     if then_pointee.ty == or_else_pointee.ty
                         || then_pointee.ty == Type::Void
