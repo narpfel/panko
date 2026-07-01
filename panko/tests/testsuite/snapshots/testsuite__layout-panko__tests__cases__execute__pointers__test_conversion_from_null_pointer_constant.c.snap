@@ -7,31 +7,32 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c"
+   (function-definition external stack-size=56
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (a~2 `ptr<int>` @0) (sign-extend `ptr<int>` @0 (0 `int` @8)))
+         (definition (b~3 `ptr<bool>` @8) (zero-extend `ptr<bool>` @8 (0 `bool` @16)))
+         (definition (c~4 `ptr<char const>` @16) (noop-type-conversion `ptr<char const>` @16 (sign-extend `ptr<void>` @16 (0 `int` @24))))
+         (definition (d~5 `ptr<long> const` @24) (noop-type-conversion `ptr<long>` @24 (nullptr `nullptr_t` @24)))
+         (definition (e~6 `ptr<fn() -> int>` @32)
+            (sign-extend `ptr<fn() -> int>` @32
+               (conditional `int` @40
+                  (42 `int` @44)
+                  (0 `int` @40)
+                  (1 `int` @40))))
+         (return
+            (logical-and `int` @40
+               (logical-and `int` @40
+                  (logical-and `int` @40
+                     (logical-and `int` @40
+                        (not `int` @40 (a~2 `ptr<int>` @0))
+                        (not `int` @44 (b~3 `ptr<bool>` @8)))
+                     (not `int` @44 (c~4 `ptr<char const>` @16)))
+                  (not `int` @44 (d~5 `ptr<long> const` @24)))
+               (not `int` @44 (e~6 `ptr<fn() -> int>` @32)))))))
 
 ----- stderr -----
-Error: invalid implicit conversion from `int` to `ptr<int>`
-   ╭─[panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c:5:14]
-   │
- 5 │     int* a = 0;
-   │              ┬  
-   │              ╰── this is of type `int`, which cannot be implicitly converted to `ptr<int>`
-───╯
-
-Error: invalid implicit conversion from `bool` to `ptr<bool>`
-   ╭─[panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c:6:15]
-   │
- 6 │     bool* b = false;
-   │               ──┬──  
-   │                 ╰──── this is of type `bool`, which cannot be implicitly converted to `ptr<bool>`
-───╯
-
-Error: invalid implicit conversion from `int` to `ptr<fn() -> int>`
-   ╭─[panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c:9:24]
-   │
- 9 │     typeof(int())* e = 42 ? 0 : 1;
-   │                        ─────┬────  
-   │                             ╰────── this is of type `int`, which cannot be implicitly converted to `ptr<fn() -> int>`
-───╯

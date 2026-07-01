@@ -1,5 +1,4 @@
 // [[return: 1]]
-// [[known-bug]]
 
 int main() {
     int* a = 0;

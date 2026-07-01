@@ -1131,7 +1131,7 @@ fn convert<'a>(
                 false => convert(),
             },
 
-        (Type::Nullptr, _) if ptr::is_nullptr_constant(expr) => convert(),
+        (Type::Pointer(_) | Type::Nullptr, _) if ptr::is_nullptr_constant(expr) => convert(),
 
         // TODO: clang (but not gcc) allows implicitly converting `Type::Function(_)` to
         // `Type::Pointer(_)` (with a warning).
