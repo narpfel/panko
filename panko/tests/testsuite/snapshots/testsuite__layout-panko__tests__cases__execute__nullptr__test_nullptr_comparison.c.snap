@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/nullptr/test_nullptr_comparison.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (function-definition external stack-size=72
+   (function-definition external stack-size=104
       (main~1 `fn() -> int` (static main))
       (compound-statement
          (definition (x~3 `int` @0) (42 `int` @0))
@@ -85,6 +85,46 @@ exit_code: 0
                         (string `array<char; 4>` @void "%d\n\0"))))
                (ptr-not-equal `int` @48
                   (null~5 `ptr<array<long; 10>>` @16)
-                  (nullptr `nullptr_t` @56)))))))
+                  (nullptr `nullptr_t` @56))))
+         (expression
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 13>>` @40
+                        (string `array<char; 13>` @void "%d %d %d %d\n\0"))))
+               (ptr-not-equal `int` @48
+                  (p~4 `ptr<int>` @8)
+                  (sign-extend `nullptr_t` @56 (0 `int` @64)))
+               (ptr-equal `int` @52
+                  (noop-type-conversion `nullptr_t` @56 (0 `long long` @56))
+                  (p~4 `ptr<int>` @8))
+               (ptr-not-equal `int` @64
+                  (noop-type-conversion `nullptr_t` @72 (zero-extend `ptr<void>` @72 (0 `unsigned int` @80)))
+                  (p~4 `ptr<int>` @8))
+               (ptr-equal `int` @84
+                  (p~4 `ptr<int>` @8)
+                  (noop-type-conversion `nullptr_t` @88 (noop-type-conversion `ptr<void>` @88 (0 `unsigned long` @88))))))
+         (expression
+            (call `int` @24
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 13>>` @40
+                        (string `array<char; 13>` @void "%d %d %d %d\n\0"))))
+               (ptr-not-equal `int` @48
+                  (null~5 `ptr<array<long; 10>>` @16)
+                  (sign-extend `nullptr_t` @56 (0 `int` @64)))
+               (ptr-equal `int` @52
+                  (noop-type-conversion `nullptr_t` @56 (0 `long long` @56))
+                  (null~5 `ptr<array<long; 10>>` @16))
+               (ptr-not-equal `int` @64
+                  (noop-type-conversion `nullptr_t` @72 (sign-extend `ptr<void>` @72 (0 `int` @80)))
+                  (null~5 `ptr<array<long; 10>>` @16))
+               (ptr-equal `int` @84
+                  (null~5 `ptr<array<long; 10>>` @16)
+                  (noop-type-conversion `nullptr_t` @88 (noop-type-conversion `ptr<void>` @88 (0 `unsigned long` @88)))))))))
 
 ----- stderr -----

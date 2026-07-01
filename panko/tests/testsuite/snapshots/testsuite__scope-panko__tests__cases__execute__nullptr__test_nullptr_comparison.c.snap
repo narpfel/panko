@@ -41,6 +41,20 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d\n")
-               (not-equal (name null~5 `ptr<array<long; 10>>`) nullptr))))))
+               (not-equal (name null~5 `ptr<array<long; 10>>`) nullptr)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d %d\n")
+               (not-equal (name p~4 `ptr<int>`) 0)
+               (equal 0ll (name p~4 `ptr<int>`))
+               (not-equal (cast `ptr<void>` 0u) (name p~4 `ptr<int>`))
+               (equal (name p~4 `ptr<int>`) (cast `ptr<void>` 0ul))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d %d\n")
+               (not-equal (name null~5 `ptr<array<long; 10>>`) 0)
+               (equal 0ll (name null~5 `ptr<array<long; 10>>`))
+               (not-equal (cast `ptr<void>` 0) (name null~5 `ptr<array<long; 10>>`))
+               (equal (name null~5 `ptr<array<long; 10>>`) (cast `ptr<void>` 0ul)))))))
 
 ----- stderr -----
