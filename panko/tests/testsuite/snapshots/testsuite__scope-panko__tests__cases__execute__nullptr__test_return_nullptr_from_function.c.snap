@@ -18,6 +18,10 @@ exit_code: 0
    (function-definition
       main~2 `fn() -> int`
       (compound-statement
-         (return (equal (call (name f~0 `fn() -> typeof(nullptr)`)) nullptr)))))
+         (declaration null~4 `ptr<int>` (call (name f~0 `fn() -> typeof(nullptr)`)))
+         (return
+            (logical-and
+               (equal (call (name f~0 `fn() -> typeof(nullptr)`)) nullptr)
+               (not (name null~4 `ptr<int>`)))))))
 
 ----- stderr -----

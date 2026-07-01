@@ -134,7 +134,7 @@ fn write_u64<'a>(value: u64) -> Repr<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Address<'a> {
+pub(super) struct Address<'a> {
     target: Target<'a>,
     offset: u64,
 }
@@ -158,7 +158,7 @@ fn write_address<'a>(address: Address<'a>) -> Repr<'a> {
     Repr::Bytes(address.into_bytes().collect())
 }
 
-enum Pointer<'a> {
+pub(super) enum Pointer<'a> {
     FromInt(Result<u64, Errors<'a>>),
     Address(Address<'a>),
 }
@@ -199,7 +199,7 @@ impl<'a> Value<'a> {
         }
     }
 
-    fn into_pointer(self) -> Pointer<'a> {
+    pub(super) fn into_pointer(self) -> Pointer<'a> {
         let Self { ty, repr } = self;
         assert_matches!(ty, Type::Pointer(_) | Type::Nullptr);
         match repr {

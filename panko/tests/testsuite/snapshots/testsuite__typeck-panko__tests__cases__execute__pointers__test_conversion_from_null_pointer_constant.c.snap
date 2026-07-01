@@ -1,0 +1,38 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c"
+   (function-definition external
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition a~2 `ptr<int>` (sign-extend `ptr<int>` (0 `int`)))
+         (definition b~3 `ptr<bool>` (zero-extend `ptr<bool>` (false `bool`)))
+         (definition c~4 `ptr<char const>` (noop-type-conversion `ptr<char const>` (sign-extend `ptr<void>` (0 `int`))))
+         (definition d~5 `ptr<long> const` (noop-type-conversion `ptr<long>` (nullptr `nullptr_t`)))
+         (definition e~6 `ptr<fn() -> int>`
+            (sign-extend `ptr<fn() -> int>`
+               (conditional `int`
+                  (42 `int`)
+                  (0 `int`)
+                  (1 `int`))))
+         (return
+            (logical-and `int`
+               (logical-and `int`
+                  (logical-and `int`
+                     (logical-and `int`
+                        (not `int` (a~2 `ptr<int>`))
+                        (not `int` (b~3 `ptr<bool>`)))
+                     (not `int` (c~4 `ptr<char const>`)))
+                  (not `int` (d~5 `ptr<long> const`)))
+               (not `int` (e~6 `ptr<fn() -> int>`)))))))
+
+----- stderr -----

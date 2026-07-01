@@ -11,6 +11,8 @@ use super::QualifiedType;
 use super::Type;
 use super::TypedExpression;
 use super::convert_as_if_by_assignment;
+use crate::typecheck::constexpr;
+use crate::typecheck::constexpr::Pointer;
 use crate::typecheck::diagnostics::Diagnostic;
 
 #[derive(Debug, Clone, Copy)]
@@ -99,17 +101,15 @@ pub(crate) fn typeck_ptrcmp<'a>(
     rhs: TypedExpression<'a>,
 ) -> TypedExpression<'a> {
     // TODO: should check for type compatibility, not exact equality
-    let expr = if lhs.ty.ty != Type::Nullptr && rhs.ty.ty != Type::Nullptr && lhs.ty.ty != rhs.ty.ty
-    {
-        sess.emit(Diagnostic::IncompatibleTypesInPtrCmp { at: *op_token, lhs, rhs })
-    }
-    else {
-        Expression::PtrCmp {
-            lhs: sess.alloc(lhs),
-            kind,
-            rhs: sess.alloc(rhs),
-        }
-    };
+    let expr =
+        match lhs.ty.ty != Type::Nullptr && rhs.ty.ty != Type::Nullptr && lhs.ty.ty != rhs.ty.ty {
+            true => sess.emit(Diagnostic::IncompatibleTypesInPtrCmp { at: *op_token, lhs, rhs }),
+            false => Expression::PtrCmp {
+                lhs: sess.alloc(lhs),
+                kind,
+                rhs: sess.alloc(rhs),
+            },
+        };
     TypedExpression { ty: Type::int().unqualified(), expr }
 }
 
@@ -147,4 +147,25 @@ pub(crate) fn typeck_ptrdiff<'a>(
         ty: Type::ptrdiff_t().unqualified(),
         expr,
     }
+}
+
+pub(super) fn is_nullptr_constant(expr: TypedExpression) -> bool {
+    try {
+        match expr.ty.ty {
+            Type::Arithmetic(Arithmetic::Integral(_)) =>
+                constexpr::eval(&expr).into_unsigned().ok()?.ok()? == 0,
+            Type::Nullptr
+            | Type::Pointer(QualifiedType {
+                is_const: false,
+                is_volatile: false,
+                ty: Type::Void,
+                loc: _,
+            }) => match constexpr::eval(&expr).into_pointer() {
+                Pointer::FromInt(int) => int.ok()? == 0,
+                Pointer::Address(_) => false,
+            },
+            _ => false,
+        }
+    }
+    .unwrap_or_default()
 }

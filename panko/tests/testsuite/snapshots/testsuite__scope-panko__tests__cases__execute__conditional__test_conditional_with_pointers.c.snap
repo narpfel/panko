@@ -32,6 +32,13 @@ exit_code: 0
                (conditional
                   0
                   (name v_ip~5 `ptr<int volatile>`)
+                  0)
+               (assoc `ptr<int volatile>` 0)))
+         (expression
+            (generic
+               (conditional
+                  0
+                  (name v_ip~5 `ptr<int volatile>`)
                   nullptr)
                (assoc `ptr<int volatile>` 0)))
          (expression

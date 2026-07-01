@@ -17,6 +17,14 @@ exit_code: 0
          (definition a~2 `nullptr_t` (nullptr `nullptr_t`))
          (definition b~3 `nullptr_t` (noop-type-conversion `nullptr_t` (nullptr `nullptr_t`)))
          (expression (assign `nullptr_t` (a~2 `nullptr_t`) (nullptr `nullptr_t`)))
-         (expression (assign `nullptr_t` (b~3 `nullptr_t`) (noop-type-conversion `nullptr_t` (nullptr `nullptr_t`)))))))
+         (expression (assign `nullptr_t` (b~3 `nullptr_t`) (noop-type-conversion `nullptr_t` (nullptr `nullptr_t`))))
+         (expression (assign `nullptr_t` (a~2 `nullptr_t`) (b~3 `nullptr_t`)))
+         (expression (assign `nullptr_t` (b~3 `nullptr_t`) (noop-type-conversion `nullptr_t` (a~2 `nullptr_t`))))
+         (expression (assign `nullptr_t` (a~2 `nullptr_t`) (sign-extend `nullptr_t` (0 `int`))))
+         (expression (assign `nullptr_t` (a~2 `nullptr_t`) (sign-extend `nullptr_t` (multiply `int` (2 `int`) (0 `int`)))))
+         (expression (assign `nullptr_t` (a~2 `nullptr_t`) (noop-type-conversion `nullptr_t` (sign-extend `ptr<void>` (0 `int`)))))
+         (expression (assign `nullptr_t` (b~3 `nullptr_t`) (sign-extend `nullptr_t` (0 `int`))))
+         (expression (assign `nullptr_t` (b~3 `nullptr_t`) (sign-extend `nullptr_t` (multiply `int` (2 `int`) (0 `int`)))))
+         (expression (assign `nullptr_t` (b~3 `nullptr_t`) (noop-type-conversion `nullptr_t` (sign-extend `ptr<void>` (0 `int`))))))))
 
 ----- stderr -----

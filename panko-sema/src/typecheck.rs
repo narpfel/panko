@@ -1091,7 +1091,6 @@ fn convert<'a>(
     kind: ConversionKind,
 ) -> TypedExpression<'a> {
     // TODO: forbid ptr <=> float
-    // TODO: if target is nullptr_t, expr must be nullptr or a null pointer constant
     let target_ty = target.ty;
     let expr_ty = expr.ty.ty;
     let extend_kind = match expr_ty {
@@ -1131,6 +1130,8 @@ fn convert<'a>(
                 true => return expr,
                 false => convert(),
             },
+
+        (Type::Pointer(_) | Type::Nullptr, _) if ptr::is_nullptr_constant(expr) => convert(),
 
         // TODO: clang (but not gcc) allows implicitly converting `Type::Function(_)` to
         // `Type::Pointer(_)` (with a warning).
@@ -1739,18 +1740,33 @@ fn typeck_binop<'a>(
         (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
             if matches!(op.kind, BinOpKind::Subtract) =>
             ptr::typeck_ptrsub(sess, op, lhs, pointee_ty, rhs),
-        (Type::Pointer(_), Type::Pointer(_)) if let BinOpKind::Comparison(cmp) = op.kind =>
-            ptr::typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
-        (Type::Pointer(lhs_pointee_ty), Type::Pointer(rhs_pointee_ty))
-            if matches!(op.kind, BinOpKind::Subtract) =>
-            ptr::typeck_ptrdiff(sess, op, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
-        // TODO: allow `nullptr <op> <null pointer constant>`
+        (Type::Nullptr | Type::Pointer(_), _)
+            if let BinOpKind::Comparison(cmp @ (Comparison::Equal | Comparison::NotEqual)) =
+                op.kind
+                && ptr::is_nullptr_constant(rhs) =>
+        {
+            let rhs = convert_as_if_by_assignment(sess, Type::Nullptr.unqualified(), rhs);
+            ptr::typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs)
+        }
+        (_, Type::Nullptr | Type::Pointer(_))
+            if let BinOpKind::Comparison(cmp @ (Comparison::Equal | Comparison::NotEqual)) =
+                op.kind
+                && ptr::is_nullptr_constant(lhs) =>
+        {
+            let lhs = convert_as_if_by_assignment(sess, Type::Nullptr.unqualified(), lhs);
+            ptr::typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs)
+        }
         (Type::Nullptr, Type::Nullptr | Type::Pointer(_)) | (Type::Pointer(_), Type::Nullptr)
             if let BinOpKind::Comparison(cmp @ (Comparison::Equal | Comparison::NotEqual)) =
                 op.kind =>
         // TODO: this will generate `PtrCmp` operations with different parameter types, maybe
         // insert some `NoopTypeConversion`s?
             ptr::typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
+        (Type::Pointer(_), Type::Pointer(_)) if let BinOpKind::Comparison(cmp) = op.kind =>
+            ptr::typeck_ptrcmp(sess, lhs, cmp, &op.token, rhs),
+        (Type::Pointer(lhs_pointee_ty), Type::Pointer(rhs_pointee_ty))
+            if matches!(op.kind, BinOpKind::Subtract) =>
+            ptr::typeck_ptrdiff(sess, op, lhs, lhs_pointee_ty, rhs, rhs_pointee_ty),
         _ => sess.emit(Diagnostic::InvalidOperandsForBinaryOperator { at: *op, lhs, rhs }),
     }
 }
@@ -2518,6 +2534,9 @@ fn typeck_expression<'a>(
                     Type::Arithmetic(perform_usual_arithmetic_conversions(then_ty, or_else_ty)),
 
                 (Type::Void, Type::Void) => Type::Void,
+
+                (Type::Pointer(_), _) if ptr::is_nullptr_constant(or_else) => then.ty.ty,
+                (_, Type::Pointer(_)) if ptr::is_nullptr_constant(then) => or_else.ty.ty,
 
                 (Type::Pointer(then_pointee), Type::Pointer(or_else_pointee))
                     if then_pointee.ty == or_else_pointee.ty

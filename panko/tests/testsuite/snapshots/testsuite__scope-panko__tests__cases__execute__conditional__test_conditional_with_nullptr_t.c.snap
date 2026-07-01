@@ -1,0 +1,56 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/conditional/test_conditional_with_nullptr_t.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/conditional/test_conditional_with_nullptr_t.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (declaration x~3 `int` 42)
+         (declaration y~4 `int` 27)
+         (declaration runtime_nullptr~5 `typeof(nullptr)` nullptr)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (deref
+                  (conditional
+                     0
+                     (name runtime_nullptr~5 `typeof(nullptr)`)
+                     (addressof (name x~3 `int`))))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (deref
+                  (conditional
+                     1
+                     (addressof (name y~4 `int`))
+                     (name runtime_nullptr~5 `typeof(nullptr)`)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (equal
+                  (conditional
+                     1
+                     (name runtime_nullptr~5 `typeof(nullptr)`)
+                     (name runtime_nullptr~5 `typeof(nullptr)`))
+                  nullptr)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (generic
+                  (conditional
+                     0
+                     (name runtime_nullptr~5 `typeof(nullptr)`)
+                     (name runtime_nullptr~5 `typeof(nullptr)`))
+                  (assoc `typeof(nullptr)` 1)))))))
+
+----- stderr -----

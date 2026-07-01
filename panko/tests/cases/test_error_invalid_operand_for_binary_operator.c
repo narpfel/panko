@@ -6,4 +6,5 @@ int main() {
     int x = 42;
     char c;
     &x == &c;
+    &x + &x;
 }

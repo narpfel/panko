@@ -17,6 +17,14 @@ exit_code: 0
          (declaration a~2 `typeof(nullptr)` nullptr)
          (declaration b~3 `typeof(nullptr)` (cast `typeof(nullptr)` nullptr))
          (expression (assign (name a~2 `typeof(nullptr)`) nullptr))
-         (expression (assign (name b~3 `typeof(nullptr)`) (cast `typeof(nullptr)` nullptr))))))
+         (expression (assign (name b~3 `typeof(nullptr)`) (cast `typeof(nullptr)` nullptr)))
+         (expression (assign (name a~2 `typeof(nullptr)`) (name b~3 `typeof(nullptr)`)))
+         (expression (assign (name b~3 `typeof(nullptr)`) (cast `typeof(nullptr)` (name a~2 `typeof(nullptr)`))))
+         (expression (assign (name a~2 `typeof(nullptr)`) 0))
+         (expression (assign (name a~2 `typeof(nullptr)`) (multiply 2 0)))
+         (expression (assign (name a~2 `typeof(nullptr)`) (cast `ptr<void>` 0)))
+         (expression (assign (name b~3 `typeof(nullptr)`) (cast `typeof(nullptr)` 0)))
+         (expression (assign (name b~3 `typeof(nullptr)`) (cast `typeof(nullptr)` (multiply 2 0))))
+         (expression (assign (name b~3 `typeof(nullptr)`) (cast `typeof(nullptr)` (cast `ptr<void>` 0)))))))
 
 ----- stderr -----
