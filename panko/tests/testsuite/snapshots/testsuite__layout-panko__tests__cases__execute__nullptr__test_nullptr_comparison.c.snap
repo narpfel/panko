@@ -151,6 +151,79 @@ exit_code: 0
                   (sign-extend `nullptr_t` @112
                      (subtract `int` @120
                         (1 `int` @120)
-                        (1 `int` @124)))))))))
+                        (1 `int` @124))))))
+         (definition (runtime_nullptr~6 `nullptr_t` @24) (nullptr `nullptr_t` @24))
+         (expression
+            (call `int` @32
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 7>>` @48
+                        (string `array<char; 7>` @void "%d %d\n\0"))))
+               (ptr-equal `int` @56
+                  (p~4 `ptr<int>` @8)
+                  (runtime_nullptr~6 `nullptr_t` @24))
+               (ptr-equal `int` @60
+                  (runtime_nullptr~6 `nullptr_t` @24)
+                  (p~4 `ptr<int>` @8))))
+         (expression
+            (call `int` @32
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 7>>` @48
+                        (string `array<char; 7>` @void "%d %d\n\0"))))
+               (ptr-not-equal `int` @56
+                  (p~4 `ptr<int>` @8)
+                  (runtime_nullptr~6 `nullptr_t` @24))
+               (ptr-not-equal `int` @60
+                  (runtime_nullptr~6 `nullptr_t` @24)
+                  (p~4 `ptr<int>` @8))))
+         (expression
+            (call `int` @32
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 4>>` @48
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (ptr-equal `int` @56
+                  (runtime_nullptr~6 `nullptr_t` @24)
+                  (runtime_nullptr~6 `nullptr_t` @24))))
+         (expression
+            (call `int` @32
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 4>>` @48
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (ptr-not-equal `int` @56
+                  (runtime_nullptr~6 `nullptr_t` @24)
+                  (runtime_nullptr~6 `nullptr_t` @24))))
+         (expression
+            (call `int` @32
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 4>>` @48
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (ptr-equal `int` @56
+                  (null~5 `ptr<array<long; 10>>` @16)
+                  (runtime_nullptr~6 `nullptr_t` @24))))
+         (expression
+            (call `int` @32
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @40
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @48
+                  (noop-type-conversion `ptr<char>` @48
+                     (addressof `ptr<array<char; 4>>` @48
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (ptr-not-equal `int` @56
+                  (null~5 `ptr<array<long; 10>>` @16)
+                  (runtime_nullptr~6 `nullptr_t` @24)))))))
 
 ----- stderr -----

@@ -29,4 +29,18 @@ int main() {
         nullptr != (0xffff'ffff'ffff'ffff + 1),
         nullptr == (1 - 1)
     );
+
+    typeof(nullptr) runtime_nullptr = nullptr;
+    // [[print: 0 0]]
+    printf("%d %d\n", p == runtime_nullptr, runtime_nullptr == p);
+    // [[print: 1 1]]
+    printf("%d %d\n", p != runtime_nullptr, runtime_nullptr != p);
+    // [[print: 1]]
+    printf("%d\n", runtime_nullptr == runtime_nullptr);
+    // [[print: 0]]
+    printf("%d\n", runtime_nullptr != runtime_nullptr);
+    // [[print: 1]]
+    printf("%d\n", null == runtime_nullptr);
+    // [[print: 0]]
+    printf("%d\n", null != runtime_nullptr);
 }

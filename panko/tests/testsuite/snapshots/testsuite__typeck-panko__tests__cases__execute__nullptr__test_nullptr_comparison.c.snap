@@ -109,6 +109,63 @@ exit_code: 0
                (ptr-equal `int` (noop-type-conversion `nullptr_t` (0l `long`)) (nullptr `nullptr_t`))
                (ptr-not-equal `int` (noop-type-conversion `nullptr_t` (negate `long` (0l `long`))) (nullptr `nullptr_t`))
                (ptr-not-equal `int` (nullptr `nullptr_t`) (noop-type-conversion `nullptr_t` (add `unsigned long` (0xffff'ffff'ffff'ffff `unsigned long`) (sign-extend `unsigned long` (1 `int`)))))
-               (ptr-equal `int` (nullptr `nullptr_t`) (sign-extend `nullptr_t` (subtract `int` (1 `int`) (1 `int`)))))))))
+               (ptr-equal `int` (nullptr `nullptr_t`) (sign-extend `nullptr_t` (subtract `int` (1 `int`) (1 `int`))))))
+         (definition runtime_nullptr~6 `nullptr_t` (nullptr `nullptr_t`))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (ptr-equal `int` (p~4 `ptr<int>`) (runtime_nullptr~6 `nullptr_t`))
+               (ptr-equal `int` (runtime_nullptr~6 `nullptr_t`) (p~4 `ptr<int>`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (ptr-not-equal `int` (p~4 `ptr<int>`) (runtime_nullptr~6 `nullptr_t`))
+               (ptr-not-equal `int` (runtime_nullptr~6 `nullptr_t`) (p~4 `ptr<int>`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (ptr-equal `int` (runtime_nullptr~6 `nullptr_t`) (runtime_nullptr~6 `nullptr_t`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (ptr-not-equal `int` (runtime_nullptr~6 `nullptr_t`) (runtime_nullptr~6 `nullptr_t`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (ptr-equal `int` (null~5 `ptr<array<long; 10>>`) (runtime_nullptr~6 `nullptr_t`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 4>>`
+                        (string `array<char; 4>` "%d\n\0"))))
+               (ptr-not-equal `int` (null~5 `ptr<array<long; 10>>`) (runtime_nullptr~6 `nullptr_t`)))))))
 
 ----- stderr -----
