@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid implicit conversion from `int` to `ptr<int>`
+   ╭─[panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c:5:14]
+   │
+ 5 │     int* a = 0;
+   │              ┬  
+   │              ╰── this is of type `int`, which cannot be implicitly converted to `ptr<int>`
+───╯
+
+Error: invalid implicit conversion from `bool` to `ptr<bool>`
+   ╭─[panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c:6:15]
+   │
+ 6 │     bool* b = false;
+   │               ──┬──  
+   │                 ╰──── this is of type `bool`, which cannot be implicitly converted to `ptr<bool>`
+───╯
+
+Error: invalid implicit conversion from `int` to `ptr<fn() -> int>`
+   ╭─[panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c:9:24]
+   │
+ 9 │     typeof(int())* e = 42 ? 0 : 1;
+   │                        ─────┬────  
+   │                             ╰────── this is of type `int`, which cannot be implicitly converted to `ptr<fn() -> int>`
+───╯

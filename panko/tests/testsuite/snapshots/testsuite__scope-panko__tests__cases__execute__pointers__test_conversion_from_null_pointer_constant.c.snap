@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_conversion_from_null_pointer_constant.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration a~2 `ptr<int>` 0)
+         (declaration b~3 `ptr<bool>` false)
+         (declaration c~4 `ptr<char const>` (cast `ptr<void>` 0))
+         (declaration d~5 `ptr<long> const` nullptr)
+         (declaration e~6 `ptr<typeof(`fn() -> int`)>`
+            (conditional
+               42
+               0
+               1))
+         (return
+            (logical-and
+               (logical-and
+                  (logical-and
+                     (logical-and
+                        (not (name a~2 `ptr<int>`))
+                        (not (name b~3 `ptr<bool>`)))
+                     (not (name c~4 `ptr<char const>`)))
+                  (not (name d~5 `ptr<long> const`)))
+               (not (name e~6 `ptr<typeof(`fn() -> int`)>`)))))))
+
+----- stderr -----
