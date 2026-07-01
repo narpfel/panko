@@ -32,6 +32,16 @@ exit_code: 0
                   (conditional
                      0
                      (cast `ptr<void>` 0l)
-                     (name p~4 `ptr<int>`))))))))
+                     (name p~4 `ptr<int>`)))))
+         (declaration y~5 `int` ∅)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (generic
+                  (conditional
+                     0
+                     (cast `ptr<void>` (addressof (name y~5 `int`)))
+                     (addressof (name y~5 `int`)))
+                  (assoc `ptr<void>` 0)))))))
 
 ----- stderr -----

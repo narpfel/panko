@@ -44,6 +44,16 @@ exit_code: 0
                   (conditional `ptr<int>` @48
                      (0 `int` @56)
                      (noop-type-conversion `ptr<int>` @48 (noop-type-conversion `ptr<void>` @48 (0 `long` @48)))
-                     (p~4 `ptr<int>` @8))))))))
+                     (p~4 `ptr<int>` @8)))))
+         (definition (y~5 `int` (static y.5)) ∅)
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 4>>` @32
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (0 `int` @40))))))
 
 ----- stderr -----
