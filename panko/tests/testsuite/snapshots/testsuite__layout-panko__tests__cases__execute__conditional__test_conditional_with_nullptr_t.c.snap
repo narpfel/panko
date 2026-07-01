@@ -1,0 +1,73 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/conditional/test_conditional_with_nullptr_t.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/conditional/test_conditional_with_nullptr_t.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (function-definition external stack-size=72
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (definition (x~3 `int` @0) (42 `int` @0))
+         (definition (y~4 `int` @4) (27 `int` @4))
+         (definition (runtime_nullptr~5 `nullptr_t` @8) (nullptr `nullptr_t` @8))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 4>>` @32
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (deref `int` @40
+                  (conditional `ptr<int>` @48
+                     (0 `int` @56)
+                     (noop-type-conversion `ptr<int>` @8 (runtime_nullptr~5 `nullptr_t` @8))
+                     (addressof `ptr<int>` @48
+                        (x~3 `int` @0))))))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 4>>` @32
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (deref `int` @40
+                  (conditional `ptr<int>` @48
+                     (1 `int` @56)
+                     (addressof `ptr<int>` @48
+                        (y~4 `int` @4))
+                     (noop-type-conversion `ptr<int>` @8 (runtime_nullptr~5 `nullptr_t` @8))))))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 4>>` @32
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (ptr-equal `int` @40
+                  (conditional `nullptr_t` @48
+                     (1 `int` @56)
+                     (runtime_nullptr~5 `nullptr_t` @8)
+                     (runtime_nullptr~5 `nullptr_t` @8))
+                  (nullptr `nullptr_t` @56))))
+         (expression
+            (call `int` @16
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @24
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @32
+                  (noop-type-conversion `ptr<char>` @32
+                     (addressof `ptr<array<char; 4>>` @32
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (1 `int` @40))))))
+
+----- stderr -----
