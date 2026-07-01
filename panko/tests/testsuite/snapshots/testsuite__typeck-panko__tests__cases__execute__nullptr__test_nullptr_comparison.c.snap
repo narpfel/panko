@@ -97,6 +97,18 @@ exit_code: 0
                (ptr-not-equal `int` (null~5 `ptr<array<long; 10>>`) (sign-extend `nullptr_t` (0 `int`)))
                (ptr-equal `int` (noop-type-conversion `nullptr_t` (0ll `long long`)) (null~5 `ptr<array<long; 10>>`))
                (ptr-not-equal `int` (noop-type-conversion `nullptr_t` (sign-extend `ptr<void>` (0 `int`))) (null~5 `ptr<array<long; 10>>`))
-               (ptr-equal `int` (null~5 `ptr<array<long; 10>>`) (noop-type-conversion `nullptr_t` (noop-type-conversion `ptr<void>` (0ul `unsigned long`)))))))))
+               (ptr-equal `int` (null~5 `ptr<array<long; 10>>`) (noop-type-conversion `nullptr_t` (noop-type-conversion `ptr<void>` (0ul `unsigned long`))))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 13>>`
+                        (string `array<char; 13>` "%d %d %d %d\n\0"))))
+               (ptr-equal `int` (noop-type-conversion `nullptr_t` (0l `long`)) (nullptr `nullptr_t`))
+               (ptr-not-equal `int` (noop-type-conversion `nullptr_t` (negate `long` (0l `long`))) (nullptr `nullptr_t`))
+               (ptr-not-equal `int` (nullptr `nullptr_t`) (noop-type-conversion `nullptr_t` (add `unsigned long` (0xffff'ffff'ffff'ffff `unsigned long`) (sign-extend `unsigned long` (1 `int`)))))
+               (ptr-equal `int` (nullptr `nullptr_t`) (sign-extend `nullptr_t` (subtract `int` (1 `int`) (1 `int`)))))))))
 
 ----- stderr -----

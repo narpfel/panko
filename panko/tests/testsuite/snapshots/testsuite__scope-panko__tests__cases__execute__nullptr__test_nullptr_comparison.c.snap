@@ -55,6 +55,13 @@ exit_code: 0
                (not-equal (name null~5 `ptr<array<long; 10>>`) 0)
                (equal 0ll (name null~5 `ptr<array<long; 10>>`))
                (not-equal (cast `ptr<void>` 0) (name null~5 `ptr<array<long; 10>>`))
-               (equal (name null~5 `ptr<array<long; 10>>`) (cast `ptr<void>` 0ul)))))))
+               (equal (name null~5 `ptr<array<long; 10>>`) (cast `ptr<void>` 0ul))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d %d\n")
+               (equal 0l nullptr)
+               (not-equal (negate 0l) nullptr)
+               (not-equal nullptr (add 0xffff'ffff'ffff'ffff 1))
+               (equal nullptr (subtract 1 1)))))))
 
 ----- stderr -----

@@ -21,4 +21,12 @@ int main() {
     printf("%d %d %d %d\n", p != 0, 0ll == p, (void*)0u != p, p == (void*)0ul);
     // [[print: 0 1 0 1]]
     printf("%d %d %d %d\n", null != 0, 0ll == null, (void*)0 != null, null == (void*)0ul);
+    // [[print: 1 0 0 1]]
+    printf(
+        "%d %d %d %d\n",
+        0l == nullptr,
+        -0l != nullptr,
+        nullptr != (0xffff'ffff'ffff'ffff + 1),
+        nullptr == (1 - 1)
+    );
 }
