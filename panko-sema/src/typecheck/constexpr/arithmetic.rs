@@ -4,7 +4,6 @@ use std::ops::BitXor as _;
 
 use panko_parser::Comparison;
 
-use crate::typecheck::Type;
 use crate::typecheck::TypedExpression;
 use crate::typecheck::constexpr::Byte;
 use crate::typecheck::constexpr::Errors;
@@ -14,11 +13,11 @@ use crate::typecheck::constexpr::diagnostics::Kind::*;
 
 type Result<'a, T, E = Errors<'a>> = std::result::Result<T, E>;
 
-pub(super) trait C<'a>
+pub(super) trait C<'a, 'b>
 where
     Self: Sized,
 {
-    fn into_value(self, ty: Type<'a>) -> Value<'a>;
+    fn into_value(self, expr: &'b TypedExpression<'a>) -> Value<'a, 'b>;
 
     fn neg(self, expr: &TypedExpression<'a>) -> Self;
     fn compl(self, expr: &TypedExpression<'a>) -> Self;
@@ -88,14 +87,15 @@ macro_rules! infallible {
 
 macro_rules! int_impl {
     (impl C for $t:ident with $prefix:ident { $( $meth:ident ),* } and $shl:ident) => {
-        impl<'a> C<'a> for Result<'a, $t> {
-            fn into_value(self, ty: Type<'a>) -> Value<'a> {
+        impl<'a, 'b> C<'a, 'b> for Result<'a, $t> {
+            fn into_value(self, expr: &'b TypedExpression<'a>) -> Value<'a, 'b> {
                 self.map_or_else(
-                    |errors| Value::with_errors(ty, errors),
+                    |errors| Value::with_errors(expr, errors),
                     |value| {
+                        let ty = expr.ty.ty;
                         assert!(ty.can_represent(value), "`{ty}`.can_represent({value})");
                         let repr = Repr::Bytes(Box::new(value.to_le_bytes().map(Byte::Literal)));
-                        Value { ty, repr }
+                        Value { expr, repr }
                     },
                 )
             }

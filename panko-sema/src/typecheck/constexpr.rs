@@ -76,8 +76,8 @@ enum Integral {
 }
 
 #[derive(Debug)]
-pub(super) struct Value<'a> {
-    ty: Type<'a>,
+pub(super) struct Value<'a, 'b> {
+    expr: &'b TypedExpression<'a>,
     repr: Repr<'a>,
 }
 
@@ -205,10 +205,10 @@ impl<'a> Pointer<'a> {
     }
 }
 
-impl<'a> Value<'a> {
+impl<'a, 'b> Value<'a, 'b> {
     fn into_integral(self) -> Result<Integral, Errors<'a>> {
-        let Self { ty, repr: _ } = &self;
-        let signedness = match ty {
+        let Self { expr, repr: _ } = &self;
+        let signedness = match expr.ty.ty {
             Type::Arithmetic(Arithmetic::Integral(integral)) => integral.signedness,
             _ => todo!("type error"),
         };
@@ -216,7 +216,8 @@ impl<'a> Value<'a> {
             Signedness::Unsigned => Type::ULONG,
             Signedness::Signed => Type::LONG,
         };
-        let Value { ty: _, repr } = self.convert(ty, ConversionKind::SignExtend);
+        let expr = TypedExpression { ty: ty.unqualified(), ..**expr };
+        let Value { expr: _, repr } = self.convert(&expr, ConversionKind::SignExtend);
         let bytes = read_literal_bytes(&repr.into_bytes()?)
             .expect("`convert` only generates `Repr`s that only contain `Literal`s");
         match signedness {
@@ -233,8 +234,8 @@ impl<'a> Value<'a> {
     }
 
     pub(super) fn into_pointer(self) -> Pointer<'a> {
-        let Self { ty, repr } = self;
-        assert_matches!(ty, Type::Pointer(_) | Type::Nullptr);
+        let Self { expr, repr } = self;
+        assert_matches!(expr.ty.ty, Type::Pointer(_) | Type::Nullptr);
         match repr {
             Repr::Bytes(bytes) if let Some(value) = read_u64(&bytes) => Pointer::FromInt(Ok(value)),
             Repr::Bytes(bytes) if let Some(addr) = read_address(&bytes) => Pointer::Address(addr),
@@ -243,34 +244,39 @@ impl<'a> Value<'a> {
         }
     }
 
-    fn error(ty: Type<'a>) -> Self {
-        Self { ty, repr: Repr::Error(Errors::default()) }
+    fn error(expr: &'b TypedExpression<'a>) -> Self {
+        Self {
+            expr,
+            repr: Repr::Error(Errors::default()),
+        }
     }
 
-    fn with_errors(ty: Type<'a>, errors: Errors<'a>) -> Self {
-        Self { ty, repr: Repr::Error(errors) }
+    fn with_errors(expr: &'b TypedExpression<'a>, errors: Errors<'a>) -> Self {
+        Self { expr, repr: Repr::Error(errors) }
     }
 
-    fn int(value: u64, ty: Type<'a>) -> Self {
+    fn int(value: u64, expr: &'b TypedExpression<'a>) -> Self {
+        let ty = expr.ty.ty;
         assert!(ty.can_represent(value), "`{ty}`.can_represent({value})");
         match ty {
             Type::Arithmetic(Arithmetic::Integral(integral)) => {
                 let size = usize::try_from(integral.size()).unwrap();
                 let bytes = value.to_le_bytes().map(Byte::Literal)[..size].into();
                 let repr = Repr::Bytes(bytes);
-                Self { ty, repr }
+                Self { expr, repr }
             }
             _ => todo!("error: invalid type for integral constexpr value"),
         }
     }
 
-    fn convert(self, new_ty: Type<'a>, kind: ConversionKind) -> Self {
-        let Self { ty, repr } = self;
+    fn convert<'c>(self, expr: &'c TypedExpression<'a>, kind: ConversionKind) -> Value<'a, 'c> {
+        let Self { expr: old_expr, repr } = self;
+        let ty = old_expr.ty.ty;
         type Kind = ConversionKind;
         match kind {
-            _ if let Repr::Error(_) = repr => Self { ty: new_ty, repr },
+            _ if let Repr::Error(_) = repr => Value { expr, repr },
             // TODO: check for illegal pointer conversions
-            Kind::Noop => Self { ty: new_ty, repr },
+            Kind::Noop => Value { expr, repr },
             Kind::Bool => {
                 let is_nonzero = match repr {
                     Repr::Bytes(bytes) => bytes.iter().any(|&b| match b {
@@ -279,7 +285,7 @@ impl<'a> Value<'a> {
                     }),
                     Repr::Error(_) => unreachable!(),
                 };
-                Self::int(is_nonzero.into(), new_ty)
+                Value::int(is_nonzero.into(), expr)
             }
             Kind::Truncate | Kind::ZeroExtend | Kind::SignExtend => match ty {
                 Type::Arithmetic(Arithmetic::Integral(integral)) => {
@@ -295,9 +301,9 @@ impl<'a> Value<'a> {
                             },
                         _ => 0,
                     };
-                    bytes.resize(usize::try_from(new_ty.size()).unwrap(), fill_value);
+                    bytes.resize(usize::try_from(expr.ty.ty.size()).unwrap(), fill_value);
                     let repr = Repr::Bytes(bytes.into_iter().map(Byte::Literal).collect());
-                    Self { ty: new_ty, repr }
+                    Value { expr, repr }
                 }
                 _ => todo!("error message, e. g. `static int x = (int)&static_var;`"),
             },
@@ -322,8 +328,8 @@ impl<'a> Value<'a> {
 macro_rules! impl_as_ty {
     ($pattern:pat => $t:ident + $l:lifetime) => {
         fn ${concat(as_, $t)}(&self) -> Option<Result<$t, Errors<$l>>> {
-            let Self { ty, repr } = self;
-            match *ty {
+            let Self { expr, repr } = self;
+            match expr.ty.ty {
                 $pattern => Some(match repr {
                     Repr::Bytes(bytes) => Ok($t::from_le_bytes(read_literal_bytes(bytes)?)),
                     Repr::Error(errors) => Err(errors.clone()),
@@ -334,7 +340,7 @@ macro_rules! impl_as_ty {
     };
 }
 
-impl<'a> Value<'a> {
+impl<'a> Value<'a, '_> {
     impl_as_ty!(Type::ULLONG | Type::ULONG => u64 + 'a);
 
     impl_as_ty!(Type::LLONG | Type::LONG => i64 + 'a);
@@ -371,7 +377,7 @@ trait IntoErrors<'a> {
     fn into_errors(self) -> Option<Errors<'a>>;
 }
 
-impl<'a> IntoErrors<'a> for Value<'a> {
+impl<'a> IntoErrors<'a> for Value<'a, '_> {
     fn into_errors(self) -> Option<Errors<'a>> {
         match self.repr {
             Repr::Error(errors) => Some(errors),
@@ -402,30 +408,31 @@ fn gather_errors<'a>(values: impl IntoIterator<Item = impl IntoErrors<'a>>) -> E
         .fold(Errors::default(), Errors::chain)
 }
 
-fn no_errors<'a>() -> [Value<'a>; 0] {
+fn no_errors<'a, 'b>() -> [Value<'a, 'b>; 0] {
     []
 }
 
-fn not_constexpr<'a>(
-    expr: &TypedExpression<'a>,
+fn not_constexpr<'a, 'b>(
+    expr: &'b TypedExpression<'a>,
     values: impl IntoIterator<Item = impl IntoErrors<'a>>,
-) -> Value<'a> {
+) -> Value<'a, 'b> {
     let errors = gather_errors(values).chain(Errors::new(Diagnostic::NotConstexpr { at: *expr }));
-    Value::with_errors(expr.ty.ty, errors)
+    Value::with_errors(expr, errors)
 }
 
 fn as_bool<'a>(expr: &TypedExpression<'a>) -> Result<bool, Errors<'a>> {
-    let value = eval(expr).convert(Type::BOOL, ConversionKind::Bool);
+    let bool_expr = TypedExpression { ty: Type::BOOL.unqualified(), ..*expr };
+    let value = eval(expr).convert(&bool_expr, ConversionKind::Bool);
     Ok(value.into_unsigned()?.expect("`bool` is unsigned") != 0)
 }
 
-fn eval_pointer_arithmetic<'a>(
-    expr: &TypedExpression<'a>,
+fn eval_pointer_arithmetic<'a, 'b>(
+    expr: &'b TypedExpression<'a>,
     pointer: &TypedExpression<'a>,
-    integral: Value<'a>,
+    integral: Value<'a, '_>,
     pointee_size: u64,
     op: impl FnOnce(u64, i64) -> Option<u64>,
-) -> Value<'a> {
+) -> Value<'a, 'b> {
     let integral = integral.as_i64().expect("not a type error");
     let pointee_size = pointee_size
         .checked_cast_signed()
@@ -442,7 +449,7 @@ fn eval_pointer_arithmetic<'a>(
     }
     .unwrap_or_else(Repr::Error);
 
-    Value { ty: expr.ty.ty, repr }
+    Value { expr, repr }
 }
 
 enum PointerBinopKind {
@@ -450,13 +457,13 @@ enum PointerBinopKind {
     Other,
 }
 
-fn eval_pointer_binop<'a>(
-    typed_expr: &TypedExpression<'a>,
+fn eval_pointer_binop<'a, 'b>(
+    typed_expr: &'b TypedExpression<'a>,
     kind: PointerBinopKind,
     lhs: &TypedExpression<'a>,
     rhs: &TypedExpression<'a>,
-    compute: impl FnOnce(Result<u64, Errors<'a>>, Result<u64, Errors<'a>>) -> Value<'a>,
-) -> Value<'a> {
+    compute: impl FnOnce(Result<u64, Errors<'a>>, Result<u64, Errors<'a>>) -> Value<'a, 'b>,
+) -> Value<'a, 'b> {
     let lhs = eval(lhs);
     let rhs = eval(rhs);
 
@@ -489,7 +496,11 @@ fn eval_pointer_binop<'a>(
     }
 }
 
-fn eval_static_initialiser<'a>(ty: Type<'a>, initialiser: &Initialiser<'a>) -> Value<'a> {
+fn eval_static_initialiser<'a, 'b>(
+    expr: &'b TypedExpression<'a>,
+    initialiser: &'b Initialiser<'a>,
+) -> Value<'a, 'b> {
+    let ty = expr.ty.ty;
     match initialiser {
         Initialiser::Braced { subobject_initialisers } => {
             let mut repr = Repr::empty(&ty);
@@ -531,7 +542,7 @@ fn eval_static_initialiser<'a>(ty: Type<'a>, initialiser: &Initialiser<'a>) -> V
                         repr = Repr::Error(std::mem::take(errors).chain(gather_errors([value]))),
                 }
             }
-            Value { ty, repr }
+            Value { expr, repr }
         }
         Initialiser::Expression(expr) => eval(expr),
         Initialiser::Static { initialiser: _, value } => {
@@ -555,14 +566,17 @@ fn eval_static_initialiser<'a>(ty: Type<'a>, initialiser: &Initialiser<'a>) -> V
                     reports.iter().copied().map(Either::Right),
                 ))),
             };
-            Value { ty, repr }
+            Value { expr, repr }
         }
     }
 }
 
-fn eval_string_literal<'a>(ty: Type<'a>, string_literal: &StringLiteral<'a>) -> Value<'a> {
+fn eval_string_literal<'a, 'b>(
+    expr: &'b TypedExpression<'a>,
+    string_literal: &StringLiteral<'a>,
+) -> Value<'a, 'b> {
     Value {
-        ty,
+        expr,
         repr: Repr::Bytes(
             string_literal
                 .value()
@@ -574,15 +588,18 @@ fn eval_string_literal<'a>(ty: Type<'a>, string_literal: &StringLiteral<'a>) -> 
     }
 }
 
-fn pointer_to_string_literal<'a>(ty: Type<'a>, string: &'a ByteStr) -> Value<'a> {
+fn pointer_to_string_literal<'a, 'b>(
+    expr: &'b TypedExpression<'a>,
+    string: &'a ByteStr,
+) -> Value<'a, 'b> {
     let repr = write_address(Address {
         target: Target::String(string),
         offset: 0,
     });
-    Value { ty, repr }
+    Value { expr, repr }
 }
 
-pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
+pub(super) fn eval<'a, 'b>(typed_expr: &'b TypedExpression<'a>) -> Value<'a, 'b> {
     let TypedExpression { ty, expr } = typed_expr;
     let ty = ty.ty;
 
@@ -592,7 +609,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             match () {
                 $(
                     () if let Some(operand) = operand.${concat(as_, $t)}() =>
-                        operand.$meth(typed_expr).into_value(ty),
+                        operand.$meth(typed_expr).into_value(typed_expr),
                 )*
                 () => todo!(),
             }
@@ -600,7 +617,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
     }
 
     match expr {
-        Expression::Error(_) => Value::error(ty),
+        Expression::Error(_) => Value::error(typed_expr),
 
         Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => eval(expr),
 
@@ -624,23 +641,30 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             ty: _,
             align: value,
             close_paren: _,
-        } => Value::int(*value, ty),
+        } => Value::int(*value, typed_expr),
 
-        Expression::String(string_literal) => eval_string_literal(ty, string_literal),
+        Expression::String(string_literal) => eval_string_literal(typed_expr, string_literal),
 
-        Expression::Nullptr(_) => Value::int(0, Type::size_t()).convert(ty, ConversionKind::Noop),
+        Expression::Nullptr(_) => Value {
+            expr: typed_expr,
+            repr: Repr::Bytes([Byte::Literal(0); 8].into()),
+        },
 
-        Expression::NoopTypeConversion(expr) => eval(expr).convert(ty, ConversionKind::Noop),
-        Expression::Truncate(expr) => eval(expr).convert(ty, ConversionKind::Truncate),
-        Expression::SignExtend(expr) => eval(expr).convert(ty, ConversionKind::SignExtend),
-        Expression::ZeroExtend(expr) => eval(expr).convert(ty, ConversionKind::ZeroExtend),
-        Expression::BoolCast(expr) => eval(expr).convert(ty, ConversionKind::Bool),
+        Expression::NoopTypeConversion(expr) =>
+            eval(expr).convert(typed_expr, ConversionKind::Noop),
+        Expression::Truncate(expr) => eval(expr).convert(typed_expr, ConversionKind::Truncate),
+        Expression::SignExtend(expr) => eval(expr).convert(typed_expr, ConversionKind::SignExtend),
+        Expression::ZeroExtend(expr) => eval(expr).convert(typed_expr, ConversionKind::ZeroExtend),
+        Expression::BoolCast(expr) => eval(expr).convert(typed_expr, ConversionKind::Bool),
 
         Expression::VoidCast(expr) => {
             let errors = gather_errors([eval(expr)]);
             match errors.0.is_empty() {
-                true => Value { ty, repr: Repr::Bytes(Box::new([])) },
-                false => Value::with_errors(ty, errors),
+                true => Value {
+                    expr: typed_expr,
+                    repr: Repr::Bytes(Box::new([])),
+                },
+                false => Value::with_errors(typed_expr, errors),
             }
         }
 
@@ -667,7 +691,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                                         BinOpKind::RightShift => lhs.shr(rhs),
                                         _ => unreachable!(),
                                     };
-                                    result.into_value(ty)
+                                    result.into_value(typed_expr)
                                 }
                         )*
                         $(
@@ -686,9 +710,9 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                                         BinOpKind::BitXor => lhs.bitxor(rhs),
                                         BinOpKind::BitOr => lhs.bitor(rhs),
                                         BinOpKind::Comparison(comparison) =>
-                                            return lhs.compare(comparison, rhs).into_value(ty),
+                                            return lhs.compare(comparison, rhs).into_value(typed_expr),
                                     };
-                                    result.into_value(ty)
+                                    result.into_value(typed_expr)
                                 }
                         )*
                         () => todo!(),
@@ -702,23 +726,25 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
         Expression::Compl { compl: _, operand } => unary!(eval(operand), compl, u32, i32, u64, i64),
         Expression::Not { not: _, operand } => {
             assert_eq!(ty, Type::int());
-            let operand = eval(operand).convert(ty, ConversionKind::Bool);
+            let operand = eval(operand).convert(typed_expr, ConversionKind::Bool);
             unary!(operand, not, i32)
         }
 
         Expression::Addressof { ampersand, operand } => match &operand.expr {
-            Expression::Parenthesised { open_paren: _, expr, close_paren: _ } =>
-                eval(&TypedExpression {
+            Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => {
+                let Value { expr: _, repr } = eval(&TypedExpression {
                     expr: Expression::Addressof { ampersand: *ampersand, operand: expr },
                     ..*typed_expr
-                }),
+                });
+                Value { expr: typed_expr, repr }
+            }
             Expression::Name(reference)
             | Expression::CompoundLiteral {
                 open_paren: _,
                 decl: Declaration { reference, initialiser: _ },
             } => match reference.storage_duration {
                 StorageDuration::Static(_) => Value {
-                    ty,
+                    expr: typed_expr,
                     repr: write_address(Address {
                         target: Target::Reference(reference),
                         offset: 0,
@@ -732,14 +758,18 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                     ty: Type::Pointer(&lhs.ty).unqualified(),
                     expr: Expression::Addressof { ampersand: *ampersand, operand: lhs },
                 };
-                let offset = Value::int(member.offset, Type::ptrdiff_t());
+                let member_expr = TypedExpression {
+                    ty: Type::ptrdiff_t().unqualified(),
+                    ..*typed_expr
+                };
+                let offset = Value::int(member.offset, &member_expr);
                 eval_pointer_arithmetic(typed_expr, pointer, offset, 1, u64::checked_add_signed)
             }
-            Expression::String(string) => pointer_to_string_literal(ty, string.value()),
+            Expression::String(string) => pointer_to_string_literal(typed_expr, string.value()),
             Expression::BuiltinName(BuiltinName {
                 kind: BuiltinNameKind::Func(name),
                 loc: _,
-            }) => pointer_to_string_literal(ty, name),
+            }) => pointer_to_string_literal(typed_expr, name),
             _ => unreachable!("there are no other expression kinds that are valid as lvalues"),
         },
 
@@ -778,7 +808,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                     arithmetic::binop(difference, pointee_size, i64::div_exact, || {
                         UnalignedPointer.at(typed_expr)
                     });
-                result.into_value(ty)
+                result.into_value(typed_expr)
             }),
 
         Expression::PtrCmp { lhs, kind, rhs } => {
@@ -787,7 +817,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                 _ => PointerBinopKind::Other,
             };
             eval_pointer_binop(typed_expr, binop_kind, lhs, rhs, |lhs, rhs| {
-                lhs.compare(*kind, rhs).into_value(ty)
+                lhs.compare(*kind, rhs).into_value(typed_expr)
             })
         }
 
@@ -809,7 +839,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             let errors = gather_errors([first]);
             match errors.0.is_empty() {
                 true => second,
-                false => Value::with_errors(ty, errors.chain(gather_errors([second]))),
+                false => Value::with_errors(typed_expr, errors.chain(gather_errors([second]))),
             }
         }
 
@@ -818,19 +848,21 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                 LogicalOpKind::And => try { as_bool(lhs)? && as_bool(rhs)? },
                 LogicalOpKind::Or => try { as_bool(lhs)? || as_bool(rhs)? },
             };
-            result.map(i32::from).into_value(ty)
+            result.map(i32::from).into_value(typed_expr)
         }
 
         Expression::Conditional { condition, then, or_else } => match as_bool(condition) {
             Ok(true) => eval(then),
             Ok(false) => eval(or_else),
-            Err(errors) => Value::with_errors(ty, errors),
+            Err(errors) => Value::with_errors(typed_expr, errors),
         },
 
         Expression::CompoundLiteral { open_paren: _, decl } => {
             let Declaration { reference: _, initialiser } = decl;
-            let initialiser = initialiser.expect("compound literals always have initialisers");
-            eval_static_initialiser(ty, &initialiser)
+            let initialiser = initialiser
+                .as_ref()
+                .expect("compound literals always have initialisers");
+            eval_static_initialiser(typed_expr, initialiser)
         }
 
         Expression::MemberAccess { lhs, member, member_loc: _ } => {
@@ -839,7 +871,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
             let size = ty.size();
             let indices = member.offset..member.offset.strict_add(size);
             let repr = lhs.repr.get(indices);
-            let result = Value { ty, repr };
+            let result = Value { expr: typed_expr, repr };
             match member.kind {
                 MemberKind::Normal => result,
                 MemberKind::Bitfield(Bitfield { offset, width }) => {
@@ -858,12 +890,12 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                         }
                     };
                     value.map_or_else(
-                        |errors| Value::with_errors(ty, errors),
+                        |errors| Value::with_errors(typed_expr, errors),
                         |value| {
                             let size = usize::try_from(size).unwrap();
                             let bytes = value.to_le_bytes().map(Byte::Literal)[..size].into();
                             let repr = Repr::Bytes(bytes);
-                            Value { ty, repr }
+                            Value { expr: typed_expr, repr }
                         },
                     )
                 }
@@ -879,7 +911,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
 
         Expression::Deref { star: _, operand } => match eval(operand).into_pointer() {
             Pointer::FromInt(Ok(_)) => not_constexpr(typed_expr, no_errors()),
-            Pointer::FromInt(Err(errors)) => Value::with_errors(ty, errors),
+            Pointer::FromInt(Err(errors)) => Value::with_errors(typed_expr, errors),
             Pointer::Address(Address { target, offset }) => match target {
                 Target::Reference(_reference) => todo!("`constexpr` and e. g. `static const`"),
                 Target::String(byte_str) => {
@@ -890,7 +922,7 @@ pub(super) fn eval<'a>(typed_expr: &TypedExpression<'a>) -> Value<'a> {
                         None => return not_constexpr(typed_expr, no_errors()),
                     };
                     let repr = Repr::Bytes([Byte::Literal(c)].into());
-                    Value { ty, repr }
+                    Value { expr: typed_expr, repr }
                 }
             },
         },
@@ -966,10 +998,14 @@ fn persist<'a>(sess: &Session<'a>, bytes: Box<[Byte<'a>]>) -> PersistedValue<'a,
 
 pub(super) fn run_static_initialiser<'a>(
     sess: &Session<'a>,
-    ty: &Type<'a>,
+    reference: &Reference<'a>,
     initialiser: &'a Initialiser<'a>,
 ) -> Initialiser<'a> {
-    let value = eval_static_initialiser(*ty, initialiser);
+    let expr = TypedExpression {
+        ty: reference.ty,
+        expr: Expression::Name(*reference),
+    };
+    let value = eval_static_initialiser(&expr, initialiser);
     Initialiser::Static {
         initialiser: InitialiserRef(initialiser),
         value: value.persist(sess),
