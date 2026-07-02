@@ -91,7 +91,6 @@ enum Repr<'a> {
 enum Byte<'a> {
     Literal(u8),
     Address {
-        #[expect(unused, reason = "TODO: check for wellformedness while parsing")]
         index: u64,
         target: Target<'a>,
         // TODO: this should be bounded by the `reference`’s type’s size
@@ -114,6 +113,19 @@ impl<'a> Target<'a> {
     }
 }
 
+impl PartialEq for Target<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Reference(reference), Self::Reference(other_reference)) =>
+                reference.id == other_reference.id,
+            (Self::Reference(_), Self::String(_)) | (Self::String(_), Self::Reference(_)) => false,
+            (Self::String(byte_str), Self::String(other_byte_str)) => byte_str == other_byte_str,
+        }
+    }
+}
+
+impl Eq for Target<'_> {}
+
 fn iter_literal_bytes(bytes: &[Byte]) -> impl Iterator<Item = Option<u8>> {
     bytes.iter().map(|b| match b {
         Byte::Literal(b) => Some(*b),
@@ -133,7 +145,7 @@ fn write_u64<'a>(value: u64) -> Repr<'a> {
     Repr::Bytes(Box::new(value.to_le_bytes().map(Byte::Literal)))
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) struct Address<'a> {
     target: Target<'a>,
     offset: u64,
@@ -147,10 +159,31 @@ impl<'a> Address<'a> {
 }
 
 fn read_address<'a>(bytes: &[Byte<'a>]) -> Option<Address<'a>> {
-    match bytes.first()? {
-        Byte::Literal(_) => None,
-        Byte::Address { index: _, target, offset } =>
-            Some(Address { target: *target, offset: *offset }),
+    let address = match *bytes.first()? {
+        Byte::Address { index: 0, target, offset } => Address { target, offset },
+        _ => return None,
+    };
+
+    let (index, address) = bytes
+        .iter()
+        .try_fold(
+            (0, address),
+            |(prev_index, expected_address), byte| match *byte {
+                Byte::Literal(_) => None,
+                Byte::Address { index, target, offset } => {
+                    let address = Address { target, offset };
+                    match index == prev_index && address == expected_address {
+                        true => Some((index.strict_add(1), address)),
+                        false => None,
+                    }
+                }
+            },
+        )
+        .unzip();
+
+    match index {
+        Some(8) => address,
+        _ => None,
     }
 }
 
