@@ -121,26 +121,24 @@ pub(super) fn typeck_ptrdiff<'a>(
     rhs: TypedExpression<'a>,
     rhs_pointee_ty: &QualifiedType<'a>,
 ) -> TypedExpression<'a> {
-    // TODO: should check for type compatibility, not exact equality
-    let expr = if lhs_pointee_ty.ty != rhs_pointee_ty.ty {
-        sess.emit(Diagnostic::PtrDiffIncompatiblePointeeTypes { at: op.token, lhs, rhs })
-    }
-    else {
-        match lhs_pointee_ty.ty.is_complete() && rhs_pointee_ty.ty.is_complete() {
-            true => Expression::PtrDiff {
+    // TODO: should be able to emit multiple errors, i. e. when the pointee types are both
+    // different and incomplete
+    let expr = match () {
+        // TODO: should check for type compatibility, not exact equality
+        () if lhs_pointee_ty.ty != rhs_pointee_ty.ty =>
+            sess.emit(Diagnostic::PtrDiffIncompatiblePointeeTypes { at: op.token, lhs, rhs }),
+        () if lhs_pointee_ty.ty.is_complete() && rhs_pointee_ty.ty.is_complete() =>
+            Expression::PtrDiff {
                 lhs: sess.alloc(lhs),
                 rhs: sess.alloc(rhs),
                 pointee_size: lhs_pointee_ty.ty.size(),
             },
-            // TODO: this assumes that both pointee types are the same; pass the actual incomplete
-            // pointee ty here.
-            false => sess.emit(Diagnostic::PointerArithmeticWithIncompletePointee {
-                at: *op,
-                pointee_ty: *lhs_pointee_ty,
-                lhs,
-                rhs,
-            }),
-        }
+        () => sess.emit(Diagnostic::PointerArithmeticWithIncompletePointee {
+            at: *op,
+            pointee_ty: *lhs_pointee_ty,
+            lhs,
+            rhs,
+        }),
     };
 
     TypedExpression {
