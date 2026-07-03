@@ -30,7 +30,7 @@ impl PtrAddOrder {
     }
 }
 
-pub(crate) fn typeck_ptradd<'a>(
+pub(super) fn typeck_ptradd<'a>(
     sess: &'a Session<'a>,
     op: &BinOp<'a>,
     pointer: TypedExpression<'a>,
@@ -63,7 +63,7 @@ pub(crate) fn typeck_ptradd<'a>(
     }
 }
 
-pub(crate) fn typeck_ptrsub<'a>(
+pub(super) fn typeck_ptrsub<'a>(
     sess: &'a Session<'a>,
     op: &BinOp<'a>,
     pointer: TypedExpression<'a>,
@@ -93,7 +93,7 @@ pub(crate) fn typeck_ptrsub<'a>(
     }
 }
 
-pub(crate) fn typeck_ptrcmp<'a>(
+pub(super) fn typeck_ptrcmp<'a>(
     sess: &'a Session<'a>,
     lhs: TypedExpression<'a>,
     kind: Comparison,
@@ -113,7 +113,7 @@ pub(crate) fn typeck_ptrcmp<'a>(
     TypedExpression { ty: Type::int().unqualified(), expr }
 }
 
-pub(crate) fn typeck_ptrdiff<'a>(
+pub(super) fn typeck_ptrdiff<'a>(
     sess: &'a Session<'a>,
     op: &BinOp<'a>,
     lhs: TypedExpression<'a>,
