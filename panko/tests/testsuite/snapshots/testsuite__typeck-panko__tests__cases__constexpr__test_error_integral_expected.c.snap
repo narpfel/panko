@@ -62,3 +62,10 @@ Error: cannot expose numerical value of address bytes to constexpr context
  10 │     int zs[(long)&x];
     │                  ──  
 ────╯
+
+Error: cannot perform truncating cast from `ptr<int>` to `int` in constant expression
+    ╭─[panko/tests/cases/constexpr/test_error_integral_expected.c:13:20]
+    │
+ 13 │         int x:(int)&x;
+    │                    ──  
+────╯

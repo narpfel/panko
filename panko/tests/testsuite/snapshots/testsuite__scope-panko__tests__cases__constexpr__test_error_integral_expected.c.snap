@@ -21,6 +21,8 @@ exit_code: 0
             (braced
                (designation ((index (string "42"))) 123)))
          (declaration x~5 `int` ∅)
-         (declaration zs~6 `array<int; (cast `long` (addressof (name x~5 `int`)))>` ∅))))
+         (declaration zs~6 `array<int; (cast `long` (addressof (name x~5 `int`)))>` ∅)
+         (struct T2~7
+            (member x (bitfield-width (cast `int` (addressof (name x~5 `int`)))) `int`)))))
 
 ----- stderr -----

@@ -37,7 +37,8 @@ use crate::typecheck::literal::StringLiteral;
 mod arithmetic;
 mod diagnostics;
 
-enum ConversionKind {
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum ConversionKind {
     Truncate,
     ZeroExtend,
     SignExtend,
@@ -272,6 +273,7 @@ impl<'a, 'b> Value<'a, 'b> {
     fn convert<'c>(self, expr: &'c TypedExpression<'a>, kind: ConversionKind) -> Value<'a, 'c> {
         let Self { expr: old_expr, repr } = self;
         let ty = old_expr.ty.ty;
+        let error = |e| Value { expr, repr: Repr::Error(Errors::new(e)) };
         type Kind = ConversionKind;
         match kind {
             _ if let Repr::Error(_) = repr => Value { expr, repr },
@@ -292,7 +294,7 @@ impl<'a, 'b> Value<'a, 'b> {
                     let maybe_bytes =
                         iter_literal_bytes(&repr.into_bytes().expect("repr is not `Repr::Error`"))
                             .collect::<Option<Vec<_>>>();
-                    let repr = match maybe_bytes {
+                    match maybe_bytes {
                         Some(mut bytes) => {
                             let fill_value = match integral.signedness {
                                 Signedness::Signed if let ConversionKind::SignExtend = kind =>
@@ -303,14 +305,13 @@ impl<'a, 'b> Value<'a, 'b> {
                                 _ => 0,
                             };
                             bytes.resize(usize::try_from(expr.ty.ty.size()).unwrap(), fill_value);
-                            Repr::Bytes(bytes.into_iter().map(Byte::Literal).collect())
+                            let repr = Repr::Bytes(bytes.into_iter().map(Byte::Literal).collect());
+                            Value { expr, repr }
                         }
-                        None =>
-                            Repr::Error(Errors::new(Diagnostic::AddressBytesExposed { at: *expr })),
-                    };
-                    Value { expr, repr }
+                        None => error(Diagnostic::AddressBytesExposed { at: *expr }),
+                    }
                 }
-                _ => todo!("error message, e. g. `static int x = (int)&static_var;`"),
+                _ => error(Diagnostic::InvalidCast { at: *expr, kind, ty }),
             },
         }
     }

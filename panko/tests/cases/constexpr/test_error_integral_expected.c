@@ -8,4 +8,8 @@ int main() {
 
     static int x;
     int zs[(long)&x];
+
+    struct T2 {
+        int x:(int)&x;
+    };
 }
