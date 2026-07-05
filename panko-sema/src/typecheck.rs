@@ -1547,7 +1547,7 @@ fn typeck_declaration<'a>(
         let initialiser = typeck_initialiser(sess, initialiser?, &reference);
         match reference.storage_duration {
             StorageDuration::Static(_) =>
-                constexpr::run_static_initialiser(sess, &reference.ty.ty, sess.alloc(initialiser)),
+                constexpr::run_static_initialiser(sess, &reference, sess.alloc(initialiser)),
             StorageDuration::Automatic => initialiser,
         }
     };

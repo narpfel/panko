@@ -1,10 +1,14 @@
 use std::fmt;
 
+use ariadne::Color::Blue;
 use ariadne::Color::Red;
+use ariadne::Fmt as _;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
+use crate::typecheck::Type;
 use crate::typecheck::TypedExpression;
+use crate::typecheck::constexpr::ConversionKind;
 use crate::typecheck::constexpr::Errors;
 
 #[derive(Debug, Clone, Report)]
@@ -18,6 +22,33 @@ pub(crate) enum Diagnostic<'a> {
     #[error("not a constant expression")]
     #[diagnostics(at(colour = Red))]
     NotConstexpr { at: TypedExpression<'a> },
+
+    #[error("integral value expected, but got value of type `{ty}`")]
+    #[diagnostics(at(colour = Red))]
+    #[with(ty = at.ty.ty)]
+    IntegralExpected { at: TypedExpression<'a> },
+
+    #[error("cannot expose numerical value of address bytes to constexpr context")]
+    #[diagnostics(at(colour = Red))]
+    AddressBytesExposed { at: TypedExpression<'a> },
+
+    #[error("cannot perform {kind} cast from `{ty}` to `{to_ty}` in constant expression")]
+    #[diagnostics(at(colour = Red))]
+    #[with(
+        to_ty = at.ty.ty,
+        ty = ty.fg(Blue),
+        kind = match kind {
+            ConversionKind::Noop | ConversionKind::Bool => unreachable!(),
+            ConversionKind::Truncate => "truncating",
+            ConversionKind::SignExtend => "sign-extending",
+            ConversionKind::ZeroExtend => "zero-extending",
+        }.fg(Red),
+    )]
+    InvalidCast {
+        at: TypedExpression<'a>,
+        kind: ConversionKind,
+        ty: Type<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
