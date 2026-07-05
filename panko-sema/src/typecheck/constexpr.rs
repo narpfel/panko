@@ -210,7 +210,7 @@ impl<'a, 'b> Value<'a, 'b> {
         let Self { expr, repr: _ } = &self;
         let signedness = match expr.ty.ty {
             Type::Arithmetic(Arithmetic::Integral(integral)) => integral.signedness,
-            _ => todo!("type error"),
+            _ => return Err(Errors::new(Diagnostic::IntegralExpected { at: **expr })),
         };
         let ty = match signedness {
             Signedness::Unsigned => Type::ULONG,

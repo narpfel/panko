@@ -1,0 +1,49 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/constexpr/test_error_integral_expected.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: integral value expected, but got value of type `ptr<char>`
+   ╭─[panko/tests/cases/constexpr/test_error_integral_expected.c:2:11]
+   │
+ 2 │     int x:"42";
+   │           ────  
+───╯
+
+Error: cannot declare variable `xs` with incomplete type `array<int; ∅>`
+   ╭─[panko/tests/cases/constexpr/test_error_integral_expected.c:6:9]
+   │
+ 6 │     int xs["42"];
+   │         ─┬  
+   │          ╰── declared here
+───╯
+
+Error: integral value expected, but got value of type `ptr<char>`
+   ╭─[panko/tests/cases/constexpr/test_error_integral_expected.c:6:12]
+   │
+ 6 │     int xs["42"];
+   │            ────  
+───╯
+
+Error: integral value expected, but got value of type `ptr<char>`
+   ╭─[panko/tests/cases/constexpr/test_error_integral_expected.c:7:18]
+   │
+ 7 │     int ys[] = {["42"] = 123};
+   │                  ────  
+───╯
+
+Error: integral value expected, but got value of type `ptr<char>`
+   ╭─[panko/tests/cases/constexpr/test_error_integral_expected.c:7:18]
+   │
+ 7 │     int ys[] = {["42"] = 123};
+   │                  ────  
+───╯

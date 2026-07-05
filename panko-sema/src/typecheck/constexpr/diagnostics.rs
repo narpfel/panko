@@ -18,6 +18,11 @@ pub(crate) enum Diagnostic<'a> {
     #[error("not a constant expression")]
     #[diagnostics(at(colour = Red))]
     NotConstexpr { at: TypedExpression<'a> },
+
+    #[error("integral value expected, but got value of type `{ty}`")]
+    #[diagnostics(at(colour = Red))]
+    #[with(ty = at.ty.ty)]
+    IntegralExpected { at: TypedExpression<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
