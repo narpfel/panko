@@ -23,6 +23,10 @@ pub(crate) enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red))]
     #[with(ty = at.ty.ty)]
     IntegralExpected { at: TypedExpression<'a> },
+
+    #[error("cannot expose numerical value of address bytes to constexpr context")]
+    #[diagnostics(at(colour = Red))]
+    AddressBytesExposed { at: TypedExpression<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]

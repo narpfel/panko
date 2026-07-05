@@ -5,4 +5,7 @@ struct T {
 int main() {
     int xs["42"];
     int ys[] = {["42"] = 123};
+
+    static int x;
+    int zs[(long)&x];
 }

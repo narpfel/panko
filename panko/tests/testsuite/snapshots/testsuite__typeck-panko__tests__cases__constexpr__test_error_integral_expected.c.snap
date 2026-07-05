@@ -47,3 +47,18 @@ Error: integral value expected, but got value of type `ptr<char>`
  7 │     int ys[] = {["42"] = 123};
    │                  ────  
 ───╯
+
+Error: cannot declare variable `zs` with incomplete type `array<int; ∅>`
+    ╭─[panko/tests/cases/constexpr/test_error_integral_expected.c:10:9]
+    │
+ 10 │     int zs[(long)&x];
+    │         ─┬  
+    │          ╰── declared here
+────╯
+
+Error: cannot expose numerical value of address bytes to constexpr context
+    ╭─[panko/tests/cases/constexpr/test_error_integral_expected.c:10:18]
+    │
+ 10 │     int zs[(long)&x];
+    │                  ──  
+────╯

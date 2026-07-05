@@ -19,6 +19,8 @@ exit_code: 0
          (declaration xs~3 `array<int; (string "42")>` ∅)
          (declaration ys~4 `array<int; ∅>`
             (braced
-               (designation ((index (string "42"))) 123))))))
+               (designation ((index (string "42"))) 123)))
+         (declaration x~5 `int` ∅)
+         (declaration zs~6 `array<int; (cast `long` (addressof (name x~5 `int`)))>` ∅))))
 
 ----- stderr -----

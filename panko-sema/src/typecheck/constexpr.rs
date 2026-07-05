@@ -289,20 +289,25 @@ impl<'a, 'b> Value<'a, 'b> {
             }
             Kind::Truncate | Kind::ZeroExtend | Kind::SignExtend => match ty {
                 Type::Arithmetic(Arithmetic::Integral(integral)) => {
-                    let mut bytes =
+                    let maybe_bytes =
                         iter_literal_bytes(&repr.into_bytes().expect("repr is not `Repr::Error`"))
-                            .collect::<Option<Vec<_>>>()
-                            .expect("TODO: error message: invalid ptr2int cast, e. g. `(int)(size_t)&static_var`");
-                    let fill_value = match integral.signedness {
-                        Signedness::Signed if let ConversionKind::SignExtend = kind =>
-                            match bytes.last().unwrap().cast_signed() < 0 {
-                                true => 0xff,
-                                false => 0,
-                            },
-                        _ => 0,
+                            .collect::<Option<Vec<_>>>();
+                    let repr = match maybe_bytes {
+                        Some(mut bytes) => {
+                            let fill_value = match integral.signedness {
+                                Signedness::Signed if let ConversionKind::SignExtend = kind =>
+                                    match bytes.last().unwrap().cast_signed() < 0 {
+                                        true => 0xff,
+                                        false => 0,
+                                    },
+                                _ => 0,
+                            };
+                            bytes.resize(usize::try_from(expr.ty.ty.size()).unwrap(), fill_value);
+                            Repr::Bytes(bytes.into_iter().map(Byte::Literal).collect())
+                        }
+                        None =>
+                            Repr::Error(Errors::new(Diagnostic::AddressBytesExposed { at: *expr })),
                     };
-                    bytes.resize(usize::try_from(expr.ty.ty.size()).unwrap(), fill_value);
-                    let repr = Repr::Bytes(bytes.into_iter().map(Byte::Literal).collect());
                     Value { expr, repr }
                 }
                 _ => todo!("error message, e. g. `static int x = (int)&static_var;`"),
