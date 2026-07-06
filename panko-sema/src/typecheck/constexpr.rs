@@ -266,7 +266,7 @@ impl<'a, 'b> Value<'a, 'b> {
                 let repr = Repr::Bytes(bytes);
                 Self { expr, repr }
             }
-            _ => todo!("error: invalid type for integral constexpr value"),
+            _ => panic!("invalid type `{ty}` for integral constexpr value"),
         }
     }
 
