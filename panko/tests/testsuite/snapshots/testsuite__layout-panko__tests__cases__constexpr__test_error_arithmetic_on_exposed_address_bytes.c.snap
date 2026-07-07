@@ -1,0 +1,62 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/constexpr/test_error_arithmetic_on_exposed_address_bytes.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot expose numerical value of address bytes to constexpr context
+    ╭─[panko/tests/cases/constexpr/test_error_arithmetic_on_exposed_address_bytes.c:10:20]
+    │
+ 10 │ size_t d = (size_t)&a + 1;
+    │                    ──  
+────╯
+
+Error: cannot expose numerical value of address bytes to constexpr context
+    ╭─[panko/tests/cases/constexpr/test_error_arithmetic_on_exposed_address_bytes.c:13:21]
+    │
+ 13 │ size_t e = ~(size_t)&a;
+    │                     ──  
+────╯
+
+Error: cannot expose numerical value of address bytes to constexpr context
+    ╭─[panko/tests/cases/constexpr/test_error_arithmetic_on_exposed_address_bytes.c:14:21]
+    │
+ 14 │ size_t f = -(size_t)&a;
+    │                     ──  
+────╯
+
+Error: cannot expose numerical value of address bytes to constexpr context
+    ╭─[panko/tests/cases/constexpr/test_error_arithmetic_on_exposed_address_bytes.c:15:20]
+    │
+ 15 │ size_t g = (size_t)&a / 2;
+    │                    ──  
+────╯
+
+Error: cannot expose numerical value of address bytes to constexpr context
+    ╭─[panko/tests/cases/constexpr/test_error_arithmetic_on_exposed_address_bytes.c:16:24]
+    │
+ 16 │ size_t h = 2 * (size_t)&a;
+    │                        ──  
+────╯
+
+Error: cannot expose numerical value of address bytes to constexpr context
+    ╭─[panko/tests/cases/constexpr/test_error_arithmetic_on_exposed_address_bytes.c:19:20]
+    │
+ 19 │ size_t i = (size_t)&a | (size_t)&a;
+    │                    ──  
+────╯
+
+Error: cannot expose numerical value of address bytes to constexpr context
+    ╭─[panko/tests/cases/constexpr/test_error_arithmetic_on_exposed_address_bytes.c:19:33]
+    │
+ 19 │ size_t i = (size_t)&a | (size_t)&a;
+    │                                 ──  
+────╯
