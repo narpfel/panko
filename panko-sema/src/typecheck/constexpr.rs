@@ -134,12 +134,22 @@ fn iter_literal_bytes(bytes: &[Byte]) -> impl Iterator<Item = Option<u8>> {
     })
 }
 
-fn read_literal_bytes<const N: usize>(bytes: &[Byte]) -> Option<[u8; N]> {
-    iter_literal_bytes(bytes).collect_array()?.transpose()
+#[derive(Debug, Clone, Copy)]
+struct AddressBytesExposed;
+
+fn read_literal_bytes<const N: usize>(
+    bytes: &[Byte],
+) -> Option<Result<[u8; N], AddressBytesExposed>> {
+    Some(
+        iter_literal_bytes(bytes)
+            .collect_array()?
+            .transpose()
+            .ok_or(AddressBytesExposed),
+    )
 }
 
 fn read_u64(bytes: &[Byte]) -> Option<u64> {
-    Some(u64::from_le_bytes(read_literal_bytes(bytes)?))
+    Some(u64::from_le_bytes(read_literal_bytes(bytes)?.ok()?))
 }
 
 fn write_u64<'a>(value: u64) -> Repr<'a> {
@@ -219,7 +229,8 @@ impl<'a, 'b> Value<'a, 'b> {
         };
         let expr = TypedExpression { ty: ty.unqualified(), ..**expr };
         let Value { expr: _, repr } = self.convert(&expr, ConversionKind::SignExtend);
-        let bytes = read_literal_bytes(&repr.into_bytes()?)
+        let bytes = read_literal_bytes(&repr.into_bytes()?);
+        let bytes = try { bytes?.ok()? }
             .expect("`convert` only generates `Repr`s that only contain `Literal`s");
         match signedness {
             Signedness::Signed => Ok(Integral::Signed(i64::from_le_bytes(bytes))),
@@ -337,7 +348,11 @@ macro_rules! impl_as_ty {
             let Self { expr, repr } = self;
             match expr.ty.ty {
                 $pattern => Some(match repr {
-                    Repr::Bytes(bytes) => Ok($t::from_le_bytes(read_literal_bytes(bytes)?)),
+                    Repr::Bytes(bytes) => read_literal_bytes(bytes)?
+                        .map($t::from_le_bytes)
+                        .map_err(|AddressBytesExposed| {
+                            Errors::new(Diagnostic::AddressBytesExposed { at: **expr })
+                        }),
                     Repr::Error(errors) => Err(errors.clone()),
                 }),
                 _ => None,
@@ -617,7 +632,7 @@ pub(super) fn eval<'a, 'b>(typed_expr: &'b TypedExpression<'a>) -> Value<'a, 'b>
                     () if let Some(operand) = operand.${concat(as_, $t)}() =>
                         operand.$meth(typed_expr).into_value(typed_expr),
                 )*
-                () => todo!(),
+                () => unreachable!(),
             }
         }};
     }
@@ -721,7 +736,7 @@ pub(super) fn eval<'a, 'b>(typed_expr: &'b TypedExpression<'a>) -> Value<'a, 'b>
                                     result.into_value(typed_expr)
                                 }
                         )*
-                        () => todo!(),
+                        () => unreachable!(),
                     }
                 };
             }
