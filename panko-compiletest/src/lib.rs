@@ -3,10 +3,10 @@
 #![feature(internal_output_capture)]
 #![feature(mpmc_channel)]
 #![feature(string_from_utf8_lossy_owned)]
+#![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
 
 use std::borrow::Borrow;
-use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ffi::OsString;
@@ -41,6 +41,7 @@ use regex::Regex;
 use regex::bytes;
 
 const FG_BOLD: &str = "\x1B[1m";
+const FG_ITALIC: &str = "\x1B[3m";
 const FG_RED: &str = "\x1B[31m";
 const FG_GREEN: &str = "\x1B[32m";
 const FG_YELLOW: &str = "\x1B[33m";
@@ -85,19 +86,19 @@ fn expand_escape_sequences(s: &str) -> String {
 
 pub struct Context {
     expected_result: RefCell<ExpectedResult>,
-    expects_failure: Cell<bool>,
+    expects_failure: RefCell<Option<Option<String>>>,
 }
 
 impl Context {
     fn new(expected_result: ExpectedResult) -> Self {
         Self {
             expected_result: RefCell::new(expected_result),
-            expects_failure: Cell::new(false),
+            expects_failure: RefCell::new(None),
         }
     }
 
-    fn expect_failure(&self) {
-        self.expects_failure.set(true);
+    fn expect_failure(&self, reason: Option<String>) {
+        self.expects_failure.replace(Some(reason));
     }
 
     fn should_panic_with_output(&self, regex: &str) {
@@ -229,12 +230,16 @@ impl TestCase {
         let output_capture = OutputCapture::new();
         let result = catch_unwind(AssertUnwindSafe(|| {
             test_fn.run(&context);
-            if context.expects_failure.get() {
-                eprintln!("test {FG_BOLD}`{name}`{RESET} was marked xfail but passed");
+            if let Some(maybe_reason) = &*context.expects_failure.borrow() {
+                eprint!("test {FG_BOLD}`{name}`{RESET} was marked xfail");
+                if let Some(reason) = maybe_reason {
+                    eprint!(" (reason: {FG_ITALIC}{reason}{RESET})");
+                }
+                eprintln!(" but passed");
             }
         }));
         let expected_result = &*context.expected_result.borrow();
-        let expects_failure = context.expects_failure.get();
+        let expects_failure = context.expects_failure.into_inner().is_some();
         let result = match result {
             Ok(()) => match (expected_result, expects_failure) {
                 (ExpectedResult::Success, false) => TestResult::Success,
@@ -314,10 +319,9 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
         .unwrap()
         .join("\n");
 
-    let known_bug_re = Regex::new(r"(?m)^// \[\[known-bug\]\]$").unwrap();
-    let is_known_bug = known_bug_re.is_match(&source);
-    if is_known_bug {
-        context.expect_failure();
+    let known_bug_re = Regex::new(r"(?m)^// \[\[known-bug(?:: (?P<reason>.*?))?\]\]$").unwrap();
+    if let Some(captures) = known_bug_re.captures(&source) {
+        context.expect_failure(try { captures.name("reason")?.as_str().to_owned() });
     }
 
     let compile_error_re =
