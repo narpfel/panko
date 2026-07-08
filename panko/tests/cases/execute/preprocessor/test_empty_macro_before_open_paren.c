@@ -1,4 +1,4 @@
-// [[known-bug]]
+// [[known-bug: function-like macros should only be expanded when the *next* pp-token is `(`]]
 
 int puts(char const*);
 

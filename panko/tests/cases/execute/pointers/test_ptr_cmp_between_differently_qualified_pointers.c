@@ -1,4 +1,4 @@
-// [[known-bug]]
+// [[known-bug: comparison between pointers with different pointee qualifiers not implemented]]
 // [[return: 1]]
 
 int main() {

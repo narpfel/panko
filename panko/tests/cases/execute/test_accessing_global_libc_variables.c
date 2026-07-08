@@ -1,4 +1,4 @@
-// [[known-bug]]
+// [[known-bug: referencing global variables from libc is broken]]
 
 // TODO: include `<stdio.h>`
 typedef void FILE;

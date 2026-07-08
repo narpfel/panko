@@ -1,4 +1,4 @@
-// [[known-bug]]
+// [[known-bug: dropping pointee qualifiers in implicit pointer conversions is not rejected]]
 
 // The pointer compatibility constraints for `simple-assignment` from §6.5.17.2
 // are not implemented.

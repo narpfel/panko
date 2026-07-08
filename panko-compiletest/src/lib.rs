@@ -3,7 +3,6 @@
 #![feature(internal_output_capture)]
 #![feature(mpmc_channel)]
 #![feature(string_from_utf8_lossy_owned)]
-#![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
 
 use std::borrow::Borrow;
@@ -86,7 +85,7 @@ fn expand_escape_sequences(s: &str) -> String {
 
 pub struct Context {
     expected_result: RefCell<ExpectedResult>,
-    expects_failure: RefCell<Option<Option<String>>>,
+    expects_failure: RefCell<Option<String>>,
 }
 
 impl Context {
@@ -97,7 +96,7 @@ impl Context {
         }
     }
 
-    fn expect_failure(&self, reason: Option<String>) {
+    fn expect_failure(&self, reason: String) {
         self.expects_failure.replace(Some(reason));
     }
 
@@ -230,12 +229,11 @@ impl TestCase {
         let output_capture = OutputCapture::new();
         let result = catch_unwind(AssertUnwindSafe(|| {
             test_fn.run(&context);
-            if let Some(maybe_reason) = &*context.expects_failure.borrow() {
-                eprint!("test {FG_BOLD}`{name}`{RESET} was marked xfail");
-                if let Some(reason) = maybe_reason {
-                    eprint!(" (reason: {FG_ITALIC}{reason}{RESET})");
-                }
-                eprintln!(" but passed");
+            if let Some(reason) = &*context.expects_failure.borrow() {
+                eprintln!(
+                    "test {FG_BOLD}`{name}`{RESET} was marked xfail \
+                    (reason: {FG_ITALIC}{reason}{RESET}) but passed",
+                );
             }
         }));
         let expected_result = &*context.expected_result.borrow();
@@ -319,9 +317,9 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
         .unwrap()
         .join("\n");
 
-    let known_bug_re = Regex::new(r"(?m)^// \[\[known-bug(?:: (?P<reason>.*?))?\]\]$").unwrap();
+    let known_bug_re = Regex::new(r"(?m)^// \[\[known-bug: (?P<reason>.*?)\]\]$").unwrap();
     if let Some(captures) = known_bug_re.captures(&source) {
-        context.expect_failure(try { captures.name("reason")?.as_str().to_owned() });
+        context.expect_failure(captures.name("reason").unwrap().as_str().to_owned());
     }
 
     let compile_error_re =

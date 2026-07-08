@@ -1,4 +1,4 @@
-// [[known-bug]]
+// [[known-bug: struct name resolution uses wrong scope when shadowing]]
 
 int printf(char const*, ...);
 

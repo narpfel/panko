@@ -1,4 +1,4 @@
-// [[known-bug]]
+// [[known-bug: redeclaring a struct/union with different tag is not rejected]]
 
 void f() {
     struct T;
