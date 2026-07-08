@@ -1,4 +1,4 @@
-// [[known-bug]]
+// [[known-bug: pointers to incomplete structs are not completed when the struct is completed]]
 // [[return: 4]]
 
 int printf(char const*, ...);

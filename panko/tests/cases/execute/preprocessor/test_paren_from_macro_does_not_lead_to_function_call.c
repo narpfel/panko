@@ -1,4 +1,4 @@
-// [[known-bug]]
+// [[known-bug: macros that expand to parens should not lead to macro function calls when expanded from macro]]
 
 int printf(char const*, ...);
 
@@ -21,6 +21,8 @@ int main() {
     printf("%d\n", id(a lparen() rparen()));
     // [[print: 27]]
     printf("%d\n", a lparen() rparen());
+
+    // this case is incorrect
     // [[print: 27]]
     printf("%d\n", nested);
 }

@@ -1,5 +1,5 @@
 // [[return: 42]]
-// [[known-bug]]
+// [[known-bug: codegen incorrectly assumes that `extern`al variable declarations in local scope are tentative definitions]]
 
 int name = 42;
 

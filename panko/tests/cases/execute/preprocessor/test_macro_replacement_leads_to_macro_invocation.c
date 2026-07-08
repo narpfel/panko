@@ -1,4 +1,4 @@
-// [[known-bug]]
+// [[known-bug: rescanning is not implemented correctly]]
 
 int printf(char const*, ...);
 

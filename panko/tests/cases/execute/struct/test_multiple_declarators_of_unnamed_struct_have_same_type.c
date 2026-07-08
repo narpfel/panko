@@ -1,4 +1,4 @@
-// [[known-bug]]
+// [[known-bug: declarators are split into distinct declarations, which leads to different unnamed structs]]
 // [[return: 1]]
 
 int main() {

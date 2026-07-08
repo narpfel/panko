@@ -1,4 +1,4 @@
-// [[known-bug]]
+// [[known-bug: pp-numbers are not implemented]]
 // [[compile-error: invalid integer suffix `\+name`]]
 
 int main() {

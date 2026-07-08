@@ -1,4 +1,4 @@
-// [[known-bug]]
+// [[known-bug: inline functions with external linkage must not refer to identifiers with internal linkage]]
 
 static int a;
 
