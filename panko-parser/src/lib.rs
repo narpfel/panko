@@ -119,14 +119,15 @@ enum Diagnostic<'a> {
         ty: ast::Type<'a>,
     },
 
-    #[error("default parameters are not allowed")]
+    #[error("default {kind}s are not allowed")]
     #[diagnostics(
-        param_loc(colour = Blue, label = "in the declaration of this parameter"),
+        decl_loc(colour = Blue, label = "in the declaration of this {kind}"),
         at(colour = Red, label = "help: remove this initialiser"),
     )]
-    DefaultParameter {
+    InvalidDefaultValue {
         at: Initialiser<'a>,
-        param_loc: Loc<'a>,
+        decl_loc: Loc<'a>,
+        kind: &'a str,
     },
 }
 

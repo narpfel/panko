@@ -382,9 +382,10 @@ ParameterDeclaration: ast::ParameterDeclaration<'a> = {
                 })
             }
             if let Some(initialiser) = initialiser {
-                sess.emit(ast::Diagnostic::DefaultParameter {
+                sess.emit(ast::Diagnostic::InvalidDefaultValue {
                     at: initialiser,
-                    param_loc: declarator.loc_with(declaration_specifiers),
+                    decl_loc: declarator.loc_with(declaration_specifiers),
+                    kind: "parameter",
                 })
             }
             declarator

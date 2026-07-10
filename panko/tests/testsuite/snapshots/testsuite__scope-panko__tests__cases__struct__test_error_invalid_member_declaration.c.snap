@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/struct/test_error_invalid_member_declaration.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: default struct members are not allowed
+   ╭─[panko/tests/cases/struct/test_error_invalid_member_declaration.c:2:13]
+   │
+ 2 │     int a = 42;
+   │         ┬   ─┬  
+   │         │    ╰── help: remove this initialiser
+   │         │       
+   │         ╰─────── in the declaration of this struct member
+───╯

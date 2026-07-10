@@ -430,17 +430,19 @@ impl<'a> Member<'a> {
                     storage_class,
                     function_specifiers,
                 } = decl;
-                assert_matches!(
-                    initialiser,
-                    None,
-                    "TODO: error message for initialiser in struct member",
-                );
+                let loc = try { name?.loc() }.unwrap_or_else(|| ty.loc());
+                if let Some(initialiser) = initialiser {
+                    sess.emit(cst::Diagnostic::InvalidDefaultValue {
+                        at: initialiser,
+                        decl_loc: loc,
+                        kind: "struct member",
+                    })
+                }
                 assert_matches!(
                     storage_class,
                     None,
                     "TODO: error message for storage_class in struct member",
                 );
-                let loc = try { name?.loc() }.unwrap_or_else(|| ty.loc());
                 reject_function_specifiers(sess, &function_specifiers, loc, "struct member");
                 Either::Right(Member { name, bitfield_width, ty })
             }
