@@ -21,3 +21,23 @@ Error: default struct members are not allowed
    │         │       
    │         ╰─────── in the declaration of this struct member
 ───╯
+
+Error: members cannot have storage classes
+   ╭─[panko/tests/cases/struct/test_error_invalid_member_declaration.c:3:5]
+   │
+ 3 │     static long b;
+   │     ───┬──      ┬  
+   │        │        ╰── in this member declaration
+   │        │           
+   │        ╰─────────── member `b` declared with storage class `static`
+───╯
+
+Error: members cannot have storage classes
+   ╭─[panko/tests/cases/struct/test_error_invalid_member_declaration.c:4:5]
+   │
+ 4 │     typedef char c;
+   │     ───┬───      ┬  
+   │        │         ╰── in this member declaration
+   │        │            
+   │        ╰──────────── member `c` declared with storage class `typedef`
+───╯

@@ -1,4 +1,3 @@
-use std::assert_matches;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::fmt;
@@ -101,6 +100,18 @@ enum Diagnostic<'a> {
         at: Token<'a>,
         name: &'a str,
         parameter: Loc<'a>,
+    },
+
+    #[error("members cannot have storage classes")]
+    #[diagnostics(
+        at(colour = Red, label = "member `{name}` declared with storage class `{at}`"),
+        member_loc(colour = Blue, label = "in this member declaration"),
+    )]
+    #[with(name = try { name.as_ref()?.slice() }.unwrap_or(NO_VALUE).fg(Blue))]
+    StorageClassInMemberDeclaration {
+        at: Token<'a>,
+        name: Option<Token<'a>>,
+        member_loc: Loc<'a>,
     },
 
     #[error("invalid storage class `{at}` applied to definition of function `{function}`")]
@@ -438,11 +449,13 @@ impl<'a> Member<'a> {
                         kind: "struct member",
                     })
                 }
-                assert_matches!(
-                    storage_class,
-                    None,
-                    "TODO: error message for storage_class in struct member",
-                );
+                if let Some(storage_class) = storage_class {
+                    sess.emit(Diagnostic::StorageClassInMemberDeclaration {
+                        at: storage_class.token,
+                        name,
+                        member_loc: loc,
+                    })
+                }
                 reject_function_specifiers(sess, &function_specifiers, loc, "struct member");
                 Either::Right(Member { name, bitfield_width, ty })
             }
