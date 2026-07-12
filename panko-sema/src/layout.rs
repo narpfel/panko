@@ -648,7 +648,6 @@ fn layout_expression_in_slot<'a>(
             let callee = bump.alloc(layout_expression(stack, bump, callee));
             let args = bump
                 .alloc_slice_fill_iter(args.iter().map(|arg| layout_expression(stack, bump, arg)));
-            // TODO: handle arguments that are not class INTEGER
             stack.function_arguments(ty.ty, args);
             (slot, Expression::Call { callee, args, is_varargs })
         }
