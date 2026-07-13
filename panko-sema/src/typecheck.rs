@@ -33,7 +33,6 @@ use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::reject_function_specifiers;
 use panko_report::Report;
-use variant_types::IntoVariant as _;
 
 use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
@@ -1617,7 +1616,7 @@ fn typeck_statement<'a>(
                 None => match return_ty.ty {
                     Type::Void => None,
                     _ => Some(sess.emit(Diagnostic::ReturnWithoutValueInNonVoidFunction {
-                        at: stmt.into_variant(),
+                        at: *return_,
                         function: *function,
                     })),
                 },

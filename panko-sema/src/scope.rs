@@ -192,13 +192,6 @@ impl<'a> Redeclared<'a> {
             Self::TypedefAsValue { at, typedef_ty: _, value_ty: _ } => at.slice(),
         }
     }
-
-    fn loc(&self) -> Loc<'a> {
-        match self {
-            Self::ValueAsTypedef { at, reference: _ } => at.loc(),
-            Self::TypedefAsValue { at, typedef_ty: _, value_ty: _ } => at.loc(),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -276,21 +269,16 @@ pub(crate) struct Varargs<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 
-// TODO: this is a hack required by the `variant_types` derive macro
-type MaybeExpr<'a> = Option<Expression<'a>>;
-type CompleteStruct<'a> = Complete<'a, Scope>;
-
-#[variant_types::derive_variant_types]
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
-    StructDecl(CompleteStruct<'a>),
+    StructDecl(Complete<'a, Scope>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
-    Expression(MaybeExpr<'a>),
+    Expression(Option<Expression<'a>>),
     Compound(CompoundStatement<'a>),
     Return {
         return_: Token<'a>,
-        expr: MaybeExpr<'a>,
+        expr: Option<Expression<'a>>,
     },
     Redeclared(Redeclared<'a>),
     HoistedCompoundLiteral(Reference<'a>),
@@ -556,31 +544,6 @@ impl<'a> FunctionDefinition<'a> {
 
     pub(crate) fn loc(&self) -> Loc<'a> {
         self.reference.loc()
-    }
-}
-
-impl<'a> Statement<'a> {
-    pub(crate) fn loc(&self) -> Loc<'a> {
-        match self {
-            Statement::StructDecl(_) => todo!("location of struct decl"),
-            Statement::Declaration(decl) => decl.reference.loc(),
-            Statement::Typedef(typedef) => typedef.loc(),
-            Statement::Expression(expr) => expr.as_ref().unwrap().loc(),
-            Statement::Compound(_) => todo!(),
-            Statement::Return { return_, expr } => {
-                let loc = return_.loc();
-                match expr {
-                    Some(expr) => loc.until(expr.loc()),
-                    None => loc,
-                }
-            }
-            Statement::Redeclared(redeclared) => redeclared.loc(),
-            Statement::HoistedCompoundLiteral(reference) => reference.loc(),
-        }
-    }
-
-    fn slice(&self) -> &'static str {
-        unimplemented!("TODO: `variant-types` requires this, but `panko` does not really need this")
     }
 }
 

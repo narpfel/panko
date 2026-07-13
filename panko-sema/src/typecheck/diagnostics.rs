@@ -89,19 +89,18 @@ pub(super) enum Diagnostic<'a> {
     },
 
     #[error(
-        "`{return_}` statement without value in non-`void` function `{name}` returning `{return_ty}`"
+        "`{at}` statement without value in non-`void` function `{name}` returning `{return_ty}`"
     )]
     #[diagnostics(
-        at(colour = Red, label = "`{return_}` statement here"),
+        at(colour = Red, label = "`{at}` statement here"),
         function(colour = Blue, label = "function `{name}` declared here"),
     )]
     #[with(
-        return_ = at.return_,
         name = function.reference,
         return_ty = function.return_ty(),
     )]
     ReturnWithoutValueInNonVoidFunction {
-        at: scope::StatementTypes::Return<'a>,
+        at: Token<'a>,
         function: scope::FunctionDefinition<'a>,
     },
 

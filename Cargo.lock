@@ -772,7 +772,6 @@ dependencies = [
  "panko-lex",
  "panko-parser",
  "panko-report",
- "variant-types",
  "yansi",
 ]
 
@@ -1175,24 +1174,6 @@ name = "valuable"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba73ea9cf16a25df0c8caa16c51acb937d5712a8429db78a3ee29d5dcacd3a65"
-
-[[package]]
-name = "variant-types"
-version = "0.1.0"
-source = "git+https://github.com/narpfel/crabbing-interpreters#6a240732e5c5e1970792a676bf56bae55a8a9dce"
-dependencies = [
- "variant-types-derive",
-]
-
-[[package]]
-name = "variant-types-derive"
-version = "0.1.0"
-source = "git+https://github.com/narpfel/crabbing-interpreters#6a240732e5c5e1970792a676bf56bae55a8a9dce"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
 
 [[package]]
 name = "version_check"
