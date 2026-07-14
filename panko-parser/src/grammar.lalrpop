@@ -120,7 +120,6 @@ extern {
         "||" => Token { kind: TokenKind::PipePipe, .. },
 
         "?" => Token { kind: TokenKind::QuestionMark, .. },
-        ":" => Token { kind: TokenKind::Colon, .. },
 
         "++" => Token { kind: TokenKind::PlusPlus, .. },
         "--" => Token { kind: TokenKind::MinusMinus, ..},
@@ -509,7 +508,7 @@ TypeSpecifier: ast::TypeSpecifier<'a> = {
     TypeSpecifierToken => ast::TypeSpecifier::new(<>),
     BitIntTypeSpecifier => todo!(),
     AtomicTypeSpecifier => todo!(),
-    StructOrUnionSpecifier => <>,
+    StructOrUnionSpecifier,
     EnumSpecifier => todo!(),
     TypedefName => ast::TypeSpecifier::new(<>),
     TypeofSpecifier,
