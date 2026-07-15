@@ -7,31 +7,67 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c
 ---
-success: true
-exit_code: 0
+success: false
+exit_code: 1
 ----- stdout -----
-(translation-unit "panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c"
-   (function-definition external stack-size=8
-      (f~0 `fn() -> void` (static f))
-      (compound-statement))
-   (function-definition external stack-size=24
-      (g~3 `fn() -> void` (static g))
-      (compound-statement
-         (struct U~5
-            (member x @0 `int`)
-            (member y @4 `int`))
-         (definition (value~6 `struct U~5 complete` @0) ∅)))
-   (function-definition external stack-size=8
-      (h~7 `fn() -> void` (static h))
-      (compound-statement
-         (union V~9
-            (member x @0 `int`)
-            (member y @0 `unsigned int`))
-         (struct V~9
-            (member x @0 `int`)
-            (member y @4 `unsigned int`))))
-   (function-definition external stack-size=8
-      (main~10 `fn() -> int` (static main))
-      (compound-statement)))
 
 ----- stderr -----
+Error: redeclaration of `struct T~2` with different tag `union`
+   ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:4:11]
+   │
+ 2 │     struct T;
+   │            ┬  
+   │            ╰── previously declared here as `struct`
+   │ 
+ 4 │     union T;
+   │           ┬  
+   │           ╰── redeclared here as `union`
+───╯
+
+Error: redeclaration of `struct U~5 complete` with different tag `union`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:13:11]
+    │
+  8 │     struct U {
+    │            ┬  
+    │            ╰── previously declared here as `struct`
+    │ 
+ 13 │     union U value;
+    │           ┬  
+    │           ╰── redeclared here as `union`
+────╯
+
+Error: redeclaration of `struct U~5 complete` with different tag `union`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:13:11]
+    │
+  8 │     struct U {
+    │            ┬  
+    │            ╰── previously declared here as `struct`
+    │ 
+ 13 │     union U value;
+    │           ┬  
+    │           ╰── redeclared here as `union`
+────╯
+
+Error: redeclaration of `union V~9 complete` with different tag `struct`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:22:12]
+    │
+ 17 │     union V {
+    │           ┬  
+    │           ╰── previously declared here as `union`
+    │ 
+ 22 │     struct V {
+    │            ┬  
+    │            ╰── redeclared here as `struct`
+────╯
+
+Error: redeclaration of `union Name~12` with different tag `struct`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:31:12]
+    │
+ 29 │     union Name;
+    │           ──┬─  
+    │             ╰─── previously declared here as `union`
+    │ 
+ 31 │     struct Name {
+    │            ──┬─  
+    │              ╰─── redeclared here as `struct`
+────╯

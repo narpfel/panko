@@ -1,5 +1,3 @@
-// [[known-bug: redeclaring a struct/union with different tag is not rejected]]
-
 void f() {
     struct T;
     // [[compile-error: redeclaration of `struct T~\d+` with different tag `union`]]
@@ -24,6 +22,14 @@ void h() {
     struct V {
         int x;
         unsigned y;
+    };
+}
+
+void i() {
+    union Name;
+    // [[compile-error: redeclaration of `union Name~\d+` with different tag `struct`]]
+    struct Name {
+        int member;
     };
 }
 

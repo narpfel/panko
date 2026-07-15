@@ -34,6 +34,8 @@ use panko_report::Sliced as _;
 use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
 use crate::scope::scopes::Scopes;
+use crate::scope::scopes::Tag;
+use crate::scope::scopes::Tagged;
 use crate::ty;
 use crate::ty::Complete;
 use crate::ty::ParameterDeclaration;
@@ -87,6 +89,24 @@ pub(crate) enum Diagnostic<'a> {
         at: QualifiedType<'a>,
         reference: Reference<'a>,
         kind: &'a str,
+    },
+
+    #[error("redeclaration of `{previous_ty}` with different tag `{actual}`")]
+    #[diagnostics(
+        at(colour = Red, label = "redeclared here as `{actual}`"),
+        previous_decl(colour = Blue, label = "previously declared here as `{expected}`"),
+    )]
+    #[with(
+        previous_ty = previous_ty.fg(Blue),
+        actual = actual.fg(Red),
+        expected = expected.fg(Blue),
+    )]
+    TagMismatchInRedeclaration {
+        at: Loc<'a>,
+        previous_decl: Loc<'a>,
+        previous_ty: Type<'a>,
+        expected: Tag,
+        actual: Tag,
     },
 }
 
@@ -763,18 +783,28 @@ fn resolve_function_ty<'a>(
 }
 
 fn resolve_struct<'a>(scopes: &mut Scopes<'a>, r#struct: &Struct<'a>) -> Type<'a> {
-    match r#struct {
-        Struct::Incomplete { name, kind } => scopes.lookup_or_add_struct(name.slice(), *kind),
+    let (Tagged { ty, tag, loc }, previous_decl) = match *r#struct {
+        Struct::Incomplete { name, kind } => (scopes.lookup_or_add_struct(name, kind), None),
         Struct::Complete { name, kind, members } => {
-            let (ty, _previous_definition) = scopes.lookup_or_add_complete_struct(
-                try { name.as_ref()?.slice() },
-                *kind,
-                members,
-            );
-            // TODO: implement check that `ty` is a valid redeclaration of `_previous_definition`
-            ty
+            // TODO: if redeclared, check that redeclaration is valid
+            scopes.lookup_or_add_complete_struct(name, kind, members)
         }
+    };
+    let expected = try { previous_decl?.tag }.unwrap_or(tag);
+    let actual = r#struct.kind().into();
+    if expected != actual {
+        scopes.sess.emit(Diagnostic::TagMismatchInRedeclaration {
+            at: r#struct.loc(),
+            previous_decl: try { previous_decl?.loc? }
+                .or(loc)
+                .expect("only named structs are redeclared")
+                .loc(),
+            previous_ty: try { previous_decl?.ty }.unwrap_or(ty),
+            expected,
+            actual,
+        })
     }
+    ty
 }
 
 fn resolve_struct_members<'a>(
