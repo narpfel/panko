@@ -7,6 +7,7 @@ use std::vec::Drain;
 
 use itertools::Either;
 use panko_lex::Loc;
+use panko_lex::Token;
 use panko_parser::StructKind;
 use panko_parser::ast;
 use panko_parser::ast::Session;
@@ -56,6 +57,7 @@ impl From<StructKind> for Tag {
 pub(super) struct Tagged<'a> {
     pub(super) ty: Type<'a>,
     pub(super) tag: Tag,
+    pub(super) loc: Option<Token<'a>>,
 }
 
 #[derive(Debug, Default)]
@@ -317,11 +319,16 @@ impl<'a> Scopes<'a> {
         self.tagged_entry(name).map(|entry| *entry.get())
     }
 
-    pub(super) fn lookup_or_add_struct(&mut self, name: &'a str, kind: StructKind) -> Tagged<'a> {
+    pub(super) fn lookup_or_add_struct(&mut self, loc: Token<'a>, kind: StructKind) -> Tagged<'a> {
+        let name = loc.slice();
         self.lookup_tagged(name).unwrap_or_else(|| {
             let id = self.id();
             let r#struct = Type::Struct(Struct::Incomplete { name, id, kind });
-            let tagged = Tagged { ty: r#struct, tag: kind.into() };
+            let tagged = Tagged {
+                ty: r#struct,
+                tag: kind.into(),
+                loc: Some(loc),
+            };
             *self
                 .lookup_tagged_innermost(name)
                 .insert_entry(tagged)
@@ -331,14 +338,15 @@ impl<'a> Scopes<'a> {
 
     pub(super) fn lookup_or_add_complete_struct(
         &mut self,
-        name: Option<&'a str>,
+        loc: Option<Token<'a>>,
         kind: StructKind,
         members: &'a [Either<TypeDeclaration<'a>, ast::Member<'a>>],
     ) -> (Tagged<'a>, Option<Tagged<'a>>) {
+        let name = try { loc?.slice() };
         let previous_definition = try { self.lookup_tagged(name?)? };
 
         // forward declare so that `name` is available in the body
-        let forward_decl = try { self.lookup_or_add_struct(name?, kind).ty };
+        let forward_decl = try { self.lookup_or_add_struct(loc?, kind).ty };
 
         let members = super::resolve_struct_members(self, members);
 
@@ -348,7 +356,7 @@ impl<'a> Scopes<'a> {
             None => self.id(),
         };
         let ty = Type::Struct(Struct::Complete(Complete { name, id, kind, members }));
-        let tagged = Tagged { ty, tag: kind.into() };
+        let tagged = Tagged { ty, tag: kind.into(), loc };
 
         if let Some(name) = name {
             // complete the forward declaration

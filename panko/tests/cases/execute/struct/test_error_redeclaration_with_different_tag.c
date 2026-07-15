@@ -1,5 +1,3 @@
-// [[known-bug: the error message is incomplete]]
-
 void f() {
     struct T;
     // [[compile-error: redeclaration of `struct T~\d+` with different tag `union`]]

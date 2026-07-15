@@ -12,34 +12,50 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: struct redeclared as union
-   ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:6:11]
+Error: redeclaration of `struct T~2` with different tag `union`
+   ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:4:11]
    │
- 6 │     union T;
+ 2 │     struct T;
+   │            ┬  
+   │            ╰── previously declared here as `struct`
+   │ 
+ 4 │     union T;
    │           ┬  
    │           ╰── redeclared here as `union`
 ───╯
 
-Error: struct redeclared as union
-    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:15:11]
+Error: redeclaration of `struct U~5 complete` with different tag `union`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:13:11]
     │
- 15 │     union U value;
+  8 │     struct U {
+    │            ┬  
+    │            ╰── previously declared here as `struct`
+    │ 
+ 13 │     union U value;
     │           ┬  
     │           ╰── redeclared here as `union`
 ────╯
 
-Error: struct redeclared as union
-    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:15:11]
+Error: redeclaration of `struct U~5 complete` with different tag `union`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:13:11]
     │
- 15 │     union U value;
+  8 │     struct U {
+    │            ┬  
+    │            ╰── previously declared here as `struct`
+    │ 
+ 13 │     union U value;
     │           ┬  
     │           ╰── redeclared here as `union`
 ────╯
 
-Error: union redeclared as struct
-    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:24:12]
+Error: redeclaration of `union V~9 complete` with different tag `struct`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:22:12]
     │
- 24 │     struct V {
+ 17 │     union V {
+    │           ┬  
+    │           ╰── previously declared here as `union`
+    │ 
+ 22 │     struct V {
     │            ┬  
     │            ╰── redeclared here as `struct`
 ────╯
