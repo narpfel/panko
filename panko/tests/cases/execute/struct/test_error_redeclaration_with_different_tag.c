@@ -25,4 +25,12 @@ void h() {
     };
 }
 
+void i() {
+    union Name;
+    // [[compile-error: redeclaration of `union Name~\d+` with different tag `struct`]]
+    struct Name {
+        int member;
+    };
+}
+
 int main() {}

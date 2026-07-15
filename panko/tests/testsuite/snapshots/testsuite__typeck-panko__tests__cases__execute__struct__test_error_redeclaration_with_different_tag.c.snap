@@ -59,3 +59,15 @@ Error: redeclaration of `union V~9 complete` with different tag `struct`
     │            ┬  
     │            ╰── redeclared here as `struct`
 ────╯
+
+Error: redeclaration of `union Name~12` with different tag `struct`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:31:12]
+    │
+ 29 │     union Name;
+    │           ──┬─  
+    │             ╰─── previously declared here as `union`
+    │ 
+ 31 │     struct Name {
+    │            ──┬─  
+    │              ╰─── redeclared here as `struct`
+────╯
