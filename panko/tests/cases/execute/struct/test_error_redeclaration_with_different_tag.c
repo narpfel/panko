@@ -1,4 +1,4 @@
-// [[known-bug: redeclaring a struct/union with different tag is not rejected]]
+// [[known-bug: the error message is incomplete]]
 
 void f() {
     struct T;

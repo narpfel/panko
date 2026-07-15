@@ -7,31 +7,39 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c
 ---
-success: true
-exit_code: 0
+success: false
+exit_code: 1
 ----- stdout -----
-(translation-unit "panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c"
-   (function-definition external stack-size=8
-      (f~0 `fn() -> void` (static f))
-      (compound-statement))
-   (function-definition external stack-size=24
-      (g~3 `fn() -> void` (static g))
-      (compound-statement
-         (struct U~5
-            (member x @0 `int`)
-            (member y @4 `int`))
-         (definition (value~6 `struct U~5 complete` @0) ∅)))
-   (function-definition external stack-size=8
-      (h~7 `fn() -> void` (static h))
-      (compound-statement
-         (union V~9
-            (member x @0 `int`)
-            (member y @0 `unsigned int`))
-         (struct V~9
-            (member x @0 `int`)
-            (member y @4 `unsigned int`))))
-   (function-definition external stack-size=8
-      (main~10 `fn() -> int` (static main))
-      (compound-statement)))
 
 ----- stderr -----
+Error: struct redeclared as union
+   ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:6:11]
+   │
+ 6 │     union T;
+   │           ┬  
+   │           ╰── redeclared here as `union`
+───╯
+
+Error: struct redeclared as union
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:15:11]
+    │
+ 15 │     union U value;
+    │           ┬  
+    │           ╰── redeclared here as `union`
+────╯
+
+Error: struct redeclared as union
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:15:11]
+    │
+ 15 │     union U value;
+    │           ┬  
+    │           ╰── redeclared here as `union`
+────╯
+
+Error: union redeclared as struct
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:24:12]
+    │
+ 24 │     struct V {
+    │            ┬  
+    │            ╰── redeclared here as `struct`
+────╯

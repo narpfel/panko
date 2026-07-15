@@ -2,6 +2,7 @@ use std::bstr::ByteStr;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::collections::hash_map::OccupiedEntry;
+use std::fmt::Display;
 use std::vec::Drain;
 
 use itertools::Either;
@@ -26,11 +27,42 @@ use crate::scope::BuiltinName;
 use crate::ty::Complete;
 use crate::ty::Struct;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Tag {
+    Struct,
+    Union,
+}
+
+impl Display for Tag {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::Struct => "struct",
+            Self::Union => "union",
+        };
+        write!(f, "{s}")
+    }
+}
+
+impl From<StructKind> for Tag {
+    fn from(kind: StructKind) -> Self {
+        match kind {
+            StructKind::Struct => Self::Struct,
+            StructKind::Union => Self::Union,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(super) struct Tagged<'a> {
+    pub(super) ty: Type<'a>,
+    pub(super) tag: Tag,
+}
+
 #[derive(Debug, Default)]
 struct Scope<'a> {
     names: nonempty::Vec<HashMap<&'a str, Reference<'a>>>,
     type_names: nonempty::Vec<HashMap<&'a str, QualifiedType<'a>>>,
-    structs: nonempty::Vec<HashMap<&'a str, Type<'a>>>,
+    tagged: nonempty::Vec<HashMap<&'a str, Tagged<'a>>>,
     function_name: Option<&'a str>,
 }
 
@@ -66,8 +98,8 @@ impl<'a> Scope<'a> {
         self.type_names.last_mut().entry(name)
     }
 
-    fn struct_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<&'a str, Type<'a>>> {
-        self.structs
+    fn tagged_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<&'a str, Tagged<'a>>> {
+        self.tagged
             .iter_mut()
             .rev()
             .find_map(|scope| match scope.entry(name) {
@@ -76,32 +108,32 @@ impl<'a> Scope<'a> {
             })
     }
 
-    fn lookup_struct_innermost(&mut self, name: &'a str) -> Entry<&'a str, Type<'a>> {
-        self.structs.last_mut().entry(name)
+    fn lookup_tagged_innermost(&mut self, name: &'a str) -> Entry<&'a str, Tagged<'a>> {
+        self.tagged.last_mut().entry(name)
     }
 
     fn push(&mut self) {
         let Self {
             names,
             type_names,
-            structs,
+            tagged,
             function_name: _,
         } = self;
         names.push(HashMap::default());
         type_names.push(HashMap::default());
-        structs.push(HashMap::default());
+        tagged.push(HashMap::default());
     }
 
     fn pop(&mut self) {
         let Self {
             names,
             type_names,
-            structs,
+            tagged,
             function_name: _,
         } = self;
         names.pop();
         type_names.pop();
-        structs.pop();
+        tagged.pop();
     }
 }
 
@@ -270,27 +302,29 @@ impl<'a> Scopes<'a> {
         self.scopes.last_mut().lookup_ty_innermost(name)
     }
 
-    fn lookup_struct_innermost(&mut self, name: &'a str) -> Entry<&'a str, Type<'a>> {
-        self.scopes.last_mut().lookup_struct_innermost(name)
+    fn lookup_tagged_innermost(&mut self, name: &'a str) -> Entry<&'a str, Tagged<'a>> {
+        self.scopes.last_mut().lookup_tagged_innermost(name)
     }
 
-    fn struct_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<&'a str, Type<'a>>> {
+    fn tagged_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<&'a str, Tagged<'a>>> {
         self.scopes
             .iter_mut()
             .rev()
-            .find_map(|scope| scope.struct_entry(name))
+            .find_map(|scope| scope.tagged_entry(name))
     }
 
-    fn lookup_struct(&mut self, name: &'a str) -> Option<Type<'a>> {
-        self.struct_entry(name).map(|entry| *entry.get())
+    fn lookup_tagged(&mut self, name: &'a str) -> Option<Tagged<'a>> {
+        self.tagged_entry(name).map(|entry| *entry.get())
     }
 
-    pub(super) fn lookup_or_add_struct(&mut self, name: &'a str, kind: StructKind) -> Type<'a> {
-        self.lookup_struct(name).unwrap_or_else(|| {
+    pub(super) fn lookup_or_add_struct(&mut self, name: &'a str, kind: StructKind) -> Tagged<'a> {
+        self.lookup_tagged(name).unwrap_or_else(|| {
             let id = self.id();
+            let r#struct = Type::Struct(Struct::Incomplete { name, id, kind });
+            let tagged = Tagged { ty: r#struct, tag: kind.into() };
             *self
-                .lookup_struct_innermost(name)
-                .insert_entry(Type::Struct(Struct::Incomplete { name, id, kind }))
+                .lookup_tagged_innermost(name)
+                .insert_entry(tagged)
                 .get()
         })
     }
@@ -300,11 +334,11 @@ impl<'a> Scopes<'a> {
         name: Option<&'a str>,
         kind: StructKind,
         members: &'a [Either<TypeDeclaration<'a>, ast::Member<'a>>],
-    ) -> (Type<'a>, Option<Type<'a>>) {
-        let previous_definition = try { self.lookup_struct(name?)? };
+    ) -> (Tagged<'a>, Option<Tagged<'a>>) {
+        let previous_definition = try { self.lookup_tagged(name?)? };
 
         // forward declare so that `name` is available in the body
-        let forward_decl = try { self.lookup_or_add_struct(name?, kind) };
+        let forward_decl = try { self.lookup_or_add_struct(name?, kind).ty };
 
         let members = super::resolve_struct_members(self, members);
 
@@ -314,13 +348,14 @@ impl<'a> Scopes<'a> {
             None => self.id(),
         };
         let ty = Type::Struct(Struct::Complete(Complete { name, id, kind, members }));
+        let tagged = Tagged { ty, tag: kind.into() };
 
         if let Some(name) = name {
             // complete the forward declaration
-            self.lookup_struct_innermost(name).insert_entry(ty);
+            self.lookup_tagged_innermost(name).insert_entry(tagged);
         }
 
-        (ty, previous_definition)
+        (tagged, previous_definition)
     }
 
     pub(super) fn push(&mut self, function_name: &'a str) {

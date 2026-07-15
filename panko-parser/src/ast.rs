@@ -419,6 +419,27 @@ pub enum Struct<'a> {
     },
 }
 
+impl<'a> Struct<'a> {
+    pub fn loc(&self) -> Loc<'a> {
+        match self {
+            Self::Incomplete { name, kind: _ } => name.loc(),
+            Self::Complete { name, kind: _, members: _ } => name
+                .expect(
+                    "only needed for tag mismatches in redeclarations; \
+                    and unnamed structs are never redeclared",
+                )
+                .loc(),
+        }
+    }
+
+    pub fn kind(&self) -> StructKind {
+        match self {
+            Self::Incomplete { name: _, kind } | Self::Complete { name: _, kind, members: _ } =>
+                *kind,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Member<'a> {
     pub name: Option<Token<'a>>,

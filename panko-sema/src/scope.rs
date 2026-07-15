@@ -34,6 +34,8 @@ use panko_report::Sliced as _;
 use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
 use crate::scope::scopes::Scopes;
+use crate::scope::scopes::Tag;
+use crate::scope::scopes::Tagged;
 use crate::ty;
 use crate::ty::Complete;
 use crate::ty::ParameterDeclaration;
@@ -87,6 +89,15 @@ pub(crate) enum Diagnostic<'a> {
         at: QualifiedType<'a>,
         reference: Reference<'a>,
         kind: &'a str,
+    },
+
+    // TODO: include location of the original declaration in the error message
+    #[error("{expected} redeclared as {actual}")]
+    #[diagnostics(at(colour = Red, label = "redeclared here as `{actual}`"))]
+    TagMismatchInRedeclaration {
+        at: Loc<'a>,
+        expected: Tag,
+        actual: Tag,
     },
 }
 
@@ -763,18 +774,27 @@ fn resolve_function_ty<'a>(
 }
 
 fn resolve_struct<'a>(scopes: &mut Scopes<'a>, r#struct: &Struct<'a>) -> Type<'a> {
-    match r#struct {
-        Struct::Incomplete { name, kind } => scopes.lookup_or_add_struct(name.slice(), *kind),
-        Struct::Complete { name, kind, members } => {
-            let (ty, _previous_definition) = scopes.lookup_or_add_complete_struct(
-                try { name.as_ref()?.slice() },
-                *kind,
-                members,
-            );
-            // TODO: implement check that `ty` is a valid redeclaration of `_previous_definition`
-            ty
-        }
+    let Tagged { ty, tag: expected } =
+        match r#struct {
+            Struct::Incomplete { name, kind } => scopes.lookup_or_add_struct(name.slice(), *kind),
+            Struct::Complete { name, kind, members } => {
+                let (Tagged { ty, tag }, previous_definition) = scopes
+                    .lookup_or_add_complete_struct(try { name.as_ref()?.slice() }, *kind, members);
+                // TODO: implement check that `ty` is a valid redeclaration of
+                // `previous_definition.ty`
+                let tag = try { previous_definition?.tag }.unwrap_or(tag);
+                Tagged { ty, tag }
+            }
+        };
+    let actual = r#struct.kind().into();
+    if expected != actual {
+        scopes.sess.emit(Diagnostic::TagMismatchInRedeclaration {
+            at: r#struct.loc(),
+            expected,
+            actual,
+        })
     }
+    ty
 }
 
 fn resolve_struct_members<'a>(
