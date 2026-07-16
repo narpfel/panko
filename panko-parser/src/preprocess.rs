@@ -172,6 +172,7 @@ enum Replacement<'a> {
     VaOpt(&'a [Replacement<'a>]),
     VaArgs,
     Stringise(usize),
+    StringiseVaArgs,
     Concat {
         lhs: &'a Replacement<'a>,
         hash_hash: Token<'a>,
@@ -196,6 +197,8 @@ impl<'a> Replacement<'a> {
             }),
             Self::Stringise(index) =>
                 Expanded::Stringise(Stringise { call, replacement: call.get(*index) }),
+            Self::StringiseVaArgs =>
+                Expanded::Stringise(Stringise { call, replacement: call.get_va_args() }),
             Self::Concat { lhs, hash_hash, rhs } =>
                 Expanded::Concat(Concat { call, lhs, hash_hash: *hash_hash, rhs }),
         }
@@ -1131,7 +1134,8 @@ fn parse_replacement<'a>(
         TokenKind::Hash => match tokens.split_off_first() {
             Some(token) if let Some(index) = parameters.get_index_of(token.slice()) =>
                 Replacement::Stringise(index),
-            Some(_) => todo!("error: not a parameter (but allow `__VA_OPT__` and `__VA_ARGS__`)"),
+            Some(token) if token.slice() == "__VA_ARGS__" => Replacement::StringiseVaArgs,
+            Some(_) => todo!("error: not a parameter (but allow `__VA_OPT__`)"),
             None => {
                 let () = sess.emit(Diagnostic::StringiseAtEndOfMacro { at: *token });
                 return None;
