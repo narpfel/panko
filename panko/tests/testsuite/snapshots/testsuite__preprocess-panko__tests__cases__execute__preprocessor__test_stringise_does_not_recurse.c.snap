@@ -10,15 +10,13 @@ info:
 success: true
 exit_code: 0
 ----- stdout -----
-
-
 int puts(char const*);
 
 
 
 int main() {
 
-    puts( "\"\\\"42\\\"\"" );
+    puts( "F(F(42))" );
 }
 
 ----- stderr -----

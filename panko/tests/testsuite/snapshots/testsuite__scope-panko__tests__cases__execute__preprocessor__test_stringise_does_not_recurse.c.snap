@@ -17,6 +17,6 @@ exit_code: 0
       (compound-statement
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (string "\"\\\"42\\\"\""))))))
+               (string "F(F(42))"))))))
 
 ----- stderr -----

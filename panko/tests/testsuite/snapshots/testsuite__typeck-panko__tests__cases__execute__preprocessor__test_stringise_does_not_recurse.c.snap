@@ -22,6 +22,6 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>`
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 9>>`
-                        (string `array<char; 9>` "\"\\\"42\\\"\"\0")))))))))
+                        (string `array<char; 9>` "F(F(42))\0")))))))))
 
 ----- stderr -----

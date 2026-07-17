@@ -1,5 +1,3 @@
-// [[known-bug: hideset tracking for stringise is incorrect]]
-
 int puts(char const*);
 
 #define F(x) #x

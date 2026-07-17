@@ -486,7 +486,7 @@ impl<'a> Expander<'a> {
         stringise: Stringise<'a>,
     ) -> Token<'a> {
         let Stringise { call, replacement } = stringise;
-        let argument = Expanding::Argument(Argument { call, replacement, update_hideset: true });
+        let argument = Expanding::Argument(Argument { call, replacement, update_hideset: false });
         let depth = self.todo.len();
         self.push(argument);
         let mut result = vec![b'"'];
