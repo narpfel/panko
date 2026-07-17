@@ -1102,6 +1102,9 @@ fn parse_va_opt<'a>(
     va_opt: &Token<'a>,
     tokens: &mut &'a [Token<'a>],
 ) -> Result<Replacement<'a>, ()> {
+    if !is_varargs {
+        sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *va_opt })
+    }
     eat(tokens, TokenKind::LParen)?;
     let iter = &mut tokens.iter().copied().peekable();
     let va_opt_tokens_count = eat_until_in_balanced_parens(iter, |token| {
@@ -1142,15 +1145,8 @@ fn parse_replacement<'a>(
             }
         },
         _ => match token.slice() {
-            "__VA_OPT__" => {
-                if !is_varargs {
-                    sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
-                }
-                match parse_va_opt(sess, parameters, is_varargs, token, tokens) {
-                    Ok(va_opt) => va_opt,
-                    Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
-                }
-            }
+            "__VA_OPT__" => parse_va_opt(sess, parameters, is_varargs, token, tokens)
+                .expect("TODO: error message: error while parsing `__VA_OPT__`"),
             "__VA_ARGS__" => {
                 if !is_varargs {
                     sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
