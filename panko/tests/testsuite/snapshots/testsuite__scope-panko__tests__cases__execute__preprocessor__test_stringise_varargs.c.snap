@@ -29,6 +29,18 @@ exit_code: 0
                (string "2, 3")))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (string "hello, world"))))))
+               (string "hello, world")))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "\"" "" "\" => \"" "" "\"")))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "\"" "" "\" => \"" "" "\"")))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "\"" "hello world" "\" => \"" ",," "\"")))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "\"" "hello world" "\" => \"" "not, empty" "\""))))))
 
 ----- stderr -----

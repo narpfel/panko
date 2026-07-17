@@ -14,6 +14,8 @@ int puts(char const*);
 
 
 
+
+
 int main() {
 
     puts( "" );
@@ -25,6 +27,15 @@ int main() {
     puts( "2, 3" );
 
     puts( "hello, world" );
+
+
+    puts( "\"" "" "\" => \"" "" "\"" );
+
+    puts( "\"" "" "\" => \"" "" "\"" );
+
+    puts( "\"" "hello world" "\" => \"" ",," "\"" );
+
+    puts( "\"" "hello world" "\" => \"" "not, empty" "\"" );
 }
 
 ----- stderr -----

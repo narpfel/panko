@@ -54,6 +54,38 @@ exit_code: 0
                (noop-type-conversion `ptr<char const>`
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 13>>`
-                        (string `array<char; 13>` "hello, world\0")))))))))
+                        (string `array<char; 13>` "hello, world\0"))))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>`
+                  (puts~0 `fn(∅: ptr<char const>) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 9>>`
+                        (string `array<char; 9>` "\"\" => \"\"\0"))))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>`
+                  (puts~0 `fn(∅: ptr<char const>) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 9>>`
+                        (string `array<char; 9>` "\"\" => \"\"\0"))))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>`
+                  (puts~0 `fn(∅: ptr<char const>) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 22>>`
+                        (string `array<char; 22>` "\"hello world\" => \",,\"\0"))))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>`
+                  (puts~0 `fn(∅: ptr<char const>) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 30>>`
+                        (string `array<char; 30>` "\"hello world\" => \"not, empty\"\0")))))))))
 
 ----- stderr -----

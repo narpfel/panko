@@ -23,6 +23,7 @@ use panko_lex::TokenKind;
 
 use crate::TypedefTracker;
 use crate::ast::Session;
+use crate::error_todo;
 use crate::handle_parse_error;
 use crate::nonempty;
 use crate::preprocess::diagnostics::Diagnostic;
@@ -166,10 +167,19 @@ pub(crate) fn tokens_loc<'a>(tokens: &[Token<'a>]) -> Loc<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+enum VaOptMode {
+    Stringise,
+    Normal,
+}
+
+#[derive(Debug, Clone, Copy)]
 enum Replacement<'a> {
     Literal(Token<'a>),
     Parameter(usize),
-    VaOpt(&'a [Replacement<'a>]),
+    VaOpt {
+        replacement: &'a [Replacement<'a>],
+        mode: VaOptMode,
+    },
     VaArgs,
     Stringise(usize),
     StringiseVaArgs,
@@ -189,7 +199,8 @@ impl<'a> Replacement<'a> {
                 replacement: call.get(*index),
                 update_hideset: true,
             }),
-            Self::VaOpt(replacement) => Expanded::VaOpt(VaOpt { call, replacement }),
+            Self::VaOpt { replacement, mode } =>
+                Expanded::VaOpt(VaOpt { call, replacement, mode: *mode }),
             Self::VaArgs => Expanded::Argument(Argument {
                 call,
                 replacement: call.get_va_args(),
@@ -360,6 +371,7 @@ impl<'a> Expanding<'a> {
 struct VaOpt<'a> {
     call: FunctionCall<'a>,
     replacement: &'a [Replacement<'a>],
+    mode: VaOptMode,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -462,7 +474,7 @@ impl<'a> Expander<'a> {
     }
 
     fn expand_va_opt(&mut self, macros: &HashMap<&'a str, Macro<'a>>, va_opt: VaOpt<'a>) {
-        let VaOpt { call, replacement } = va_opt;
+        let VaOpt { call, replacement, mode } = va_opt;
         let depth = self.todo.len();
         let fake_va_args = Expanding::Argument(Argument {
             call,
@@ -470,14 +482,18 @@ impl<'a> Expander<'a> {
             update_hideset: false,
         });
         self.push(fake_va_args.clone());
-        if self.next_until(macros, depth).is_some() {
+        let replacement = self.next_until(macros, depth).map_or_default(|_| {
             self.done(&fake_va_args);
-            self.push(Expanding::Argument(Argument {
-                call,
-                replacement,
-                update_hideset: false,
-            }));
-        }
+            replacement
+        });
+        let expanding = match mode {
+            VaOptMode::Stringise => Expanding::Token(Some(
+                self.stringise(macros, Stringise { call, replacement }),
+            )),
+            VaOptMode::Normal =>
+                Expanding::Argument(Argument { call, replacement, update_hideset: false }),
+        };
+        self.push(expanding)
     }
 
     fn stringise(
@@ -1100,6 +1116,7 @@ fn parse_va_opt<'a>(
     parameters: &IndexSet<&str>,
     is_varargs: bool,
     va_opt: &Token<'a>,
+    mode: VaOptMode,
     tokens: &mut &'a [Token<'a>],
 ) -> Result<Replacement<'a>, ()> {
     if !is_varargs {
@@ -1118,7 +1135,10 @@ fn parse_va_opt<'a>(
     let va_opt_tokens =
         parse_function_like_replacement(sess, parameters, is_varargs, va_opt_tokens);
     eat(tokens, TokenKind::RParen)?;
-    Ok(Replacement::VaOpt(sess.alloc_slice_copy(&va_opt_tokens)))
+    Ok(Replacement::VaOpt {
+        replacement: sess.alloc_slice_copy(&va_opt_tokens),
+        mode,
+    })
 }
 
 fn parse_replacement<'a>(
@@ -1138,15 +1158,31 @@ fn parse_replacement<'a>(
             Some(token) if let Some(index) = parameters.get_index_of(token.slice()) =>
                 Replacement::Stringise(index),
             Some(token) if token.slice() == "__VA_ARGS__" => Replacement::StringiseVaArgs,
-            Some(_) => todo!("error: not a parameter (but allow `__VA_OPT__`)"),
+            Some(token) if token.slice() == "__VA_OPT__" => parse_va_opt(
+                sess,
+                parameters,
+                is_varargs,
+                token,
+                VaOptMode::Stringise,
+                tokens,
+            )
+            .expect("TODO: error message: error while parsing `__VA_OPT__`"),
+            Some(token) => error_todo!(token, "not a parameter"),
             None => {
                 let () = sess.emit(Diagnostic::StringiseAtEndOfMacro { at: *token });
                 return None;
             }
         },
         _ => match token.slice() {
-            "__VA_OPT__" => parse_va_opt(sess, parameters, is_varargs, token, tokens)
-                .expect("TODO: error message: error while parsing `__VA_OPT__`"),
+            "__VA_OPT__" => parse_va_opt(
+                sess,
+                parameters,
+                is_varargs,
+                token,
+                VaOptMode::Normal,
+                tokens,
+            )
+            .expect("TODO: error message: error while parsing `__VA_OPT__`"),
             "__VA_ARGS__" => {
                 if !is_varargs {
                     sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
