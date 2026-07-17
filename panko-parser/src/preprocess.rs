@@ -1111,42 +1111,38 @@ fn eat<'a>(tokens: &mut &'a [Token<'a>], kind: TokenKind) -> Result<&'a Token<'a
     }
 }
 
-fn parse_va_opt<'a>(
-    sess: &'a Session<'a>,
-    parameters: &IndexSet<&str>,
-    is_varargs: bool,
-    va_opt: &Token<'a>,
-    mode: VaOptMode,
-    tokens: &mut &'a [Token<'a>],
-) -> Result<Replacement<'a>, ()> {
-    if !is_varargs {
-        sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *va_opt })
-    }
-    eat(tokens, TokenKind::LParen)?;
-    let iter = &mut tokens.iter().copied().peekable();
-    let va_opt_tokens_count = eat_until_in_balanced_parens(iter, |token| {
-        if token.slice() == "__VA_OPT__" {
-            sess.emit(Diagnostic::NestedVaOpt { at: *token, va_opt: *va_opt })
-        }
-        token.kind == TokenKind::RParen
-    })
-    .count();
-    let va_opt_tokens = tokens.split_off(..va_opt_tokens_count).unwrap();
-    let va_opt_tokens =
-        parse_function_like_replacement(sess, parameters, is_varargs, va_opt_tokens);
-    eat(tokens, TokenKind::RParen)?;
-    Ok(Replacement::VaOpt {
-        replacement: sess.alloc_slice_copy(&va_opt_tokens),
-        mode,
-    })
-}
-
 fn parse_replacement<'a>(
     sess: &'a Session<'a>,
     parameters: &IndexSet<&str>,
     is_varargs: bool,
     tokens: &mut &'a [Token<'a>],
 ) -> Option<Replacement<'a>> {
+    let parse_va_opt = |tokens: &mut &'a [Token<'a>],
+                        va_opt: &Token<'a>,
+                        mode: VaOptMode|
+     -> Result<Replacement<'a>, ()> {
+        if !is_varargs {
+            sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *va_opt })
+        }
+        eat(tokens, TokenKind::LParen)?;
+        let iter = &mut tokens.iter().copied().peekable();
+        let va_opt_tokens_count = eat_until_in_balanced_parens(iter, |token| {
+            if token.slice() == "__VA_OPT__" {
+                sess.emit(Diagnostic::NestedVaOpt { at: *token, va_opt: *va_opt })
+            }
+            token.kind == TokenKind::RParen
+        })
+        .count();
+        let va_opt_tokens = tokens.split_off(..va_opt_tokens_count).unwrap();
+        let va_opt_tokens =
+            parse_function_like_replacement(sess, parameters, is_varargs, va_opt_tokens);
+        eat(tokens, TokenKind::RParen)?;
+        Ok(Replacement::VaOpt {
+            replacement: sess.alloc_slice_copy(&va_opt_tokens),
+            mode,
+        })
+    };
+
     let token = tokens.split_off_first()?;
     let replacement = match token.kind {
         TokenKind::HashHash => {
@@ -1158,15 +1154,9 @@ fn parse_replacement<'a>(
             Some(token) if let Some(index) = parameters.get_index_of(token.slice()) =>
                 Replacement::Stringise(index),
             Some(token) if token.slice() == "__VA_ARGS__" => Replacement::StringiseVaArgs,
-            Some(token) if token.slice() == "__VA_OPT__" => parse_va_opt(
-                sess,
-                parameters,
-                is_varargs,
-                token,
-                VaOptMode::Stringise,
-                tokens,
-            )
-            .expect("TODO: error message: error while parsing `__VA_OPT__`"),
+            Some(token) if token.slice() == "__VA_OPT__" =>
+                parse_va_opt(tokens, token, VaOptMode::Stringise)
+                    .expect("TODO: error message: error while parsing `__VA_OPT__`"),
             Some(token) => error_todo!(token, "not a parameter"),
             None => {
                 let () = sess.emit(Diagnostic::StringiseAtEndOfMacro { at: *token });
@@ -1174,15 +1164,8 @@ fn parse_replacement<'a>(
             }
         },
         _ => match token.slice() {
-            "__VA_OPT__" => parse_va_opt(
-                sess,
-                parameters,
-                is_varargs,
-                token,
-                VaOptMode::Normal,
-                tokens,
-            )
-            .expect("TODO: error message: error while parsing `__VA_OPT__`"),
+            "__VA_OPT__" => parse_va_opt(tokens, token, VaOptMode::Normal)
+                .expect("TODO: error message: error while parsing `__VA_OPT__`"),
             "__VA_ARGS__" => {
                 if !is_varargs {
                     sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
