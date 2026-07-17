@@ -201,11 +201,7 @@ impl<'a> Replacement<'a> {
             }),
             Self::VaOpt { replacement, mode } =>
                 Expanded::VaOpt(VaOpt { call, replacement, mode: *mode }),
-            Self::VaArgs => Expanded::Argument(Argument {
-                call,
-                replacement: call.get_va_args(),
-                update_hideset: false,
-            }),
+            Self::VaArgs => Expanded::Argument(call.va_args()),
             Self::Stringise(index) =>
                 Expanded::Stringise(Stringise { call, replacement: call.get(*index) }),
             Self::StringiseVaArgs =>
@@ -311,6 +307,14 @@ impl<'a> FunctionCall<'a> {
 
     fn get_va_args(&self) -> &'a [Replacement<'a>] {
         self.get(self.parameter_count)
+    }
+
+    fn va_args(&self) -> Argument<'a> {
+        Argument {
+            call: *self,
+            replacement: self.get_va_args(),
+            update_hideset: false,
+        }
     }
 }
 
@@ -476,11 +480,7 @@ impl<'a> Expander<'a> {
     fn expand_va_opt(&mut self, macros: &HashMap<&'a str, Macro<'a>>, va_opt: VaOpt<'a>) {
         let VaOpt { call, replacement, mode } = va_opt;
         let depth = self.todo.len();
-        let fake_va_args = Expanding::Argument(Argument {
-            call,
-            replacement: call.get_va_args(),
-            update_hideset: false,
-        });
+        let fake_va_args = Expanding::Argument(call.va_args());
         self.push(fake_va_args.clone());
         let replacement = self.next_until(macros, depth).map_or_default(|_| {
             self.done(&fake_va_args);
