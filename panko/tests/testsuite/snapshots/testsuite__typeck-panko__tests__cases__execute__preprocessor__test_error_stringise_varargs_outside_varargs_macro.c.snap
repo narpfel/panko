@@ -12,10 +12,18 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: `__VA_OPT__` outside of variadic macro
-   ╭─[panko/tests/cases/execute/preprocessor/test_error_stringise_varargs_outside_varargs_macro.c:7:19]
+Error: `__VA_ARGS__` outside of variadic macro
+   ╭─[panko/tests/cases/execute/preprocessor/test_error_stringise_varargs_outside_varargs_macro.c:2:18]
    │
- 7 │ #define M2(a, b) #__VA_OPT__(42)
+ 2 │ #define M(a, b) #__VA_ARGS__
+   │                  ─────┬─────  
+   │                       ╰─────── `__VA_ARGS__` is forbidden outside of variadic macros
+───╯
+
+Error: `__VA_OPT__` outside of variadic macro
+   ╭─[panko/tests/cases/execute/preprocessor/test_error_stringise_varargs_outside_varargs_macro.c:5:19]
+   │
+ 5 │ #define M2(a, b) #__VA_OPT__(42)
    │                   ─────┬────  
    │                        ╰────── `__VA_OPT__` is forbidden outside of variadic macros
 ───╯

@@ -1117,6 +1117,13 @@ fn parse_replacement<'a>(
     is_varargs: bool,
     tokens: &mut &'a [Token<'a>],
 ) -> Option<Replacement<'a>> {
+    let parse_va_args = |va_args: &Token<'a>, replacement| {
+        if !is_varargs {
+            sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *va_args })
+        }
+        replacement
+    };
+
     let parse_va_opt = |tokens: &mut &'a [Token<'a>],
                         va_opt: &Token<'a>,
                         mode: VaOptMode|
@@ -1153,7 +1160,8 @@ fn parse_replacement<'a>(
         TokenKind::Hash => match tokens.split_off_first() {
             Some(token) if let Some(index) = parameters.get_index_of(token.slice()) =>
                 Replacement::Stringise(index),
-            Some(token) if token.slice() == "__VA_ARGS__" => Replacement::StringiseVaArgs,
+            Some(token) if token.slice() == "__VA_ARGS__" =>
+                parse_va_args(token, Replacement::StringiseVaArgs),
             Some(token) if token.slice() == "__VA_OPT__" =>
                 parse_va_opt(tokens, token, VaOptMode::Stringise)
                     .expect("TODO: error message: error while parsing `__VA_OPT__`"),
@@ -1166,12 +1174,7 @@ fn parse_replacement<'a>(
         _ => match token.slice() {
             "__VA_OPT__" => parse_va_opt(tokens, token, VaOptMode::Normal)
                 .expect("TODO: error message: error while parsing `__VA_OPT__`"),
-            "__VA_ARGS__" => {
-                if !is_varargs {
-                    sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
-                }
-                Replacement::VaArgs
-            }
+            "__VA_ARGS__" => parse_va_args(token, Replacement::VaArgs),
             _ => parse_token_as_maybe_parameter(parameters, token),
         },
     };
