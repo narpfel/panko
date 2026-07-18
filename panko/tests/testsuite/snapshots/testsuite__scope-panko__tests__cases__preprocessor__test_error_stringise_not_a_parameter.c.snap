@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/preprocessor/test_error_stringise_not_a_parameter.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: stringise operand `42` is not a macro parameter
+   ╭─[panko/tests/cases/preprocessor/test_error_stringise_not_a_parameter.c:3:15]
+   │
+ 3 │ #define F(x) #42
+   │               ─┬  
+   │                ╰── this is not a macro parameter
+───╯

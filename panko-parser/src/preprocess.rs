@@ -8,6 +8,7 @@ use std::fmt::Display;
 use std::io::stdout;
 use std::iter::Peekable;
 use std::iter::from_fn;
+use std::iter::once;
 use std::ops::Not as _;
 use std::path::Path;
 
@@ -165,13 +166,51 @@ pub(crate) fn tokens_loc<'a>(tokens: &[Token<'a>]) -> Loc<'a> {
     }
 }
 
+fn stringise_tokens<'a>(sess: &Session<'a>, tokens: impl Iterator<Item = Token<'a>>) -> Token<'a> {
+    struct TokenDisplayer<'a>(Token<'a>);
+
+    impl Display for TokenDisplayer<'_> {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            let Self(token) = self;
+            match token.kind {
+                TokenKind::String | TokenKind::CharConstant(_) =>
+                    token.slice().chars().try_for_each(|c| match c {
+                        '"' | '\\' => write!(f, "\\{c}"),
+                        _ => write!(f, "{c}"),
+                    }),
+                _ => write!(f, "{}", token.slice()),
+            }
+        }
+    }
+
+    let mut result = vec![b'"'];
+    write_preprocessed_tokens(&mut result, tokens, TokenDisplayer).unwrap();
+    result.push(b'"');
+
+    Token::from_str(
+        sess.bump(),
+        TokenKind::String,
+        sess.alloc_str(str::from_utf8(&result).unwrap()),
+    )
+}
+
+#[derive(Debug, Clone, Copy)]
+enum VaOptMode {
+    Stringise,
+    Normal,
+}
+
 #[derive(Debug, Clone, Copy)]
 enum Replacement<'a> {
     Literal(Token<'a>),
     Parameter(usize),
-    VaOpt(&'a [Replacement<'a>]),
+    VaOpt {
+        replacement: &'a [Replacement<'a>],
+        mode: VaOptMode,
+    },
     VaArgs,
     Stringise(usize),
+    StringiseVaArgs,
     Concat {
         lhs: &'a Replacement<'a>,
         hash_hash: Token<'a>,
@@ -188,14 +227,13 @@ impl<'a> Replacement<'a> {
                 replacement: call.get(*index),
                 update_hideset: true,
             }),
-            Self::VaOpt(replacement) => Expanded::VaOpt(VaOpt { call, replacement }),
-            Self::VaArgs => Expanded::Argument(Argument {
-                call,
-                replacement: call.get_va_args(),
-                update_hideset: false,
-            }),
+            Self::VaOpt { replacement, mode } =>
+                Expanded::VaOpt(VaOpt { call, replacement, mode: *mode }),
+            Self::VaArgs => Expanded::Argument(call.va_args()),
             Self::Stringise(index) =>
                 Expanded::Stringise(Stringise { call, replacement: call.get(*index) }),
+            Self::StringiseVaArgs =>
+                Expanded::Stringise(Stringise { call, replacement: call.get_va_args() }),
             Self::Concat { lhs, hash_hash, rhs } =>
                 Expanded::Concat(Concat { call, lhs, hash_hash: *hash_hash, rhs }),
         }
@@ -298,6 +336,14 @@ impl<'a> FunctionCall<'a> {
     fn get_va_args(&self) -> &'a [Replacement<'a>] {
         self.get(self.parameter_count)
     }
+
+    fn va_args(&self) -> Argument<'a> {
+        Argument {
+            call: *self,
+            replacement: self.get_va_args(),
+            update_hideset: false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -357,6 +403,7 @@ impl<'a> Expanding<'a> {
 struct VaOpt<'a> {
     call: FunctionCall<'a>,
     replacement: &'a [Replacement<'a>],
+    mode: VaOptMode,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -459,22 +506,22 @@ impl<'a> Expander<'a> {
     }
 
     fn expand_va_opt(&mut self, macros: &HashMap<&'a str, Macro<'a>>, va_opt: VaOpt<'a>) {
-        let VaOpt { call, replacement } = va_opt;
+        let VaOpt { call, replacement, mode } = va_opt;
         let depth = self.todo.len();
-        let fake_va_args = Expanding::Argument(Argument {
-            call,
-            replacement: call.get_va_args(),
-            update_hideset: false,
-        });
+        let fake_va_args = Expanding::Argument(call.va_args());
         self.push(fake_va_args.clone());
-        if self.next_until(macros, depth).is_some() {
+        let replacement = self.next_until(macros, depth).map_or_default(|_| {
             self.done(&fake_va_args);
-            self.push(Expanding::Argument(Argument {
-                call,
-                replacement,
-                update_hideset: false,
-            }));
-        }
+            replacement
+        });
+        let expanding = match mode {
+            VaOptMode::Stringise => Expanding::Token(Some(
+                self.stringise(macros, Stringise { call, replacement }),
+            )),
+            VaOptMode::Normal =>
+                Expanding::Argument(Argument { call, replacement, update_hideset: false }),
+        };
+        self.push(expanding)
     }
 
     fn stringise(
@@ -483,40 +530,10 @@ impl<'a> Expander<'a> {
         stringise: Stringise<'a>,
     ) -> Token<'a> {
         let Stringise { call, replacement } = stringise;
-        let argument = Expanding::Argument(Argument { call, replacement, update_hideset: true });
+        let argument = Expanding::Argument(Argument { call, replacement, update_hideset: false });
         let depth = self.todo.len();
         self.push(argument);
-        let mut result = vec![b'"'];
-
-        struct TokenDisplayer<'a>(Token<'a>);
-
-        impl Display for TokenDisplayer<'_> {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                let Self(token) = self;
-                match token.kind {
-                    TokenKind::String | TokenKind::CharConstant(_) =>
-                        token.slice().chars().try_for_each(|c| match c {
-                            '"' | '\\' => write!(f, "\\{c}"),
-                            _ => write!(f, "{c}"),
-                        }),
-                    _ => write!(f, "{}", token.slice()),
-                }
-            }
-        }
-
-        write_preprocessed_tokens(
-            &mut result,
-            from_fn(|| self.next_until(macros, depth)),
-            TokenDisplayer,
-        )
-        .unwrap();
-
-        result.push(b'"');
-        Token::from_str(
-            self.sess.bump(),
-            TokenKind::String,
-            self.sess.alloc_str(str::from_utf8(&result).unwrap()),
-        )
+        stringise_tokens(self.sess, from_fn(|| self.next_until(macros, depth)))
     }
 
     fn paste(&mut self, macros: &HashMap<&'a str, Macro<'a>>, concat: Concat<'a>) {
@@ -1092,35 +1109,45 @@ fn eat<'a>(tokens: &mut &'a [Token<'a>], kind: TokenKind) -> Result<&'a Token<'a
     }
 }
 
-fn parse_va_opt<'a>(
-    sess: &'a Session<'a>,
-    parameters: &IndexSet<&str>,
-    is_varargs: bool,
-    va_opt: &Token<'a>,
-    tokens: &mut &'a [Token<'a>],
-) -> Result<Replacement<'a>, ()> {
-    eat(tokens, TokenKind::LParen)?;
-    let iter = &mut tokens.iter().copied().peekable();
-    let va_opt_tokens_count = eat_until_in_balanced_parens(iter, |token| {
-        if token.slice() == "__VA_OPT__" {
-            sess.emit(Diagnostic::NestedVaOpt { at: *token, va_opt: *va_opt })
-        }
-        token.kind == TokenKind::RParen
-    })
-    .count();
-    let va_opt_tokens = tokens.split_off(..va_opt_tokens_count).unwrap();
-    let va_opt_tokens =
-        parse_function_like_replacement(sess, parameters, is_varargs, va_opt_tokens);
-    eat(tokens, TokenKind::RParen)?;
-    Ok(Replacement::VaOpt(sess.alloc_slice_copy(&va_opt_tokens)))
-}
-
 fn parse_replacement<'a>(
     sess: &'a Session<'a>,
     parameters: &IndexSet<&str>,
     is_varargs: bool,
     tokens: &mut &'a [Token<'a>],
 ) -> Option<Replacement<'a>> {
+    let parse_va_args = |va_args: &Token<'a>, replacement| {
+        if !is_varargs {
+            sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *va_args })
+        }
+        replacement
+    };
+
+    let parse_va_opt = |tokens: &mut &'a [Token<'a>],
+                        va_opt: &Token<'a>,
+                        mode: VaOptMode|
+     -> Result<Replacement<'a>, ()> {
+        if !is_varargs {
+            sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *va_opt })
+        }
+        eat(tokens, TokenKind::LParen)?;
+        let iter = &mut tokens.iter().copied().peekable();
+        let va_opt_tokens_count = eat_until_in_balanced_parens(iter, |token| {
+            if token.slice() == "__VA_OPT__" {
+                sess.emit(Diagnostic::NestedVaOpt { at: *token, va_opt: *va_opt })
+            }
+            token.kind == TokenKind::RParen
+        })
+        .count();
+        let va_opt_tokens = tokens.split_off(..va_opt_tokens_count).unwrap();
+        let va_opt_tokens =
+            parse_function_like_replacement(sess, parameters, is_varargs, va_opt_tokens);
+        eat(tokens, TokenKind::RParen)?;
+        Ok(Replacement::VaOpt {
+            replacement: sess.alloc_slice_copy(&va_opt_tokens),
+            mode,
+        })
+    };
+
     let token = tokens.split_off_first()?;
     let replacement = match token.kind {
         TokenKind::HashHash => {
@@ -1131,28 +1158,24 @@ fn parse_replacement<'a>(
         TokenKind::Hash => match tokens.split_off_first() {
             Some(token) if let Some(index) = parameters.get_index_of(token.slice()) =>
                 Replacement::Stringise(index),
-            Some(_) => todo!("error: not a parameter (but allow `__VA_OPT__` and `__VA_ARGS__`)"),
+            Some(token) if token.slice() == "__VA_ARGS__" =>
+                parse_va_args(token, Replacement::StringiseVaArgs),
+            Some(token) if token.slice() == "__VA_OPT__" =>
+                parse_va_opt(tokens, token, VaOptMode::Stringise)
+                    .expect("TODO: error message: error while parsing `__VA_OPT__`"),
+            Some(token) => {
+                let () = sess.emit(Diagnostic::StringiseNotAParameter { at: *token });
+                Replacement::Literal(stringise_tokens(sess, once(*token)))
+            }
             None => {
                 let () = sess.emit(Diagnostic::StringiseAtEndOfMacro { at: *token });
                 return None;
             }
         },
         _ => match token.slice() {
-            "__VA_OPT__" => {
-                if !is_varargs {
-                    sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
-                }
-                match parse_va_opt(sess, parameters, is_varargs, token, tokens) {
-                    Ok(va_opt) => va_opt,
-                    Err(()) => todo!("error message: error while parsing `__VA_OPT__`"),
-                }
-            }
-            "__VA_ARGS__" => {
-                if !is_varargs {
-                    sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *token })
-                }
-                Replacement::VaArgs
-            }
+            "__VA_OPT__" => parse_va_opt(tokens, token, VaOptMode::Normal)
+                .expect("TODO: error message: error while parsing `__VA_OPT__`"),
+            "__VA_ARGS__" => parse_va_args(token, Replacement::VaArgs),
             _ => parse_token_as_maybe_parameter(parameters, token),
         },
     };

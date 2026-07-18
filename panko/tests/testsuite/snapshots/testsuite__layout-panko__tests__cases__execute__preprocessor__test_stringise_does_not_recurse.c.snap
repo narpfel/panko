@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/preprocessor/test_stringise_does_not_recurse.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/preprocessor/test_stringise_does_not_recurse.c"
+   (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
+   (function-definition external stack-size=40
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+                  (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 9>>` @16
+                        (string `array<char; 9>` @void "F(F(42))\0")))))))))
+
+----- stderr -----
