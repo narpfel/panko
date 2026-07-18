@@ -175,6 +175,10 @@ pub(super) enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "this `{at}` must be followed by a macro parameter"))]
     StringiseAtEndOfMacro { at: Token<'a> },
 
+    #[error("stringise operand `{at}` is not a macro parameter")]
+    #[diagnostics(at(colour = Red, label = "this is not a macro parameter"))]
+    StringiseNotAParameter { at: Token<'a> },
+
     #[error("non-identifier `{at}` of kind `{kind}` in function-like macro parameter list")]
     #[diagnostics(at(colour = Red, label = "only identifiers are allowed as parameter names"))]
     #[with(kind = format!("{:?}", at.kind).fg(Red))]

@@ -8,6 +8,7 @@ use std::fmt::Display;
 use std::io::stdout;
 use std::iter::Peekable;
 use std::iter::from_fn;
+use std::iter::once;
 use std::ops::Not as _;
 use std::path::Path;
 
@@ -23,7 +24,6 @@ use panko_lex::TokenKind;
 
 use crate::TypedefTracker;
 use crate::ast::Session;
-use crate::error_todo;
 use crate::handle_parse_error;
 use crate::nonempty;
 use crate::preprocess::diagnostics::Diagnostic;
@@ -164,6 +164,34 @@ pub(crate) fn tokens_loc<'a>(tokens: &[Token<'a>]) -> Loc<'a> {
         [token] => token.loc(),
         [first, .., last] => first.loc().until(last.loc()),
     }
+}
+
+fn stringise_tokens<'a>(sess: &Session<'a>, tokens: impl Iterator<Item = Token<'a>>) -> Token<'a> {
+    struct TokenDisplayer<'a>(Token<'a>);
+
+    impl Display for TokenDisplayer<'_> {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            let Self(token) = self;
+            match token.kind {
+                TokenKind::String | TokenKind::CharConstant(_) =>
+                    token.slice().chars().try_for_each(|c| match c {
+                        '"' | '\\' => write!(f, "\\{c}"),
+                        _ => write!(f, "{c}"),
+                    }),
+                _ => write!(f, "{}", token.slice()),
+            }
+        }
+    }
+
+    let mut result = vec![b'"'];
+    write_preprocessed_tokens(&mut result, tokens, TokenDisplayer).unwrap();
+    result.push(b'"');
+
+    Token::from_str(
+        sess.bump(),
+        TokenKind::String,
+        sess.alloc_str(str::from_utf8(&result).unwrap()),
+    )
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -505,37 +533,7 @@ impl<'a> Expander<'a> {
         let argument = Expanding::Argument(Argument { call, replacement, update_hideset: false });
         let depth = self.todo.len();
         self.push(argument);
-        let mut result = vec![b'"'];
-
-        struct TokenDisplayer<'a>(Token<'a>);
-
-        impl Display for TokenDisplayer<'_> {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                let Self(token) = self;
-                match token.kind {
-                    TokenKind::String | TokenKind::CharConstant(_) =>
-                        token.slice().chars().try_for_each(|c| match c {
-                            '"' | '\\' => write!(f, "\\{c}"),
-                            _ => write!(f, "{c}"),
-                        }),
-                    _ => write!(f, "{}", token.slice()),
-                }
-            }
-        }
-
-        write_preprocessed_tokens(
-            &mut result,
-            from_fn(|| self.next_until(macros, depth)),
-            TokenDisplayer,
-        )
-        .unwrap();
-
-        result.push(b'"');
-        Token::from_str(
-            self.sess.bump(),
-            TokenKind::String,
-            self.sess.alloc_str(str::from_utf8(&result).unwrap()),
-        )
+        stringise_tokens(self.sess, from_fn(|| self.next_until(macros, depth)))
     }
 
     fn paste(&mut self, macros: &HashMap<&'a str, Macro<'a>>, concat: Concat<'a>) {
@@ -1165,7 +1163,10 @@ fn parse_replacement<'a>(
             Some(token) if token.slice() == "__VA_OPT__" =>
                 parse_va_opt(tokens, token, VaOptMode::Stringise)
                     .expect("TODO: error message: error while parsing `__VA_OPT__`"),
-            Some(token) => error_todo!(token, "not a parameter"),
+            Some(token) => {
+                let () = sess.emit(Diagnostic::StringiseNotAParameter { at: *token });
+                Replacement::Literal(stringise_tokens(sess, once(*token)))
+            }
             None => {
                 let () = sess.emit(Diagnostic::StringiseAtEndOfMacro { at: *token });
                 return None;
