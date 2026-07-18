@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/preprocessor/test_error_stringise_varargs_outside_varargs_macro.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `__VA_OPT__` outside of variadic macro
+   ╭─[panko/tests/cases/execute/preprocessor/test_error_stringise_varargs_outside_varargs_macro.c:7:19]
+   │
+ 7 │ #define M2(a, b) #__VA_OPT__(42)
+   │                   ─────┬────  
+   │                        ╰────── `__VA_OPT__` is forbidden outside of variadic macros
+───╯
