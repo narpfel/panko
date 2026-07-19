@@ -431,7 +431,7 @@ impl EncodingPrefix {
 }
 
 fn lex_encoding_prefix(lexer: &mut Lexer<TokenKind>) -> EncodingPrefix {
-    // the slice it at least two bytes long due to opening and closing quotes
+    // the slice is at least two bytes long due to opening and closing quotes
     let bytes = lexer.slice().as_bytes();
     let maybe_prefix = (bytes[0], bytes[1]);
     match maybe_prefix {
