@@ -196,7 +196,6 @@ pub(super) fn parse_char_literal<'a>(
         unreachable!()
     };
     let ty = Type::char_constant_ty(encoding_prefix);
-    // TODO: check that escape sequence values are in range
     let values = parse_escape_sequences(
         char.slice()[encoding_prefix.len() + 1..char.slice().len() - 1].chars(),
         encoding_prefix,
