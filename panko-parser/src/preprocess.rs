@@ -1122,14 +1122,14 @@ fn parse_replacement<'a>(
         replacement
     };
 
-    let parse_va_opt = |tokens: &mut &'a [Token<'a>],
-                        va_opt: &Token<'a>,
-                        mode: VaOptMode|
-     -> Result<Replacement<'a>, ()> {
+    let parse_va_opt = |tokens: &mut &'a [Token<'a>], va_opt: &Token<'a>, mode: VaOptMode| {
         if !is_varargs {
             sess.emit(Diagnostic::VaArgsOrVaOptOutsideOfVariadicMacro { at: *va_opt })
         }
-        eat(tokens, TokenKind::LParen)?;
+        if let Err(()) = eat(tokens, TokenKind::LParen) {
+            sess.emit(Diagnostic::VaOptMissingOpenParen { at: *va_opt })
+        }
+
         let iter = &mut tokens.iter().copied().peekable();
         let va_opt_tokens_count = eat_until_in_balanced_parens(iter, |token| {
             if token.slice() == "__VA_OPT__" {
@@ -1141,11 +1141,15 @@ fn parse_replacement<'a>(
         let va_opt_tokens = tokens.split_off(..va_opt_tokens_count).unwrap();
         let va_opt_tokens =
             parse_function_like_replacement(sess, parameters, is_varargs, va_opt_tokens);
-        eat(tokens, TokenKind::RParen)?;
-        Ok(Replacement::VaOpt {
+
+        if let Err(()) = eat(tokens, TokenKind::RParen) {
+            sess.emit(Diagnostic::VaOptMissingCloseParen { at: *va_opt })
+        }
+
+        Replacement::VaOpt {
             replacement: sess.alloc_slice_copy(&va_opt_tokens),
             mode,
-        })
+        }
     };
 
     let token = tokens.split_off_first()?;
@@ -1161,8 +1165,7 @@ fn parse_replacement<'a>(
             Some(token) if token.slice() == "__VA_ARGS__" =>
                 parse_va_args(token, Replacement::StringiseVaArgs),
             Some(token) if token.slice() == "__VA_OPT__" =>
-                parse_va_opt(tokens, token, VaOptMode::Stringise)
-                    .expect("TODO: error message: error while parsing `__VA_OPT__`"),
+                parse_va_opt(tokens, token, VaOptMode::Stringise),
             Some(token) => {
                 let () = sess.emit(Diagnostic::StringiseNotAParameter { at: *token });
                 Replacement::Literal(stringise_tokens(sess, once(*token)))
@@ -1173,8 +1176,7 @@ fn parse_replacement<'a>(
             }
         },
         _ => match token.slice() {
-            "__VA_OPT__" => parse_va_opt(tokens, token, VaOptMode::Normal)
-                .expect("TODO: error message: error while parsing `__VA_OPT__`"),
+            "__VA_OPT__" => parse_va_opt(tokens, token, VaOptMode::Normal),
             "__VA_ARGS__" => parse_va_args(token, Replacement::VaArgs),
             _ => parse_token_as_maybe_parameter(parameters, token),
         },

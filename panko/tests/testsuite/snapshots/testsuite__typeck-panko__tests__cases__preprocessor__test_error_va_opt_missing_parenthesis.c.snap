@@ -1,0 +1,69 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/preprocessor/test_error_va_opt_missing_parenthesis.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `__VA_OPT__` requires a parenthesised token sequence
+   ╭─[panko/tests/cases/preprocessor/test_error_va_opt_missing_parenthesis.c:1:20]
+   │
+ 1 │ #define F1(x, ...) __VA_OPT__)
+   │                    ─────┬────  
+   │                         ╰────── expected an open parenthesis after this `__VA_OPT__`
+───╯
+
+Error: `__VA_OPT__` requires a parenthesised token sequence
+   ╭─[panko/tests/cases/preprocessor/test_error_va_opt_missing_parenthesis.c:2:20]
+   │
+ 2 │ #define F2(x, ...) __VA_OPT__ 42
+   │                    ─────┬────  
+   │                         ╰────── expected an open parenthesis after this `__VA_OPT__`
+───╯
+
+Error: `__VA_OPT__` requires a parenthesised token sequence
+   ╭─[panko/tests/cases/preprocessor/test_error_va_opt_missing_parenthesis.c:2:20]
+   │
+ 2 │ #define F2(x, ...) __VA_OPT__ 42
+   │                    ─────┬────  
+   │                         ╰────── this `__VA_OPT__` does not have a matching closing parenthesis
+───╯
+
+Error: `__VA_OPT__` requires a parenthesised token sequence
+   ╭─[panko/tests/cases/preprocessor/test_error_va_opt_missing_parenthesis.c:3:20]
+   │
+ 3 │ #define F3(x, ...) __VA_OPT__(42
+   │                    ─────┬────  
+   │                         ╰────── this `__VA_OPT__` does not have a matching closing parenthesis
+───╯
+
+Error: `__VA_OPT__` requires a parenthesised token sequence
+   ╭─[panko/tests/cases/preprocessor/test_error_va_opt_missing_parenthesis.c:4:20]
+   │
+ 4 │ #define F4(x, ...) __VA_OPT__(
+   │                    ─────┬────  
+   │                         ╰────── this `__VA_OPT__` does not have a matching closing parenthesis
+───╯
+
+Error: `__VA_OPT__` requires a parenthesised token sequence
+   ╭─[panko/tests/cases/preprocessor/test_error_va_opt_missing_parenthesis.c:5:20]
+   │
+ 5 │ #define F5(x, ...) __VA_OPT__
+   │                    ─────┬────  
+   │                         ╰────── expected an open parenthesis after this `__VA_OPT__`
+───╯
+
+Error: `__VA_OPT__` requires a parenthesised token sequence
+   ╭─[panko/tests/cases/preprocessor/test_error_va_opt_missing_parenthesis.c:5:20]
+   │
+ 5 │ #define F5(x, ...) __VA_OPT__
+   │                    ─────┬────  
+   │                         ╰────── this `__VA_OPT__` does not have a matching closing parenthesis
+───╯

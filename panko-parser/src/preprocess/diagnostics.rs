@@ -70,6 +70,16 @@ pub(super) enum Diagnostic<'a> {
     )]
     NestedVaOpt { at: Token<'a>, va_opt: Token<'a> },
 
+    #[error("`{at}` requires a parenthesised token sequence")]
+    #[diagnostics(at(colour = Red, label = "expected {expectation} after this `{at}`"))]
+    #[with(expectation = "an open parenthesis".fg(Blue))]
+    VaOptMissingOpenParen { at: Token<'a> },
+
+    #[error("`{at}` requires a parenthesised token sequence")]
+    #[diagnostics(at(colour = Red, label = "this `{at}` does not have {expectation}"))]
+    #[with(expectation = "a matching closing parenthesis".fg(Blue))]
+    VaOptMissingCloseParen { at: Token<'a> },
+
     #[error("`{at}` does not define anything")]
     #[diagnostics(at(colour = Red, label = "help: add a macro name and an optional expansion"))]
     EmptyDefine { at: Loc<'a> },
