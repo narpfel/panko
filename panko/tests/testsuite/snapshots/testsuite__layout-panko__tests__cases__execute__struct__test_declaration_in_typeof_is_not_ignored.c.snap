@@ -1,0 +1,50 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_declaration_in_typeof_is_not_ignored.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot declare variable `x` with incomplete type `struct T~2`
+   ╭─[panko/tests/cases/execute/struct/test_declaration_in_typeof_is_not_ignored.c:6:14]
+   │
+ 6 │     struct T x = {.x = 42};
+   │              ┬  
+   │              ╰── declared here
+───╯
+
+Error: cannot initialise variable of incomplete type `struct T~2`
+   ╭─[panko/tests/cases/execute/struct/test_declaration_in_typeof_is_not_ignored.c:6:18]
+   │
+ 6 │     struct T x = {.x = 42};
+   │     ────┬─── ┬   ────┬────  
+   │         │    │       ╰────── cannot initialise variable of incomplete type
+   │         │    │              
+   │         │    ╰────────────── while defining this variable
+   │         │                   
+   │         ╰─────────────────── `struct T~2` is incomplete
+───╯
+
+Error: member access on incomplete struct type `struct T~2`
+   ╭─[panko/tests/cases/execute/struct/test_declaration_in_typeof_is_not_ignored.c:8:12]
+   │
+ 8 │     return x.x;
+   │            ┬ ─  
+   │            │    
+   │            ╰──── this expression has incomplete struct type `struct T~2`
+───╯
+
+Error: invalid implicit conversion from `void` to `int`
+   ╭─[panko/tests/cases/execute/struct/test_declaration_in_typeof_is_not_ignored.c:8:12]
+   │
+ 8 │     return x.x;
+   │            ┬  
+   │            ╰── this is of type `void`, which cannot be implicitly converted to `int`
+───╯
