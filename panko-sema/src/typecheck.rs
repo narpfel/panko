@@ -856,7 +856,7 @@ fn typeck_struct_members<'a>(
                 Some(0) => {
                     if let Some(name) = name {
                         sess.emit(Diagnostic::NamedZeroWidthBitfield {
-                            at: *name,
+                            at: name,
                             width: width_expr.unwrap(),
                         })
                     }

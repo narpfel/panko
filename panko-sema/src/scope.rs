@@ -112,7 +112,7 @@ pub(crate) enum Diagnostic<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Member<'a> {
-    pub(crate) name: Option<&'a Token<'a>>,
+    pub(crate) name: Option<Token<'a>>,
     pub(crate) bitfield_width: Option<BitfieldWidth<'a>>,
     pub(crate) ty: QualifiedType<'a>,
 }
@@ -820,14 +820,13 @@ fn resolve_struct_members<'a>(
         }
         Either::Right(member) => {
             let ast::Member { name, bitfield_width, ty } = member;
-            let name = name.as_ref();
             let bitfield_width = try {
                 BitfieldWidth {
                     width: resolve_expr(scopes, bitfield_width.as_ref()?),
                 }
             };
             let ty = resolve_ty(scopes, ty);
-            Some(NoHashEq(Member { name, bitfield_width, ty }))
+            Some(NoHashEq(Member { name: *name, bitfield_width, ty }))
         }
     }))
 }
