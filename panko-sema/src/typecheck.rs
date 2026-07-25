@@ -114,7 +114,8 @@ impl<Expression> PartialEq for ArrayLength<Expression> {
             (ArrayLength::Constant(self_length), ArrayLength::Constant(other_length)) =>
                 self_length == other_length,
             (ArrayLength::Unknown, _) | (_, ArrayLength::Unknown) => true,
-            _ => todo!("type compatibility involving variably-modified types not implemented"),
+            (ArrayLength::Variable(_), _) | (_, ArrayLength::Variable(_)) =>
+                todo!("type compatibility involving variably-modified types not implemented"),
         }
     }
 }
