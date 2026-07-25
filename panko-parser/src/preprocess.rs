@@ -24,6 +24,7 @@ use panko_lex::TokenKind;
 
 use crate::TypedefTracker;
 use crate::ast::Session;
+use crate::error_todo;
 use crate::handle_parse_error;
 use crate::nonempty;
 use crate::preprocess::diagnostics::Diagnostic;
@@ -736,8 +737,11 @@ impl<'a> Preprocessor<'a> {
             Some(token) if token.slice() == "include" => {
                 self.eval_include(hash);
             }
-            Some(token) =>
-                todo!("error: unimplemented preprocessor directive starting in {token:?}"),
+            Some(token) => error_todo!(
+                token,
+                "unimplemented preprocessor directive starting in {:#?}",
+                token,
+            ),
         }
     }
 

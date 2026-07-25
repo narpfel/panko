@@ -13,6 +13,7 @@ use panko_parser::LogicalOpKind;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
+use panko_parser::unimplemented_todo;
 use panko_report::Report;
 
 use crate::scope::BuiltinName;
@@ -934,7 +935,11 @@ pub(super) fn eval<'a, 'b>(typed_expr: &'b TypedExpression<'a>) -> Value<'a, 'b>
             Pointer::FromInt(Ok(_)) => not_constexpr(typed_expr, no_errors()),
             Pointer::FromInt(Err(errors)) => Value::with_errors(typed_expr, errors),
             Pointer::Address(Address { target, offset }) => match target {
-                Target::Reference(_reference) => todo!("`constexpr` and e. g. `static const`"),
+                Target::Reference(reference) => unimplemented_todo!(
+                    reference,
+                    "deref of pointer to named variable; happens for \
+                    `constexpr` and e. g. `static const`",
+                ),
                 Target::String(byte_str) => {
                     let index = usize::try_from(offset).unwrap();
                     let c = match byte_str.get(index) {

@@ -31,6 +31,7 @@ use crate::UnaryOp;
 use crate::UnaryOpKind;
 use crate::ast::FromError;
 use crate::ast::Session;
+use crate::unimplemented_todo;
 
 #[derive(Debug, Clone, Copy)]
 pub(super) enum EvalError {
@@ -451,7 +452,8 @@ pub(super) fn eval<'a>(sess: &Session<'a>, expr: &Expression<'a>) -> Value<'a> {
                 },
             }
         }
-        Expression::CharConstant(_token) => todo!(),
+        Expression::CharConstant(token) =>
+            unimplemented_todo!(token, "character constants in preprocessor expressions"),
         Expression::String(_) =>
             sess.emit(Diagnostic::InvalidExpression { at: *expr, kind: "string literals" }),
         Expression::Nullptr(_) =>

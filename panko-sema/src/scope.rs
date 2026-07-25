@@ -28,6 +28,7 @@ use panko_parser::ast::TypeDeclaration;
 use panko_parser::ast::reject_function_specifiers;
 use panko_parser::error_todo;
 use panko_parser::sexpr_builder::SExpr;
+use panko_parser::unimplemented_todo;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
@@ -1070,7 +1071,11 @@ fn resolve_declaration<'a>(
             IsInGlobalScope::Yes => Some(Linkage::Internal),
             IsInGlobalScope::No => Some(Linkage::None),
         },
-        Some(storage_class) => todo!("not implemented: storage class {:?}", storage_class),
+        Some(kind) => unimplemented_todo!(
+            storage_class.unwrap(),
+            "not implemented: storage class {:?}",
+            kind,
+        ),
         None => None,
     };
     let storage_duration = match linkage {

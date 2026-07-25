@@ -32,6 +32,7 @@ use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::reject_function_specifiers;
+use panko_parser::unimplemented_todo;
 use panko_report::Report;
 
 use crate::fake_trait_impls::HashEqIgnored;
@@ -740,7 +741,7 @@ fn typeck_array_ty<'a>(
     match is_parameter {
         IsParameter::Yes => {
             if matches!(length, ArrayLength::Variable(_)) {
-                todo!("unimplemented: variably-modified type as function parameter");
+                unimplemented_todo!(loc.0, "variably-modified type as function parameter");
             }
             Type::Pointer(ty)
         }
@@ -1925,7 +1926,8 @@ fn typeck_unary_op<'a>(
                         operand: sess.alloc(operand),
                         length,
                     },
-                    ArrayLength::Variable(_) => todo!("`_Lengthof` of a variably-modified type"),
+                    ArrayLength::Variable(_) =>
+                        unimplemented_todo!(expr, "`_Lengthof` of a variably-modified type"),
                     ArrayLength::Unknown => sess.emit(Diagnostic::LengthofOfArrayOfUnknownLength {
                         op: operator.token,
                         at: operand,
@@ -2374,7 +2376,8 @@ fn typeck_expression<'a>(
                         length,
                         close_paren: *close_paren,
                     },
-                    ArrayLength::Variable(_) => todo!("_Lengthof of a variably-modified type"),
+                    ArrayLength::Variable(_) =>
+                        unimplemented_todo!(expr, "_Lengthof of a variably-modified type"),
                     ArrayLength::Unknown =>
                         sess.emit(Diagnostic::LengthofOfArrayTyOfUnknownLength {
                             op: *lengthof,

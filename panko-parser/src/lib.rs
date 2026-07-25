@@ -171,23 +171,33 @@ pub enum TodoError<'a> {
     #[error("TODO: {msg}")]
     #[diagnostics(at(colour = Red))]
     #[with(msg = yansi::Paint::bold(&msg.fg(Red)).to_string())]
-    Error { at: Loc<'a>, msg: String },
+    Error { at: Loc<'a>, msg: &'a str },
+}
+
+#[doc(hidden)]
+pub fn todo_impl(at: Loc, msg: &str) -> ! {
+    let error = TodoError::Error { at, msg };
+    error.print();
+    todo!("{msg}")
 }
 
 #[macro_export]
 macro_rules! error_todo {
     ($at:expr $(,)?) => {{
-        let msg = String::from("unimplemented error");
-        let error = $crate::TodoError::Error { at: $at.loc(), msg: msg.clone() };
-        $crate::Report::print(&error);
-        todo!("{msg}")
+        $crate::todo_impl($at.loc(), "unimplemented error")
     }};
     ($at:expr, $msg:literal $(, $param:expr)* $(,)?) => {{
-        let at = $at.loc();
-        let msg = format!(concat!("unimplemented error: ", $msg), $($param,)*);
-        let error = $crate::TodoError::Error { at, msg: msg.clone() };
-        $crate::Report::print(&error);
-        todo!("{msg}")
+        $crate::todo_impl($at.loc(), &format!(concat!("unimplemented error: ", $msg), $($param,)*))
+    }};
+}
+
+#[macro_export]
+macro_rules! unimplemented_todo {
+    ($at:expr $(,)?) => {{
+        $crate::todo_impl($at.loc(), "unimplemented feature")
+    }};
+    ($at:expr, $msg:literal $(, $param:expr)* $(,)?) => {{
+        $crate::todo_impl($at.loc(), &format!(concat!("unimplemented feature: ", $msg), $($param,)*))
     }};
 }
 
@@ -572,7 +582,7 @@ impl<'a> TypeSpecifier<'a> {
             Kind::Typeof { unqual, expr } => exclusive(Parsed::Typeof { unqual, expr }),
             Kind::TypeofTy { unqual, ty } => exclusive(Parsed::TypeofTy { unqual, ty }),
             Kind::Struct(r#struct) => exclusive(Parsed::Struct(r#struct)),
-            _ => todo!("unimplemented type specifier: {self:#?}"),
+            _ => unimplemented_todo!(self, "unimplemented type specifier: {:#?}", self),
         }
     }
 }

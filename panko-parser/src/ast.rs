@@ -35,6 +35,7 @@ use crate::TypeSpecifierQualifier::Qualifier;
 use crate::TypeSpecifierQualifier::Specifier;
 use crate::UnlabeledStatement;
 use crate::sexpr_builder::AsSExpr as _;
+use crate::unimplemented_todo;
 
 mod as_sexpr;
 
@@ -740,7 +741,7 @@ impl<'a> TypeQualifier<'a> {
                     sess.emit(Diagnostic::DuplicateDeclarationSpecifier { at: self, first }),
                 None => *volatile_qualifier = Some(self),
             },
-            _ => todo!("{self:#?}"),
+            _ => unimplemented_todo!(self, "unimplemented type qualifier {:#?}", self),
         }
     }
 }
@@ -1006,7 +1007,11 @@ pub(crate) fn parse_declaration_specifiers<'a>(
                         at: *class,
                     }),
                 },
-            cst::DeclarationSpecifier::StorageClass(storage_class) => todo!("{storage_class:#?}"),
+            cst::DeclarationSpecifier::StorageClass(storage_class) => unimplemented_todo!(
+                storage_class,
+                "unimplemented storage class {:#?}",
+                storage_class,
+            ),
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Specifier(specifier)) =>
                 ty = specifier.parse(sess, specifiers, i, ty),
             cst::DeclarationSpecifier::TypeSpecifierQualifier(Qualifier(qualifier)) =>
@@ -1141,7 +1146,10 @@ pub(crate) fn parse_declarator<'a>(
                         None => (),
                         Some(storage_class)
                             if let StorageClassSpecifierKind::Register = storage_class.kind =>
-                            todo!("register storage class in parameters"),
+                            unimplemented_todo!(
+                                storage_class,
+                                "register storage class in parameters",
+                            ),
                         Some(storage_class) =>
                             sess.emit(Diagnostic::StorageClassInParameterDeclaration {
                                 at: storage_class.token,
