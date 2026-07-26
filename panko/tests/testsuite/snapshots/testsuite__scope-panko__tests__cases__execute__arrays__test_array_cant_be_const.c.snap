@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arrays/test_array_cant_be_const.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/arrays/test_array_cant_be_const.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration xs~2 `typeof(`array<int; 5>`) const`
+            (braced
+               1
+               2
+               3
+               4
+               5))
+         (declaration p~3 `ptr<int>` (name xs~2 `typeof(`array<int; 5>`) const`)))))
+
+----- stderr -----

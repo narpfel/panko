@@ -76,6 +76,15 @@ pub(super) enum Diagnostic<'a> {
         kind: ConversionKind,
     },
 
+    #[error("implicit conversion from `{from_ty}` to `{to_ty}` drops qualifiers")]
+    #[diagnostics(at(colour = Red, label = "this is of type `{from_ty}`, which is more qualified than `{to_ty}`"))]
+    #[with(from_ty = from_ty.fg(Blue), to_ty = to_ty.fg(Magenta))]
+    ImplicitConversionDropsQualifiers {
+        at: TypedExpression<'a>,
+        from_ty: Type<'a>,
+        to_ty: Type<'a>,
+    },
+
     #[error("invalid non-scalar cast from `{from_ty}` to `{target_ty}`")]
     #[diagnostics(
         at(colour = Blue, label = "this is of type `{from_ty}`"),

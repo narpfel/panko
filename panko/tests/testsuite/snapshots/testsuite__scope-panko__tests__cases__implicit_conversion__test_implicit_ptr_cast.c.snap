@@ -17,14 +17,9 @@ exit_code: 0
          (declaration p~2 `ptr<int>` ∅)
          (return (name p~2 `ptr<int>`))))
    (function-definition
-      const_can_be_removed~3 `fn() -> ptr<int>`
+      cast_between_completely_different_ptr_types~3 `fn() -> ptr<ptr<char>>`
       (compound-statement
-         (declaration p~5 `ptr<int const>` ∅)
-         (return (name p~5 `ptr<int const>`))))
-   (function-definition
-      cast_between_completely_different_ptr_types~6 `fn() -> ptr<ptr<char>>`
-      (compound-statement
-         (declaration p~8 `ptr<int>` ∅)
-         (return (name p~8 `ptr<int>`)))))
+         (declaration p~5 `ptr<int>` ∅)
+         (return (name p~5 `ptr<int>`)))))
 
 ----- stderr -----

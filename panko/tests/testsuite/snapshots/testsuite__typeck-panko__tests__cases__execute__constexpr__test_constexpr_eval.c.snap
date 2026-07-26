@@ -1167,11 +1167,10 @@ exit_code: 0
             (definition a~136 `ptr<char const>`
                (noop-type-conversion `ptr<char const>`
                   (addressof `ptr<array<char const; 5>>`
-                     (builtin-name `array<char const; 5> const` __func__ "main"))))
+                     (builtin-name `array<char const; 5>` __func__ "main"))))
             (definition b~137 `ptr<array<char const; 5>>`
-               (noop-type-conversion `ptr<array<char const; 5>>`
-                  (addressof `ptr<array<char const; 5> const>`
-                     (builtin-name `array<char const; 5> const` __func__ "main"))))
+               (addressof `ptr<array<char const; 5>>`
+                  (builtin-name `array<char const; 5>` __func__ "main")))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -1206,8 +1205,8 @@ exit_code: 0
                   (ptr-add `ptr<char const>`
                      (noop-type-conversion `ptr<char const>`
                         (addressof `ptr<array<char const; 5>>`
-                           (builtin-name `array<char const; 5> const` __func__ "main")))
-                     (noop-type-conversion `long` (subtract `unsigned long` (lengthof `unsigned long` 5 (builtin-name `array<char const; 5> const` __func__ "main")) (sign-extend `unsigned long` (1 `int`)))))))
+                           (builtin-name `array<char const; 5>` __func__ "main")))
+                     (noop-type-conversion `long` (subtract `unsigned long` (lengthof `unsigned long` 5 (builtin-name `array<char const; 5>` __func__ "main")) (sign-extend `unsigned long` (1 `int`)))))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

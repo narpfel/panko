@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/arrays/test_array_cant_be_const.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/arrays/test_array_cant_be_const.c"
+   (function-definition external
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition xs~2 `array<int; 5> const`
+            (braced
+               (subobject +0 (1 `int`))
+               (subobject +4 (2 `int`))
+               (subobject +8 (3 `int`))
+               (subobject +12 (4 `int`))
+               (subobject +16 (5 `int`))))
+         (definition p~3 `ptr<int>`
+            (noop-type-conversion `ptr<int>`
+               (addressof `ptr<array<int; 5>>`
+                  (xs~2 `array<int; 5> const`)))))))
+
+----- stderr -----
