@@ -547,6 +547,7 @@ impl<T: Step> AsSExpr for Type<'_, T> {
     }
 }
 
+// TODO: arrays can‘t be qualified and should propagate their qualifiers to their element type
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct QualifiedType<'a, T: Step> {
     pub(crate) is_const: bool,
