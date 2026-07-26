@@ -2719,19 +2719,17 @@ fn typeck_expression<'a>(
         }
         scope::Expression::BuiltinName(name @ BuiltinName { kind, loc }) => {
             let ty = match kind {
-                BuiltinNameKind::GpOffset => Type::size_t(),
+                BuiltinNameKind::GpOffset => Type::size_t().as_const(),
                 BuiltinNameKind::OverflowArgArea =>
-                    Type::Pointer(const { &Type::Void.unqualified() }),
+                    Type::Pointer(const { &Type::Void.unqualified() }).as_const(),
                 BuiltinNameKind::Func(func) => Type::Array(ArrayType {
                     ty: const { &Type::char().as_const() },
                     length: ArrayLength::Constant(u64::try_from(func.len()).unwrap() + 1),
                     loc: HashEqIgnored(*loc),
-                }),
+                })
+                .unqualified(),
             };
-            TypedExpression {
-                ty: ty.as_const(),
-                expr: Expression::BuiltinName(*name),
-            }
+            TypedExpression { ty, expr: Expression::BuiltinName(*name) }
         }
         scope::Expression::CompoundLiteral { open_paren, decl } => {
             let decl = typeck_declaration(sess, decl);
