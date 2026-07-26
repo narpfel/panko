@@ -1124,9 +1124,20 @@ fn convert<'a>(
         (Type::Void, _) if kind == ConversionKind::Explicit =>
             Expression::VoidCast(sess.alloc(expr)),
 
-        (Type::Arithmetic(_), Type::Arithmetic(_))
-        | (Type::Pointer(_), Type::Pointer(_))
-        | (Type::Nullptr, Type::Nullptr) =>
+        (Type::Pointer(target_pointee), Type::Pointer(expr_pointee)) => match kind {
+            ConversionKind::Explicit => convert(),
+            ConversionKind::Implicit if target_pointee == expr_pointee => return expr,
+            ConversionKind::Implicit
+                if &target_pointee.merge_qualifiers(expr_pointee) == target_pointee =>
+                convert(),
+            ConversionKind::Implicit => sess.emit(Diagnostic::ImplicitConversionDropsQualifiers {
+                at: expr,
+                from_ty: expr_ty,
+                to_ty: target_ty,
+            }),
+        },
+
+        (Type::Arithmetic(_), Type::Arithmetic(_)) | (Type::Nullptr, Type::Nullptr) =>
             match kind == ConversionKind::Implicit && target_ty == expr_ty {
                 true => return expr,
                 false => convert(),
