@@ -242,7 +242,11 @@ impl TestCase {
             Ok(()) => match (expected_result, expects_failure) {
                 (ExpectedResult::Success, false) => TestResult::Success,
                 (ExpectedResult::Success, true) => TestResult::XPass,
-                (ExpectedResult::ShouldPanic(_), false) => TestResult::Failure,
+                (ExpectedResult::ShouldPanic(expected_messages), false) => {
+                    eprintln!("test {FG_BOLD}`{name}`{RESET} should panic but did not");
+                    eprintln!("expected panic with messages {expected_messages:#?}");
+                    TestResult::Failure
+                }
                 (ExpectedResult::ShouldPanic(_), true) => TestResult::XFail,
             },
             Err(_panic_payload) => match (expected_result, expects_failure) {
