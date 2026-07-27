@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/pointers/test_implicit_conversion_between_pointers_to_different_but_compatible_types.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_implicit_conversion_between_pointers_to_different_but_compatible_types.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (declaration xs~2 `array<int; 5>`
+            (braced
+               42))
+         (declaration p1~3 `ptr<typeof(`array<int; 5>`)>` (addressof (name xs~2 `array<int; 5>`)))
+         (declaration p2~4 `ptr<typeof(`array<int const; 5>`)>` (name p1~3 `ptr<typeof(`array<int; 5>`)>`))
+         (return (deref (deref (name p2~4 `ptr<typeof(`array<int const; 5>`)>`)))))))
+
+----- stderr -----

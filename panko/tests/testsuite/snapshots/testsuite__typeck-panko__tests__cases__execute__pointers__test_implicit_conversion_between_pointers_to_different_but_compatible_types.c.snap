@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/pointers/test_implicit_conversion_between_pointers_to_different_but_compatible_types.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/pointers/test_implicit_conversion_between_pointers_to_different_but_compatible_types.c"
+   (function-definition external
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition xs~2 `array<int; 5>`
+            (braced
+               (subobject +0 (42 `int`))))
+         (definition p1~3 `ptr<array<int; 5>>`
+            (addressof `ptr<array<int; 5>>`
+               (xs~2 `array<int; 5>`)))
+         (definition p2~4 `ptr<array<int const; 5>>` (noop-type-conversion `ptr<array<int const; 5>>` (p1~3 `ptr<array<int; 5>>`)))
+         (return
+            (deref `int const`
+               (noop-type-conversion `ptr<int const>`
+                  (addressof `ptr<array<int const; 5>>`
+                     (deref `array<int const; 5>` (p2~4 `ptr<array<int const; 5>>`)))))))))
+
+----- stderr -----
