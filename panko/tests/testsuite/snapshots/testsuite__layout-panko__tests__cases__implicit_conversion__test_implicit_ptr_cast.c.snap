@@ -17,9 +17,15 @@ exit_code: 0
          (definition (p~2 `ptr<int>` @0) ∅)
          (return (noop-type-conversion `ptr<int const>` @0 (p~2 `ptr<int>` @0)))))
    (function-definition external stack-size=24
-      (cast_between_completely_different_ptr_types~3 `fn() -> ptr<ptr<char>>` (static cast_between_completely_different_ptr_types))
+      (implicit_cast_to_void_pointer~3 `fn() -> ptr<void>` (static implicit_cast_to_void_pointer))
       (compound-statement
          (definition (p~5 `ptr<int>` @0) ∅)
-         (return (noop-type-conversion `ptr<ptr<char>>` @0 (p~5 `ptr<int>` @0))))))
+         (return (noop-type-conversion `ptr<void>` @0 (p~5 `ptr<int>` @0)))))
+   (function-definition external stack-size=24
+      (implicit_cast_from_void_pointer~6 `fn(p: ptr<void>) -> ptr<int>` (static implicit_cast_from_void_pointer))
+      (params
+         (p~8 `ptr<void>` @0))
+      (compound-statement
+         (return (noop-type-conversion `ptr<int>` @0 (p~8 `ptr<void>` @0))))))
 
 ----- stderr -----

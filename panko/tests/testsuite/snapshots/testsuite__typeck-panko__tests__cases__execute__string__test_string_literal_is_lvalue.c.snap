@@ -15,13 +15,17 @@ exit_code: 0
    (function-definition external
       main~1 `fn() -> int`
       (compound-statement
+         (definition hello~3 `ptr<array<char; ∅>>`
+            (addressof `ptr<array<char; 6>>`
+               (string `array<char; 6>` "hello\0")))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`
                   (puts~0 `fn(∅: ptr<char const>) -> int`))
                (noop-type-conversion `ptr<char const>`
-                  (addressof `ptr<array<char; 6>>`
-                     (string `array<char; 6>` "hello\0")))))
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; ∅>>`
+                        (deref `array<char; ∅>` (hello~3 `ptr<array<char; ∅>>`)))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>) -> int>`

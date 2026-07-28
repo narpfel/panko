@@ -21,3 +21,11 @@ Error: incompatible operand types in conditional expression (pointers are compat
    │         │      
    │         ╰────── this is of type `ptr<int const>`
 ───╯
+
+Error: invalid implicit conversion from `ptr<char const>` to `ptr<int const>`
+   ╭─[panko/tests/cases/test_error_incompatible_pointer_types_in_conditional.c:4:13]
+   │
+ 4 │     1 ? p : c;
+   │             ┬  
+   │             ╰── this is of type `ptr<char const>`, which cannot be implicitly converted to `ptr<int const>`
+───╯

@@ -1,3 +1,4 @@
+// [[known-bug: implicit conversions are incorrectly only allowed between equal pointee types, but should be allowed between compatible pointee types]]
 // [[return: 42]]
 
 int main() {

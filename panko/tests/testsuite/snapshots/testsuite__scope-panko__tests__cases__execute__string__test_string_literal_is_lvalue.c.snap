@@ -15,9 +15,10 @@ exit_code: 0
    (function-definition
       main~1 `fn() -> int`
       (compound-statement
+         (declaration hello~3 `ptr<typeof(`array<char; ∅>`)>` (addressof (string "hello")))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
-               (addressof (string "hello"))))
+               (deref (name hello~3 `ptr<typeof(`array<char; ∅>`)>`))))
          (expression
             (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
                (addressof (deref (string "world"))))))))

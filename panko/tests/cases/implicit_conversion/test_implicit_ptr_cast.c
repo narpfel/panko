@@ -3,7 +3,11 @@ int const* const_can_be_added() {
     return p;
 }
 
-char** cast_between_completely_different_ptr_types() {
+void* implicit_cast_to_void_pointer() {
     int* p;
+    return p;
+}
+
+int* implicit_cast_from_void_pointer(void* p) {
     return p;
 }
