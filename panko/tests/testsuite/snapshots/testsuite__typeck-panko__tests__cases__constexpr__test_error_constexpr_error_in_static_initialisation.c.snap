@@ -377,11 +377,11 @@ Error: overflow in pointer addition in constant expression
 ────╯
 
 Error: overflow in object size calculation in constant expression
-    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:93:22]
+    ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:93:40]
     │
- 93 │     static int* p4 = &xs + 1;
-    │                      ─┬─  
-    │                       ╰─── in this expression of type `ptr<array<int; 2305843009213693952>>`
+ 93 │     static typeof(int[1l << 61])* p4 = &xs + 1;
+    │                                        ─┬─  
+    │                                         ╰─── in this expression of type `ptr<array<int; 2305843009213693952>>`
 ────╯
 
 Error: division by zero in constant expression

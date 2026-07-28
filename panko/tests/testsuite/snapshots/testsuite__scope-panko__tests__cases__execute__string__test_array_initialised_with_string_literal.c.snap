@@ -68,17 +68,17 @@ exit_code: 0
                   (designation ((index 0)) (string "first"))
                   (designation ((index 1))
                      (braced
-                        (designation ((index 0)) (string "second"))))
+                        (designation ((index 3)) (string "second"))))
                   (string "third")))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (name strings~8 `array<array<array<char; 100>; 5>; ∅>`) 0)))
+                  (subscript (subscript (name strings~8 `array<array<array<char; 100>; 5>; ∅>`) 0) 0)))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (name strings~8 `array<array<array<char; 100>; 5>; ∅>`) 1)))
+                  (subscript (subscript (name strings~8 `array<array<array<char; 100>; 5>; ∅>`) 1) 3)))
             (expression
                (call (name puts~1 `fn(∅: ptr<char const>) -> int`)
-                  (subscript (name strings~8 `array<array<array<char; 100>; 5>; ∅>`) 2))))
+                  (subscript (subscript (name strings~8 `array<array<array<char; 100>; 5>; ∅>`) 2) 0))))
          (return (add (lengthof (name strings~7 `array<array<char; 100>; ∅>`)) (lengthof (subscript (name strings~7 `array<array<char; 100>; ∅>`) 0)))))))
 
 ----- stderr -----

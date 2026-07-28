@@ -90,7 +90,7 @@ void error_in_pointer_addition() {
     static int* p2 = &a - 1;
     static int* p3 = (int*)20 - 10;
     static int xs[1l << 61];
-    static int* p4 = &xs + 1;
+    static typeof(int[1l << 61])* p4 = &xs + 1;
 }
 
 void errors_in_compound_literals() {

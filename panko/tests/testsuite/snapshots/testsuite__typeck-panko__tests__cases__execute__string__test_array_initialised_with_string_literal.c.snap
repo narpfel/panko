@@ -132,47 +132,62 @@ exit_code: 0
             (definition strings~8 `array<array<array<char; 100>; 5>; 3>`
                (braced
                   (subobject +0 (string `array<char; 6>` "first\0"))
-                  (subobject +500 (string `array<char; 7>` "second\0"))
+                  (subobject +800 (string `array<char; 7>` "second\0"))
                   (subobject +1000 (string `array<char; 6>` "third\0"))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>) -> int>`
                      (puts~1 `fn(∅: ptr<char const>) -> int`))
                   (noop-type-conversion `ptr<char const>`
-                     (noop-type-conversion `ptr<array<char; 100>>`
-                        (addressof `ptr<array<array<char; 100>; 5>>`
-                           (deref `array<array<char; 100>; 5>`
-                              (ptr-add `ptr<array<array<char; 100>; 5>>`
-                                 (noop-type-conversion `ptr<array<array<char; 100>; 5>>`
-                                    (addressof `ptr<array<array<array<char; 100>; 5>; 3>>`
-                                       (strings~8 `array<array<array<char; 100>; 5>; 3>`)))
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 100>>`
+                           (deref `array<char; 100>`
+                              (ptr-add `ptr<array<char; 100>>`
+                                 (noop-type-conversion `ptr<array<char; 100>>`
+                                    (addressof `ptr<array<array<char; 100>; 5>>`
+                                       (deref `array<array<char; 100>; 5>`
+                                          (ptr-add `ptr<array<array<char; 100>; 5>>`
+                                             (noop-type-conversion `ptr<array<array<char; 100>; 5>>`
+                                                (addressof `ptr<array<array<array<char; 100>; 5>; 3>>`
+                                                   (strings~8 `array<array<array<char; 100>; 5>; 3>`)))
+                                             (sign-extend `long` (0 `int`))))))
                                  (sign-extend `long` (0 `int`)))))))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>) -> int>`
                      (puts~1 `fn(∅: ptr<char const>) -> int`))
                   (noop-type-conversion `ptr<char const>`
-                     (noop-type-conversion `ptr<array<char; 100>>`
-                        (addressof `ptr<array<array<char; 100>; 5>>`
-                           (deref `array<array<char; 100>; 5>`
-                              (ptr-add `ptr<array<array<char; 100>; 5>>`
-                                 (noop-type-conversion `ptr<array<array<char; 100>; 5>>`
-                                    (addressof `ptr<array<array<array<char; 100>; 5>; 3>>`
-                                       (strings~8 `array<array<array<char; 100>; 5>; 3>`)))
-                                 (sign-extend `long` (1 `int`)))))))))
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 100>>`
+                           (deref `array<char; 100>`
+                              (ptr-add `ptr<array<char; 100>>`
+                                 (noop-type-conversion `ptr<array<char; 100>>`
+                                    (addressof `ptr<array<array<char; 100>; 5>>`
+                                       (deref `array<array<char; 100>; 5>`
+                                          (ptr-add `ptr<array<array<char; 100>; 5>>`
+                                             (noop-type-conversion `ptr<array<array<char; 100>; 5>>`
+                                                (addressof `ptr<array<array<array<char; 100>; 5>; 3>>`
+                                                   (strings~8 `array<array<array<char; 100>; 5>; 3>`)))
+                                             (sign-extend `long` (1 `int`))))))
+                                 (sign-extend `long` (3 `int`)))))))))
             (expression
                (call `int`
                   (addressof `ptr<fn(∅: ptr<char const>) -> int>`
                      (puts~1 `fn(∅: ptr<char const>) -> int`))
                   (noop-type-conversion `ptr<char const>`
-                     (noop-type-conversion `ptr<array<char; 100>>`
-                        (addressof `ptr<array<array<char; 100>; 5>>`
-                           (deref `array<array<char; 100>; 5>`
-                              (ptr-add `ptr<array<array<char; 100>; 5>>`
-                                 (noop-type-conversion `ptr<array<array<char; 100>; 5>>`
-                                    (addressof `ptr<array<array<array<char; 100>; 5>; 3>>`
-                                       (strings~8 `array<array<array<char; 100>; 5>; 3>`)))
-                                 (sign-extend `long` (2 `int`))))))))))
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 100>>`
+                           (deref `array<char; 100>`
+                              (ptr-add `ptr<array<char; 100>>`
+                                 (noop-type-conversion `ptr<array<char; 100>>`
+                                    (addressof `ptr<array<array<char; 100>; 5>>`
+                                       (deref `array<array<char; 100>; 5>`
+                                          (ptr-add `ptr<array<array<char; 100>; 5>>`
+                                             (noop-type-conversion `ptr<array<array<char; 100>; 5>>`
+                                                (addressof `ptr<array<array<array<char; 100>; 5>; 3>>`
+                                                   (strings~8 `array<array<array<char; 100>; 5>; 3>`)))
+                                             (sign-extend `long` (2 `int`))))))
+                                 (sign-extend `long` (0 `int`))))))))))
          (return
             (truncate `int`
                (add `unsigned long` (lengthof `unsigned long` 3 (strings~7 `array<array<char; 100>; 3>`))

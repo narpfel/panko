@@ -1110,6 +1110,14 @@ fn convert<'a>(
         };
         cast(sess.alloc(expr))
     };
+    let invalid = || {
+        sess.emit(Diagnostic::InvalidConversion {
+            at: expr,
+            from_ty: expr_ty,
+            to_ty: target_ty,
+            kind,
+        })
+    };
 
     let expr = match (target_ty, expr_ty) {
         _ if kind == ConversionKind::Explicit
@@ -1128,13 +1136,19 @@ fn convert<'a>(
             ConversionKind::Explicit => convert(),
             ConversionKind::Implicit if target_pointee == expr_pointee => return expr,
             ConversionKind::Implicit
-                if &target_pointee.merge_qualifiers(expr_pointee) == target_pointee =>
-                convert(),
-            ConversionKind::Implicit => sess.emit(Diagnostic::ImplicitConversionDropsQualifiers {
-                at: expr,
-                from_ty: expr_ty,
-                to_ty: target_ty,
-            }),
+                // TODO: should check for type compatibility, not exact equality
+                if (target_pointee.ty == expr_pointee.ty
+                    || (target_pointee.ty == Type::Void && expr_pointee.ty.is_object())
+                    || (target_pointee.ty.is_object() && expr_pointee.ty == Type::Void)) =>
+                match &target_pointee.merge_qualifiers(expr_pointee) == target_pointee {
+                    true => convert(),
+                    false => sess.emit(Diagnostic::ImplicitConversionDropsQualifiers {
+                        at: expr,
+                        from_ty: expr_ty,
+                        to_ty: target_ty,
+                    }),
+                },
+            ConversionKind::Implicit => invalid(),
         },
 
         (Type::Arithmetic(_), Type::Arithmetic(_)) | (Type::Nullptr, Type::Nullptr) =>
@@ -1164,12 +1178,7 @@ fn convert<'a>(
             return expr;
         }
 
-        _ => sess.emit(Diagnostic::InvalidConversion {
-            at: expr,
-            from_ty: expr_ty,
-            to_ty: target_ty,
-            kind,
-        }),
+        _ => invalid(),
     };
     TypedExpression { ty: target.make_unqualified(), expr }
 }

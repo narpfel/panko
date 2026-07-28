@@ -17,9 +17,15 @@ exit_code: 0
          (declaration p~2 `ptr<int>` ∅)
          (return (name p~2 `ptr<int>`))))
    (function-definition
-      cast_between_completely_different_ptr_types~3 `fn() -> ptr<ptr<char>>`
+      implicit_cast_to_void_pointer~3 `fn() -> ptr<void>`
       (compound-statement
          (declaration p~5 `ptr<int>` ∅)
-         (return (name p~5 `ptr<int>`)))))
+         (return (name p~5 `ptr<int>`))))
+   (function-definition
+      implicit_cast_from_void_pointer~6 `fn(p: ptr<void>) -> ptr<int>`
+      (params
+         p~8 `ptr<void>`)
+      (compound-statement
+         (return (name p~8 `ptr<void>`)))))
 
 ----- stderr -----

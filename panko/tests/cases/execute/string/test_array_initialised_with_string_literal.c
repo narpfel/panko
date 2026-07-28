@@ -43,16 +43,16 @@ int main() {
     {
         char strings[][5][100] = {
             [0] = "first",
-            [1] = {[0] = "second"},
+            [1] = {[3] = "second"},
             "third",
         };
 
         // [[print: first]]
-        puts(strings[0]);
+        puts(strings[0][0]);
         // [[print: second]]
-        puts(strings[1]);
+        puts(strings[1][3]);
         // [[print: third]]
-        puts(strings[2]);
+        puts(strings[2][0]);
     }
 
     return _Lengthof strings + _Lengthof strings[0];

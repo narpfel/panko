@@ -12,25 +12,29 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/string/test_string_literal_is_lvalue.c"
    (declaration external (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)) ∅)
-   (function-definition external stack-size=40
+   (function-definition external stack-size=56
       (main~1 `fn() -> int` (static main))
       (compound-statement
+         (definition (hello~3 `ptr<array<char; ∅>>` @0)
+            (addressof `ptr<array<char; 6>>` @0
+               (string `array<char; 6>` @void "hello\0")))
          (expression
-            (call `int` @0
-               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+            (call `int` @8
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @16
                   (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
-               (noop-type-conversion `ptr<char const>` @16
-                  (addressof `ptr<array<char; 6>>` @16
-                     (string `array<char; 6>` @void "hello\0")))))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; ∅>>` @24
+                        (deref `array<char; ∅>` @24 (hello~3 `ptr<array<char; ∅>>` @0)))))))
          (expression
-            (call `int` @0
-               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @8
+            (call `int` @8
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>` @16
                   (puts~0 `fn(∅: ptr<char const>) -> int` (static puts)))
-               (noop-type-conversion `ptr<char const>` @16
-                  (addressof `ptr<char>` @16
-                     (deref `char` @16
-                        (noop-type-conversion `ptr<char>` @24
-                           (addressof `ptr<array<char; 6>>` @24
+               (noop-type-conversion `ptr<char const>` @24
+                  (addressof `ptr<char>` @24
+                     (deref `char` @24
+                        (noop-type-conversion `ptr<char>` @32
+                           (addressof `ptr<array<char; 6>>` @32
                               (string `array<char; 6>` @void "world\0")))))))))))
 
 ----- stderr -----
