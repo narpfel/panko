@@ -1,3 +1,4 @@
+use std::assert_matches;
 use std::path::Path;
 
 use panko_lex::Token;
@@ -409,9 +410,10 @@ SpecifierQualifierList: ast::DeclarationSpecifiers<'a> = {
 
 TypeName: crate::ast::QualifiedType<'a> = {
     <specifier_qualifier_list:SpecifierQualifierList> <abstract_declarator:AbstractDeclarator?> => {
-        // TODO: assert that `storage_class` and `function_specifiers` are `None`
-        let crate::ast::DeclarationSpecifiers { storage_class: _, function_specifiers: _, ty }
+        let crate::ast::DeclarationSpecifiers { storage_class, function_specifiers, ty }
             = crate::ast::parse_declaration_specifiers(sess, specifier_qualifier_list);
+        assert_matches!(storage_class, None);
+        assert_matches!(function_specifiers, crate::ast::FunctionSpecifiers { inline: None, noreturn: None });
         match abstract_declarator {
             None => ty,
             Some(abstract_declarator) => {
