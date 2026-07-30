@@ -696,10 +696,10 @@ fn function_specifier_kind(token_kind: TokenKind) -> FunctionSpecifierKind {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct InitDeclarator<'a> {
-    declarator: Declarator<'a>,
-    bitfield_width: Option<Expression<'a>>,
-    initialiser: Option<Initialiser<'a>>,
+pub struct InitDeclarator<'a> {
+    pub declarator: Declarator<'a>,
+    pub bitfield_width: Option<Expression<'a>>,
+    pub initialiser: Option<Initialiser<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -748,9 +748,9 @@ pub enum Designator<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Declarator<'a> {
-    pointers: Option<&'a [Pointer<'a>]>,
-    direct_declarator: DirectDeclarator<'a>,
+pub struct Declarator<'a> {
+    pub pointers: Option<&'a [Pointer<'a>]>,
+    pub direct_declarator: DirectDeclarator<'a>,
 }
 
 impl<'a> Declarator<'a> {
@@ -782,7 +782,7 @@ fn pointers_loc<'a>(pointers: &[Pointer<'a>]) -> Loc<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Pointer<'a> {
+pub struct Pointer<'a> {
     star: Token<'a>,
     qualifiers: &'a [TypeQualifier<'a>],
 }
@@ -799,7 +799,7 @@ impl<'a> Pointer<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum DirectDeclarator<'a> {
+pub enum DirectDeclarator<'a> {
     Abstract,
     Identifier(Token<'a>),
     Parenthesised {
@@ -949,7 +949,7 @@ impl<'a> DirectDeclarator<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct ArrayDeclarator<'a> {
+pub struct ArrayDeclarator<'a> {
     direct_declarator: &'a DirectDeclarator<'a>,
     type_qualifiers: &'a [TypeQualifier<'a>],
     length: Option<Expression<'a>>,
@@ -957,7 +957,7 @@ struct ArrayDeclarator<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct FunctionDeclarator<'a> {
+pub struct FunctionDeclarator<'a> {
     direct_declarator: &'a DirectDeclarator<'a>,
     parameter_type_list: ParameterTypeList<'a>,
     close_paren: Token<'a>,

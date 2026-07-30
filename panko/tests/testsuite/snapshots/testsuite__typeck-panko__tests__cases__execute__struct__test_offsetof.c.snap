@@ -21,12 +21,12 @@ exit_code: 0
       (member x @0 `int`)
       (member y @8 `int`)
       (member l @16 `long`)
-      (member nested_struct @24 `struct ∅~5 complete`))
+      (member nested_struct @24 `struct ∅~3 complete`))
    (typedef TypeName `struct T~1 complete`)
    (function-definition external
-      main~6 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
-         (definition t~8 `struct T~1 complete` ∅)
+         (definition t~6 `struct T~1 complete` ∅)
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
