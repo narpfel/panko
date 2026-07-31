@@ -108,6 +108,17 @@ pub(crate) enum Diagnostic<'a> {
         expected: Tag,
         actual: Tag,
     },
+
+    #[error("invalid storage class `{at}` applied to definition of function `{function}`")]
+    #[diagnostics(
+        at(colour = Red, label = "`{at}` is invalid for functions"),
+        function(colour = Blue, label = "in the definition of function `{function}`"),
+    )]
+    InvalidStorageClassForFunctionDefinition { at: Token<'a>, function: Token<'a> },
+
+    #[error("function defined without a name")]
+    #[diagnostics(at(colour = Red, label = "this definition lacks a name"))]
+    FunctionDefinedWithoutName { at: QualifiedType<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -858,14 +869,25 @@ fn resolve_function_definition<'a>(
     def: &ast::FunctionDefinition<'a>,
 ) -> ExternalDeclaration<'a> {
     let ast::FunctionDefinition {
-        name,
+        declarator,
         storage_class,
         inline,
         noreturn,
         ty,
         body,
     } = def;
-    let ty = resolve_ty(scopes, ty);
+    let (ty, name) = ast::parse_declarator(scopes.sess, *ty, *declarator, ast::IsParameter::No);
+    let ty = resolve_ty(scopes, &ty);
+    let name = name.unwrap_or_else(|| {
+        let error = Diagnostic::FunctionDefinedWithoutName { at: ty };
+        let () = scopes.sess.emit(error);
+        // TODO: this should be a unique name for each function for error recovery
+        Token::from_str(
+            scopes.sess.bump(),
+            panko_lex::TokenKind::Identifier,
+            "unnamed.function",
+        )
+    });
     let linkage = match storage_class {
         None => match inline {
             Some(_) => Linkage::Inline,
@@ -873,6 +895,14 @@ fn resolve_function_definition<'a>(
         },
         Some(FunctionStorageClass::Extern) => Linkage::External,
         Some(FunctionStorageClass::Static) => Linkage::Internal,
+        Some(FunctionStorageClass::Invalid(storage_class)) => {
+            let error = Diagnostic::InvalidStorageClassForFunctionDefinition {
+                at: storage_class.token,
+                function: name,
+            };
+            let () = scopes.sess.emit(error);
+            Linkage::External
+        }
     };
     let maybe_reference = scopes.add_function(name.slice(), name.loc(), ty, linkage);
     let reference = match maybe_reference {
@@ -883,7 +913,7 @@ fn resolve_function_definition<'a>(
         }
         Err(ty) =>
             return scopes.sess.emit(Diagnostic::TypedefRedeclaredAsValue {
-                at: *name,
+                at: name,
                 ty,
                 kind: "function",
             }),
@@ -903,7 +933,7 @@ fn resolve_function_definition<'a>(
             // TODO: this should be `Type::Error`
             let () = scopes
                 .sess
-                .emit(Diagnostic::FunctionDeclaratorDoesNotHaveFunctionType { at: *name });
+                .emit(Diagnostic::FunctionDeclaratorDoesNotHaveFunctionType { at: name });
             FunctionType {
                 params: &[],
                 return_type: scopes.sess.alloc(non_function_ty),

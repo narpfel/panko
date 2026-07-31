@@ -11,7 +11,6 @@ use itertools::Itertools as _;
 use panko_lex::Bump;
 use panko_lex::Loc;
 use panko_lex::Token;
-use panko_lex::TokenKind;
 use panko_report::Report;
 use panko_report::Sliced as _;
 
@@ -113,17 +112,6 @@ enum Diagnostic<'a> {
         name: Option<Token<'a>>,
         member_loc: Loc<'a>,
     },
-
-    #[error("invalid storage class `{at}` applied to definition of function `{function}`")]
-    #[diagnostics(
-        at(colour = Red, label = "`{at}` is invalid for functions"),
-        function(colour = Blue, label = "in the definition of function `{function}`"),
-    )]
-    InvalidStorageClassForFunctionDefinition { at: Token<'a>, function: Token<'a> },
-
-    #[error("function defined without a name")]
-    #[diagnostics(at(colour = Red, label = "this definition lacks a name"))]
-    FunctionDefinedWithoutName { at: QualifiedType<'a> },
 }
 
 // TODO: could this be `From<&'a dyn Report>`?
@@ -297,15 +285,16 @@ pub struct Declaration<'a, InitDeclarator> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum FunctionStorageClass {
+pub enum FunctionStorageClass<'a> {
     Extern,
     Static,
+    Invalid(cst::StorageClassSpecifier<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct FunctionDefinition<'a> {
-    pub name: Token<'a>,
-    pub storage_class: Option<FunctionStorageClass>,
+    pub declarator: cst::Declarator<'a>,
+    pub storage_class: Option<FunctionStorageClass<'a>>,
     pub inline: Option<cst::FunctionSpecifier<'a>>,
     pub noreturn: Option<cst::FunctionSpecifier<'a>>,
     pub ty: QualifiedType<'a>,
@@ -505,23 +494,14 @@ impl<'a> FunctionDefinition<'a> {
         let cst::FunctionDefinition { declaration_specifiers, declarator, body } = *def;
         let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
             parse_declaration_specifiers(sess, declaration_specifiers);
-        let (ty, name) = parse_declarator(sess, ty, declarator, IsParameter::No);
-        let name = name.unwrap_or_else(|| {
-            let () = sess.emit(Diagnostic::FunctionDefinedWithoutName { at: ty });
-            // TODO: this should be a unique name for each function for error recovery
-            Token::from_str(sess.bump, TokenKind::Identifier, "unnamed.function")
-        });
         let storage_class = match try { storage_class?.kind } {
             Some(StorageClassSpecifierKind::Extern) => Some(FunctionStorageClass::Extern),
             Some(StorageClassSpecifierKind::Static) => Some(FunctionStorageClass::Static),
-            Some(_) => sess.emit(Diagnostic::InvalidStorageClassForFunctionDefinition {
-                at: storage_class.unwrap().token,
-                function: name,
-            }),
+            Some(_) => Some(FunctionStorageClass::Invalid(storage_class.unwrap())),
             None => None,
         };
         Self {
-            name,
+            declarator,
             storage_class,
             inline: function_specifiers.inline,
             noreturn: function_specifiers.noreturn,
