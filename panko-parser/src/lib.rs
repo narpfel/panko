@@ -217,18 +217,6 @@ pub enum ExternalDeclaration<'a> {
 pub struct Declaration<'a> {
     specifiers: DeclarationSpecifiers<'a>,
     init_declarator_list: &'a [InitDeclarator<'a>],
-    semi: Token<'a>,
-}
-
-impl<'a> Declaration<'a> {
-    fn loc(&self) -> Loc<'a> {
-        let Self {
-            specifiers,
-            init_declarator_list: _,
-            semi,
-        } = self;
-        specifiers.loc().until(semi.loc())
-    }
 }
 
 #[derive(Debug, Clone, Copy)]

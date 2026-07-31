@@ -187,7 +187,7 @@ FunctionBody = { CompoundStatement<DontPushTypedefScope> }
 
 Declaration: ast::Declaration<'a> = {
     <head:DeclarationHead<AbstractDeclaratorDisallowed, InitDeclarator<MaybeAbstractDeclarator>?>>
-    <init_declarator_list:("," <InitDeclaratorList>)?> <semi:";"> => {
+    <init_declarator_list:("," <InitDeclaratorList>)?> ";" => {
         let (specifiers, declarator) = head;
         let init_declarator_list = match init_declarator_list {
             None => sess.alloc_slice_copy(declarator.as_slice()),
@@ -199,7 +199,7 @@ Declaration: ast::Declaration<'a> = {
             }
         };
         typedef_tracker.is_not_in_typedef();
-        ast::Declaration { specifiers, init_declarator_list, semi }
+        ast::Declaration { specifiers, init_declarator_list }
     },
     // attribute-specifier-sequence declaration-specifiers init_declarator_list ";"
     // static_assert-declaration

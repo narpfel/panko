@@ -16,14 +16,22 @@ Error: declaration does not specify a name
    ╭─[panko/tests/cases/decl_in_global_scope/test_error_declaration_without_name.c:1:1]
    │
  1 │ int = 42;
-   │ ────┬────  
-   │     ╰────── this looks like a declaration with type `int`
+   │ ────┬───  
+   │     ╰───── this looks like a declaration with type `int`
 ───╯
 
 Error: declaration does not specify a name
    ╭─[panko/tests/cases/decl_in_global_scope/test_error_declaration_without_name.c:2:1]
    │
  2 │ char const* = nullptr;
-   │ ───────────┬──────────  
-   │            ╰──────────── this looks like a declaration with type `ptr<char const>`
+   │ ──────────┬──────────  
+   │           ╰──────────── this looks like a declaration with type `ptr<char const>`
+───╯
+
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/decl_in_global_scope/test_error_declaration_without_name.c:3:1]
+   │
+ 3 │ int(int parameter_name), with_name[42];
+   │ ───────────┬───────────  
+   │            ╰───────────── this looks like a declaration with type `fn(parameter_name: int) -> int`
 ───╯

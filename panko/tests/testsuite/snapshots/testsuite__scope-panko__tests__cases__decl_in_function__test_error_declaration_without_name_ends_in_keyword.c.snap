@@ -16,6 +16,6 @@ Error: declaration does not specify a name
    ╭─[panko/tests/cases/decl_in_function/test_error_declaration_without_name_ends_in_keyword.c:2:5]
    │
  2 │     long int = 42;
-   │     ───────┬──────  
-   │            ╰──────── this looks like a declaration with type `long`
+   │     ──────┬──────  
+   │           ╰──────── this looks like a declaration with type `long`
 ───╯

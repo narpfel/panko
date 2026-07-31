@@ -67,10 +67,7 @@ enum Diagnostic<'a> {
     #[error("declaration does not specify a name")]
     #[diagnostics(at(colour = Red, label = "this looks like a declaration with type `{ty}`"))]
     #[with(ty = ty.fg(Red))]
-    DeclarationWithoutName {
-        at: cst::Declaration<'a>,
-        ty: QualifiedType<'a>,
-    },
+    DeclarationWithoutName { at: Loc<'a>, ty: QualifiedType<'a> },
 
     #[error("cannot use type qualifier `{at}` in non-parameter array declarator")]
     #[diagnostics(at(colour = Red, label = "help: remove this `{at}`"))]
@@ -602,11 +599,7 @@ impl fmt::Display for FunctionType<'_> {
 
 impl<'a> Declaration<'a, InitDeclarator<'a>> {
     fn from_parse_tree(sess: &'a Session<'a>, decl: &'a cst::Declaration<'a>) -> Self {
-        let cst::Declaration {
-            specifiers,
-            init_declarator_list,
-            semi: _,
-        } = decl;
+        let cst::Declaration { specifiers, init_declarator_list } = decl;
         let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
             parse_declaration_specifiers(sess, *specifiers);
         Self {
@@ -628,12 +621,16 @@ impl<'a> Declaration<'a, InitDeclarator<'a>> {
             for InitDeclarator {
                 declarator,
                 bitfield_width: _,
-                initialiser: _,
+                initialiser,
             } in declarators
             {
                 if declarator.direct_declarator.name().is_none() {
                     let (ty, _) = parse_declarator(sess, ty, *declarator, IsParameter::No);
-                    sess.emit(Diagnostic::DeclarationWithoutName { at: *decl, ty })
+                    let loc = ty.loc().until_maybe(
+                        try { initialiser.as_ref()?.loc() }
+                            .or_else(|| declarator.direct_declarator.maybe_end_loc()),
+                    );
+                    sess.emit(Diagnostic::DeclarationWithoutName { at: loc, ty })
                 }
             }
         }

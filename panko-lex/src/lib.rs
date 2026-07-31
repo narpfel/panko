@@ -274,6 +274,13 @@ impl<'a> Loc<'a> {
         }
     }
 
+    pub fn until_maybe(self, other: Option<Self>) -> Self {
+        match other {
+            Some(other) => self.until(other),
+            None => self,
+        }
+    }
+
     pub fn report(&self, kind: ariadne::ReportKind<'a>) -> ariadne::ReportBuilder<'a, Self> {
         ariadne::Report::build(kind, *self)
     }
