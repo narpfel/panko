@@ -494,6 +494,7 @@ impl<'a> FunctionDefinition<'a> {
         let cst::FunctionDefinition { declaration_specifiers, declarator, body } = *def;
         let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
             parse_declaration_specifiers(sess, declaration_specifiers);
+        let FunctionSpecifiers { inline, noreturn } = function_specifiers;
         let storage_class = match try { storage_class?.kind } {
             Some(StorageClassSpecifierKind::Extern) => Some(FunctionStorageClass::Extern),
             Some(StorageClassSpecifierKind::Static) => Some(FunctionStorageClass::Static),
@@ -503,8 +504,8 @@ impl<'a> FunctionDefinition<'a> {
         Self {
             declarator,
             storage_class,
-            inline: function_specifiers.inline,
-            noreturn: function_specifiers.noreturn,
+            inline,
+            noreturn,
             ty,
             body: CompoundStatement::from_parse_tree(sess, &body),
         }
