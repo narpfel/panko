@@ -16,6 +16,7 @@ use panko_parser::LogicalOp;
 use panko_parser::MemberAccessOp;
 use panko_parser::MemberAccessOpKind;
 use panko_parser::StorageClassSpecifierKind;
+use panko_parser::TypeName;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast;
@@ -724,6 +725,22 @@ impl IncrementFixity<'_> {
     }
 }
 
+fn resolve_typename<'a>(
+    scopes: &mut Scopes<'a>,
+    TypeName { ty, declarator }: &TypeName<'a>,
+) -> QualifiedType<'a> {
+    let ty = match declarator {
+        Some(declarator) => {
+            let (ty, name) =
+                ast::parse_declarator(scopes.sess, *ty, **declarator, ast::IsParameter::No);
+            assert_matches!(name, None);
+            ty
+        }
+        None => *ty,
+    };
+    resolve_ty(scopes, &ty)
+}
+
 fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> QualifiedType<'a> {
     let ast::QualifiedType { is_const, is_volatile, ty, loc } = *ty;
     let ty = match ty {
@@ -764,7 +781,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             allow_bitfields: false,
         },
         ast::Type::TypeofTy { unqual, ty } => Type::Typeof {
-            expr: NoHashEq(Typeof::Ty(scopes.sess.alloc(resolve_ty(scopes, ty)))),
+            expr: NoHashEq(Typeof::Ty(scopes.sess.alloc(resolve_typename(scopes, ty)))),
             unqual,
             allow_bitfields: false,
         },
@@ -1301,7 +1318,7 @@ fn resolve_assoc<'a>(
 ) -> GenericAssociation<'a> {
     match assoc {
         ast::GenericAssociation::Ty { ty, expr } => GenericAssociation::Ty {
-            ty: resolve_ty(scopes, ty),
+            ty: resolve_typename(scopes, ty),
             expr: resolve_expr(scopes, expr),
         },
         ast::GenericAssociation::Default { default, expr } => GenericAssociation::Default {
@@ -1365,22 +1382,22 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         },
         ast::Expression::Sizeof { sizeof, ty, close_paren } => Expression::Sizeof {
             sizeof: *sizeof,
-            ty: resolve_ty(scopes, ty),
+            ty: resolve_typename(scopes, ty),
             close_paren: *close_paren,
         },
         ast::Expression::Lengthof { lengthof, ty, close_paren } => Expression::Lengthof {
             lengthof: *lengthof,
-            ty: resolve_ty(scopes, ty),
+            ty: resolve_typename(scopes, ty),
             close_paren: *close_paren,
         },
         ast::Expression::Alignof { alignof, ty, close_paren } => Expression::Alignof {
             alignof: *alignof,
-            ty: resolve_ty(scopes, ty),
+            ty: resolve_typename(scopes, ty),
             close_paren: *close_paren,
         },
         ast::Expression::Cast { open_paren, ty, expr } => Expression::Cast {
             open_paren: *open_paren,
-            ty: resolve_ty(scopes, ty),
+            ty: resolve_typename(scopes, ty),
             expr: scopes.sess.alloc(resolve_expr(scopes, expr)),
         },
         ast::Expression::Subscript { lhs, rhs, close_bracket } => Expression::Subscript {
@@ -1474,14 +1491,14 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             close_paren,
         } => Expression::BuiltinOffsetof {
             builtin_offsetof: *builtin_offsetof,
-            ty: resolve_ty(scopes, ty),
+            ty: resolve_typename(scopes, ty),
             member: *member,
             close_paren: *close_paren,
         },
         ast::Expression::CompoundLiteral {
             open_paren,
             storage_class_specifiers,
-            ty,
+            ty: TypeName { ty, declarator },
             initialiser,
         } => {
             if storage_class_specifiers.len() > 1 {
@@ -1495,10 +1512,15 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             let name = format!("compound_literal.{}", scopes.id().0);
             let name = scopes.sess.alloc_str(&name);
             let name = Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name);
+            let cst::Declarator { pointers, direct_declarator } =
+                *declarator.unwrap_or(&cst::Declarator {
+                    pointers: None,
+                    direct_declarator: panko_parser::DirectDeclarator::Abstract,
+                });
             let declarators = scopes.sess.alloc([ast::InitDeclarator {
                 declarator: cst::Declarator {
-                    pointers: None,
-                    direct_declarator: panko_parser::DirectDeclarator::Identifier(name),
+                    pointers,
+                    direct_declarator: direct_declarator.with_name(scopes.sess, name).unwrap(),
                 },
                 bitfield_width: None,
                 initialiser: Some(**initialiser),

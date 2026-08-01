@@ -621,7 +621,7 @@ enum TypeSpecifierKind<'a> {
     },
     TypeofTy {
         unqual: bool,
-        ty: &'a QualifiedType<'a>,
+        ty: &'a TypeName<'a>,
     },
 }
 
@@ -736,6 +736,12 @@ pub enum Designator<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct TypeName<'a> {
+    pub ty: QualifiedType<'a>,
+    pub declarator: Option<&'a Declarator<'a>>,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct Declarator<'a> {
     pub pointers: Option<&'a [Pointer<'a>]>,
     pub direct_declarator: DirectDeclarator<'a>,
@@ -799,7 +805,7 @@ pub enum DirectDeclarator<'a> {
 }
 
 impl<'a> DirectDeclarator<'a> {
-    fn with_name(&self, sess: &'a ast::Session<'a>, name: Token<'a>) -> Option<Self> {
+    pub fn with_name(&self, sess: &'a ast::Session<'a>, name: Token<'a>) -> Option<Self> {
         match self {
             DirectDeclarator::Abstract => Some(Self::Identifier(name)),
             DirectDeclarator::Identifier(_) => None,
@@ -1040,22 +1046,22 @@ pub enum Expression<'a> {
     },
     Sizeof {
         sizeof: Token<'a>,
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         close_paren: Token<'a>,
     },
     Lengthof {
         lengthof: Token<'a>,
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         close_paren: Token<'a>,
     },
     Alignof {
         alignof: Token<'a>,
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         close_paren: Token<'a>,
     },
     Cast {
         open_paren: Token<'a>,
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         expr: &'a Expression<'a>,
     },
     Subscript {
@@ -1096,14 +1102,14 @@ pub enum Expression<'a> {
     },
     BuiltinOffsetof {
         builtin_offsetof: Token<'a>,
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         member: Token<'a>,
         close_paren: Token<'a>,
     },
     CompoundLiteral {
         open_paren: Token<'a>,
         storage_class_specifiers: &'a [StorageClassSpecifier<'a>],
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         initialiser: &'a Initialiser<'a>,
     },
 }
@@ -1283,7 +1289,7 @@ pub struct GenericAssocList<'a>(pub &'a [GenericAssociation<'a>]);
 #[derive(Debug, Clone, Copy)]
 pub enum GenericAssociation<'a> {
     Ty {
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         expr: Expression<'a>,
     },
     Default {

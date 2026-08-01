@@ -27,6 +27,7 @@ use crate::NO_VALUE;
 use crate::PrimaryBlock;
 use crate::StorageClassSpecifierKind;
 use crate::StructKind;
+use crate::TypeName;
 use crate::TypeQualifier;
 use crate::TypeQualifierKind;
 use crate::TypeSpecifierQualifier::Qualifier;
@@ -315,7 +316,7 @@ pub enum Type<'a> {
     },
     TypeofTy {
         unqual: bool,
-        ty: &'a QualifiedType<'a>,
+        ty: &'a TypeName<'a>,
     },
     Struct(Struct<'a>),
     // TODO
@@ -782,7 +783,7 @@ pub(crate) enum ParsedSpecifiers<'a> {
     },
     TypeofTy {
         unqual: bool,
-        ty: &'a QualifiedType<'a>,
+        ty: &'a TypeName<'a>,
     },
     Struct(cst::Struct<'a>),
 }
