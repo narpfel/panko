@@ -13,17 +13,17 @@ exit_code: 1
 
 ----- stderr -----
 Error: cannot declare variable `x` with incomplete type `struct T~2`
-   ╭─[panko/tests/cases/execute/struct/test_declaration_in_typeof_is_not_ignored.c:6:14]
+   ╭─[panko/tests/cases/execute/struct/test_declaration_in_typeof_is_not_ignored.c:7:14]
    │
- 6 │     struct T x = {.x = 42};
+ 7 │     struct T x = {.x = 42};
    │              ┬  
    │              ╰── declared here
 ───╯
 
 Error: cannot initialise variable of incomplete type `struct T~2`
-   ╭─[panko/tests/cases/execute/struct/test_declaration_in_typeof_is_not_ignored.c:6:18]
+   ╭─[panko/tests/cases/execute/struct/test_declaration_in_typeof_is_not_ignored.c:7:18]
    │
- 6 │     struct T x = {.x = 42};
+ 7 │     struct T x = {.x = 42};
    │     ────┬─── ┬   ────┬────  
    │         │    │       ╰────── cannot initialise variable of incomplete type
    │         │    │              
