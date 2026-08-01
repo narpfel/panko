@@ -52,14 +52,6 @@ Error: declaration does not specify a type
    │                ╰──── type missing
 ───╯
 
-Error: declaration does not specify a type
-   ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised_looks_like_function.c:9:14]
-   │
- 9 │         int (const);
-   │              ──┬──  
-   │                ╰──── type missing
-───╯
-
 Error: declaration does not specify a name
     ╭─[panko/tests/cases/typedef/test_error_shadow_typedef_in_inner_scope_parenthesised_looks_like_function.c:10:9]
     │

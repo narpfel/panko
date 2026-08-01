@@ -119,6 +119,14 @@ pub(crate) enum Diagnostic<'a> {
     #[error("function defined without a name")]
     #[diagnostics(at(colour = Red, label = "this definition lacks a name"))]
     FunctionDefinedWithoutName { at: QualifiedType<'a> },
+
+    #[error("declaration does not specify a name")]
+    #[diagnostics(at(colour = Red, label = "this looks like a declaration with type `{ty}`"))]
+    #[with(ty = ty.fg(Red))]
+    DeclarationWithoutName {
+        at: Loc<'a>,
+        ty: ast::QualifiedType<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -227,10 +235,17 @@ impl<'a> Redeclared<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum DeclarationOrTypedef<'a> {
+    Error(&'a dyn Report),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Redeclared(Redeclared<'a>),
     StructDecl(Complete<'a, Scope>),
+}
+
+impl<'a> FromError<'a> for DeclarationOrTypedef<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Error(error)
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1105,9 +1120,24 @@ gen fn resolve_declaration<'a>(
 
     for cst::InitDeclarator { declarator, bitfield_width, initialiser } in *declarators {
         let (ty, name) = ast::parse_declarator(sess, *ty, *declarator, ast::IsParameter::No);
-        let Some(name) = name
-        else {
-            continue;
+        let name = match name {
+            Some(name) => name,
+            // TODO: 6.7.1: reject struct/enum decl without tag, allow enum decl without tag that
+            // contains an enumerator list
+            None if let ast::Type::Struct(_) = ty.ty => continue,
+            None => {
+                let loc = ty.loc().until_maybe(
+                    try { initialiser.as_ref()?.loc() }
+                        .or_else(|| declarator.direct_declarator.maybe_end_loc()),
+                );
+                yield sess.emit(Diagnostic::DeclarationWithoutName { at: loc, ty });
+                // TODO: this should be a unique name for each value for error recovery
+                Token::from_str(
+                    scopes.sess.bump(),
+                    panko_lex::TokenKind::Identifier,
+                    "unnamed.value",
+                )
+            }
         };
         let ty = resolve_ty(scopes, &ty);
         let linkage = match try { storage_class.as_ref()?.kind } {
@@ -1230,6 +1260,8 @@ gen fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> S
             ast::Statement::Declaration(decl) =>
                 for decl in resolve_declaration(scopes, decl) {
                     match decl {
+                        DeclarationOrTypedef::Error(error) =>
+                            yield Statement::Expression(Some(Expression::from_error(error))),
                         DeclarationOrTypedef::StructDecl(struct_decl) =>
                             yield Statement::StructDecl(struct_decl),
                         DeclarationOrTypedef::Declaration(declaration) =>
@@ -1500,6 +1532,7 @@ gen fn resolve_external_declaration<'a>(
         ast::ExternalDeclaration::Declaration(decl) =>
             for decl in resolve_declaration(scopes, decl) {
                 match decl {
+                    DeclarationOrTypedef::Error(error) => yield ExternalDeclaration::Error(error),
                     DeclarationOrTypedef::StructDecl(struct_decl) =>
                         yield ExternalDeclaration::StructDecl(struct_decl),
                     DeclarationOrTypedef::Declaration(declaration) =>

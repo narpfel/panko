@@ -64,11 +64,6 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "type missing"))]
     DeclarationWithoutType { at: cst::DeclarationSpecifiers<'a> },
 
-    #[error("declaration does not specify a name")]
-    #[diagnostics(at(colour = Red, label = "this looks like a declaration with type `{ty}`"))]
-    #[with(ty = ty.fg(Red))]
-    DeclarationWithoutName { at: Loc<'a>, ty: QualifiedType<'a> },
-
     #[error("cannot use type qualifier `{at}` in non-parameter array declarator")]
     #[diagnostics(at(colour = Red, label = "help: remove this `{at}`"))]
     InvalidTypeQualifierInArrayBrackets { at: TypeQualifier<'a> },
@@ -481,7 +476,7 @@ impl<'a> ExternalDeclaration<'a> {
             cst::ExternalDeclaration::FunctionDefinition(def) =>
                 Self::FunctionDefinition(FunctionDefinition::from_parse_tree(sess, def)),
             cst::ExternalDeclaration::Declaration(decl) =>
-                Self::Declaration(Declaration::from_parse_tree_no_abstract(sess, decl)),
+                Self::Declaration(Declaration::from_parse_tree(sess, decl)),
         }
     }
 }
@@ -510,7 +505,7 @@ impl<'a> FunctionDefinition<'a> {
 }
 
 impl<'a> QualifiedType<'a> {
-    fn loc(&self) -> Loc<'a> {
+    pub fn loc(&self) -> Loc<'a> {
         self.loc
     }
 }
@@ -609,33 +604,6 @@ impl<'a> Declaration<'a, InitDeclarator<'a>> {
             declarators: *init_declarator_list,
         }
     }
-
-    fn from_parse_tree_no_abstract(sess: &'a Session<'a>, decl: &'a cst::Declaration<'a>) -> Self {
-        let decl_stmt @ Self {
-            storage_class: _,
-            function_specifiers: _,
-            ty,
-            declarators,
-        } = Self::from_parse_tree(sess, decl);
-        if !matches!(ty.ty, Type::Struct(_)) {
-            for InitDeclarator {
-                declarator,
-                bitfield_width: _,
-                initialiser,
-            } in declarators
-            {
-                if declarator.direct_declarator.name().is_none() {
-                    let (ty, _) = parse_declarator(sess, ty, *declarator, IsParameter::No);
-                    let loc = ty.loc().until_maybe(
-                        try { initialiser.as_ref()?.loc() }
-                            .or_else(|| declarator.direct_declarator.maybe_end_loc()),
-                    );
-                    sess.emit(Diagnostic::DeclarationWithoutName { at: loc, ty })
-                }
-            }
-        }
-        decl_stmt
-    }
 }
 
 impl<'a> TypeQualifier<'a> {
@@ -673,7 +641,7 @@ impl<'a> Statement<'a> {
     fn from_parse_tree(sess: &'a Session<'a>, item: &'a BlockItem<'a>) -> Self {
         match item {
             BlockItem::Declaration(decl) =>
-                Self::Declaration(Declaration::from_parse_tree_no_abstract(sess, decl)),
+                Self::Declaration(Declaration::from_parse_tree(sess, decl)),
             BlockItem::UnlabeledStatement(stmt) => Self::from_unlabeled_statement(sess, stmt),
         }
     }

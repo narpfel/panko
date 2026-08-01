@@ -701,7 +701,7 @@ pub enum Initialiser<'a> {
 }
 
 impl<'a> Initialiser<'a> {
-    fn loc(&self) -> Loc<'a> {
+    pub fn loc(&self) -> Loc<'a> {
         match self {
             Self::Braced {
                 open_brace,
@@ -925,7 +925,7 @@ impl<'a> DirectDeclarator<'a> {
         }
     }
 
-    fn maybe_end_loc(&self) -> Option<Loc<'a>> {
+    pub fn maybe_end_loc(&self) -> Option<Loc<'a>> {
         Some(match self {
             Self::Abstract => return None,
             Self::Identifier(token) => token.loc(),
