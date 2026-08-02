@@ -7,7 +7,6 @@ use ariadne::Color::Blue;
 use ariadne::Color::Red;
 use ariadne::Fmt as _;
 use itertools::Either;
-use itertools::Itertools as _;
 use panko_lex::Bump;
 use panko_lex::Loc;
 use panko_lex::Token;
@@ -284,9 +283,6 @@ pub struct QualifiedType<'a> {
 #[derive(Debug, Clone, Copy)]
 pub enum Type<'a> {
     Arithmetic(Arithmetic),
-    Pointer(&'a QualifiedType<'a>),
-    Array(ArrayType<'a>),
-    Function(FunctionType<'a, QualifiedType<'a>>),
     Void,
     Typedef(Token<'a>),
     Typeof {
@@ -328,19 +324,6 @@ pub enum IntegralKind {
 pub enum Signedness {
     Signed,
     Unsigned,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct ArrayType<'a> {
-    pub ty: &'a QualifiedType<'a>,
-    pub length: Option<&'a Expression<'a>>,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct FunctionType<'a, T> {
-    pub params: &'a [cst::ParameterDeclaration<'a>],
-    pub return_type: &'a T,
-    pub is_varargs: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -500,9 +483,6 @@ impl fmt::Display for Type<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Type::Arithmetic(Arithmetic::Integral(integral)) => write!(f, "{integral}"),
-            Type::Pointer(pointee) => write!(f, "ptr<{pointee}>"),
-            Type::Array(array) => write!(f, "{array}"),
-            Type::Function(function) => write!(f, "{function}"),
             Type::Void => write!(f, "void"),
             Type::Typedef(name) => write!(f, "typedef<{}>", name.slice()),
             Type::Typeof { unqual, expr } => write!(
@@ -533,38 +513,6 @@ impl fmt::Display for Integral {
             write!(f, "{signedness} ")?;
         }
         write!(f, "{kind}")
-    }
-}
-
-impl fmt::Display for ArrayType<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let Self { ty, length } = self;
-        write!(f, "array<{ty}; {length}>", length = length.as_sexpr())
-    }
-}
-
-impl<T> fmt::Display for FunctionType<'_, T>
-where
-    T: fmt::Display,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let Self { params, return_type, is_varargs } = *self;
-        let maybe_ellipsis = match (is_varargs, params.is_empty()) {
-            (true, true) => "...",
-            (true, false) => ", ...",
-            _ => "",
-        };
-        write!(
-            f,
-            "fn({}{}) -> {}",
-            params.iter().format_with(", ", |param, f| f(&format_args!(
-                "{}: {}",
-                param.declaration_specifiers.as_sexpr(),
-                param.declarator.as_sexpr(),
-            ))),
-            maybe_ellipsis,
-            return_type,
-        )
     }
 }
 

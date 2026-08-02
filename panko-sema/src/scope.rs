@@ -815,15 +815,10 @@ fn parse_declarator<'a>(
                     pointers: None,
                     direct_declarator: *direct_declarator,
                 };
-                let function_ty = ast::FunctionType {
-                    params: parameter_list,
-                    return_type: scopes.sess.alloc(ty),
-                    is_varargs,
-                };
                 ty = QualifiedType {
                     is_const: false,
                     is_volatile: false,
-                    ty: Type::Function(resolve_function_ty(scopes, &function_ty)),
+                    ty: Type::Function(resolve_function_ty(scopes, parameter_list, ty, is_varargs)),
                     loc: HashEqIgnored(ty.loc.0.until(close_paren.loc())),
                 };
             }
@@ -897,17 +892,6 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
     let ast::QualifiedType { is_const, is_volatile, ty, loc } = *ty;
     let ty = match ty {
         ast::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
-        ast::Type::Pointer(pointee) =>
-            Type::Pointer(scopes.sess.alloc(resolve_ty(scopes, pointee))),
-        ast::Type::Array(ast::ArrayType { ty, length }) => Type::Array(ArrayType {
-            // process `length` before `ty` so that `ty`s completed in the `length` expr are
-            // complete when checking `ty`
-            length: NoHashEq(try { scopes.sess.alloc(resolve_expr(scopes, length?)) }),
-            ty: scopes.sess.alloc(resolve_ty(scopes, ty)),
-            loc: HashEqIgnored(loc),
-        }),
-        ast::Type::Function(function_type) =>
-            Type::Function(resolve_function_ty(scopes, &function_type)),
         ast::Type::Void => Type::Void,
         ast::Type::Typedef(name) => {
             let QualifiedType {
@@ -943,28 +927,12 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
     QualifiedType { is_const, is_volatile, ty, loc }
 }
 
-trait Resolve<'a> {
-    fn resolve(&self, scopes: &mut Scopes<'a>) -> QualifiedType<'a>;
-}
-
-impl<'a> Resolve<'a> for ast::QualifiedType<'a> {
-    fn resolve(&self, scopes: &mut Scopes<'a>) -> QualifiedType<'a> {
-        resolve_ty(scopes, self)
-    }
-}
-
-impl<'a> Resolve<'a> for QualifiedType<'a> {
-    fn resolve(&self, _scopes: &mut Scopes<'a>) -> QualifiedType<'a> {
-        *self
-    }
-}
-
-fn resolve_function_ty<'a, T: Resolve<'a>>(
+fn resolve_function_ty<'a>(
     scopes: &mut Scopes<'a>,
-    function_ty: &ast::FunctionType<'a, T>,
+    params: &[cst::ParameterDeclaration<'a>],
+    return_type: QualifiedType<'a>,
+    is_varargs: bool,
 ) -> FunctionType<'a> {
-    let ast::FunctionType { params, return_type, is_varargs } = *function_ty;
-
     let sess = scopes.sess;
     scopes.open_new_scope();
     let params = params.iter().map(
@@ -996,7 +964,7 @@ fn resolve_function_ty<'a, T: Resolve<'a>>(
     );
     let params = sess.alloc_slice_fill_iter(params);
     scopes.exit_scope();
-    let return_type = sess.alloc(return_type.resolve(scopes));
+    let return_type = sess.alloc(return_type);
 
     // TODO: this makes a bunch of unnecessary allocations
     let params_by_name = params
