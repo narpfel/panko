@@ -406,12 +406,6 @@ pub enum Statement<'a> {
     },
 }
 
-impl<'a> FromError<'a> for Statement<'a> {
-    fn from_error(error: &'a dyn Report) -> Self {
-        Self::Expression(Some(Expression::from_error(error)))
-    }
-}
-
 impl<'a> ExternalDeclaration<'a> {
     fn from_parse_tree(sess: &'a Session<'a>, decl: &'a cst::ExternalDeclaration<'a>) -> Self {
         match decl {
