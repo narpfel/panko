@@ -62,7 +62,7 @@ exit_code: 0
          (union ∅~9
             (member s `struct UnnamedNonzeroLengthBitfield~6 complete`)
             (member as_int `int`))
-         (declaration u~11 `union ∅~9 complete`
+         (declaration u~10 `union ∅~9 complete`
             (braced
                (designation ((member s) (member x)) 0b0110'1111)
                (designation ((member s) (member y)) 0b0111'0111)))
@@ -78,6 +78,6 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "0b%032b\n")
                (dot as_int
-                  (name u~11 `union ∅~9 complete`)))))))
+                  (name u~10 `union ∅~9 complete`)))))))
 
 ----- stderr -----

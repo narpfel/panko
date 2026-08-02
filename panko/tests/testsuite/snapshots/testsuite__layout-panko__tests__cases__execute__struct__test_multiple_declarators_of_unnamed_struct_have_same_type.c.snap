@@ -16,11 +16,11 @@ exit_code: 0
       (compound-statement
          (struct ∅~2
             (member x @0 `int`))
-         (definition (p1~4 `ptr<struct ∅~2 complete>` @0) (noop-type-conversion `ptr<struct ∅~2 complete>` @0 (nullptr `nullptr_t` @0)))
-         (definition (p2~6 `ptr<struct ∅~2 complete>` @8) (noop-type-conversion `ptr<struct ∅~2 complete>` @8 (nullptr `nullptr_t` @8)))
+         (definition (p1~3 `ptr<struct ∅~2 complete>` @0) (noop-type-conversion `ptr<struct ∅~2 complete>` @0 (nullptr `nullptr_t` @0)))
+         (definition (p2~4 `ptr<struct ∅~2 complete>` @8) (noop-type-conversion `ptr<struct ∅~2 complete>` @8 (nullptr `nullptr_t` @8)))
          (return
             (ptr-equal `int` @16
-               (p1~4 `ptr<struct ∅~2 complete>` @0)
-               (p2~6 `ptr<struct ∅~2 complete>` @8))))))
+               (p1~3 `ptr<struct ∅~2 complete>` @0)
+               (p2~4 `ptr<struct ∅~2 complete>` @8))))))
 
 ----- stderr -----

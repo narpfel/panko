@@ -27,12 +27,12 @@ exit_code: 0
          (union ∅~5
             (member t @0 `struct T~1 complete`)
             (member x @0 `long`))
-         (definition u~7 `union ∅~5 complete`
+         (definition u~6 `union ∅~5 complete`
             (braced
                (subobject +0[0:20] (noop-type-conversion `unsigned int` (0x55555 `int`)))
                (subobject +0[20:40] (sign-extend `long` (0xbbbbb `int`)))
                (subobject +4[8:28] (noop-type-conversion `unsigned int` (0xccccc `int`)))))
-         (definition u_with_static~9 `union ∅~5 complete`
+         (definition u_with_static~7 `union ∅~5 complete`
             (braced
                (subobject +0 (static_t~2 `struct T~1 complete`))))
          (expression
@@ -46,17 +46,17 @@ exit_code: 0
                (greater `int`
                   (member `unsigned int` x +0[0:20]
                      (member `struct T~1 complete` t +0
-                        (u~7 `union ∅~5 complete`)))
+                        (u~6 `union ∅~5 complete`)))
                   (noop-type-conversion `unsigned int` (0 `int`)))
                (less `int`
                   (member `long` y +0[20:40]
                      (member `struct T~1 complete` t +0
-                        (u~7 `union ∅~5 complete`)))
+                        (u~6 `union ∅~5 complete`)))
                   (sign-extend `long` (0 `int`)))
                (greater `int`
                   (member `unsigned int` z +4[8:28]
                      (member `struct T~1 complete` t +0
-                        (u~7 `union ∅~5 complete`)))
+                        (u~6 `union ∅~5 complete`)))
                   (noop-type-conversion `unsigned int` (0 `int`)))))
          (expression
             (call `int`
@@ -67,19 +67,19 @@ exit_code: 0
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "0x%016lx\n\0"))))
                (member `long` x +0
-                  (u~7 `union ∅~5 complete`))))
-         (definition compound_assignment_result~10 `unsigned int`
+                  (u~6 `union ∅~5 complete`))))
+         (definition compound_assignment_result~8 `unsigned int`
             (combine `unsigned int`
-               (assign `ptr<struct T~1 complete>` (unnamed-temporary~11 `ptr<struct T~1 complete>`)
+               (assign `ptr<struct T~1 complete>` (unnamed-temporary~9 `ptr<struct T~1 complete>`)
                   (addressof `ptr<struct T~1 complete>`
                      (member `struct T~1 complete` t +0
-                        (u~7 `union ∅~5 complete`))))
+                        (u~6 `union ∅~5 complete`))))
                (assign `unsigned int`
                   (member `unsigned int` x +0[0:20]
-                     (deref `struct T~1 complete` (unnamed-temporary~11 `ptr<struct T~1 complete>`)))
+                     (deref `struct T~1 complete` (unnamed-temporary~9 `ptr<struct T~1 complete>`)))
                   (add `unsigned int`
                      (member `unsigned int` x +0[0:20]
-                        (deref `struct T~1 complete` (unnamed-temporary~11 `ptr<struct T~1 complete>`)))
+                        (deref `struct T~1 complete` (unnamed-temporary~9 `ptr<struct T~1 complete>`)))
                      (noop-type-conversion `unsigned int` (11 `int`))))))
          (expression
             (call `int`
@@ -90,30 +90,30 @@ exit_code: 0
                      (addressof `ptr<array<char; 16>>`
                         (string `array<char; 16>` "0x%016lx %x %x\n\0"))))
                (member `long` x +0
-                  (u~7 `union ∅~5 complete`))
+                  (u~6 `union ∅~5 complete`))
                (member `unsigned int` x +0[0:20]
                   (member `struct T~1 complete` t +0
-                     (u~7 `union ∅~5 complete`)))
-               (compound_assignment_result~10 `unsigned int`)))
-         (definition preincrement_result~12 `int`
+                     (u~6 `union ∅~5 complete`)))
+               (compound_assignment_result~8 `unsigned int`)))
+         (definition preincrement_result~10 `int`
             (truncate `int`
                (combine `long`
-                  (assign `ptr<struct T~1 complete>` (unnamed-temporary~13 `ptr<struct T~1 complete>`)
+                  (assign `ptr<struct T~1 complete>` (unnamed-temporary~11 `ptr<struct T~1 complete>`)
                      (addressof `ptr<struct T~1 complete>`
                         (member `struct T~1 complete` t +0
-                           (u~7 `union ∅~5 complete`))))
+                           (u~6 `union ∅~5 complete`))))
                   (assign `long`
                      (member `long` y +0[20:40]
-                        (deref `struct T~1 complete` (unnamed-temporary~13 `ptr<struct T~1 complete>`)))
+                        (deref `struct T~1 complete` (unnamed-temporary~11 `ptr<struct T~1 complete>`)))
                      (add `long`
                         (member `long` y +0[20:40]
-                           (deref `struct T~1 complete` (unnamed-temporary~13 `ptr<struct T~1 complete>`)))
+                           (deref `struct T~1 complete` (unnamed-temporary~11 `ptr<struct T~1 complete>`)))
                         (sign-extend `long` (++ `int`)))))))
-         (definition uty~14 `int`
+         (definition uty~12 `int`
             (truncate `int`
                (member `long` y +0[20:40]
                   (member `struct T~1 complete` t +0
-                     (u~7 `union ∅~5 complete`)))))
+                     (u~6 `union ∅~5 complete`)))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -123,39 +123,39 @@ exit_code: 0
                      (addressof `ptr<array<char; 16>>`
                         (string `array<char; 16>` "0x%016lx %x %x\n\0"))))
                (member `long` x +0
-                  (u~7 `union ∅~5 complete`))
-               (uty~14 `int`)
-               (preincrement_result~12 `int`)))
-         (definition postincrement_result~15 `int`
+                  (u~6 `union ∅~5 complete`))
+               (uty~12 `int`)
+               (preincrement_result~10 `int`)))
+         (definition postincrement_result~13 `int`
             (truncate `int`
                (combine `long`
                   (combine `long`
                      (combine `long`
-                        (assign `ptr<struct T~1 complete>` (unnamed-temporary~17 `ptr<struct T~1 complete>`)
+                        (assign `ptr<struct T~1 complete>` (unnamed-temporary~15 `ptr<struct T~1 complete>`)
                            (addressof `ptr<struct T~1 complete>`
                               (member `struct T~1 complete` t +0
-                                 (u~7 `union ∅~5 complete`))))
-                        (assign `long` (unnamed-temporary~18 `long`)
+                                 (u~6 `union ∅~5 complete`))))
+                        (assign `long` (unnamed-temporary~16 `long`)
                            (member `long` y +0[20:40]
-                              (deref `struct T~1 complete` (unnamed-temporary~17 `ptr<struct T~1 complete>`)))))
+                              (deref `struct T~1 complete` (unnamed-temporary~15 `ptr<struct T~1 complete>`)))))
                      (combine `long`
-                        (assign `ptr<struct T~1 complete>` (unnamed-temporary~16 `ptr<struct T~1 complete>`)
+                        (assign `ptr<struct T~1 complete>` (unnamed-temporary~14 `ptr<struct T~1 complete>`)
                            (addressof `ptr<struct T~1 complete>`
-                              (deref `struct T~1 complete` (unnamed-temporary~17 `ptr<struct T~1 complete>`))))
+                              (deref `struct T~1 complete` (unnamed-temporary~15 `ptr<struct T~1 complete>`))))
                         (assign `long`
                            (member `long` y +0[20:40]
-                              (deref `struct T~1 complete` (unnamed-temporary~16 `ptr<struct T~1 complete>`)))
+                              (deref `struct T~1 complete` (unnamed-temporary~14 `ptr<struct T~1 complete>`)))
                            (add `long`
                               (member `long` y +0[20:40]
-                                 (deref `struct T~1 complete` (unnamed-temporary~16 `ptr<struct T~1 complete>`)))
+                                 (deref `struct T~1 complete` (unnamed-temporary~14 `ptr<struct T~1 complete>`)))
                               (sign-extend `long` (++ `int`))))))
-                  (unnamed-temporary~18 `long`))))
+                  (unnamed-temporary~16 `long`))))
          (expression
-            (assign `int` (uty~14 `int`)
+            (assign `int` (uty~12 `int`)
                (truncate `int`
                   (member `long` y +0[20:40]
                      (member `struct T~1 complete` t +0
-                        (u~7 `union ∅~5 complete`))))))
+                        (u~6 `union ∅~5 complete`))))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -165,40 +165,40 @@ exit_code: 0
                      (addressof `ptr<array<char; 16>>`
                         (string `array<char; 16>` "0x%016lx %x %x\n\0"))))
                (member `long` x +0
-                  (u~7 `union ∅~5 complete`))
-               (uty~14 `int`)
-               (postincrement_result~15 `int`)))
-         (definition ptr~19 `ptr<struct T~1 complete>`
+                  (u~6 `union ∅~5 complete`))
+               (uty~12 `int`)
+               (postincrement_result~13 `int`)))
+         (definition ptr~17 `ptr<struct T~1 complete>`
             (addressof `ptr<struct T~1 complete>`
                (member `struct T~1 complete` t +0
-                  (u~7 `union ∅~5 complete`))))
-         (definition postdecrement_result~20 `int`
+                  (u~6 `union ∅~5 complete`))))
+         (definition postdecrement_result~18 `int`
             (noop-type-conversion `int`
                (combine `unsigned int`
                   (combine `unsigned int`
                      (combine `unsigned int`
-                        (assign `ptr<struct T~1 complete>` (unnamed-temporary~22 `ptr<struct T~1 complete>`)
+                        (assign `ptr<struct T~1 complete>` (unnamed-temporary~20 `ptr<struct T~1 complete>`)
                            (addressof `ptr<struct T~1 complete>`
-                              (deref `struct T~1 complete` (ptr~19 `ptr<struct T~1 complete>`))))
-                        (assign `unsigned int` (unnamed-temporary~23 `unsigned int`)
+                              (deref `struct T~1 complete` (ptr~17 `ptr<struct T~1 complete>`))))
+                        (assign `unsigned int` (unnamed-temporary~21 `unsigned int`)
                            (member `unsigned int` z +4[8:28]
-                              (deref `struct T~1 complete` (unnamed-temporary~22 `ptr<struct T~1 complete>`)))))
+                              (deref `struct T~1 complete` (unnamed-temporary~20 `ptr<struct T~1 complete>`)))))
                      (combine `unsigned int`
-                        (assign `ptr<struct T~1 complete>` (unnamed-temporary~21 `ptr<struct T~1 complete>`)
+                        (assign `ptr<struct T~1 complete>` (unnamed-temporary~19 `ptr<struct T~1 complete>`)
                            (addressof `ptr<struct T~1 complete>`
-                              (deref `struct T~1 complete` (unnamed-temporary~22 `ptr<struct T~1 complete>`))))
+                              (deref `struct T~1 complete` (unnamed-temporary~20 `ptr<struct T~1 complete>`))))
                         (assign `unsigned int`
                            (member `unsigned int` z +4[8:28]
-                              (deref `struct T~1 complete` (unnamed-temporary~21 `ptr<struct T~1 complete>`)))
+                              (deref `struct T~1 complete` (unnamed-temporary~19 `ptr<struct T~1 complete>`)))
                            (subtract `unsigned int`
                               (member `unsigned int` z +4[8:28]
-                                 (deref `struct T~1 complete` (unnamed-temporary~21 `ptr<struct T~1 complete>`)))
+                                 (deref `struct T~1 complete` (unnamed-temporary~19 `ptr<struct T~1 complete>`)))
                               (noop-type-conversion `unsigned int` (-- `int`))))))
-                  (unnamed-temporary~23 `unsigned int`))))
-         (definition utz~24 `unsigned int`
+                  (unnamed-temporary~21 `unsigned int`))))
+         (definition utz~22 `unsigned int`
             (member `unsigned int` z +4[8:28]
                (member `struct T~1 complete` t +0
-                  (u~7 `union ∅~5 complete`))))
+                  (u~6 `union ∅~5 complete`))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -208,9 +208,9 @@ exit_code: 0
                      (addressof `ptr<array<char; 16>>`
                         (string `array<char; 16>` "0x%016lx %x %x\n\0"))))
                (member `long` x +0
-                  (u~7 `union ∅~5 complete`))
-               (utz~24 `unsigned int`)
-               (postdecrement_result~20 `int`)))
+                  (u~6 `union ∅~5 complete`))
+               (utz~22 `unsigned int`)
+               (postdecrement_result~18 `int`)))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
@@ -234,8 +234,8 @@ exit_code: 0
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "0x%016lx\n\0"))))
                (member `long` x +0
-                  (u_with_static~9 `union ∅~5 complete`))))
-         (struct BitfieldWithConstexprWidth~25
+                  (u_with_static~7 `union ∅~5 complete`))))
+         (struct BitfieldWithConstexprWidth~23
             (member x @0[0:4] `int`))
          (return (truncate `int` (sizeof `unsigned long` 8 `struct T~1 complete`))))))
 

@@ -21,54 +21,54 @@ exit_code: 0
          (union ∅~4
             (member t `struct T~1 complete`)
             (member x `long`))
-         (declaration u~6 `union ∅~4 complete` (braced ∅))
+         (declaration u~5 `union ∅~4 complete` (braced ∅))
          (expression
             (assign
                (dot x
                   (dot t
-                     (name u~6 `union ∅~4 complete`)))
+                     (name u~5 `union ∅~4 complete`)))
                0x55555))
          (expression
             (assign
                (dot y
                   (dot t
-                     (name u~6 `union ∅~4 complete`)))
+                     (name u~5 `union ∅~4 complete`)))
                0xbbbbb))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "0x%016lx\n")
                (dot x
-                  (name u~6 `union ∅~4 complete`))))
-         (declaration assign_to_x~7 `unsigned int`
+                  (name u~5 `union ∅~4 complete`))))
+         (declaration assign_to_x~6 `unsigned int`
             (assign
                (dot x
                   (dot t
-                     (name u~6 `union ∅~4 complete`)))
+                     (name u~5 `union ∅~4 complete`)))
                0xabcde))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "0x%016lx 0x%08x 0x%08x\n")
                (dot x
-                  (name u~6 `union ∅~4 complete`))
+                  (name u~5 `union ∅~4 complete`))
                (dot x
                   (dot t
-                     (name u~6 `union ∅~4 complete`)))
-               (name assign_to_x~7 `unsigned int`)))
-         (declaration assign_to_y~8 `long`
+                     (name u~5 `union ∅~4 complete`)))
+               (name assign_to_x~6 `unsigned int`)))
+         (declaration assign_to_y~7 `long`
             (assign
                (dot y
                   (dot t
-                     (name u~6 `union ∅~4 complete`)))
+                     (name u~5 `union ∅~4 complete`)))
                0xcba98))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "0x%016lx 0x%08x 0x%08x\n")
                (dot x
-                  (name u~6 `union ∅~4 complete`))
+                  (name u~5 `union ∅~4 complete`))
                (cast `int`
                   (dot y
                      (dot t
-                        (name u~6 `union ∅~4 complete`))))
-               (cast `int` (name assign_to_y~8 `long`)))))))
+                        (name u~5 `union ∅~4 complete`))))
+               (cast `int` (name assign_to_y~7 `long`)))))))
 
 ----- stderr -----

@@ -16,8 +16,8 @@ exit_code: 0
       (compound-statement
          (struct ∅~2
             (member x `int`))
-         (declaration p1~4 `ptr<struct ∅~2 complete>` nullptr)
-         (declaration p2~6 `ptr<struct ∅~2 complete>` nullptr)
-         (return (equal (name p1~4 `ptr<struct ∅~2 complete>`) (name p2~6 `ptr<struct ∅~2 complete>`))))))
+         (declaration p1~3 `ptr<struct ∅~2 complete>` nullptr)
+         (declaration p2~4 `ptr<struct ∅~2 complete>` nullptr)
+         (return (equal (name p1~3 `ptr<struct ∅~2 complete>`) (name p2~4 `ptr<struct ∅~2 complete>`))))))
 
 ----- stderr -----

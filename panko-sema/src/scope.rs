@@ -1324,15 +1324,6 @@ gen fn resolve_declaration<'a>(
     }
 
     for cst::InitDeclarator { declarator, bitfield_width, initialiser } in *declarators {
-        // TODO: This skips an id for each unnamed struct decl, which mimics the previous
-        // behaviour that each declarator generated a *different* unnamed struct. This limits test
-        // snapshot changes to struct type ids, leaving the remaining ids stable.
-        if let ast::Type::Struct(r#struct) = unresolved_ty.ty
-            && let Type::Struct(ty::Struct::Complete(Complete { name: None, .. })) = ty.ty
-            && let Struct::Complete { .. } = r#struct
-        {
-            let _ = scopes.id();
-        }
         let (ty, name) = parse_declarator(scopes, ty, *declarator, IsParameter::No);
         let name = match name {
             Some(name) => name,

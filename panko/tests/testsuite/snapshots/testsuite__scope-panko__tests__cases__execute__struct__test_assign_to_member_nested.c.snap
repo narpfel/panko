@@ -27,7 +27,7 @@ exit_code: 0
          (struct ∅~4
             (member x `int`)
             (member t `struct T~2 complete`))
-         (declaration a~6 `struct ∅~4 complete`
+         (declaration a~5 `struct ∅~4 complete`
             (braced
                123
                (name t~3 `struct T~2 complete`)))
@@ -35,11 +35,11 @@ exit_code: 0
             (assign
                (dot x
                   (dot t
-                     (name a~6 `struct ∅~4 complete`)))
+                     (name a~5 `struct ∅~4 complete`)))
                5))
          (return
             (dot x
                (dot t
-                  (name a~6 `struct ∅~4 complete`)))))))
+                  (name a~5 `struct ∅~4 complete`)))))))
 
 ----- stderr -----
