@@ -21,18 +21,18 @@ exit_code: 0
          (union ∅~4
             (member t @0 `struct T~1 complete`)
             (member x @0 `long`))
-         (definition (u~6 `union ∅~5 complete` @0) (braced ∅))
+         (definition (u~6 `union ∅~4 complete` @0) (braced ∅))
          (expression
             (assign `unsigned int` @8
                (member `unsigned int` @8 x +0[0:20]
                   (member `struct T~1 complete` @0 t +0
-                     (u~6 `union ∅~5 complete` @0)))
+                     (u~6 `union ∅~4 complete` @0)))
                (noop-type-conversion `unsigned int` @8 (349525 `int` @8))))
          (expression
             (assign `long` @8
                (member `long` @8 y +0[20:40]
                   (member `struct T~1 complete` @0 t +0
-                     (u~6 `union ∅~5 complete` @0)))
+                     (u~6 `union ∅~4 complete` @0)))
                (sign-extend `long` @8 (768955 `int` @16))))
          (expression
             (call `int` @8
@@ -43,12 +43,12 @@ exit_code: 0
                      (addressof `ptr<array<char; 10>>` @24
                         (string `array<char; 10>` @void "0x%016lx\n\0"))))
                (member `long` @0 x +0
-                  (u~6 `union ∅~5 complete` @0))))
+                  (u~6 `union ∅~4 complete` @0))))
          (definition (assign_to_x~7 `unsigned int` @8)
             (assign `unsigned int` @12
                (member `unsigned int` @12 x +0[0:20]
                   (member `struct T~1 complete` @0 t +0
-                     (u~6 `union ∅~5 complete` @0)))
+                     (u~6 `union ∅~4 complete` @0)))
                (noop-type-conversion `unsigned int` @12 (703710 `int` @12))))
          (expression
             (call `int` @12
@@ -59,16 +59,16 @@ exit_code: 0
                      (addressof `ptr<array<char; 24>>` @24
                         (string `array<char; 24>` @void "0x%016lx 0x%08x 0x%08x\n\0"))))
                (member `long` @0 x +0
-                  (u~6 `union ∅~5 complete` @0))
+                  (u~6 `union ∅~4 complete` @0))
                (member `unsigned int` @32 x +0[0:20]
                   (member `struct T~1 complete` @0 t +0
-                     (u~6 `union ∅~5 complete` @0)))
+                     (u~6 `union ∅~4 complete` @0)))
                (assign_to_x~7 `unsigned int` @8)))
          (definition (assign_to_y~8 `long` @16)
             (assign `long` @24
                (member `long` @24 y +0[20:40]
                   (member `struct T~1 complete` @0 t +0
-                     (u~6 `union ∅~5 complete` @0)))
+                     (u~6 `union ∅~4 complete` @0)))
                (sign-extend `long` @24 (834200 `int` @32))))
          (expression
             (call `int` @24
@@ -79,11 +79,11 @@ exit_code: 0
                      (addressof `ptr<array<char; 24>>` @40
                         (string `array<char; 24>` @void "0x%016lx 0x%08x 0x%08x\n\0"))))
                (member `long` @0 x +0
-                  (u~6 `union ∅~5 complete` @0))
+                  (u~6 `union ∅~4 complete` @0))
                (truncate `int` @48
                   (member `long` @56 y +0[20:40]
                      (member `struct T~1 complete` @0 t +0
-                        (u~6 `union ∅~5 complete` @0))))
+                        (u~6 `union ∅~4 complete` @0))))
                (truncate `int` @64 (assign_to_y~8 `long` @16)))))))
 
 ----- stderr -----

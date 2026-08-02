@@ -19,7 +19,7 @@ exit_code: 0
    (struct ∅~2
       (member x @0 `int`)
       (member t @4 `struct T~0 complete`))
-   (definition external (a~4 `struct ∅~3 complete` (static a))
+   (definition external (a~4 `struct ∅~2 complete` (static a))
       (braced
          (subobject +0 (123 `int`))
          (subobject +4 (42 `int`))))
@@ -35,11 +35,11 @@ exit_code: 0
             (assign `int` @0
                (member `int` @0 x +0
                   (member `struct T~0 complete` @void t +4
-                     (a~4 `struct ∅~3 complete` (static a))))
+                     (a~4 `struct ∅~2 complete` (static a))))
                (5 `int` @0)))
          (return
             (member `int` @0 x +0
                (member `struct T~0 complete` @void t +4
-                  (a~4 `struct ∅~3 complete` (static a))))))))
+                  (a~4 `struct ∅~2 complete` (static a))))))))
 
 ----- stderr -----

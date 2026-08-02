@@ -7,19 +7,20 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/struct/test_multiple_declarators_of_unnamed_struct_have_same_type.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_multiple_declarators_of_unnamed_struct_have_same_type.c"
+   (function-definition external stack-size=40
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (struct ∅~2
+            (member x @0 `int`))
+         (definition (p1~4 `ptr<struct ∅~2 complete>` @0) (noop-type-conversion `ptr<struct ∅~2 complete>` @0 (nullptr `nullptr_t` @0)))
+         (definition (p2~6 `ptr<struct ∅~2 complete>` @8) (noop-type-conversion `ptr<struct ∅~2 complete>` @8 (nullptr `nullptr_t` @8)))
+         (return
+            (ptr-equal `int` @16
+               (p1~4 `ptr<struct ∅~2 complete>` @0)
+               (p2~6 `ptr<struct ∅~2 complete>` @8))))))
 
 ----- stderr -----
-Error: comparison of pointers to incompatible types
-   ╭─[panko/tests/cases/execute/struct/test_multiple_declarators_of_unnamed_struct_have_same_type.c:8:15]
-   │
- 8 │     return p1 == p2;
-   │            ─┬ ─┬ ─┬  
-   │             │  │  ╰── this is of type `ptr<struct ∅~5 complete>`
-   │             │  │     
-   │             │  ╰───── pointer comparisons are only allowed between pointers to compatible types
-   │             │        
-   │             ╰──────── this is of type `ptr<struct ∅~3 complete>`
-───╯

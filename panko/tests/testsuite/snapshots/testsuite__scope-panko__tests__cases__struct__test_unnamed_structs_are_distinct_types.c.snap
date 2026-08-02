@@ -13,26 +13,26 @@ exit_code: 0
 (translation-unit "panko/tests/cases/struct/test_unnamed_structs_are_distinct_types.c"
    (struct ∅~0
       (member x `int`))
-   (typedef T `struct ∅~1 complete`)
-   (declaration p1~2 `ptr<struct ∅~1 complete>` ∅)
-   (declaration p2~3 `ptr<struct ∅~1 complete>` ∅)
+   (typedef T `struct ∅~0 complete`)
+   (declaration p1~2 `ptr<struct ∅~0 complete>` ∅)
+   (declaration p2~3 `ptr<struct ∅~0 complete>` ∅)
    (function-definition
       okay~4 `fn() -> void`
       (compound-statement
-         (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p2~3 `ptr<struct ∅~1 complete>`)))
-         (declaration p3~6 `ptr<struct ∅~1 complete>` nullptr)
-         (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p3~6 `ptr<struct ∅~1 complete>`)))))
+         (expression (equal (name p1~2 `ptr<struct ∅~0 complete>`) (name p2~3 `ptr<struct ∅~0 complete>`)))
+         (declaration p3~6 `ptr<struct ∅~0 complete>` nullptr)
+         (expression (equal (name p1~2 `ptr<struct ∅~0 complete>`) (name p3~6 `ptr<struct ∅~0 complete>`)))))
    (struct ∅~7
       (member x `int`))
-   (declaration p4~9 `ptr<struct ∅~8 complete>` ∅)
+   (declaration p4~9 `ptr<struct ∅~7 complete>` ∅)
    (function-definition
       should_error~10 `fn() -> void`
       (compound-statement
-         (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p4~9 `ptr<struct ∅~8 complete>`)))
+         (expression (equal (name p1~2 `ptr<struct ∅~0 complete>`) (name p4~9 `ptr<struct ∅~7 complete>`)))
          (struct ∅~12
             (member x `int`))
-         (declaration p5~14 `ptr<struct ∅~13 complete>` ∅)
-         (expression (equal (name p1~2 `ptr<struct ∅~1 complete>`) (name p5~14 `ptr<struct ∅~13 complete>`)))
-         (expression (equal (name p4~9 `ptr<struct ∅~8 complete>`) (name p5~14 `ptr<struct ∅~13 complete>`))))))
+         (declaration p5~14 `ptr<struct ∅~12 complete>` ∅)
+         (expression (equal (name p1~2 `ptr<struct ∅~0 complete>`) (name p5~14 `ptr<struct ∅~12 complete>`)))
+         (expression (equal (name p4~9 `ptr<struct ∅~7 complete>`) (name p5~14 `ptr<struct ∅~12 complete>`))))))
 
 ----- stderr -----
