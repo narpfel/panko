@@ -1,5 +1,4 @@
 // [[return: 42]]
-// [[known-bug: struct decl contained in `typeof` without declarators is ignored]]
 
 typeof(struct T { int x; });
 

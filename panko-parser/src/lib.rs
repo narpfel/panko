@@ -220,10 +220,10 @@ pub struct Declaration<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct DeclarationSpecifiers<'a>(&'a [DeclarationSpecifier<'a>]);
+pub struct DeclarationSpecifiers<'a>(&'a [DeclarationSpecifier<'a>]);
 
 impl<'a> DeclarationSpecifiers<'a> {
-    fn loc(&self) -> Loc<'a> {
+    pub fn loc(&self) -> Loc<'a> {
         match self.0 {
             [] => unreachable!(),
             [specifier] => specifier.loc(),
@@ -330,7 +330,7 @@ impl<'a> TypeSpecifierQualifier<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct TypeQualifier<'a> {
+pub struct TypeQualifier<'a> {
     token: Token<'a>,
     kind: TypeQualifierKind,
 }
@@ -343,11 +343,11 @@ impl<'a> TypeQualifier<'a> {
         }
     }
 
-    fn loc(&self) -> Loc<'a> {
+    pub fn loc(&self) -> Loc<'a> {
         self.token.loc()
     }
 
-    fn slice(&self) -> &'a str {
+    pub fn slice(&self) -> &'a str {
         self.token.slice()
     }
 }
@@ -777,8 +777,8 @@ fn pointers_loc<'a>(pointers: &[Pointer<'a>]) -> Loc<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Pointer<'a> {
-    star: Token<'a>,
-    qualifiers: &'a [TypeQualifier<'a>],
+    pub star: Token<'a>,
+    pub qualifiers: &'a [TypeQualifier<'a>],
 }
 
 impl<'a> Pointer<'a> {
@@ -944,29 +944,29 @@ impl<'a> DirectDeclarator<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct ArrayDeclarator<'a> {
-    direct_declarator: &'a DirectDeclarator<'a>,
-    type_qualifiers: &'a [TypeQualifier<'a>],
-    length: Option<Expression<'a>>,
-    close_bracket: Token<'a>,
+    pub direct_declarator: &'a DirectDeclarator<'a>,
+    pub type_qualifiers: &'a [TypeQualifier<'a>],
+    pub length: Option<Expression<'a>>,
+    pub close_bracket: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct FunctionDeclarator<'a> {
-    direct_declarator: &'a DirectDeclarator<'a>,
-    parameter_type_list: ParameterTypeList<'a>,
-    close_paren: Token<'a>,
+    pub direct_declarator: &'a DirectDeclarator<'a>,
+    pub parameter_type_list: ParameterTypeList<'a>,
+    pub close_paren: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct ParameterTypeList<'a> {
-    parameter_list: &'a [ParameterDeclaration<'a>],
-    is_varargs: bool,
+pub struct ParameterTypeList<'a> {
+    pub parameter_list: &'a [ParameterDeclaration<'a>],
+    pub is_varargs: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct ParameterDeclaration<'a> {
-    declaration_specifiers: DeclarationSpecifiers<'a>,
-    declarator: Option<Declarator<'a>>,
+pub struct ParameterDeclaration<'a> {
+    pub declaration_specifiers: DeclarationSpecifiers<'a>,
+    pub declarator: Option<Declarator<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]

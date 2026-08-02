@@ -25,7 +25,7 @@ Error: declaration does not specify a name
    │
  5 │         name = 42;
    │         ────┬────  
-   │             ╰────── this looks like a declaration with type `typedef<name>`
+   │             ╰────── this looks like a declaration with type `int`
 ───╯
 
 Error: declaration does not specify a name

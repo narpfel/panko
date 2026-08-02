@@ -6,7 +6,6 @@ use crate::ast::Declaration;
 use crate::ast::ExternalDeclaration;
 use crate::ast::FunctionDefinition;
 use crate::ast::Member;
-use crate::ast::ParameterDeclaration;
 use crate::ast::QualifiedType;
 use crate::ast::Statement;
 use crate::ast::Struct;
@@ -66,12 +65,6 @@ impl AsSExpr for QualifiedType<'_> {
 impl AsSExpr for Type<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::display(self)
-    }
-}
-
-impl AsSExpr for ParameterDeclaration<'_> {
-    fn as_sexpr(&self) -> SExpr {
-        SExpr::new("param").inherit(&self.name).inherit(&self.ty)
     }
 }
 

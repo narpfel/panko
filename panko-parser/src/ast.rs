@@ -15,11 +15,8 @@ use panko_report::Report;
 use panko_report::Sliced as _;
 
 use crate as cst;
-use crate::ArrayDeclarator;
 use crate::BlockItem;
 pub use crate::DesignatedInitialiser;
-use crate::DirectDeclarator;
-use crate::FunctionDeclarator;
 pub use crate::InitDeclarator;
 pub use crate::Initialiser;
 use crate::JumpStatement;
@@ -65,10 +62,6 @@ enum Diagnostic<'a> {
     #[diagnostics(at(colour = Red, label = "type missing"))]
     DeclarationWithoutType { at: cst::DeclarationSpecifiers<'a> },
 
-    #[error("cannot use type qualifier `{at}` in non-parameter array declarator")]
-    #[diagnostics(at(colour = Red, label = "help: remove this `{at}`"))]
-    InvalidTypeQualifierInArrayBrackets { at: TypeQualifier<'a> },
-
     #[error("{kind} `{name}` declared with function-specifier `{at}`")]
     #[diagnostics(
         at(colour = Red, label = "help: remove this `{at}`"),
@@ -78,20 +71,6 @@ enum Diagnostic<'a> {
         at: cst::FunctionSpecifier<'a>,
         name: Loc<'a>,
         kind: &'a str,
-    },
-
-    #[error(
-        "parameter `{name}` declared with storage class `{at}` (only `register` is allowed for parameters)"
-    )]
-    #[diagnostics(
-        at(colour = Red, label = "this storage class is not allowed for function parameters"),
-        parameter(colour = Blue, label = "in this parameter declaration"),
-    )]
-    #[with(name = name.fg(Blue))]
-    StorageClassInParameterDeclaration {
-        at: Token<'a>,
-        name: &'a str,
-        parameter: Loc<'a>,
     },
 
     #[error("members cannot have storage classes")]
@@ -307,7 +286,7 @@ pub enum Type<'a> {
     Arithmetic(Arithmetic),
     Pointer(&'a QualifiedType<'a>),
     Array(ArrayType<'a>),
-    Function(FunctionType<'a>),
+    Function(FunctionType<'a, QualifiedType<'a>>),
     Void,
     Typedef(Token<'a>),
     Typeof {
@@ -358,17 +337,10 @@ pub struct ArrayType<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct FunctionType<'a> {
-    pub params: &'a [ParameterDeclaration<'a>],
-    pub return_type: &'a QualifiedType<'a>,
+pub struct FunctionType<'a, T> {
+    pub params: &'a [cst::ParameterDeclaration<'a>],
+    pub return_type: &'a T,
     pub is_varargs: bool,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct ParameterDeclaration<'a> {
-    pub loc: Loc<'a>,
-    pub ty: QualifiedType<'a>,
-    pub name: Option<Token<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -571,7 +543,10 @@ impl fmt::Display for ArrayType<'_> {
     }
 }
 
-impl fmt::Display for FunctionType<'_> {
+impl<T> fmt::Display for FunctionType<'_, T>
+where
+    T: fmt::Display,
+{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self { params, return_type, is_varargs } = *self;
         let maybe_ellipsis = match (is_varargs, params.is_empty()) {
@@ -584,8 +559,8 @@ impl fmt::Display for FunctionType<'_> {
             "fn({}{}) -> {}",
             params.iter().format_with(", ", |param, f| f(&format_args!(
                 "{}: {}",
-                param.name.map_or(NO_VALUE, |name| name.slice()),
-                param.ty,
+                param.declaration_specifiers.as_sexpr(),
+                param.declarator.as_sexpr(),
             ))),
             maybe_ellipsis,
             return_type,
@@ -761,10 +736,10 @@ impl fmt::Display for Signedness {
     }
 }
 
-pub(crate) struct DeclarationSpecifiers<'a> {
-    pub(crate) storage_class: Option<cst::StorageClassSpecifier<'a>>,
-    pub(crate) function_specifiers: FunctionSpecifiers<'a>,
-    pub(crate) ty: QualifiedType<'a>,
+pub struct DeclarationSpecifiers<'a> {
+    pub storage_class: Option<cst::StorageClassSpecifier<'a>>,
+    pub function_specifiers: FunctionSpecifiers<'a>,
+    pub ty: QualifiedType<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -829,13 +804,13 @@ impl<'a> ParsedSpecifiers<'a> {
 }
 
 #[derive(Default)]
-struct Qualifiers<'a> {
-    const_qualifier: Option<TypeQualifier<'a>>,
-    volatile_qualifier: Option<TypeQualifier<'a>>,
+pub struct Qualifiers<'a> {
+    pub const_qualifier: Option<TypeQualifier<'a>>,
+    pub volatile_qualifier: Option<TypeQualifier<'a>>,
 }
 
 impl<'a> Qualifiers<'a> {
-    fn parse(sess: &'a Session<'a>, type_qualifiers: &[TypeQualifier<'a>]) -> Self {
+    pub fn parse(sess: &'a Session<'a>, type_qualifiers: &[TypeQualifier<'a>]) -> Self {
         let mut qualifiers = Self::default();
         for qualifier in type_qualifiers {
             qualifier.parse(sess, &mut qualifiers)
@@ -850,7 +825,7 @@ pub struct FunctionSpecifiers<'a> {
     pub noreturn: Option<cst::FunctionSpecifier<'a>>,
 }
 
-pub(crate) fn parse_declaration_specifiers<'a>(
+pub fn parse_declaration_specifiers<'a>(
     sess: &'a Session<'a>,
     specifiers: cst::DeclarationSpecifiers<'a>,
 ) -> DeclarationSpecifiers<'a> {
@@ -926,126 +901,6 @@ pub fn reject_function_specifiers<'a>(
             kind,
         })
     }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum IsParameter {
-    Yes,
-    No,
-}
-
-pub fn parse_declarator<'a>(
-    sess: &'a Session<'a>,
-    mut ty: QualifiedType<'a>,
-    mut declarator: cst::Declarator<'a>,
-    is_parameter: IsParameter,
-) -> (QualifiedType<'a>, Option<Token<'a>>) {
-    let name = loop {
-        for pointer in declarator.pointers.unwrap_or_default() {
-            let Qualifiers { const_qualifier, volatile_qualifier } =
-                Qualifiers::parse(sess, pointer.qualifiers);
-            ty = QualifiedType {
-                is_const: const_qualifier.is_some(),
-                is_volatile: volatile_qualifier.is_some(),
-                ty: Type::Pointer(sess.alloc(ty)),
-                loc: pointer.star.loc().until(ty.loc),
-            };
-        }
-        match declarator.direct_declarator {
-            DirectDeclarator::Abstract => break None,
-            DirectDeclarator::Identifier(name) => break Some(name),
-            DirectDeclarator::Parenthesised { declarator: decl, close_paren: _ } =>
-                declarator = *decl,
-            DirectDeclarator::ArrayDeclarator(ArrayDeclarator {
-                direct_declarator,
-                type_qualifiers,
-                length,
-                close_bracket,
-            }) => {
-                let Qualifiers { const_qualifier, volatile_qualifier } = match is_parameter {
-                    IsParameter::Yes => Qualifiers::parse(sess, type_qualifiers),
-                    IsParameter::No => {
-                        for qualifier in type_qualifiers {
-                            sess.emit(Diagnostic::InvalidTypeQualifierInArrayBrackets {
-                                at: *qualifier,
-                            })
-                        }
-                        Qualifiers::default()
-                    }
-                };
-                declarator = cst::Declarator {
-                    pointers: None,
-                    direct_declarator: *direct_declarator,
-                };
-                ty = QualifiedType {
-                    is_const: const_qualifier.is_some(),
-                    is_volatile: volatile_qualifier.is_some(),
-                    ty: Type::Array(ArrayType {
-                        ty: sess.alloc(ty),
-                        length: try { sess.alloc(length?) },
-                    }),
-                    loc: ty.loc.until(close_bracket.loc()),
-                }
-            }
-            DirectDeclarator::FunctionDeclarator(FunctionDeclarator {
-                direct_declarator,
-                parameter_type_list,
-                close_paren,
-            }) => {
-                declarator = cst::Declarator {
-                    pointers: None,
-                    direct_declarator: *direct_declarator,
-                };
-
-                let params = parameter_type_list.parameter_list.iter().map(|param| {
-                    let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
-                        parse_declaration_specifiers(sess, param.declaration_specifiers);
-                    let (ty, name) = param.declarator.map_or((ty, None), |declarator| {
-                        parse_declarator(sess, ty, declarator, IsParameter::Yes)
-                    });
-                    let loc =
-                        name.map_or_else(|| param.declaration_specifiers.loc(), |name| name.loc());
-
-                    match storage_class {
-                        None => (),
-                        Some(storage_class)
-                            if let StorageClassSpecifierKind::Register = storage_class.kind =>
-                            unimplemented_todo!(
-                                storage_class,
-                                "register storage class in parameters",
-                            ),
-                        Some(storage_class) =>
-                            sess.emit(Diagnostic::StorageClassInParameterDeclaration {
-                                at: storage_class.token,
-                                name: try { name?.slice() }.unwrap_or(NO_VALUE),
-                                parameter: loc,
-                            }),
-                    }
-
-                    reject_function_specifiers(
-                        sess,
-                        &function_specifiers,
-                        loc,
-                        "function parameter",
-                    );
-
-                    ParameterDeclaration { loc, ty, name }
-                });
-
-                ty = QualifiedType {
-                    is_const: false,
-                    is_volatile: false,
-                    ty: Type::Function(FunctionType {
-                        params: sess.alloc_slice_fill_iter(params),
-                        is_varargs: parameter_type_list.is_varargs,
-                        return_type: sess.alloc(ty),
-                    }),
-                    loc: ty.loc.until(close_paren.loc()),
-                };
-            }
-        }
-    };
-    (ty, name)
 }
 
 pub(crate) fn from_parse_tree<'a>(
