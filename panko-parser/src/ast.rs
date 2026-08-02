@@ -231,13 +231,6 @@ pub struct TranslationUnit<'a> {
 pub enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a, InitDeclarator<'a>>),
-    Error(&'a dyn Report),
-}
-
-impl<'a> FromError<'a> for ExternalDeclaration<'a> {
-    fn from_error(error: &'a dyn Report) -> Self {
-        Self::Error(error)
-    }
 }
 
 #[derive(Debug, Clone, Copy)]

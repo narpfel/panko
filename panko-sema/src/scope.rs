@@ -1720,7 +1720,6 @@ gen fn resolve_external_declaration<'a>(
                         yield ExternalDeclaration::Redeclared(redeclared),
                 }
             },
-        ast::ExternalDeclaration::Error(error) => yield ExternalDeclaration::Error(*error),
     }
 }
 
