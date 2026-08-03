@@ -1307,7 +1307,7 @@ gen fn resolve_declaration<'a>(
                 Token::from_str(
                     scopes.sess.bump(),
                     panko_lex::TokenKind::Identifier,
-                    "unnamed.value",
+                    "unnamed.declarator",
                 )
             }
         };
