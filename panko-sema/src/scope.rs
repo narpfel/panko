@@ -1297,7 +1297,6 @@ gen fn resolve_declaration<'a>(
             Some(name) => name,
             // TODO: 6.7.1: reject struct/enum decl without tag, allow enum decl without tag that
             // contains an enumerator list
-            None if let Type::Struct(_) = ty.ty => continue,
             None => {
                 let loc = unresolved_ty.loc().until_maybe(
                     try { initialiser.as_ref()?.loc() }

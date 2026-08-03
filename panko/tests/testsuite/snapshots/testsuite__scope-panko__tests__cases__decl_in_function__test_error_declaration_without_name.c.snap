@@ -43,3 +43,11 @@ Error: declaration does not specify a name
    │     ───────────────────────┬───────────────────────  
    │                            ╰───────────────────────── this looks like a declaration with type `fn() -> struct HasTagButAbstractDeclarator~6 complete`
 ───╯
+
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/decl_in_function/test_error_declaration_without_name.c:9:5]
+   │
+ 9 │     struct ShouldAlsoError { int x; } = {};
+   │     ───────────────────┬──────────────────  
+   │                        ╰──────────────────── this looks like a declaration with type `struct ShouldAlsoError~8 complete`
+───╯
