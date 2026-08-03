@@ -5,4 +5,5 @@ int main() {
         name = 42;
     }
     int(), *but_this_has_a_name();
+    struct HasTagButAbstractDeclarator { int x; }();
 }
