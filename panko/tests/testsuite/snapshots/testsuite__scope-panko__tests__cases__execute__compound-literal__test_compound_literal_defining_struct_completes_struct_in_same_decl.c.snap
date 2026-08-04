@@ -1,0 +1,28 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/compound-literal/test_compound_literal_defining_struct_completes_struct_in_same_decl.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/compound-literal/test_compound_literal_defining_struct_completes_struct_in_same_decl.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.4~5 `struct T~2 complete`)
+         (declaration p~3 `ptr<struct T~2>`
+            (addressof
+               (compound-literal
+                  (declaration compound_literal.4~5 `struct T~2 complete`
+                     (braced
+                        123)))))
+         (return
+            (arrow x
+               (name p~3 `ptr<struct T~2>`))))))
+
+----- stderr -----

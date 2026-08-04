@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/compound-literal/test_compound_literal_defining_struct.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/compound-literal/test_compound_literal_defining_struct.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.4~6 `struct T~5 complete`)
+         (declaration p~3 `ptr<void>`
+            (addressof
+               (compound-literal
+                  (declaration compound_literal.4~6 `struct T~5 complete`
+                     (braced
+                        42
+                        27)))))
+         (declaration p2~7 `ptr<struct T~5 complete>` (name p~3 `ptr<void>`))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (arrow x
+                  (name p2~7 `ptr<struct T~5 complete>`))
+               (arrow y
+                  (name p2~7 `ptr<struct T~5 complete>`)))))))
+
+----- stderr -----
