@@ -27,7 +27,7 @@ exit_code: 0
          (struct ∅~4
             (member x @0 `int`)
             (member t @4 `struct T~2 complete`))
-         (definition (a~6 `struct ∅~5 complete` @4)
+         (definition (a~5 `struct ∅~4 complete` @4)
             (braced
                (subobject +0 (123 `int` @4))
                (subobject +4 (t~3 `struct T~2 complete` @0))))
@@ -35,11 +35,11 @@ exit_code: 0
             (assign `int` @8
                (member `int` @8 x +0
                   (member `struct T~2 complete` @8 t +4
-                     (a~6 `struct ∅~5 complete` @4)))
+                     (a~5 `struct ∅~4 complete` @4)))
                (5 `int` @8)))
          (return
             (member `int` @8 x +0
                (member `struct T~2 complete` @8 t +4
-                  (a~6 `struct ∅~5 complete` @4)))))))
+                  (a~5 `struct ∅~4 complete` @4)))))))
 
 ----- stderr -----

@@ -1,3 +1,4 @@
+use std::assert_matches;
 use std::bstr::ByteStr;
 use std::fmt;
 use std::path::Path;
@@ -5,26 +6,33 @@ use std::path::Path;
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
 use ariadne::Fmt as _;
-use itertools::Either;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser as cst;
+use panko_parser::ArrayDeclarator;
 use panko_parser::BinOp;
+use panko_parser::DirectDeclarator;
+use panko_parser::FunctionDeclarator;
 use panko_parser::IncrementOp;
 use panko_parser::LogicalOp;
 use panko_parser::MemberAccessOp;
 use panko_parser::MemberAccessOpKind;
+use panko_parser::NO_VALUE;
+use panko_parser::ParameterTypeList;
 use panko_parser::StorageClassSpecifierKind;
+use panko_parser::TypeName;
+use panko_parser::TypeQualifier;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast;
+use panko_parser::ast::DeclarationSpecifiers;
 use panko_parser::ast::FromError;
 use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::FunctionStorageClass;
+use panko_parser::ast::Qualifiers;
 use panko_parser::ast::Session;
 use panko_parser::ast::Struct;
-use panko_parser::ast::TypeDeclaration;
 use panko_parser::ast::reject_function_specifiers;
 use panko_parser::error_todo;
 use panko_parser::sexpr_builder::SExpr;
@@ -109,6 +117,40 @@ pub(crate) enum Diagnostic<'a> {
         expected: Tag,
         actual: Tag,
     },
+
+    #[error("invalid storage class `{at}` applied to definition of function `{function}`")]
+    #[diagnostics(
+        at(colour = Red, label = "`{at}` is invalid for functions"),
+        function(colour = Blue, label = "in the definition of function `{function}`"),
+    )]
+    InvalidStorageClassForFunctionDefinition { at: Token<'a>, function: Token<'a> },
+
+    #[error("function defined without a name")]
+    #[diagnostics(at(colour = Red, label = "this definition lacks a name"))]
+    FunctionDefinedWithoutName { at: QualifiedType<'a> },
+
+    #[error("declaration does not specify a name")]
+    #[diagnostics(at(colour = Red, label = "this looks like a declaration with type `{ty}`"))]
+    #[with(ty = ty.fg(Red))]
+    DeclarationWithoutName { at: Loc<'a>, ty: QualifiedType<'a> },
+
+    #[error(
+        "parameter `{name}` declared with storage class `{at}` (only `register` is allowed for parameters)"
+    )]
+    #[diagnostics(
+        at(colour = Red, label = "this storage class is not allowed for function parameters"),
+        parameter(colour = Blue, label = "in this parameter declaration"),
+    )]
+    #[with(name = name.fg(Blue))]
+    StorageClassInParameterDeclaration {
+        at: Token<'a>,
+        name: &'a str,
+        parameter: Loc<'a>,
+    },
+
+    #[error("cannot use type qualifier `{at}` in non-parameter array declarator")]
+    #[diagnostics(at(colour = Red, label = "help: remove this `{at}`"))]
+    InvalidTypeQualifierInArrayBrackets { at: TypeQualifier<'a> },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -217,9 +259,17 @@ impl<'a> Redeclared<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum DeclarationOrTypedef<'a> {
+    Error(&'a dyn Report),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Redeclared(Redeclared<'a>),
+    StructDecl(Complete<'a, Scope>),
+}
+
+impl<'a> FromError<'a> for DeclarationOrTypedef<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Error(error)
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -698,21 +748,150 @@ impl IncrementFixity<'_> {
     }
 }
 
+fn parse_declarator<'a>(
+    scopes: &mut Scopes<'a>,
+    mut ty: QualifiedType<'a>,
+    mut declarator: cst::Declarator<'a>,
+    is_parameter: IsParameter,
+) -> (QualifiedType<'a>, Option<Token<'a>>) {
+    let sess = scopes.sess;
+    let name = loop {
+        for pointer in declarator.pointers.unwrap_or_default() {
+            let Qualifiers { const_qualifier, volatile_qualifier } =
+                Qualifiers::parse(sess, pointer.qualifiers);
+            ty = QualifiedType {
+                is_const: const_qualifier.is_some(),
+                is_volatile: volatile_qualifier.is_some(),
+                ty: Type::Pointer(sess.alloc(ty)),
+                loc: HashEqIgnored(pointer.star.loc().until(ty.loc.0)),
+            };
+        }
+        match declarator.direct_declarator {
+            DirectDeclarator::Abstract => break None,
+            DirectDeclarator::Identifier(name) => break Some(name),
+            DirectDeclarator::Parenthesised { declarator: decl, close_paren: _ } =>
+                declarator = *decl,
+            DirectDeclarator::ArrayDeclarator(ArrayDeclarator {
+                direct_declarator,
+                type_qualifiers,
+                length,
+                close_bracket,
+            }) => {
+                let Qualifiers { const_qualifier, volatile_qualifier } = match is_parameter {
+                    IsParameter::Yes => Qualifiers::parse(sess, type_qualifiers),
+                    IsParameter::No => {
+                        for qualifier in type_qualifiers {
+                            sess.emit(Diagnostic::InvalidTypeQualifierInArrayBrackets {
+                                at: *qualifier,
+                            })
+                        }
+                        Qualifiers::default()
+                    }
+                };
+                declarator = cst::Declarator {
+                    pointers: None,
+                    direct_declarator: *direct_declarator,
+                };
+                let loc = HashEqIgnored(ty.loc.0.until(close_bracket.loc()));
+                ty = QualifiedType {
+                    is_const: const_qualifier.is_some(),
+                    is_volatile: volatile_qualifier.is_some(),
+                    ty: Type::Array(ArrayType {
+                        length: NoHashEq(try { sess.alloc(resolve_expr(scopes, &length?)) }),
+                        // the `length` expr can complete the element type, so we have to hack
+                        // around the Ast being immutable
+                        ty: sess.alloc(reresolve_ty(scopes, &ty)),
+                        loc,
+                    }),
+                    loc,
+                }
+            }
+            DirectDeclarator::FunctionDeclarator(FunctionDeclarator {
+                direct_declarator,
+                parameter_type_list: ParameterTypeList { parameter_list, is_varargs },
+                close_paren,
+            }) => {
+                declarator = cst::Declarator {
+                    pointers: None,
+                    direct_declarator: *direct_declarator,
+                };
+                ty = QualifiedType {
+                    is_const: false,
+                    is_volatile: false,
+                    ty: Type::Function(resolve_function_ty(scopes, parameter_list, ty, is_varargs)),
+                    loc: HashEqIgnored(ty.loc.0.until(close_paren.loc())),
+                };
+            }
+        }
+    };
+    (ty, name)
+}
+
+fn resolve_typename<'a>(
+    scopes: &mut Scopes<'a>,
+    TypeName { ty, declarator }: &TypeName<'a>,
+) -> QualifiedType<'a> {
+    let ty = resolve_ty(scopes, ty);
+    match declarator {
+        Some(declarator) => {
+            let (ty, name) = parse_declarator(scopes, ty, **declarator, IsParameter::No);
+            assert_matches!(name, None);
+            ty
+        }
+        None => ty,
+    }
+}
+
+fn reresolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &QualifiedType<'a>) -> QualifiedType<'a> {
+    let QualifiedType { is_const, is_volatile, ty, loc } = *ty;
+    let ty = match ty {
+        Type::Arithmetic(_) | Type::Void | Type::Nullptr => ty,
+        Type::Pointer(ty) => Type::Pointer(scopes.sess.alloc(reresolve_ty(scopes, ty))),
+        Type::Array(ArrayType { ty, length, loc }) => Type::Array(ArrayType {
+            ty: scopes.sess.alloc(reresolve_ty(scopes, ty)),
+            length,
+            loc,
+        }),
+        Type::Function(ty::FunctionType { params, return_type, is_varargs }) => {
+            let sess = scopes.sess;
+            let params = params
+                .iter()
+                .map(|&ParameterDeclaration { loc, ty, name }| {
+                    let ty = reresolve_ty(scopes, &ty);
+                    ParameterDeclaration { loc, ty, name }
+                });
+            let params = sess.alloc_slice_fill_iter(params);
+            let return_type = sess.alloc(reresolve_ty(scopes, return_type));
+            let function_ty = ty::FunctionType { params, return_type, is_varargs };
+            Type::Function(function_ty)
+        }
+        Type::Typeof { expr, unqual, allow_bitfields } => {
+            let expr = match expr.0 {
+                Typeof::Expr(expr) => Typeof::Expr(expr),
+                Typeof::Ty(ty) => Typeof::Ty(scopes.sess.alloc(reresolve_ty(scopes, ty))),
+            };
+            Type::Typeof {
+                expr: NoHashEq(expr),
+                unqual,
+                allow_bitfields,
+            }
+        }
+        Type::Struct(r#struct @ ty::Struct::Complete(_)) => Type::Struct(r#struct),
+        Type::Struct(ty::Struct::Incomplete { name, id: _, kind }) =>
+            scopes
+                .lookup_or_add_struct(
+                    Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name),
+                    kind,
+                )
+                .ty,
+    };
+    QualifiedType { is_const, is_volatile, ty, loc }
+}
+
 fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> QualifiedType<'a> {
     let ast::QualifiedType { is_const, is_volatile, ty, loc } = *ty;
     let ty = match ty {
         ast::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
-        ast::Type::Pointer(pointee) =>
-            Type::Pointer(scopes.sess.alloc(resolve_ty(scopes, pointee))),
-        ast::Type::Array(ast::ArrayType { ty, length }) => Type::Array(ArrayType {
-            // process `length` before `ty` so that `ty`s completed in the `length` expr are
-            // complete when checking `ty`
-            length: NoHashEq(try { scopes.sess.alloc(resolve_expr(scopes, length?)) }),
-            ty: scopes.sess.alloc(resolve_ty(scopes, ty)),
-            loc: HashEqIgnored(loc),
-        }),
-        ast::Type::Function(function_type) =>
-            Type::Function(resolve_function_ty(scopes, &function_type)),
         ast::Type::Void => Type::Void,
         ast::Type::Typedef(name) => {
             let QualifiedType {
@@ -738,7 +917,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             allow_bitfields: false,
         },
         ast::Type::TypeofTy { unqual, ty } => Type::Typeof {
-            expr: NoHashEq(Typeof::Ty(scopes.sess.alloc(resolve_ty(scopes, ty)))),
+            expr: NoHashEq(Typeof::Ty(scopes.sess.alloc(resolve_typename(scopes, ty)))),
             unqual,
             allow_bitfields: false,
         },
@@ -750,20 +929,42 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
 
 fn resolve_function_ty<'a>(
     scopes: &mut Scopes<'a>,
-    function_ty: &ast::FunctionType<'a>,
+    params: &[cst::ParameterDeclaration<'a>],
+    return_type: QualifiedType<'a>,
+    is_varargs: bool,
 ) -> FunctionType<'a> {
-    let ast::FunctionType { params, return_type, is_varargs } = *function_ty;
-
+    let sess = scopes.sess;
     scopes.open_new_scope();
-    let params = scopes.sess.alloc_slice_fill_iter(params.iter().map(
-        |&ast::ParameterDeclaration { loc, ty, name }| ParameterDeclaration {
-            loc,
-            ty: resolve_ty(scopes, &ty),
-            name,
+    let params = params.iter().map(
+        |&cst::ParameterDeclaration { declaration_specifiers, declarator }| {
+            let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
+                ast::parse_declaration_specifiers(sess, declaration_specifiers);
+            let ty = resolve_ty(scopes, &ty);
+            let (ty, name) = declarator.map_or((ty, None), |declarator| {
+                parse_declarator(scopes, ty, declarator, IsParameter::Yes)
+            });
+            let loc = name.map_or_else(|| declaration_specifiers.loc(), |name| name.loc());
+
+            match storage_class {
+                None => (),
+                Some(storage_class)
+                    if let StorageClassSpecifierKind::Register = storage_class.kind =>
+                    unimplemented_todo!(storage_class, "register storage class in parameters",),
+                Some(storage_class) => sess.emit(Diagnostic::StorageClassInParameterDeclaration {
+                    at: storage_class.token,
+                    name: try { name?.slice() }.unwrap_or(NO_VALUE),
+                    parameter: loc,
+                }),
+            }
+
+            reject_function_specifiers(sess, &function_specifiers, loc, "function parameter");
+
+            ParameterDeclaration { loc, ty, name }
         },
-    ));
+    );
+    let params = sess.alloc_slice_fill_iter(params);
     scopes.exit_scope();
-    let return_type = scopes.sess.alloc(resolve_ty(scopes, return_type));
+    let return_type = sess.alloc(return_type);
 
     // TODO: this makes a bunch of unnecessary allocations
     let params_by_name = params
@@ -810,26 +1011,43 @@ fn resolve_struct<'a>(scopes: &mut Scopes<'a>, r#struct: &Struct<'a>) -> Type<'a
 
 fn resolve_struct_members<'a>(
     scopes: &mut Scopes<'a>,
-    members: &'a [Either<TypeDeclaration<'a>, ast::Member<'a>>],
+    members: &'a [ast::Declaration<'a, ast::Member<'a>>],
 ) -> &'a [NoHashEq<Member<'a>>] {
     let sess = scopes.sess;
-    sess.alloc_slice_collect(members.iter().filter_map(|member| match member {
-        Either::Left(type_decl) => {
-            resolve_type_declaration(scopes, type_decl, |_| ());
-            // TODO: don’t ignore
-            None
+    let members = gen {
+        for member in members {
+            let ast::Declaration {
+                storage_class,
+                function_specifiers,
+                ty: unqualified_ty,
+                declarators,
+            } = member;
+            assert_matches!(storage_class, None);
+            assert_matches!(
+                function_specifiers,
+                FunctionSpecifiers { inline: None, noreturn: None },
+            );
+
+            let ty = resolve_ty(scopes, unqualified_ty);
+            if let ast::Type::Struct(Struct::Complete { name: None, kind: _, members: _ }) =
+                unqualified_ty.ty
+                && declarators.is_empty()
+            {
+                yield NoHashEq(Member { name: None, bitfield_width: None, ty })
+            }
+
+            for ast::Member { declarator, bitfield_width } in *declarators {
+                let (ty, name) = parse_declarator(scopes, ty, *declarator, IsParameter::No);
+                let bitfield_width = try {
+                    BitfieldWidth {
+                        width: resolve_expr(scopes, bitfield_width.as_ref()?),
+                    }
+                };
+                yield NoHashEq(Member { name, bitfield_width, ty })
+            }
         }
-        Either::Right(member) => {
-            let ast::Member { name, bitfield_width, ty } = member;
-            let bitfield_width = try {
-                BitfieldWidth {
-                    width: resolve_expr(scopes, bitfield_width.as_ref()?),
-                }
-            };
-            let ty = resolve_ty(scopes, ty);
-            Some(NoHashEq(Member { name: *name, bitfield_width, ty }))
-        }
-    }))
+    };
+    sess.alloc_slice_collect(members)
 }
 
 fn resolve_function_definition<'a>(
@@ -837,7 +1055,7 @@ fn resolve_function_definition<'a>(
     def: &ast::FunctionDefinition<'a>,
 ) -> ExternalDeclaration<'a> {
     let ast::FunctionDefinition {
-        name,
+        declarator,
         storage_class,
         inline,
         noreturn,
@@ -845,6 +1063,17 @@ fn resolve_function_definition<'a>(
         body,
     } = def;
     let ty = resolve_ty(scopes, ty);
+    let (ty, name) = parse_declarator(scopes, ty, *declarator, IsParameter::No);
+    let name = name.unwrap_or_else(|| {
+        let error = Diagnostic::FunctionDefinedWithoutName { at: ty };
+        let () = scopes.sess.emit(error);
+        // TODO: this should be a unique name for each function for error recovery
+        Token::from_str(
+            scopes.sess.bump(),
+            panko_lex::TokenKind::Identifier,
+            "unnamed.function",
+        )
+    });
     let linkage = match storage_class {
         None => match inline {
             Some(_) => Linkage::Inline,
@@ -852,6 +1081,14 @@ fn resolve_function_definition<'a>(
         },
         Some(FunctionStorageClass::Extern) => Linkage::External,
         Some(FunctionStorageClass::Static) => Linkage::Internal,
+        Some(FunctionStorageClass::Invalid(storage_class)) => {
+            let error = Diagnostic::InvalidStorageClassForFunctionDefinition {
+                at: storage_class.token,
+                function: name,
+            };
+            let () = scopes.sess.emit(error);
+            Linkage::External
+        }
     };
     let maybe_reference = scopes.add_function(name.slice(), name.loc(), ty, linkage);
     let reference = match maybe_reference {
@@ -862,7 +1099,7 @@ fn resolve_function_definition<'a>(
         }
         Err(ty) =>
             return scopes.sess.emit(Diagnostic::TypedefRedeclaredAsValue {
-                at: *name,
+                at: name,
                 ty,
                 kind: "function",
             }),
@@ -882,7 +1119,7 @@ fn resolve_function_definition<'a>(
             // TODO: this should be `Type::Error`
             let () = scopes
                 .sess
-                .emit(Diagnostic::FunctionDeclaratorDoesNotHaveFunctionType { at: *name });
+                .emit(Diagnostic::FunctionDeclaratorDoesNotHaveFunctionType { at: name });
             FunctionType {
                 params: &[],
                 return_type: scopes.sess.alloc(non_function_ty),
@@ -1033,164 +1270,198 @@ fn resolve_initialiser<'a>(
     }
 }
 
-fn resolve_declaration<'a>(
+gen fn resolve_declaration<'a>(
     scopes: &mut Scopes<'a>,
-    decl: &ast::Declaration<'a>,
+    decl: &ast::Declaration<'a, cst::InitDeclarator<'a>>,
 ) -> DeclarationOrTypedef<'a> {
+    let sess = scopes.sess;
     let ast::Declaration {
-        ty,
-        name,
-        bitfield_width,
-        initialiser,
         storage_class,
         function_specifiers,
+        ty: unresolved_ty,
+        declarators,
     } = decl;
-    let ty = resolve_ty(scopes, ty);
 
-    let linkage = match try { storage_class.as_ref()?.kind } {
-        Some(StorageClassSpecifierKind::Typedef) => {
-            reject_function_specifiers(scopes.sess, function_specifiers, name.loc(), "type alias");
+    let ty = resolve_ty(scopes, unresolved_ty);
 
-            let previously_declared_as = scopes.add_ty(name.slice(), ty);
-            match previously_declared_as {
-                Ok(previously_declared_as) =>
-                    return DeclarationOrTypedef::Typedef(Typedef {
-                        ty,
-                        name: *name,
-                        previously_declared_as,
-                    }),
-                Err(reference) =>
-                    return DeclarationOrTypedef::Redeclared(Redeclared::ValueAsTypedef {
-                        at: ty,
-                        reference,
-                    }),
-            }
-        }
-        Some(StorageClassSpecifierKind::Extern) => Some(Linkage::External),
-        Some(StorageClassSpecifierKind::Static) => match scopes.is_in_global_scope() {
-            IsInGlobalScope::Yes => Some(Linkage::Internal),
-            IsInGlobalScope::No => Some(Linkage::None),
-        },
-        Some(kind) => unimplemented_todo!(
-            storage_class.unwrap(),
-            "not implemented: storage class {:?}",
-            kind,
-        ),
-        None => None,
-    };
-    let storage_duration = match linkage {
-        Some(linkage) => StorageDuration::Static(Some(linkage)),
-        None => match scopes.is_in_global_scope() {
-            IsInGlobalScope::Yes => StorageDuration::Static(None),
-            IsInGlobalScope::No => StorageDuration::Automatic,
-        },
-    };
-
-    let maybe_reference = scopes.add(
-        name.slice(),
-        name.loc(),
-        ty,
-        storage_duration,
-        IsParameter::No,
-        scopes.is_in_global_scope(),
-    );
-    let reference = match maybe_reference {
-        Ok(reference) => reference,
-        Err(typedef_ty) =>
-            return DeclarationOrTypedef::Redeclared(Redeclared::TypedefAsValue {
-                at: *name,
-                typedef_ty,
-                value_ty: ty,
-            }),
-    };
-    // TODO: move resolving the initialiser into `Scopes::add` so that the `add_initialiser` call
-    // cannot be forgotten
-    let initialiser: Option<_> = try {
-        let initialiser = match initialiser.as_ref()? {
-            ast::Initialiser::Braced {
-                open_brace,
-                initialiser_list,
-                close_brace,
-            } => Initialiser::Braced {
-                open_brace: *open_brace,
-                initialiser_list: scopes.sess.alloc_slice_fill_iter(
-                    initialiser_list
-                        .iter()
-                        .map(|initialiser| resolve_initialiser(scopes, initialiser)),
-                ),
-                close_brace: *close_brace,
-            },
-            ast::Initialiser::Expression(initialiser) =>
-                Initialiser::Expression(resolve_expr(scopes, initialiser)),
-        };
-        scopes.sess.alloc(initialiser)
-    };
-    let ref_initialiser = initialiser.map(RefInitialiser::Initialiser);
-    scopes.add_initialiser(&reference, ref_initialiser);
-
-    if let Some(bitfield_width) = bitfield_width {
-        let _ = resolve_expr(scopes, bitfield_width);
-        scopes
-            .sess
-            .emit(cst::BitfieldDiagnostic::NonStructMemberBitfield {
-                at: *bitfield_width,
-                decl_loc: reference.ty.loc().until(reference.decl_loc),
-                kind: match scopes.is_in_global_scope() {
-                    IsInGlobalScope::Yes => "global variable",
-                    IsInGlobalScope::No => "local variable",
-                },
-            })
+    if let ast::Type::Struct(r#struct) = unresolved_ty.ty
+        && let Type::Struct(ty::Struct::Complete(struct_decl)) = ty.ty
+        && let Struct::Complete { .. } = r#struct
+    {
+        yield DeclarationOrTypedef::StructDecl(struct_decl)
     }
 
-    DeclarationOrTypedef::Declaration(Declaration {
-        function_specifiers: *function_specifiers,
-        reference: Reference {
-            initialiser: ref_initialiser,
-            ..reference
-        },
-        initialiser,
-    })
-}
+    for cst::InitDeclarator { declarator, bitfield_width, initialiser } in *declarators {
+        let (ty, name) = parse_declarator(scopes, ty, *declarator, IsParameter::No);
+        let name = match name {
+            Some(name) => name,
+            // TODO: 6.7.1: reject struct/enum decl without tag, allow enum decl without tag that
+            // contains an enumerator list
+            None => {
+                let loc = unresolved_ty.loc().until_maybe(
+                    try { initialiser.as_ref()?.loc() }
+                        .or_else(|| declarator.direct_declarator.maybe_end_loc()),
+                );
+                yield sess.emit(Diagnostic::DeclarationWithoutName { at: loc, ty });
+                // TODO: this should be a unique name for each value for error recovery
+                Token::from_str(
+                    scopes.sess.bump(),
+                    panko_lex::TokenKind::Identifier,
+                    "unnamed.declarator",
+                )
+            }
+        };
+        let linkage = match try { storage_class.as_ref()?.kind } {
+            Some(StorageClassSpecifierKind::Typedef) => {
+                reject_function_specifiers(
+                    scopes.sess,
+                    function_specifiers,
+                    name.loc(),
+                    "type alias",
+                );
 
-fn resolve_type_declaration<'a, T>(
-    scopes: &mut Scopes<'a>,
-    TypeDeclaration::Struct(r#struct): &TypeDeclaration<'a>,
-    f: impl FnOnce(Complete<'a, Scope>) -> T,
-) -> Option<T> {
-    let resolved_struct = resolve_struct(scopes, r#struct);
-    match (r#struct, resolved_struct) {
-        (Struct::Complete { .. }, Type::Struct(ty::Struct::Complete(complete))) =>
-            Some(f(complete)),
-        (Struct::Complete { .. }, _) => unreachable!(),
-        (Struct::Incomplete { .. }, _) => None,
+                let previously_declared_as = scopes.add_ty(name.slice(), ty);
+                match previously_declared_as {
+                    Ok(previously_declared_as) =>
+                        yield DeclarationOrTypedef::Typedef(Typedef {
+                            ty,
+                            name,
+                            previously_declared_as,
+                        }),
+                    Err(reference) =>
+                        yield DeclarationOrTypedef::Redeclared(Redeclared::ValueAsTypedef {
+                            at: ty,
+                            reference,
+                        }),
+                };
+                continue;
+            }
+            Some(StorageClassSpecifierKind::Extern) => Some(Linkage::External),
+            Some(StorageClassSpecifierKind::Static) => match scopes.is_in_global_scope() {
+                IsInGlobalScope::Yes => Some(Linkage::Internal),
+                IsInGlobalScope::No => Some(Linkage::None),
+            },
+            Some(kind) => unimplemented_todo!(
+                storage_class.unwrap(),
+                "not implemented: storage class {:?}",
+                kind,
+            ),
+            None => None,
+        };
+        let storage_duration = match linkage {
+            Some(linkage) => StorageDuration::Static(Some(linkage)),
+            None => match scopes.is_in_global_scope() {
+                IsInGlobalScope::Yes => StorageDuration::Static(None),
+                IsInGlobalScope::No => StorageDuration::Automatic,
+            },
+        };
+
+        let maybe_reference = scopes.add(
+            name.slice(),
+            name.loc(),
+            ty,
+            storage_duration,
+            IsParameter::No,
+            scopes.is_in_global_scope(),
+        );
+        let reference = match maybe_reference {
+            Ok(reference) => reference,
+            Err(typedef_ty) => {
+                yield DeclarationOrTypedef::Redeclared(Redeclared::TypedefAsValue {
+                    at: name,
+                    typedef_ty,
+                    value_ty: ty,
+                });
+                continue;
+            }
+        };
+        // TODO: move resolving the initialiser into `Scopes::add` so that the `add_initialiser` call
+        // cannot be forgotten
+        let initialiser: Option<_> = try {
+            let initialiser = match initialiser.as_ref()? {
+                ast::Initialiser::Braced {
+                    open_brace,
+                    initialiser_list,
+                    close_brace,
+                } => Initialiser::Braced {
+                    open_brace: *open_brace,
+                    initialiser_list: scopes.sess.alloc_slice_fill_iter(
+                        initialiser_list
+                            .iter()
+                            .map(|initialiser| resolve_initialiser(scopes, initialiser)),
+                    ),
+                    close_brace: *close_brace,
+                },
+                ast::Initialiser::Expression(initialiser) =>
+                    Initialiser::Expression(resolve_expr(scopes, initialiser)),
+            };
+            scopes.sess.alloc(initialiser)
+        };
+        let ref_initialiser = initialiser.map(RefInitialiser::Initialiser);
+        scopes.add_initialiser(&reference, ref_initialiser);
+
+        if let Some(bitfield_width) = bitfield_width {
+            let _ = resolve_expr(scopes, bitfield_width);
+            scopes
+                .sess
+                .emit(cst::BitfieldDiagnostic::NonStructMemberBitfield {
+                    at: *bitfield_width,
+                    decl_loc: reference.ty.loc().until(reference.decl_loc),
+                    kind: match scopes.is_in_global_scope() {
+                        IsInGlobalScope::Yes => "global variable",
+                        IsInGlobalScope::No => "local variable",
+                    },
+                })
+        }
+
+        yield DeclarationOrTypedef::Declaration(Declaration {
+            function_specifiers: *function_specifiers,
+            reference: Reference {
+                initialiser: ref_initialiser,
+                ..reference
+            },
+            initialiser,
+        })
     }
 }
 
 gen fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Statement<'a> {
-    let stmt = try {
+    let stmts = gen {
         match stmt {
-            ast::Statement::TypeDeclaration(type_decl) =>
-                resolve_type_declaration(scopes, type_decl, Statement::StructDecl)?,
-            ast::Statement::Declaration(decl) => match resolve_declaration(scopes, decl) {
-                DeclarationOrTypedef::Declaration(declaration) =>
-                    Statement::Declaration(declaration),
-                DeclarationOrTypedef::Typedef(typedef) => Statement::Typedef(typedef),
-                DeclarationOrTypedef::Redeclared(redeclared) => Statement::Redeclared(redeclared),
-            },
+            ast::Statement::Declaration(decl) =>
+                for decl in resolve_declaration(scopes, decl) {
+                    match decl {
+                        DeclarationOrTypedef::Error(error) =>
+                            yield Statement::Expression(Some(Expression::from_error(error))),
+                        DeclarationOrTypedef::StructDecl(struct_decl) =>
+                            yield Statement::StructDecl(struct_decl),
+                        DeclarationOrTypedef::Declaration(declaration) =>
+                            yield Statement::Declaration(declaration),
+                        DeclarationOrTypedef::Typedef(typedef) => yield Statement::Typedef(typedef),
+                        DeclarationOrTypedef::Redeclared(redeclared) =>
+                            yield Statement::Redeclared(redeclared),
+                    }
+                },
             ast::Statement::Expression(expr) =>
-                Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
+                yield Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
             ast::Statement::Compound(stmts) =>
-                Statement::Compound(resolve_compound_statement(scopes, stmts, OpenNewScope::Yes)),
-            ast::Statement::Return { return_, expr } => Statement::Return {
-                return_: *return_,
-                expr: try { resolve_expr(scopes, expr.as_ref()?) },
-            },
+                yield Statement::Compound(resolve_compound_statement(
+                    scopes,
+                    stmts,
+                    OpenNewScope::Yes,
+                )),
+            ast::Statement::Return { return_, expr } =>
+                yield Statement::Return {
+                    return_: *return_,
+                    expr: try { resolve_expr(scopes, expr.as_ref()?) },
+                },
         }
     };
+    let stmts = stmts.collect_vec();
     for hoisted_ref in scopes.take_hoisted_compound_literals() {
         yield Statement::HoistedCompoundLiteral(hoisted_ref);
     }
-    if let Some(stmt) = stmt {
+    for stmt in stmts {
         yield stmt;
     }
 }
@@ -1201,7 +1472,7 @@ fn resolve_assoc<'a>(
 ) -> GenericAssociation<'a> {
     match assoc {
         ast::GenericAssociation::Ty { ty, expr } => GenericAssociation::Ty {
-            ty: resolve_ty(scopes, ty),
+            ty: resolve_typename(scopes, ty),
             expr: resolve_expr(scopes, expr),
         },
         ast::GenericAssociation::Default { default, expr } => GenericAssociation::Default {
@@ -1265,22 +1536,22 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         },
         ast::Expression::Sizeof { sizeof, ty, close_paren } => Expression::Sizeof {
             sizeof: *sizeof,
-            ty: resolve_ty(scopes, ty),
+            ty: resolve_typename(scopes, ty),
             close_paren: *close_paren,
         },
         ast::Expression::Lengthof { lengthof, ty, close_paren } => Expression::Lengthof {
             lengthof: *lengthof,
-            ty: resolve_ty(scopes, ty),
+            ty: resolve_typename(scopes, ty),
             close_paren: *close_paren,
         },
         ast::Expression::Alignof { alignof, ty, close_paren } => Expression::Alignof {
             alignof: *alignof,
-            ty: resolve_ty(scopes, ty),
+            ty: resolve_typename(scopes, ty),
             close_paren: *close_paren,
         },
         ast::Expression::Cast { open_paren, ty, expr } => Expression::Cast {
             open_paren: *open_paren,
-            ty: resolve_ty(scopes, ty),
+            ty: resolve_typename(scopes, ty),
             expr: scopes.sess.alloc(resolve_expr(scopes, expr)),
         },
         ast::Expression::Subscript { lhs, rhs, close_bracket } => Expression::Subscript {
@@ -1374,14 +1645,14 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             close_paren,
         } => Expression::BuiltinOffsetof {
             builtin_offsetof: *builtin_offsetof,
-            ty: resolve_ty(scopes, ty),
+            ty: resolve_typename(scopes, ty),
             member: *member,
             close_paren: *close_paren,
         },
         ast::Expression::CompoundLiteral {
             open_paren,
             storage_class_specifiers,
-            ty,
+            ty: TypeName { ty, declarator },
             initialiser,
         } => {
             if storage_class_specifiers.len() > 1 {
@@ -1394,43 +1665,61 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             let storage_class = storage_class_specifiers.first().copied();
             let name = format!("compound_literal.{}", scopes.id().0);
             let name = scopes.sess.alloc_str(&name);
-            let decl = ast::Declaration {
-                ty: *ty,
-                name: Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name),
+            let name = Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name);
+            let cst::Declarator { pointers, direct_declarator } =
+                *declarator.unwrap_or(&cst::Declarator {
+                    pointers: None,
+                    direct_declarator: DirectDeclarator::Abstract,
+                });
+            let declarators = scopes.sess.alloc([ast::InitDeclarator {
+                declarator: cst::Declarator {
+                    pointers,
+                    direct_declarator: direct_declarator.with_name(scopes.sess, name).unwrap(),
+                },
                 bitfield_width: None,
                 initialiser: Some(**initialiser),
+            }]);
+            let decl = ast::Declaration {
                 storage_class,
                 function_specifiers: FunctionSpecifiers { inline: None, noreturn: None },
+                ty: *ty,
+                declarators,
             };
-            let decl = match resolve_declaration(scopes, &decl) {
-                DeclarationOrTypedef::Declaration(declaration) => declaration,
-                DeclarationOrTypedef::Typedef(_) => unreachable!(),
-                DeclarationOrTypedef::Redeclared(_) => unreachable!(),
-            };
+            let decl = resolve_declaration(scopes, &decl)
+                .filter_map(|decl| match decl {
+                    DeclarationOrTypedef::Declaration(decl) => Some(decl),
+                    _ => None,
+                })
+                .exactly_one()
+                .unwrap_or_else(|_| panic!("compound literals have exactly one declarator"));
             scopes.hoist_compound_literal(decl.reference);
             Expression::CompoundLiteral { open_paren: *open_paren, decl }
         }
     }
 }
 
-fn resolve_external_declaration<'a>(
+gen fn resolve_external_declaration<'a>(
     scopes: &mut Scopes<'a>,
     decl: &ast::ExternalDeclaration<'a>,
-) -> Option<ExternalDeclaration<'a>> {
-    Some(match decl {
-        ast::ExternalDeclaration::TypeDeclaration(type_decl) =>
-            resolve_type_declaration(scopes, type_decl, ExternalDeclaration::StructDecl)?,
+) -> ExternalDeclaration<'a> {
+    match decl {
         ast::ExternalDeclaration::FunctionDefinition(def) =>
-            resolve_function_definition(scopes, def),
-        ast::ExternalDeclaration::Declaration(decl) => match resolve_declaration(scopes, decl) {
-            DeclarationOrTypedef::Declaration(declaration) =>
-                ExternalDeclaration::Declaration(declaration),
-            DeclarationOrTypedef::Typedef(typedef) => ExternalDeclaration::Typedef(typedef),
-            DeclarationOrTypedef::Redeclared(redeclared) =>
-                ExternalDeclaration::Redeclared(redeclared),
-        },
-        ast::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
-    })
+            yield resolve_function_definition(scopes, def),
+        ast::ExternalDeclaration::Declaration(decl) =>
+            for decl in resolve_declaration(scopes, decl) {
+                match decl {
+                    DeclarationOrTypedef::Error(error) => yield ExternalDeclaration::Error(error),
+                    DeclarationOrTypedef::StructDecl(struct_decl) =>
+                        yield ExternalDeclaration::StructDecl(struct_decl),
+                    DeclarationOrTypedef::Declaration(declaration) =>
+                        yield ExternalDeclaration::Declaration(declaration),
+                    DeclarationOrTypedef::Typedef(typedef) =>
+                        yield ExternalDeclaration::Typedef(typedef),
+                    DeclarationOrTypedef::Redeclared(redeclared) =>
+                        yield ExternalDeclaration::Redeclared(redeclared),
+                }
+            },
+    }
 }
 
 pub fn resolve_names<'a>(
@@ -1441,10 +1730,12 @@ pub fn resolve_names<'a>(
     let ast::TranslationUnit { filename, decls } = translation_unit;
     TranslationUnit {
         filename,
-        decls: sess.alloc_slice_collect(
-            decls
-                .iter()
-                .filter_map(|decl| resolve_external_declaration(scopes, decl)),
-        ),
+        decls: sess.alloc_slice_collect(gen {
+            for decl in decls {
+                for decl in resolve_external_declaration(scopes, decl) {
+                    yield decl
+                }
+            }
+        }),
     }
 }

@@ -1,0 +1,19 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/decl_in_function/test_error_declaration_without_name.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/decl_in_function/test_error_declaration_without_name.c"
+   (function-definition external stack-size=24
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (definition (p~2 `ptr<long>` @0) ∅))))
+
+----- stderr -----

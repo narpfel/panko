@@ -5,7 +5,6 @@ use panko_lex::Token;
 use panko_lex::TokenKind;
 
 use crate as ast;
-use crate::ast::IsParameter;
 use crate::ast::Session;
 use crate::TypedefTracker;
 
@@ -187,7 +186,7 @@ FunctionBody = { CompoundStatement<DontPushTypedefScope> }
 
 Declaration: ast::Declaration<'a> = {
     <head:DeclarationHead<AbstractDeclaratorDisallowed, InitDeclarator<MaybeAbstractDeclarator>?>>
-    <init_declarator_list:("," <InitDeclaratorList>)?> <semi:";"> => {
+    <init_declarator_list:("," <InitDeclaratorList>)?> ";" => {
         let (specifiers, declarator) = head;
         let init_declarator_list = match init_declarator_list {
             None => sess.alloc_slice_copy(declarator.as_slice()),
@@ -199,7 +198,7 @@ Declaration: ast::Declaration<'a> = {
             }
         };
         typedef_tracker.is_not_in_typedef();
-        ast::Declaration { specifiers, init_declarator_list, semi }
+        ast::Declaration { specifiers, init_declarator_list }
     },
     // attribute-specifier-sequence declaration-specifiers init_declarator_list ";"
     // static_assert-declaration
@@ -408,20 +407,13 @@ SpecifierQualifierList: ast::DeclarationSpecifiers<'a> = {
         ast::DeclarationSpecifiers(<>),
 }
 
-TypeName: crate::ast::QualifiedType<'a> = {
-    <specifier_qualifier_list:SpecifierQualifierList> <abstract_declarator:AbstractDeclarator?> => {
+TypeName: ast::TypeName<'a> = {
+    <specifier_qualifier_list:SpecifierQualifierList> <declarator:Bump<AbstractDeclarator>?> => {
         let crate::ast::DeclarationSpecifiers { storage_class, function_specifiers, ty }
             = crate::ast::parse_declaration_specifiers(sess, specifier_qualifier_list);
         assert_matches!(storage_class, None);
         assert_matches!(function_specifiers, crate::ast::FunctionSpecifiers { inline: None, noreturn: None });
-        match abstract_declarator {
-            None => ty,
-            Some(abstract_declarator) => {
-                let (ty, name) = crate::ast::parse_declarator(sess, ty, abstract_declarator, IsParameter::No);
-                assert!(name.is_none());
-                ty
-            },
-        }
+        ast::TypeName { ty, declarator }
     },
 }
 

@@ -29,6 +29,7 @@ use crate::PrimaryBlock;
 use crate::StorageClassSpecifier;
 use crate::StructKind;
 use crate::TranslationUnit;
+use crate::TypeName;
 use crate::TypeQualifier;
 use crate::TypeSpecifier;
 use crate::TypeSpecifierQualifier;
@@ -164,6 +165,13 @@ impl AsSExpr for Designator<'_> {
                 SExpr::new("index").inherit(index),
             Designator::Identifier { dot: _, ident } => SExpr::new("member").inherit(ident),
         }
+    }
+}
+
+impl AsSExpr for TypeName<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { ty, declarator } = self;
+        SExpr::new("type-name").inherit(ty).inherit(declarator)
     }
 }
 

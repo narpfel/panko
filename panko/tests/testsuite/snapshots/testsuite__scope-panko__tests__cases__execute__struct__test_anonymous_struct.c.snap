@@ -14,19 +14,19 @@ exit_code: 0
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (struct WithAnonymousStruct~1
       (member x `int`)
-      (member ∅ `struct ∅~3 complete`))
-   (struct PropagatesQualifiers~4
+      (member ∅ `struct ∅~2 complete`))
+   (struct PropagatesQualifiers~3
       (member x `int`)
-      (member ∅ `struct ∅~6 complete const`))
-   (struct WithStructName~7
+      (member ∅ `struct ∅~4 complete const`))
+   (struct WithStructName~5
       (member x `int`))
-   (struct WithMemberName~9
+   (struct WithMemberName~7
       (member x `int`)
-      (member s `struct ∅~11 complete`))
+      (member s `struct ∅~8 complete`))
    (function-definition
-      main~12 `fn() -> int`
+      main~9 `fn() -> int`
       (compound-statement
-         (declaration value~14 `struct WithAnonymousStruct~1 complete`
+         (declaration value~11 `struct WithAnonymousStruct~1 complete`
             (braced
                (designation ((member x)) 42)
                (designation ((member y)) 27)
@@ -35,11 +35,11 @@ exit_code: 0
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d %d %ld\n")
                (dot x
-                  (name value~14 `struct WithAnonymousStruct~1 complete`))
+                  (name value~11 `struct WithAnonymousStruct~1 complete`))
                (dot y
-                  (name value~14 `struct WithAnonymousStruct~1 complete`))
+                  (name value~11 `struct WithAnonymousStruct~1 complete`))
                (dot l
-                  (name value~14 `struct WithAnonymousStruct~1 complete`))))
+                  (name value~11 `struct WithAnonymousStruct~1 complete`))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %zu\n")
@@ -48,14 +48,14 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %zu\n")
-               (sizeof `struct WithStructName~7 complete`)
-               (alignof `struct WithStructName~7 complete`)))
+               (sizeof `struct WithStructName~5 complete`)
+               (alignof `struct WithStructName~5 complete`)))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu %zu\n")
-               (sizeof `struct WithMemberName~9 complete`)
-               (alignof `struct WithMemberName~9 complete`)))
-         (struct ∅~15
+               (sizeof `struct WithMemberName~7 complete`)
+               (alignof `struct WithMemberName~7 complete`)))
+         (struct ∅~12
             (member test_maybe_anonymous_struct_at_block_scope `int`)))))
 
 ----- stderr -----

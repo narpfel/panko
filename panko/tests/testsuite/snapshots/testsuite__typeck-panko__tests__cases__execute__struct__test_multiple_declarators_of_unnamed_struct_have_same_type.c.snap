@@ -7,19 +7,17 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/struct/test_multiple_declarators_of_unnamed_struct_have_same_type.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_multiple_declarators_of_unnamed_struct_have_same_type.c"
+   (function-definition external
+      main~0 `fn() -> int`
+      (compound-statement
+         (struct ∅~2
+            (member x @0 `int`))
+         (definition p1~3 `ptr<struct ∅~2 complete>` (noop-type-conversion `ptr<struct ∅~2 complete>` (nullptr `nullptr_t`)))
+         (definition p2~4 `ptr<struct ∅~2 complete>` (noop-type-conversion `ptr<struct ∅~2 complete>` (nullptr `nullptr_t`)))
+         (return (ptr-equal `int` (p1~3 `ptr<struct ∅~2 complete>`) (p2~4 `ptr<struct ∅~2 complete>`))))))
 
 ----- stderr -----
-Error: comparison of pointers to incompatible types
-   ╭─[panko/tests/cases/execute/struct/test_multiple_declarators_of_unnamed_struct_have_same_type.c:8:15]
-   │
- 8 │     return p1 == p2;
-   │            ─┬ ─┬ ─┬  
-   │             │  │  ╰── this is of type `ptr<struct ∅~5 complete>`
-   │             │  │     
-   │             │  ╰───── pointer comparisons are only allowed between pointers to compatible types
-   │             │        
-   │             ╰──────── this is of type `ptr<struct ∅~3 complete>`
-───╯

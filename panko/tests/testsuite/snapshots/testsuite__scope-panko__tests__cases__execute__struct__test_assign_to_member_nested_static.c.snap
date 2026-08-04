@@ -19,13 +19,13 @@ exit_code: 0
    (struct ∅~2
       (member x `int`)
       (member t `struct T~0 complete`))
-   (declaration a~4 `struct ∅~3 complete`
+   (declaration a~3 `struct ∅~2 complete`
       (braced
          123
          (braced
             42)))
    (function-definition
-      main~5 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
          (expression
             (assign
@@ -36,11 +36,11 @@ exit_code: 0
             (assign
                (dot x
                   (dot t
-                     (name a~4 `struct ∅~3 complete`)))
+                     (name a~3 `struct ∅~2 complete`)))
                5))
          (return
             (dot x
                (dot t
-                  (name a~4 `struct ∅~3 complete`)))))))
+                  (name a~3 `struct ∅~2 complete`)))))))
 
 ----- stderr -----

@@ -11,7 +11,6 @@ use panko_lex::Token;
 use panko_parser::StructKind;
 use panko_parser::ast;
 use panko_parser::ast::Session;
-use panko_parser::ast::TypeDeclaration;
 use panko_parser::nonempty;
 
 use super::BuiltinNameKind;
@@ -340,7 +339,7 @@ impl<'a> Scopes<'a> {
         &mut self,
         loc: Option<Token<'a>>,
         kind: StructKind,
-        members: &'a [Either<TypeDeclaration<'a>, ast::Member<'a>>],
+        members: &'a [ast::Declaration<'a, ast::Member<'a>>],
     ) -> (Tagged<'a>, Option<Tagged<'a>>) {
         let name = try { loc?.slice() };
         let previous_definition = try { self.lookup_tagged(name?)? };

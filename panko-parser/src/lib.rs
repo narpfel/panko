@@ -217,25 +217,13 @@ pub enum ExternalDeclaration<'a> {
 pub struct Declaration<'a> {
     specifiers: DeclarationSpecifiers<'a>,
     init_declarator_list: &'a [InitDeclarator<'a>],
-    semi: Token<'a>,
-}
-
-impl<'a> Declaration<'a> {
-    fn loc(&self) -> Loc<'a> {
-        let Self {
-            specifiers,
-            init_declarator_list: _,
-            semi,
-        } = self;
-        specifiers.loc().until(semi.loc())
-    }
 }
 
 #[derive(Debug, Clone, Copy)]
-struct DeclarationSpecifiers<'a>(&'a [DeclarationSpecifier<'a>]);
+pub struct DeclarationSpecifiers<'a>(&'a [DeclarationSpecifier<'a>]);
 
 impl<'a> DeclarationSpecifiers<'a> {
-    fn loc(&self) -> Loc<'a> {
+    pub fn loc(&self) -> Loc<'a> {
         match self.0 {
             [] => unreachable!(),
             [specifier] => specifier.loc(),
@@ -342,7 +330,7 @@ impl<'a> TypeSpecifierQualifier<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct TypeQualifier<'a> {
+pub struct TypeQualifier<'a> {
     token: Token<'a>,
     kind: TypeQualifierKind,
 }
@@ -355,11 +343,11 @@ impl<'a> TypeQualifier<'a> {
         }
     }
 
-    fn loc(&self) -> Loc<'a> {
+    pub fn loc(&self) -> Loc<'a> {
         self.token.loc()
     }
 
-    fn slice(&self) -> &'a str {
+    pub fn slice(&self) -> &'a str {
         self.token.slice()
     }
 }
@@ -633,7 +621,7 @@ enum TypeSpecifierKind<'a> {
     },
     TypeofTy {
         unqual: bool,
-        ty: &'a QualifiedType<'a>,
+        ty: &'a TypeName<'a>,
     },
 }
 
@@ -696,10 +684,10 @@ fn function_specifier_kind(token_kind: TokenKind) -> FunctionSpecifierKind {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct InitDeclarator<'a> {
-    declarator: Declarator<'a>,
-    bitfield_width: Option<Expression<'a>>,
-    initialiser: Option<Initialiser<'a>>,
+pub struct InitDeclarator<'a> {
+    pub declarator: Declarator<'a>,
+    pub bitfield_width: Option<Expression<'a>>,
+    pub initialiser: Option<Initialiser<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -713,7 +701,7 @@ pub enum Initialiser<'a> {
 }
 
 impl<'a> Initialiser<'a> {
-    fn loc(&self) -> Loc<'a> {
+    pub fn loc(&self) -> Loc<'a> {
         match self {
             Self::Braced {
                 open_brace,
@@ -748,9 +736,15 @@ pub enum Designator<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Declarator<'a> {
-    pointers: Option<&'a [Pointer<'a>]>,
-    direct_declarator: DirectDeclarator<'a>,
+pub struct TypeName<'a> {
+    pub ty: QualifiedType<'a>,
+    pub declarator: Option<&'a Declarator<'a>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Declarator<'a> {
+    pub pointers: Option<&'a [Pointer<'a>]>,
+    pub direct_declarator: DirectDeclarator<'a>,
 }
 
 impl<'a> Declarator<'a> {
@@ -782,9 +776,9 @@ fn pointers_loc<'a>(pointers: &[Pointer<'a>]) -> Loc<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Pointer<'a> {
-    star: Token<'a>,
-    qualifiers: &'a [TypeQualifier<'a>],
+pub struct Pointer<'a> {
+    pub star: Token<'a>,
+    pub qualifiers: &'a [TypeQualifier<'a>],
 }
 
 impl<'a> Pointer<'a> {
@@ -799,7 +793,7 @@ impl<'a> Pointer<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum DirectDeclarator<'a> {
+pub enum DirectDeclarator<'a> {
     Abstract,
     Identifier(Token<'a>),
     Parenthesised {
@@ -811,7 +805,7 @@ enum DirectDeclarator<'a> {
 }
 
 impl<'a> DirectDeclarator<'a> {
-    fn with_name(&self, sess: &'a ast::Session<'a>, name: Token<'a>) -> Option<Self> {
+    pub fn with_name(&self, sess: &'a ast::Session<'a>, name: Token<'a>) -> Option<Self> {
         match self {
             DirectDeclarator::Abstract => Some(Self::Identifier(name)),
             DirectDeclarator::Identifier(_) => None,
@@ -937,7 +931,7 @@ impl<'a> DirectDeclarator<'a> {
         }
     }
 
-    fn maybe_end_loc(&self) -> Option<Loc<'a>> {
+    pub fn maybe_end_loc(&self) -> Option<Loc<'a>> {
         Some(match self {
             Self::Abstract => return None,
             Self::Identifier(token) => token.loc(),
@@ -949,30 +943,30 @@ impl<'a> DirectDeclarator<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct ArrayDeclarator<'a> {
-    direct_declarator: &'a DirectDeclarator<'a>,
-    type_qualifiers: &'a [TypeQualifier<'a>],
-    length: Option<Expression<'a>>,
-    close_bracket: Token<'a>,
+pub struct ArrayDeclarator<'a> {
+    pub direct_declarator: &'a DirectDeclarator<'a>,
+    pub type_qualifiers: &'a [TypeQualifier<'a>],
+    pub length: Option<Expression<'a>>,
+    pub close_bracket: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct FunctionDeclarator<'a> {
-    direct_declarator: &'a DirectDeclarator<'a>,
-    parameter_type_list: ParameterTypeList<'a>,
-    close_paren: Token<'a>,
+pub struct FunctionDeclarator<'a> {
+    pub direct_declarator: &'a DirectDeclarator<'a>,
+    pub parameter_type_list: ParameterTypeList<'a>,
+    pub close_paren: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct ParameterTypeList<'a> {
-    parameter_list: &'a [ParameterDeclaration<'a>],
-    is_varargs: bool,
+pub struct ParameterTypeList<'a> {
+    pub parameter_list: &'a [ParameterDeclaration<'a>],
+    pub is_varargs: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct ParameterDeclaration<'a> {
-    declaration_specifiers: DeclarationSpecifiers<'a>,
-    declarator: Option<Declarator<'a>>,
+pub struct ParameterDeclaration<'a> {
+    pub declaration_specifiers: DeclarationSpecifiers<'a>,
+    pub declarator: Option<Declarator<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1052,22 +1046,22 @@ pub enum Expression<'a> {
     },
     Sizeof {
         sizeof: Token<'a>,
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         close_paren: Token<'a>,
     },
     Lengthof {
         lengthof: Token<'a>,
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         close_paren: Token<'a>,
     },
     Alignof {
         alignof: Token<'a>,
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         close_paren: Token<'a>,
     },
     Cast {
         open_paren: Token<'a>,
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         expr: &'a Expression<'a>,
     },
     Subscript {
@@ -1108,14 +1102,14 @@ pub enum Expression<'a> {
     },
     BuiltinOffsetof {
         builtin_offsetof: Token<'a>,
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         member: Token<'a>,
         close_paren: Token<'a>,
     },
     CompoundLiteral {
         open_paren: Token<'a>,
         storage_class_specifiers: &'a [StorageClassSpecifier<'a>],
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         initialiser: &'a Initialiser<'a>,
     },
 }
@@ -1295,7 +1289,7 @@ pub struct GenericAssocList<'a>(pub &'a [GenericAssociation<'a>]);
 #[derive(Debug, Clone, Copy)]
 pub enum GenericAssociation<'a> {
     Ty {
-        ty: QualifiedType<'a>,
+        ty: TypeName<'a>,
         expr: Expression<'a>,
     },
     Default {

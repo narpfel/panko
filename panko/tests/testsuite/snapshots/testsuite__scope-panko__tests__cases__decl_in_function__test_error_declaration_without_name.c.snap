@@ -16,14 +16,38 @@ Error: declaration does not specify a name
    ╭─[panko/tests/cases/decl_in_function/test_error_declaration_without_name.c:2:5]
    │
  2 │     int = 42;
-   │     ────┬────  
-   │         ╰────── this looks like a declaration with type `int`
+   │     ────┬───  
+   │         ╰───── this looks like a declaration with type `int`
 ───╯
 
 Error: declaration does not specify a name
    ╭─[panko/tests/cases/decl_in_function/test_error_declaration_without_name.c:5:9]
    │
  5 │         name = 42;
-   │         ─────┬────  
-   │              ╰────── this looks like a declaration with type `typedef<name>`
+   │         ────┬────  
+   │             ╰────── this looks like a declaration with type `int`
+───╯
+
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/decl_in_function/test_error_declaration_without_name.c:7:5]
+   │
+ 7 │     int(), *but_this_has_a_name();
+   │     ──┬──  
+   │       ╰──── this looks like a declaration with type `fn() -> int`
+───╯
+
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/decl_in_function/test_error_declaration_without_name.c:8:5]
+   │
+ 8 │     struct HasTagButAbstractDeclarator { int x; }();
+   │     ───────────────────────┬───────────────────────  
+   │                            ╰───────────────────────── this looks like a declaration with type `fn() -> struct HasTagButAbstractDeclarator~6 complete`
+───╯
+
+Error: declaration does not specify a name
+   ╭─[panko/tests/cases/decl_in_function/test_error_declaration_without_name.c:9:5]
+   │
+ 9 │     struct ShouldAlsoError { int x; } = {};
+   │     ───────────────────┬──────────────────  
+   │                        ╰──────────────────── this looks like a declaration with type `struct ShouldAlsoError~8 complete`
 ───╯

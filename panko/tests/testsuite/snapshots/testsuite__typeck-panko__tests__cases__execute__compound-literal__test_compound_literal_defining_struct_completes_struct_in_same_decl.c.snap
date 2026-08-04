@@ -1,0 +1,46 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/compound-literal/test_compound_literal_defining_struct_completes_struct_in_same_decl.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid implicit conversion from `ptr<struct T~2 complete>` to `ptr<struct T~2>`
+   ╭─[panko/tests/cases/execute/compound-literal/test_compound_literal_defining_struct_completes_struct_in_same_decl.c:5:19]
+   │
+ 5 │     struct T* p = &(struct T { int x; }){123};
+   │                   ─┬  
+   │                    ╰── this is of type `ptr<struct T~2 complete>`, which cannot be implicitly converted to `ptr<struct T~2>`
+───╯
+
+Error: dereference of pointer to incomplete type `struct T~2`
+   ╭─[panko/tests/cases/execute/compound-literal/test_compound_literal_defining_struct_completes_struct_in_same_decl.c:7:12]
+   │
+ 7 │     return p->x;
+   │            ┬  
+   │            ╰── this expression has type `ptr<struct T~2>`
+───╯
+
+Error: member access on incomplete struct type `struct T~2`
+   ╭─[panko/tests/cases/execute/compound-literal/test_compound_literal_defining_struct_completes_struct_in_same_decl.c:7:12]
+   │
+ 7 │     return p->x;
+   │            ─┬──  
+   │             │    
+   │             ╰──── this expression has incomplete struct type `struct T~2`
+───╯
+
+Error: invalid implicit conversion from `void` to `int`
+   ╭─[panko/tests/cases/execute/compound-literal/test_compound_literal_defining_struct_completes_struct_in_same_decl.c:7:12]
+   │
+ 7 │     return p->x;
+   │            ─┬─  
+   │             ╰─── this is of type `void`, which cannot be implicitly converted to `int`
+───╯

@@ -6,12 +6,10 @@ use crate::ast::Declaration;
 use crate::ast::ExternalDeclaration;
 use crate::ast::FunctionDefinition;
 use crate::ast::Member;
-use crate::ast::ParameterDeclaration;
 use crate::ast::QualifiedType;
 use crate::ast::Statement;
 use crate::ast::Struct;
 use crate::ast::TranslationUnit;
-use crate::ast::TypeDeclaration;
 use crate::sexpr_builder::AsSExpr;
 use crate::sexpr_builder::SExpr;
 
@@ -27,10 +25,8 @@ impl AsSExpr for TranslationUnit<'_> {
 impl AsSExpr for ExternalDeclaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            ExternalDeclaration::TypeDeclaration(type_decl) => type_decl.as_sexpr(),
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
-            ExternalDeclaration::Error(_error) => SExpr::string("error"),
         }
     }
 }
@@ -38,26 +34,24 @@ impl AsSExpr for ExternalDeclaration<'_> {
 impl AsSExpr for FunctionDefinition<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("function-definition")
-            .inherit(&self.name)
+            .inherit(&self.declarator)
             .lines([&self.ty])
             .lines([&self.body])
     }
 }
 
-impl AsSExpr for Declaration<'_> {
+impl<T> AsSExpr for Declaration<'_, T>
+where
+    T: AsSExpr,
+{
     fn as_sexpr(&self) -> SExpr {
-        SExpr::new("declaration")
-            .inherit(&self.name)
-            .inherit(&self.ty)
-            .inherit(&self.initialiser)
-    }
-}
-
-impl AsSExpr for TypeDeclaration<'_> {
-    fn as_sexpr(&self) -> SExpr {
-        match self {
-            Self::Struct(r#struct) => r#struct.as_sexpr(),
-        }
+        let Self {
+            storage_class: _,
+            function_specifiers: _,
+            ty,
+            declarators,
+        } = self;
+        SExpr::new("declaration").inherit(ty).lines(*declarators)
     }
 }
 
@@ -73,12 +67,6 @@ impl AsSExpr for Type<'_> {
     }
 }
 
-impl AsSExpr for ParameterDeclaration<'_> {
-    fn as_sexpr(&self) -> SExpr {
-        SExpr::new("param").inherit(&self.name).inherit(&self.ty)
-    }
-}
-
 impl AsSExpr for Struct<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
@@ -91,11 +79,10 @@ impl AsSExpr for Struct<'_> {
 
 impl AsSExpr for Member<'_> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name, bitfield_width, ty } = self;
+        let Self { declarator, bitfield_width } = self;
         SExpr::new("member")
-            .inherit(name)
+            .inherit(declarator)
             .inherit(bitfield_width)
-            .inherit(ty)
     }
 }
 
@@ -108,7 +95,6 @@ impl AsSExpr for CompoundStatement<'_> {
 impl AsSExpr for Statement<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            Statement::TypeDeclaration(type_decl) => type_decl.as_sexpr(),
             Statement::Declaration(decl) => decl.as_sexpr(),
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),

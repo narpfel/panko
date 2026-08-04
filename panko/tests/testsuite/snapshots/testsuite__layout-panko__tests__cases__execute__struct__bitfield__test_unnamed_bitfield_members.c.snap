@@ -81,7 +81,7 @@ exit_code: 0
          (union ∅~9
             (member s @0 `struct UnnamedNonzeroLengthBitfield~6 complete`)
             (member as_int @0 `int`))
-         (definition (u~11 `union ∅~10 complete` @0)
+         (definition (u~10 `union ∅~9 complete` @0)
             (braced
                (subobject +0[0:7] (111 `int` @4))
                (subobject +0[14:21] (119 `int` @4))))
@@ -112,6 +112,6 @@ exit_code: 0
                      (addressof `ptr<array<char; 9>>` @16
                         (string `array<char; 9>` @void "0b%032b\n\0"))))
                (member `int` @0 as_int +0
-                  (u~11 `union ∅~10 complete` @0)))))))
+                  (u~10 `union ∅~9 complete` @0)))))))
 
 ----- stderr -----

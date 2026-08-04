@@ -36,18 +36,6 @@ Error: redeclaration of `struct U~5 complete` with different tag `union`
     │           ╰── redeclared here as `union`
 ────╯
 
-Error: redeclaration of `struct U~5 complete` with different tag `union`
-    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:13:11]
-    │
-  8 │     struct U {
-    │            ┬  
-    │            ╰── previously declared here as `struct`
-    │ 
- 13 │     union U value;
-    │           ┬  
-    │           ╰── redeclared here as `union`
-────╯
-
 Error: redeclaration of `union V~9 complete` with different tag `struct`
     ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:22:12]
     │

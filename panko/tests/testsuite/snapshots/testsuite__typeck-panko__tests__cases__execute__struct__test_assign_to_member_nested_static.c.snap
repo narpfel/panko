@@ -19,12 +19,12 @@ exit_code: 0
    (struct ∅~2
       (member x @0 `int`)
       (member t @4 `struct T~0 complete`))
-   (definition external a~4 `struct ∅~3 complete`
+   (definition external a~3 `struct ∅~2 complete`
       (braced
          (subobject +0 (123 `int`))
          (subobject +4 (42 `int`))))
    (function-definition external
-      main~5 `fn() -> int`
+      main~4 `fn() -> int`
       (compound-statement
          (expression
             (assign `int`
@@ -35,11 +35,11 @@ exit_code: 0
             (assign `int`
                (member `int` x +0
                   (member `struct T~0 complete` t +4
-                     (a~4 `struct ∅~3 complete`)))
+                     (a~3 `struct ∅~2 complete`)))
                (5 `int`)))
          (return
             (member `int` x +0
                (member `struct T~0 complete` t +4
-                  (a~4 `struct ∅~3 complete`)))))))
+                  (a~3 `struct ∅~2 complete`)))))))
 
 ----- stderr -----
