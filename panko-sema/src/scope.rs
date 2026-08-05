@@ -1163,7 +1163,7 @@ fn resolve_function_definition<'a>(
     });
 
     let sess = scopes.sess;
-    let params = sess.alloc_slice_collect(params.iter().enumerate().map(|(i, param)| {
+    let params = sess.alloc_slice_fill_iter(params.iter().enumerate().map(|(i, param)| {
         let name = param.name.map_or_else(
             || sess.alloc_str(&format!("{}.unnamed_parameter.{i}", name.slice())),
             |name| name.slice(),
