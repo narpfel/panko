@@ -2,6 +2,7 @@ use std::borrow::Cow;
 use std::iter;
 
 use itertools::Either;
+use panko_parser::ast;
 use panko_parser::sexpr_builder::AsSExpr;
 use panko_parser::sexpr_builder::SExpr;
 
@@ -24,6 +25,8 @@ use super::Typedef;
 use super::Typeof;
 use crate::scope::BitfieldWidth;
 use crate::scope::BuiltinName;
+use crate::scope::Declarator;
+use crate::scope::Declarators;
 use crate::scope::Member;
 
 impl AsSExpr for Member<'_> {
@@ -55,12 +58,9 @@ impl AsSExpr for TranslationUnit<'_> {
 impl AsSExpr for ExternalDeclaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            ExternalDeclaration::StructDecl(decl) => decl.as_sexpr(),
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
-            ExternalDeclaration::Typedef(typedef) => typedef.as_sexpr(),
             ExternalDeclaration::Error(_error) => SExpr::new("error"),
-            ExternalDeclaration::Redeclared(redeclared) => redeclared.as_sexpr(),
         }
     }
 }
@@ -88,6 +88,29 @@ impl AsSExpr for FunctionDefinition<'_> {
 impl AsSExpr for ParamRefs<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("params").lines(self.0)
+    }
+}
+
+impl AsSExpr for Declarator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Typedef(typedef) => typedef.as_sexpr(),
+            Self::Declaration(decl) => decl.as_sexpr(),
+            Self::Redeclared(redeclared) => redeclared.as_sexpr(),
+        }
+    }
+}
+
+impl AsSExpr for Declarators<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { ty, unresolved_ty, declarators } = self;
+        let sexpr = match &ty.ty {
+            crate::ty::Type::Struct(crate::ty::Struct::Complete(complete))
+                if let ast::Type::Struct(ast::Struct::Complete { .. }) = unresolved_ty.ty =>
+                SExpr::flat().lines([complete]),
+            _ => SExpr::flat(),
+        };
+        sexpr.lines(*declarators)
     }
 }
 
@@ -157,13 +180,10 @@ impl AsSExpr for CompoundStatement<'_> {
 impl AsSExpr for Statement<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
-            Statement::StructDecl(decl) => decl.as_sexpr(),
             Statement::Declaration(decl) => decl.as_sexpr(),
-            Statement::Typedef(typedef) => typedef.as_sexpr(),
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),
             Statement::Return { return_: _, expr } => SExpr::new("return").inherit(expr),
-            Statement::Redeclared(redeclared) => redeclared.as_sexpr(),
             Statement::HoistedCompoundLiteral(reference) =>
                 SExpr::new("hoisted-compound-literal").inherit(reference),
         }

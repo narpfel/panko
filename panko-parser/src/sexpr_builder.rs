@@ -17,6 +17,7 @@ pub struct SExpr<'a> {
     name: Cow<'a, str>,
     params: Vec<Param<'a>>,
     parenthesise_if_empty: bool,
+    flat: bool,
 }
 
 impl<'a> SExpr<'a> {
@@ -25,6 +26,7 @@ impl<'a> SExpr<'a> {
             name: s.into(),
             params: vec![],
             parenthesise_if_empty: true,
+            flat: false,
         }
     }
 
@@ -33,6 +35,7 @@ impl<'a> SExpr<'a> {
             name: s.into(),
             params: vec![],
             parenthesise_if_empty: false,
+            flat: false,
         }
     }
 
@@ -41,6 +44,7 @@ impl<'a> SExpr<'a> {
             name: "".into(),
             params: vec![],
             parenthesise_if_empty: true,
+            flat: false,
         }
     }
 
@@ -49,6 +53,16 @@ impl<'a> SExpr<'a> {
             name: format!("`{value}`").into(),
             params: vec![],
             parenthesise_if_empty: false,
+            flat: false,
+        }
+    }
+
+    pub fn flat() -> Self {
+        Self {
+            name: "".into(),
+            params: vec![],
+            parenthesise_if_empty: false,
+            flat: true,
         }
     }
 
@@ -140,25 +154,38 @@ impl<'a> SExpr<'a> {
     }
 
     fn is_empty(&self) -> bool {
-        let Self { name, params, parenthesise_if_empty } = self;
+        let Self {
+            name,
+            params,
+            parenthesise_if_empty,
+            flat: _,
+        } = self;
         name.is_empty() && params.is_empty() && !parenthesise_if_empty
     }
 
     fn fmt(&self, f: &mut fmt::Formatter, indent: usize) -> fmt::Result {
         let should_parenthesise = self.params.is_empty() && !self.parenthesise_if_empty;
-        let (open_paren, close_paren) = if should_parenthesise {
+        let (open_paren, close_paren) = if self.flat || should_parenthesise {
             ("", "")
         }
         else {
             ("(", ")")
         };
 
+        let indent = match self.flat {
+            true => indent - SEXPR_INDENT,
+            false => indent,
+        };
         write!(
             f,
             "{EMPTY:indent$}{open_paren}{}",
             self.name
                 .bold()
                 .whenever(yansi::Condition::cached(!should_parenthesise)),
+            indent = match self.flat {
+                true => 0,
+                false => indent,
+            },
         )?;
         let mut has_line_break = false;
         let first_was_preceded = !self.name.is_empty();
