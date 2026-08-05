@@ -1468,32 +1468,22 @@ fn resolve_declaration<'a>(
 }
 
 gen fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Statement<'a> {
-    let stmts = gen {
-        match stmt {
-            ast::Statement::Declaration(decl) =>
-                yield Statement::Declaration(resolve_declaration(scopes, decl)),
-            ast::Statement::Expression(expr) =>
-                yield Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
-            ast::Statement::Compound(stmts) =>
-                yield Statement::Compound(resolve_compound_statement(
-                    scopes,
-                    stmts,
-                    OpenNewScope::Yes,
-                )),
-            ast::Statement::Return { return_, expr } =>
-                yield Statement::Return {
-                    return_: *return_,
-                    expr: try { resolve_expr(scopes, expr.as_ref()?) },
-                },
-        }
+    let stmt = match stmt {
+        ast::Statement::Declaration(decl) =>
+            Statement::Declaration(resolve_declaration(scopes, decl)),
+        ast::Statement::Expression(expr) =>
+            Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
+        ast::Statement::Compound(stmts) =>
+            Statement::Compound(resolve_compound_statement(scopes, stmts, OpenNewScope::Yes)),
+        ast::Statement::Return { return_, expr } => Statement::Return {
+            return_: *return_,
+            expr: try { resolve_expr(scopes, expr.as_ref()?) },
+        },
     };
-    let stmts = stmts.collect_vec();
     for hoisted_ref in scopes.take_hoisted_compound_literals() {
         yield Statement::HoistedCompoundLiteral(hoisted_ref);
     }
-    for stmt in stmts {
-        yield stmt;
-    }
+    yield stmt;
 }
 
 fn resolve_assoc<'a>(
@@ -1732,15 +1722,15 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
     }
 }
 
-gen fn resolve_external_declaration<'a>(
+fn resolve_external_declaration<'a>(
     scopes: &mut Scopes<'a>,
     decl: &ast::ExternalDeclaration<'a>,
 ) -> ExternalDeclaration<'a> {
     match decl {
         ast::ExternalDeclaration::FunctionDefinition(def) =>
-            yield resolve_function_definition(scopes, def),
+            resolve_function_definition(scopes, def),
         ast::ExternalDeclaration::Declaration(decl) =>
-            yield ExternalDeclaration::Declaration(resolve_declaration(scopes, decl)),
+            ExternalDeclaration::Declaration(resolve_declaration(scopes, decl)),
     }
 }
 
@@ -1752,12 +1742,10 @@ pub fn resolve_names<'a>(
     let ast::TranslationUnit { filename, decls } = translation_unit;
     TranslationUnit {
         filename,
-        decls: sess.alloc_slice_collect(gen {
-            for decl in decls {
-                for decl in resolve_external_declaration(scopes, decl) {
-                    yield decl
-                }
-            }
-        }),
+        decls: sess.alloc_slice_fill_iter(
+            decls
+                .iter()
+                .map(|decl| resolve_external_declaration(scopes, decl)),
+        ),
     }
 }
