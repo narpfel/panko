@@ -258,6 +258,13 @@ pub(crate) enum Declarator<'a> {
     Typedef(Typedef<'a>),
     Declaration(Declaration<'a>),
     Redeclared(Redeclared<'a>),
+    Error(&'a dyn Report),
+}
+
+impl<'a> FromError<'a> for Declarator<'a> {
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::Error(error)
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1431,39 +1438,40 @@ fn resolve_declaration<'a>(
         _ => resolve_value_declaration,
     };
 
-    let declarators = declarators.iter().map(|&init_declarator| {
-        let cst::InitDeclarator { declarator, bitfield_width, initialiser } = init_declarator;
-        let (ty, name) = parse_declarator(scopes, ty, declarator, IsParameter::No);
-        let name = match name {
-            Some(name) => name,
-            // TODO: 6.7.1: reject struct/enum decl without tag, allow enum decl without tag that
-            // contains an enumerator list
-            None => {
-                let loc = unresolved_ty.loc().until_maybe(
-                    try { initialiser.as_ref()?.loc() }
-                        .or_else(|| declarator.direct_declarator.maybe_end_loc()),
-                );
-                // TODO: use this error
-                let () = sess.emit(Diagnostic::DeclarationWithoutName { at: loc, ty });
-                // TODO: this should be a unique name for each value for error recovery
-                Token::from_str(
-                    scopes.sess.bump(),
-                    panko_lex::TokenKind::Identifier,
-                    "unnamed.declarator",
-                )
-            }
-        };
-        resolve(
-            scopes,
-            storage_duration,
-            function_specifiers,
-            InitDeclarator { ty, name, bitfield_width, initialiser },
-        )
-    });
+    let declarators = gen {
+        for &init_declarator in *declarators {
+            let cst::InitDeclarator { declarator, bitfield_width, initialiser } = init_declarator;
+            let (ty, name) = parse_declarator(scopes, ty, declarator, IsParameter::No);
+            let name = match name {
+                Some(name) => name,
+                // TODO: 6.7.1: reject struct/enum decl without tag, allow enum decl without tag that
+                // contains an enumerator list
+                None => {
+                    let loc = unresolved_ty.loc().until_maybe(
+                        try { initialiser.as_ref()?.loc() }
+                            .or_else(|| declarator.direct_declarator.maybe_end_loc()),
+                    );
+                    yield sess.emit(Diagnostic::DeclarationWithoutName { at: loc, ty });
+                    // TODO: this should be a unique name for each value for error recovery
+                    Token::from_str(
+                        scopes.sess.bump(),
+                        panko_lex::TokenKind::Identifier,
+                        "unnamed.declarator",
+                    )
+                }
+            };
+            yield resolve(
+                scopes,
+                storage_duration,
+                function_specifiers,
+                InitDeclarator { ty, name, bitfield_width, initialiser },
+            )
+        }
+    };
     Declarators {
         ty,
         unresolved_ty: *unresolved_ty,
-        declarators: sess.alloc_slice_fill_iter(declarators),
+        declarators: sess.alloc_slice_collect(declarators),
     }
 }
 

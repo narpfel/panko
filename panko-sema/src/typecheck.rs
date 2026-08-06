@@ -1635,6 +1635,7 @@ gen fn typeck_statement<'a>(
                         Statement::Declaration(typeck_declaration(sess, decl)),
                     Declarator::Redeclared(redeclared) =>
                         typeck_redeclaration_error(sess, redeclared),
+                    Declarator::Error(error) => Statement::from_error(*error),
                 }
             }
             return;
@@ -2869,6 +2870,7 @@ pub fn resolve_types<'a>(
                                 typeck_declaration_in_global_scope(sess, decl),
                             Declarator::Redeclared(redeclared) =>
                                 typeck_redeclaration_error(sess, redeclared),
+                            Declarator::Error(error) => ExternalDeclaration::from_error(*error),
                         }
                     }
                     return;

@@ -97,6 +97,7 @@ impl AsSExpr for Declarator<'_> {
             Self::Typedef(typedef) => typedef.as_sexpr(),
             Self::Declaration(decl) => decl.as_sexpr(),
             Self::Redeclared(redeclared) => redeclared.as_sexpr(),
+            Self::Error(_) => SExpr::new("error"),
         }
     }
 }
