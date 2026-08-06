@@ -1448,8 +1448,12 @@ fn resolve_declaration<'a>(
                 // contains an enumerator list
                 None => {
                     let loc = unresolved_ty.loc().until_maybe(
-                        try { initialiser.as_ref()?.loc() }
-                            .or_else(|| declarator.direct_declarator.maybe_end_loc()),
+                        try { initialiser.as_ref()?.loc() }.or_else(|| {
+                            declarator
+                                .direct_declarator
+                                .maybe_end_loc()
+                                .or_else(|| try { declarator.pointers?.last()?.loc() })
+                        }),
                     );
                     yield sess.emit(Diagnostic::DeclarationWithoutName { at: loc, ty });
                     // TODO: this should be a unique name for each value for error recovery

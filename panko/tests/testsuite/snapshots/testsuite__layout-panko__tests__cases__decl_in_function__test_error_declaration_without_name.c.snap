@@ -56,6 +56,6 @@ Error: declaration does not specify a name
     ╭─[panko/tests/cases/decl_in_function/test_error_declaration_without_name.c:10:5]
     │
  10 │     int**;
-    │     ─┬─  
-    │      ╰─── this looks like a declaration with type `ptr<ptr<int>>`
+    │     ──┬──  
+    │       ╰──── this looks like a declaration with type `ptr<ptr<int>>`
 ────╯

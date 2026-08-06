@@ -782,7 +782,7 @@ pub struct Pointer<'a> {
 }
 
 impl<'a> Pointer<'a> {
-    fn loc(&self) -> Loc<'a> {
+    pub fn loc(&self) -> Loc<'a> {
         let Self { star, qualifiers } = self;
         let loc = star.loc();
         match qualifiers.last() {
