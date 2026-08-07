@@ -7,4 +7,5 @@ int main() {
     int(), *but_this_has_a_name();
     struct HasTagButAbstractDeclarator { int x; }();
     struct ShouldAlsoError { int x; } = {};
+    int**;
 }
