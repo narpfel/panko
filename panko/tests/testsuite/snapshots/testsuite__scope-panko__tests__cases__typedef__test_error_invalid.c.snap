@@ -49,3 +49,51 @@ Error: bitfields can only be struct or union members, not global variables
    │              │               
    │              ╰─────────────── in this global variable
 ───╯
+
+Error: `typedef` declarations cannot have initialisers
+   ╭─[panko/tests/cases/typedef/test_error_invalid.c:6:13]
+   │
+ 6 │ typedef int T4 = 42;
+   │ ───────     ─┬   ─┬  
+   │              │    ╰── help: remove this initialiser
+   │              │       
+   │              ╰─────── in this `typedef` declaration
+───╯
+
+Error: `typedef` declarations cannot have initialisers
+   ╭─[panko/tests/cases/typedef/test_error_invalid.c:7:13]
+   │
+ 7 │ typedef int T5 = undefined;
+   │ ───────     ─┬   ────┬────  
+   │              │       ╰────── help: remove this initialiser
+   │              │              
+   │              ╰────────────── in this `typedef` declaration
+───╯
+
+Error: use of undeclared identifier `undefined`
+   ╭─[panko/tests/cases/typedef/test_error_invalid.c:7:18]
+   │
+ 7 │ typedef int T5 = undefined;
+   │                  ────┬────  
+   │                      ╰────── this name has not been declared
+───╯
+
+Error: `typedef` declarations cannot have initialisers
+   ╭─[panko/tests/cases/typedef/test_error_invalid.c:8:13]
+   │
+ 8 │ typedef int T6:10 = 20;
+   │ ───────     ─┬      ─┬  
+   │              │       ╰── help: remove this initialiser
+   │              │          
+   │              ╰────────── in this `typedef` declaration
+───╯
+
+Error: bitfields can only be struct or union members, not global variables
+   ╭─[panko/tests/cases/typedef/test_error_invalid.c:8:16]
+   │
+ 8 │ typedef int T6:10 = 20;
+   │             ─┬ ─┬  
+   │              │  ╰── bitfields are not allowed here
+   │              │     
+   │              ╰───── in this global variable
+───╯

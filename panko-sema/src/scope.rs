@@ -150,6 +150,18 @@ pub(crate) enum Diagnostic<'a> {
     #[error("cannot use type qualifier `{at}` in non-parameter array declarator")]
     #[diagnostics(at(colour = Red, label = "help: remove this `{at}`"))]
     InvalidTypeQualifierInArrayBrackets { at: TypeQualifier<'a> },
+
+    #[error("`{typedef}` declarations cannot have initialisers")]
+    #[diagnostics(
+        typedef(colour = Blue),
+        at(colour = Blue, label = "in this `{typedef}` declaration"),
+        initialiser(colour = Red, label = "help: remove this initialiser"),
+    )]
+    TypedefWithInitialiser {
+        at: Token<'a>,
+        typedef: Token<'a>,
+        initialiser: Initialiser<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1322,6 +1334,7 @@ fn resolve_initialiser<'a>(
 
 fn resolve_typedef_declaration<'a>(
     scopes: &mut Scopes<'a>,
+    decl: &ast::Declaration<'a, cst::InitDeclarator<'a>>,
     storage_duration: StorageDuration<Option<Linkage>>,
     function_specifiers: &FunctionSpecifiers<'a>,
     declarator: InitDeclarator<'a>,
@@ -1337,8 +1350,12 @@ fn resolve_typedef_declaration<'a>(
 
     reject_bitfield_width(scopes, bitfield_width.as_ref(), name.loc());
     if let Some(initialiser) = initialiser {
-        let initialiser = resolve_initialiser(scopes, &initialiser);
-        error_todo!(initialiser, "typedef with initialiser")
+        // TODO: use this error
+        scopes.sess.emit(Diagnostic::TypedefWithInitialiser {
+            at: name,
+            typedef: decl.storage_class.unwrap().token,
+            initialiser: resolve_initialiser(scopes, &initialiser),
+        })
     }
 
     match previously_declared_as {
@@ -1350,6 +1367,7 @@ fn resolve_typedef_declaration<'a>(
 
 fn resolve_value_declaration<'a>(
     scopes: &mut Scopes<'a>,
+    _decl: &ast::Declaration<'a, cst::InitDeclarator<'a>>,
     storage_duration: StorageDuration<Option<Linkage>>,
     function_specifiers: &FunctionSpecifiers<'a>,
     declarator: InitDeclarator<'a>,
@@ -1467,6 +1485,7 @@ fn resolve_declaration<'a>(
             };
             yield resolve(
                 scopes,
+                decl,
                 storage_duration,
                 function_specifiers,
                 InitDeclarator { ty, name, bitfield_width, initialiser },
