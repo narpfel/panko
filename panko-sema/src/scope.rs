@@ -1283,6 +1283,7 @@ fn reject_bitfield_width<'a>(
 ) {
     if let Some(bitfield_width) = bitfield_width {
         let _ = resolve_expr(scopes, bitfield_width);
+        // TODO: use this error
         scopes
             .sess
             .emit(cst::BitfieldDiagnostic::NonStructMemberBitfield {
