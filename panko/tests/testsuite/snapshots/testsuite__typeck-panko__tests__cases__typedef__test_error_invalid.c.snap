@@ -1,0 +1,51 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/typedef/test_error_invalid.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: bitfields can only be struct or union members, not global variables
+   ╭─[panko/tests/cases/typedef/test_error_invalid.c:1:16]
+   │
+ 1 │ typedef int T1:20;
+   │             ─┬ ─┬  
+   │              │  ╰── bitfields are not allowed here
+   │              │     
+   │              ╰───── in this global variable
+───╯
+
+Error: use of undeclared identifier `undefined`
+   ╭─[panko/tests/cases/typedef/test_error_invalid.c:2:16]
+   │
+ 2 │ typedef int T2:undefined;
+   │                ────┬────  
+   │                    ╰────── this name has not been declared
+───╯
+
+Error: bitfields can only be struct or union members, not global variables
+   ╭─[panko/tests/cases/typedef/test_error_invalid.c:2:16]
+   │
+ 2 │ typedef int T2:undefined;
+   │             ─┬ ────┬────  
+   │              │     ╰────── bitfields are not allowed here
+   │              │            
+   │              ╰──────────── in this global variable
+───╯
+
+Error: bitfields can only be struct or union members, not global variables
+   ╭─[panko/tests/cases/typedef/test_error_invalid.c:4:16]
+   │
+ 4 │ typedef int T3:sizeof(void);
+   │             ─┬ ──────┬─────  
+   │              │       ╰─────── bitfields are not allowed here
+   │              │               
+   │              ╰─────────────── in this global variable
+───╯
