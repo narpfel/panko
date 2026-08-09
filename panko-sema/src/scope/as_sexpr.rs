@@ -105,6 +105,8 @@ impl AsSExpr for Declarator<'_> {
 impl AsSExpr for Declarators<'_> {
     fn as_sexpr(&self) -> SExpr {
         let Self { ty, unresolved_ty, declarators } = self;
+        // TODO: this is not really an accurate representation of the AST, but it has the same
+        // format as the remaining `Step`s and is generally shorter
         let sexpr = match &ty.ty {
             crate::ty::Type::Struct(crate::ty::Struct::Complete(complete))
                 if let ast::Type::Struct(ast::Struct::Complete { .. }) = unresolved_ty.ty =>
