@@ -24,6 +24,7 @@ use panko_parser::MemberAccessOpKind;
 use panko_parser::StructKind;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
+use panko_parser::ast;
 use panko_parser::ast::Arithmetic;
 use panko_parser::ast::FromError;
 use panko_parser::ast::FunctionSpecifiers;
@@ -41,6 +42,8 @@ use crate::scope;
 use crate::scope::BitfieldWidth;
 use crate::scope::BuiltinName;
 use crate::scope::BuiltinNameKind;
+use crate::scope::Declarator;
+use crate::scope::Declarators;
 use crate::scope::DesignatedInitialiser;
 use crate::scope::Designation;
 use crate::scope::Designator;
@@ -1604,25 +1607,39 @@ fn typeck_compound_statement<'a>(
     function: &scope::FunctionDefinition<'a>,
 ) -> CompoundStatement<'a> {
     CompoundStatement(
-        sess.alloc_slice_fill_iter(
+        sess.alloc_slice_collect(
             stmt.0
                 .iter()
-                .map(|stmt| typeck_statement(sess, stmt, function)),
+                .flat_map(|stmt| typeck_statement(sess, stmt, function)),
         ),
     )
 }
 
-fn typeck_statement<'a>(
+gen fn typeck_statement<'a>(
     sess: &'a Session<'a>,
     stmt: &scope::Statement<'a>,
     function: &scope::FunctionDefinition<'a>,
 ) -> Statement<'a> {
-    match stmt {
-        scope::Statement::StructDecl(complete) =>
-            Statement::StructDecl(typeck_complete_struct(sess, complete)),
-        scope::Statement::Declaration(decl) =>
-            Statement::Declaration(typeck_declaration(sess, decl)),
-        scope::Statement::Typedef(typedef) => Statement::Typedef(typeck_typedef(sess, typedef)),
+    yield match stmt {
+        scope::Statement::Declaration(Declarators { ty, unresolved_ty, declarators }) => {
+            if let ty::Type::Struct(Struct::Complete(complete)) = &ty.ty
+                && let ast::Type::Struct(ast::Struct::Complete { .. }) = unresolved_ty.ty
+            {
+                yield Statement::StructDecl(typeck_complete_struct(sess, complete))
+            }
+            for decl in *declarators {
+                yield match decl {
+                    Declarator::Typedef(typedef) =>
+                        Statement::Typedef(typeck_typedef(sess, typedef)),
+                    Declarator::Declaration(decl) =>
+                        Statement::Declaration(typeck_declaration(sess, decl)),
+                    Declarator::Redeclared(redeclared) =>
+                        typeck_redeclaration_error(sess, redeclared),
+                    Declarator::Error(error) => Statement::from_error(*error),
+                }
+            }
+            return;
+        }
         scope::Statement::Expression(expr) =>
             Statement::Expression(try { typeck_expression(sess, expr.as_ref()?, Context::Default) }),
         scope::Statement::Compound(stmt) =>
@@ -1653,7 +1670,6 @@ fn typeck_statement<'a>(
                 None => Statement::Return(expr),
             }
         }
-        scope::Statement::Redeclared(redeclared) => typeck_redeclaration_error(sess, redeclared),
         scope::Statement::HoistedCompoundLiteral(reference) => {
             let initialiser = match reference.initialiser {
                 Some(RefInitialiser::Initialiser(initialiser)) => Some(initialiser),
@@ -2830,18 +2846,37 @@ pub fn resolve_types<'a>(
     let scope::TranslationUnit { filename, decls } = translation_unit;
     TranslationUnit {
         filename,
-        decls: sess.alloc_slice_fill_iter(decls.iter().map(|decl| match decl {
-            scope::ExternalDeclaration::StructDecl(complete) =>
-                ExternalDeclaration::StructDecl(typeck_complete_struct(sess, complete)),
-            scope::ExternalDeclaration::FunctionDefinition(def) =>
-                ExternalDeclaration::FunctionDefinition(typeck_function_definition(sess, def)),
-            scope::ExternalDeclaration::Typedef(typedef) =>
-                ExternalDeclaration::Typedef(typeck_typedef(sess, typedef)),
-            scope::ExternalDeclaration::Declaration(decl) =>
-                typeck_declaration_in_global_scope(sess, decl),
-            scope::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
-            scope::ExternalDeclaration::Redeclared(redeclared) =>
-                typeck_redeclaration_error(sess, redeclared),
+        decls: sess.alloc_slice_collect(decls.iter().flat_map(|decl| gen {
+            yield match decl {
+                scope::ExternalDeclaration::FunctionDefinition(def) =>
+                    ExternalDeclaration::FunctionDefinition(typeck_function_definition(sess, def)),
+                scope::ExternalDeclaration::Declaration(Declarators {
+                    ty,
+                    unresolved_ty,
+                    declarators,
+                }) => {
+                    if let ty::Type::Struct(Struct::Complete(complete)) = &ty.ty
+                        && let ast::Type::Struct(ast::Struct::Complete { .. }) = unresolved_ty.ty
+                    {
+                        yield ExternalDeclaration::StructDecl(typeck_complete_struct(
+                            sess, complete,
+                        ))
+                    }
+                    for decl in *declarators {
+                        yield match decl {
+                            Declarator::Typedef(typedef) =>
+                                ExternalDeclaration::Typedef(typeck_typedef(sess, typedef)),
+                            Declarator::Declaration(decl) =>
+                                typeck_declaration_in_global_scope(sess, decl),
+                            Declarator::Redeclared(redeclared) =>
+                                typeck_redeclaration_error(sess, redeclared),
+                            Declarator::Error(error) => ExternalDeclaration::from_error(*error),
+                        }
+                    }
+                    return;
+                }
+                scope::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
+            }
         })),
     }
 }
