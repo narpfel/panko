@@ -68,6 +68,10 @@ debug = "line-tables-only"
 opt-level = 3
 codegen-backend = "llvm"
 
+[profile.clif.package.panko-derive-report]
+opt-level = 3
+codegen-backend = "llvm"
+
 # TODO: `panko-compiletest` requires unwinding support/`catch_unwind`, so we
 # can’t use the cranelift backend until unwinding support is done
 [profile.clif.package.panko-compiletest]
