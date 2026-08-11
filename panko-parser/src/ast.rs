@@ -100,6 +100,13 @@ impl<'a> FromError<'a> for &'a (dyn Report + 'a) {
     }
 }
 
+impl<'a, T> FromError<'a> for Option<T> {
+    fn from_error(_error: &'a dyn Report) -> Self {
+        // TODO: use this error (or check that all usages should really ignore the error)
+        None
+    }
+}
+
 impl<'a, T, E> FromError<'a> for Either<E, T>
 where
     E: FromError<'a>,
