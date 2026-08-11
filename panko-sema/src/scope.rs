@@ -34,7 +34,6 @@ use panko_parser::ast::Qualifiers;
 use panko_parser::ast::Session;
 use panko_parser::ast::Struct;
 use panko_parser::ast::reject_function_specifiers;
-use panko_parser::error_todo;
 use panko_parser::sexpr_builder::SExpr;
 use panko_parser::unimplemented_todo;
 use panko_report::Report;
@@ -123,6 +122,16 @@ pub(crate) enum Diagnostic<'a> {
         function(colour = Blue, label = "in the definition of function `{function}`"),
     )]
     InvalidStorageClassForFunctionDefinition { at: Token<'a>, function: Token<'a> },
+
+    #[error("invalid storage class `{at}` applied to compound literal")]
+    #[diagnostics(
+        at(colour = Red, label = "`{at}` is invalid for compound literals"),
+        compound_literal(colour = Blue),
+    )]
+    InvalidStorageClassForCompoundLiteral {
+        at: Token<'a>,
+        compound_literal: ast::Expression<'a>,
+    },
 
     #[error("function defined without a name")]
     #[diagnostics(at(colour = Red, label = "this definition lacks a name"))]
@@ -1707,14 +1716,25 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             ty: TypeName { ty, declarator },
             initialiser,
         } => {
-            if storage_class_specifiers.len() > 1 {
-                error_todo!(
+            type Kind = StorageClassSpecifierKind;
+            let storage_class = match storage_class_specifiers {
+                [] => None,
+                [storage_class]
+                    if let Kind::Constexpr | Kind::Static | Kind::Register | Kind::ThreadLocal =
+                        storage_class.kind =>
+                    Some(*storage_class),
+                [storage_class] => {
+                    let error = Diagnostic::InvalidStorageClassForCompoundLiteral {
+                        at: storage_class.token,
+                        compound_literal: *expr,
+                    };
+                    scopes.sess.emit(error)
+                }
+                [_, _, ..] => unimplemented_todo!(
                     expr,
                     "multiple storage class specifiers not implemented for compound literals",
-                )
-            }
-            // TODO: reject invalid storage class specifiers
-            let storage_class = storage_class_specifiers.first().copied();
+                ),
+            };
             let name = format!("compound_literal.{}", scopes.id().0);
             let name = scopes.sess.alloc_str(&name);
             let name = Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name);
@@ -1747,7 +1767,7 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             }
             .into_iter()
             .exactly_one()
-            .unwrap_or_else(|_| panic!("compound literals have exactly one declarator"));
+            .unwrap_or_else(|_| unreachable!("compound literals have exactly one declarator"));
             scopes.hoist_compound_literal(decl.reference);
             Expression::CompoundLiteral { open_paren: *open_paren, decl }
         }

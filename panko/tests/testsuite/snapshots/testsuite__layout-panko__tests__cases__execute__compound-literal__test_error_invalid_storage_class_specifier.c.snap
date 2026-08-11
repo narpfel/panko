@@ -7,14 +7,43 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/compound-literal/test_error_invalid_storage_class_specifier.c
 ---
-success: true
-exit_code: 0
+success: false
+exit_code: 1
 ----- stdout -----
-(translation-unit "panko/tests/cases/execute/compound-literal/test_error_invalid_storage_class_specifier.c"
-   (function-definition external stack-size=8
-      (main~0 `fn() -> int` (static main))
-      (compound-statement
-         (definition external (compound_literal.2~3 `int` (static compound_literal.2)) (braced ∅))
-         (expression (compound-literal `int` (static compound_literal.2) (definition external (compound_literal.2~3 `int` (static compound_literal.2)) (braced ∅)))))))
 
 ----- stderr -----
+Error: invalid storage class `extern` applied to compound literal
+   ╭─[panko/tests/cases/execute/compound-literal/test_error_invalid_storage_class_specifier.c:3:10]
+   │
+ 3 │ int a = (extern int){42};
+   │         ────┬───────────  
+   │             │             
+   │             ╰───────────── `extern` is invalid for compound literals
+───╯
+
+Error: invalid storage class `typedef` applied to compound literal
+   ╭─[panko/tests/cases/execute/compound-literal/test_error_invalid_storage_class_specifier.c:4:10]
+   │
+ 4 │ int b = (typedef int){27};
+   │         ────┬────────────  
+   │             │              
+   │             ╰────────────── `typedef` is invalid for compound literals
+───╯
+
+Error: invalid storage class `extern` applied to compound literal
+    ╭─[panko/tests/cases/execute/compound-literal/test_error_invalid_storage_class_specifier.c:10:6]
+    │
+ 10 │     (extern int){1};
+    │     ────┬──────────  
+    │         │            
+    │         ╰──────────── `extern` is invalid for compound literals
+────╯
+
+Error: invalid storage class `typedef` applied to compound literal
+    ╭─[panko/tests/cases/execute/compound-literal/test_error_invalid_storage_class_specifier.c:11:6]
+    │
+ 11 │     (typedef int){2};
+    │     ────┬───────────  
+    │         │             
+    │         ╰───────────── `typedef` is invalid for compound literals
+────╯
