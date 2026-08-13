@@ -47,6 +47,7 @@ extern {
 
         "struct" => Token { kind: TokenKind::Struct, .. },
         "union" => Token { kind: TokenKind::Union, .. },
+        "enum" => Token { kind: TokenKind::Enum, .. },
 
         // TypeSpecifierToken
         "void" => Token { kind: TokenKind::Void, .. },
@@ -503,7 +504,7 @@ TypeSpecifier: ast::TypeSpecifier<'a> = {
     BitIntTypeSpecifier => todo!(),
     AtomicTypeSpecifier => todo!(),
     StructOrUnionSpecifier,
-    EnumSpecifier => todo!(),
+    EnumSpecifier,
     TypedefName => ast::TypeSpecifier::new(<>),
     TypeofSpecifier,
 }
@@ -551,7 +552,19 @@ StructOrUnionSpecifier: ast::TypeSpecifier<'a> = {
         ast::TypeSpecifier::r#struct(<>),
 }
 
-EnumSpecifier: () = {}
+EnumSpecifier: ast::TypeSpecifier<'a> = {
+    "enum" AnyIdentifier => ast::TypeSpecifier::incomplete_enum(<>),
+    <"enum"> <AnyIdentifier?> "{"
+        PushIsInTypedef
+        <NonEmptyCommaSep<Enumerator>> ","?
+        PopIsInTypedef
+    "}" => ast::TypeSpecifier::r#enum(<>),
+}
+
+Enumerator: ast::Enumerator<'a> = {
+    <name:AnyIdentifier> <value:("=" <ConstantExpression>)?> => ast::Enumerator { <> },
+}
+
 TypeofSpecifier: ast::TypeSpecifier<'a> = {
     <r#typeof:TypeofAndIsUnqual> "(" <expr:Bump<Expression>> ")" =>
         ast::TypeSpecifier {

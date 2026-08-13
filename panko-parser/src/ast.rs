@@ -16,6 +16,7 @@ use panko_report::Sliced as _;
 use crate as cst;
 use crate::BlockItem;
 pub use crate::DesignatedInitialiser;
+use crate::Enumerator;
 pub use crate::InitDeclarator;
 pub use crate::Initialiser;
 use crate::JumpStatement;
@@ -287,6 +288,7 @@ pub enum Type<'a> {
         ty: &'a TypeName<'a>,
     },
     Struct(Struct<'a>),
+    Enum(Enum<'a>),
     // TODO
 }
 
@@ -351,6 +353,17 @@ impl<'a> Struct<'a> {
                 *kind,
         }
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Enum<'a> {
+    Incomplete {
+        name: Token<'a>,
+    },
+    Complete {
+        name: Option<Token<'a>>,
+        enumerators: &'a [Enumerator<'a>],
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -487,6 +500,9 @@ impl fmt::Display for Type<'_> {
             Type::Struct(Struct::Incomplete { name, kind }) => write!(f, "{kind} {}", name.slice()),
             Type::Struct(Struct::Complete { name, kind, members: _ }) =>
                 write!(f, "{kind} {} complete", name.as_sexpr()),
+            Type::Enum(Enum::Incomplete { name }) => write!(f, "enum {}", name.slice()),
+            Type::Enum(Enum::Complete { name, enumerators: _ }) =>
+                write!(f, "enum {} complete", name.as_sexpr()),
         }
     }
 }
@@ -696,6 +712,7 @@ pub(crate) enum ParsedSpecifiers<'a> {
         ty: &'a TypeName<'a>,
     },
     Struct(cst::Struct<'a>),
+    Enum(cst::Enum<'a>),
 }
 
 impl<'a> ParsedSpecifiers<'a> {
@@ -734,6 +751,9 @@ impl<'a> ParsedSpecifiers<'a> {
                         members.iter().map(|member| Member::parse(sess, member)),
                     ),
                 }),
+            Self::Enum(cst::Enum::Incomplete { name }) => Type::Enum(Enum::Incomplete { name }),
+            Self::Enum(cst::Enum::Complete { name, enumerators }) =>
+                Type::Enum(Enum::Complete { name, enumerators }),
         }
     }
 }

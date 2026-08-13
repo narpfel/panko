@@ -942,6 +942,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             allow_bitfields: false,
         },
         ast::Type::Struct(r#struct) => resolve_struct(scopes, &r#struct),
+        ast::Type::Enum(_enum) => unimplemented_todo!(loc, "resolving enums"),
     };
     let loc = HashEqIgnored(loc);
     QualifiedType { is_const, is_volatile, ty, loc }
