@@ -207,6 +207,7 @@ pub(crate) struct BitfieldWidth<'a> {
 pub(crate) enum Scope {}
 
 impl ty::Step for Scope {
+    type Enumerators<'a> = NoHashEq<Enumerators<'a>>;
     type LengthExpr<'a> = NoHashEq<Option<&'a Expression<'a>>>;
     type Member<'a> = NoHashEq<Member<'a>>;
     type TypeofExpr<'a> = NoHashEq<Typeof<'a>>;
@@ -584,6 +585,15 @@ pub enum BuiltinNameKind<'a> {
     Func(&'a ByteStr),
 }
 
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Enumerator<'a> {
+    pub(crate) name: Token<'a>,
+    pub(crate) value: Option<Expression<'a>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Enumerators<'a>(&'a [Enumerator<'a>]);
+
 impl fmt::Display for BuiltinNameKind<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
@@ -904,6 +914,7 @@ fn reresolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &QualifiedType<'a>) -> Qualifie
                     kind,
                 )
                 .ty,
+        Type::Enum(_enum) => unimplemented_todo!(loc.0, "reresolving enums"),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
