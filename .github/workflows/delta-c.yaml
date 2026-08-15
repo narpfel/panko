@@ -27,7 +27,7 @@ jobs:
 
           git \
             clone https://github.com/narpfel/delta-c \
-            --revision=1e8cb4e9087ddf78da664c52e237f2954ef0dcd0
+            --revision=e0b10dfc0e37f442625a82327e29e20680a11da6
 
           python delta-c/Δc.py \
             --color=always \
