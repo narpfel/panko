@@ -19,17 +19,18 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly-2026-08-09
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: generate coverage
         run: |
           set -x
 
-          git \
-            clone https://github.com/narpfel/delta-c \
-            --revision=e0b10dfc0e37f442625a82327e29e20680a11da6
+          pip install git+https://github.com/narpfel/delta-c@d60c5821f81fc37429066d3be69e9480091e8aaa
 
-          python delta-c/Δc.py \
+          Δc \
             --color=always \
             origin/"${{ github.base_ref }}" \
             origin/"${{ github.head_ref }}" \
