@@ -27,6 +27,7 @@ use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast;
 use panko_parser::ast::DeclarationSpecifiers;
+use panko_parser::ast::Enum;
 use panko_parser::ast::FromError;
 use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::FunctionStorageClass;
@@ -914,7 +915,11 @@ fn reresolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &QualifiedType<'a>) -> Qualifie
                     kind,
                 )
                 .ty,
-        Type::Enum(_enum) => unimplemented_todo!(loc.0, "reresolving enums"),
+        Type::Enum(r#enum @ ty::Enum::Complete(_)) => Type::Enum(r#enum),
+        Type::Enum(ty::Enum::Incomplete { name, id: _ }) => {
+            let name = Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name);
+            scopes.lookup_or_add_enum(name).ty
+        }
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -953,7 +958,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             allow_bitfields: false,
         },
         ast::Type::Struct(r#struct) => resolve_struct(scopes, &r#struct),
-        ast::Type::Enum(_enum) => unimplemented_todo!(loc, "resolving enums"),
+        ast::Type::Enum(r#enum) => resolve_enum(scopes, &r#enum),
     };
     let loc = HashEqIgnored(loc);
     QualifiedType { is_const, is_volatile, ty, loc }
@@ -1080,6 +1085,39 @@ fn resolve_struct_members<'a>(
         }
     };
     sess.alloc_slice_collect(members)
+}
+
+fn resolve_enum<'a>(scopes: &mut Scopes<'a>, r#enum: &Enum<'a>) -> Type<'a> {
+    let (Tagged { ty, tag, loc }, previous_decl) = match *r#enum {
+        Enum::Incomplete { name } => (scopes.lookup_or_add_enum(name), None),
+        Enum::Complete { name, enumerators } => {
+            // TODO: if redeclared, check that redeclaration is valid
+            scopes.lookup_or_add_complete_enum(name, enumerators)
+        }
+    };
+    let expected = try { previous_decl?.tag }.unwrap_or(tag);
+    let actual = Tag::Enum;
+    if expected != actual {
+        scopes.sess.emit(Diagnostic::TagMismatchInRedeclaration {
+            at: r#enum.loc(),
+            previous_decl: try { previous_decl?.loc? }
+                .or(loc)
+                .expect("only named enums are redeclared")
+                .loc(),
+            previous_ty: try { previous_decl?.ty }.unwrap_or(ty),
+            expected,
+            actual,
+        })
+    }
+    ty
+}
+
+#[expect(unused, reason = "TODO: resolve enumerators")]
+fn resolve_enumerators<'a>(
+    scopes: &mut Scopes<'a>,
+    enumerators: &[cst::Enumerator<'a>],
+) -> Enumerators<'a> {
+    todo!("resolve enumerators")
 }
 
 fn resolve_function_definition<'a>(

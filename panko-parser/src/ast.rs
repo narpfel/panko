@@ -366,6 +366,20 @@ pub enum Enum<'a> {
     },
 }
 
+impl<'a> Enum<'a> {
+    pub fn loc(&self) -> Loc<'a> {
+        match self {
+            Self::Incomplete { name } => name.loc(),
+            Self::Complete { name, enumerators: _ } => name
+                .expect(
+                    "only needed for tag mismatches in redeclarations; \
+                    and unnamed enums are never redeclared",
+                )
+                .loc(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Member<'a> {
     pub declarator: cst::Declarator<'a>,

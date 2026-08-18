@@ -183,6 +183,15 @@ pub enum Enum<'a, T: Step> {
     Complete(CompleteEnum<'a, T>),
 }
 
+impl<T: Step> Enum<'_, T> {
+    pub(crate) fn id(&self) -> Id {
+        match self {
+            Self::Incomplete { name: _, id }
+            | Self::Complete(CompleteEnum { name: _, id, enumerators: _ }) => *id,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Type<'a, T: Step> {
     Arithmetic(Arithmetic),
