@@ -177,6 +177,15 @@ pub struct CompleteEnum<'a, T: Step> {
     pub enumerators: T::Enumerators<'a>,
 }
 
+impl<T: Step> AsSExpr for CompleteEnum<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { name, id, enumerators } = self;
+        SExpr::new("enum")
+            .inline_string(format!("{name}~{id}", name = name.as_sexpr(), id = id.0))
+            .inherit(enumerators)
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Enum<'a, T: Step> {
     Incomplete { name: &'a str, id: Id },

@@ -113,6 +113,9 @@ impl AsSExpr for Declarators<'_> {
             crate::ty::Type::Struct(crate::ty::Struct::Complete(complete))
                 if let ast::Type::Struct(ast::Struct::Complete { .. }) = unresolved_ty.ty =>
                 SExpr::flat().lines([complete]),
+            crate::ty::Type::Enum(crate::ty::Enum::Complete(complete))
+                if let ast::Type::Enum(ast::Enum::Complete { .. }) = unresolved_ty.ty =>
+                SExpr::flat().lines([complete]),
             _ => SExpr::flat(),
         };
         sexpr.lines(*declarators)
