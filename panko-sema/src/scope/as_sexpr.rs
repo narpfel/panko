@@ -27,6 +27,8 @@ use crate::scope::BitfieldWidth;
 use crate::scope::BuiltinName;
 use crate::scope::Declarator;
 use crate::scope::Declarators;
+use crate::scope::Enumerator;
+use crate::scope::Enumerators;
 use crate::scope::Member;
 
 impl AsSExpr for Member<'_> {
@@ -110,6 +112,9 @@ impl AsSExpr for Declarators<'_> {
         let sexpr = match &ty.ty {
             crate::ty::Type::Struct(crate::ty::Struct::Complete(complete))
                 if let ast::Type::Struct(ast::Struct::Complete { .. }) = unresolved_ty.ty =>
+                SExpr::flat().lines([complete]),
+            crate::ty::Type::Enum(crate::ty::Enum::Complete(complete))
+                if let ast::Type::Enum(ast::Enum::Complete { .. }) = unresolved_ty.ty =>
                 SExpr::flat().lines([complete]),
             _ => SExpr::flat(),
         };
@@ -288,5 +293,19 @@ impl AsSExpr for BuiltinName<'_> {
     fn as_sexpr(&self) -> SExpr {
         let Self { kind, loc: _ } = self;
         SExpr::new("builtin-name").inline_string(kind.to_string())
+    }
+}
+
+impl AsSExpr for Enumerator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { name, value } = self;
+        SExpr::new(name.slice()).inherit(value)
+    }
+}
+
+impl AsSExpr for Enumerators<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self(enumerators) = self;
+        SExpr::new("enumerators").lines_explicit_empty(*enumerators)
     }
 }

@@ -8,6 +8,7 @@ use std::vec::Drain;
 use itertools::Either;
 use panko_lex::Loc;
 use panko_lex::Token;
+use panko_parser::Enumerator;
 use panko_parser::StructKind;
 use panko_parser::ast;
 use panko_parser::ast::Session;
@@ -23,14 +24,18 @@ use super::RefInitialiser;
 use super::Reference;
 use super::StorageDuration;
 use super::Type;
+use crate::fake_trait_impls::NoHashEq;
 use crate::scope::BuiltinName;
 use crate::ty::Complete;
+use crate::ty::CompleteEnum;
+use crate::ty::Enum;
 use crate::ty::Struct;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Tag {
     Struct,
     Union,
+    Enum,
 }
 
 impl Display for Tag {
@@ -38,6 +43,7 @@ impl Display for Tag {
         let s = match self {
             Self::Struct => "struct",
             Self::Union => "union",
+            Self::Enum => "enum",
         };
         write!(f, "{s}")
     }
@@ -335,6 +341,23 @@ impl<'a> Scopes<'a> {
         })
     }
 
+    pub(super) fn lookup_or_add_enum(&mut self, loc: Token<'a>) -> Tagged<'a> {
+        let name = loc.slice();
+        self.lookup_tagged(name).unwrap_or_else(|| {
+            let id = self.id();
+            let r#enum = Type::Enum(Enum::Incomplete { name, id });
+            let tagged = Tagged {
+                ty: r#enum,
+                tag: Tag::Enum,
+                loc: Some(loc),
+            };
+            *self
+                .lookup_tagged_innermost(name)
+                .insert_entry(tagged)
+                .get()
+        })
+    }
+
     pub(super) fn lookup_or_add_complete_struct(
         &mut self,
         loc: Option<Token<'a>>,
@@ -356,6 +379,35 @@ impl<'a> Scopes<'a> {
         };
         let ty = Type::Struct(Struct::Complete(Complete { name, id, kind, members }));
         let tagged = Tagged { ty, tag: kind.into(), loc };
+
+        if let Some(name) = name {
+            // complete the forward declaration
+            self.lookup_tagged_innermost(name).insert_entry(tagged);
+        }
+
+        (tagged, previous_definition)
+    }
+
+    pub(super) fn lookup_or_add_complete_enum(
+        &mut self,
+        loc: Option<Token<'a>>,
+        enumerators: &'a [Enumerator<'a>],
+    ) -> (Tagged<'a>, Option<Tagged<'a>>) {
+        let name = try { loc?.slice() };
+        let previous_definition = try { self.lookup_tagged(name?)? };
+
+        // forward declare so that `name` is available in the body
+        let forward_decl = try { self.lookup_or_add_enum(loc?).ty };
+
+        let enumerators = NoHashEq(super::resolve_enumerators(self, enumerators));
+
+        let id = match forward_decl {
+            Some(Type::Enum(r#enum)) => r#enum.id(),
+            Some(_) => unreachable!(),
+            None => self.id(),
+        };
+        let ty = Type::Enum(Enum::Complete(CompleteEnum { name, id, enumerators }));
+        let tagged = Tagged { ty, tag: Tag::Enum, loc };
 
         if let Some(name) = name {
             // complete the forward declaration

@@ -10,6 +10,7 @@ use panko_parser::LogicalOp;
 use panko_parser::ast::Integral;
 use panko_report::Report;
 
+use crate::fake_trait_impls::HashEqIgnored;
 use crate::layout::stack::Stack;
 use crate::scope::BuiltinName;
 use crate::scope::Id;
@@ -20,6 +21,8 @@ use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::Class;
 use crate::ty::Complete;
+use crate::ty::CompleteEnum;
+use crate::ty::Enum;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
 use crate::ty::Struct;
@@ -38,6 +41,7 @@ mod stack;
 pub struct Layout;
 
 impl ty::Step for Layout {
+    type Enumerators<'a> = HashEqIgnored<&'a Type<'a>>;
     type LengthExpr<'a> = ArrayLength<'a>;
     type Member<'a> = Member<'a, Self>;
     type TypeofExpr<'a> = !;
@@ -349,6 +353,12 @@ fn layout_ty_unqual<'a>(
         ty::Type::Struct(Struct::Complete(complete)) => {
             let complete = layout_complete_struct(stack, bump, &complete);
             Type::Struct(Struct::Complete(complete))
+        }
+        ty::Type::Enum(Enum::Incomplete { name, id }) => Type::Enum(Enum::Incomplete { name, id }),
+        ty::Type::Enum(Enum::Complete(CompleteEnum { name, id, enumerators })) => {
+            let HashEqIgnored(ty) = enumerators;
+            let enumerators = HashEqIgnored(bump.alloc(layout_ty_unqual(stack, bump, *ty)));
+            Type::Enum(Enum::Complete(CompleteEnum { name, id, enumerators }))
         }
     }
 }

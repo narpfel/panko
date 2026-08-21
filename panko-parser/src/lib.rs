@@ -433,6 +433,24 @@ impl<'a> TypeSpecifier<'a> {
         }
     }
 
+    fn incomplete_enum(r#enum: Token<'a>, name: Token<'a>) -> Self {
+        Self {
+            token: r#enum,
+            kind: TypeSpecifierKind::Enum(Enum::Incomplete { name }),
+        }
+    }
+
+    fn r#enum(
+        r#enum: Token<'a>,
+        name: Option<Token<'a>>,
+        enumerators: &'a [Enumerator<'a>],
+    ) -> Self {
+        Self {
+            token: r#enum,
+            kind: TypeSpecifierKind::Enum(Enum::Complete { name, enumerators }),
+        }
+    }
+
     fn loc(&self) -> Loc<'a> {
         match self.kind {
             TypeSpecifierKind::Struct(
@@ -570,6 +588,7 @@ impl<'a> TypeSpecifier<'a> {
             Kind::Typeof { unqual, expr } => exclusive(Parsed::Typeof { unqual, expr }),
             Kind::TypeofTy { unqual, ty } => exclusive(Parsed::TypeofTy { unqual, ty }),
             Kind::Struct(r#struct) => exclusive(Parsed::Struct(r#struct)),
+            Kind::Enum(r#enum) => exclusive(Parsed::Enum(r#enum)),
             _ => unimplemented_todo!(self, "unimplemented type specifier: {:#?}", self),
         }
     }
@@ -586,6 +605,23 @@ enum Struct<'a> {
         kind: StructKind,
         members: &'a [Declaration<'a>],
     },
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Enum<'a> {
+    Incomplete {
+        name: Token<'a>,
+    },
+    Complete {
+        name: Option<Token<'a>>,
+        enumerators: &'a [Enumerator<'a>],
+    },
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Enumerator<'a> {
+    pub name: Token<'a>,
+    pub value: Option<Expression<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -613,7 +649,7 @@ enum TypeSpecifierKind<'a> {
     // atomic-type-specifier
     // struct-or-union-specifier
     Struct(Struct<'a>),
-    // enum-specifier
+    Enum(Enum<'a>),
     TypedefName,
     Typeof {
         unqual: bool,
