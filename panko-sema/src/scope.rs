@@ -916,10 +916,12 @@ fn reresolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &QualifiedType<'a>) -> Qualifie
                 )
                 .ty,
         Type::Enum(r#enum @ ty::Enum::Complete(_)) => Type::Enum(r#enum),
-        Type::Enum(ty::Enum::Incomplete { name, id: _ }) => {
+        Type::Enum(ty::Enum::Incomplete { name: Some(name), id: _ }) => {
             let name = Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name);
-            scopes.lookup_or_add_enum(name).ty
+            scopes.lookup_or_add_enum(Some(name)).ty
         }
+        Type::Enum(ty::Enum::Incomplete { name: None, id }) =>
+            Type::Enum(ty::Enum::Incomplete { name: None, id }),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -1089,7 +1091,7 @@ fn resolve_struct_members<'a>(
 
 fn resolve_enum<'a>(scopes: &mut Scopes<'a>, r#enum: &Enum<'a>) -> Type<'a> {
     let (Tagged { ty, tag, loc }, previous_decl) = match *r#enum {
-        Enum::Incomplete { name } => (scopes.lookup_or_add_enum(name), None),
+        Enum::Incomplete { name } => (scopes.lookup_or_add_enum(Some(name)), None),
         Enum::Complete { name, enumerators } => {
             // TODO: if redeclared, check that redeclaration is valid
             scopes.lookup_or_add_complete_enum(name, enumerators)

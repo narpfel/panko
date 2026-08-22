@@ -341,20 +341,19 @@ impl<'a> Scopes<'a> {
         })
     }
 
-    pub(super) fn lookup_or_add_enum(&mut self, loc: Token<'a>) -> Tagged<'a> {
-        let name = loc.slice();
-        self.lookup_tagged(name).unwrap_or_else(|| {
+    pub(super) fn lookup_or_add_enum(&mut self, loc: Option<Token<'a>>) -> Tagged<'a> {
+        let name = try { loc?.slice() };
+        try { self.lookup_tagged(name?)? }.unwrap_or_else(|| {
             let id = self.id();
             let r#enum = Type::Enum(Enum::Incomplete { name, id });
-            let tagged = Tagged {
-                ty: r#enum,
-                tag: Tag::Enum,
-                loc: Some(loc),
-            };
-            *self
-                .lookup_tagged_innermost(name)
-                .insert_entry(tagged)
-                .get()
+            let tagged = Tagged { ty: r#enum, tag: Tag::Enum, loc };
+            match name {
+                Some(name) => *self
+                    .lookup_tagged_innermost(name)
+                    .insert_entry(tagged)
+                    .get(),
+                None => tagged,
+            }
         })
     }
 
@@ -397,14 +396,13 @@ impl<'a> Scopes<'a> {
         let previous_definition = try { self.lookup_tagged(name?)? };
 
         // forward declare so that `name` is available in the body
-        let forward_decl = try { self.lookup_or_add_enum(loc?).ty };
+        let forward_decl = self.lookup_or_add_enum(loc).ty;
 
         let enumerators = NoHashEq(super::resolve_enumerators(self, enumerators));
 
         let id = match forward_decl {
-            Some(Type::Enum(r#enum)) => r#enum.id(),
-            Some(_) => unreachable!(),
-            None => self.id(),
+            Type::Enum(r#enum) => r#enum.id(),
+            _ => unreachable!(),
         };
         let ty = Type::Enum(Enum::Complete(CompleteEnum { name, id, enumerators }));
         let tagged = Tagged { ty, tag: Tag::Enum, loc };

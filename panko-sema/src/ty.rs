@@ -188,7 +188,7 @@ impl<T: Step> AsSExpr for CompleteEnum<'_, T> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Enum<'a, T: Step> {
-    Incomplete { name: &'a str, id: Id },
+    Incomplete { name: Option<&'a str>, id: Id },
     Complete(CompleteEnum<'a, T>),
 }
 
@@ -586,7 +586,8 @@ impl<T: Step> fmt::Display for Type<'_, T> {
                 write!(f, "{kind} {name}~{id}", id = id.0),
             Type::Struct(Struct::Complete(Complete { name, id, kind, members: _ })) =>
                 write!(f, "{kind} {}~{} complete", name.as_sexpr(), id.0),
-            Type::Enum(Enum::Incomplete { name, id }) => write!(f, "enum {name}~{id}", id = id.0),
+            Type::Enum(Enum::Incomplete { name, id }) =>
+                write!(f, "enum {name}~{id}", name = name.as_sexpr(), id = id.0),
             Type::Enum(Enum::Complete(CompleteEnum { name, id, enumerators: _ })) =>
                 write!(f, "enum {}~{} complete", name.as_sexpr(), id.0),
         }
