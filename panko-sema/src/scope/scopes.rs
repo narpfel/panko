@@ -11,6 +11,7 @@ use panko_lex::Token;
 use panko_parser::StructKind;
 use panko_parser::ast;
 use panko_parser::ast::Session;
+use panko_parser::error_todo;
 use panko_parser::nonempty;
 
 use super::BuiltinNameKind;
@@ -201,7 +202,8 @@ impl<'a> Scopes<'a> {
             Entry::Occupied(mut entry) => {
                 let previous_definition = match entry.get_mut() {
                     Name::Reference(previous_definition) => previous_definition,
-                    Name::Enumerator(_) => todo!("enumerator redeclared as variable"),
+                    Name::Enumerator(enumerator) =>
+                        error_todo!(enumerator, "enumerator redeclared as variable"),
                 };
                 let reference = Reference {
                     id: previous_definition.id,
@@ -233,7 +235,8 @@ impl<'a> Scopes<'a> {
         match self.lookup_innermost(name.slice()) {
             Entry::Occupied(mut entry) => {
                 let previous_definition = match entry.get_mut() {
-                    Name::Reference(_) => todo!("variable redeclared as enumerator"),
+                    Name::Reference(reference) =>
+                        error_todo!(reference, "variable redeclared as enumerator"),
                     Name::Enumerator(previous_definition) => previous_definition,
                 };
                 let enumerator = Enumerator { id: previous_definition.id, ..enumerator };
@@ -256,7 +259,8 @@ impl<'a> Scopes<'a> {
         if let Entry::Occupied(entry) = self.lookup_innermost(name) {
             match *entry.get() {
                 Name::Reference(reference) => return Err(reference),
-                Name::Enumerator(_) => todo!("enumerator redeclared as type name"),
+                Name::Enumerator(enumerator) =>
+                    error_todo!(enumerator, "enumerator redeclared as type name"),
             }
         }
 

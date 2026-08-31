@@ -605,6 +605,13 @@ pub(crate) struct Enumerator<'a> {
     pub(crate) value: Option<&'a Expression<'a>>,
 }
 
+impl<'a> Enumerator<'a> {
+    fn loc(&self) -> Loc<'a> {
+        let Self { name, id: _, value } = self;
+        name.loc().until_maybe(try { value.as_ref()?.loc() })
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Enumerators<'a>(&'a [Enumerator<'a>]);
 
@@ -727,8 +734,7 @@ impl<'a> Expression<'a> {
             Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
             Expression::CompoundLiteral { open_paren, decl } =>
                 open_paren.loc().until(decl.initialiser.unwrap().loc()),
-            Expression::Enumerator(Enumerator { name, id: _, value }) =>
-                name.loc().until_maybe(try { value.as_ref()?.loc() }),
+            Expression::Enumerator(enumerator) => enumerator.loc(),
         }
     }
 }
