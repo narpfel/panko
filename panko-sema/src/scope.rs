@@ -513,7 +513,7 @@ pub struct Reference<'a> {
     pub(crate) initialiser: Option<RefInitialiser<'a>>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy)]
 pub enum RefKind {
     Declaration,
     TentativeDefinition,
