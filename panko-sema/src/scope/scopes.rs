@@ -8,7 +8,6 @@ use std::vec::Drain;
 use itertools::Either;
 use panko_lex::Loc;
 use panko_lex::Token;
-use panko_parser::Enumerator;
 use panko_parser::StructKind;
 use panko_parser::ast;
 use panko_parser::ast::Session;
@@ -26,10 +25,18 @@ use super::StorageDuration;
 use super::Type;
 use crate::fake_trait_impls::NoHashEq;
 use crate::scope::BuiltinName;
+use crate::scope::Enumerator;
+use crate::scope::Expression;
 use crate::ty::Complete;
 use crate::ty::CompleteEnum;
 use crate::ty::Enum;
 use crate::ty::Struct;
+
+#[derive(Debug, Clone, Copy)]
+pub(super) enum Name<'a> {
+    Reference(Reference<'a>),
+    Enumerator(Enumerator<'a>),
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Tag {
@@ -67,7 +74,7 @@ pub(super) struct Tagged<'a> {
 
 #[derive(Debug, Default)]
 struct Scope<'a> {
-    names: nonempty::Vec<HashMap<&'a str, Reference<'a>>>,
+    names: nonempty::Vec<HashMap<&'a str, Name<'a>>>,
     type_names: nonempty::Vec<HashMap<&'a str, QualifiedType<'a>>>,
     tagged: nonempty::Vec<HashMap<&'a str, Tagged<'a>>>,
     function_name: Option<&'a str>,
@@ -81,7 +88,7 @@ impl<'a> Scope<'a> {
         }
     }
 
-    fn lookup(&self, name: &'a str) -> Option<Reference<'a>> {
+    fn lookup(&self, name: &'a str) -> Option<Name<'a>> {
         self.names
             .iter()
             .rev()
@@ -89,7 +96,7 @@ impl<'a> Scope<'a> {
             .copied()
     }
 
-    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Reference<'a>> {
+    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Name<'a>> {
         self.names.last_mut().entry(name)
     }
 
@@ -192,7 +199,10 @@ impl<'a> Scopes<'a> {
         };
         match self.lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
-                let previous_definition = entry.get_mut();
+                let previous_definition = match entry.get_mut() {
+                    Name::Reference(previous_definition) => previous_definition,
+                    Name::Enumerator(_) => todo!("enumerator redeclared as variable"),
+                };
                 let reference = Reference {
                     id: previous_definition.id,
                     previous_definition: Some(
@@ -204,8 +214,35 @@ impl<'a> Scopes<'a> {
                 Ok(reference)
             }
             Entry::Vacant(entry) => {
-                entry.insert(reference);
+                entry.insert(Name::Reference(reference));
                 Ok(reference)
+            }
+        }
+    }
+
+    pub(super) fn add_enumerator(
+        &mut self,
+        name: Token<'a>,
+        value: Option<&'a Expression<'a>>,
+    ) -> Result<Enumerator<'a>, QualifiedType<'a>> {
+        if let Entry::Occupied(entry) = self.lookup_ty_innermost(name.slice()) {
+            return Err(*entry.get());
+        }
+
+        let enumerator = Enumerator { name, id: self.id(), value };
+        match self.lookup_innermost(name.slice()) {
+            Entry::Occupied(mut entry) => {
+                let previous_definition = match entry.get_mut() {
+                    Name::Reference(_) => todo!("variable redeclared as enumerator"),
+                    Name::Enumerator(previous_definition) => previous_definition,
+                };
+                let enumerator = Enumerator { id: previous_definition.id, ..enumerator };
+                *previous_definition = enumerator;
+                Ok(enumerator)
+            }
+            Entry::Vacant(entry) => {
+                entry.insert(Name::Enumerator(enumerator));
+                Ok(enumerator)
             }
         }
     }
@@ -217,7 +254,10 @@ impl<'a> Scopes<'a> {
         ty: QualifiedType<'a>,
     ) -> Result<Option<QualifiedType<'a>>, Reference<'a>> {
         if let Entry::Occupied(entry) = self.lookup_innermost(name) {
-            return Err(*entry.get());
+            match *entry.get() {
+                Name::Reference(reference) => return Err(reference),
+                Name::Enumerator(_) => todo!("enumerator redeclared as type name"),
+            }
         }
 
         match self.lookup_ty_innermost(name) {
@@ -266,7 +306,7 @@ impl<'a> Scopes<'a> {
         &self,
         name: &'a str,
         loc: Loc<'a>,
-    ) -> Option<Either<Reference<'a>, BuiltinName<'a>>> {
+    ) -> Option<Either<Name<'a>, BuiltinName<'a>>> {
         match name {
             "__panko_gp_offset" if let IsInGlobalScope::No = self.is_in_global_scope() =>
                 Some(Either::Right(BuiltinName {
@@ -290,11 +330,15 @@ impl<'a> Scopes<'a> {
                 .iter()
                 .rev()
                 .find_map(|scope| scope.lookup(name))
-                .map(|reference| Either::Left(reference.at(loc))),
+                .map(|name| match name {
+                    Name::Reference(reference) => Name::Reference(reference.at(loc)),
+                    Name::Enumerator(enumerator) => Name::Enumerator(enumerator),
+                })
+                .map(Either::Left),
         }
     }
 
-    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Reference<'a>> {
+    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Name<'a>> {
         self.scopes.last_mut().lookup_innermost(name)
     }
 
@@ -390,7 +434,7 @@ impl<'a> Scopes<'a> {
     pub(super) fn lookup_or_add_complete_enum(
         &mut self,
         loc: Option<Token<'a>>,
-        enumerators: &'a [Enumerator<'a>],
+        enumerators: &'a [panko_parser::Enumerator<'a>],
     ) -> (Tagged<'a>, Option<Tagged<'a>>) {
         let name = try { loc?.slice() };
         let previous_definition = try { self.lookup_tagged(name?)? };
@@ -452,7 +496,10 @@ impl<'a> Scopes<'a> {
         initialiser: Option<RefInitialiser<'a>>,
     ) {
         match self.lookup_innermost(reference.name) {
-            Entry::Occupied(mut entry) => entry.get_mut().initialiser = initialiser,
+            Entry::Occupied(mut entry) => match entry.get_mut() {
+                Name::Reference(reference) => reference.initialiser = initialiser,
+                Name::Enumerator(_) => unreachable!(),
+            },
             Entry::Vacant(_) => unreachable!(),
         }
     }

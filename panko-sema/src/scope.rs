@@ -35,6 +35,7 @@ use panko_parser::ast::Qualifiers;
 use panko_parser::ast::Session;
 use panko_parser::ast::Struct;
 use panko_parser::ast::reject_function_specifiers;
+use panko_parser::error_todo;
 use panko_parser::sexpr_builder::SExpr;
 use panko_parser::unimplemented_todo;
 use panko_report::Report;
@@ -42,6 +43,7 @@ use panko_report::Sliced as _;
 
 use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
+use crate::scope::scopes::Name;
 use crate::scope::scopes::Scopes;
 use crate::scope::scopes::Tag;
 use crate::scope::scopes::Tagged;
@@ -485,6 +487,16 @@ pub(crate) enum Expression<'a> {
         open_paren: Token<'a>,
         decl: Declaration<'a>,
     },
+    Enumerator(Enumerator<'a>),
+}
+
+impl<'a> From<Name<'a>> for Expression<'a> {
+    fn from(name: Name<'a>) -> Self {
+        match name {
+            Name::Reference(reference) => Self::Name(reference),
+            Name::Enumerator(enumerator) => Self::Enumerator(enumerator),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -589,7 +601,8 @@ pub enum BuiltinNameKind<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Enumerator<'a> {
     pub(crate) name: Token<'a>,
-    pub(crate) value: Option<Expression<'a>>,
+    pub(crate) id: Id,
+    pub(crate) value: Option<&'a Expression<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -714,6 +727,8 @@ impl<'a> Expression<'a> {
             Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
             Expression::CompoundLiteral { open_paren, decl } =>
                 open_paren.loc().until(decl.initialiser.unwrap().loc()),
+            Expression::Enumerator(Enumerator { name, id: _, value }) =>
+                name.loc().until_maybe(try { value.as_ref()?.loc() }),
         }
     }
 }
@@ -1114,12 +1129,18 @@ fn resolve_enum<'a>(scopes: &mut Scopes<'a>, r#enum: &Enum<'a>) -> Type<'a> {
     ty
 }
 
-#[expect(unused, reason = "TODO: resolve enumerators")]
 fn resolve_enumerators<'a>(
     scopes: &mut Scopes<'a>,
     enumerators: &[cst::Enumerator<'a>],
 ) -> Enumerators<'a> {
-    todo!("resolve enumerators")
+    let sess = scopes.sess;
+    let enumerators = enumerators.iter().map(|&cst::Enumerator { name, value }| {
+        let value = try { sess.alloc(resolve_expr(scopes, &value?)) };
+        scopes
+            .add_enumerator(name, value)
+            .unwrap_or_else(|_| error_todo!(name, "type name redeclared as enumerator"))
+    });
+    Enumerators(sess.alloc_slice_fill_iter(enumerators))
 }
 
 fn resolve_function_definition<'a>(
@@ -1601,7 +1622,7 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::Name(name) => try {
             scopes
                 .lookup(name.slice(), name.loc())?
-                .map_left(Expression::Name)
+                .map_left(Expression::from)
                 .map_right(Expression::BuiltinName)
                 .into_inner()
         }

@@ -2787,6 +2787,8 @@ fn typeck_expression<'a>(
             };
             TypedExpression { ty: decl.reference.ty, expr }
         }
+        scope::Expression::Enumerator(enumerator) =>
+            unimplemented_todo!(enumerator.name, "typeck enumerator"),
     };
 
     match context {

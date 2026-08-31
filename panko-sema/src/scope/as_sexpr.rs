@@ -260,6 +260,7 @@ impl AsSExpr for Expression<'_> {
             Expression::BuiltinName(builtin_name) => builtin_name.as_sexpr(),
             Expression::CompoundLiteral { open_paren: _, decl } =>
                 SExpr::new("compound-literal").inherit(decl),
+            Expression::Enumerator(enumerator) => enumerator.as_sexpr(),
         }
     }
 }
@@ -298,8 +299,10 @@ impl AsSExpr for BuiltinName<'_> {
 
 impl AsSExpr for Enumerator<'_> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name, value } = self;
-        SExpr::new(name.slice()).inherit(value)
+        let Self { name, id, value } = self;
+        SExpr::new("enumerator")
+            .inline_string(format!("{}~{}", name.slice(), id.0))
+            .lines_explicit_empty(value)
     }
 }
 
