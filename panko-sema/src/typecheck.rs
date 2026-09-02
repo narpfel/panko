@@ -1706,8 +1706,8 @@ where
         false => "value",
     };
     let diagnostic = match *redeclared {
-        Redeclared::ValueAsTypedef { at, reference } =>
-            scope::Diagnostic::ValueRedeclaredAsTypedef { at, reference, kind },
+        Redeclared::ValueAsTypedef { at, name } =>
+            scope::Diagnostic::ValueRedeclaredAsTypedef { at, name, kind },
         Redeclared::TypedefAsValue { at, typedef_ty, value_ty: _ } =>
             scope::Diagnostic::TypedefRedeclaredAsValue { at, ty: typedef_ty, kind },
     };

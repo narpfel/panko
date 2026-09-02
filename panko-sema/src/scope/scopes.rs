@@ -13,6 +13,7 @@ use panko_parser::ast;
 use panko_parser::ast::Session;
 use panko_parser::error_todo;
 use panko_parser::nonempty;
+use panko_parser::unimplemented_todo;
 
 use super::BuiltinNameKind;
 use super::Id;
@@ -34,9 +35,32 @@ use crate::ty::Enum;
 use crate::ty::Struct;
 
 #[derive(Debug, Clone, Copy)]
-pub(super) enum Name<'a> {
+pub(crate) enum Name<'a> {
     Reference(Reference<'a>),
     Enumerator(Enumerator<'a>),
+}
+
+impl<'a> Name<'a> {
+    pub(super) fn loc(&self) -> Loc<'a> {
+        match self {
+            Self::Reference(reference) => reference.loc(),
+            Self::Enumerator(enumerator) => enumerator.loc(),
+        }
+    }
+
+    pub(super) fn name(&self) -> &'a str {
+        match self {
+            Self::Reference(reference) => reference.name,
+            Self::Enumerator(enumerator) => enumerator.name.slice(),
+        }
+    }
+
+    pub(super) fn ty(&self) -> &QualifiedType<'a> {
+        match self {
+            Self::Reference(reference) => &reference.ty,
+            Self::Enumerator(enumerator) => unimplemented_todo!(enumerator, "type of enumerator"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -255,13 +279,9 @@ impl<'a> Scopes<'a> {
         &mut self,
         name: &'a str,
         ty: QualifiedType<'a>,
-    ) -> Result<Option<QualifiedType<'a>>, Reference<'a>> {
+    ) -> Result<Option<QualifiedType<'a>>, Name<'a>> {
         if let Entry::Occupied(entry) = self.lookup_innermost(name) {
-            match *entry.get() {
-                Name::Reference(reference) => return Err(reference),
-                Name::Enumerator(enumerator) =>
-                    error_todo!(enumerator, "enumerator redeclared as type name"),
-            }
+            return Err(*entry.get());
         }
 
         match self.lookup_ty_innermost(name) {

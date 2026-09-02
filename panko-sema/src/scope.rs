@@ -86,18 +86,18 @@ pub(crate) enum Diagnostic<'a> {
         kind: &'a str,
     },
 
-    #[error("{kind} name `{name}` redeclared as `{typedef}` name")]
+    #[error("{kind} name `{name_str}` redeclared as `{typedef}` name")]
     #[diagnostics(
         at(colour = Red, label = "redeclared here as a `{typedef}` name"),
-        reference(colour = Blue, label = "originally declared here as a {kind} name"),
+        name(colour = Blue, label = "originally declared here as a {kind} name"),
     )]
     #[with(
         typedef = "typedef".fg(Red),
-        name = reference.name,
+        name_str = name.name(),
     )]
     ValueRedeclaredAsTypedef {
         at: QualifiedType<'a>,
-        reference: Reference<'a>,
+        name: Name<'a>,
         kind: &'a str,
     },
 
@@ -253,7 +253,7 @@ impl<'a> FromError<'a> for ExternalDeclaration<'a> {
 pub(crate) enum Redeclared<'a> {
     ValueAsTypedef {
         at: QualifiedType<'a>,
-        reference: Reference<'a>,
+        name: Name<'a>,
     },
     TypedefAsValue {
         at: Token<'a>,
@@ -265,14 +265,14 @@ pub(crate) enum Redeclared<'a> {
 impl<'a> Redeclared<'a> {
     pub(crate) fn ty(&self) -> &QualifiedType<'a> {
         match self {
-            Self::ValueAsTypedef { at: _, reference } => &reference.ty,
+            Self::ValueAsTypedef { at: _, name } => name.ty(),
             Self::TypedefAsValue { at: _, typedef_ty: _, value_ty } => value_ty,
         }
     }
 
     fn name(&self) -> &'a str {
         match self {
-            Self::ValueAsTypedef { at: _, reference } => reference.name,
+            Self::ValueAsTypedef { at: _, name } => name.name(),
             Self::TypedefAsValue { at, typedef_ty: _, value_ty: _ } => at.slice(),
         }
     }
@@ -1449,7 +1449,7 @@ fn resolve_typedef_declaration<'a>(
     match previously_declared_as {
         Ok(previously_declared_as) =>
             Declarator::Typedef(Typedef { ty, name, previously_declared_as }),
-        Err(reference) => Declarator::Redeclared(Redeclared::ValueAsTypedef { at: ty, reference }),
+        Err(name) => Declarator::Redeclared(Redeclared::ValueAsTypedef { at: ty, name }),
     }
 }
 
