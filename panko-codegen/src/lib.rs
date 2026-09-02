@@ -381,7 +381,7 @@ impl<'a> Codegen<'a> {
             return;
         }
         match ty {
-            Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => {
+            Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr | Type::Enum(_) => {
                 self.emit_args("mov", &[&Rax.with_ty(ty), &src]);
                 self.emit_args("mov", &[&tgt, &Rax.with_ty(ty)]);
             }

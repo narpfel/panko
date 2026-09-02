@@ -61,6 +61,7 @@ use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::Class;
 use crate::ty::Complete;
+use crate::ty::Enum;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
 use crate::ty::Struct;
@@ -175,6 +176,7 @@ pub struct Member<'a, T: ty::Step> {
 pub(crate) enum Typeck {}
 
 impl ty::Step for Typeck {
+    type Enumerators<'a> = HashEqIgnored<&'a Type<'a>>;
     type LengthExpr<'a> = ArrayLength<&'a TypedExpression<'a>>;
     type Member<'a> = Member<'a, Self>;
     type TypeofExpr<'a> = !;
@@ -764,10 +766,12 @@ fn typeck_function_ty<'a>(
         | Type::Pointer(_)
         | Type::Void
         | Type::Nullptr
-        | Type::Struct(Struct::Complete(_)) => (),
+        | Type::Struct(Struct::Complete(_))
+        | Type::Enum(Enum::Complete(_)) => (),
         Type::Array(_)
         | Type::Function(_)
-        | Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
+        | Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ })
+        | Type::Enum(Enum::Incomplete { name: _, id: _ }) =>
             sess.emit(Diagnostic::InvalidFunctionReturnType { at: *return_type }),
         Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match expr {},
     }
@@ -959,6 +963,9 @@ fn typeck_ty_with_initialiser<'a>(
             Type::Struct(Struct::Incomplete { name, id, kind }),
         ty::Type::Struct(Struct::Complete(complete)) =>
             Type::Struct(Struct::Complete(typeck_complete_struct(sess, &complete))),
+        ty::Type::Enum(Enum::Incomplete { name, id }) => Type::Enum(Enum::Incomplete { name, id }),
+        ty::Type::Enum(Enum::Complete(_)) =>
+            unimplemented_todo!(loc.0, "typechecking complete enum"),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -1699,8 +1706,8 @@ where
         false => "value",
     };
     let diagnostic = match *redeclared {
-        Redeclared::ValueAsTypedef { at, reference } =>
-            scope::Diagnostic::ValueRedeclaredAsTypedef { at, reference, kind },
+        Redeclared::ValueAsTypedef { at, name } =>
+            scope::Diagnostic::ValueRedeclaredAsTypedef { at, name, kind },
         Redeclared::TypedefAsValue { at, typedef_ty, value_ty: _ } =>
             scope::Diagnostic::TypedefRedeclaredAsValue { at, ty: typedef_ty, kind },
     };
@@ -2659,6 +2666,11 @@ fn typeck_expression<'a>(
                     });
                     then.ty.ty
                 }
+
+                (Type::Enum(_), _) =>
+                    unimplemented_todo!(then.ty, "conditional operator with enum"),
+                (_, Type::Enum(_)) =>
+                    unimplemented_todo!(or_else.ty, "conditional operator with enum"),
             };
             let result_ty = result_ty.unqualified();
             TypedExpression {
@@ -2775,6 +2787,8 @@ fn typeck_expression<'a>(
             };
             TypedExpression { ty: decl.reference.ty, expr }
         }
+        scope::Expression::Enumerator(enumerator) =>
+            unimplemented_todo!(enumerator.name, "typeck enumerator"),
     };
 
     match context {
