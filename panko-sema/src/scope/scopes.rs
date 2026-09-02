@@ -263,6 +263,7 @@ impl<'a> Scopes<'a> {
                         error_todo!(reference, "variable redeclared as enumerator"),
                     Name::Enumerator(previous_definition) => previous_definition,
                 };
+                // TODO: check that `enumerator` is a valid redeclaration of `previous_definition`
                 let enumerator = Enumerator { id: previous_definition.id, ..enumerator };
                 *previous_definition = enumerator;
                 Ok(enumerator)
