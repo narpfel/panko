@@ -299,9 +299,10 @@ impl AsSExpr for BuiltinName<'_> {
 
 impl AsSExpr for Enumerator<'_> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name, id, value } = self;
+        let Self { name, id, ty, value } = self;
         SExpr::new("enumerator")
             .inline_string(format!("{}~{}", name.slice(), id.0))
+            .inline_string(format!("{}", super::Type::Enum(*ty).as_sexpr()))
             .lines_explicit_empty(value)
     }
 }

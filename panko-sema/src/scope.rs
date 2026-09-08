@@ -602,12 +602,15 @@ pub enum BuiltinNameKind<'a> {
 pub(crate) struct Enumerator<'a> {
     pub(crate) name: Token<'a>,
     pub(crate) id: Id,
+    // TODO: the initial (incomplete) forward declaration does not get completed when resolving
+    // mentions of the enumerator after the `enum` has been completed
+    pub(crate) ty: ty::Enum<'a, Scope>,
     pub(crate) value: Option<&'a Expression<'a>>,
 }
 
 impl<'a> Enumerator<'a> {
     fn loc(&self) -> Loc<'a> {
-        let Self { name, id: _, value } = self;
+        let Self { name, id: _, ty: _, value } = self;
         name.loc().until_maybe(try { value.as_ref()?.loc() })
     }
 }
@@ -1137,13 +1140,14 @@ fn resolve_enum<'a>(scopes: &mut Scopes<'a>, r#enum: &Enum<'a>) -> Type<'a> {
 
 fn resolve_enumerators<'a>(
     scopes: &mut Scopes<'a>,
+    ty: ty::Enum<'a, Scope>,
     enumerators: &[cst::Enumerator<'a>],
 ) -> Enumerators<'a> {
     let sess = scopes.sess;
     let enumerators = enumerators.iter().map(|&cst::Enumerator { name, value }| {
         let value = try { sess.alloc(resolve_expr(scopes, &value?)) };
         scopes
-            .add_enumerator(name, value)
+            .add_enumerator(name, ty, value)
             .unwrap_or_else(|_| error_todo!(name, "type name redeclared as enumerator"))
     });
     Enumerators(sess.alloc_slice_fill_iter(enumerators))

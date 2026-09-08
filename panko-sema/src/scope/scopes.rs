@@ -249,13 +249,14 @@ impl<'a> Scopes<'a> {
     pub(super) fn add_enumerator(
         &mut self,
         name: Token<'a>,
+        ty: Enum<'a, super::Scope>,
         value: Option<&'a Expression<'a>>,
     ) -> Result<Enumerator<'a>, QualifiedType<'a>> {
         if let Entry::Occupied(entry) = self.lookup_ty_innermost(name.slice()) {
             return Err(*entry.get());
         }
 
-        let enumerator = Enumerator { name, id: self.id(), value };
+        let enumerator = Enumerator { name, id: self.id(), ty, value };
         match self.lookup_innermost(name.slice()) {
             Entry::Occupied(mut entry) => {
                 let previous_definition = match entry.get_mut() {
@@ -466,8 +467,12 @@ impl<'a> Scopes<'a> {
 
         // forward declare so that `name` is available in the body
         let forward_decl = self.lookup_or_add_enum(loc).ty;
+        let Type::Enum(enum_ty) = forward_decl
+        else {
+            unreachable!()
+        };
 
-        let enumerators = NoHashEq(super::resolve_enumerators(self, enumerators));
+        let enumerators = NoHashEq(super::resolve_enumerators(self, enum_ty, enumerators));
 
         let id = match forward_decl {
             Type::Enum(r#enum) => r#enum.id(),
