@@ -175,6 +175,7 @@ pub enum TodoError<'a> {
 }
 
 #[doc(hidden)]
+#[track_caller]
 pub fn todo_impl(at: Loc, msg: &str) -> ! {
     let error = TodoError::Error { at, msg };
     error.print();
