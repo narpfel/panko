@@ -195,6 +195,7 @@ pub struct TranslationUnit<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum ExternalDeclaration<'a> {
     StructDecl(Complete<'a, Typeck>),
+    EnumDecl(CompleteEnum<'a, Typeck>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -309,6 +310,7 @@ pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
     StructDecl(Complete<'a, Typeck>),
+    EnumDecl(CompleteEnum<'a, Typeck>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<TypedExpression<'a>>),
@@ -1679,6 +1681,13 @@ gen fn typeck_statement<'a>(
             {
                 yield Statement::StructDecl(typeck_complete_struct(sess, complete))
             }
+
+            if let ty::Type::Enum(Enum::Complete(complete)) = &ty.ty
+                && let ast::Type::Enum(ast::Enum::Complete { .. }) = unresolved_ty.ty
+            {
+                yield Statement::EnumDecl(typeck_complete_enum(sess, complete))
+            }
+
             for decl in *declarators {
                 yield match decl {
                     Declarator::Typedef(typedef) =>
@@ -2921,6 +2930,13 @@ pub fn resolve_types<'a>(
                             sess, complete,
                         ))
                     }
+
+                    if let ty::Type::Enum(Enum::Complete(complete)) = &ty.ty
+                        && let ast::Type::Enum(ast::Enum::Complete { .. }) = unresolved_ty.ty
+                    {
+                        yield ExternalDeclaration::EnumDecl(typeck_complete_enum(sess, complete))
+                    }
+
                     for decl in *declarators {
                         yield match decl {
                             Declarator::Typedef(typedef) =>

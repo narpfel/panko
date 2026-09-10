@@ -62,6 +62,7 @@ pub struct TranslationUnit<'a> {
 #[derive(Debug, Clone, Copy)]
 pub enum ExternalDeclaration<'a> {
     StructDecl(Complete<'a, Layout>),
+    EnumDecl(CompleteEnum<'a, Layout>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -135,6 +136,7 @@ pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
 #[derive(Debug, Clone, Copy)]
 pub enum Statement<'a> {
     StructDecl(Complete<'a, Layout>),
+    EnumDecl(CompleteEnum<'a, Layout>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<LayoutedExpression<'a>>),
@@ -516,6 +518,8 @@ fn layout_statement<'a>(
     Some(match stmt {
         typecheck::Statement::StructDecl(complete) =>
             Statement::StructDecl(layout_complete_struct(stack, bump, complete)),
+        typecheck::Statement::EnumDecl(complete) =>
+            Statement::EnumDecl(layout_complete_enum(stack, bump, *complete)),
         typecheck::Statement::Declaration(decl) =>
             Statement::Declaration(layout_declaration(stack, bump, decl)),
         typecheck::Statement::Typedef(typedef) => Statement::Typedef(*typedef),
@@ -772,6 +776,10 @@ pub fn layout<'a>(
                     bump,
                     complete,
                 )),
+            typecheck::ExternalDeclaration::EnumDecl(complete) => {
+                let complete = layout_complete_enum(&mut Stack::default(), bump, *complete);
+                ExternalDeclaration::EnumDecl(complete)
+            }
             typecheck::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(layout_function_definition(bump, def)),
             typecheck::ExternalDeclaration::Declaration(decl) =>

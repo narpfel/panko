@@ -34,6 +34,7 @@ impl AsSExpr for ExternalDeclaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             ExternalDeclaration::StructDecl(decl) => decl.as_sexpr(),
+            ExternalDeclaration::EnumDecl(decl) => decl.as_sexpr(),
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
             ExternalDeclaration::Typedef(typedef) => typedef.as_sexpr(),
@@ -114,6 +115,7 @@ impl AsSExpr for Statement<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Statement::StructDecl(decl) => decl.as_sexpr(),
+            Statement::EnumDecl(decl) => decl.as_sexpr(),
             Statement::Declaration(decl) => decl.as_sexpr(),
             Statement::Typedef(typedef) => typedef.as_sexpr(),
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
