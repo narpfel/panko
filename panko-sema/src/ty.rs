@@ -22,6 +22,7 @@ use crate::fake_trait_impls::HashEqIgnored;
 use crate::scope::Id;
 use crate::typecheck;
 use crate::typecheck::ArrayLength;
+use crate::typecheck::Enumerators;
 use crate::typecheck::Typeck;
 
 pub(crate) mod subobjects;
@@ -407,7 +408,7 @@ where
             TypeofExpr<'a> = !,
             LengthExpr<'a> = ArrayLength<E>,
             Member<'a> = typecheck::Member<'a, S>,
-            Enumerators<'a> = HashEqIgnored<&'a Self>,
+            Enumerators<'a> = HashEqIgnored<Enumerators<'a, S>>,
         >,
 {
     pub fn is_object(&self) -> bool {
@@ -459,7 +460,7 @@ where
             }
             Type::Enum(Enum::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
             Type::Enum(Enum::Complete(CompleteEnum { name: _, id: _, enumerators })) => {
-                let HashEqIgnored(ty) = enumerators;
+                let HashEqIgnored(Enumerators { ty, enumerators: _ }) = enumerators;
                 ty.size()
             }
         }
@@ -484,7 +485,7 @@ where
                 .unwrap_or_else(|| panic!("empty {kind}s are not allowed")),
             Type::Enum(Enum::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
             Type::Enum(Enum::Complete(CompleteEnum { name: _, id: _, enumerators })) => {
-                let HashEqIgnored(ty) = enumerators;
+                let HashEqIgnored(Enumerators { ty, enumerators: _ }) = enumerators;
                 ty.align()
             }
         }
@@ -496,7 +497,7 @@ where
                 TypeofExpr<'b> = !,
                 LengthExpr<'b> = ArrayLength<E2>,
                 Member<'b> = typecheck::Member<'b, S2>,
-                Enumerators<'b> = HashEqIgnored<&'b Type<'b, S2>>,
+                Enumerators<'b> = HashEqIgnored<Enumerators<'b, S2>>,
             >,
     {
         // TODO: This is more restrictive than necessary.

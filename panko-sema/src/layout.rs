@@ -27,6 +27,8 @@ use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
 use crate::ty::Struct;
 use crate::typecheck;
+use crate::typecheck::Enumerator;
+use crate::typecheck::Enumerators;
 use crate::typecheck::Member;
 use crate::typecheck::MemberKind;
 use crate::typecheck::PtrAddOrder;
@@ -41,7 +43,7 @@ mod stack;
 pub struct Layout;
 
 impl ty::Step for Layout {
-    type Enumerators<'a> = HashEqIgnored<&'a Type<'a>>;
+    type Enumerators<'a> = HashEqIgnored<Enumerators<'a, Self>>;
     type LengthExpr<'a> = ArrayLength<'a>;
     type Member<'a> = Member<'a, Self>;
     type TypeofExpr<'a> = !;
@@ -321,6 +323,23 @@ fn layout_complete_struct<'a>(
     Complete { name, id, kind, members }
 }
 
+fn layout_complete_enum<'a>(
+    stack: &mut Stack<'a>,
+    bump: &'a Bump,
+    complete: CompleteEnum<'a, Typeck>,
+) -> CompleteEnum<'a, Layout> {
+    let CompleteEnum { name, id, enumerators } = complete;
+    let HashEqIgnored(Enumerators { ty, enumerators }) = enumerators;
+    let ty = bump.alloc(layout_ty_unqual(stack, bump, *ty));
+    let enumerators = bump.alloc_slice_fill_iter(enumerators.iter().map(|enumerator| {
+        let Enumerator { name, id, ty, value } = *enumerator;
+        let ty = layout_ty_unqual(stack, bump, ty);
+        Enumerator { name, id, ty, value }
+    }));
+    let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
+    CompleteEnum { name, id, enumerators }
+}
+
 fn layout_ty_unqual<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
@@ -355,11 +374,8 @@ fn layout_ty_unqual<'a>(
             Type::Struct(Struct::Complete(complete))
         }
         ty::Type::Enum(Enum::Incomplete { name, id }) => Type::Enum(Enum::Incomplete { name, id }),
-        ty::Type::Enum(Enum::Complete(CompleteEnum { name, id, enumerators })) => {
-            let HashEqIgnored(ty) = enumerators;
-            let enumerators = HashEqIgnored(bump.alloc(layout_ty_unqual(stack, bump, *ty)));
-            Type::Enum(Enum::Complete(CompleteEnum { name, id, enumerators }))
-        }
+        ty::Type::Enum(Enum::Complete(complete)) =>
+            Type::Enum(Enum::Complete(layout_complete_enum(stack, bump, complete))),
     }
 }
 

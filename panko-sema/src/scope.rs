@@ -616,7 +616,7 @@ impl<'a> Enumerator<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct Enumerators<'a>(&'a [Enumerator<'a>]);
+pub(crate) struct Enumerators<'a>(pub(crate) &'a [Enumerator<'a>]);
 
 impl fmt::Display for BuiltinNameKind<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

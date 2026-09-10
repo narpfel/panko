@@ -21,6 +21,8 @@ use super::TypedExpression;
 use super::Typedef;
 use crate::ty::Step;
 use crate::ty::subobjects::Subobject;
+use crate::typecheck::Enumerator;
+use crate::typecheck::Enumerators;
 use crate::typecheck::Member;
 use crate::typecheck::MemberKind;
 
@@ -249,6 +251,23 @@ impl AsSExpr for Expression<'_> {
             Expression::CompoundLiteral { open_paren: _, decl } =>
                 SExpr::new("compound-literal").inherit(decl),
         }
+    }
+}
+
+impl<T: Step> AsSExpr for Enumerators<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { ty: _, enumerators } = self;
+        SExpr::new("enumerators").lines(*enumerators)
+    }
+}
+
+impl<T: Step> AsSExpr for Enumerator<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { name, id, ty, value } = self;
+        SExpr::new("enumerator")
+            .inline_string(format!("{}~{}", name.slice(), id.0))
+            .inherit(ty)
+            .inline_string(value.to_string())
     }
 }
 
