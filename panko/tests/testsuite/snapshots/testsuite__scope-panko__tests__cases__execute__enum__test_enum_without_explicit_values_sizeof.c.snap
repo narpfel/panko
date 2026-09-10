@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_enum_without_explicit_values_sizeof.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_without_explicit_values_sizeof.c"
+   (enum E~0
+      (enumerators
+         (enumerator A~1 `enum E~0` ∅)
+         (enumerator B~2 `enum E~0` ∅)
+         (enumerator C~3 `enum E~0` ∅)))
+   (declaration x~4 `enum E~0 complete` ∅)
+   (function-definition
+      main~5 `fn() -> int`
+      (compound-statement
+         (enum E2~7
+            (enumerators
+               (enumerator X~8 `enum E2~7` ∅)
+               (enumerator Y~9 `enum E2~7` ∅)
+               (enumerator Z~10 `enum E2~7` ∅)))
+         (declaration e2~11 `array<enum E2~7 complete; (sizeof (name x~4 `enum E~0 complete`))>` ∅)
+         (return (sizeof (name e2~11 `array<enum E2~7 complete; (sizeof (name x~4 `enum E~0 complete`))>`))))))
+
+----- stderr -----
