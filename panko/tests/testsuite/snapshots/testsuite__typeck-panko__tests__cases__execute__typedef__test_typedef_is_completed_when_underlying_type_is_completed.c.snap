@@ -1,0 +1,52 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/typedef/test_typedef_is_completed_when_underlying_type_is_completed.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot declare variable `value` with incomplete type `struct T~1`
+    ╭─[panko/tests/cases/execute/typedef/test_typedef_is_completed_when_underlying_type_is_completed.c:13:14]
+    │
+ 13 │     TypedefT value = { .x = 4 };
+    │              ──┬──  
+    │                ╰──── declared here
+────╯
+
+Error: cannot initialise variable of incomplete type `struct T~1`
+    ╭─[panko/tests/cases/execute/typedef/test_typedef_is_completed_when_underlying_type_is_completed.c:13:22]
+    │
+  6 │ typedef struct T TypedefT;
+    │ ────────┬───────  
+    │         ╰───────── `struct T~1` is incomplete
+    │ 
+ 13 │     TypedefT value = { .x = 4 };
+    │              ──┬──   ─────┬────  
+    │                │          ╰────── cannot initialise variable of incomplete type
+    │                │                 
+    │                ╰───────────────── while defining this variable
+────╯
+
+Error: member access on incomplete struct type `struct T~1`
+    ╭─[panko/tests/cases/execute/typedef/test_typedef_is_completed_when_underlying_type_is_completed.c:14:12]
+    │
+ 14 │     return value.x;
+    │            ──┬── ─  
+    │              │      
+    │              ╰────── this expression has incomplete struct type `struct T~1`
+────╯
+
+Error: invalid implicit conversion from `void` to `int`
+    ╭─[panko/tests/cases/execute/typedef/test_typedef_is_completed_when_underlying_type_is_completed.c:14:12]
+    │
+ 14 │     return value.x;
+    │            ──┬──  
+    │              ╰──── this is of type `void`, which cannot be implicitly converted to `int`
+────╯
