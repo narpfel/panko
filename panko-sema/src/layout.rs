@@ -10,6 +10,7 @@ use panko_parser::LogicalOp;
 use panko_parser::ast::Integral;
 use panko_report::Report;
 
+use crate::fake_trait_impls::HashEqIgnored;
 use crate::layout::stack::Stack;
 use crate::scope::BuiltinName;
 use crate::scope::Id;
@@ -20,10 +21,14 @@ use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::Class;
 use crate::ty::Complete;
+use crate::ty::CompleteEnum;
+use crate::ty::Enum;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
 use crate::ty::Struct;
 use crate::typecheck;
+use crate::typecheck::Enumerator;
+use crate::typecheck::Enumerators;
 use crate::typecheck::Member;
 use crate::typecheck::MemberKind;
 use crate::typecheck::PtrAddOrder;
@@ -38,6 +43,7 @@ mod stack;
 pub struct Layout;
 
 impl ty::Step for Layout {
+    type Enumerators<'a> = HashEqIgnored<Enumerators<'a, Self>>;
     type LengthExpr<'a> = ArrayLength<'a>;
     type Member<'a> = Member<'a, Self>;
     type TypeofExpr<'a> = !;
@@ -56,6 +62,7 @@ pub struct TranslationUnit<'a> {
 #[derive(Debug, Clone, Copy)]
 pub enum ExternalDeclaration<'a> {
     StructDecl(Complete<'a, Layout>),
+    EnumDecl(CompleteEnum<'a, Layout>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -129,6 +136,7 @@ pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
 #[derive(Debug, Clone, Copy)]
 pub enum Statement<'a> {
     StructDecl(Complete<'a, Layout>),
+    EnumDecl(CompleteEnum<'a, Layout>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<LayoutedExpression<'a>>),
@@ -317,6 +325,23 @@ fn layout_complete_struct<'a>(
     Complete { name, id, kind, members }
 }
 
+fn layout_complete_enum<'a>(
+    stack: &mut Stack<'a>,
+    bump: &'a Bump,
+    complete: CompleteEnum<'a, Typeck>,
+) -> CompleteEnum<'a, Layout> {
+    let CompleteEnum { name, id, enumerators } = complete;
+    let HashEqIgnored(Enumerators { ty, enumerators }) = enumerators;
+    let ty = bump.alloc(layout_ty_unqual(stack, bump, *ty));
+    let enumerators = bump.alloc_slice_fill_iter(enumerators.iter().map(|enumerator| {
+        let Enumerator { name, id, ty, value } = *enumerator;
+        let ty = layout_ty_unqual(stack, bump, ty);
+        Enumerator { name, id, ty, value }
+    }));
+    let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
+    CompleteEnum { name, id, enumerators }
+}
+
 fn layout_ty_unqual<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
@@ -350,6 +375,9 @@ fn layout_ty_unqual<'a>(
             let complete = layout_complete_struct(stack, bump, &complete);
             Type::Struct(Struct::Complete(complete))
         }
+        ty::Type::Enum(Enum::Incomplete { name, id }) => Type::Enum(Enum::Incomplete { name, id }),
+        ty::Type::Enum(Enum::Complete(complete)) =>
+            Type::Enum(Enum::Complete(layout_complete_enum(stack, bump, complete))),
     }
 }
 
@@ -490,6 +518,8 @@ fn layout_statement<'a>(
     Some(match stmt {
         typecheck::Statement::StructDecl(complete) =>
             Statement::StructDecl(layout_complete_struct(stack, bump, complete)),
+        typecheck::Statement::EnumDecl(complete) =>
+            Statement::EnumDecl(layout_complete_enum(stack, bump, *complete)),
         typecheck::Statement::Declaration(decl) =>
             Statement::Declaration(layout_declaration(stack, bump, decl)),
         typecheck::Statement::Typedef(typedef) => Statement::Typedef(*typedef),
@@ -746,6 +776,10 @@ pub fn layout<'a>(
                     bump,
                     complete,
                 )),
+            typecheck::ExternalDeclaration::EnumDecl(complete) => {
+                let complete = layout_complete_enum(&mut Stack::default(), bump, *complete);
+                ExternalDeclaration::EnumDecl(complete)
+            }
             typecheck::ExternalDeclaration::FunctionDefinition(def) =>
                 ExternalDeclaration::FunctionDefinition(layout_function_definition(bump, def)),
             typecheck::ExternalDeclaration::Declaration(decl) =>

@@ -18,7 +18,7 @@ exit_code: 0
    (function-definition
       main~3 `fn() -> int`
       (compound-statement
-         (struct T~1
+         (struct T~5
             (member x `int`))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)

@@ -15,9 +15,9 @@ exit_code: 0
       main~0 `fn() -> int`
       (compound-statement
          (compound-statement
-            (struct T~2
+            (struct T~3
                (member x `int`)))
-         (declaration incomplete_here~3 `struct T~2`
+         (declaration incomplete_here~4 `struct T~2`
             (braced
                (designation ((member x)) 42))))))
 

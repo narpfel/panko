@@ -61,6 +61,8 @@ use crate::ty;
 use crate::ty::ArrayType;
 use crate::ty::Class;
 use crate::ty::Complete;
+use crate::ty::CompleteEnum;
+use crate::ty::Enum;
 use crate::ty::FunctionType;
 use crate::ty::ParameterDeclaration;
 use crate::ty::Struct;
@@ -175,6 +177,7 @@ pub struct Member<'a, T: ty::Step> {
 pub(crate) enum Typeck {}
 
 impl ty::Step for Typeck {
+    type Enumerators<'a> = HashEqIgnored<Enumerators<'a, Self>>;
     type LengthExpr<'a> = ArrayLength<&'a TypedExpression<'a>>;
     type Member<'a> = Member<'a, Self>;
     type TypeofExpr<'a> = !;
@@ -192,6 +195,7 @@ pub struct TranslationUnit<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum ExternalDeclaration<'a> {
     StructDecl(Complete<'a, Typeck>),
+    EnumDecl(CompleteEnum<'a, Typeck>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
@@ -306,6 +310,7 @@ pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
     StructDecl(Complete<'a, Typeck>),
+    EnumDecl(CompleteEnum<'a, Typeck>),
     Declaration(Declaration<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<TypedExpression<'a>>),
@@ -461,6 +466,20 @@ pub(crate) enum Expression<'a> {
         open_paren: Token<'a>,
         decl: &'a Declaration<'a>,
     },
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Enumerators<'a, T: ty::Step> {
+    pub(crate) ty: &'a ty::Type<'a, T>,
+    pub(crate) enumerators: &'a [Enumerator<'a, T>],
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Enumerator<'a, T: ty::Step> {
+    pub(crate) name: Token<'a>,
+    pub(crate) id: Id,
+    pub(crate) ty: ty::Type<'a, T>,
+    pub(crate) value: u64,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -764,10 +783,12 @@ fn typeck_function_ty<'a>(
         | Type::Pointer(_)
         | Type::Void
         | Type::Nullptr
-        | Type::Struct(Struct::Complete(_)) => (),
+        | Type::Struct(Struct::Complete(_))
+        | Type::Enum(Enum::Complete(_)) => (),
         Type::Array(_)
         | Type::Function(_)
-        | Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) =>
+        | Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ })
+        | Type::Enum(Enum::Incomplete { name: _, id: _ }) =>
             sess.emit(Diagnostic::InvalidFunctionReturnType { at: *return_type }),
         Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match expr {},
     }
@@ -914,6 +935,36 @@ fn typeck_complete_struct<'a>(
     Complete { name, id, kind, members }
 }
 
+fn typeck_complete_enum<'a>(
+    sess: &'a Session<'a>,
+    complete: &CompleteEnum<'a, scope::Scope>,
+) -> CompleteEnum<'a, Typeck> {
+    let CompleteEnum { name, id, enumerators } = *complete;
+    let mut enumerator_values = IndexMap::default();
+    for enumerator in enumerators.0.0 {
+        let enumerator = typeck_enumerator(&mut enumerator_values, enumerator);
+        let was_present = enumerator_values.insert(enumerator.id, enumerator);
+        assert_matches!(was_present, None);
+    }
+    let enumerators = sess.alloc_slice_fill_iter(enumerator_values.into_values());
+    let ty = &const { Type::int() };
+    let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
+    CompleteEnum { name, id, enumerators }
+}
+
+fn typeck_enumerator<'a>(
+    enumerator_values: &mut IndexMap<Id, Enumerator<'a, Typeck>>,
+    enumerator: &scope::Enumerator<'a>,
+) -> Enumerator<'a, Typeck> {
+    let scope::Enumerator { name, id, ty: _, value } = *enumerator;
+    if let Some(value) = value {
+        unimplemented_todo!(value, "explicit values for enumerators");
+    }
+    let ty = Type::int();
+    let value = try { enumerator_values.last()?.1.value.strict_add(1) }.unwrap_or(0);
+    Enumerator { name, id, ty, value }
+}
+
 fn typeck_ty_with_initialiser<'a>(
     sess: &'a Session<'a>,
     ty: scope::QualifiedType<'a>,
@@ -959,6 +1010,9 @@ fn typeck_ty_with_initialiser<'a>(
             Type::Struct(Struct::Incomplete { name, id, kind }),
         ty::Type::Struct(Struct::Complete(complete)) =>
             Type::Struct(Struct::Complete(typeck_complete_struct(sess, &complete))),
+        ty::Type::Enum(Enum::Incomplete { name, id }) => Type::Enum(Enum::Incomplete { name, id }),
+        ty::Type::Enum(Enum::Complete(complete)) =>
+            Type::Enum(Enum::Complete(typeck_complete_enum(sess, &complete))),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -1627,6 +1681,13 @@ gen fn typeck_statement<'a>(
             {
                 yield Statement::StructDecl(typeck_complete_struct(sess, complete))
             }
+
+            if let ty::Type::Enum(Enum::Complete(complete)) = &ty.ty
+                && let ast::Type::Enum(ast::Enum::Complete { .. }) = unresolved_ty.ty
+            {
+                yield Statement::EnumDecl(typeck_complete_enum(sess, complete))
+            }
+
             for decl in *declarators {
                 yield match decl {
                     Declarator::Typedef(typedef) =>
@@ -1699,8 +1760,8 @@ where
         false => "value",
     };
     let diagnostic = match *redeclared {
-        Redeclared::ValueAsTypedef { at, reference } =>
-            scope::Diagnostic::ValueRedeclaredAsTypedef { at, reference, kind },
+        Redeclared::ValueAsTypedef { at, name } =>
+            scope::Diagnostic::ValueRedeclaredAsTypedef { at, name, kind },
         Redeclared::TypedefAsValue { at, typedef_ty, value_ty: _ } =>
             scope::Diagnostic::TypedefRedeclaredAsValue { at, ty: typedef_ty, kind },
     };
@@ -2659,6 +2720,11 @@ fn typeck_expression<'a>(
                     });
                     then.ty.ty
                 }
+
+                (Type::Enum(_), _) =>
+                    unimplemented_todo!(then.ty, "conditional operator with enum"),
+                (_, Type::Enum(_)) =>
+                    unimplemented_todo!(or_else.ty, "conditional operator with enum"),
             };
             let result_ty = result_ty.unqualified();
             TypedExpression {
@@ -2775,6 +2841,8 @@ fn typeck_expression<'a>(
             };
             TypedExpression { ty: decl.reference.ty, expr }
         }
+        scope::Expression::Enumerator(enumerator) =>
+            unimplemented_todo!(enumerator.name, "typeck enumerator"),
     };
 
     match context {
@@ -2862,6 +2930,13 @@ pub fn resolve_types<'a>(
                             sess, complete,
                         ))
                     }
+
+                    if let ty::Type::Enum(Enum::Complete(complete)) = &ty.ty
+                        && let ast::Type::Enum(ast::Enum::Complete { .. }) = unresolved_ty.ty
+                    {
+                        yield ExternalDeclaration::EnumDecl(typeck_complete_enum(sess, complete))
+                    }
+
                     for decl in *declarators {
                         yield match decl {
                             Declarator::Typedef(typedef) =>

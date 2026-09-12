@@ -21,6 +21,8 @@ use super::TypedExpression;
 use super::Typedef;
 use crate::ty::Step;
 use crate::ty::subobjects::Subobject;
+use crate::typecheck::Enumerator;
+use crate::typecheck::Enumerators;
 use crate::typecheck::Member;
 use crate::typecheck::MemberKind;
 
@@ -69,6 +71,7 @@ impl AsSExpr for ExternalDeclaration<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             ExternalDeclaration::StructDecl(decl) => decl.as_sexpr(),
+            ExternalDeclaration::EnumDecl(decl) => decl.as_sexpr(),
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
             ExternalDeclaration::Typedef(typedef) => typedef.as_sexpr(),
@@ -154,6 +157,7 @@ impl AsSExpr for Statement<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Statement::StructDecl(decl) => decl.as_sexpr(),
+            Statement::EnumDecl(decl) => decl.as_sexpr(),
             Statement::Declaration(decl) => decl.as_sexpr(),
             Statement::Typedef(typedef) => typedef.as_sexpr(),
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
@@ -249,6 +253,23 @@ impl AsSExpr for Expression<'_> {
             Expression::CompoundLiteral { open_paren: _, decl } =>
                 SExpr::new("compound-literal").inherit(decl),
         }
+    }
+}
+
+impl<T: Step> AsSExpr for Enumerators<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { ty: _, enumerators } = self;
+        SExpr::new("enumerators").lines(*enumerators)
+    }
+}
+
+impl<T: Step> AsSExpr for Enumerator<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { name, id, ty, value } = self;
+        SExpr::new("enumerator")
+            .inline_string(format!("{}~{}", name.slice(), id.0))
+            .inherit(ty)
+            .inline_string(value.to_string())
     }
 }
 

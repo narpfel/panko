@@ -15,7 +15,7 @@ exit_code: 0
    (function-definition
       f~2 `fn() -> void`
       (compound-statement
-         (struct T~0
+         (struct T~4
             (member x `int`)
             (member y `int`))
          (expression (sizeof (deref (name ptr~1 `ptr<struct T~0>`)))))))

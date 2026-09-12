@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/enum/test_enum_without_explicit_values_sizeof.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_without_explicit_values_sizeof.c"
+   (enum E~0
+      (enumerators
+         (enumerator A~1 `int` 0)
+         (enumerator B~2 `int` 1)
+         (enumerator C~3 `int` 2)))
+   (tentative-definition external (x~4 `enum E~0 complete` (static x)) ∅)
+   (function-definition external stack-size=40
+      (main~5 `fn() -> int` (static main))
+      (compound-statement
+         (enum E2~7
+            (enumerators
+               (enumerator X~8 `int` 0)
+               (enumerator Y~9 `int` 1)
+               (enumerator Z~10 `int` 2)))
+         (definition (e2~11 `array<enum E2~7 complete; 4>` @0) ∅)
+         (return (truncate `int` @16 (16 `unsigned long` @24))))))
+
+----- stderr -----

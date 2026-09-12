@@ -51,14 +51,14 @@ trait CaptureOutputForLibtest {
 
 impl CaptureOutputForLibtest for Command {
     fn status_with_captured_output(&mut self) -> io::Result<ExitStatus> {
-        let output = self.output()?;
-        if !output.stdout.is_empty() {
-            println!("{}", String::from_utf8_lossy(&output.stdout));
+        let Output { status, stdout, stderr } = self.output()?;
+        if !stdout.is_empty() {
+            println!("{}", String::from_utf8_lossy(&stdout));
         }
-        if !output.stderr.is_empty() {
-            eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+        if !stderr.is_empty() {
+            eprintln!("{}", String::from_utf8_lossy(&stderr));
         }
-        Ok(output.status)
+        Ok(status)
     }
 }
 

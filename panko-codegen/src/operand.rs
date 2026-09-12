@@ -134,7 +134,8 @@ impl fmt::Display for Operand<'_> {
             OperandKind::Pointer { address: memory, is_dereferenced } => {
                 let size = match self.ty {
                     // scalars are always dereferenced
-                    Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => self.ty.size(),
+                    Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr | Type::Enum(_) =>
+                        self.ty.size(),
                     // Using a function results in a pointer to that function, so we need 8 bytes.
                     Type::Function(_) => match is_dereferenced {
                         true => unreachable!(),
