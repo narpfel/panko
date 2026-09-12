@@ -480,18 +480,13 @@ impl<'a> Scopes<'a> {
         let previous_definition = try { self.lookup_tagged(name?)? };
 
         // forward declare so that `name` is available in the body
-        let forward_decl = self.lookup_or_add_enum(loc).ty;
-        let Type::Enum(enum_ty) = forward_decl
-        else {
-            unreachable!()
-        };
-
-        let enumerators = NoHashEq(super::resolve_enumerators(self, enum_ty, enumerators));
-
-        let id = match forward_decl {
-            Type::Enum(r#enum) => r#enum.id(),
+        let forward_decl = match self.lookup_or_add_enum(loc).ty {
+            Type::Enum(r#enum) => r#enum,
             _ => unreachable!(),
         };
+
+        let enumerators = NoHashEq(super::resolve_enumerators(self, forward_decl, enumerators));
+        let id = forward_decl.id();
         let ty = Type::Enum(Enum::Complete(CompleteEnum { name, id, enumerators }));
         let tagged = Tagged { ty, tag: Tag::Enum, loc };
 
