@@ -383,6 +383,13 @@ impl<'a> Scopes<'a> {
         self.scopes.last_mut().lookup_tagged_innermost(name)
     }
 
+    fn get_tagged_innermost(&mut self, name: &'a str) -> Option<Tagged<'a>> {
+        match self.lookup_tagged_innermost(name) {
+            Entry::Occupied(entry) => Some(*entry.get()),
+            Entry::Vacant(_) => None,
+        }
+    }
+
     fn tagged_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<&'a str, Tagged<'a>>> {
         self.scopes
             .iter_mut()
@@ -448,7 +455,7 @@ impl<'a> Scopes<'a> {
         members: &'a [ast::Declaration<'a, ast::Member<'a>>],
     ) -> (Tagged<'a>, Option<Tagged<'a>>) {
         let name = try { loc?.slice() };
-        let previous_definition = try { self.lookup_tagged(name?)? };
+        let previous_definition = try { self.get_tagged_innermost(name?)? };
 
         // forward declare so that `name` is available in the body
         let forward_decl = try { self.lookup_or_add_struct_innermost(loc?, kind).ty };
@@ -477,7 +484,7 @@ impl<'a> Scopes<'a> {
         enumerators: &'a [panko_parser::Enumerator<'a>],
     ) -> (Tagged<'a>, Option<Tagged<'a>>) {
         let name = try { loc?.slice() };
-        let previous_definition = try { self.lookup_tagged(name?)? };
+        let previous_definition = try { self.get_tagged_innermost(name?)? };
 
         // forward declare so that `name` is available in the body
         let forward_decl = match self.lookup_or_add_enum(loc).ty {
