@@ -411,6 +411,20 @@ impl<'a> Scopes<'a> {
         })
     }
 
+    fn lookup_or_add_struct_innermost(&mut self, loc: Token<'a>, kind: StructKind) -> Tagged<'a> {
+        let name = loc.slice();
+        let entry = self.scopes.last_mut().lookup_tagged_innermost(name);
+        *entry.or_insert_with(|| {
+            let id = Id(self.next_id);
+            self.next_id += 1;
+            Tagged {
+                ty: Type::Struct(Struct::Incomplete { name, id, kind }),
+                tag: kind.into(),
+                loc: Some(loc),
+            }
+        })
+    }
+
     pub(super) fn lookup_or_add_enum(&mut self, loc: Option<Token<'a>>) -> Tagged<'a> {
         let name = try { loc?.slice() };
         try { self.lookup_tagged(name?)? }.unwrap_or_else(|| {
@@ -437,7 +451,7 @@ impl<'a> Scopes<'a> {
         let previous_definition = try { self.lookup_tagged(name?)? };
 
         // forward declare so that `name` is available in the body
-        let forward_decl = try { self.lookup_or_add_struct(loc?, kind).ty };
+        let forward_decl = try { self.lookup_or_add_struct_innermost(loc?, kind).ty };
 
         let members = super::resolve_struct_members(self, members);
 
