@@ -602,8 +602,6 @@ pub enum BuiltinNameKind<'a> {
 pub(crate) struct Enumerator<'a> {
     pub(crate) name: Token<'a>,
     pub(crate) id: Id,
-    // TODO: the initial (incomplete) forward declaration does not get completed when resolving
-    // mentions of the enumerator after the `enum` has been completed
     pub(crate) ty: ty::Enum<'a, Scope>,
     pub(crate) value: Option<&'a Expression<'a>>,
 }
