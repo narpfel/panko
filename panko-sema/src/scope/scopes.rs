@@ -101,7 +101,7 @@ pub(super) struct Tagged<'a> {
 struct Scope<'a> {
     names: nonempty::Vec<HashMap<&'a str, Name<'a>>>,
     type_names: nonempty::Vec<HashMap<&'a str, QualifiedType<'a>>>,
-    tagged: nonempty::Vec<HashMap<&'a str, Tagged<'a>>>,
+    tagged: nonempty::Vec<HashMap<&'a str, Id>>,
     function_name: Option<&'a str>,
 }
 
@@ -137,18 +137,27 @@ impl<'a> Scope<'a> {
         self.type_names.last_mut().entry(name)
     }
 
-    fn tagged_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<&'a str, Tagged<'a>>> {
-        self.tagged
-            .iter_mut()
-            .rev()
-            .find_map(|scope| match scope.entry(name) {
-                Entry::Occupied(entry) => Some(entry),
-                Entry::Vacant(_) => None,
-            })
+    fn tagged_entry<'e>(
+        &mut self,
+        env: &'e mut Env<'a>,
+        name: &'a str,
+    ) -> Option<OccupiedEntry<'e, Id, Tagged<'a>>> {
+        let mut scopes = self.tagged.iter_mut().rev();
+        let id = scopes.find_map(|scope| scope.get(name))?;
+        match env.tagged.entry(*id) {
+            Entry::Occupied(entry) => Some(entry),
+            Entry::Vacant(_) => None,
+        }
     }
 
-    fn lookup_tagged_innermost(&mut self, name: &'a str) -> Entry<&'a str, Tagged<'a>> {
-        self.tagged.last_mut().entry(name)
+    fn lookup_tagged_innermost<'e>(
+        &mut self,
+        env: &'e mut Env<'a>,
+        name: &'a str,
+        id: Id,
+    ) -> Entry<'e, Id, Tagged<'a>> {
+        let id = self.tagged.last_mut().entry(name).or_insert(id);
+        env.tagged.entry(*id)
     }
 
     fn push(&mut self) {
@@ -176,11 +185,20 @@ impl<'a> Scope<'a> {
     }
 }
 
+// This is used to lookup types by `id`.
+//
+// TODO: Check out if the same could be achieved by using a data structure like `iddqd::BiHashMap`.
+#[derive(Debug, Default)]
+struct Env<'a> {
+    tagged: HashMap<Id, Tagged<'a>>,
+}
+
 #[derive(Debug)]
 pub(super) struct Scopes<'a> {
     pub(super) sess: &'a Session<'a>,
     /// at most two elements: the global scope and a function scope
     scopes: nonempty::Vec<Scope<'a>>,
+    env: Env<'a>,
     next_id: u64,
     hoisted_compound_literal_decls: Vec<Reference<'a>>,
 }
@@ -190,6 +208,7 @@ impl<'a> Scopes<'a> {
         Self {
             sess,
             scopes: nonempty::Vec::default(),
+            env: Env::default(),
             next_id: 0,
             hoisted_compound_literal_decls: vec![],
         }
@@ -379,22 +398,24 @@ impl<'a> Scopes<'a> {
         self.scopes.last_mut().lookup_ty_innermost(name)
     }
 
-    fn lookup_tagged_innermost(&mut self, name: &'a str) -> Entry<&'a str, Tagged<'a>> {
-        self.scopes.last_mut().lookup_tagged_innermost(name)
+    fn lookup_tagged_innermost(&mut self, name: &'a str, id: Id) -> Entry<Id, Tagged<'a>> {
+        self.scopes
+            .last_mut()
+            .lookup_tagged_innermost(&mut self.env, name, id)
     }
 
     fn get_tagged_innermost(&mut self, name: &'a str) -> Option<Tagged<'a>> {
-        match self.lookup_tagged_innermost(name) {
-            Entry::Occupied(entry) => Some(*entry.get()),
-            Entry::Vacant(_) => None,
-        }
+        let id = self.scopes.last_mut().tagged.last_mut().get(name)?;
+        self.env.tagged.get(id).copied()
     }
 
-    fn tagged_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<&'a str, Tagged<'a>>> {
-        self.scopes
-            .iter_mut()
-            .rev()
-            .find_map(|scope| scope.tagged_entry(name))
+    fn tagged_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<Id, Tagged<'a>>> {
+        for scope in self.scopes.iter_mut().rev() {
+            if let Some(entry) = scope.tagged_entry(&mut self.env, name) {
+                return Some(entry);
+            }
+        }
+        None
     }
 
     fn lookup_tagged(&mut self, name: &'a str) -> Option<Tagged<'a>> {
@@ -412,7 +433,7 @@ impl<'a> Scopes<'a> {
                 loc: Some(loc),
             };
             *self
-                .lookup_tagged_innermost(name)
+                .lookup_tagged_innermost(name, id)
                 .insert_entry(tagged)
                 .get()
         })
@@ -420,15 +441,20 @@ impl<'a> Scopes<'a> {
 
     fn lookup_or_add_struct_innermost(&mut self, loc: Token<'a>, kind: StructKind) -> Tagged<'a> {
         let name = loc.slice();
-        let entry = self.scopes.last_mut().lookup_tagged_innermost(name);
-        *entry.or_insert_with(|| {
+        let scope = self.scopes.last_mut().tagged.last_mut();
+        let id = scope.get(name).copied().unwrap_or_else(|| {
             let id = Id(self.next_id);
             self.next_id += 1;
-            Tagged {
-                ty: Type::Struct(Struct::Incomplete { name, id, kind }),
-                tag: kind.into(),
-                loc: Some(loc),
-            }
+            id
+        });
+        let entry = self
+            .scopes
+            .last_mut()
+            .lookup_tagged_innermost(&mut self.env, name, id);
+        *entry.or_insert_with(|| Tagged {
+            ty: Type::Struct(Struct::Incomplete { name, id, kind }),
+            tag: kind.into(),
+            loc: Some(loc),
         })
     }
 
@@ -440,7 +466,7 @@ impl<'a> Scopes<'a> {
             let tagged = Tagged { ty: r#enum, tag: Tag::Enum, loc };
             match name {
                 Some(name) => *self
-                    .lookup_tagged_innermost(name)
+                    .lookup_tagged_innermost(name, id)
                     .insert_entry(tagged)
                     .get(),
                 None => tagged,
@@ -472,7 +498,7 @@ impl<'a> Scopes<'a> {
 
         if let Some(name) = name {
             // complete the forward declaration
-            self.lookup_tagged_innermost(name).insert_entry(tagged);
+            self.lookup_tagged_innermost(name, id).insert_entry(tagged);
         }
 
         (tagged, previous_definition)
@@ -499,7 +525,7 @@ impl<'a> Scopes<'a> {
 
         if let Some(name) = name {
             // complete the forward declaration
-            self.lookup_tagged_innermost(name).insert_entry(tagged);
+            self.lookup_tagged_innermost(name, id).insert_entry(tagged);
         }
 
         (tagged, previous_definition)
