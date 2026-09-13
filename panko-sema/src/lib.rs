@@ -12,6 +12,8 @@
 #![feature(stmt_expr_attributes)]
 #![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
+#![feature(view_type_macro)]
+#![feature(view_types)]
 
 use std::fmt::Display;
 

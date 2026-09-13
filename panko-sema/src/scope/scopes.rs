@@ -442,11 +442,7 @@ impl<'a> Scopes<'a> {
     fn lookup_or_add_struct_innermost(&mut self, loc: Token<'a>, kind: StructKind) -> Tagged<'a> {
         let name = loc.slice();
         let scope = self.scopes.last_mut().tagged.last_mut();
-        let id = scope.get(name).copied().unwrap_or_else(|| {
-            let id = Id(self.next_id);
-            self.next_id += 1;
-            id
-        });
+        let id = scope.get(name).copied().unwrap_or_else(|| self.id());
         let entry = self
             .scopes
             .last_mut()
@@ -548,7 +544,7 @@ impl<'a> Scopes<'a> {
         self.scopes.last_mut().pop();
     }
 
-    pub(super) fn id(&mut self) -> Id {
+    pub(super) fn id(self: &mut core::view_type!(Self.{next_id})) -> Id {
         let id = Id(self.next_id);
         self.next_id += 1;
         id
