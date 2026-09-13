@@ -1,0 +1,43 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/enum/test_enum_without_explicit_values_enumerators.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_without_explicit_values_enumerators.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (enum E~1
+      (enumerators
+         (enumerator A~2 `int` 0)
+         (enumerator B~3 `int` 1)
+         (enumerator C~4 `int` 2)
+         (enumerator D~5 `int` 3)))
+   (definition external (b~6 `int` (static b)) (B `int`))
+   (function-definition external stack-size=56
+      (main~7 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 20>>` @16
+                        (string `array<char; 20>` @void "%d + %d + %d == %d\n\0"))))
+               (0 `int` @24)
+               (b~6 `int` (static b))
+               (3 `int` @28)
+               (add `int` @32
+                  (add `int` @32
+                     (0 `int` @32)
+                     (b~6 `int` (static b)))
+                  (3 `int` @36))))
+         (return (2 `int` @0)))))
+
+----- stderr -----

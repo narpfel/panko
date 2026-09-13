@@ -2841,8 +2841,21 @@ fn typeck_expression<'a>(
             };
             TypedExpression { ty: decl.reference.ty, expr }
         }
-        scope::Expression::Enumerator(enumerator) =>
-            unimplemented_todo!(enumerator.name, "typeck enumerator"),
+        scope::Expression::Enumerator(scope::Enumerator { name, id: _, ty, value: _ }) => {
+            let CompleteEnum { name: _, id: _, enumerators } = match ty {
+                Enum::Incomplete { .. } => unreachable!(),
+                Enum::Complete(complete) => typeck_complete_enum(sess, complete),
+            };
+            let HashEqIgnored(Enumerators { ty, enumerators }) = enumerators;
+            let Enumerator { name, id: _, ty: _, value } = *enumerators
+                .iter()
+                .find(|enumerator| enumerator.name.slice() == name.slice())
+                .unwrap();
+            TypedExpression {
+                ty: ty.unqualified(),
+                expr: Expression::Integer { value, token: name },
+            }
+        }
     };
 
     match context {

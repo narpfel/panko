@@ -377,7 +377,13 @@ impl<'a> Scopes<'a> {
                 .find_map(|scope| scope.lookup(name))
                 .map(|name| match name {
                     Name::Reference(reference) => Name::Reference(reference.at(loc)),
-                    Name::Enumerator(enumerator) => Name::Enumerator(enumerator),
+                    Name::Enumerator(Enumerator { name, id, ty, value }) => {
+                        let ty = match self.env.tagged.get(&ty.id()) {
+                            Some(Tagged { ty: Type::Enum(r#enum), tag: _, loc: _ }) => *r#enum,
+                            _ => unreachable!(),
+                        };
+                        Name::Enumerator(Enumerator { name, id, ty, value })
+                    }
                 })
                 .map(Either::Left),
         }
