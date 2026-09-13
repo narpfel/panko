@@ -14,21 +14,21 @@ exit_code: 0
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (enum E~1
       (enumerators
-         (enumerator A~2 `enum E~1` ∅)
-         (enumerator B~3 `enum E~1` ∅)
-         (enumerator C~4 `enum E~1` ∅)
-         (enumerator D~5 `enum E~1` ∅)))
-   (declaration b~6 `int` (enumerator B~3 `enum E~1 complete` ∅))
+         (enumerator A~2 `enum E~1`.0 ∅)
+         (enumerator B~3 `enum E~1`.1 ∅)
+         (enumerator C~4 `enum E~1`.2 ∅)
+         (enumerator D~5 `enum E~1`.3 ∅)))
+   (declaration b~6 `int` (enumerator B~3 `enum E~1 complete`.1 ∅))
    (function-definition
       main~7 `fn() -> int`
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%d + %d + %d == %d\n")
-               (enumerator A~2 `enum E~1 complete` ∅)
+               (enumerator A~2 `enum E~1 complete`.0 ∅)
                (name b~6 `int`)
-               (enumerator D~5 `enum E~1 complete` ∅)
-               (add (add (enumerator A~2 `enum E~1 complete` ∅) (name b~6 `int`)) (enumerator D~5 `enum E~1 complete` ∅))))
-         (return (enumerator C~4 `enum E~1 complete` ∅)))))
+               (enumerator D~5 `enum E~1 complete`.3 ∅)
+               (add (add (enumerator A~2 `enum E~1 complete`.0 ∅) (name b~6 `int`)) (enumerator D~5 `enum E~1 complete`.3 ∅))))
+         (return (enumerator C~4 `enum E~1 complete`.2 ∅)))))
 
 ----- stderr -----

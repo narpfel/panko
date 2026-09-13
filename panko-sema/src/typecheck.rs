@@ -479,6 +479,7 @@ pub(crate) struct Enumerator<'a, T: ty::Step> {
     pub(crate) name: Token<'a>,
     pub(crate) id: Id,
     pub(crate) ty: ty::Type<'a, T>,
+    pub(crate) index: usize,
     pub(crate) value: u64,
 }
 
@@ -956,13 +957,13 @@ fn typeck_enumerator<'a>(
     enumerator_values: &mut IndexMap<Id, Enumerator<'a, Typeck>>,
     enumerator: &scope::Enumerator<'a>,
 ) -> Enumerator<'a, Typeck> {
-    let scope::Enumerator { name, id, ty: _, value } = *enumerator;
+    let scope::Enumerator { name, id, ty: _, index, value } = *enumerator;
     if let Some(value) = value {
         unimplemented_todo!(value, "explicit values for enumerators");
     }
     let ty = Type::int();
     let value = try { enumerator_values.last()?.1.value.strict_add(1) }.unwrap_or(0);
-    Enumerator { name, id, ty, value }
+    Enumerator { name, id, ty, index, value }
 }
 
 fn typeck_ty_with_initialiser<'a>(
@@ -2841,16 +2842,14 @@ fn typeck_expression<'a>(
             };
             TypedExpression { ty: decl.reference.ty, expr }
         }
-        scope::Expression::Enumerator(scope::Enumerator { name, id: _, ty, value: _ }) => {
+        scope::Expression::Enumerator(enumerator) => {
+            let scope::Enumerator { name: _, id: _, ty, index, value: _ } = enumerator;
             let CompleteEnum { name: _, id: _, enumerators } = match ty {
                 Enum::Incomplete { .. } => unreachable!(),
                 Enum::Complete(complete) => typeck_complete_enum(sess, complete),
             };
             let HashEqIgnored(Enumerators { ty, enumerators }) = enumerators;
-            let Enumerator { name, id: _, ty: _, value } = *enumerators
-                .iter()
-                .find(|enumerator| enumerator.name.slice() == name.slice())
-                .unwrap();
+            let Enumerator { name, id: _, ty: _, index: _, value } = enumerators[*index];
             TypedExpression {
                 ty: ty.unqualified(),
                 expr: Expression::Integer { value, token: name },

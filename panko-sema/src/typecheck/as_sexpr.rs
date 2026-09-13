@@ -265,9 +265,10 @@ impl<T: Step> AsSExpr for Enumerators<'_, T> {
 
 impl<T: Step> AsSExpr for Enumerator<'_, T> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name, id, ty, value } = self;
+        let Self { name, id, ty, index, value } = self;
         SExpr::new("enumerator")
             .inline_string(format!("{}~{}", name.slice(), id.0))
+            .inline_string(index.to_string())
             .inherit(ty)
             .inline_string(value.to_string())
     }

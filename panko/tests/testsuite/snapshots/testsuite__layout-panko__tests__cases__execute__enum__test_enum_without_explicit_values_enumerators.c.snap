@@ -14,10 +14,10 @@ exit_code: 0
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (enum E~1
       (enumerators
-         (enumerator A~2 `int` 0)
-         (enumerator B~3 `int` 1)
-         (enumerator C~4 `int` 2)
-         (enumerator D~5 `int` 3)))
+         (enumerator A~2 0 `int` 0)
+         (enumerator B~3 1 `int` 1)
+         (enumerator C~4 2 `int` 2)
+         (enumerator D~5 3 `int` 3)))
    (definition external (b~6 `int` (static b)) (B `int`))
    (function-definition external stack-size=56
       (main~7 `fn() -> int` (static main))

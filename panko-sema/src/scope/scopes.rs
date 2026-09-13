@@ -269,13 +269,14 @@ impl<'a> Scopes<'a> {
         &mut self,
         name: Token<'a>,
         ty: Enum<'a, super::Scope>,
+        index: usize,
         value: Option<&'a Expression<'a>>,
     ) -> Result<Enumerator<'a>, QualifiedType<'a>> {
         if let Entry::Occupied(entry) = self.lookup_ty_innermost(name.slice()) {
             return Err(*entry.get());
         }
 
-        let enumerator = Enumerator { name, id: self.id(), ty, value };
+        let enumerator = Enumerator { name, id: self.id(), ty, index, value };
         match self.lookup_innermost(name.slice()) {
             Entry::Occupied(mut entry) => {
                 let previous_definition = match entry.get_mut() {
@@ -377,12 +378,12 @@ impl<'a> Scopes<'a> {
                 .find_map(|scope| scope.lookup(name))
                 .map(|name| match name {
                     Name::Reference(reference) => Name::Reference(reference.at(loc)),
-                    Name::Enumerator(Enumerator { name, id, ty, value }) => {
+                    Name::Enumerator(Enumerator { name, id, ty, index, value }) => {
                         let ty = match self.env.tagged.get(&ty.id()) {
                             Some(Tagged { ty: Type::Enum(r#enum), tag: _, loc: _ }) => *r#enum,
                             _ => unreachable!(),
                         };
-                        Name::Enumerator(Enumerator { name, id, ty, value })
+                        Name::Enumerator(Enumerator { name, id, ty, index, value })
                     }
                 })
                 .map(Either::Left),

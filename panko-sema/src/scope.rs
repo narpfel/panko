@@ -603,12 +603,13 @@ pub(crate) struct Enumerator<'a> {
     pub(crate) name: Token<'a>,
     pub(crate) id: Id,
     pub(crate) ty: ty::Enum<'a, Scope>,
+    pub(crate) index: usize,
     pub(crate) value: Option<&'a Expression<'a>>,
 }
 
 impl<'a> Enumerator<'a> {
     fn loc(&self) -> Loc<'a> {
-        let Self { name, id: _, ty: _, value } = self;
+        let Self { name, id: _, ty: _, index: _, value } = self;
         name.loc().until_maybe(try { value.as_ref()?.loc() })
     }
 }
@@ -1142,10 +1143,11 @@ fn resolve_enumerators<'a>(
     enumerators: &[cst::Enumerator<'a>],
 ) -> Enumerators<'a> {
     let sess = scopes.sess;
-    let enumerators = enumerators.iter().map(|&cst::Enumerator { name, value }| {
+    let enumerators = enumerators.iter().enumerate().map(|(i, enumerator)| {
+        let cst::Enumerator { name, value } = *enumerator;
         let value = try { sess.alloc(resolve_expr(scopes, &value?)) };
         scopes
-            .add_enumerator(name, ty, value)
+            .add_enumerator(name, ty, i, value)
             .unwrap_or_else(|_| error_todo!(name, "type name redeclared as enumerator"))
     });
     Enumerators(sess.alloc_slice_fill_iter(enumerators))
