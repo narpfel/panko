@@ -59,3 +59,27 @@ Error: redeclaration of `union Name~12` with different tag `struct`
     │            ──┬─  
     │              ╰─── redeclared here as `struct`
 ────╯
+
+Error: redeclaration of `enum E~17 complete` with different tag `struct`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:41:12]
+    │
+ 39 │     enum E { A, B };
+    │          ┬  
+    │          ╰── previously declared here as `enum`
+    │ 
+ 41 │     struct E;
+    │            ┬  
+    │            ╰── redeclared here as `struct`
+────╯
+
+Error: redeclaration of `struct Wat~22` with different tag `enum`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:47:10]
+    │
+ 45 │     struct Wat;
+    │            ─┬─  
+    │             ╰─── previously declared here as `struct`
+    │ 
+ 47 │     enum Wat { X };
+    │          ─┬─  
+    │           ╰─── redeclared here as `enum`
+────╯

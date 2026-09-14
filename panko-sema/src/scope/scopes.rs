@@ -518,6 +518,7 @@ impl<'a> Scopes<'a> {
         // forward declare so that `name` is available in the body
         let forward_decl = match self.lookup_or_add_enum(loc).ty {
             Type::Enum(r#enum) => r#enum,
+            Type::Struct(r#struct) => Enum::Incomplete { name, id: r#struct.id() },
             _ => unreachable!(),
         };
 
