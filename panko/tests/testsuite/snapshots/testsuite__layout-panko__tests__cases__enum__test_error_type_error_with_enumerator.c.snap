@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/enum/test_error_type_error_with_enumerator.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid operands to binary operator `<`
+   ╭─[panko/tests/cases/enum/test_error_type_error_with_enumerator.c:4:13]
+   │
+ 4 │     nullptr < A;
+   │     ───┬─── ─ ┬  
+   │        │      ╰── this is of type `int`
+   │        │         
+   │        ╰───────── this is of type `nullptr_t`
+───╯

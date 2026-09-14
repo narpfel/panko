@@ -11,7 +11,9 @@ use panko_lex::Token;
 use panko_parser::StructKind;
 use panko_parser::ast;
 use panko_parser::ast::Session;
+use panko_parser::error_todo;
 use panko_parser::nonempty;
+use panko_parser::unimplemented_todo;
 
 use super::BuiltinNameKind;
 use super::Id;
@@ -23,14 +25,49 @@ use super::RefInitialiser;
 use super::Reference;
 use super::StorageDuration;
 use super::Type;
+use crate::fake_trait_impls::NoHashEq;
 use crate::scope::BuiltinName;
+use crate::scope::Enumerator;
+use crate::scope::Expression;
 use crate::ty::Complete;
+use crate::ty::CompleteEnum;
+use crate::ty::Enum;
 use crate::ty::Struct;
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum Name<'a> {
+    Reference(Reference<'a>),
+    Enumerator(Enumerator<'a>),
+}
+
+impl<'a> Name<'a> {
+    pub(super) fn loc(&self) -> Loc<'a> {
+        match self {
+            Self::Reference(reference) => reference.loc(),
+            Self::Enumerator(enumerator) => enumerator.loc(),
+        }
+    }
+
+    pub(super) fn name(&self) -> &'a str {
+        match self {
+            Self::Reference(reference) => reference.name,
+            Self::Enumerator(enumerator) => enumerator.name,
+        }
+    }
+
+    pub(super) fn ty(&self) -> &QualifiedType<'a> {
+        match self {
+            Self::Reference(reference) => &reference.ty,
+            Self::Enumerator(enumerator) => unimplemented_todo!(enumerator, "type of enumerator"),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Tag {
     Struct,
     Union,
+    Enum,
 }
 
 impl Display for Tag {
@@ -38,6 +75,7 @@ impl Display for Tag {
         let s = match self {
             Self::Struct => "struct",
             Self::Union => "union",
+            Self::Enum => "enum",
         };
         write!(f, "{s}")
     }
@@ -61,9 +99,9 @@ pub(super) struct Tagged<'a> {
 
 #[derive(Debug, Default)]
 struct Scope<'a> {
-    names: nonempty::Vec<HashMap<&'a str, Reference<'a>>>,
+    names: nonempty::Vec<HashMap<&'a str, Name<'a>>>,
     type_names: nonempty::Vec<HashMap<&'a str, QualifiedType<'a>>>,
-    tagged: nonempty::Vec<HashMap<&'a str, Tagged<'a>>>,
+    tagged: nonempty::Vec<HashMap<&'a str, Id>>,
     function_name: Option<&'a str>,
 }
 
@@ -75,7 +113,7 @@ impl<'a> Scope<'a> {
         }
     }
 
-    fn lookup(&self, name: &'a str) -> Option<Reference<'a>> {
+    fn lookup(&self, name: &'a str) -> Option<Name<'a>> {
         self.names
             .iter()
             .rev()
@@ -83,7 +121,7 @@ impl<'a> Scope<'a> {
             .copied()
     }
 
-    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Reference<'a>> {
+    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Name<'a>> {
         self.names.last_mut().entry(name)
     }
 
@@ -99,18 +137,27 @@ impl<'a> Scope<'a> {
         self.type_names.last_mut().entry(name)
     }
 
-    fn tagged_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<&'a str, Tagged<'a>>> {
-        self.tagged
-            .iter_mut()
-            .rev()
-            .find_map(|scope| match scope.entry(name) {
-                Entry::Occupied(entry) => Some(entry),
-                Entry::Vacant(_) => None,
-            })
+    fn tagged_entry<'e>(
+        &mut self,
+        env: &'e mut Env<'a>,
+        name: &'a str,
+    ) -> Option<OccupiedEntry<'e, Id, Tagged<'a>>> {
+        let mut scopes = self.tagged.iter_mut().rev();
+        let id = scopes.find_map(|scope| scope.get(name))?;
+        match env.tagged.entry(*id) {
+            Entry::Occupied(entry) => Some(entry),
+            Entry::Vacant(_) => None,
+        }
     }
 
-    fn lookup_tagged_innermost(&mut self, name: &'a str) -> Entry<&'a str, Tagged<'a>> {
-        self.tagged.last_mut().entry(name)
+    fn lookup_tagged_innermost<'e>(
+        &mut self,
+        env: &'e mut Env<'a>,
+        name: &'a str,
+        id: Id,
+    ) -> Entry<'e, Id, Tagged<'a>> {
+        let id = self.tagged.last_mut().entry(name).or_insert(id);
+        env.tagged.entry(*id)
     }
 
     fn push(&mut self) {
@@ -138,11 +185,20 @@ impl<'a> Scope<'a> {
     }
 }
 
+// This is used to lookup types by `id`.
+//
+// TODO: Check out if the same could be achieved by using a data structure like `iddqd::BiHashMap`.
+#[derive(Debug, Default)]
+struct Env<'a> {
+    tagged: HashMap<Id, Tagged<'a>>,
+}
+
 #[derive(Debug)]
 pub(super) struct Scopes<'a> {
     pub(super) sess: &'a Session<'a>,
     /// at most two elements: the global scope and a function scope
     scopes: nonempty::Vec<Scope<'a>>,
+    env: Env<'a>,
     next_id: u64,
     hoisted_compound_literal_decls: Vec<Reference<'a>>,
 }
@@ -152,6 +208,7 @@ impl<'a> Scopes<'a> {
         Self {
             sess,
             scopes: nonempty::Vec::default(),
+            env: Env::default(),
             next_id: 0,
             hoisted_compound_literal_decls: vec![],
         }
@@ -186,7 +243,11 @@ impl<'a> Scopes<'a> {
         };
         match self.lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
-                let previous_definition = entry.get_mut();
+                let previous_definition = match entry.get_mut() {
+                    Name::Reference(previous_definition) => previous_definition,
+                    Name::Enumerator(enumerator) =>
+                        error_todo!(enumerator, "enumerator redeclared as variable"),
+                };
                 let reference = Reference {
                     id: previous_definition.id,
                     previous_definition: Some(
@@ -198,8 +259,42 @@ impl<'a> Scopes<'a> {
                 Ok(reference)
             }
             Entry::Vacant(entry) => {
-                entry.insert(reference);
+                entry.insert(Name::Reference(reference));
                 Ok(reference)
+            }
+        }
+    }
+
+    pub(super) fn add_enumerator(
+        &mut self,
+        name: Token<'a>,
+        ty: Enum<'a, super::Scope>,
+        index: usize,
+        value: Option<&'a Expression<'a>>,
+    ) -> Result<Enumerator<'a>, QualifiedType<'a>> {
+        if let Entry::Occupied(entry) = self.lookup_ty_innermost(name.slice()) {
+            return Err(*entry.get());
+        }
+
+        let loc = name.loc();
+        let name = name.slice();
+        let id = self.id();
+        let enumerator = Enumerator { name, loc, id, ty, index, value };
+        match self.lookup_innermost(name) {
+            Entry::Occupied(mut entry) => {
+                let previous_definition = match entry.get_mut() {
+                    Name::Reference(reference) =>
+                        error_todo!(reference, "variable redeclared as enumerator"),
+                    Name::Enumerator(previous_definition) => previous_definition,
+                };
+                // TODO: check that `enumerator` is a valid redeclaration of `previous_definition`
+                let enumerator = Enumerator { id: previous_definition.id, ..enumerator };
+                *previous_definition = enumerator;
+                Ok(enumerator)
+            }
+            Entry::Vacant(entry) => {
+                entry.insert(Name::Enumerator(enumerator));
+                Ok(enumerator)
             }
         }
     }
@@ -209,7 +304,7 @@ impl<'a> Scopes<'a> {
         &mut self,
         name: &'a str,
         ty: QualifiedType<'a>,
-    ) -> Result<Option<QualifiedType<'a>>, Reference<'a>> {
+    ) -> Result<Option<QualifiedType<'a>>, Name<'a>> {
         if let Entry::Occupied(entry) = self.lookup_innermost(name) {
             return Err(*entry.get());
         }
@@ -260,7 +355,7 @@ impl<'a> Scopes<'a> {
         &self,
         name: &'a str,
         loc: Loc<'a>,
-    ) -> Option<Either<Reference<'a>, BuiltinName<'a>>> {
+    ) -> Option<Either<Name<'a>, BuiltinName<'a>>> {
         match name {
             "__panko_gp_offset" if let IsInGlobalScope::No = self.is_in_global_scope() =>
                 Some(Either::Right(BuiltinName {
@@ -284,11 +379,21 @@ impl<'a> Scopes<'a> {
                 .iter()
                 .rev()
                 .find_map(|scope| scope.lookup(name))
-                .map(|reference| Either::Left(reference.at(loc))),
+                .map(|name| match name {
+                    Name::Reference(reference) => Name::Reference(reference.at(loc)),
+                    Name::Enumerator(Enumerator { name, loc: _, id, ty, index, value }) => {
+                        let ty = match self.env.tagged.get(&ty.id()) {
+                            Some(Tagged { ty: Type::Enum(r#enum), tag: _, loc: _ }) => *r#enum,
+                            _ => unreachable!(),
+                        };
+                        Name::Enumerator(Enumerator { name, loc, id, ty, index, value })
+                    }
+                })
+                .map(Either::Left),
         }
     }
 
-    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Reference<'a>> {
+    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Name<'a>> {
         self.scopes.last_mut().lookup_innermost(name)
     }
 
@@ -303,15 +408,24 @@ impl<'a> Scopes<'a> {
         self.scopes.last_mut().lookup_ty_innermost(name)
     }
 
-    fn lookup_tagged_innermost(&mut self, name: &'a str) -> Entry<&'a str, Tagged<'a>> {
-        self.scopes.last_mut().lookup_tagged_innermost(name)
+    fn lookup_tagged_innermost(&mut self, name: &'a str, id: Id) -> Entry<Id, Tagged<'a>> {
+        self.scopes
+            .last_mut()
+            .lookup_tagged_innermost(&mut self.env, name, id)
     }
 
-    fn tagged_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<&'a str, Tagged<'a>>> {
-        self.scopes
-            .iter_mut()
-            .rev()
-            .find_map(|scope| scope.tagged_entry(name))
+    fn get_tagged_innermost(&mut self, name: &'a str) -> Option<Tagged<'a>> {
+        let id = self.scopes.last_mut().tagged.last_mut().get(name)?;
+        self.env.tagged.get(id).copied()
+    }
+
+    fn tagged_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<Id, Tagged<'a>>> {
+        for scope in self.scopes.iter_mut().rev() {
+            if let Some(entry) = scope.tagged_entry(&mut self.env, name) {
+                return Some(entry);
+            }
+        }
+        None
     }
 
     fn lookup_tagged(&mut self, name: &'a str) -> Option<Tagged<'a>> {
@@ -329,9 +443,40 @@ impl<'a> Scopes<'a> {
                 loc: Some(loc),
             };
             *self
-                .lookup_tagged_innermost(name)
+                .lookup_tagged_innermost(name, id)
                 .insert_entry(tagged)
                 .get()
+        })
+    }
+
+    fn lookup_or_add_struct_innermost(&mut self, loc: Token<'a>, kind: StructKind) -> Tagged<'a> {
+        let name = loc.slice();
+        let scope = self.scopes.last_mut().tagged.last_mut();
+        let id = scope.get(name).copied().unwrap_or_else(|| self.id());
+        let entry = self
+            .scopes
+            .last_mut()
+            .lookup_tagged_innermost(&mut self.env, name, id);
+        *entry.or_insert_with(|| Tagged {
+            ty: Type::Struct(Struct::Incomplete { name, id, kind }),
+            tag: kind.into(),
+            loc: Some(loc),
+        })
+    }
+
+    pub(super) fn lookup_or_add_enum(&mut self, loc: Option<Token<'a>>) -> Tagged<'a> {
+        let name = try { loc?.slice() };
+        try { self.lookup_tagged(name?)? }.unwrap_or_else(|| {
+            let id = self.id();
+            let r#enum = Type::Enum(Enum::Incomplete { name, id });
+            let tagged = Tagged { ty: r#enum, tag: Tag::Enum, loc };
+            match name {
+                Some(name) => *self
+                    .lookup_tagged_innermost(name, id)
+                    .insert_entry(tagged)
+                    .get(),
+                None => tagged,
+            }
         })
     }
 
@@ -342,10 +487,10 @@ impl<'a> Scopes<'a> {
         members: &'a [ast::Declaration<'a, ast::Member<'a>>],
     ) -> (Tagged<'a>, Option<Tagged<'a>>) {
         let name = try { loc?.slice() };
-        let previous_definition = try { self.lookup_tagged(name?)? };
+        let previous_definition = try { self.get_tagged_innermost(name?)? };
 
         // forward declare so that `name` is available in the body
-        let forward_decl = try { self.lookup_or_add_struct(loc?, kind).ty };
+        let forward_decl = try { self.lookup_or_add_struct_innermost(loc?, kind).ty };
 
         let members = super::resolve_struct_members(self, members);
 
@@ -359,7 +504,35 @@ impl<'a> Scopes<'a> {
 
         if let Some(name) = name {
             // complete the forward declaration
-            self.lookup_tagged_innermost(name).insert_entry(tagged);
+            self.lookup_tagged_innermost(name, id).insert_entry(tagged);
+        }
+
+        (tagged, previous_definition)
+    }
+
+    pub(super) fn lookup_or_add_complete_enum(
+        &mut self,
+        loc: Option<Token<'a>>,
+        enumerators: &'a [panko_parser::Enumerator<'a>],
+    ) -> (Tagged<'a>, Option<Tagged<'a>>) {
+        let name = try { loc?.slice() };
+        let previous_definition = try { self.get_tagged_innermost(name?)? };
+
+        // forward declare so that `name` is available in the body
+        let forward_decl = match self.lookup_or_add_enum(loc).ty {
+            Type::Enum(r#enum) => r#enum,
+            Type::Struct(r#struct) => Enum::Incomplete { name, id: r#struct.id() },
+            _ => unreachable!(),
+        };
+
+        let enumerators = NoHashEq(super::resolve_enumerators(self, forward_decl, enumerators));
+        let id = forward_decl.id();
+        let ty = Type::Enum(Enum::Complete(CompleteEnum { name, id, enumerators }));
+        let tagged = Tagged { ty, tag: Tag::Enum, loc };
+
+        if let Some(name) = name {
+            // complete the forward declaration
+            self.lookup_tagged_innermost(name, id).insert_entry(tagged);
         }
 
         (tagged, previous_definition)
@@ -382,7 +555,7 @@ impl<'a> Scopes<'a> {
         self.scopes.last_mut().pop();
     }
 
-    pub(super) fn id(&mut self) -> Id {
+    pub(super) fn id(self: &mut core::view_type!(Self.{next_id})) -> Id {
         let id = Id(self.next_id);
         self.next_id += 1;
         id
@@ -402,7 +575,10 @@ impl<'a> Scopes<'a> {
         initialiser: Option<RefInitialiser<'a>>,
     ) {
         match self.lookup_innermost(reference.name) {
-            Entry::Occupied(mut entry) => entry.get_mut().initialiser = initialiser,
+            Entry::Occupied(mut entry) => match entry.get_mut() {
+                Name::Reference(reference) => reference.initialiser = initialiser,
+                Name::Enumerator(_) => unreachable!(),
+            },
             Entry::Vacant(_) => unreachable!(),
         }
     }
