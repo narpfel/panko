@@ -51,7 +51,7 @@ impl<'a> Name<'a> {
     pub(super) fn name(&self) -> &'a str {
         match self {
             Self::Reference(reference) => reference.name,
-            Self::Enumerator(enumerator) => enumerator.name.slice(),
+            Self::Enumerator(enumerator) => enumerator.name,
         }
     }
 
@@ -276,8 +276,11 @@ impl<'a> Scopes<'a> {
             return Err(*entry.get());
         }
 
-        let enumerator = Enumerator { name, id: self.id(), ty, index, value };
-        match self.lookup_innermost(name.slice()) {
+        let loc = name.loc();
+        let name = name.slice();
+        let id = self.id();
+        let enumerator = Enumerator { name, loc, id, ty, index, value };
+        match self.lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
                 let previous_definition = match entry.get_mut() {
                     Name::Reference(reference) =>
@@ -378,12 +381,12 @@ impl<'a> Scopes<'a> {
                 .find_map(|scope| scope.lookup(name))
                 .map(|name| match name {
                     Name::Reference(reference) => Name::Reference(reference.at(loc)),
-                    Name::Enumerator(Enumerator { name, id, ty, index, value }) => {
+                    Name::Enumerator(Enumerator { name, loc: _, id, ty, index, value }) => {
                         let ty = match self.env.tagged.get(&ty.id()) {
                             Some(Tagged { ty: Type::Enum(r#enum), tag: _, loc: _ }) => *r#enum,
                             _ => unreachable!(),
                         };
-                        Name::Enumerator(Enumerator { name, id, ty, index, value })
+                        Name::Enumerator(Enumerator { name, loc, id, ty, index, value })
                     }
                 })
                 .map(Either::Left),

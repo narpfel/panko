@@ -299,9 +299,9 @@ impl AsSExpr for BuiltinName<'_> {
 
 impl AsSExpr for Enumerator<'_> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name, id, ty, index, value } = self;
+        let Self { name, loc: _, id, ty, index, value } = self;
         SExpr::new("enumerator")
-            .inline_string(format!("{}~{}", name.slice(), id.0))
+            .inline_string(format!("{name}~{}", id.0))
             .inline_string(format!("{}.{index}", super::Type::Enum(*ty).as_sexpr()))
             .lines_explicit_empty(value)
     }

@@ -600,7 +600,8 @@ pub enum BuiltinNameKind<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Enumerator<'a> {
-    pub(crate) name: Token<'a>,
+    pub(crate) name: &'a str,
+    pub(crate) loc: Loc<'a>,
     pub(crate) id: Id,
     pub(crate) ty: ty::Enum<'a, Scope>,
     pub(crate) index: usize,
@@ -609,8 +610,7 @@ pub(crate) struct Enumerator<'a> {
 
 impl<'a> Enumerator<'a> {
     fn loc(&self) -> Loc<'a> {
-        let Self { name, id: _, ty: _, index: _, value } = self;
-        name.loc().until_maybe(try { value.as_ref()?.loc() })
+        self.loc
     }
 }
 
