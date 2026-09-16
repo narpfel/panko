@@ -11,7 +11,6 @@ use panko_lex::Token;
 use panko_parser::StructKind;
 use panko_parser::ast;
 use panko_parser::ast::Session;
-use panko_parser::error_todo;
 use panko_parser::nonempty;
 use panko_parser::unimplemented_todo;
 
@@ -59,6 +58,20 @@ impl<'a> Name<'a> {
         match self {
             Self::Reference(reference) => &reference.ty,
             Self::Enumerator(enumerator) => unimplemented_todo!(enumerator, "type of enumerator"),
+        }
+    }
+
+    fn id(&self) -> Id {
+        match self {
+            Self::Reference(reference) => reference.id,
+            Self::Enumerator(enumerator) => enumerator.id,
+        }
+    }
+
+    fn at(&self, loc: Loc<'a>) -> Name<'a> {
+        match self {
+            Self::Reference(reference) => Self::Reference(reference.at(loc)),
+            Self::Enumerator(enumerator) => Self::Enumerator(Enumerator { loc, ..*enumerator }),
         }
     }
 }
@@ -243,19 +256,15 @@ impl<'a> Scopes<'a> {
         };
         match self.lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
-                let previous_definition = match entry.get_mut() {
-                    Name::Reference(previous_definition) => previous_definition,
-                    Name::Enumerator(enumerator) =>
-                        error_todo!(enumerator, "enumerator redeclared as variable"),
-                };
+                let previous_definition = entry.get_mut();
                 let reference = Reference {
-                    id: previous_definition.id,
+                    id: previous_definition.id(),
                     previous_definition: Some(
-                        sess.alloc(previous_definition.at(previous_definition.usage_loc)),
+                        sess.alloc(previous_definition.at(previous_definition.loc())),
                     ),
                     ..reference
                 };
-                *previous_definition = reference;
+                *previous_definition = Name::Reference(reference);
                 Ok(reference)
             }
             Entry::Vacant(entry) => {
@@ -282,14 +291,13 @@ impl<'a> Scopes<'a> {
         let enumerator = Enumerator { name, loc, id, ty, index, value };
         match self.lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
-                let previous_definition = match entry.get_mut() {
-                    Name::Reference(reference) =>
-                        error_todo!(reference, "variable redeclared as enumerator"),
-                    Name::Enumerator(previous_definition) => previous_definition,
-                };
+                let previous_definition = entry.get_mut();
                 // TODO: check that `enumerator` is a valid redeclaration of `previous_definition`
-                let enumerator = Enumerator { id: previous_definition.id, ..enumerator };
-                *previous_definition = enumerator;
+                let enumerator = Enumerator {
+                    id: previous_definition.id(),
+                    ..enumerator
+                };
+                *previous_definition = Name::Enumerator(enumerator);
                 Ok(enumerator)
             }
             Entry::Vacant(entry) => {

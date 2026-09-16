@@ -53,6 +53,7 @@ use crate::scope::IncrementFixity;
 use crate::scope::IsInGlobalScope;
 use crate::scope::IsParameter;
 use crate::scope::Linkage;
+use crate::scope::Name;
 use crate::scope::Redeclared;
 use crate::scope::RefInitialiser;
 use crate::scope::RefKind;
@@ -1027,6 +1028,21 @@ fn typeck_ty<'a>(
     typeck_ty_with_initialiser(sess, ty, is_parameter, None)
 }
 
+fn typeck_previous_definition<'a>(
+    sess: &'a Session<'a>,
+    previous_definition: &Name<'a>,
+    needs_initialiser: NeedsInitialiser,
+) -> Reference<'a> {
+    match previous_definition {
+        Name::Reference(previous_definition) =>
+            typeck_reference(sess, *previous_definition, needs_initialiser),
+        Name::Enumerator(previous_definition) => unimplemented_todo!(
+            previous_definition,
+            "typechecking enumerators for when checking if previous definition is allowed",
+        ),
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 enum NeedsInitialiser {
     No,
@@ -1064,7 +1080,7 @@ fn typeck_reference<'a>(
         Some(previous_definition) => {
             // TODO: this is quadratic in the number of previous decls for this name
             let previous_definition =
-                typeck_reference(sess, *previous_definition, needs_initialiser);
+                typeck_previous_definition(sess, previous_definition, needs_initialiser);
             let previous_linkage = previous_definition.linkage();
             let previous_ty = previous_definition.ty;
             let composite_ty = ty.composite_ty(sess.bump(), &previous_ty).unwrap_or(ty);
@@ -1576,7 +1592,8 @@ fn typeck_reference_declaration<'a>(
 
     if let Some(previous_definition) = previous_definition {
         // TODO: this is quadratic in the number of previous decls for this name
-        let previous_definition = typeck_reference(sess, *previous_definition, needs_initialiser);
+        let previous_definition =
+            typeck_previous_definition(sess, previous_definition, needs_initialiser);
         if previous_definition.storage_duration != StorageDuration::Static(Linkage::Inline)
             && previous_definition.storage_duration != reference.storage_duration
         {
@@ -2912,8 +2929,11 @@ fn typeck_declaration_in_global_scope<'a>(
                 StorageDuration::Static(Some(Linkage::External)),
             ) || declaration.function_specifiers.inline.is_none())
                 && let Some(previous_definition) = declaration.reference.previous_definition
-                && let previous_definition =
-                    typeck_reference(sess, *previous_definition, NeedsInitialiser::Yes)
+                && let previous_definition = typeck_previous_definition(
+                    sess,
+                    previous_definition,
+                    NeedsInitialiser::Yes,
+                )
                 && let StorageDuration::Static(Linkage::Inline) =
                     previous_definition.storage_duration =>
             ExternalDeclaration::ProvideExternalDefinitionForInlineFunction(decl.reference.name()),

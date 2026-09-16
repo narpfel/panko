@@ -43,7 +43,7 @@ use panko_report::Sliced as _;
 
 use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
-use crate::scope::scopes::Name;
+pub(crate) use crate::scope::scopes::Name;
 use crate::scope::scopes::Scopes;
 use crate::scope::scopes::Tag;
 use crate::scope::scopes::Tagged;
@@ -507,7 +507,7 @@ pub struct Reference<'a> {
     pub(crate) id: Id,
     pub(crate) usage_loc: Loc<'a>,
     pub(crate) storage_duration: StorageDuration<Option<Linkage>>,
-    pub(crate) previous_definition: Option<&'a Self>,
+    pub(crate) previous_definition: Option<&'a Name<'a>>,
     pub(crate) is_parameter: IsParameter,
     pub(crate) is_in_global_scope: IsInGlobalScope,
     pub(crate) initialiser: Option<RefInitialiser<'a>>,
@@ -609,7 +609,7 @@ pub(crate) struct Enumerator<'a> {
 }
 
 impl<'a> Enumerator<'a> {
-    fn loc(&self) -> Loc<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
         self.loc
     }
 }
