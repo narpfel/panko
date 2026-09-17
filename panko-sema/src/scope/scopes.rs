@@ -563,7 +563,7 @@ impl<'a> Scopes<'a> {
         self.scopes.last_mut().pop();
     }
 
-    pub(super) fn id(self: &mut core::view_type!(Self.{next_id})) -> Id {
+    pub(super) fn id(&mut self) -> Id {
         let id = Id(self.next_id);
         self.next_id += 1;
         id
