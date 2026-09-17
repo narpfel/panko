@@ -34,9 +34,12 @@ use crate::ty::Enum;
 use crate::ty::Struct;
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum Name<'a> {
+struct Unfixupped<'a>(Enumerator<'a>);
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum Name<'a, E = Enumerator<'a>> {
     Reference(Reference<'a>),
-    Enumerator(Enumerator<'a>),
+    Enumerator(E),
 }
 
 impl<'a> Name<'a> {
@@ -112,7 +115,7 @@ pub(super) struct Tagged<'a> {
 
 #[derive(Debug, Default)]
 struct Scope<'a> {
-    names: nonempty::Vec<HashMap<&'a str, Name<'a>>>,
+    names: nonempty::Vec<HashMap<&'a str, Name<'a, Unfixupped<'a>>>>,
     type_names: nonempty::Vec<HashMap<&'a str, QualifiedType<'a>>>,
     tagged: nonempty::Vec<HashMap<&'a str, Id>>,
     function_name: Option<&'a str>,
@@ -126,7 +129,7 @@ impl<'a> Scope<'a> {
         }
     }
 
-    fn lookup(&self, name: &'a str) -> Option<Name<'a>> {
+    fn lookup(&self, name: &'a str) -> Option<Name<'a, Unfixupped<'a>>> {
         self.names
             .iter()
             .rev()
@@ -134,7 +137,7 @@ impl<'a> Scope<'a> {
             .copied()
     }
 
-    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Name<'a>> {
+    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Name<'a, Unfixupped<'a>>> {
         self.names.last_mut().entry(name)
     }
 
@@ -206,6 +209,21 @@ struct Env<'a> {
     tagged: HashMap<Id, Tagged<'a>>,
 }
 
+impl<'a> Env<'a> {
+    fn fixup_enumerator_ty(&self, name: Name<'a, Unfixupped<'a>>) -> Name<'a> {
+        match name {
+            Name::Reference(reference) => Name::Reference(reference),
+            Name::Enumerator(Unfixupped(enumerator)) => {
+                let ty = match self.tagged.get(&enumerator.ty.id()) {
+                    Some(Tagged { ty: Type::Enum(r#enum), tag: _, loc: _ }) => *r#enum,
+                    _ => unreachable!(),
+                };
+                Name::Enumerator(Enumerator { ty, ..enumerator })
+            }
+        }
+    }
+}
+
 #[derive(Debug)]
 pub(super) struct Scopes<'a> {
     pub(super) sess: &'a Session<'a>,
@@ -254,9 +272,10 @@ impl<'a> Scopes<'a> {
             is_in_global_scope,
             initialiser: None,
         };
-        match self.lookup_innermost(name) {
+        match self.scopes.last_mut().lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
-                let previous_definition = entry.get_mut();
+                let stored = entry.get_mut();
+                let previous_definition = self.env.fixup_enumerator_ty(*stored);
                 let reference = Reference {
                     id: previous_definition.id(),
                     previous_definition: Some(
@@ -264,7 +283,7 @@ impl<'a> Scopes<'a> {
                     ),
                     ..reference
                 };
-                *previous_definition = Name::Reference(reference);
+                *stored = Name::Reference(reference);
                 Ok(reference)
             }
             Entry::Vacant(entry) => {
@@ -289,19 +308,20 @@ impl<'a> Scopes<'a> {
         let name = name.slice();
         let id = self.id();
         let enumerator = Enumerator { name, loc, id, ty, index, value };
-        match self.lookup_innermost(name) {
+        match self.scopes.last_mut().lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
-                let previous_definition = entry.get_mut();
+                let stored = entry.get_mut();
+                let previous_definition = self.env.fixup_enumerator_ty(*stored);
                 // TODO: check that `enumerator` is a valid redeclaration of `previous_definition`
                 let enumerator = Enumerator {
                     id: previous_definition.id(),
                     ..enumerator
                 };
-                *previous_definition = Name::Enumerator(enumerator);
+                *stored = Name::Enumerator(Unfixupped(enumerator));
                 Ok(enumerator)
             }
             Entry::Vacant(entry) => {
-                entry.insert(Name::Enumerator(enumerator));
+                entry.insert(Name::Enumerator(Unfixupped(enumerator)));
                 Ok(enumerator)
             }
         }
@@ -313,8 +333,8 @@ impl<'a> Scopes<'a> {
         name: &'a str,
         ty: QualifiedType<'a>,
     ) -> Result<Option<QualifiedType<'a>>, Name<'a>> {
-        if let Entry::Occupied(entry) = self.lookup_innermost(name) {
-            return Err(*entry.get());
+        if let Entry::Occupied(entry) = self.scopes.last_mut().lookup_innermost(name) {
+            return Err(self.env.fixup_enumerator_ty(*entry.get()));
         }
 
         match self.lookup_ty_innermost(name) {
@@ -387,21 +407,11 @@ impl<'a> Scopes<'a> {
                 .iter()
                 .rev()
                 .find_map(|scope| scope.lookup(name))
-                .map(|name| match name {
-                    Name::Reference(reference) => Name::Reference(reference.at(loc)),
-                    Name::Enumerator(Enumerator { name, loc: _, id, ty, index, value }) => {
-                        let ty = match self.env.tagged.get(&ty.id()) {
-                            Some(Tagged { ty: Type::Enum(r#enum), tag: _, loc: _ }) => *r#enum,
-                            _ => unreachable!(),
-                        };
-                        Name::Enumerator(Enumerator { name, loc, id, ty, index, value })
-                    }
-                })
-                .map(Either::Left),
+                .map(|name| Either::Left(self.env.fixup_enumerator_ty(name).at(loc))),
         }
     }
 
-    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Name<'a>> {
+    fn lookup_innermost(&mut self, name: &'a str) -> Entry<&'a str, Name<'a, Unfixupped<'a>>> {
         self.scopes.last_mut().lookup_innermost(name)
     }
 
