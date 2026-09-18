@@ -59,3 +59,51 @@ Error: redeclaration of `union Name~12` with different tag `struct`
     │            ──┬─  
     │              ╰─── redeclared here as `struct`
 ────╯
+
+Error: redeclaration of `enum E~17 complete` with different tag `struct`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:41:12]
+    │
+ 39 │     enum E { A, B };
+    │          ┬  
+    │          ╰── previously declared here as `enum`
+    │ 
+ 41 │     struct E;
+    │            ┬  
+    │            ╰── redeclared here as `struct`
+────╯
+
+Error: redeclaration of `struct Wat~22` with different tag `enum`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:47:10]
+    │
+ 45 │     struct Wat;
+    │            ─┬─  
+    │             ╰─── previously declared here as `struct`
+    │ 
+ 47 │     enum Wat { X };
+    │          ─┬─  
+    │           ╰─── redeclared here as `enum`
+────╯
+
+Error: redeclaration of `enum Incomplete~26` with different tag `struct`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:53:12]
+    │
+ 51 │     enum Incomplete;
+    │          ─────┬────  
+    │               ╰────── previously declared here as `enum`
+    │ 
+ 53 │     struct Incomplete;
+    │            ─────┬────  
+    │                 ╰────── redeclared here as `struct`
+────╯
+
+Error: redeclaration of `struct AlsoIncomplete~29` with different tag `enum`
+    ╭─[panko/tests/cases/execute/struct/test_error_redeclaration_with_different_tag.c:59:10]
+    │
+ 57 │     struct AlsoIncomplete;
+    │            ───────┬──────  
+    │                   ╰──────── previously declared here as `struct`
+    │ 
+ 59 │     enum AlsoIncomplete;
+    │          ───────┬──────  
+    │                 ╰──────── redeclared here as `enum`
+────╯

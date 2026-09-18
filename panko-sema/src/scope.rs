@@ -6,6 +6,7 @@ use std::path::Path;
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
 use ariadne::Fmt as _;
+use itertools::Either;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
@@ -27,6 +28,7 @@ use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast;
 use panko_parser::ast::DeclarationSpecifiers;
+use panko_parser::ast::Enum;
 use panko_parser::ast::FromError;
 use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::FunctionStorageClass;
@@ -34,6 +36,7 @@ use panko_parser::ast::Qualifiers;
 use panko_parser::ast::Session;
 use panko_parser::ast::Struct;
 use panko_parser::ast::reject_function_specifiers;
+use panko_parser::error_todo;
 use panko_parser::sexpr_builder::SExpr;
 use panko_parser::unimplemented_todo;
 use panko_report::Report;
@@ -41,6 +44,7 @@ use panko_report::Sliced as _;
 
 use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
+pub(crate) use crate::scope::scopes::Name;
 use crate::scope::scopes::Scopes;
 use crate::scope::scopes::Tag;
 use crate::scope::scopes::Tagged;
@@ -83,19 +87,34 @@ pub(crate) enum Diagnostic<'a> {
         kind: &'a str,
     },
 
-    #[error("{kind} name `{name}` redeclared as `{typedef}` name")]
+    #[error("{kind} name `{name_str}` redeclared as `{typedef}` name")]
     #[diagnostics(
         at(colour = Red, label = "redeclared here as a `{typedef}` name"),
-        reference(colour = Blue, label = "originally declared here as a {kind} name"),
+        name(colour = Blue, label = "originally declared here as a {kind} name"),
     )]
     #[with(
         typedef = "typedef".fg(Red),
-        name = reference.name,
+        name_str = name.name(),
     )]
     ValueRedeclaredAsTypedef {
         at: QualifiedType<'a>,
-        reference: Reference<'a>,
+        name: Name<'a>,
         kind: &'a str,
+    },
+
+    // TODO: this should show `function name ...` for redeclared functions, but that needs typeck
+    #[error("value name `{name}` redeclared as {red_enumerator} name")]
+    #[diagnostics(
+        at(colour = Red, label = "redeclared here as an {red_enumerator} name"),
+        variable(colour = Blue, label = "originally declared here as a value name"),
+    )]
+    #[with(
+        red_enumerator = "enumerator".fg(Red),
+        name = variable.name,
+    )]
+    VariableRedeclaredAsEnumerator {
+        at: Token<'a>,
+        variable: Reference<'a>,
     },
 
     #[error("redeclaration of `{previous_ty}` with different tag `{actual}`")]
@@ -207,6 +226,7 @@ pub(crate) struct BitfieldWidth<'a> {
 pub(crate) enum Scope {}
 
 impl ty::Step for Scope {
+    type Enumerators<'a> = NoHashEq<Enumerators<'a>>;
     type LengthExpr<'a> = NoHashEq<Option<&'a Expression<'a>>>;
     type Member<'a> = NoHashEq<Member<'a>>;
     type TypeofExpr<'a> = NoHashEq<Typeof<'a>>;
@@ -249,7 +269,7 @@ impl<'a> FromError<'a> for ExternalDeclaration<'a> {
 pub(crate) enum Redeclared<'a> {
     ValueAsTypedef {
         at: QualifiedType<'a>,
-        reference: Reference<'a>,
+        name: Name<'a>,
     },
     TypedefAsValue {
         at: Token<'a>,
@@ -261,14 +281,14 @@ pub(crate) enum Redeclared<'a> {
 impl<'a> Redeclared<'a> {
     pub(crate) fn ty(&self) -> &QualifiedType<'a> {
         match self {
-            Self::ValueAsTypedef { at: _, reference } => &reference.ty,
+            Self::ValueAsTypedef { at: _, name } => name.ty(),
             Self::TypedefAsValue { at: _, typedef_ty: _, value_ty } => value_ty,
         }
     }
 
     fn name(&self) -> &'a str {
         match self {
-            Self::ValueAsTypedef { at: _, reference } => reference.name,
+            Self::ValueAsTypedef { at: _, name } => name.name(),
             Self::TypedefAsValue { at, typedef_ty: _, value_ty: _ } => at.slice(),
         }
     }
@@ -483,6 +503,16 @@ pub(crate) enum Expression<'a> {
         open_paren: Token<'a>,
         decl: Declaration<'a>,
     },
+    Enumerator(Enumerator<'a>),
+}
+
+impl<'a> From<Name<'a>> for Expression<'a> {
+    fn from(name: Name<'a>) -> Self {
+        match name {
+            Name::Reference(reference) => Self::Name(reference),
+            Name::Enumerator(enumerator) => Self::Enumerator(enumerator),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -499,7 +529,7 @@ pub struct Reference<'a> {
     pub(crate) initialiser: Option<RefInitialiser<'a>>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy)]
 pub enum RefKind {
     Declaration,
     TentativeDefinition,
@@ -583,6 +613,25 @@ pub enum BuiltinNameKind<'a> {
     OverflowArgArea,
     Func(&'a ByteStr),
 }
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Enumerator<'a> {
+    pub(crate) name: &'a str,
+    pub(crate) loc: Loc<'a>,
+    pub(crate) id: Id,
+    pub(crate) ty: ty::Enum<'a, Scope>,
+    pub(crate) index: usize,
+    pub(crate) value: Option<&'a Expression<'a>>,
+}
+
+impl<'a> Enumerator<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
+        self.loc
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Enumerators<'a>(pub(crate) &'a [Enumerator<'a>]);
 
 impl fmt::Display for BuiltinNameKind<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -703,6 +752,7 @@ impl<'a> Expression<'a> {
             Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
             Expression::CompoundLiteral { open_paren, decl } =>
                 open_paren.loc().until(decl.initialiser.unwrap().loc()),
+            Expression::Enumerator(enumerator) => enumerator.loc(),
         }
     }
 }
@@ -904,6 +954,13 @@ fn reresolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &QualifiedType<'a>) -> Qualifie
                     kind,
                 )
                 .ty,
+        Type::Enum(r#enum @ ty::Enum::Complete(_)) => Type::Enum(r#enum),
+        Type::Enum(ty::Enum::Incomplete { name: Some(name), id: _ }) => {
+            let name = Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name);
+            scopes.lookup_or_add_enum(Some(name)).ty
+        }
+        Type::Enum(ty::Enum::Incomplete { name: None, id }) =>
+            Type::Enum(ty::Enum::Incomplete { name: None, id }),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -942,6 +999,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             allow_bitfields: false,
         },
         ast::Type::Struct(r#struct) => resolve_struct(scopes, &r#struct),
+        ast::Type::Enum(r#enum) => resolve_enum(scopes, &r#enum),
     };
     let loc = HashEqIgnored(loc);
     QualifiedType { is_const, is_volatile, ty, loc }
@@ -1070,6 +1128,62 @@ fn resolve_struct_members<'a>(
     sess.alloc_slice_collect(members)
 }
 
+fn resolve_enum<'a>(scopes: &mut Scopes<'a>, r#enum: &Enum<'a>) -> Type<'a> {
+    let (Tagged { ty, tag, loc }, previous_decl) = match *r#enum {
+        Enum::Incomplete { name } => (scopes.lookup_or_add_enum(Some(name)), None),
+        Enum::Complete { name, enumerators } => {
+            // TODO: if redeclared, check that redeclaration is valid
+            scopes.lookup_or_add_complete_enum(name, enumerators)
+        }
+    };
+    let expected = try { previous_decl?.tag }.unwrap_or(tag);
+    let actual = Tag::Enum;
+    if expected != actual {
+        scopes.sess.emit(Diagnostic::TagMismatchInRedeclaration {
+            at: r#enum.loc(),
+            previous_decl: try { previous_decl?.loc? }
+                .or(loc)
+                .expect("only named enums are redeclared")
+                .loc(),
+            previous_ty: try { previous_decl?.ty }.unwrap_or(ty),
+            expected,
+            actual,
+        })
+    }
+    ty
+}
+
+fn resolve_enumerators<'a>(
+    scopes: &mut Scopes<'a>,
+    ty: ty::Enum<'a, Scope>,
+    enumerators: &[cst::Enumerator<'a>],
+) -> Enumerators<'a> {
+    let sess = scopes.sess;
+    let enumerators = enumerators.iter().enumerate().map(|(i, enumerator)| {
+        let cst::Enumerator { name, value } = *enumerator;
+        let value = try { sess.alloc(resolve_expr(scopes, &value?)) };
+        scopes
+            .add_enumerator(name, ty, i, value)
+            .unwrap_or_else(|previous_declaration| {
+                let error = match previous_declaration {
+                    Either::Left(ty) =>
+                        Diagnostic::TypedefRedeclaredAsValue { at: name, ty, kind: "enumerator" },
+                    Either::Right(variable) =>
+                        Diagnostic::VariableRedeclaredAsEnumerator { at: name, variable },
+                };
+                Enumerator {
+                    name: name.slice(),
+                    loc: name.loc(),
+                    id: scopes.id(),
+                    ty,
+                    index: i,
+                    value: Some(sess.alloc(sess.emit(error))),
+                }
+            })
+    });
+    Enumerators(sess.alloc_slice_fill_iter(enumerators))
+}
+
 fn resolve_function_definition<'a>(
     scopes: &mut Scopes<'a>,
     def: &ast::FunctionDefinition<'a>,
@@ -1117,12 +1231,14 @@ fn resolve_function_definition<'a>(
             scopes.add_initialiser(&reference, initialiser);
             Reference { initialiser, ..reference }
         }
-        Err(ty) =>
+        Err(Either::Left(ty)) =>
             return scopes.sess.emit(Diagnostic::TypedefRedeclaredAsValue {
                 at: name,
                 ty,
                 kind: "function",
             }),
+        Err(Either::Right(enumerator)) =>
+            error_todo!(enumerator, "function redeclared as enumerator"),
     };
     scopes.push(name.slice());
 
@@ -1370,7 +1486,7 @@ fn resolve_typedef_declaration<'a>(
     match previously_declared_as {
         Ok(previously_declared_as) =>
             Declarator::Typedef(Typedef { ty, name, previously_declared_as }),
-        Err(reference) => Declarator::Redeclared(Redeclared::ValueAsTypedef { at: ty, reference }),
+        Err(name) => Declarator::Redeclared(Redeclared::ValueAsTypedef { at: ty, name }),
     }
 }
 
@@ -1392,13 +1508,15 @@ fn resolve_value_declaration<'a>(
     );
     let reference = match maybe_reference {
         Ok(reference) => reference,
-        Err(typedef_ty) => {
+        Err(Either::Left(typedef_ty)) => {
             return Declarator::Redeclared(Redeclared::TypedefAsValue {
                 at: name,
                 typedef_ty,
                 value_ty: ty,
             });
         }
+        Err(Either::Right(enumerator)) =>
+            error_todo!(enumerator, "enumerator redeclared as variable"),
     };
     // TODO: move resolving the initialiser into `Scopes::add` so that the `add_initialiser` call
     // cannot be forgotten
@@ -1549,7 +1667,7 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::Name(name) => try {
             scopes
                 .lookup(name.slice(), name.loc())?
-                .map_left(Expression::Name)
+                .map_left(Expression::from)
                 .map_right(Expression::BuiltinName)
                 .into_inner()
         }

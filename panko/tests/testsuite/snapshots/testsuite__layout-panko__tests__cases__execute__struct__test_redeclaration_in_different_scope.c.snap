@@ -1,0 +1,23 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/struct/test_redeclaration_in_different_scope.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_redeclaration_in_different_scope.c"
+   (struct T~0
+      (member x @0 `int`))
+   (function-definition external stack-size=24
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (struct T~3
+            (member l @0 `long`))
+         (return (truncate `int` @0 (8 `unsigned long` @8))))))
+
+----- stderr -----
