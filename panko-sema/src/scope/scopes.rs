@@ -64,13 +64,6 @@ impl<'a> Name<'a> {
         }
     }
 
-    fn id(&self) -> Id {
-        match self {
-            Self::Reference(reference) => reference.id,
-            Self::Enumerator(enumerator) => enumerator.id,
-        }
-    }
-
     fn at(&self, loc: Loc<'a>) -> Name<'a> {
         match self {
             Self::Reference(reference) => Self::Reference(reference.at(loc)),
@@ -253,9 +246,9 @@ impl<'a> Scopes<'a> {
         storage_duration: StorageDuration<Option<Linkage>>,
         is_parameter: IsParameter,
         is_in_global_scope: IsInGlobalScope,
-    ) -> Result<Reference<'a>, QualifiedType<'a>> {
+    ) -> Result<Reference<'a>, Either<QualifiedType<'a>, Enumerator<'a>>> {
         if let Entry::Occupied(entry) = self.lookup_ty_innermost(name) {
-            return Err(*entry.get());
+            return Err(Either::Left(*entry.get()));
         }
 
         let sess = self.sess;
@@ -275,9 +268,12 @@ impl<'a> Scopes<'a> {
         match self.scopes.last_mut().lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
                 let stored = entry.get_mut();
-                let previous_definition = self.env.fixup_enumerator_ty(*stored);
+                let previous_definition = match self.env.fixup_enumerator_ty(*stored) {
+                    Name::Reference(reference) => reference,
+                    Name::Enumerator(enumerator) => return Err(Either::Right(enumerator)),
+                };
                 let reference = Reference {
-                    id: previous_definition.id(),
+                    id: previous_definition.id,
                     previous_definition: Some(
                         sess.alloc(previous_definition.at(previous_definition.loc())),
                     ),
@@ -293,15 +289,16 @@ impl<'a> Scopes<'a> {
         }
     }
 
+    #[expect(clippy::result_large_err)]
     pub(super) fn add_enumerator(
         &mut self,
         name: Token<'a>,
         ty: Enum<'a, super::Scope>,
         index: usize,
         value: Option<&'a Expression<'a>>,
-    ) -> Result<Enumerator<'a>, QualifiedType<'a>> {
+    ) -> Result<Enumerator<'a>, Either<QualifiedType<'a>, Reference<'a>>> {
         if let Entry::Occupied(entry) = self.lookup_ty_innermost(name.slice()) {
-            return Err(*entry.get());
+            return Err(Either::Left(*entry.get()));
         }
 
         let loc = name.loc();
@@ -311,12 +308,12 @@ impl<'a> Scopes<'a> {
         match self.scopes.last_mut().lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
                 let stored = entry.get_mut();
-                let previous_definition = self.env.fixup_enumerator_ty(*stored);
-                // TODO: check that `enumerator` is a valid redeclaration of `previous_definition`
-                let enumerator = Enumerator {
-                    id: previous_definition.id(),
-                    ..enumerator
+                let previous_definition = match self.env.fixup_enumerator_ty(*stored) {
+                    Name::Reference(reference) => return Err(Either::Right(reference)),
+                    Name::Enumerator(enumerator) => enumerator,
                 };
+                // TODO: check that `enumerator` is a valid redeclaration of `previous_definition`
+                let enumerator = Enumerator { id: previous_definition.id, ..enumerator };
                 *stored = Name::Enumerator(Unfixupped(enumerator));
                 Ok(enumerator)
             }
@@ -352,7 +349,7 @@ impl<'a> Scopes<'a> {
         loc: Loc<'a>,
         ty: QualifiedType<'a>,
         linkage: Linkage,
-    ) -> Result<Reference<'a>, QualifiedType<'a>> {
+    ) -> Result<Reference<'a>, Either<QualifiedType<'a>, Enumerator<'a>>> {
         self.add(
             name,
             loc,

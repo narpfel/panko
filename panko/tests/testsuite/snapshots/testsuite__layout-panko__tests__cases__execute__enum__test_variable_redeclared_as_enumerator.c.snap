@@ -7,14 +7,19 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/enum/test_variable_redeclared_as_enumerator.c
 ---
-success: true
-exit_code: 0
+success: false
+exit_code: 1
 ----- stdout -----
-(translation-unit "panko/tests/cases/execute/enum/test_variable_redeclared_as_enumerator.c"
-   (tentative-definition external (Value~0 `int` (static Value)) ∅)
-   (enum E~1
-      (enumerators
-         (enumerator Other~2 0 `int` 0)
-         (enumerator Value~0 1 `int` 1))))
 
 ----- stderr -----
+Error: value name `Value` redeclared as enumerator name
+   ╭─[panko/tests/cases/execute/enum/test_variable_redeclared_as_enumerator.c:4:17]
+   │
+ 1 │ int Value;
+   │     ──┬──  
+   │       ╰──── originally declared here as a value name
+   │ 
+ 4 │ enum E { Other, Value };
+   │                 ──┬──  
+   │                   ╰──── redeclared here as an enumerator name
+───╯
