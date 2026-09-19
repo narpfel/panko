@@ -1761,15 +1761,7 @@ where
         true => "function",
         false => "value",
     };
-    let diagnostic = match *redeclared {
-        Redeclared::ValueAsTypedef { at, name } =>
-            scope::Diagnostic::ValueRedeclaredAsTypedef { at, name, kind },
-        Redeclared::TypedefAsValue { at, typedef_ty, value_ty: _ } =>
-            scope::Diagnostic::TypedefRedeclaredAsValue { at, ty: typedef_ty, kind },
-        Redeclared::EnumeratorAsVariable { enumerator, at, value_ty: _ } =>
-            scope::Diagnostic::EnumeratorRedeclaredAsVariable { at, enumerator, kind },
-    };
-    sess.emit(diagnostic)
+    redeclared.into_diagnostic(sess, kind)
 }
 
 fn compare_by_size_with_unsigned_as_tie_breaker(ty: &Arithmetic) -> impl Ord + use<> {

@@ -28,6 +28,7 @@ use crate::fake_trait_impls::NoHashEq;
 use crate::scope::BuiltinName;
 use crate::scope::Enumerator;
 use crate::scope::Expression;
+use crate::scope::Redeclared;
 use crate::ty::Complete;
 use crate::ty::CompleteEnum;
 use crate::ty::Enum;
@@ -238,6 +239,7 @@ impl<'a> Scopes<'a> {
         }
     }
 
+    #[expect(clippy::result_large_err)]
     pub(super) fn add(
         &mut self,
         name: &'a str,
@@ -246,9 +248,13 @@ impl<'a> Scopes<'a> {
         storage_duration: StorageDuration<Option<Linkage>>,
         is_parameter: IsParameter,
         is_in_global_scope: IsInGlobalScope,
-    ) -> Result<Reference<'a>, Either<QualifiedType<'a>, Enumerator<'a>>> {
+    ) -> Result<Reference<'a>, Redeclared<'a>> {
         if let Entry::Occupied(entry) = self.lookup_ty_innermost(name) {
-            return Err(Either::Left(*entry.get()));
+            return Err(Redeclared::TypedefAsValue {
+                at: loc,
+                typedef_ty: *entry.get(),
+                value_ty: ty,
+            });
         }
 
         let sess = self.sess;
@@ -270,7 +276,12 @@ impl<'a> Scopes<'a> {
                 let stored = entry.get_mut();
                 let previous_definition = match self.env.fixup_enumerator_ty(*stored) {
                     Name::Reference(reference) => reference,
-                    Name::Enumerator(enumerator) => return Err(Either::Right(enumerator)),
+                    Name::Enumerator(enumerator) =>
+                        return Err(Redeclared::EnumeratorAsVariable {
+                            enumerator,
+                            at: loc,
+                            value_ty: ty,
+                        }),
                 };
                 let reference = Reference {
                     id: previous_definition.id,
@@ -296,9 +307,13 @@ impl<'a> Scopes<'a> {
         ty: Enum<'a, super::Scope>,
         index: usize,
         value: Option<&'a Expression<'a>>,
-    ) -> Result<Enumerator<'a>, Either<QualifiedType<'a>, Reference<'a>>> {
+    ) -> Result<Enumerator<'a>, Redeclared<'a>> {
         if let Entry::Occupied(entry) = self.lookup_ty_innermost(name.slice()) {
-            return Err(Either::Left(*entry.get()));
+            return Err(Redeclared::TypedefAsValue {
+                at: name.loc(),
+                typedef_ty: *entry.get(),
+                value_ty: Type::Enum(ty).unqualified(),
+            });
         }
 
         let loc = name.loc();
@@ -309,7 +324,11 @@ impl<'a> Scopes<'a> {
             Entry::Occupied(mut entry) => {
                 let stored = entry.get_mut();
                 let previous_definition = match self.env.fixup_enumerator_ty(*stored) {
-                    Name::Reference(reference) => return Err(Either::Right(reference)),
+                    Name::Reference(reference) =>
+                        return Err(Redeclared::VariableAsEnumerator {
+                            at: loc,
+                            variable: reference,
+                        }),
                     Name::Enumerator(enumerator) => enumerator,
                 };
                 // TODO: check that `enumerator` is a valid redeclaration of `previous_definition`
@@ -343,13 +362,14 @@ impl<'a> Scopes<'a> {
         }
     }
 
+    #[expect(clippy::result_large_err)]
     pub(super) fn add_function(
         &mut self,
         name: &'a str,
         loc: Loc<'a>,
         ty: QualifiedType<'a>,
         linkage: Linkage,
-    ) -> Result<Reference<'a>, Either<QualifiedType<'a>, Enumerator<'a>>> {
+    ) -> Result<Reference<'a>, Redeclared<'a>> {
         self.add(
             name,
             loc,

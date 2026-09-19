@@ -6,7 +6,6 @@ use std::path::Path;
 use ariadne::Color::Blue;
 use ariadne::Color::Red;
 use ariadne::Fmt as _;
-use itertools::Either;
 use itertools::Itertools as _;
 use panko_lex::Loc;
 use panko_lex::Token;
@@ -81,7 +80,7 @@ pub(crate) enum Diagnostic<'a> {
     )]
     #[with(typedef = "typedef".fg(Blue))]
     TypedefRedeclaredAsValue {
-        at: Token<'a>,
+        at: Loc<'a>,
         ty: QualifiedType<'a>,
         kind: &'a str,
     },
@@ -101,19 +100,19 @@ pub(crate) enum Diagnostic<'a> {
         kind: &'a str,
     },
 
-    // TODO: this should show `function name ...` for redeclared functions, but that needs typeck
-    #[error("value name `{name}` redeclared as {red_enumerator} name")]
+    #[error("{kind} name `{name}` redeclared as {red_enumerator} name")]
     #[diagnostics(
         at(colour = Red, label = "redeclared here as an {red_enumerator} name"),
-        variable(colour = Blue, label = "originally declared here as a value name"),
+        variable(colour = Blue, label = "originally declared here as a {kind} name"),
     )]
     #[with(
         red_enumerator = "enumerator".fg(Red),
         name = variable.name,
     )]
     VariableRedeclaredAsEnumerator {
-        at: Token<'a>,
+        at: Loc<'a>,
         variable: Reference<'a>,
+        kind: &'a str,
     },
 
     #[error("{blue_enumerator} name `{name}` redeclared as {kind} name")]
@@ -126,7 +125,7 @@ pub(crate) enum Diagnostic<'a> {
         name = enumerator.name,
     )]
     EnumeratorRedeclaredAsVariable {
-        at: Token<'a>,
+        at: Loc<'a>,
         enumerator: Enumerator<'a>,
         kind: &'a str,
     },
@@ -286,23 +285,45 @@ pub(crate) enum Redeclared<'a> {
         name: Name<'a>,
     },
     TypedefAsValue {
-        at: Token<'a>,
+        at: Loc<'a>,
         typedef_ty: QualifiedType<'a>,
         value_ty: QualifiedType<'a>,
     },
     EnumeratorAsVariable {
         enumerator: Enumerator<'a>,
-        at: Token<'a>,
+        at: Loc<'a>,
         value_ty: QualifiedType<'a>,
+    },
+    VariableAsEnumerator {
+        at: Loc<'a>,
+        variable: Reference<'a>,
     },
 }
 
 impl<'a> Redeclared<'a> {
+    pub(crate) fn into_diagnostic<E>(self, sess: &'a Session<'a>, kind: &'a str) -> E
+    where
+        E: FromError<'a>,
+    {
+        let diagnostic = match self {
+            Self::ValueAsTypedef { at, name } =>
+                Diagnostic::ValueRedeclaredAsTypedef { at, name, kind },
+            Self::TypedefAsValue { at, typedef_ty, value_ty: _ } =>
+                Diagnostic::TypedefRedeclaredAsValue { at, ty: typedef_ty, kind },
+            Self::EnumeratorAsVariable { enumerator, at, value_ty: _ } =>
+                Diagnostic::EnumeratorRedeclaredAsVariable { at, enumerator, kind },
+            Self::VariableAsEnumerator { at, variable } =>
+                Diagnostic::VariableRedeclaredAsEnumerator { at, variable, kind },
+        };
+        sess.emit(diagnostic)
+    }
+
     pub(crate) fn ty(&self) -> &QualifiedType<'a> {
         match self {
             Self::ValueAsTypedef { at: _, name } => name.ty(),
             Self::TypedefAsValue { at: _, typedef_ty: _, value_ty } => value_ty,
             Self::EnumeratorAsVariable { enumerator: _, at: _, value_ty } => value_ty,
+            Self::VariableAsEnumerator { at: _, variable } => &variable.ty,
         }
     }
 
@@ -311,6 +332,7 @@ impl<'a> Redeclared<'a> {
             Self::ValueAsTypedef { at: _, name } => name.name(),
             Self::TypedefAsValue { at, typedef_ty: _, value_ty: _ } => at.slice(),
             Self::EnumeratorAsVariable { enumerator, at: _, value_ty: _ } => enumerator.name,
+            Self::VariableAsEnumerator { at: _, variable } => variable.name,
         }
     }
 }
@@ -1185,21 +1207,14 @@ fn resolve_enumerators<'a>(
         let value = try { sess.alloc(resolve_expr(scopes, &value?)) };
         scopes
             .add_enumerator(name, ty, i, value)
-            .unwrap_or_else(|previous_declaration| {
-                let error = match previous_declaration {
-                    Either::Left(ty) =>
-                        Diagnostic::TypedefRedeclaredAsValue { at: name, ty, kind: "enumerator" },
-                    Either::Right(variable) =>
-                        Diagnostic::VariableRedeclaredAsEnumerator { at: name, variable },
-                };
-                Enumerator {
-                    name: name.slice(),
-                    loc: name.loc(),
-                    id: scopes.id(),
-                    ty,
-                    index: i,
-                    value: Some(sess.alloc(sess.emit(error))),
-                }
+            .unwrap_or_else(|redeclared| Enumerator {
+                name: name.slice(),
+                loc: name.loc(),
+                id: scopes.id(),
+                ty,
+                index: i,
+                // TODO: pass `"function"` for redeclared functions, but that needs typeck
+                value: Some(sess.alloc(redeclared.into_diagnostic(sess, "value"))),
             })
     });
     Enumerators(sess.alloc_slice_fill_iter(enumerators))
@@ -1252,20 +1267,7 @@ fn resolve_function_definition<'a>(
             scopes.add_initialiser(&reference, initialiser);
             Reference { initialiser, ..reference }
         }
-        Err(Either::Left(ty)) =>
-            return scopes.sess.emit(Diagnostic::TypedefRedeclaredAsValue {
-                at: name,
-                ty,
-                kind: "function",
-            }),
-        Err(Either::Right(enumerator)) => {
-            let error = Diagnostic::EnumeratorRedeclaredAsVariable {
-                at: name,
-                enumerator,
-                kind: "function",
-            };
-            return scopes.sess.emit(error);
-        }
+        Err(redeclared) => return redeclared.into_diagnostic(scopes.sess, "function"),
     };
     scopes.push(name.slice());
 
@@ -1535,19 +1537,7 @@ fn resolve_value_declaration<'a>(
     );
     let reference = match maybe_reference {
         Ok(reference) => reference,
-        Err(Either::Left(typedef_ty)) => {
-            return Declarator::Redeclared(Redeclared::TypedefAsValue {
-                at: name,
-                typedef_ty,
-                value_ty: ty,
-            });
-        }
-        Err(Either::Right(enumerator)) =>
-            return Declarator::Redeclared(Redeclared::EnumeratorAsVariable {
-                enumerator,
-                at: name,
-                value_ty: ty,
-            }),
+        Err(redeclared) => return Declarator::Redeclared(redeclared),
     };
     // TODO: move resolving the initialiser into `Scopes::add` so that the `add_initialiser` call
     // cannot be forgotten
