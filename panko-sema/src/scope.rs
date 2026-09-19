@@ -318,12 +318,12 @@ impl<'a> Redeclared<'a> {
         sess.emit(diagnostic)
     }
 
-    pub(crate) fn ty(&self) -> &QualifiedType<'a> {
+    pub(crate) fn ty(&self) -> Option<&QualifiedType<'a>> {
         match self {
             Self::ValueAsTypedef { at: _, name } => name.ty(),
-            Self::TypedefAsValue { at: _, typedef_ty: _, value_ty } => value_ty,
-            Self::EnumeratorAsVariable { enumerator: _, at: _, value_ty } => value_ty,
-            Self::VariableAsEnumerator { at: _, variable } => &variable.ty,
+            Self::TypedefAsValue { at: _, typedef_ty: _, value_ty } => Some(value_ty),
+            Self::EnumeratorAsVariable { enumerator: _, at: _, value_ty } => Some(value_ty),
+            Self::VariableAsEnumerator { at: _, variable } => Some(&variable.ty),
         }
     }
 

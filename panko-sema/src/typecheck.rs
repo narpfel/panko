@@ -1756,12 +1756,14 @@ fn typeck_redeclaration_error<'a, Error>(
 where
     Error: FromError<'a>,
 {
-    let ty = typeck_ty(sess, *redeclared.ty(), IsParameter::No);
-    let kind = match ty.ty.is_function() {
-        true => "function",
-        false => "value",
+    let kind = try {
+        let ty = typeck_ty(sess, *redeclared.ty()?, IsParameter::No);
+        match ty.ty.is_function() {
+            true => "function",
+            false => "value",
+        }
     };
-    redeclared.into_diagnostic(sess, kind)
+    redeclared.into_diagnostic(sess, kind.unwrap_or("enumerator"))
 }
 
 fn compare_by_size_with_unsigned_as_tie_breaker(ty: &Arithmetic) -> impl Ord + use<> {

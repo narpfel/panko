@@ -12,7 +12,6 @@ use panko_parser::StructKind;
 use panko_parser::ast;
 use panko_parser::ast::Session;
 use panko_parser::nonempty;
-use panko_parser::unimplemented_todo;
 
 use super::BuiltinNameKind;
 use super::Id;
@@ -58,10 +57,10 @@ impl<'a> Name<'a> {
         }
     }
 
-    pub(super) fn ty(&self) -> &QualifiedType<'a> {
+    pub(super) fn ty(&self) -> Option<&QualifiedType<'a>> {
         match self {
-            Self::Reference(reference) => &reference.ty,
-            Self::Enumerator(enumerator) => unimplemented_todo!(enumerator, "type of enumerator"),
+            Self::Reference(reference) => Some(&reference.ty),
+            Self::Enumerator(_) => None,
         }
     }
 

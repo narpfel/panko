@@ -1,0 +1,19 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_enumerator_redeclared_as_typedef.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enumerator_redeclared_as_typedef.c"
+   (enum E~0
+      (enumerators
+         (enumerator Type~1 `enum E~0`.0 ∅)))
+   (redeclared Type))
+
+----- stderr -----

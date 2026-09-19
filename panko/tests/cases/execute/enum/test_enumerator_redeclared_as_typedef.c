@@ -1,6 +1,3 @@
-// [[known-bug: this panics]]
-// [[nosnapshot]]
-
 enum E { Type };
 
 // [[compile-error: enumerator name `Type` redeclared as `typedef` name]]
