@@ -36,7 +36,6 @@ use panko_parser::ast::Qualifiers;
 use panko_parser::ast::Session;
 use panko_parser::ast::Struct;
 use panko_parser::ast::reject_function_specifiers;
-use panko_parser::error_todo;
 use panko_parser::sexpr_builder::SExpr;
 use panko_parser::unimplemented_todo;
 use panko_report::Report;
@@ -115,6 +114,21 @@ pub(crate) enum Diagnostic<'a> {
     VariableRedeclaredAsEnumerator {
         at: Token<'a>,
         variable: Reference<'a>,
+    },
+
+    #[error("{blue_enumerator} name `{name}` redeclared as {kind} name")]
+    #[diagnostics(
+        at(colour = Red, label = "redeclared here as a {kind} name"),
+        enumerator(colour = Blue, label = "originally declared here as an {blue_enumerator} name"),
+    )]
+    #[with(
+        blue_enumerator = "enumerator".fg(Blue),
+        name = enumerator.name,
+    )]
+    EnumeratorRedeclaredAsVariable {
+        at: Token<'a>,
+        enumerator: Enumerator<'a>,
+        kind: &'a str,
     },
 
     #[error("redeclaration of `{previous_ty}` with different tag `{actual}`")]
@@ -276,6 +290,11 @@ pub(crate) enum Redeclared<'a> {
         typedef_ty: QualifiedType<'a>,
         value_ty: QualifiedType<'a>,
     },
+    EnumeratorAsVariable {
+        enumerator: Enumerator<'a>,
+        at: Token<'a>,
+        value_ty: QualifiedType<'a>,
+    },
 }
 
 impl<'a> Redeclared<'a> {
@@ -283,6 +302,7 @@ impl<'a> Redeclared<'a> {
         match self {
             Self::ValueAsTypedef { at: _, name } => name.ty(),
             Self::TypedefAsValue { at: _, typedef_ty: _, value_ty } => value_ty,
+            Self::EnumeratorAsVariable { enumerator: _, at: _, value_ty } => value_ty,
         }
     }
 
@@ -290,6 +310,7 @@ impl<'a> Redeclared<'a> {
         match self {
             Self::ValueAsTypedef { at: _, name } => name.name(),
             Self::TypedefAsValue { at, typedef_ty: _, value_ty: _ } => at.slice(),
+            Self::EnumeratorAsVariable { enumerator, at: _, value_ty: _ } => enumerator.name,
         }
     }
 }
@@ -1237,8 +1258,14 @@ fn resolve_function_definition<'a>(
                 ty,
                 kind: "function",
             }),
-        Err(Either::Right(enumerator)) =>
-            error_todo!(enumerator, "function redeclared as enumerator"),
+        Err(Either::Right(enumerator)) => {
+            let error = Diagnostic::EnumeratorRedeclaredAsVariable {
+                at: name,
+                enumerator,
+                kind: "function",
+            };
+            return scopes.sess.emit(error);
+        }
     };
     scopes.push(name.slice());
 
@@ -1516,7 +1543,11 @@ fn resolve_value_declaration<'a>(
             });
         }
         Err(Either::Right(enumerator)) =>
-            error_todo!(enumerator, "enumerator redeclared as variable"),
+            return Declarator::Redeclared(Redeclared::EnumeratorAsVariable {
+                enumerator,
+                at: name,
+                value_ty: ty,
+            }),
     };
     // TODO: move resolving the initialiser into `Scopes::add` so that the `add_initialiser` call
     // cannot be forgotten

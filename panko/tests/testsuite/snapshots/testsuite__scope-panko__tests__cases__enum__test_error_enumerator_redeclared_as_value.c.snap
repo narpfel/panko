@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/enum/test_error_enumerator_redeclared_as_value.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/enum/test_error_enumerator_redeclared_as_value.c"
+   (enum E~0
+      (enumerators
+         (enumerator Variable~1 `enum E~0`.0 ∅)
+         (enumerator Function~2 `enum E~0`.1 ∅)))
+   (redeclared Variable)
+   (redeclared Function))
+
+----- stderr -----
