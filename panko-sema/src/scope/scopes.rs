@@ -2,7 +2,6 @@ use std::assert_matches;
 use std::bstr::ByteStr;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
-use std::collections::hash_map::OccupiedEntry;
 use std::fmt::Display;
 use std::vec::Drain;
 
@@ -147,17 +146,9 @@ impl<'a> Scope<'a> {
         self.type_names.last_mut().entry(name)
     }
 
-    fn tagged_entry<'e>(
-        &mut self,
-        env: &'e mut Env<'a>,
-        name: &'a str,
-    ) -> Option<OccupiedEntry<'e, Id, Tagged<'a>>> {
-        let mut scopes = self.tagged.iter_mut().rev();
-        let id = scopes.find_map(|scope| scope.get(name))?;
-        match env.tagged.entry(*id) {
-            Entry::Occupied(entry) => Some(entry),
-            Entry::Vacant(_) => None,
-        }
+    fn lookup_tagged<'e>(&self, env: &'e Env<'a>, name: &'a str) -> Option<&'e Tagged<'a>> {
+        let id = self.tagged.iter().rev().find_map(|scope| scope.get(name))?;
+        env.tagged.get(id)
     }
 
     fn lookup_tagged_innermost<'e>(
@@ -454,17 +445,12 @@ impl<'a> Scopes<'a> {
         self.env.tagged.get(id).copied()
     }
 
-    fn tagged_entry(&mut self, name: &'a str) -> Option<OccupiedEntry<Id, Tagged<'a>>> {
-        for scope in self.scopes.iter_mut().rev() {
-            if let Some(entry) = scope.tagged_entry(&mut self.env, name) {
-                return Some(entry);
-            }
-        }
-        None
-    }
-
-    fn lookup_tagged(&mut self, name: &'a str) -> Option<Tagged<'a>> {
-        self.tagged_entry(name).map(|entry| *entry.get())
+    fn lookup_tagged(&self, name: &'a str) -> Option<Tagged<'a>> {
+        self.scopes
+            .iter()
+            .rev()
+            .find_map(|scope| scope.lookup_tagged(&self.env, name))
+            .copied()
     }
 
     pub(super) fn lookup_or_add_struct(&mut self, loc: Token<'a>, kind: StructKind) -> Tagged<'a> {
