@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_typedef_redeclared_as_enumerator.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: `typedef` name `Name` redeclared as value name
+   ╭─[panko/tests/cases/execute/enum/test_typedef_redeclared_as_enumerator.c:6:8]
+   │
+ 3 │ typedef int Name;
+   │ ─────┬─────  
+   │      ╰─────── originally declared here as a `typedef` name
+   │ 
+ 6 │ enum { Name };
+   │        ──┬─  
+   │          ╰─── redeclared here as a value name
+───╯

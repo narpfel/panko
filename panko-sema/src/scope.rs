@@ -1214,6 +1214,7 @@ fn resolve_enumerators<'a>(
                 ty,
                 index: i,
                 // TODO: pass `"function"` for redeclared functions, but that needs typeck
+                // TODO: this is also incorrect for `Redeclared::TypedefAsValue`
                 value: Some(sess.alloc(redeclared.into_diagnostic(sess, "value"))),
             })
     });
