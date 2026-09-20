@@ -574,18 +574,18 @@ impl<'a> Scopes<'a> {
             Some(name) => {
                 self.lookup_tagged_innermost(name, id).insert_entry(tagged);
             }
-            None =>
-                if let Some(previous_decl) = self.env.tagged.insert(id, tagged) {
-                    assert_matches!(
-                        previous_decl,
-                        Tagged {
-                            ty: Type::Enum(Enum::Incomplete { name: None, id: old_id }),
-                            tag: Tag::Enum,
-                            loc: None,
-                        }
-                        if id == old_id,
-                    )
-                },
+            None => {
+                let previous_decl = self.env.tagged.insert(id, tagged);
+                assert_matches!(
+                    previous_decl,
+                    Some(Tagged {
+                        ty: Type::Enum(Enum::Incomplete { name: None, id: old_id }),
+                        tag: Tag::Enum,
+                        loc: None,
+                    })
+                    if id == old_id,
+                )
+            }
         }
 
         (tagged, previous_definition)
