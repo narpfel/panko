@@ -1,3 +1,4 @@
+use std::assert_matches;
 use std::bstr::ByteStr;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
@@ -509,7 +510,11 @@ impl<'a> Scopes<'a> {
                     .lookup_tagged_innermost(name, id)
                     .insert_entry(tagged)
                     .get(),
-                None => tagged,
+                None => {
+                    let was_present = self.env.tagged.insert(id, tagged);
+                    assert_matches!(was_present, None);
+                    tagged
+                }
             }
         })
     }
@@ -564,9 +569,23 @@ impl<'a> Scopes<'a> {
         let ty = Type::Enum(Enum::Complete(CompleteEnum { name, id, enumerators }));
         let tagged = Tagged { ty, tag: Tag::Enum, loc };
 
-        if let Some(name) = name {
-            // complete the forward declaration
-            self.lookup_tagged_innermost(name, id).insert_entry(tagged);
+        // complete the forward declaration
+        match name {
+            Some(name) => {
+                self.lookup_tagged_innermost(name, id).insert_entry(tagged);
+            }
+            None =>
+                if let Some(previous_decl) = self.env.tagged.insert(id, tagged) {
+                    assert_matches!(
+                        previous_decl,
+                        Tagged {
+                            ty: Type::Enum(Enum::Incomplete { name: None, id: old_id }),
+                            tag: Tag::Enum,
+                            loc: None,
+                        }
+                        if id == old_id,
+                    )
+                },
         }
 
         (tagged, previous_definition)
