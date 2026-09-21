@@ -627,6 +627,7 @@ impl<'a> Codegen<'a> {
         match stmt {
             Statement::StructDecl(_) | Statement::EnumDecl(_) => {
                 // struct and enum decls don’t generate code (they don’t contain VMT refs)
+                // TODO: enum decls can contain errors which should be emitted here
             }
             Statement::Declaration(decl) => self.declaration(decl),
             Statement::Typedef(_) => {
@@ -1338,6 +1339,7 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
         match decl {
             ExternalDeclaration::StructDecl(_) | ExternalDeclaration::EnumDecl(_) => {
                 // struct and enum decls don’t generate code (they don’t contain VMT refs)
+                // TODO: enum decls can contain errors which should be emitted here
             }
             ExternalDeclaration::FunctionDefinition(def) => cg.function_definition(def),
             ExternalDeclaration::Declaration(decl) => cg.external_declaration(decl),
