@@ -1516,7 +1516,7 @@ fn resolve_typedef_declaration<'a>(
     match previously_declared_as {
         Ok(previously_declared_as) =>
             Declarator::Typedef(Typedef { ty, name, previously_declared_as }),
-        Err(name) => Declarator::Redeclared(Redeclared::ValueAsTypedef { at: ty, name }),
+        Err(redeclared) => Declarator::Redeclared(redeclared),
     }
 }
 

@@ -339,9 +339,12 @@ impl<'a> Scopes<'a> {
         &mut self,
         name: &'a str,
         ty: QualifiedType<'a>,
-    ) -> Result<Option<QualifiedType<'a>>, Name<'a>> {
+    ) -> Result<Option<QualifiedType<'a>>, Redeclared<'a>> {
         if let Entry::Occupied(entry) = self.scopes.last_mut().lookup_innermost(name) {
-            return Err(self.env.fixup_enumerator_ty(*entry.get()));
+            return Err(Redeclared::ValueAsTypedef {
+                at: ty,
+                name: self.env.fixup_enumerator_ty(*entry.get()),
+            });
         }
 
         match self.lookup_ty_innermost(name) {
