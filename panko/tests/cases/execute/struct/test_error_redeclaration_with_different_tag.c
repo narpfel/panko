@@ -34,3 +34,27 @@ void i() {
 }
 
 int main() {}
+
+void j() {
+    enum E { A, B };
+    // [[compile-error: redeclaration of `enum E~\d+ complete` with different tag `struct`]]
+    struct E;
+}
+
+void k() {
+    struct Wat;
+    // [[compile-error: redeclaration of `struct Wat~\d+` with different tag `enum`]]
+    enum Wat { X };
+}
+
+void l() {
+    enum Incomplete;
+    // [[compile-error: redeclaration of `enum Incomplete~\d+` with different tag `struct`]]
+    struct Incomplete;
+}
+
+void m() {
+    struct AlsoIncomplete;
+    // [[compile-error: redeclaration of `struct AlsoIncomplete~\d+` with different tag `enum`]]
+    enum AlsoIncomplete;
+}

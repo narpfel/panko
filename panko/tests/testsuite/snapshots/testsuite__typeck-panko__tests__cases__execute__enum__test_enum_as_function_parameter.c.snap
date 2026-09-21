@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_enum_as_function_parameter.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid implicit conversion from `enum E~0 complete` to `enum E~0 complete`
+    ╭─[panko/tests/cases/execute/enum/test_enum_as_function_parameter.c:11:14]
+    │
+ 11 │     return f(x);
+    │              ┬  
+    │              ╰── this is of type `enum E~0 complete`, which cannot be implicitly converted to `enum E~0 complete`
+────╯

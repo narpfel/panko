@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/enum/test_error_enumerator_redeclared_as_function.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: enumerator name `Function` redeclared as function name
+   ╭─[panko/tests/cases/enum/test_error_enumerator_redeclared_as_function.c:3:6]
+   │
+ 1 │ enum E { Function };
+   │          ────┬───  
+   │              ╰───── originally declared here as an enumerator name
+   │ 
+ 3 │ void Function() {}
+   │      ────┬───  
+   │          ╰───── redeclared here as a function name
+───╯

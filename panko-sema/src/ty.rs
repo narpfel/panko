@@ -22,6 +22,7 @@ use crate::fake_trait_impls::HashEqIgnored;
 use crate::scope::Id;
 use crate::typecheck;
 use crate::typecheck::ArrayLength;
+use crate::typecheck::Enumerators;
 use crate::typecheck::Typeck;
 
 pub(crate) mod subobjects;
@@ -30,6 +31,7 @@ pub trait Step {
     type TypeofExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
     type LengthExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
     type Member<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
+    type Enumerators<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -170,6 +172,49 @@ impl<T: Step> Struct<'_, T> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct CompleteEnum<'a, T: Step> {
+    pub name: Option<&'a str>,
+    pub id: Id,
+    pub enumerators: T::Enumerators<'a>,
+}
+
+impl<T: Step> AsSExpr for CompleteEnum<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { name, id, enumerators } = self;
+        SExpr::new("enum")
+            .inline_string(format!("{name}~{id}", name = name.as_sexpr(), id = id.0))
+            .inherit(enumerators)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Enum<'a, T: Step> {
+    Incomplete { name: Option<&'a str>, id: Id },
+    Complete(CompleteEnum<'a, T>),
+}
+
+impl<T: Step> Enum<'_, T> {
+    pub(crate) fn id(&self) -> Id {
+        match self {
+            Self::Incomplete { name: _, id }
+            | Self::Complete(CompleteEnum { name: _, id, enumerators: _ }) => *id,
+        }
+    }
+}
+
+impl<T: Step> AsSExpr for Enum<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let s = match self {
+            Enum::Incomplete { name, id } =>
+                format!("enum {name}~{id}", name = name.as_sexpr(), id = id.0),
+            Enum::Complete(CompleteEnum { name, id, enumerators: _ }) =>
+                format!("enum {}~{} complete", name.as_sexpr(), id.0),
+        };
+        SExpr::string(s)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Type<'a, T: Step> {
     Arithmetic(Arithmetic),
     Pointer(&'a QualifiedType<'a, T>),
@@ -183,6 +228,7 @@ pub enum Type<'a, T: Step> {
     },
     Nullptr,
     Struct(Struct<'a, T>),
+    Enum(Enum<'a, T>),
     // TODO
 }
 
@@ -362,6 +408,7 @@ where
             TypeofExpr<'a> = !,
             LengthExpr<'a> = ArrayLength<E>,
             Member<'a> = typecheck::Member<'a, S>,
+            Enumerators<'a> = HashEqIgnored<Enumerators<'a, S>>,
         >,
 {
     pub fn is_object(&self) -> bool {
@@ -411,6 +458,11 @@ where
                 let member = member.unwrap_or_else(|| panic!("empty {kind}s are not allowed"));
                 (member.offset + member.ty.ty.size()).next_multiple_of(self.align())
             }
+            Type::Enum(Enum::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
+            Type::Enum(Enum::Complete(CompleteEnum { name: _, id: _, enumerators })) => {
+                let HashEqIgnored(Enumerators { ty, enumerators: _ }) = enumerators;
+                ty.size()
+            }
         }
     }
 
@@ -431,6 +483,11 @@ where
                 .map(|member| member.ty.ty.align())
                 .max()
                 .unwrap_or_else(|| panic!("empty {kind}s are not allowed")),
+            Type::Enum(Enum::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
+            Type::Enum(Enum::Complete(CompleteEnum { name: _, id: _, enumerators })) => {
+                let HashEqIgnored(Enumerators { ty, enumerators: _ }) = enumerators;
+                ty.align()
+            }
         }
     }
 
@@ -440,6 +497,7 @@ where
                 TypeofExpr<'b> = !,
                 LengthExpr<'b> = ArrayLength<E2>,
                 Member<'b> = typecheck::Member<'b, S2>,
+                Enumerators<'b> = HashEqIgnored<Enumerators<'b, S2>>,
             >,
     {
         // TODO: This is more restrictive than necessary.
@@ -456,6 +514,8 @@ where
             Type::Nullptr => true,
             Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) => false,
             Type::Struct(Struct::Complete(_)) => true,
+            Type::Enum(Enum::Incomplete { name: _, id: _ }) => false,
+            Type::Enum(Enum::Complete(_)) => true,
         }
     }
 
@@ -496,6 +556,8 @@ where
                 2 => Some(Class::Pair(PairKind::Integer)),
                 3.. => Some(Class::Memory),
             },
+            Self::Enum(Enum::Incomplete { name: _, id: _ }) => None,
+            Self::Enum(Enum::Complete(_)) => Some(Class::Integer),
         }
     }
 
@@ -537,6 +599,7 @@ impl<T: Step> fmt::Display for Type<'_, T> {
                 write!(f, "{kind} {name}~{id}", id = id.0),
             Type::Struct(Struct::Complete(Complete { name, id, kind, members: _ })) =>
                 write!(f, "{kind} {}~{} complete", name.as_sexpr(), id.0),
+            Type::Enum(r#enum) => write!(f, "{}", r#enum.as_sexpr()),
         }
     }
 }
@@ -657,7 +720,8 @@ impl<'a> QualifiedType<'a, Typeck> {
             | Type::Function(_)
             | Type::Void
             | Type::Nullptr
-            | Type::Struct(Struct::Incomplete { .. }) => true,
+            | Type::Struct(Struct::Incomplete { .. })
+            | Type::Enum(_) => true,
             Type::Struct(Struct::Complete(Complete { name: _, id: _, kind: _, members })) =>
                 members.iter().all(|member| member.ty.is_modifiable()),
         };

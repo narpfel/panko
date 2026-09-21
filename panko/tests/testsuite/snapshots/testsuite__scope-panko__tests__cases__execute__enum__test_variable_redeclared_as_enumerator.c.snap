@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_variable_redeclared_as_enumerator.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: value name `Value` redeclared as enumerator name
+   ╭─[panko/tests/cases/execute/enum/test_variable_redeclared_as_enumerator.c:4:17]
+   │
+ 1 │ int Value;
+   │     ──┬──  
+   │       ╰──── originally declared here as a value name
+   │ 
+ 4 │ enum E { Other, Value };
+   │                 ──┬──  
+   │                   ╰──── redeclared here as an enumerator name
+───╯

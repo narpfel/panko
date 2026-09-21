@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_enum_as_function_return_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_as_function_return_type.c"
+   (enum E~0
+      (enumerators
+         (enumerator A~1 `enum E~0`.0 ∅)
+         (enumerator B~2 `enum E~0`.1 ∅)
+         (enumerator C~3 `enum E~0`.2 ∅)))
+   (declaration x~4 `enum E~0 complete` ∅)
+   (function-definition
+      f~5 `fn() -> enum E~0 complete`
+      (compound-statement
+         (return (name x~4 `enum E~0 complete`))))
+   (function-definition
+      main~7 `fn() -> int`
+      (compound-statement
+         (return (call (name f~5 `fn() -> enum E~0 complete`))))))
+
+----- stderr -----

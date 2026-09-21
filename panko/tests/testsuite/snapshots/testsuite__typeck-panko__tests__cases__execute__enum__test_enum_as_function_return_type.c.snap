@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_enum_as_function_return_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid implicit conversion from `enum E~0 complete` to `enum E~0 complete`
+   ╭─[panko/tests/cases/execute/enum/test_enum_as_function_return_type.c:6:12]
+   │
+ 6 │     return x;
+   │            ┬  
+   │            ╰── this is of type `enum E~0 complete`, which cannot be implicitly converted to `enum E~0 complete`
+───╯
+
+Error: invalid implicit conversion from `enum E~0 complete` to `int`
+    ╭─[panko/tests/cases/execute/enum/test_enum_as_function_return_type.c:10:12]
+    │
+ 10 │     return f();
+    │            ─┬─  
+    │             ╰─── this is of type `enum E~0 complete`, which cannot be implicitly converted to `int`
+────╯

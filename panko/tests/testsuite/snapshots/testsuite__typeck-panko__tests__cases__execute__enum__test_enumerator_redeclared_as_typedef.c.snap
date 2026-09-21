@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_enumerator_redeclared_as_typedef.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: enumerator name `Type` redeclared as `typedef` name
+   ╭─[panko/tests/cases/execute/enum/test_enumerator_redeclared_as_typedef.c:4:1]
+   │
+ 1 │ enum E { Type };
+   │          ──┬─  
+   │            ╰─── originally declared here as a enumerator name
+   │ 
+ 4 │ typedef int Type;
+   │ ─────┬─────  
+   │      ╰─────── redeclared here as a `typedef` name
+───╯

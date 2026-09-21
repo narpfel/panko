@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/enum/test_error_enumerator_redeclared_as_value.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: enumerator name `Variable` redeclared as value name
+   ╭─[panko/tests/cases/enum/test_error_enumerator_redeclared_as_value.c:3:5]
+   │
+ 1 │ enum E { Variable, Function };
+   │          ────┬───  
+   │              ╰───── originally declared here as an enumerator name
+   │ 
+ 3 │ int Variable;
+   │     ────┬───  
+   │         ╰───── redeclared here as a value name
+───╯
+
+Error: enumerator name `Function` redeclared as function name
+   ╭─[panko/tests/cases/enum/test_error_enumerator_redeclared_as_value.c:5:5]
+   │
+ 1 │ enum E { Variable, Function };
+   │                    ────┬───  
+   │                        ╰───── originally declared here as an enumerator name
+   │ 
+ 5 │ int Function();
+   │     ────┬───  
+   │         ╰───── redeclared here as a function name
+───╯

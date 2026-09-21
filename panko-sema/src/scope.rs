@@ -27,6 +27,7 @@ use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast;
 use panko_parser::ast::DeclarationSpecifiers;
+use panko_parser::ast::Enum;
 use panko_parser::ast::FromError;
 use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::FunctionStorageClass;
@@ -41,6 +42,7 @@ use panko_report::Sliced as _;
 
 use crate::fake_trait_impls::HashEqIgnored;
 use crate::fake_trait_impls::NoHashEq;
+pub(crate) use crate::scope::scopes::Name;
 use crate::scope::scopes::Scopes;
 use crate::scope::scopes::Tag;
 use crate::scope::scopes::Tagged;
@@ -78,23 +80,53 @@ pub(crate) enum Diagnostic<'a> {
     )]
     #[with(typedef = "typedef".fg(Blue))]
     TypedefRedeclaredAsValue {
-        at: Token<'a>,
+        at: Loc<'a>,
         ty: QualifiedType<'a>,
         kind: &'a str,
     },
 
-    #[error("{kind} name `{name}` redeclared as `{typedef}` name")]
+    #[error("{kind} name `{name_str}` redeclared as `{typedef}` name")]
     #[diagnostics(
         at(colour = Red, label = "redeclared here as a `{typedef}` name"),
-        reference(colour = Blue, label = "originally declared here as a {kind} name"),
+        name(colour = Blue, label = "originally declared here as a {kind} name"),
     )]
     #[with(
         typedef = "typedef".fg(Red),
-        name = reference.name,
+        name_str = name.name(),
     )]
     ValueRedeclaredAsTypedef {
         at: QualifiedType<'a>,
-        reference: Reference<'a>,
+        name: Name<'a>,
+        kind: &'a str,
+    },
+
+    #[error("{kind} name `{name}` redeclared as {red_enumerator} name")]
+    #[diagnostics(
+        at(colour = Red, label = "redeclared here as an {red_enumerator} name"),
+        variable(colour = Blue, label = "originally declared here as a {kind} name"),
+    )]
+    #[with(
+        red_enumerator = "enumerator".fg(Red),
+        name = variable.name,
+    )]
+    VariableRedeclaredAsEnumerator {
+        at: Loc<'a>,
+        variable: Reference<'a>,
+        kind: &'a str,
+    },
+
+    #[error("{blue_enumerator} name `{name}` redeclared as {kind} name")]
+    #[diagnostics(
+        at(colour = Red, label = "redeclared here as a {kind} name"),
+        enumerator(colour = Blue, label = "originally declared here as an {blue_enumerator} name"),
+    )]
+    #[with(
+        blue_enumerator = "enumerator".fg(Blue),
+        name = enumerator.name,
+    )]
+    EnumeratorRedeclaredAsVariable {
+        at: Loc<'a>,
+        enumerator: Enumerator<'a>,
         kind: &'a str,
     },
 
@@ -207,6 +239,7 @@ pub(crate) struct BitfieldWidth<'a> {
 pub(crate) enum Scope {}
 
 impl ty::Step for Scope {
+    type Enumerators<'a> = NoHashEq<Enumerators<'a>>;
     type LengthExpr<'a> = NoHashEq<Option<&'a Expression<'a>>>;
     type Member<'a> = NoHashEq<Member<'a>>;
     type TypeofExpr<'a> = NoHashEq<Typeof<'a>>;
@@ -249,27 +282,57 @@ impl<'a> FromError<'a> for ExternalDeclaration<'a> {
 pub(crate) enum Redeclared<'a> {
     ValueAsTypedef {
         at: QualifiedType<'a>,
-        reference: Reference<'a>,
+        name: Name<'a>,
     },
     TypedefAsValue {
-        at: Token<'a>,
+        at: Loc<'a>,
         typedef_ty: QualifiedType<'a>,
         value_ty: QualifiedType<'a>,
+    },
+    EnumeratorAsVariable {
+        enumerator: Enumerator<'a>,
+        at: Loc<'a>,
+        value_ty: QualifiedType<'a>,
+    },
+    VariableAsEnumerator {
+        at: Loc<'a>,
+        variable: Reference<'a>,
     },
 }
 
 impl<'a> Redeclared<'a> {
-    pub(crate) fn ty(&self) -> &QualifiedType<'a> {
+    pub(crate) fn into_diagnostic<E>(self, sess: &'a Session<'a>, kind: &'a str) -> E
+    where
+        E: FromError<'a>,
+    {
+        let diagnostic = match self {
+            Self::ValueAsTypedef { at, name } =>
+                Diagnostic::ValueRedeclaredAsTypedef { at, name, kind },
+            Self::TypedefAsValue { at, typedef_ty, value_ty: _ } =>
+                Diagnostic::TypedefRedeclaredAsValue { at, ty: typedef_ty, kind },
+            Self::EnumeratorAsVariable { enumerator, at, value_ty: _ } =>
+                Diagnostic::EnumeratorRedeclaredAsVariable { at, enumerator, kind },
+            Self::VariableAsEnumerator { at, variable } =>
+                Diagnostic::VariableRedeclaredAsEnumerator { at, variable, kind },
+        };
+        sess.emit(diagnostic)
+    }
+
+    pub(crate) fn ty(&self) -> Option<&QualifiedType<'a>> {
         match self {
-            Self::ValueAsTypedef { at: _, reference } => &reference.ty,
-            Self::TypedefAsValue { at: _, typedef_ty: _, value_ty } => value_ty,
+            Self::ValueAsTypedef { at: _, name } => name.ty(),
+            Self::TypedefAsValue { at: _, typedef_ty: _, value_ty } => Some(value_ty),
+            Self::EnumeratorAsVariable { enumerator: _, at: _, value_ty } => Some(value_ty),
+            Self::VariableAsEnumerator { at: _, variable } => Some(&variable.ty),
         }
     }
 
     fn name(&self) -> &'a str {
         match self {
-            Self::ValueAsTypedef { at: _, reference } => reference.name,
+            Self::ValueAsTypedef { at: _, name } => name.name(),
             Self::TypedefAsValue { at, typedef_ty: _, value_ty: _ } => at.slice(),
+            Self::EnumeratorAsVariable { enumerator, at: _, value_ty: _ } => enumerator.name,
+            Self::VariableAsEnumerator { at: _, variable } => variable.name,
         }
     }
 }
@@ -483,6 +546,16 @@ pub(crate) enum Expression<'a> {
         open_paren: Token<'a>,
         decl: Declaration<'a>,
     },
+    Enumerator(Enumerator<'a>),
+}
+
+impl<'a> From<Name<'a>> for Expression<'a> {
+    fn from(name: Name<'a>) -> Self {
+        match name {
+            Name::Reference(reference) => Self::Name(reference),
+            Name::Enumerator(enumerator) => Self::Enumerator(enumerator),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -499,7 +572,7 @@ pub struct Reference<'a> {
     pub(crate) initialiser: Option<RefInitialiser<'a>>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy)]
 pub enum RefKind {
     Declaration,
     TentativeDefinition,
@@ -583,6 +656,25 @@ pub enum BuiltinNameKind<'a> {
     OverflowArgArea,
     Func(&'a ByteStr),
 }
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Enumerator<'a> {
+    pub(crate) name: &'a str,
+    pub(crate) loc: Loc<'a>,
+    pub(crate) id: Id,
+    pub(crate) ty: ty::Enum<'a, Scope>,
+    pub(crate) index: usize,
+    pub(crate) value: Option<&'a Expression<'a>>,
+}
+
+impl<'a> Enumerator<'a> {
+    pub(crate) fn loc(&self) -> Loc<'a> {
+        self.loc
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Enumerators<'a>(pub(crate) &'a [Enumerator<'a>]);
 
 impl fmt::Display for BuiltinNameKind<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -703,6 +795,7 @@ impl<'a> Expression<'a> {
             Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
             Expression::CompoundLiteral { open_paren, decl } =>
                 open_paren.loc().until(decl.initialiser.unwrap().loc()),
+            Expression::Enumerator(enumerator) => enumerator.loc(),
         }
     }
 }
@@ -904,6 +997,13 @@ fn reresolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &QualifiedType<'a>) -> Qualifie
                     kind,
                 )
                 .ty,
+        Type::Enum(r#enum @ ty::Enum::Complete(_)) => Type::Enum(r#enum),
+        Type::Enum(ty::Enum::Incomplete { name: Some(name), id: _ }) => {
+            let name = Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name);
+            scopes.lookup_or_add_enum(Some(name)).ty
+        }
+        Type::Enum(ty::Enum::Incomplete { name: None, id }) =>
+            Type::Enum(ty::Enum::Incomplete { name: None, id }),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -942,6 +1042,7 @@ fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> Quali
             allow_bitfields: false,
         },
         ast::Type::Struct(r#struct) => resolve_struct(scopes, &r#struct),
+        ast::Type::Enum(r#enum) => resolve_enum(scopes, &r#enum),
     };
     let loc = HashEqIgnored(loc);
     QualifiedType { is_const, is_volatile, ty, loc }
@@ -1070,6 +1171,56 @@ fn resolve_struct_members<'a>(
     sess.alloc_slice_collect(members)
 }
 
+fn resolve_enum<'a>(scopes: &mut Scopes<'a>, r#enum: &Enum<'a>) -> Type<'a> {
+    let (Tagged { ty, tag, loc }, previous_decl) = match *r#enum {
+        Enum::Incomplete { name } => (scopes.lookup_or_add_enum(Some(name)), None),
+        Enum::Complete { name, enumerators } => {
+            // TODO: if redeclared, check that redeclaration is valid
+            scopes.lookup_or_add_complete_enum(name, enumerators)
+        }
+    };
+    let expected = try { previous_decl?.tag }.unwrap_or(tag);
+    let actual = Tag::Enum;
+    if expected != actual {
+        scopes.sess.emit(Diagnostic::TagMismatchInRedeclaration {
+            at: r#enum.loc(),
+            previous_decl: try { previous_decl?.loc? }
+                .or(loc)
+                .expect("only named enums are redeclared")
+                .loc(),
+            previous_ty: try { previous_decl?.ty }.unwrap_or(ty),
+            expected,
+            actual,
+        })
+    }
+    ty
+}
+
+fn resolve_enumerators<'a>(
+    scopes: &mut Scopes<'a>,
+    ty: ty::Enum<'a, Scope>,
+    enumerators: &[cst::Enumerator<'a>],
+) -> Enumerators<'a> {
+    let sess = scopes.sess;
+    let enumerators = enumerators.iter().enumerate().map(|(i, enumerator)| {
+        let cst::Enumerator { name, value } = *enumerator;
+        let value = try { sess.alloc(resolve_expr(scopes, &value?)) };
+        scopes
+            .add_enumerator(name, ty, i, value)
+            .unwrap_or_else(|redeclared| Enumerator {
+                name: name.slice(),
+                loc: name.loc(),
+                id: scopes.id(),
+                ty,
+                index: i,
+                // TODO: pass `"function"` for redeclared functions, but that needs typeck
+                // TODO: this is also incorrect for `Redeclared::TypedefAsValue`
+                value: Some(sess.alloc(redeclared.into_diagnostic(sess, "value"))),
+            })
+    });
+    Enumerators(sess.alloc_slice_fill_iter(enumerators))
+}
+
 fn resolve_function_definition<'a>(
     scopes: &mut Scopes<'a>,
     def: &ast::FunctionDefinition<'a>,
@@ -1117,12 +1268,7 @@ fn resolve_function_definition<'a>(
             scopes.add_initialiser(&reference, initialiser);
             Reference { initialiser, ..reference }
         }
-        Err(ty) =>
-            return scopes.sess.emit(Diagnostic::TypedefRedeclaredAsValue {
-                at: name,
-                ty,
-                kind: "function",
-            }),
+        Err(redeclared) => return redeclared.into_diagnostic(scopes.sess, "function"),
     };
     scopes.push(name.slice());
 
@@ -1370,7 +1516,7 @@ fn resolve_typedef_declaration<'a>(
     match previously_declared_as {
         Ok(previously_declared_as) =>
             Declarator::Typedef(Typedef { ty, name, previously_declared_as }),
-        Err(reference) => Declarator::Redeclared(Redeclared::ValueAsTypedef { at: ty, reference }),
+        Err(redeclared) => Declarator::Redeclared(redeclared),
     }
 }
 
@@ -1392,13 +1538,7 @@ fn resolve_value_declaration<'a>(
     );
     let reference = match maybe_reference {
         Ok(reference) => reference,
-        Err(typedef_ty) => {
-            return Declarator::Redeclared(Redeclared::TypedefAsValue {
-                at: name,
-                typedef_ty,
-                value_ty: ty,
-            });
-        }
+        Err(redeclared) => return Declarator::Redeclared(redeclared),
     };
     // TODO: move resolving the initialiser into `Scopes::add` so that the `add_initialiser` call
     // cannot be forgotten
@@ -1549,7 +1689,7 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::Name(name) => try {
             scopes
                 .lookup(name.slice(), name.loc())?
-                .map_left(Expression::Name)
+                .map_left(Expression::from)
                 .map_right(Expression::BuiltinName)
                 .into_inner()
         }
