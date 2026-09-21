@@ -1,4 +1,5 @@
 #![feature(bstr)]
+#![feature(closure_track_caller)]
 #![feature(cmp_minmax)]
 #![feature(exact_bitshifts)]
 #![feature(exact_div)]

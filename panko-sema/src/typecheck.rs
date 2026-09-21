@@ -1169,7 +1169,8 @@ fn convert<'a>(
         };
         cast(sess.alloc(expr))
     };
-    let invalid = || {
+    let invalid = #[track_caller]
+    || {
         sess.emit(Diagnostic::InvalidConversion {
             at: expr,
             from_ty: expr_ty,
