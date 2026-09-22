@@ -28,7 +28,7 @@ jobs:
         run: |
           set -x
 
-          pip install git+https://github.com/narpfel/delta-c@f198e409a34d84ef4217bb3b3c17d6e9541ea947
+          pip install git+https://github.com/narpfel/delta-c@f2abd26ca40485157ef3119253bc111cd6f6bfd9
 
           Δc \
             --color=always \
