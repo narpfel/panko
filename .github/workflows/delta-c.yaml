@@ -19,6 +19,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly-2026-09-22
+          components: rustc-codegen-cranelift, llvm-tools
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
