@@ -438,7 +438,6 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
     }
 }
 
-#[must_use]
 fn run_tests(cases: impl Iterator<Item = TestCase>) -> ExitCode {
     let start = Instant::now();
 
@@ -530,7 +529,6 @@ fn run_tests(cases: impl Iterator<Item = TestCase>) -> ExitCode {
     }
 }
 
-#[must_use]
 pub fn run(cases: impl Iterator<Item = TestCase>) -> ExitCode {
     color_eyre::install().unwrap();
 

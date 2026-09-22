@@ -2,7 +2,6 @@
 #![feature(coverage_attribute)]
 #![feature(exact_bitshifts)]
 #![feature(gen_blocks)]
-#![feature(never_type)]
 #![feature(stmt_expr_attributes)]
 #![feature(try_blocks)]
 #![feature(type_alias_impl_trait)]

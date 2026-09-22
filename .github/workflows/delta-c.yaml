@@ -18,7 +18,8 @@ jobs:
       - name: Install Rust nightly toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2026-08-09
+          toolchain: nightly-2026-09-22
+          components: rustc-codegen-cranelift, llvm-tools
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
@@ -28,7 +29,7 @@ jobs:
         run: |
           set -x
 
-          pip install git+https://github.com/narpfel/delta-c@f198e409a34d84ef4217bb3b3c17d6e9541ea947
+          pip install git+https://github.com/narpfel/delta-c@f2abd26ca40485157ef3119253bc111cd6f6bfd9
 
           Δc \
             --color=always \
