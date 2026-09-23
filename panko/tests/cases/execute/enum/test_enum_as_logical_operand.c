@@ -1,5 +1,3 @@
-// [[known-bug: `enum`s are not considered scalars yet]]
-
 int printf(char const*, ...);
 void memcpy(void* dest, void const* src, typeof(sizeof 0) n);
 

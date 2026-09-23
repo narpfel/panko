@@ -420,7 +420,10 @@ where
     }
 
     pub(crate) fn is_scalar(&self) -> bool {
-        matches!(self, Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr)
+        matches!(
+            self,
+            Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr | Type::Enum(_),
+        )
     }
 
     pub fn is_array(&self) -> bool {

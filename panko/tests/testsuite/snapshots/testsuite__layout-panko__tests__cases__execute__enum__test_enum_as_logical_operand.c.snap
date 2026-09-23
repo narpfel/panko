@@ -7,92 +7,77 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/enum/test_enum_as_logical_operand.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_as_logical_operand.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (declaration external (memcpy~1 `fn(dest: ptr<void>, src: ptr<void const>, n: unsigned long) -> void` (static memcpy)) ∅)
+   (enum E~2
+      (enumerators
+         (enumerator False~3 0 `int` 0)
+         (enumerator True~4 1 `int` 1)))
+   (tentative-definition external (false_value~5 `enum E~2 complete` (static false_value)) ∅)
+   (tentative-definition external (true_value~6 `enum E~2 complete` (static true_value)) ∅)
+   (function-definition external stack-size=56
+      (main~7 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `void` @void
+               (addressof `ptr<fn(dest: ptr<void>, src: ptr<void const>, n: unsigned long) -> void>` @8
+                  (memcpy~1 `fn(dest: ptr<void>, src: ptr<void const>, n: unsigned long) -> void` (static memcpy)))
+               (noop-type-conversion `ptr<void>` @16
+                  (addressof `ptr<enum E~2 complete>` @16
+                     (true_value~6 `enum E~2 complete` (static true_value))))
+               (noop-type-conversion `ptr<void const>` @24
+                  (addressof `ptr<int>` @24
+                     (compound-literal `int` @0
+                        (definition (compound_literal.9~10 `int` @0)
+                           (braced
+                              (subobject +0 (1 `int` @0)))))))
+               (4 `unsigned long` @32)))
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 7>>` @16
+                        (string `array<char; 7>` @void "%d %d\n\0"))))
+               (not `int` @24 (false_value~5 `enum E~2 complete` (static false_value)))
+               (not `int` @28 (true_value~6 `enum E~2 complete` (static true_value)))))
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 10>>` @16
+                        (string `array<char; 10>` @void "%d %d %d\n\0"))))
+               (logical-or `int` @24
+                  (false_value~5 `enum E~2 complete` (static false_value))
+                  (true_value~6 `enum E~2 complete` (static true_value)))
+               (logical-and `int` @28
+                  (false_value~5 `enum E~2 complete` (static false_value))
+                  (true_value~6 `enum E~2 complete` (static true_value)))
+               (logical-and `int` @32
+                  (true_value~6 `enum E~2 complete` (static true_value))
+                  (true_value~6 `enum E~2 complete` (static true_value)))))
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 7>>` @16
+                        (string `array<char; 7>` @void "%d %d\n\0"))))
+               (conditional `int` @24
+                  (false_value~5 `enum E~2 complete` (static false_value))
+                  (0 `int` @24)
+                  (42 `int` @24))
+               (conditional `int` @28
+                  (true_value~6 `enum E~2 complete` (static true_value))
+                  (27 `int` @28)
+                  (1 `int` @28)))))))
 
 ----- stderr -----
-Error: unary not operator expects a scalar value as operand
-    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:17:24]
-    │
- 17 │     printf("%d %d\n", !false_value, !true_value);
-    │                       ──────┬─────  
-    │                             ╰─────── this is of type `enum E~2 complete`
-────╯
-
-Error: unary not operator expects a scalar value as operand
-    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:17:38]
-    │
- 17 │     printf("%d %d\n", !false_value, !true_value);
-    │                                     ──────┬────  
-    │                                           ╰────── this is of type `enum E~2 complete`
-────╯
-
-Error: logical or operator expects a scalar value as operand
-    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:20:26]
-    │
- 20 │     printf("%d %d %d\n", false_value || true_value, false_value && true_value, true_value && true_value);
-    │                          ─────┬───────────────────  
-    │                               │                     
-    │                               ╰───────────────────── this is of type `enum E~2 complete`
-────╯
-
-Error: logical or operator expects a scalar value as operand
-    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:20:41]
-    │
- 20 │     printf("%d %d %d\n", false_value || true_value, false_value && true_value, true_value && true_value);
-    │                          ────────────────────┬────  
-    │                                              ╰────── this is of type `enum E~2 complete`
-────╯
-
-Error: logical and operator expects a scalar value as operand
-    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:20:53]
-    │
- 20 │     printf("%d %d %d\n", false_value || true_value, false_value && true_value, true_value && true_value);
-    │                                                     ─────┬───────────────────  
-    │                                                          │                     
-    │                                                          ╰───────────────────── this is of type `enum E~2 complete`
-────╯
-
-Error: logical and operator expects a scalar value as operand
-    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:20:68]
-    │
- 20 │     printf("%d %d %d\n", false_value || true_value, false_value && true_value, true_value && true_value);
-    │                                                     ────────────────────┬────  
-    │                                                                         ╰────── this is of type `enum E~2 complete`
-────╯
-
-Error: logical and operator expects a scalar value as operand
-    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:20:80]
-    │
- 20 │     printf("%d %d %d\n", false_value || true_value, false_value && true_value, true_value && true_value);
-    │                                                                                ─────┬──────────────────  
-    │                                                                                     │                    
-    │                                                                                     ╰──────────────────── this is of type `enum E~2 complete`
-────╯
-
-Error: logical and operator expects a scalar value as operand
-    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:20:94]
-    │
- 20 │     printf("%d %d %d\n", false_value || true_value, false_value && true_value, true_value && true_value);
-    │                                                                                ───────────────────┬────  
-    │                                                                                                   ╰────── this is of type `enum E~2 complete`
-────╯
-
-Error: ternary operator expects a scalar value as operand
-    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:23:23]
-    │
- 23 │     printf("%d %d\n", false_value ? 0 : 42, true_value ? 27 : 1);
-    │                       ─────┬──────────────  
-    │                            │                
-    │                            ╰──────────────── this is of type `enum E~2 complete`
-────╯
-
-Error: ternary operator expects a scalar value as operand
-    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:23:45]
-    │
- 23 │     printf("%d %d\n", false_value ? 0 : 42, true_value ? 27 : 1);
-    │                                             ─────┬─────────────  
-    │                                                  │               
-    │                                                  ╰─────────────── this is of type `enum E~2 complete`
-────╯
