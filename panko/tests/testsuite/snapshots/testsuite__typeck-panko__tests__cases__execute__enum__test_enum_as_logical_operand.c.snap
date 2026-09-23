@@ -1,0 +1,84 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_enum_as_logical_operand.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_as_logical_operand.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration external memcpy~1 `fn(dest: ptr<void>, src: ptr<void const>, n: unsigned long) -> void` ∅)
+   (enum E~2
+      (enumerators
+         (enumerator False~3 0 `int` 0)
+         (enumerator True~4 1 `int` 1)))
+   (tentative-definition external false_value~5 `enum E~2 complete` ∅)
+   (tentative-definition external true_value~6 `enum E~2 complete` ∅)
+   (function-definition external
+      main~7 `fn() -> int`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.9~10 `int`)
+         (expression
+            (call `void`
+               (addressof `ptr<fn(dest: ptr<void>, src: ptr<void const>, n: unsigned long) -> void>`
+                  (memcpy~1 `fn(dest: ptr<void>, src: ptr<void const>, n: unsigned long) -> void`))
+               (noop-type-conversion `ptr<void>`
+                  (addressof `ptr<enum E~2 complete>`
+                     (true_value~6 `enum E~2 complete`)))
+               (noop-type-conversion `ptr<void const>`
+                  (addressof `ptr<int>`
+                     (compound-literal `int`
+                        (definition compound_literal.9~10 `int`
+                           (braced
+                              (subobject +0 (True `int`)))))))
+               (sizeof `unsigned long` 4 `enum E~2 complete`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (not `int` (false_value~5 `enum E~2 complete`))
+               (not `int` (true_value~6 `enum E~2 complete`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "%d %d %d\n\0"))))
+               (logical-or `int`
+                  (false_value~5 `enum E~2 complete`)
+                  (true_value~6 `enum E~2 complete`))
+               (logical-and `int`
+                  (false_value~5 `enum E~2 complete`)
+                  (true_value~6 `enum E~2 complete`))
+               (logical-and `int`
+                  (true_value~6 `enum E~2 complete`)
+                  (true_value~6 `enum E~2 complete`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (conditional `int`
+                  (false_value~5 `enum E~2 complete`)
+                  (0 `int`)
+                  (42 `int`))
+               (conditional `int`
+                  (true_value~6 `enum E~2 complete`)
+                  (27 `int`)
+                  (1 `int`)))))))
+
+----- stderr -----
