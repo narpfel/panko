@@ -1,0 +1,98 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_enum_as_logical_operand.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unary not operator expects a scalar value as operand
+    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:17:24]
+    │
+ 17 │     printf("%d %d\n", !false_value, !true_value);
+    │                       ──────┬─────  
+    │                             ╰─────── this is of type `enum E~2 complete`
+────╯
+
+Error: unary not operator expects a scalar value as operand
+    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:17:38]
+    │
+ 17 │     printf("%d %d\n", !false_value, !true_value);
+    │                                     ──────┬────  
+    │                                           ╰────── this is of type `enum E~2 complete`
+────╯
+
+Error: logical or operator expects a scalar value as operand
+    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:20:26]
+    │
+ 20 │     printf("%d %d %d\n", false_value || true_value, false_value && true_value, true_value && true_value);
+    │                          ─────┬───────────────────  
+    │                               │                     
+    │                               ╰───────────────────── this is of type `enum E~2 complete`
+────╯
+
+Error: logical or operator expects a scalar value as operand
+    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:20:41]
+    │
+ 20 │     printf("%d %d %d\n", false_value || true_value, false_value && true_value, true_value && true_value);
+    │                          ────────────────────┬────  
+    │                                              ╰────── this is of type `enum E~2 complete`
+────╯
+
+Error: logical and operator expects a scalar value as operand
+    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:20:53]
+    │
+ 20 │     printf("%d %d %d\n", false_value || true_value, false_value && true_value, true_value && true_value);
+    │                                                     ─────┬───────────────────  
+    │                                                          │                     
+    │                                                          ╰───────────────────── this is of type `enum E~2 complete`
+────╯
+
+Error: logical and operator expects a scalar value as operand
+    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:20:68]
+    │
+ 20 │     printf("%d %d %d\n", false_value || true_value, false_value && true_value, true_value && true_value);
+    │                                                     ────────────────────┬────  
+    │                                                                         ╰────── this is of type `enum E~2 complete`
+────╯
+
+Error: logical and operator expects a scalar value as operand
+    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:20:80]
+    │
+ 20 │     printf("%d %d %d\n", false_value || true_value, false_value && true_value, true_value && true_value);
+    │                                                                                ─────┬──────────────────  
+    │                                                                                     │                    
+    │                                                                                     ╰──────────────────── this is of type `enum E~2 complete`
+────╯
+
+Error: logical and operator expects a scalar value as operand
+    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:20:94]
+    │
+ 20 │     printf("%d %d %d\n", false_value || true_value, false_value && true_value, true_value && true_value);
+    │                                                                                ───────────────────┬────  
+    │                                                                                                   ╰────── this is of type `enum E~2 complete`
+────╯
+
+Error: ternary operator expects a scalar value as operand
+    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:23:23]
+    │
+ 23 │     printf("%d %d\n", false_value ? 0 : 42, true_value ? 27 : 1);
+    │                       ─────┬──────────────  
+    │                            │                
+    │                            ╰──────────────── this is of type `enum E~2 complete`
+────╯
+
+Error: ternary operator expects a scalar value as operand
+    ╭─[panko/tests/cases/execute/enum/test_enum_as_logical_operand.c:23:45]
+    │
+ 23 │     printf("%d %d\n", false_value ? 0 : 42, true_value ? 27 : 1);
+    │                                             ─────┬─────────────  
+    │                                                  │               
+    │                                                  ╰─────────────── this is of type `enum E~2 complete`
+────╯

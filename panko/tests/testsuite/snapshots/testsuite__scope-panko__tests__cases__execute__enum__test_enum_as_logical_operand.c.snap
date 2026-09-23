@@ -1,0 +1,64 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_enum_as_logical_operand.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_as_logical_operand.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (declaration memcpy~1 `fn(dest: ptr<void>, src: ptr<void const>, n: typeof((sizeof 0))) -> void` ∅)
+   (enum E~2
+      (enumerators
+         (enumerator False~3 `enum E~2`.0 ∅)
+         (enumerator True~4 `enum E~2`.1 ∅)))
+   (declaration false_value~5 `enum E~2 complete` ∅)
+   (declaration true_value~6 `enum E~2 complete` ∅)
+   (function-definition
+      main~7 `fn() -> int`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.9~10 `int`)
+         (expression
+            (call (name memcpy~1 `fn(dest: ptr<void>, src: ptr<void const>, n: typeof((sizeof 0))) -> void`)
+               (addressof (name true_value~6 `enum E~2 complete`))
+               (addressof
+                  (compound-literal
+                     (declaration compound_literal.9~10 `int`
+                        (braced
+                           (enumerator True~4 `enum E~2 complete`.1 ∅)))))
+               (sizeof `enum E~2 complete`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (not (name false_value~5 `enum E~2 complete`))
+               (not (name true_value~6 `enum E~2 complete`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (logical-or
+                  (name false_value~5 `enum E~2 complete`)
+                  (name true_value~6 `enum E~2 complete`))
+               (logical-and
+                  (name false_value~5 `enum E~2 complete`)
+                  (name true_value~6 `enum E~2 complete`))
+               (logical-and
+                  (name true_value~6 `enum E~2 complete`)
+                  (name true_value~6 `enum E~2 complete`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (conditional
+                  (name false_value~5 `enum E~2 complete`)
+                  0
+                  42)
+               (conditional
+                  (name true_value~6 `enum E~2 complete`)
+                  27
+                  1))))))
+
+----- stderr -----
