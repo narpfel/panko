@@ -15,7 +15,6 @@ exit_code: 0
    (function-definition external
       main~3 `fn() -> int`
       (compound-statement
-         (hoisted-compound-literal compound_literal.1~2 `int`)
          (hoisted-compound-literal compound_literal.6~7 `int`)
          (definition p2~5 `ptr<int>` (sign-extend `ptr<int>` (compound-literal `int` (definition compound_literal.6~7 `int` (braced ∅)))))
          (return

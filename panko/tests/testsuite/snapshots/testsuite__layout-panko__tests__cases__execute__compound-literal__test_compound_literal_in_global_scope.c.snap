@@ -25,13 +25,6 @@ exit_code: 0
    (function-definition external stack-size=40
       (main~9 `fn() -> int` (static main))
       (compound-statement
-         (definition external (compound_literal.0~1 `int` (static compound_literal.0)) (braced ∅))
-         (definition external (compound_literal.4~5 `int` (static compound_literal.4))
-            (braced
-               (subobject +0 (42 `int`))))
-         (definition external (compound_literal.7~8 `int` (static compound_literal.7))
-            (braced
-               (subobject +0 (27 `int`))))
          (expression
             (call `int` @0
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8

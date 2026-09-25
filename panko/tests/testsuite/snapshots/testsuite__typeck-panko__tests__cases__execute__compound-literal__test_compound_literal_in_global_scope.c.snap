@@ -25,9 +25,6 @@ exit_code: 0
    (function-definition external
       main~9 `fn() -> int`
       (compound-statement
-         (hoisted-compound-literal compound_literal.0~1 `int`)
-         (hoisted-compound-literal compound_literal.4~5 `int`)
-         (hoisted-compound-literal compound_literal.7~8 `int`)
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

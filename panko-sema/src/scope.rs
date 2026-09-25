@@ -1354,6 +1354,10 @@ fn resolve_function_definition<'a>(
             .expect("duplicate parameter names are filtered out by `resolve_function_ty`")
     }));
 
+    // Drop compound literal definitions from the global scope before this function because they’re
+    // either used as static initialisers or in unevaluated contexts, both of which should not
+    // generate any definitions.
+    scopes.take_hoisted_compound_literals();
     let body = resolve_compound_statement(scopes, body, OpenNewScope::No);
     scopes.pop();
     ExternalDeclaration::FunctionDefinition(FunctionDefinition {

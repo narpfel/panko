@@ -15,7 +15,6 @@ exit_code: 0
    (function-definition external stack-size=40
       (main~3 `fn() -> int` (static main))
       (compound-statement
-         (definition external (compound_literal.1~2 `int` (static compound_literal.1)) (braced ∅))
          (definition (p2~5 `ptr<int>` @8) (sign-extend `ptr<int>` @8 (compound-literal `int` @0 (definition (compound_literal.6~7 `int` @0) (braced ∅)))))
          (return
             (logical-and `int` @16
