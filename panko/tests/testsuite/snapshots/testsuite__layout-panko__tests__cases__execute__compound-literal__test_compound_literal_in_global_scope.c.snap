@@ -1,0 +1,46 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/compound-literal/test_compound_literal_in_global_scope.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/compound-literal/test_compound_literal_in_global_scope.c"
+   (declaration external (printf~2 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (definition external (x~3 `int` (static x))
+      (compound-literal `int`
+         (definition external compound_literal.4~5 `int`
+            (braced
+               (subobject +0 (42 `int`))))))
+   (definition external (y~6 `int` (static y))
+      (compound-literal `int`
+         (definition external compound_literal.7~8 `int`
+            (braced
+               (subobject +0 (27 `int`))))))
+   (function-definition external stack-size=40
+      (main~9 `fn() -> int` (static main))
+      (compound-statement
+         (definition external (compound_literal.0~1 `int` (static compound_literal.0)) (braced ∅))
+         (definition external (compound_literal.4~5 `int` (static compound_literal.4))
+            (braced
+               (subobject +0 (42 `int`))))
+         (definition external (compound_literal.7~8 `int` (static compound_literal.7))
+            (braced
+               (subobject +0 (27 `int`))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~2 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 4>>` @16
+                        (string `array<char; 4>` @void "%d\n\0"))))
+               (y~6 `int` (static y))))
+         (return (x~3 `int` (static x))))))
+
+----- stderr -----

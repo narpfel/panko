@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/compound-literal/test_compound_literal_in_global_scope.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/compound-literal/test_compound_literal_in_global_scope.c"
+   (declaration printf~2 `fn(∅: ptr<char const>, ...) -> typeof((compound-literal (declaration compound_literal.0~1 `int` (braced ∅))))` ∅)
+   (declaration x~3 `int`
+      (compound-literal
+         (declaration compound_literal.4~5 `int`
+            (braced
+               42))))
+   (declaration y~6 `int`
+      (compound-literal
+         (declaration compound_literal.7~8 `int`
+            (braced
+               27))))
+   (function-definition
+      main~9 `fn() -> int`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.0~1 `int`)
+         (hoisted-compound-literal compound_literal.4~5 `int`)
+         (hoisted-compound-literal compound_literal.7~8 `int`)
+         (expression
+            (call (name printf~2 `fn(∅: ptr<char const>, ...) -> typeof((compound-literal (declaration compound_literal.0~1 `int` (braced ∅))))`)
+               (string "%d\n")
+               (name y~6 `int`)))
+         (return (name x~3 `int`)))))
+
+----- stderr -----
