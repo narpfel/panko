@@ -1,0 +1,37 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid explicit conversion from `int` to `enum E~0 complete`
+   ╭─[panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c:7:28]
+   │
+ 7 │     struct T* p1 = (enum E)A;
+   │                            ┬  
+   │                            ╰── this is of type `int`, which cannot be explicitly converted to `enum E~0 complete`
+───╯
+
+Error: invalid implicit conversion from `enum E~0 complete` to `ptr<struct T~6>`
+   ╭─[panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c:7:28]
+   │
+ 7 │     struct T* p1 = (enum E)A;
+   │                            ┬  
+   │                            ╰── this is of type `enum E~0 complete`, which cannot be implicitly converted to `ptr<struct T~6>`
+───╯
+
+Error: invalid implicit conversion from `enum E~0 complete` to `ptr<struct T~6>`
+   ╭─[panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c:8:20]
+   │
+ 8 │     struct T* p2 = (enum E){};
+   │                    ┬  
+   │                    ╰── this is of type `enum E~0 complete`, which cannot be implicitly converted to `ptr<struct T~6>`
+───╯

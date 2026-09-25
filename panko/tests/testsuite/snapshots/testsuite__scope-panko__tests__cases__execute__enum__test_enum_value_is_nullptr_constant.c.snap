@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c"
+   (enum E~0
+      (enumerators
+         (enumerator A~1 `enum E~0`.0 ∅)
+         (enumerator B~2 `enum E~0`.1 ∅)
+         (enumerator C~3 `enum E~0`.2 ∅)))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (declaration p1~7 `ptr<struct T~6>` (cast `enum E~0 complete` (enumerator A~1 `enum E~0 complete`.0 ∅)))
+         (hoisted-compound-literal compound_literal.9~10 `enum E~0 complete`)
+         (declaration p2~8 `ptr<struct T~6>` (compound-literal (declaration compound_literal.9~10 `enum E~0 complete` (braced ∅))))
+         (return (equal (name p1~7 `ptr<struct T~6>`) (name p2~8 `ptr<struct T~6>`))))))
+
+----- stderr -----
