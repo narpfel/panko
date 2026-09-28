@@ -1,5 +1,3 @@
-// [[known-bug: conversions between `enum`s and integrals not implemented yet]]
-
 int printf(char const*, ...);
 
 enum E { A, B, C };

@@ -12,14 +12,6 @@ exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: invalid explicit conversion from `int` to `enum E~0 complete`
-   ╭─[panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c:7:28]
-   │
- 7 │     struct T* p1 = (enum E)A;
-   │                            ┬  
-   │                            ╰── this is of type `int`, which cannot be explicitly converted to `enum E~0 complete`
-───╯
-
 Error: invalid implicit conversion from `enum E~0 complete` to `ptr<struct T~6>`
    ╭─[panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c:7:28]
    │

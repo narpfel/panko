@@ -1153,19 +1153,23 @@ fn convert<'a>(
     // TODO: forbid ptr <=> float
     let target_ty = target.ty;
     let expr_ty = expr.ty.ty;
-    let extend_kind = match expr_ty {
-        Type::Arithmetic(arithmetic) => match arithmetic.signedness() {
-            Signedness::Signed => Expression::SignExtend,
-            Signedness::Unsigned => Expression::ZeroExtend,
-        },
-        _ => Expression::ZeroExtend,
-    };
+    fn extend_kind<'a>(expr_ty: Type<'a>) -> fn(&'a TypedExpression<'a>) -> Expression<'a> {
+        match expr_ty {
+            Type::Arithmetic(arithmetic) => match arithmetic.signedness() {
+                Signedness::Signed => Expression::SignExtend,
+                Signedness::Unsigned => Expression::ZeroExtend,
+            },
+            Type::Enum(Enum::Complete(complete)) => extend_kind(*complete.enumerators.0.ty),
+            _ => Expression::ZeroExtend,
+        }
+    }
     let convert = || {
         let cast = match (target_ty, target_ty.size().cmp(&expr_ty.size())) {
+            // TODO: also use `BoolCast` when `target_ty` is an enum with underlying type `bool`
             (Type::BOOL, _) => Expression::BoolCast,
             (_, Ordering::Less) => Expression::Truncate,
             (_, Ordering::Equal) => Expression::NoopTypeConversion,
-            (_, Ordering::Greater) => extend_kind,
+            (_, Ordering::Greater) => extend_kind(expr_ty),
         };
         cast(sess.alloc(expr))
     };
@@ -1211,7 +1215,8 @@ fn convert<'a>(
             ConversionKind::Implicit => invalid(),
         },
 
-        (Type::Arithmetic(_), Type::Arithmetic(_)) | (Type::Nullptr, Type::Nullptr) =>
+        (Type::Arithmetic(_) | Type::Enum(_), Type::Arithmetic(_) | Type::Enum(_))
+        | (Type::Nullptr, Type::Nullptr) =>
             match kind == ConversionKind::Implicit && target_ty == expr_ty {
                 true => return expr,
                 false => convert(),
