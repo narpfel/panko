@@ -1,5 +1,3 @@
-// [[known-bug: binary ops not implemented for enums]]
-
 int printf(char const*, ...);
 
 enum E { A, B, C, D };

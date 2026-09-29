@@ -1791,9 +1791,41 @@ fn integral_promote(ty: Arithmetic) -> Arithmetic {
     }
 }
 
-fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) -> Arithmetic {
+#[derive(Debug, Clone, Copy)]
+enum ArithmeticTy<'a> {
+    Arithmetic(Arithmetic),
+    Enum(CompleteEnum<'a, Typeck>),
+}
+
+impl<'a> TryFrom<Type<'a>> for ArithmeticTy<'a> {
+    type Error = ();
+
+    fn try_from(ty: Type<'a>) -> Result<Self, Self::Error> {
+        match ty {
+            Type::Arithmetic(arithmetic) => Ok(Self::Arithmetic(arithmetic)),
+            Type::Enum(Enum::Complete(complete)) => Ok(Self::Enum(complete)),
+            _ => Err(()),
+        }
+    }
+}
+
+impl ArithmeticTy<'_> {
+    fn resolve_enums(&self) -> Arithmetic {
+        match self {
+            Self::Arithmetic(arithmetic) => *arithmetic,
+            Self::Enum(complete_enum) => match complete_enum.enumerators.0.ty {
+                Type::Arithmetic(arithmetic) => *arithmetic,
+                _ => unreachable!(),
+            },
+        }
+    }
+}
+
+fn perform_usual_arithmetic_conversions(lhs_ty: ArithmeticTy, rhs_ty: ArithmeticTy) -> Arithmetic {
     // TODO: handle floats
-    // TODO: convert enumerations to their underlying types
+
+    let lhs_ty = lhs_ty.resolve_enums();
+    let rhs_ty = rhs_ty.resolve_enums();
 
     let lhs_ty = integral_promote(lhs_ty);
     let rhs_ty = integral_promote(rhs_ty);
@@ -1830,7 +1862,9 @@ fn typeck_binop<'a>(
     rhs: TypedExpression<'a>,
 ) -> TypedExpression<'a> {
     match (lhs.ty.ty, rhs.ty.ty) {
-        (Type::Arithmetic(lhs_ty), Type::Arithmetic(rhs_ty)) =>
+        (lhs_ty, rhs_ty)
+            if let Ok(lhs_ty) = ArithmeticTy::try_from(lhs_ty)
+                && let Ok(rhs_ty) = ArithmeticTy::try_from(rhs_ty) =>
             typeck_arithmetic_binop(sess, *op, lhs, rhs, lhs_ty, rhs_ty),
         (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(pointee_ty))
             if matches!(op.kind, BinOpKind::Add) =>
@@ -2091,8 +2125,8 @@ fn typeck_arithmetic_binop<'a>(
     op: BinOp<'a>,
     lhs: TypedExpression<'a>,
     rhs: TypedExpression<'a>,
-    lhs_ty: Arithmetic,
-    rhs_ty: Arithmetic,
+    lhs_ty: ArithmeticTy<'a>,
+    rhs_ty: ArithmeticTy<'a>,
 ) -> TypedExpression<'a> {
     let Arithmetic::Integral(integral_ty) = perform_usual_arithmetic_conversions(lhs_ty, rhs_ty);
     let common_ty = Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified();
@@ -2127,13 +2161,13 @@ fn typeck_integral_shift<'a>(
     op: BinOp<'a>,
     lhs: TypedExpression<'a>,
     rhs: TypedExpression<'a>,
-    lhs_ty: Arithmetic,
-    rhs_ty: Arithmetic,
+    lhs_ty: ArithmeticTy<'a>,
+    rhs_ty: ArithmeticTy<'a>,
 ) -> TypedExpression<'a> {
     assert_matches!(op.kind, BinOpKind::LeftShift | BinOpKind::RightShift);
-    let lhs_ty @ Arithmetic::Integral(lhs_integral) = integral_promote(lhs_ty);
+    let lhs_ty @ Arithmetic::Integral(lhs_integral) = integral_promote(lhs_ty.resolve_enums());
     let lhs_ty = Type::Arithmetic(lhs_ty).unqualified();
-    let rhs_ty = Type::Arithmetic(integral_promote(rhs_ty)).unqualified();
+    let rhs_ty = Type::Arithmetic(integral_promote(rhs_ty.resolve_enums())).unqualified();
     let lhs = convert_as_if_by_assignment(sess, lhs_ty, lhs);
     let rhs = convert_as_if_by_assignment(sess, rhs_ty, rhs);
     TypedExpression {
@@ -2633,8 +2667,11 @@ fn typeck_expression<'a>(
             let or_else = typeck_expression(sess, or_else, Context::Default);
             // TODO: some rules are unimplemented
             let result_ty = match (then.ty.ty, or_else.ty.ty) {
-                (Type::Arithmetic(then_ty), Type::Arithmetic(or_else_ty)) =>
-                    Type::Arithmetic(perform_usual_arithmetic_conversions(then_ty, or_else_ty)),
+                (Type::Arithmetic(then_ty), Type::Arithmetic(or_else_ty)) => {
+                    let then_ty = ArithmeticTy::Arithmetic(then_ty);
+                    let or_else_ty = ArithmeticTy::Arithmetic(or_else_ty);
+                    Type::Arithmetic(perform_usual_arithmetic_conversions(then_ty, or_else_ty))
+                }
 
                 (Type::Void, Type::Void) => Type::Void,
 

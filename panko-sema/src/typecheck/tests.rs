@@ -21,8 +21,10 @@ macro_rules! test_usual_arithmetic_conversions {
     ($name:ident, $lhs_ty:expr, $rhs_ty:expr, $expected:expr $(,)?) => {
         #[test]
         fn $name() {
+            let lhs_ty = ArithmeticTy::Arithmetic($lhs_ty);
+            let rhs_ty = ArithmeticTy::Arithmetic($rhs_ty);
             assert_eq!(
-                perform_usual_arithmetic_conversions($lhs_ty, $rhs_ty),
+                perform_usual_arithmetic_conversions(lhs_ty, rhs_ty),
                 $expected,
             );
         }
