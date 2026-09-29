@@ -1153,13 +1153,13 @@ fn convert<'a>(
     // TODO: forbid ptr <=> float
     let target_ty = target.ty;
     let expr_ty = expr.ty.ty;
-    fn extend_kind<'a>(expr_ty: Type<'a>) -> fn(&'a TypedExpression<'a>) -> Expression<'a> {
+    fn extend<'a>(expr_ty: Type<'a>) -> fn(&'a TypedExpression<'a>) -> Expression<'a> {
         match expr_ty {
             Type::Arithmetic(arithmetic) => match arithmetic.signedness() {
                 Signedness::Signed => Expression::SignExtend,
                 Signedness::Unsigned => Expression::ZeroExtend,
             },
-            Type::Enum(Enum::Complete(complete)) => extend_kind(*complete.enumerators.0.ty),
+            Type::Enum(Enum::Complete(complete)) => extend(*complete.enumerators.0.ty),
             _ => Expression::ZeroExtend,
         }
     }
@@ -1169,7 +1169,7 @@ fn convert<'a>(
             (Type::BOOL, _) => Expression::BoolCast,
             (_, Ordering::Less) => Expression::Truncate,
             (_, Ordering::Equal) => Expression::NoopTypeConversion,
-            (_, Ordering::Greater) => extend_kind(expr_ty),
+            (_, Ordering::Greater) => extend(expr_ty),
         };
         cast(sess.alloc(expr))
     };
