@@ -1,5 +1,3 @@
-// [[known-bug: unary ops not implemented for enum]]
-
 int printf(char const*, ...);
 
 enum E { A, B, C };

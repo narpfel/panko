@@ -30,6 +30,10 @@ use crate::scope::Declarators;
 use crate::scope::Enumerator;
 use crate::scope::Enumerators;
 use crate::scope::Member;
+use crate::scope::Type;
+use crate::ty::Arithmetic;
+use crate::ty::Enum;
+use crate::ty::Struct;
 
 impl AsSExpr for Member<'_> {
     fn as_sexpr(&self) -> SExpr {
@@ -110,10 +114,10 @@ impl AsSExpr for Declarators<'_> {
         // TODO: this is not really an accurate representation of the AST, but it has the same
         // format as the remaining `Step`s and is generally shorter
         let sexpr = match &ty.ty {
-            crate::ty::Type::Struct(crate::ty::Struct::Complete(complete))
+            Type::Struct(Struct::Complete(complete))
                 if let ast::Type::Struct(ast::Struct::Complete { .. }) = unresolved_ty.ty =>
                 SExpr::flat().lines([complete]),
-            crate::ty::Type::Enum(crate::ty::Enum::Complete(complete))
+            Type::Arithmetic(Arithmetic::Enum(Enum::Complete(complete)))
                 if let ast::Type::Enum(ast::Enum::Complete { .. }) = unresolved_ty.ty =>
                 SExpr::flat().lines([complete]),
             _ => SExpr::flat(),
@@ -302,7 +306,7 @@ impl AsSExpr for Enumerator<'_> {
         let Self { name, loc: _, id, ty, index, value } = self;
         SExpr::new("enumerator")
             .inline_string(format!("{name}~{}", id.0))
-            .inline_string(format!("{}.{index}", super::Type::Enum(*ty).as_sexpr()))
+            .inline_string(format!("{}.{index}", Type::from(*ty).as_sexpr()))
             .lines_explicit_empty(value)
     }
 }

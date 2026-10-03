@@ -32,7 +32,7 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 16>>`
                         (string `array<char; 16>` "%d %d %d %d %d\n\0"))))
-               (a~8 `enum E~1 complete`)
+               (noop-type-conversion `int` (a~8 `enum E~1 complete`))
                (add `int` (noop-type-conversion `int` (a~8 `enum E~1 complete`)) (B `int`))
                (add `int` (noop-type-conversion `int` (b~9 `enum E~1 complete`)) (noop-type-conversion `int` (c~10 `enum E~1 complete`)))
                (multiply `int` (D `int`) (noop-type-conversion `int` (c~10 `enum E~1 complete`)))

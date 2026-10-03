@@ -3,7 +3,6 @@ use std::assert_matches;
 use panko_lex::Token;
 use panko_parser::BinOp;
 use panko_parser::Comparison;
-use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Session;
 
 use super::Expression;
@@ -11,6 +10,7 @@ use super::QualifiedType;
 use super::Type;
 use super::TypedExpression;
 use super::convert_as_if_by_assignment;
+use crate::ty::Arithmetic;
 use crate::typecheck::constexpr;
 use crate::typecheck::constexpr::Pointer;
 use crate::typecheck::diagnostics::Diagnostic;
@@ -39,7 +39,11 @@ pub(super) fn typeck_ptradd<'a>(
     order: PtrAddOrder,
 ) -> TypedExpression<'a> {
     assert_matches!(pointer.ty.ty, Type::Pointer(_));
-    assert_matches!(integral.ty.ty, Type::Arithmetic(Arithmetic::Integral(_)));
+    assert_matches!(
+        integral.ty.ty,
+        Type::Arithmetic(arithmetic)
+        if matches!(arithmetic.resolve_enums(), Arithmetic::Integral(_)),
+    );
     if pointee_ty.ty.is_complete() {
         let integral = convert_as_if_by_assignment(sess, Type::ptrdiff_t().unqualified(), integral);
         TypedExpression {

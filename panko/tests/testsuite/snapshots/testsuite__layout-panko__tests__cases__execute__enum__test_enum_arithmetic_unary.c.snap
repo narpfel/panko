@@ -7,39 +7,35 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/enum/test_enum_arithmetic_unary.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_arithmetic_unary.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (enum E~1
+      (enumerators
+         (enumerator A~2 0 `int` 0)
+         (enumerator B~3 1 `int` 1)
+         (enumerator C~4 2 `int` 2)))
+   (function-definition external stack-size=72
+      (main~5 `fn() -> int` (static main))
+      (compound-statement
+         (definition (a~7 `enum E~1 complete` @0) (noop-type-conversion `enum E~1 complete` @0 (0 `int` @0)))
+         (definition (b~8 `enum E~1 complete` @4) (noop-type-conversion `enum E~1 complete` @4 (1 `int` @4)))
+         (definition (c~9 `enum E~1 complete` @8) (noop-type-conversion `enum E~1 complete` @8 (2 `int` @8)))
+         (expression
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 23>>` @24
+                        (string `array<char; 23>` @void "%d %d %d 0x%08x %d %d\n\0"))))
+               (noop-type-conversion `int` @0 (a~7 `enum E~1 complete` @0))
+               (noop-type-conversion `int` @4 (b~8 `enum E~1 complete` @4))
+               (negate `int` @32 (noop-type-conversion `int` @4 (b~8 `enum E~1 complete` @4)))
+               (compl `int` @36 (noop-type-conversion `int` @8 (c~9 `enum E~1 complete` @8)))
+               (not `int` @40 (a~7 `enum E~1 complete` @0))
+               (not `int` @44 (b~8 `enum E~1 complete` @4)))))))
 
 ----- stderr -----
-Error: cannot apply unary plus operator to expression with type `enum E~1 complete` (arithmetic type required)
-    ╭─[panko/tests/cases/execute/enum/test_enum_arithmetic_unary.c:13:39]
-    │
- 13 │     printf("%d %d %d 0x%08x %d %d\n", +a, +b, -b, ~c, !a, !b);
-    │                                       ─┬  
-    │                                        ╰── in this expression
-────╯
-
-Error: cannot apply unary plus operator to expression with type `enum E~1 complete` (arithmetic type required)
-    ╭─[panko/tests/cases/execute/enum/test_enum_arithmetic_unary.c:13:43]
-    │
- 13 │     printf("%d %d %d 0x%08x %d %d\n", +a, +b, -b, ~c, !a, !b);
-    │                                           ─┬  
-    │                                            ╰── in this expression
-────╯
-
-Error: cannot apply unary minus operator to expression with type `enum E~1 complete` (arithmetic type required)
-    ╭─[panko/tests/cases/execute/enum/test_enum_arithmetic_unary.c:13:47]
-    │
- 13 │     printf("%d %d %d 0x%08x %d %d\n", +a, +b, -b, ~c, !a, !b);
-    │                                               ─┬  
-    │                                                ╰── in this expression
-────╯
-
-Error: cannot apply bitwise complement operator to expression with type `enum E~1 complete` (integral type required)
-    ╭─[panko/tests/cases/execute/enum/test_enum_arithmetic_unary.c:13:51]
-    │
- 13 │     printf("%d %d %d 0x%08x %d %d\n", +a, +b, -b, ~c, !a, !b);
-    │                                                   ─┬  
-    │                                                    ╰── in this expression
-────╯

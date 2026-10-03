@@ -48,8 +48,8 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @24
                      (addressof `ptr<array<char; 7>>` @24
                         (string `array<char; 7>` @void "%d %d\n\0"))))
-               (a~14 `enum E~1 complete` @0)
-               (b~15 `enum E~1 complete` @4)))))
+               (noop-type-conversion `int` @0 (a~14 `enum E~1 complete` @0))
+               (noop-type-conversion `int` @4 (b~15 `enum E~1 complete` @4))))))
    (function-definition external stack-size=40
       (explicit_to_int~16 `fn() -> void` (static explicit_to_int))
       (compound-statement
@@ -79,9 +79,9 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @24
                      (addressof `ptr<array<char; 10>>` @24
                         (string `array<char; 10>` @void "%d %d %d\n\0"))))
-               (a~22 `enum E~1 complete` @0)
-               (b~23 `enum E~1 complete` @4)
-               (c~24 `enum E~1 complete` @8)))))
+               (noop-type-conversion `int` @0 (a~22 `enum E~1 complete` @0))
+               (noop-type-conversion `int` @4 (b~23 `enum E~1 complete` @4))
+               (noop-type-conversion `int` @8 (c~24 `enum E~1 complete` @8))))))
    (function-definition external stack-size=40
       (main~25 `fn() -> int` (static main))
       (compound-statement
@@ -109,8 +109,8 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @16
                      (addressof `ptr<array<char; 10>>` @16
                         (string `array<char; 10>` @void "%d %d %d\n\0"))))
-               (x~5 `enum E~1 complete` (static x))
-               (y~6 `enum E~1 complete` (static y))
+               (noop-type-conversion `int` (static x) (x~5 `enum E~1 complete` (static x)))
+               (noop-type-conversion `int` (static y) (y~6 `enum E~1 complete` (static y)))
                (z~7 `int` (static z)))))))
 
 ----- stderr -----

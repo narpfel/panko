@@ -18,6 +18,7 @@ use crate::scope::Linkage;
 use crate::scope::RefKind;
 use crate::scope::StorageDuration;
 use crate::ty;
+use crate::ty::Arithmetic;
 use crate::ty::ArrayType;
 use crate::ty::Class;
 use crate::ty::Complete;
@@ -291,6 +292,20 @@ impl<'a> Reference<'a> {
     }
 }
 
+fn layout_arithmetic<'a>(
+    stack: &mut Stack<'a>,
+    bump: &'a Bump,
+    arithmetic: Arithmetic<'a, Typeck>,
+) -> Type<'a> {
+    match arithmetic {
+        Arithmetic::Integral(integral) => Type::Arithmetic(Arithmetic::Integral(integral)),
+        Arithmetic::Enum(Enum::Incomplete { name, id, enable }) =>
+            Type::from(Enum::Incomplete { name, id, enable }),
+        Arithmetic::Enum(Enum::Complete(complete)) =>
+            Type::from(layout_complete_enum(stack, bump, complete)),
+    }
+}
+
 fn layout_array_length<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
@@ -348,7 +363,7 @@ fn layout_ty_unqual<'a>(
     ty: typecheck::Type<'a>,
 ) -> Type<'a> {
     match ty {
-        ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
+        ty::Type::Arithmetic(arithmetic) => layout_arithmetic(stack, bump, arithmetic),
         ty::Type::Pointer(pointee) => Type::Pointer(bump.alloc(layout_ty(stack, bump, *pointee))),
         ty::Type::Array(ArrayType { ty, length, loc }) => Type::Array(ArrayType {
             ty: bump.alloc(layout_ty(stack, bump, *ty)),
@@ -375,9 +390,6 @@ fn layout_ty_unqual<'a>(
             let complete = layout_complete_struct(stack, bump, &complete);
             Type::Struct(Struct::Complete(complete))
         }
-        ty::Type::Enum(Enum::Incomplete { name, id }) => Type::Enum(Enum::Incomplete { name, id }),
-        ty::Type::Enum(Enum::Complete(complete)) =>
-            Type::Enum(Enum::Complete(layout_complete_enum(stack, bump, complete))),
     }
 }
 

@@ -28,6 +28,7 @@ use crate::scope::BuiltinName;
 use crate::scope::Enumerator;
 use crate::scope::Expression;
 use crate::scope::Redeclared;
+use crate::ty::Arithmetic;
 use crate::ty::Complete;
 use crate::ty::CompleteEnum;
 use crate::ty::Enum;
@@ -199,8 +200,8 @@ impl<'a> Env<'a> {
         match name {
             Name::Reference(reference) => Name::Reference(reference),
             Name::Enumerator(Unfixupped(enumerator)) => {
-                let ty = match self.tagged.get(&enumerator.ty.id()) {
-                    Some(Tagged { ty: Type::Enum(r#enum), tag: _, loc: _ }) => *r#enum,
+                let ty = match try { self.tagged.get(&enumerator.ty.id())?.ty } {
+                    Some(Type::Arithmetic(Arithmetic::Enum(r#enum))) => r#enum,
                     _ => unreachable!(),
                 };
                 Name::Enumerator(Enumerator { ty, ..enumerator })
@@ -303,7 +304,7 @@ impl<'a> Scopes<'a> {
             return Err(Redeclared::TypedefAsValue {
                 at: name.loc(),
                 typedef_ty: *entry.get(),
-                value_ty: Type::Enum(ty).unqualified(),
+                value_ty: Type::from(ty).unqualified(),
             });
         }
 
@@ -492,7 +493,7 @@ impl<'a> Scopes<'a> {
         let name = try { loc?.slice() };
         try { self.lookup_tagged(name?)? }.unwrap_or_else(|| {
             let id = self.id();
-            let r#enum = Type::Enum(Enum::Incomplete { name, id });
+            let r#enum = Type::from(Enum::Incomplete { name, id, enable: () });
             let tagged = Tagged { ty: r#enum, tag: Tag::Enum, loc };
             match name {
                 Some(name) => *self
@@ -548,14 +549,14 @@ impl<'a> Scopes<'a> {
 
         // forward declare so that `name` is available in the body
         let forward_decl = match self.lookup_or_add_enum(loc).ty {
-            Type::Enum(r#enum) => r#enum,
-            Type::Struct(r#struct) => Enum::Incomplete { name, id: r#struct.id() },
+            Type::Arithmetic(Arithmetic::Enum(r#enum)) => r#enum,
+            Type::Struct(r#struct) => Enum::Incomplete { name, id: r#struct.id(), enable: () },
             _ => unreachable!(),
         };
 
         let enumerators = NoHashEq(super::resolve_enumerators(self, forward_decl, enumerators));
         let id = forward_decl.id();
-        let ty = Type::Enum(Enum::Complete(CompleteEnum { name, id, enumerators }));
+        let ty = Type::from(CompleteEnum { name, id, enumerators });
         let tagged = Tagged { ty, tag: Tag::Enum, loc };
 
         // complete the forward declaration
@@ -568,7 +569,9 @@ impl<'a> Scopes<'a> {
                 assert_matches!(
                     previous_decl,
                     Some(Tagged {
-                        ty: Type::Enum(Enum::Incomplete { name: None, id: old_id }),
+                        ty: Type::Arithmetic(Arithmetic::Enum(
+                            Enum::Incomplete { name: None, id: old_id, enable: () },
+                        )),
                         tag: Tag::Enum,
                         loc: None,
                     })
