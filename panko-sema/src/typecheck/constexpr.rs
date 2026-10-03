@@ -302,7 +302,8 @@ impl<'a, 'b> Value<'a, 'b> {
                 Value::int(is_nonzero.into(), expr)
             }
             Kind::Truncate | Kind::ZeroExtend | Kind::SignExtend => match ty {
-                Type::Arithmetic(Arithmetic::Integral(integral)) => {
+                Type::Arithmetic(arithmetic) => {
+                    let Arithmetic::Integral(integral) = arithmetic.resolve_enums();
                     let maybe_bytes =
                         iter_literal_bytes(&repr.into_bytes().expect("repr is not `Repr::Error`"))
                             .collect::<Option<Vec<_>>>();

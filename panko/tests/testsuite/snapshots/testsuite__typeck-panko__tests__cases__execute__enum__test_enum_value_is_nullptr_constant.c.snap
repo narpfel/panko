@@ -7,23 +7,21 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c"
+   (enum E~0
+      (enumerators
+         (enumerator A~1 0 `int` 0)
+         (enumerator B~2 1 `int` 1)
+         (enumerator C~3 2 `int` 2)))
+   (function-definition external
+      main~4 `fn() -> int`
+      (compound-statement
+         (definition p1~7 `ptr<struct T~6>` (sign-extend `ptr<struct T~6>` (noop-type-conversion `enum E~0 complete` (A `int`))))
+         (hoisted-compound-literal compound_literal.9~10 `enum E~0 complete`)
+         (definition p2~8 `ptr<struct T~6>` (sign-extend `ptr<struct T~6>` (compound-literal `enum E~0 complete` (definition compound_literal.9~10 `enum E~0 complete` (braced ∅)))))
+         (return (ptr-equal `int` (p1~7 `ptr<struct T~6>`) (p2~8 `ptr<struct T~6>`))))))
 
 ----- stderr -----
-Error: invalid implicit conversion from `enum E~0 complete` to `ptr<struct T~6>`
-   ╭─[panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c:7:28]
-   │
- 7 │     struct T* p1 = (enum E)A;
-   │                            ┬  
-   │                            ╰── this is of type `enum E~0 complete`, which cannot be implicitly converted to `ptr<struct T~6>`
-───╯
-
-Error: invalid implicit conversion from `enum E~0 complete` to `ptr<struct T~6>`
-   ╭─[panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c:8:20]
-   │
- 8 │     struct T* p2 = (enum E){};
-   │                    ┬  
-   │                    ╰── this is of type `enum E~0 complete`, which cannot be implicitly converted to `ptr<struct T~6>`
-───╯

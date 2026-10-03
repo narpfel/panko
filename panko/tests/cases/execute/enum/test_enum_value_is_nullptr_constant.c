@@ -1,4 +1,3 @@
-// [[known-bug: check for nullptr-constant-ness of enum values not implemented yet]]
 // [[return: 1]]
 
 enum E { A, B, C };

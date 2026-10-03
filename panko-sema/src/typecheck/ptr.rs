@@ -154,8 +154,10 @@ pub(super) fn typeck_ptrdiff<'a>(
 pub(super) fn is_nullptr_constant(expr: TypedExpression) -> bool {
     try {
         match expr.ty.ty {
-            Type::Arithmetic(Arithmetic::Integral(_)) =>
-                constexpr::eval(&expr).into_unsigned().ok()?.ok()? == 0,
+            Type::Arithmetic(arithmetic) => {
+                let Arithmetic::Integral(_) = arithmetic.resolve_enums();
+                constexpr::eval(&expr).into_unsigned().ok()?.ok()? == 0
+            }
             Type::Nullptr
             | Type::Pointer(QualifiedType {
                 is_const: false,
