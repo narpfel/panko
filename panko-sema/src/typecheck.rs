@@ -1155,22 +1155,20 @@ fn convert<'a>(
     // TODO: forbid ptr <=> float
     let target_ty = target.ty;
     let expr_ty = expr.ty.ty;
-    fn extend<'a>(expr_ty: Type<'a>) -> fn(&'a TypedExpression<'a>) -> Expression<'a> {
-        match expr_ty {
-            Type::Arithmetic(arithmetic) => match arithmetic.resolve_enums().signedness() {
-                Signedness::Signed => Expression::SignExtend,
-                Signedness::Unsigned => Expression::ZeroExtend,
-            },
-            _ => Expression::ZeroExtend,
-        }
-    }
+    let extend = || match expr_ty {
+        Type::Arithmetic(arithmetic) => match arithmetic.resolve_enums().signedness() {
+            Signedness::Signed => Expression::SignExtend,
+            Signedness::Unsigned => Expression::ZeroExtend,
+        },
+        _ => Expression::ZeroExtend,
+    };
     let convert = || {
         let cast = match (target_ty, target_ty.size().cmp(&expr_ty.size())) {
             // TODO: also use `BoolCast` when `target_ty` is an enum with underlying type `bool`
             (Type::BOOL, _) => Expression::BoolCast,
             (_, Ordering::Less) => Expression::Truncate,
             (_, Ordering::Equal) => Expression::NoopTypeConversion,
-            (_, Ordering::Greater) => extend(expr_ty),
+            (_, Ordering::Greater) => extend(),
         };
         cast(sess.alloc(expr))
     };
