@@ -2626,6 +2626,8 @@ fn typeck_expression<'a>(
                 })
                 .map(|(_default_token, expr)| expr);
 
+            // TODO: this should use type compatibility, not exact equality
+
             let assocs = assocs
                 .0
                 .iter()
