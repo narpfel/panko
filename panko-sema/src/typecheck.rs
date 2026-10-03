@@ -947,6 +947,8 @@ fn typeck_complete_enum<'a>(
         assert_matches!(was_present, None);
     }
     let enumerators = sess.alloc_slice_fill_iter(enumerator_values.into_values());
+    // TODO: this should be `Type::uint()` if there are no negative enumerator values to be
+    // compatible with GCC and clang
     let ty = &const { Type::int() };
     let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
     CompleteEnum { name, id, enumerators }
