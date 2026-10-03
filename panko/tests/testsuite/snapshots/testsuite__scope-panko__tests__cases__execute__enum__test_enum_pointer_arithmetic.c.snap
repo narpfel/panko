@@ -1,0 +1,48 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum E~1
+      (enumerators
+         (enumerator A~2 `enum E~1`.0 ∅)
+         (enumerator B~3 `enum E~1`.1 ∅)
+         (enumerator C~4 `enum E~1`.2 ∅)
+         (enumerator D~5 `enum E~1`.3 ∅)))
+   (function-definition
+      main~6 `fn() -> int`
+      (compound-statement
+         (declaration xs~8 `array<int; ∅>`
+            (braced
+               42
+               27
+               5
+               123
+               456))
+         (declaration p~9 `ptr<int>` (name xs~8 `array<int; ∅>`))
+         (declaration offset~10 `enum E~1 complete` (enumerator B~3 `enum E~1 complete`.1 ∅))
+         (expression (add-assign (name p~9 `ptr<int>`) (name offset~10 `enum E~1 complete`)))
+         (declaration a~12 `int` (subscript (name p~9 `ptr<int>`) (cast `enum E~1 complete` (enumerator A~2 `enum E~1 complete`.0 ∅))))
+         (expression (assign (name offset~10 `enum E~1 complete`) (enumerator C~4 `enum E~1 complete`.2 ∅)))
+         (declaration b~13 `int` (subscript (name p~9 `ptr<int>`) (name offset~10 `enum E~1 complete`)))
+         (expression (assign (name offset~10 `enum E~1 complete`) (enumerator B~3 `enum E~1 complete`.1 ∅)))
+         (declaration c~14 `int` (deref (subtract (name p~9 `ptr<int>`) (name offset~10 `enum E~1 complete`))))
+         (declaration d~15 `int` (deref (add (name offset~10 `enum E~1 complete`) (name p~9 `ptr<int>`))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d %d\n")
+               (name a~12 `int`)
+               (name b~13 `int`)
+               (name c~14 `int`)
+               (name d~15 `int`))))))
+
+----- stderr -----

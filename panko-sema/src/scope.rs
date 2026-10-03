@@ -47,6 +47,7 @@ use crate::scope::scopes::Scopes;
 use crate::scope::scopes::Tag;
 use crate::scope::scopes::Tagged;
 use crate::ty;
+use crate::ty::Arithmetic;
 use crate::ty::ParameterDeclaration;
 
 mod as_sexpr;
@@ -955,10 +956,23 @@ fn resolve_typename<'a>(
     }
 }
 
+fn reresolve_enum<'a>(scopes: &mut Scopes<'a>, r#enum: ty::Enum<'a, Scope>) -> Type<'a> {
+    match r#enum {
+        ty::Enum::Complete(complete) => Type::from(complete),
+        ty::Enum::Incomplete { name: Some(name), id: _, enable: _ } => {
+            let name = Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name);
+            scopes.lookup_or_add_enum(Some(name)).ty
+        }
+        ty::Enum::Incomplete { name: None, id, enable } =>
+            Type::from(ty::Enum::Incomplete { name: None, id, enable }),
+    }
+}
+
 fn reresolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &QualifiedType<'a>) -> QualifiedType<'a> {
     let QualifiedType { is_const, is_volatile, ty, loc } = *ty;
     let ty = match ty {
-        Type::Arithmetic(_) | Type::Void | Type::Nullptr => ty,
+        Type::Arithmetic(Arithmetic::Integral(_)) | Type::Void | Type::Nullptr => ty,
+        Type::Arithmetic(Arithmetic::Enum(r#enum)) => reresolve_enum(scopes, r#enum),
         Type::Pointer(ty) => Type::Pointer(scopes.sess.alloc(reresolve_ty(scopes, ty))),
         Type::Array(ArrayType { ty, length, loc }) => Type::Array(ArrayType {
             ty: scopes.sess.alloc(reresolve_ty(scopes, ty)),
@@ -997,13 +1011,6 @@ fn reresolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &QualifiedType<'a>) -> Qualifie
                     kind,
                 )
                 .ty,
-        Type::Enum(r#enum @ ty::Enum::Complete(_)) => Type::Enum(r#enum),
-        Type::Enum(ty::Enum::Incomplete { name: Some(name), id: _ }) => {
-            let name = Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name);
-            scopes.lookup_or_add_enum(Some(name)).ty
-        }
-        Type::Enum(ty::Enum::Incomplete { name: None, id }) =>
-            Type::Enum(ty::Enum::Incomplete { name: None, id }),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -1011,7 +1018,8 @@ fn reresolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &QualifiedType<'a>) -> Qualifie
 fn resolve_ty<'a>(scopes: &mut Scopes<'a>, ty: &ast::QualifiedType<'a>) -> QualifiedType<'a> {
     let ast::QualifiedType { is_const, is_volatile, ty, loc } = *ty;
     let ty = match ty {
-        ast::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
+        ast::Type::Arithmetic(ast::Arithmetic::Integral(integral)) =>
+            Type::Arithmetic(Arithmetic::Integral(integral)),
         ast::Type::Void => Type::Void,
         ast::Type::Typedef(name) => {
             let QualifiedType {

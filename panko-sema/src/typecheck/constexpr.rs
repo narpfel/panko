@@ -10,7 +10,6 @@ use itertools::zip_eq;
 use panko_parser::BinOpKind;
 use panko_parser::Comparison;
 use panko_parser::LogicalOpKind;
-use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::unimplemented_todo;
@@ -19,6 +18,7 @@ use panko_report::Report;
 use crate::scope::BuiltinName;
 use crate::scope::BuiltinNameKind;
 use crate::scope::StorageDuration;
+use crate::ty::Arithmetic;
 use crate::ty::subobjects::Subobject;
 use crate::typecheck::Bitfield;
 use crate::typecheck::Declaration;
@@ -221,7 +221,7 @@ impl<'a, 'b> Value<'a, 'b> {
     fn into_integral(self) -> Result<Integral, Errors<'a>> {
         let Self { expr, repr: _ } = &self;
         let signedness = match expr.ty.ty {
-            Type::Arithmetic(Arithmetic::Integral(integral)) => integral.signedness,
+            Type::Arithmetic(arithmetic) => arithmetic.resolve_enums().signedness(),
             _ => return Err(Errors::new(Diagnostic::IntegralExpected { at: **expr })),
         };
         let ty = match signedness {
@@ -302,7 +302,8 @@ impl<'a, 'b> Value<'a, 'b> {
                 Value::int(is_nonzero.into(), expr)
             }
             Kind::Truncate | Kind::ZeroExtend | Kind::SignExtend => match ty {
-                Type::Arithmetic(Arithmetic::Integral(integral)) => {
+                Type::Arithmetic(arithmetic) => {
+                    let Arithmetic::Integral(integral) = arithmetic.resolve_enums();
                     let maybe_bytes =
                         iter_literal_bytes(&repr.into_bytes().expect("repr is not `Repr::Error`"))
                             .collect::<Option<Vec<_>>>();

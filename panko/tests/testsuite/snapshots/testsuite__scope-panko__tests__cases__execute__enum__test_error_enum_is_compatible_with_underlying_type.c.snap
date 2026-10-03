@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_error_enum_is_compatible_with_underlying_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_error_enum_is_compatible_with_underlying_type.c"
+   (enum E~0
+      (enumerators
+         (enumerator A~1 `enum E~0`.0 ∅)
+         (enumerator B~2 `enum E~0`.1 ∅)
+         (enumerator C~3 `enum E~0`.2 ∅)))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (declaration x~6 `enum E~0 complete` (enumerator A~1 `enum E~0 complete`.0 ∅))
+         (expression
+            (generic
+               (name x~6 `enum E~0 complete`)
+               (assoc `unsigned int` 0)
+               (assoc `enum E~0 complete` 1))))))
+
+----- stderr -----

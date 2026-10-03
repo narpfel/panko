@@ -25,7 +25,6 @@ use panko_parser::StructKind;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast;
-use panko_parser::ast::Arithmetic;
 use panko_parser::ast::FromError;
 use panko_parser::ast::FunctionSpecifiers;
 use panko_parser::ast::Integral;
@@ -781,16 +780,15 @@ fn typeck_function_ty<'a>(
     let FunctionType { params, return_type, is_varargs } = ty;
     let return_type = sess.alloc(typeck_ty(sess, *return_type, IsParameter::No));
     match return_type.ty {
-        Type::Arithmetic(_)
+        Type::Arithmetic(ty::Arithmetic::Integral(_) | ty::Arithmetic::Enum(Enum::Complete(_)))
         | Type::Pointer(_)
         | Type::Void
         | Type::Nullptr
-        | Type::Struct(Struct::Complete(_))
-        | Type::Enum(Enum::Complete(_)) => (),
+        | Type::Struct(Struct::Complete(_)) => (),
         Type::Array(_)
         | Type::Function(_)
         | Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ })
-        | Type::Enum(Enum::Incomplete { name: _, id: _ }) =>
+        | Type::Arithmetic(ty::Arithmetic::Enum(Enum::Incomplete { .. })) =>
             sess.emit(Diagnostic::InvalidFunctionReturnType { at: *return_type }),
         Type::Typeof { expr, unqual: _, allow_bitfields: _ } => match expr {},
     }
@@ -949,6 +947,8 @@ fn typeck_complete_enum<'a>(
         assert_matches!(was_present, None);
     }
     let enumerators = sess.alloc_slice_fill_iter(enumerator_values.into_values());
+    // TODO: this should be `Type::uint()` if there are no negative enumerator values to be
+    // compatible with GCC and clang
     let ty = &const { Type::int() };
     let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
     CompleteEnum { name, id, enumerators }
@@ -975,7 +975,12 @@ fn typeck_ty_with_initialiser<'a>(
 ) -> QualifiedType<'a> {
     let scope::QualifiedType { is_const, is_volatile, ty, loc } = ty;
     let ty = match ty {
-        ty::Type::Arithmetic(arithmetic) => Type::Arithmetic(arithmetic),
+        ty::Type::Arithmetic(ty::Arithmetic::Integral(integral)) =>
+            Type::Arithmetic(ty::Arithmetic::Integral(integral)),
+        ty::Type::Arithmetic(ty::Arithmetic::Enum(Enum::Incomplete { name, id, enable })) =>
+            Type::from(Enum::Incomplete { name, id, enable }),
+        ty::Type::Arithmetic(ty::Arithmetic::Enum(Enum::Complete(complete))) =>
+            Type::from(typeck_complete_enum(sess, &complete)),
         ty::Type::Pointer(pointee) =>
             Type::Pointer(sess.alloc(typeck_ty(sess, *pointee, IsParameter::No))),
         ty::Type::Array(ty) => typeck_array_ty(sess, ty, is_parameter, reference),
@@ -1012,9 +1017,6 @@ fn typeck_ty_with_initialiser<'a>(
             Type::Struct(Struct::Incomplete { name, id, kind }),
         ty::Type::Struct(Struct::Complete(complete)) =>
             Type::Struct(Struct::Complete(typeck_complete_struct(sess, &complete))),
-        ty::Type::Enum(Enum::Incomplete { name, id }) => Type::Enum(Enum::Incomplete { name, id }),
-        ty::Type::Enum(Enum::Complete(complete)) =>
-            Type::Enum(Enum::Complete(typeck_complete_enum(sess, &complete))),
     };
     QualifiedType { is_const, is_volatile, ty, loc }
 }
@@ -1153,8 +1155,8 @@ fn convert<'a>(
     // TODO: forbid ptr <=> float
     let target_ty = target.ty;
     let expr_ty = expr.ty.ty;
-    let extend_kind = match expr_ty {
-        Type::Arithmetic(arithmetic) => match arithmetic.signedness() {
+    let extend = || match expr_ty {
+        Type::Arithmetic(arithmetic) => match arithmetic.resolve_enums().signedness() {
             Signedness::Signed => Expression::SignExtend,
             Signedness::Unsigned => Expression::ZeroExtend,
         },
@@ -1162,10 +1164,11 @@ fn convert<'a>(
     };
     let convert = || {
         let cast = match (target_ty, target_ty.size().cmp(&expr_ty.size())) {
+            // TODO: also use `BoolCast` when `target_ty` is an enum with underlying type `bool`
             (Type::BOOL, _) => Expression::BoolCast,
             (_, Ordering::Less) => Expression::Truncate,
             (_, Ordering::Equal) => Expression::NoopTypeConversion,
-            (_, Ordering::Greater) => extend_kind,
+            (_, Ordering::Greater) => extend(),
         };
         cast(sess.alloc(expr))
     };
@@ -1228,8 +1231,8 @@ fn convert<'a>(
 
         (Type::Pointer(_), Type::Nullptr) => convert(),
 
-        (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(_))
-        | (Type::Pointer(_), Type::Arithmetic(Arithmetic::Integral(_)))
+        (Type::Arithmetic(ty::Arithmetic::Integral(_)), Type::Pointer(_))
+        | (Type::Pointer(_), Type::Arithmetic(ty::Arithmetic::Integral(_)))
             if kind == ConversionKind::Explicit =>
             convert(),
 
@@ -1313,7 +1316,8 @@ fn typeck_array_initialisation_with_string<'a>(
     initialiser: &scope::Expression<'a>,
 ) -> Option<TypedExpression<'a>> {
     // TODO: adjust this check for prefixed string literals
-    if let Type::Arithmetic(Arithmetic::Integral(integral)) = array_ty.ty.ty
+    // TODO: what about arrays with element type `enum: char`?
+    if let Type::Arithmetic(ty::Arithmetic::Integral(integral)) = array_ty.ty.ty
         && let IntegralKind::Char | IntegralKind::PlainChar = integral.kind
     {
         let expr = typeck_expression(sess, initialiser, Context::ArrayInitialisationByString);
@@ -1685,7 +1689,7 @@ gen fn typeck_statement<'a>(
                 yield Statement::StructDecl(typeck_complete_struct(sess, complete))
             }
 
-            if let ty::Type::Enum(Enum::Complete(complete)) = &ty.ty
+            if let ty::Type::Arithmetic(ty::Arithmetic::Enum(Enum::Complete(complete))) = &ty.ty
                 && let ast::Type::Enum(ast::Enum::Complete { .. }) = unresolved_ty.ty
             {
                 yield Statement::EnumDecl(typeck_complete_enum(sess, complete))
@@ -1786,9 +1790,70 @@ fn integral_promote(ty: Arithmetic) -> Arithmetic {
     }
 }
 
-fn perform_usual_arithmetic_conversions(lhs_ty: Arithmetic, rhs_ty: Arithmetic) -> Arithmetic {
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub(crate) enum EnumsResolved {}
+
+impl ty::Step for EnumsResolved {
+    type Enumerators<'a> = !;
+    type LengthExpr<'a> = <Typeck as ty::Step>::LengthExpr<'a>;
+    type Member<'a> = <Typeck as ty::Step>::Member<'a>;
+    type TypeofExpr<'a> = <Typeck as ty::Step>::TypeofExpr<'a>;
+}
+
+type Arithmetic<'a> = ty::Arithmetic<'a, EnumsResolved>;
+
+impl Arithmetic<'_> {
+    fn on_underlying<T>(self, f: impl FnOnce(&ast::Arithmetic) -> T) -> T {
+        match self {
+            Self::Integral(integral) => f(&ast::Arithmetic::Integral(integral)),
+        }
+    }
+
+    fn conversion_rank(self) -> u64 {
+        self.on_underlying(ast::Arithmetic::conversion_rank)
+    }
+
+    fn signedness(self) -> Signedness {
+        self.on_underlying(ast::Arithmetic::signedness)
+    }
+
+    pub(crate) fn size(self) -> u64 {
+        self.on_underlying(ast::Arithmetic::size)
+    }
+}
+
+impl From<Arithmetic<'_>> for ty::Arithmetic<'_, Typeck> {
+    fn from(value: Arithmetic<'_>) -> Self {
+        match value {
+            Arithmetic::Integral(integral) => Self::Integral(integral),
+        }
+    }
+}
+
+impl<'a, T> ty::Arithmetic<'a, T>
+where
+    T: ty::Step<Enumerators<'a> = HashEqIgnored<Enumerators<'a, T>>> + 'a,
+{
+    pub(crate) fn resolve_enums<'any>(&self) -> Arithmetic<'any> {
+        match self {
+            Self::Integral(integral) => Arithmetic::Integral(*integral),
+            Self::Enum(Enum::Incomplete { .. }) => unreachable!(),
+            Self::Enum(Enum::Complete(complete_enum)) => match complete_enum.enumerators.0.ty {
+                ty::Type::Arithmetic(arithmetic) => arithmetic.resolve_enums(),
+                _ => unreachable!(),
+            },
+        }
+    }
+}
+
+fn perform_usual_arithmetic_conversions<'a>(
+    lhs_ty: ty::Arithmetic<'a, Typeck>,
+    rhs_ty: ty::Arithmetic<'a, Typeck>,
+) -> Arithmetic<'a> {
     // TODO: handle floats
-    // TODO: convert enumerations to their underlying types
+
+    let lhs_ty = lhs_ty.resolve_enums();
+    let rhs_ty = rhs_ty.resolve_enums();
 
     let lhs_ty = integral_promote(lhs_ty);
     let rhs_ty = integral_promote(rhs_ty);
@@ -1827,13 +1892,14 @@ fn typeck_binop<'a>(
     match (lhs.ty.ty, rhs.ty.ty) {
         (Type::Arithmetic(lhs_ty), Type::Arithmetic(rhs_ty)) =>
             typeck_arithmetic_binop(sess, *op, lhs, rhs, lhs_ty, rhs_ty),
-        (Type::Arithmetic(Arithmetic::Integral(_)), Type::Pointer(pointee_ty))
+        // TODO: enums (this applies to all usages of `ty::Arithmetic` in this module)
+        (Type::Arithmetic(ty::Arithmetic::Integral(_)), Type::Pointer(pointee_ty))
             if matches!(op.kind, BinOpKind::Add) =>
             ptr::typeck_ptradd(sess, op, rhs, pointee_ty, lhs, PtrAddOrder::IntegralFirst),
-        (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
+        (Type::Pointer(pointee_ty), Type::Arithmetic(ty::Arithmetic::Integral(_)))
             if matches!(op.kind, BinOpKind::Add) =>
             ptr::typeck_ptradd(sess, op, lhs, pointee_ty, rhs, PtrAddOrder::PtrFirst),
-        (Type::Pointer(pointee_ty), Type::Arithmetic(Arithmetic::Integral(_)))
+        (Type::Pointer(pointee_ty), Type::Arithmetic(ty::Arithmetic::Integral(_)))
             if matches!(op.kind, BinOpKind::Subtract) =>
             ptr::typeck_ptrsub(sess, op, lhs, pointee_ty, rhs),
         (Type::Nullptr | Type::Pointer(_), _)
@@ -1925,7 +1991,9 @@ fn typeck_unary_op<'a>(
         },
         UnaryOpKind::Plus => match operand.ty.ty {
             Type::Arithmetic(arithmetic) => {
-                let result_ty = Type::Arithmetic(integral_promote(arithmetic)).unqualified();
+                let result_ty =
+                    Type::Arithmetic(integral_promote(arithmetic.resolve_enums()).into())
+                        .unqualified();
                 convert_as_if_by_assignment(sess, result_ty, operand)
             }
             _ => TypedExpression {
@@ -1941,7 +2009,9 @@ fn typeck_unary_op<'a>(
         },
         UnaryOpKind::Negate => match operand.ty.ty {
             Type::Arithmetic(arithmetic) => {
-                let result_ty = Type::Arithmetic(integral_promote(arithmetic)).unqualified();
+                let result_ty =
+                    Type::Arithmetic(integral_promote(arithmetic.resolve_enums()).into())
+                        .unqualified();
                 let operand = convert_as_if_by_assignment(sess, result_ty, operand);
                 TypedExpression {
                     ty: result_ty,
@@ -1963,9 +2033,12 @@ fn typeck_unary_op<'a>(
             },
         },
         UnaryOpKind::Compl => match operand.ty.ty {
-            Type::Arithmetic(Arithmetic::Integral(integral)) => {
-                let result_ty = Type::Arithmetic(integral_promote(Arithmetic::Integral(integral)))
-                    .unqualified();
+            Type::Arithmetic(
+                arithmetic @ (ty::Arithmetic::Integral(_) | ty::Arithmetic::Enum(_)),
+            ) => {
+                let result_ty =
+                    Type::Arithmetic(integral_promote(arithmetic.resolve_enums()).into())
+                        .unqualified();
                 let operand = convert_as_if_by_assignment(sess, result_ty, operand);
                 TypedExpression {
                     ty: result_ty,
@@ -2086,11 +2159,11 @@ fn typeck_arithmetic_binop<'a>(
     op: BinOp<'a>,
     lhs: TypedExpression<'a>,
     rhs: TypedExpression<'a>,
-    lhs_ty: Arithmetic,
-    rhs_ty: Arithmetic,
+    lhs_ty: ty::Arithmetic<'a, Typeck>,
+    rhs_ty: ty::Arithmetic<'a, Typeck>,
 ) -> TypedExpression<'a> {
     let Arithmetic::Integral(integral_ty) = perform_usual_arithmetic_conversions(lhs_ty, rhs_ty);
-    let common_ty = Type::Arithmetic(Arithmetic::Integral(integral_ty)).unqualified();
+    let common_ty = Type::Arithmetic(ty::Arithmetic::Integral(integral_ty)).unqualified();
     let ty = match op.kind {
         BinOpKind::Multiply
         | BinOpKind::Divide
@@ -2122,13 +2195,13 @@ fn typeck_integral_shift<'a>(
     op: BinOp<'a>,
     lhs: TypedExpression<'a>,
     rhs: TypedExpression<'a>,
-    lhs_ty: Arithmetic,
-    rhs_ty: Arithmetic,
+    lhs_ty: ty::Arithmetic<'a, Typeck>,
+    rhs_ty: ty::Arithmetic<'a, Typeck>,
 ) -> TypedExpression<'a> {
     assert_matches!(op.kind, BinOpKind::LeftShift | BinOpKind::RightShift);
-    let lhs_ty @ Arithmetic::Integral(lhs_integral) = integral_promote(lhs_ty);
-    let lhs_ty = Type::Arithmetic(lhs_ty).unqualified();
-    let rhs_ty = Type::Arithmetic(integral_promote(rhs_ty)).unqualified();
+    let lhs_ty @ Arithmetic::Integral(lhs_integral) = integral_promote(lhs_ty.resolve_enums());
+    let lhs_ty = Type::Arithmetic(lhs_ty.into()).unqualified();
+    let rhs_ty = Type::Arithmetic(integral_promote(rhs_ty.resolve_enums()).into()).unqualified();
     let lhs = convert_as_if_by_assignment(sess, lhs_ty, lhs);
     let rhs = convert_as_if_by_assignment(sess, rhs_ty, rhs);
     TypedExpression {
@@ -2418,8 +2491,8 @@ fn typeck_expression<'a>(
             }
 
             let default_argument_promote = |arg: TypedExpression<'a>| match arg.ty.ty {
-                Type::Arithmetic(ty @ Arithmetic::Integral(_)) =>
-                    Type::Arithmetic(integral_promote(ty)),
+                Type::Arithmetic(ty @ (ty::Arithmetic::Integral(_) | ty::Arithmetic::Enum(_))) =>
+                    Type::Arithmetic(integral_promote(ty.resolve_enums()).into()),
                 ty => ty,
             };
 
@@ -2553,6 +2626,8 @@ fn typeck_expression<'a>(
                 })
                 .map(|(_default_token, expr)| expr);
 
+            // TODO: this should use type compatibility, not exact equality
+
             let assocs = assocs
                 .0
                 .iter()
@@ -2628,8 +2703,9 @@ fn typeck_expression<'a>(
             let or_else = typeck_expression(sess, or_else, Context::Default);
             // TODO: some rules are unimplemented
             let result_ty = match (then.ty.ty, or_else.ty.ty) {
-                (Type::Arithmetic(then_ty), Type::Arithmetic(or_else_ty)) =>
-                    Type::Arithmetic(perform_usual_arithmetic_conversions(then_ty, or_else_ty)),
+                (Type::Arithmetic(then_ty), Type::Arithmetic(or_else_ty)) => Type::Arithmetic(
+                    perform_usual_arithmetic_conversions(then_ty, or_else_ty).into(),
+                ),
 
                 (Type::Void, Type::Void) => Type::Void,
 
@@ -2719,11 +2795,6 @@ fn typeck_expression<'a>(
                     });
                     then.ty.ty
                 }
-
-                (Type::Enum(_), _) =>
-                    unimplemented_todo!(then.ty, "conditional operator with enum"),
-                (_, Type::Enum(_)) =>
-                    unimplemented_todo!(or_else.ty, "conditional operator with enum"),
             };
             let result_ty = result_ty.unqualified();
             TypedExpression {
@@ -2942,7 +3013,8 @@ pub fn resolve_types<'a>(
                         ))
                     }
 
-                    if let ty::Type::Enum(Enum::Complete(complete)) = &ty.ty
+                    if let ty::Type::Arithmetic(ty::Arithmetic::Enum(Enum::Complete(complete))) =
+                        &ty.ty
                         && let ast::Type::Enum(ast::Enum::Complete { .. }) = unresolved_ty.ty
                     {
                         yield ExternalDeclaration::EnumDecl(typeck_complete_enum(sess, complete))

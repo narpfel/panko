@@ -10,7 +10,6 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_parser::NO_VALUE;
 use panko_parser::StructKind;
-use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Signedness;
@@ -19,6 +18,8 @@ use panko_parser::sexpr_builder::SExpr;
 use yansi::Paint as _;
 
 use crate::fake_trait_impls::HashEqIgnored;
+use crate::fake_trait_impls::NoHashEq;
+use crate::scope;
 use crate::scope::Id;
 use crate::typecheck;
 use crate::typecheck::ArrayLength;
@@ -31,7 +32,7 @@ pub trait Step {
     type TypeofExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
     type LengthExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
     type Member<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
-    type Enumerators<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
+    type Enumerators<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr + NeverIffNever;
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -187,16 +188,48 @@ impl<T: Step> AsSExpr for CompleteEnum<'_, T> {
     }
 }
 
+impl<'a, T: Step> From<Enum<'a, T>> for Type<'a, T> {
+    fn from(r#enum: Enum<'a, T>) -> Self {
+        Self::Arithmetic(Arithmetic::Enum(r#enum))
+    }
+}
+
+impl<'a, T: Step> From<CompleteEnum<'a, T>> for Type<'a, T> {
+    fn from(complete: CompleteEnum<'a, T>) -> Self {
+        Self::Arithmetic(Arithmetic::Enum(Enum::Complete(complete)))
+    }
+}
+
+pub trait NeverIffNever {
+    type Type: Copy + Eq + Hash + fmt::Debug;
+}
+
+impl NeverIffNever for ! {
+    type Type = !;
+}
+
+impl NeverIffNever for NoHashEq<scope::Enumerators<'_>> {
+    type Type = ();
+}
+
+impl<T: Step> NeverIffNever for HashEqIgnored<Enumerators<'_, T>> {
+    type Type = ();
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Enum<'a, T: Step> {
-    Incomplete { name: Option<&'a str>, id: Id },
+    Incomplete {
+        name: Option<&'a str>,
+        id: Id,
+        enable: <T::Enumerators<'a> as NeverIffNever>::Type,
+    },
     Complete(CompleteEnum<'a, T>),
 }
 
 impl<T: Step> Enum<'_, T> {
     pub(crate) fn id(&self) -> Id {
         match self {
-            Self::Incomplete { name: _, id }
+            Self::Incomplete { name: _, id, enable: _ }
             | Self::Complete(CompleteEnum { name: _, id, enumerators: _ }) => *id,
         }
     }
@@ -205,7 +238,7 @@ impl<T: Step> Enum<'_, T> {
 impl<T: Step> AsSExpr for Enum<'_, T> {
     fn as_sexpr(&self) -> SExpr {
         let s = match self {
-            Enum::Incomplete { name, id } =>
+            Enum::Incomplete { name, id, enable: _ } =>
                 format!("enum {name}~{id}", name = name.as_sexpr(), id = id.0),
             Enum::Complete(CompleteEnum { name, id, enumerators: _ }) =>
                 format!("enum {}~{} complete", name.as_sexpr(), id.0),
@@ -215,8 +248,14 @@ impl<T: Step> AsSExpr for Enum<'_, T> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Arithmetic<'a, T: Step> {
+    Integral(Integral),
+    Enum(Enum<'a, T>),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Type<'a, T: Step> {
-    Arithmetic(Arithmetic),
+    Arithmetic(Arithmetic<'a, T>),
     Pointer(&'a QualifiedType<'a, T>),
     Array(ArrayType<'a, T>),
     Function(FunctionType<'a, T>),
@@ -228,7 +267,6 @@ pub enum Type<'a, T: Step> {
     },
     Nullptr,
     Struct(Struct<'a, T>),
-    Enum(Enum<'a, T>),
     // TODO
 }
 
@@ -420,10 +458,7 @@ where
     }
 
     pub(crate) fn is_scalar(&self) -> bool {
-        matches!(
-            self,
-            Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr | Type::Enum(_),
-        )
+        matches!(self, Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr)
     }
 
     pub fn is_array(&self) -> bool {
@@ -432,7 +467,7 @@ where
 
     pub fn size(&self) -> u64 {
         match self {
-            Type::Arithmetic(arithmetic) => arithmetic.size(),
+            Type::Arithmetic(arithmetic) => arithmetic.resolve_enums().size(),
             Type::Pointer(_) => Self::size_t().size(),
             Type::Array(ArrayType { ty, length, loc: _ }) => {
                 let elem_size = ty.ty.size();
@@ -461,17 +496,12 @@ where
                 let member = member.unwrap_or_else(|| panic!("empty {kind}s are not allowed"));
                 (member.offset + member.ty.ty.size()).next_multiple_of(self.align())
             }
-            Type::Enum(Enum::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Enum(Enum::Complete(CompleteEnum { name: _, id: _, enumerators })) => {
-                let HashEqIgnored(Enumerators { ty, enumerators: _ }) = enumerators;
-                ty.size()
-            }
         }
     }
 
     pub fn align(&self) -> u64 {
         match self {
-            Type::Arithmetic(arithmetic) => arithmetic.size(),
+            Type::Arithmetic(arithmetic) => arithmetic.resolve_enums().size(),
             Type::Pointer(_) => Self::size_t().align(),
             Type::Array(array_type) => array_type.ty.ty.align(),
             Type::Function(_) =>
@@ -486,11 +516,6 @@ where
                 .map(|member| member.ty.ty.align())
                 .max()
                 .unwrap_or_else(|| panic!("empty {kind}s are not allowed")),
-            Type::Enum(Enum::Incomplete { name: _, id: _ }) => unreachable!("incomplete"),
-            Type::Enum(Enum::Complete(CompleteEnum { name: _, id: _, enumerators })) => {
-                let HashEqIgnored(Enumerators { ty, enumerators: _ }) = enumerators;
-                ty.align()
-            }
         }
     }
 
@@ -509,7 +534,9 @@ where
 
     pub(crate) fn is_complete(&self) -> bool {
         match self {
-            Type::Arithmetic(_) | Type::Pointer(_) | Type::Function(_) => true,
+            Type::Arithmetic(Arithmetic::Integral(_) | Arithmetic::Enum(Enum::Complete(_)))
+            | Type::Pointer(_)
+            | Type::Function(_) => true,
             Type::Array(ArrayType { ty, length, loc: _ }) =>
                 length.is_known() && ty.ty.is_complete(),
             Type::Void => false,
@@ -517,8 +544,7 @@ where
             Type::Nullptr => true,
             Type::Struct(Struct::Incomplete { name: _, id: _, kind: _ }) => false,
             Type::Struct(Struct::Complete(_)) => true,
-            Type::Enum(Enum::Incomplete { name: _, id: _ }) => false,
-            Type::Enum(Enum::Complete(_)) => true,
+            Type::Arithmetic(Arithmetic::Enum(Enum::Incomplete { .. })) => false,
         }
     }
 
@@ -545,7 +571,9 @@ where
 
     pub fn try_classify(&self) -> Option<Class> {
         match self {
-            Self::Arithmetic(_) => Some(Class::Integer),
+            Self::Arithmetic(Arithmetic::Integral(_) | Arithmetic::Enum(Enum::Complete(_))) =>
+                Some(Class::Integer),
+            Self::Arithmetic(Arithmetic::Enum(Enum::Incomplete { .. })) => None,
             Self::Pointer(_) => Some(Class::Integer),
             Self::Array(_) => None,
             Self::Function(_) => None,
@@ -559,8 +587,6 @@ where
                 2 => Some(Class::Pair(PairKind::Integer)),
                 3.. => Some(Class::Memory),
             },
-            Self::Enum(Enum::Incomplete { name: _, id: _ }) => None,
-            Self::Enum(Enum::Complete(_)) => Some(Class::Integer),
         }
     }
 
@@ -587,6 +613,7 @@ impl<T: Step> fmt::Display for Type<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Type::Arithmetic(Arithmetic::Integral(integral)) => write!(f, "{integral}"),
+            Type::Arithmetic(Arithmetic::Enum(r#enum)) => write!(f, "{}", r#enum.as_sexpr()),
             Type::Pointer(pointee) => write!(f, "ptr<{pointee}>"),
             Type::Array(array) => write!(f, "{array}"),
             Type::Function(function) => write!(f, "{function}"),
@@ -602,7 +629,6 @@ impl<T: Step> fmt::Display for Type<'_, T> {
                 write!(f, "{kind} {name}~{id}", id = id.0),
             Type::Struct(Struct::Complete(Complete { name, id, kind, members: _ })) =>
                 write!(f, "{kind} {}~{} complete", name.as_sexpr(), id.0),
-            Type::Enum(r#enum) => write!(f, "{}", r#enum.as_sexpr()),
         }
     }
 }
@@ -723,8 +749,7 @@ impl<'a> QualifiedType<'a, Typeck> {
             | Type::Function(_)
             | Type::Void
             | Type::Nullptr
-            | Type::Struct(Struct::Incomplete { .. })
-            | Type::Enum(_) => true,
+            | Type::Struct(Struct::Incomplete { .. }) => true,
             Type::Struct(Struct::Complete(Complete { name: _, id: _, kind: _, members })) =>
                 members.iter().all(|member| member.ty.is_modifiable()),
         };

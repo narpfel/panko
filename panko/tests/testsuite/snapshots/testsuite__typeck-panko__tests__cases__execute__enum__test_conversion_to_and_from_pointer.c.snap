@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_conversion_to_and_from_pointer.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid explicit conversion from `enum E~0 complete` to `ptr<int>`
+   ╭─[panko/tests/cases/execute/enum/test_conversion_to_and_from_pointer.c:9:22]
+   │
+ 9 │     int* ptr = (int*)value;
+   │                      ──┬──  
+   │                        ╰──── this is of type `enum E~0 complete`, which cannot be explicitly converted to `ptr<int>`
+───╯
+
+Error: invalid explicit conversion from `ptr<int>` to `enum E~0 complete`
+    ╭─[panko/tests/cases/execute/enum/test_conversion_to_and_from_pointer.c:10:35]
+    │
+ 10 │     enum E roundtripped = (enum E)ptr;
+    │                                   ─┬─  
+    │                                    ╰─── this is of type `ptr<int>`, which cannot be explicitly converted to `enum E~0 complete`
+────╯
