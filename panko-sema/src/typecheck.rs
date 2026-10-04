@@ -2045,12 +2045,9 @@ fn typeck_unary_op<'a>(
             },
         },
         UnaryOpKind::Compl => match operand.ty.ty {
-            Type::Arithmetic(
-                arithmetic @ (ty::Arithmetic::Integral(_) | ty::Arithmetic::Enum(_)),
-            ) => {
-                let result_ty =
-                    Type::Arithmetic(integral_promote(arithmetic.resolve_enums()).into())
-                        .unqualified();
+            Type::Arithmetic(arithmetic) => {
+                let arithmetic @ Arithmetic::Integral(_) = arithmetic.resolve_enums();
+                let result_ty = Type::Arithmetic(integral_promote(arithmetic).into()).unqualified();
                 let operand = convert_as_if_by_assignment(sess, result_ty, operand);
                 TypedExpression {
                     ty: result_ty,
