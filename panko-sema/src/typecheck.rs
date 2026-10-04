@@ -2500,8 +2500,11 @@ fn typeck_expression<'a>(
             }
 
             let default_argument_promote = |arg: TypedExpression<'a>| match arg.ty.ty {
-                Type::Arithmetic(ty @ (ty::Arithmetic::Integral(_) | ty::Arithmetic::Enum(_))) =>
-                    Type::Arithmetic(integral_promote(ty.resolve_enums()).into()),
+                // TODO: `float` => `double`
+                Type::Arithmetic(arithmetic) => {
+                    let arithmetic @ Arithmetic::Integral(_) = arithmetic.resolve_enums();
+                    Type::Arithmetic(integral_promote(arithmetic).into())
+                }
                 ty => ty,
             };
 
