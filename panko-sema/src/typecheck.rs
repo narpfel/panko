@@ -1896,15 +1896,24 @@ fn typeck_binop<'a>(
         (Type::Arithmetic(lhs_ty), Type::Arithmetic(rhs_ty)) =>
             typeck_arithmetic_binop(sess, *op, lhs, rhs, lhs_ty, rhs_ty),
         // TODO: enums (this applies to all usages of `ty::Arithmetic` in this module)
-        (Type::Arithmetic(ty::Arithmetic::Integral(_)), Type::Pointer(pointee_ty))
+        (Type::Arithmetic(arithmetic), Type::Pointer(pointee_ty))
             if matches!(op.kind, BinOpKind::Add) =>
-            ptr::typeck_ptradd(sess, op, rhs, pointee_ty, lhs, PtrAddOrder::IntegralFirst),
-        (Type::Pointer(pointee_ty), Type::Arithmetic(ty::Arithmetic::Integral(_)))
+        {
+            let Arithmetic::Integral(_) = arithmetic.resolve_enums();
+            ptr::typeck_ptradd(sess, op, rhs, pointee_ty, lhs, PtrAddOrder::IntegralFirst)
+        }
+        (Type::Pointer(pointee_ty), Type::Arithmetic(arithmetic))
             if matches!(op.kind, BinOpKind::Add) =>
-            ptr::typeck_ptradd(sess, op, lhs, pointee_ty, rhs, PtrAddOrder::PtrFirst),
-        (Type::Pointer(pointee_ty), Type::Arithmetic(ty::Arithmetic::Integral(_)))
+        {
+            let Arithmetic::Integral(_) = arithmetic.resolve_enums();
+            ptr::typeck_ptradd(sess, op, lhs, pointee_ty, rhs, PtrAddOrder::PtrFirst)
+        }
+        (Type::Pointer(pointee_ty), Type::Arithmetic(arithmetic))
             if matches!(op.kind, BinOpKind::Subtract) =>
-            ptr::typeck_ptrsub(sess, op, lhs, pointee_ty, rhs),
+        {
+            let Arithmetic::Integral(_) = arithmetic.resolve_enums();
+            ptr::typeck_ptrsub(sess, op, lhs, pointee_ty, rhs)
+        }
         (Type::Nullptr | Type::Pointer(_), _)
             if let BinOpKind::Comparison(cmp @ (Comparison::Equal | Comparison::NotEqual)) =
                 op.kind

@@ -7,131 +7,55 @@ info:
     - "--stop-after=typeck"
     - panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum E~1
+      (enumerators
+         (enumerator A~2 0 `int` 0)
+         (enumerator B~3 1 `int` 1)
+         (enumerator C~4 2 `int` 2)
+         (enumerator D~5 3 `int` 3)))
+   (function-definition external
+      main~6 `fn() -> int`
+      (compound-statement
+         (definition xs~8 `array<int; 5>`
+            (braced
+               (subobject +0 (42 `int`))
+               (subobject +4 (27 `int`))
+               (subobject +8 (5 `int`))
+               (subobject +12 (123 `int`))
+               (subobject +16 (456 `int`))))
+         (definition p~9 `ptr<int>`
+            (noop-type-conversion `ptr<int>`
+               (addressof `ptr<array<int; 5>>`
+                  (xs~8 `array<int; 5>`))))
+         (definition offset~10 `enum E~1 complete` (noop-type-conversion `enum E~1 complete` (B `int`)))
+         (expression
+            (combine `ptr<int>`
+               (assign `ptr<ptr<int>>` (unnamed-temporary~11 `ptr<ptr<int>>`)
+                  (addressof `ptr<ptr<int>>`
+                     (p~9 `ptr<int>`)))
+               (assign `ptr<int>` (deref `ptr<int>` (unnamed-temporary~11 `ptr<ptr<int>>`)) (ptr-add `ptr<int>` (deref `ptr<int>` (unnamed-temporary~11 `ptr<ptr<int>>`)) (sign-extend `long` (offset~10 `enum E~1 complete`))))))
+         (definition a~12 `int` (deref `int` (ptr-add `ptr<int>` (p~9 `ptr<int>`) (sign-extend `long` (noop-type-conversion `enum E~1 complete` (A `int`))))))
+         (expression (assign `enum E~1 complete` (offset~10 `enum E~1 complete`) (noop-type-conversion `enum E~1 complete` (C `int`))))
+         (definition b~13 `int` (deref `int` (ptr-add `ptr<int>` (p~9 `ptr<int>`) (sign-extend `long` (offset~10 `enum E~1 complete`)))))
+         (expression (assign `enum E~1 complete` (offset~10 `enum E~1 complete`) (noop-type-conversion `enum E~1 complete` (B `int`))))
+         (definition c~14 `int` (deref `int` (ptr-sub `ptr<int>` (p~9 `ptr<int>`) (sign-extend `long` (offset~10 `enum E~1 complete`)))))
+         (definition d~15 `int` (deref `int` (ptr-add `ptr<int>` (sign-extend `long` (offset~10 `enum E~1 complete`)) (p~9 `ptr<int>`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 13>>`
+                        (string `array<char; 13>` "%d %d %d %d\n\0"))))
+               (a~12 `int`)
+               (b~13 `int`)
+               (c~14 `int`)
+               (d~15 `int`))))))
 
 ----- stderr -----
-Error: invalid operands to binary operator `+=`
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:11:7]
-    │
- 11 │     p += offset;
-    │     ──┬─ ───┬──  
-    │       │     ╰──── this is of type `enum E~1 complete`
-    │       │          
-    │       ╰────────── this is of type `ptr<int>`
-────╯
-
-Error: invalid implicit conversion from `void` to `ptr<int>`
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:11:7]
-    │
- 11 │     p += offset;
-    │       ─┬  
-    │        ╰── this is of type `void`, which cannot be implicitly converted to `ptr<int>`
-────╯
-
-Error: cannot dereference this expression of type `void` (pointer or array type required)
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:12:13]
-    │
- 12 │     int a = p[(enum E)A];
-    │             ───────────┬  
-    │                        ╰── in this expression
-────╯
-
-Error: invalid implicit conversion from `void` to `int`
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:12:13]
-    │
- 12 │     int a = p[(enum E)A];
-    │             ──────┬─────  
-    │                   ╰─────── this is of type `void`, which cannot be implicitly converted to `int`
-────╯
-
-Error: invalid operands to binary operator `]`
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:12:24]
-    │
- 12 │     int a = p[(enum E)A];
-    │             ┬         ┬─  
-    │             │         │   
-    │             │         ╰─── this is of type `enum E~1 complete`
-    │             │             
-    │             ╰───────────── this is of type `ptr<int>`
-────╯
-
-Error: cannot dereference this expression of type `void` (pointer or array type required)
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:14:13]
-    │
- 14 │     int b = p[offset];
-    │             ────────┬  
-    │                     ╰── in this expression
-────╯
-
-Error: invalid implicit conversion from `void` to `int`
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:14:13]
-    │
- 14 │     int b = p[offset];
-    │             ────┬────  
-    │                 ╰────── this is of type `void`, which cannot be implicitly converted to `int`
-────╯
-
-Error: invalid operands to binary operator `]`
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:14:21]
-    │
- 14 │     int b = p[offset];
-    │             ┬ ───┬───  
-    │             │    │     
-    │             │    ╰───── this is of type `enum E~1 complete`
-    │             │          
-    │             ╰────────── this is of type `ptr<int>`
-────╯
-
-Error: cannot dereference this expression of type `void` (pointer or array type required)
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:16:13]
-    │
- 16 │     int c = *(p - offset);
-    │             ───────┬─────  
-    │                    ╰─────── in this expression
-────╯
-
-Error: invalid implicit conversion from `void` to `int`
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:16:13]
-    │
- 16 │     int c = *(p - offset);
-    │             ──────┬──────  
-    │                   ╰──────── this is of type `void`, which cannot be implicitly converted to `int`
-────╯
-
-Error: invalid operands to binary operator `-`
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:16:17]
-    │
- 16 │     int c = *(p - offset);
-    │               ┬ ─ ───┬──  
-    │               │      ╰──── this is of type `enum E~1 complete`
-    │               │           
-    │               ╰─────────── this is of type `ptr<int>`
-────╯
-
-Error: cannot dereference this expression of type `void` (pointer or array type required)
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:17:13]
-    │
- 17 │     int d = *(offset + p);
-    │             ───────┬─────  
-    │                    ╰─────── in this expression
-────╯
-
-Error: invalid implicit conversion from `void` to `int`
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:17:13]
-    │
- 17 │     int d = *(offset + p);
-    │             ──────┬──────  
-    │                   ╰──────── this is of type `void`, which cannot be implicitly converted to `int`
-────╯
-
-Error: invalid operands to binary operator `+`
-    ╭─[panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c:17:22]
-    │
- 17 │     int d = *(offset + p);
-    │               ───┬── ─ ┬  
-    │                  │     ╰── this is of type `ptr<int>`
-    │                  │        
-    │                  ╰──────── this is of type `enum E~1 complete`
-────╯

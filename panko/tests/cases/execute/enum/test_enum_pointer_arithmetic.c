@@ -1,5 +1,3 @@
-// [[known-bug: pointer arithmetic involving enum values not implemented]]
-
 int printf(char const*, ...);
 
 enum E { A, B, C, D };

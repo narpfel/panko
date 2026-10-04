@@ -75,7 +75,11 @@ pub(super) fn typeck_ptrsub<'a>(
     integral: TypedExpression<'a>,
 ) -> TypedExpression<'a> {
     assert_matches!(pointer.ty.ty, Type::Pointer(_));
-    assert_matches!(integral.ty.ty, Type::Arithmetic(Arithmetic::Integral(_)));
+    assert_matches!(
+        integral.ty.ty,
+        Type::Arithmetic(arithmetic)
+        if matches!(arithmetic.resolve_enums(), Arithmetic::Integral(_)),
+    );
     if pointee_ty.ty.is_complete() {
         let integral = convert_as_if_by_assignment(sess, Type::ptrdiff_t().unqualified(), integral);
         TypedExpression {
