@@ -1,4 +1,3 @@
-// [[known-bug: pointer <=> enum conversions not implemented yet]]
 // [[return: 1]]
 
 enum E { A, B, C, D, E };

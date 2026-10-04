@@ -7,23 +7,26 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/enum/test_conversion_to_and_from_pointer.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_conversion_to_and_from_pointer.c"
+   (enum E~0
+      (enumerators
+         (enumerator A~1 0 `int` 0)
+         (enumerator B~2 1 `int` 1)
+         (enumerator C~3 2 `int` 2)
+         (enumerator D~4 3 `int` 3)
+         (enumerator E~5 4 `int` 4)))
+   (function-definition external stack-size=40
+      (main~6 `fn() -> int` (static main))
+      (compound-statement
+         (definition (value~8 `enum E~0 complete` @0) (noop-type-conversion `enum E~0 complete` @0 (4 `int` @0)))
+         (definition (ptr~9 `ptr<int>` @8) (sign-extend `ptr<int>` @8 (value~8 `enum E~0 complete` @0)))
+         (definition (roundtripped~10 `enum E~0 complete` @16) (truncate `enum E~0 complete` @16 (ptr~9 `ptr<int>` @8)))
+         (return
+            (equal `int` @20
+               (noop-type-conversion `int` @0 (value~8 `enum E~0 complete` @0))
+               (noop-type-conversion `int` @16 (roundtripped~10 `enum E~0 complete` @16)))))))
 
 ----- stderr -----
-Error: invalid explicit conversion from `enum E~0 complete` to `ptr<int>`
-   ╭─[panko/tests/cases/execute/enum/test_conversion_to_and_from_pointer.c:9:22]
-   │
- 9 │     int* ptr = (int*)value;
-   │                      ──┬──  
-   │                        ╰──── this is of type `enum E~0 complete`, which cannot be explicitly converted to `ptr<int>`
-───╯
-
-Error: invalid explicit conversion from `ptr<int>` to `enum E~0 complete`
-    ╭─[panko/tests/cases/execute/enum/test_conversion_to_and_from_pointer.c:10:35]
-    │
- 10 │     enum E roundtripped = (enum E)ptr;
-    │                                   ─┬─  
-    │                                    ╰─── this is of type `ptr<int>`, which cannot be explicitly converted to `enum E~0 complete`
-────╯

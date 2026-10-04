@@ -1231,10 +1231,13 @@ fn convert<'a>(
 
         (Type::Pointer(_), Type::Nullptr) => convert(),
 
-        (Type::Arithmetic(ty::Arithmetic::Integral(_)), Type::Pointer(_))
-        | (Type::Pointer(_), Type::Arithmetic(ty::Arithmetic::Integral(_)))
+        (Type::Arithmetic(arithmetic), Type::Pointer(_))
+        | (Type::Pointer(_), Type::Arithmetic(arithmetic))
             if kind == ConversionKind::Explicit =>
-            convert(),
+        {
+            let Arithmetic::Integral(_) = arithmetic.resolve_enums();
+            convert()
+        }
 
         (Type::Struct(lhs), Type::Struct(rhs)) if lhs.id() == rhs.id() => {
             assert_eq!(lhs.kind(), rhs.kind());
