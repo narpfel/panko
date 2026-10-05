@@ -805,6 +805,7 @@ impl<'a> Codegen<'a> {
                 Expression::Name(_) => {
                     self.expr(target);
                     self.expr(value);
+                    // TODO: this does not work for `volatile` self-assignment
                     if target.slot != value.slot {
                         self.copy(target, value);
                     }
