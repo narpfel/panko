@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/enum/test_enum_value_in_integer_constant_expression_position.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_value_in_integer_constant_expression_position.c"
+   (function-definition external stack-size=40
+      (main~0 `fn() -> int` (static main))
+      (compound-statement
+         (enum E~2
+            (enumerators
+               (enumerator A~3 0 `int` 0)
+               (enumerator B~4 1 `int` 1)
+               (enumerator C~5 2 `int` 2)))
+         (struct T~6
+            (member x @0[0:2] `int`))
+         (definition (xs~7 `array<int; 1>` @0)
+            (braced
+               (subobject +0 (42 `int` @0))))
+         (return
+            (deref `int` @4
+               (ptr-add `ptr<int>` @8
+                  (noop-type-conversion `ptr<int>` @8
+                     (addressof `ptr<array<int; 1>>` @8
+                        (xs~7 `array<int; 1>` @0)))
+                  (sign-extend `long` @16 (0 `int` @24))))))))
+
+----- stderr -----

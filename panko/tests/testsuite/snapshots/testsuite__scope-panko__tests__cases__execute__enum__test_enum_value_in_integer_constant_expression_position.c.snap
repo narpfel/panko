@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_enum_value_in_integer_constant_expression_position.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_value_in_integer_constant_expression_position.c"
+   (function-definition
+      main~0 `fn() -> int`
+      (compound-statement
+         (enum E~2
+            (enumerators
+               (enumerator A~3 `enum E~2`.0 ∅)
+               (enumerator B~4 `enum E~2`.1 ∅)
+               (enumerator C~5 `enum E~2`.2 ∅)))
+         (struct T~6
+            (member x (bitfield-width (cast `enum E~2 complete` (enumerator C~5 `enum E~2 complete`.2 ∅))) `int`))
+         (declaration xs~7 `array<int; (cast `enum E~2 complete` (enumerator B~4 `enum E~2 complete`.1 ∅))>`
+            (braced
+               (designation ((index (cast `enum E~2 complete` (enumerator A~3 `enum E~2 complete`.0 ∅)))) 42)))
+         (return (subscript (name xs~7 `array<int; (cast `enum E~2 complete` (enumerator B~4 `enum E~2 complete`.1 ∅))>`) 0)))))
+
+----- stderr -----
