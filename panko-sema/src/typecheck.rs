@@ -2002,9 +2002,8 @@ fn typeck_unary_op<'a>(
         },
         UnaryOpKind::Plus => match operand.ty.ty {
             Type::Arithmetic(arithmetic) => {
-                let result_ty =
-                    Type::Arithmetic(integral_promote(arithmetic.resolve_enums()).into())
-                        .unqualified();
+                let arithmetic = integral_promote(arithmetic.resolve_enums()).into();
+                let result_ty = Type::Arithmetic(arithmetic).unqualified();
                 convert_as_if_by_assignment(sess, result_ty, operand)
             }
             _ => TypedExpression {
@@ -2020,9 +2019,8 @@ fn typeck_unary_op<'a>(
         },
         UnaryOpKind::Negate => match operand.ty.ty {
             Type::Arithmetic(arithmetic) => {
-                let result_ty =
-                    Type::Arithmetic(integral_promote(arithmetic.resolve_enums()).into())
-                        .unqualified();
+                let arithmetic = integral_promote(arithmetic.resolve_enums()).into();
+                let result_ty = Type::Arithmetic(arithmetic).unqualified();
                 let operand = convert_as_if_by_assignment(sess, result_ty, operand);
                 TypedExpression {
                     ty: result_ty,
