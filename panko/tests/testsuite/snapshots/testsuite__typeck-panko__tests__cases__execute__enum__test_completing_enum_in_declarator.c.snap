@@ -1,0 +1,56 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_completing_enum_in_declarator.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_completing_enum_in_declarator.c"
+   (function-definition external
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition xs~7 `array<enum E~2 complete; 4>`
+            (braced
+               (subobject +0 (noop-type-conversion `enum E~2 complete` (A `int`)))
+               (subobject +4 (noop-type-conversion `enum E~2 complete` (B `int`)))
+               (subobject +8 (noop-type-conversion `enum E~2 complete` (C `int`)))
+               (subobject +12 (noop-type-conversion `enum E~2 complete` (D `int`)))))
+         (return
+            (add `int`
+               (add `int`
+                  (add `int`
+                     (noop-type-conversion `int`
+                        (deref `enum E~2 complete`
+                           (ptr-add `ptr<enum E~2 complete>`
+                              (noop-type-conversion `ptr<enum E~2 complete>`
+                                 (addressof `ptr<array<enum E~2 complete; 4>>`
+                                    (xs~7 `array<enum E~2 complete; 4>`)))
+                              (sign-extend `long` (0 `int`)))))
+                     (noop-type-conversion `int`
+                        (deref `enum E~2 complete`
+                           (ptr-add `ptr<enum E~2 complete>`
+                              (noop-type-conversion `ptr<enum E~2 complete>`
+                                 (addressof `ptr<array<enum E~2 complete; 4>>`
+                                    (xs~7 `array<enum E~2 complete; 4>`)))
+                              (sign-extend `long` (1 `int`))))))
+                  (noop-type-conversion `int`
+                     (deref `enum E~2 complete`
+                        (ptr-add `ptr<enum E~2 complete>`
+                           (noop-type-conversion `ptr<enum E~2 complete>`
+                              (addressof `ptr<array<enum E~2 complete; 4>>`
+                                 (xs~7 `array<enum E~2 complete; 4>`)))
+                           (sign-extend `long` (2 `int`))))))
+               (noop-type-conversion `int`
+                  (deref `enum E~2 complete`
+                     (ptr-add `ptr<enum E~2 complete>`
+                        (noop-type-conversion `ptr<enum E~2 complete>`
+                           (addressof `ptr<array<enum E~2 complete; 4>>`
+                              (xs~7 `array<enum E~2 complete; 4>`)))
+                        (sign-extend `long` (3 `int`))))))))))
+
+----- stderr -----

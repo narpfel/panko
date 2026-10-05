@@ -11,7 +11,6 @@ use panko_lex::Loc;
 use panko_lex::Token;
 use panko_lex::TokenKind;
 use panko_parser::IntegerLiteralDiagnostic;
-use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Integral;
 use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
@@ -24,6 +23,7 @@ use super::Expression;
 use super::Type;
 use super::TypedExpression;
 use crate::fake_trait_impls::HashEqIgnored;
+use crate::ty::Arithmetic;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct StringLiteral<'a> {

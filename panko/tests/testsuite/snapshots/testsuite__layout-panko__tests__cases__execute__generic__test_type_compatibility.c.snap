@@ -1,0 +1,33 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/generic/test_type_compatibility.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: controlling expression does not match any type in this _Generic selection
+    ╭─[panko/tests/cases/execute/generic/test_type_compatibility.c:11:14]
+    │
+ 11 │     _Generic(x, unsigned: 0);
+    │     ─────────┬──┬───────────  
+    │              │  ╰───────────── in this _Generic selection
+    │              │                
+    │              ╰──────────────── controlling expression has type `enum E1~0 complete`
+────╯
+
+Error: controlling expression does not match any type in this _Generic selection
+    ╭─[panko/tests/cases/execute/generic/test_type_compatibility.c:13:14]
+    │
+ 13 │     _Generic(y, unsigned: 0);
+    │     ─────────┬──┬───────────  
+    │              │  ╰───────────── in this _Generic selection
+    │              │                
+    │              ╰──────────────── controlling expression has type `enum E2~4 complete`
+────╯

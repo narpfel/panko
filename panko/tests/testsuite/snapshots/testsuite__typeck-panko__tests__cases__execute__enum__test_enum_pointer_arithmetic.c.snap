@@ -1,0 +1,61 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum E~1
+      (enumerators
+         (enumerator A~2 0 `int` 0)
+         (enumerator B~3 1 `int` 1)
+         (enumerator C~4 2 `int` 2)
+         (enumerator D~5 3 `int` 3)))
+   (function-definition external
+      main~6 `fn() -> int`
+      (compound-statement
+         (definition xs~8 `array<int; 5>`
+            (braced
+               (subobject +0 (42 `int`))
+               (subobject +4 (27 `int`))
+               (subobject +8 (5 `int`))
+               (subobject +12 (123 `int`))
+               (subobject +16 (456 `int`))))
+         (definition p~9 `ptr<int>`
+            (noop-type-conversion `ptr<int>`
+               (addressof `ptr<array<int; 5>>`
+                  (xs~8 `array<int; 5>`))))
+         (definition offset~10 `enum E~1 complete` (noop-type-conversion `enum E~1 complete` (B `int`)))
+         (expression
+            (combine `ptr<int>`
+               (assign `ptr<ptr<int>>` (unnamed-temporary~11 `ptr<ptr<int>>`)
+                  (addressof `ptr<ptr<int>>`
+                     (p~9 `ptr<int>`)))
+               (assign `ptr<int>` (deref `ptr<int>` (unnamed-temporary~11 `ptr<ptr<int>>`)) (ptr-add `ptr<int>` (deref `ptr<int>` (unnamed-temporary~11 `ptr<ptr<int>>`)) (sign-extend `long` (offset~10 `enum E~1 complete`))))))
+         (definition a~12 `int` (deref `int` (ptr-add `ptr<int>` (p~9 `ptr<int>`) (sign-extend `long` (noop-type-conversion `enum E~1 complete` (A `int`))))))
+         (expression (assign `enum E~1 complete` (offset~10 `enum E~1 complete`) (noop-type-conversion `enum E~1 complete` (C `int`))))
+         (definition b~13 `int` (deref `int` (ptr-add `ptr<int>` (p~9 `ptr<int>`) (sign-extend `long` (offset~10 `enum E~1 complete`)))))
+         (expression (assign `enum E~1 complete` (offset~10 `enum E~1 complete`) (noop-type-conversion `enum E~1 complete` (B `int`))))
+         (definition c~14 `int` (deref `int` (ptr-sub `ptr<int>` (p~9 `ptr<int>`) (sign-extend `long` (offset~10 `enum E~1 complete`)))))
+         (definition d~15 `int` (deref `int` (ptr-add `ptr<int>` (sign-extend `long` (offset~10 `enum E~1 complete`)) (p~9 `ptr<int>`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 13>>`
+                        (string `array<char; 13>` "%d %d %d %d\n\0"))))
+               (a~12 `int`)
+               (b~13 `int`)
+               (c~14 `int`)
+               (d~15 `int`))))))
+
+----- stderr -----

@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_conversion_to_and_from_pointer.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_conversion_to_and_from_pointer.c"
+   (enum E~0
+      (enumerators
+         (enumerator A~1 `enum E~0`.0 ∅)
+         (enumerator B~2 `enum E~0`.1 ∅)
+         (enumerator C~3 `enum E~0`.2 ∅)
+         (enumerator D~4 `enum E~0`.3 ∅)
+         (enumerator E~5 `enum E~0`.4 ∅)))
+   (function-definition
+      main~6 `fn() -> int`
+      (compound-statement
+         (declaration value~8 `enum E~0 complete` (enumerator E~5 `enum E~0 complete`.4 ∅))
+         (declaration ptr~9 `ptr<int>` (cast `ptr<int>` (name value~8 `enum E~0 complete`)))
+         (declaration roundtripped~10 `enum E~0 complete` (cast `enum E~0 complete` (name ptr~9 `ptr<int>`)))
+         (return (equal (name value~8 `enum E~0 complete`) (name roundtripped~10 `enum E~0 complete`))))))
+
+----- stderr -----

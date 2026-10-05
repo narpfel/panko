@@ -1,0 +1,36 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_enum_arithmetic_unary.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_arithmetic_unary.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum E~1
+      (enumerators
+         (enumerator A~2 `enum E~1`.0 ∅)
+         (enumerator B~3 `enum E~1`.1 ∅)
+         (enumerator C~4 `enum E~1`.2 ∅)))
+   (function-definition
+      main~5 `fn() -> int`
+      (compound-statement
+         (declaration a~7 `enum E~1 complete` (enumerator A~2 `enum E~1 complete`.0 ∅))
+         (declaration b~8 `enum E~1 complete` (enumerator B~3 `enum E~1 complete`.1 ∅))
+         (declaration c~9 `enum E~1 complete` (cast `enum E~1 complete` (enumerator C~4 `enum E~1 complete`.2 ∅)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d 0x%08x %d %d\n")
+               (plus (name a~7 `enum E~1 complete`))
+               (plus (name b~8 `enum E~1 complete`))
+               (negate (name b~8 `enum E~1 complete`))
+               (compl (name c~9 `enum E~1 complete`))
+               (not (name a~7 `enum E~1 complete`))
+               (not (name b~8 `enum E~1 complete`)))))))
+
+----- stderr -----

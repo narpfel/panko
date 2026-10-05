@@ -2,6 +2,7 @@ use IntegralKind::*;
 use Signedness::*;
 
 use super::*;
+use crate::ty::Arithmetic;
 
 #[test]
 fn test_conversion_rank_comparison() {

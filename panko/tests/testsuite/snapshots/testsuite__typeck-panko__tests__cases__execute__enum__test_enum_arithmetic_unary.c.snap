@@ -1,0 +1,41 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_enum_arithmetic_unary.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_arithmetic_unary.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum E~1
+      (enumerators
+         (enumerator A~2 0 `int` 0)
+         (enumerator B~3 1 `int` 1)
+         (enumerator C~4 2 `int` 2)))
+   (function-definition external
+      main~5 `fn() -> int`
+      (compound-statement
+         (definition a~7 `enum E~1 complete` (noop-type-conversion `enum E~1 complete` (A `int`)))
+         (definition b~8 `enum E~1 complete` (noop-type-conversion `enum E~1 complete` (B `int`)))
+         (definition c~9 `enum E~1 complete` (noop-type-conversion `enum E~1 complete` (C `int`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 23>>`
+                        (string `array<char; 23>` "%d %d %d 0x%08x %d %d\n\0"))))
+               (noop-type-conversion `int` (a~7 `enum E~1 complete`))
+               (noop-type-conversion `int` (b~8 `enum E~1 complete`))
+               (negate `int` (noop-type-conversion `int` (b~8 `enum E~1 complete`)))
+               (compl `int` (noop-type-conversion `int` (c~9 `enum E~1 complete`)))
+               (not `int` (a~7 `enum E~1 complete`))
+               (not `int` (b~8 `enum E~1 complete`)))))))
+
+----- stderr -----

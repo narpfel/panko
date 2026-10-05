@@ -18,7 +18,6 @@ use panko_lex::Loc;
 use panko_parser::BinOpKind;
 use panko_parser::Comparison;
 use panko_parser::LogicalOpKind;
-use panko_parser::ast::Arithmetic;
 use panko_parser::ast::Signedness;
 use panko_report::Report;
 use panko_sema::layout::CompoundStatement;
@@ -42,6 +41,7 @@ use panko_sema::scope::BuiltinName;
 use panko_sema::scope::BuiltinNameKind;
 use panko_sema::scope::Linkage;
 use panko_sema::scope::RefKind;
+use panko_sema::ty::Arithmetic;
 use panko_sema::ty::ArrayType;
 use panko_sema::ty::Class;
 use panko_sema::ty::Complete;
@@ -381,7 +381,7 @@ impl<'a> Codegen<'a> {
             return;
         }
         match ty {
-            Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr | Type::Enum(_) => {
+            Type::Arithmetic(_) | Type::Pointer(_) | Type::Nullptr => {
                 self.emit_args("mov", &[&Rax.with_ty(ty), &src]);
                 self.emit_args("mov", &[&tgt, &Rax.with_ty(ty)]);
             }
@@ -805,6 +805,7 @@ impl<'a> Codegen<'a> {
                 Expression::Name(_) => {
                     self.expr(target);
                     self.expr(value);
+                    // TODO: this does not work for `volatile` self-assignment
                     if target.slot != value.slot {
                         self.copy(target, value);
                     }

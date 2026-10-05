@@ -1,0 +1,116 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_conversion_to_and_from_integral.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_conversion_to_and_from_integral.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum E~1
+      (enumerators
+         (enumerator A~2 0 `int` 0)
+         (enumerator B~3 1 `int` 1)
+         (enumerator C~4 2 `int` 2)))
+   (tentative-definition external x~5 `enum E~1 complete` ∅)
+   (definition external y~6 `enum E~1 complete` (noop-type-conversion `enum E~1 complete` (2 `int`)))
+   (definition external z~7 `int` (noop-type-conversion `int` (noop-type-conversion `enum E~1 complete` (B `int`))))
+   (function-definition external
+      implicit_to_int~8 `fn() -> void`
+      (compound-statement
+         (definition a~10 `int` (noop-type-conversion `int` (y~6 `enum E~1 complete`)))
+         (definition b~11 `int` (noop-type-conversion `int` (noop-type-conversion `enum E~1 complete` (B `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (a~10 `int`)
+               (b~11 `int`)))))
+   (function-definition external
+      implicit_from_int~12 `fn() -> void`
+      (compound-statement
+         (definition a~14 `enum E~1 complete` (noop-type-conversion `enum E~1 complete` (A `int`)))
+         (definition b~15 `enum E~1 complete` (noop-type-conversion `enum E~1 complete` (1 `int`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (noop-type-conversion `int` (a~14 `enum E~1 complete`))
+               (noop-type-conversion `int` (b~15 `enum E~1 complete`))))))
+   (function-definition external
+      explicit_to_int~16 `fn() -> void`
+      (compound-statement
+         (definition a~18 `int` (noop-type-conversion `int` (x~5 `enum E~1 complete`)))
+         (definition b~19 `int` (noop-type-conversion `int` (y~6 `enum E~1 complete`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "%d %d\n\0"))))
+               (a~18 `int`)
+               (b~19 `int`)))))
+   (function-definition external
+      explicit_from_int~20 `fn() -> void`
+      (compound-statement
+         (definition a~22 `enum E~1 complete` (noop-type-conversion `enum E~1 complete` (A `int`)))
+         (definition b~23 `enum E~1 complete` (noop-type-conversion `enum E~1 complete` (1 `int`)))
+         (definition c~24 `enum E~1 complete` (noop-type-conversion `enum E~1 complete` (C `int`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "%d %d %d\n\0"))))
+               (noop-type-conversion `int` (a~22 `enum E~1 complete`))
+               (noop-type-conversion `int` (b~23 `enum E~1 complete`))
+               (noop-type-conversion `int` (c~24 `enum E~1 complete`))))))
+   (function-definition external
+      main~25 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (implicit_to_int~8 `fn() -> void`))))
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (implicit_from_int~12 `fn() -> void`))))
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (explicit_to_int~16 `fn() -> void`))))
+         (expression
+            (call `void`
+               (addressof `ptr<fn() -> void>`
+                  (explicit_from_int~20 `fn() -> void`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "%d %d %d\n\0"))))
+               (noop-type-conversion `int` (x~5 `enum E~1 complete`))
+               (noop-type-conversion `int` (y~6 `enum E~1 complete`))
+               (z~7 `int`))))))
+
+----- stderr -----
