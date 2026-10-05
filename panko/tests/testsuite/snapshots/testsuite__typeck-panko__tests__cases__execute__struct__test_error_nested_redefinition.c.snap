@@ -1,0 +1,20 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_error_nested_redefinition.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_error_nested_redefinition.c"
+   (function-definition external
+      main~0 `fn() -> int`
+      (compound-statement
+         (definition xs~3 `array<struct T~2 complete; 32>` ∅)
+         (return (truncate `int` (lengthof `unsigned long` 32 (xs~3 `array<struct T~2 complete; 32>`)))))))
+
+----- stderr -----
