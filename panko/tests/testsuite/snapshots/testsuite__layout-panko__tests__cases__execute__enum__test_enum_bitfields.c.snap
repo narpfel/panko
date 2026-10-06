@@ -1,0 +1,38 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/enum/test_enum_bitfields.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_enum_bitfields.c"
+   (enum E~0
+      (enumerators
+         (enumerator A~1 0 `int` 0)
+         (enumerator B~2 1 `int` 1)
+         (enumerator C~3 2 `int` 2)))
+   (struct T~4
+      (member x @0[0:2] `enum E~0 complete`)
+      (member y @4[0:2] `enum E~0 complete`))
+   (function-definition external stack-size=24
+      (main~5 `fn() -> int` (static main))
+      (compound-statement
+         (definition (t~7 `struct T~4 complete` @0)
+            (braced
+               (subobject +0[0:2] (noop-type-conversion `enum E~0 complete` @8 (1 `int` @8)))
+               (subobject +4[0:2] (noop-type-conversion `enum E~0 complete` @8 (2 `int` @8)))))
+         (return
+            (add `int` @8
+               (noop-type-conversion `int` @8
+                  (member `enum E~0 complete` @8 x +0[0:2]
+                     (t~7 `struct T~4 complete` @0)))
+               (noop-type-conversion `int` @12
+                  (member `enum E~0 complete` @12 y +4[0:2]
+                     (t~7 `struct T~4 complete` @0))))))))
+
+----- stderr -----

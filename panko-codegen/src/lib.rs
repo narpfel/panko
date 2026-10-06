@@ -1262,10 +1262,13 @@ impl<'a> Codegen<'a> {
         let size = value.ty.ty.size() * 8;
         self.emit_args("shl", &[value, &size.strict_sub(width).strict_sub(offset)]);
         let right_shift = match value.ty.ty {
-            Type::Arithmetic(Arithmetic::Integral(integral)) => match integral.signedness {
-                Signedness::Signed => "sar",
-                Signedness::Unsigned => "shr",
-            },
+            Type::Arithmetic(arithmetic) => {
+                let Arithmetic::Integral(integral) = arithmetic.resolve_enums();
+                match integral.signedness {
+                    Signedness::Signed => "sar",
+                    Signedness::Unsigned => "shr",
+                }
+            }
             _ => unreachable!("nonintegral bitfield"),
         };
         self.emit_args(right_shift, &[value, &size.strict_sub(width)]);

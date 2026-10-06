@@ -270,6 +270,17 @@ pub enum Type<'a, T: Step> {
     // TODO
 }
 
+// `Type` is generic, so matching on `Type::BOOL` is not possible in all contexts. This macro
+// avoids duplicating the definition between `Type::bool` and `Type::is_bool`.
+macro_rules! bool_type {
+    () => {
+        Type::Arithmetic(Arithmetic::Integral(Integral {
+            signedness: Signedness::Unsigned,
+            kind: IntegralKind::Bool,
+        }))
+    };
+}
+
 impl<'a, T: Step> Type<'a, T> {
     pub(crate) const BOOL: Self = Self::bool();
     pub(crate) const INT: Self = Self::int();
@@ -280,10 +291,7 @@ impl<'a, T: Step> Type<'a, T> {
     pub(crate) const ULONG: Self = Self::ulong();
 
     pub(crate) const fn bool() -> Self {
-        Self::Arithmetic(Arithmetic::Integral(Integral {
-            signedness: Signedness::Unsigned,
-            kind: IntegralKind::Bool,
-        }))
+        bool_type!()
     }
 
     pub const fn char() -> Self {
@@ -437,6 +445,15 @@ impl<'a, T: Step> Type<'a, T> {
     // better
     pub fn slice(&self) -> String {
         self.to_string()
+    }
+}
+
+impl<'a, S> Type<'a, S>
+where
+    S: Step<TypeofExpr<'a> = !>,
+{
+    fn is_bool(&self) -> bool {
+        matches!(self, bool_type!())
     }
 }
 
@@ -595,15 +612,18 @@ where
     }
 
     pub(crate) fn is_valid_for_bitfield(&self) -> bool {
-        matches!(self, Self::Arithmetic(Arithmetic::Integral(_)))
+        match self {
+            Self::Arithmetic(arithmetic) =>
+                matches!(arithmetic.resolve_enums(), Arithmetic::Integral(_)),
+            _ => false,
+        }
     }
 
     pub(crate) fn max_bitfield_size(&self) -> u64 {
         match self {
-            Self::Arithmetic(Arithmetic::Integral(Integral {
-                signedness: _,
-                kind: IntegralKind::Bool,
-            })) => 1,
+            Self::Arithmetic(arithmetic)
+                if Type::Arithmetic(arithmetic.resolve_enums()).is_bool() =>
+                1,
             _ => self.size() * 8,
         }
     }
