@@ -2,6 +2,7 @@ use std::assert_matches;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
+use std::marker::PhantomData;
 use std::path::Path;
 
 use indexmap::IndexMap;
@@ -1794,18 +1795,18 @@ fn integral_promote(ty: Arithmetic) -> Arithmetic {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub(crate) enum EnumsResolved {}
+pub struct EnumsResolved<T: ty::Step>(!, PhantomData<T>);
 
-impl ty::Step for EnumsResolved {
+impl<T: ty::Step> ty::Step for EnumsResolved<T> {
     type Enumerators<'a> = !;
-    type LengthExpr<'a> = <Typeck as ty::Step>::LengthExpr<'a>;
-    type Member<'a> = <Typeck as ty::Step>::Member<'a>;
-    type TypeofExpr<'a> = <Typeck as ty::Step>::TypeofExpr<'a>;
+    type LengthExpr<'a> = T::LengthExpr<'a>;
+    type Member<'a> = T::Member<'a>;
+    type TypeofExpr<'a> = T::TypeofExpr<'a>;
 }
 
-type Arithmetic<'a> = ty::Arithmetic<'a, EnumsResolved>;
+type Arithmetic<'a> = ty::Arithmetic<'a, EnumsResolved<Typeck>>;
 
-impl Arithmetic<'_> {
+impl<S: ty::Step> ty::Arithmetic<'_, EnumsResolved<S>> {
     fn on_underlying<T>(self, f: impl FnOnce(&ast::Arithmetic) -> T) -> T {
         match self {
             Self::Integral(integral) => f(&ast::Arithmetic::Integral(integral)),
@@ -1837,9 +1838,9 @@ impl<'a, T> ty::Arithmetic<'a, T>
 where
     T: ty::Step<Enumerators<'a> = HashEqIgnored<Enumerators<'a, T>>> + 'a,
 {
-    pub(crate) fn resolve_enums<'any>(&self) -> Arithmetic<'any> {
+    pub fn resolve_enums<'any>(&self) -> ty::Arithmetic<'any, EnumsResolved<T>> {
         match self {
-            Self::Integral(integral) => Arithmetic::Integral(*integral),
+            Self::Integral(integral) => ty::Arithmetic::Integral(*integral),
             Self::Enum(Enum::Incomplete { .. }) => unreachable!(),
             Self::Enum(Enum::Complete(complete_enum)) => match complete_enum.enumerators.0.ty {
                 ty::Type::Arithmetic(arithmetic) => arithmetic.resolve_enums(),
