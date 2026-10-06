@@ -11,46 +11,66 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/generic/test_type_compatibility.c"
-   (enum E1~0
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum E1~1
       (enumerators
-         (enumerator A~1 `enum E1~0`.0 ∅)
-         (enumerator B~2 `enum E1~0`.1 ∅)
-         (enumerator C~3 `enum E1~0`.2 ∅)))
-   (enum E2~4
+         (enumerator A~2 `enum E1~1`.0 ∅)
+         (enumerator B~3 `enum E1~1`.1 ∅)
+         (enumerator C~4 `enum E1~1`.2 ∅)))
+   (enum E2~5
       (enumerators
-         (enumerator D~5 `enum E2~4`.0 ∅)
-         (enumerator E~6 `enum E2~4`.1 ∅)
-         (enumerator F~7 `enum E2~4`.2 ∅)))
+         (enumerator D~6 `enum E2~5`.0 ∅)
+         (enumerator E~7 `enum E2~5`.1 ∅)
+         (enumerator F~8 `enum E2~5`.2 ∅)))
    (function-definition
-      main~8 `fn() -> int`
+      f~9 `fn(e: enum E1~1 complete) -> int`
+      (params
+         e~11 `enum E1~1 complete`)
       (compound-statement
-         (declaration x~10 `enum E1~0 complete` (enumerator A~1 `enum E1~0 complete`.0 ∅))
-         (declaration y~11 `enum E2~4 complete` (enumerator D~5 `enum E2~4 complete`.0 ∅))
+         (return (name e~11 `enum E1~1 complete`))))
+   (declaration g~12 `fn() -> enum E1~1 complete` ∅)
+   (function-definition
+      main~13 `fn() -> int`
+      (compound-statement
+         (declaration x~15 `enum E1~1 complete` (enumerator A~2 `enum E1~1 complete`.0 ∅))
+         (declaration y~16 `enum E2~5 complete` (enumerator D~6 `enum E2~5 complete`.0 ∅))
          (expression
             (generic
-               (name x~10 `enum E1~0 complete`)
-               (assoc `enum E1~0 complete` 0)))
+               (name x~15 `enum E1~1 complete`)
+               (assoc `enum E1~1 complete` 0)))
          (expression
             (generic
-               (name x~10 `enum E1~0 complete`)
+               (name x~15 `enum E1~1 complete`)
                (assoc `unsigned int` 0)))
          (expression
             (generic
-               (name y~11 `enum E2~4 complete`)
-               (assoc `enum E2~4 complete` 0)))
+               (name y~16 `enum E2~5 complete`)
+               (assoc `enum E2~5 complete` 0)))
          (expression
             (generic
-               (name y~11 `enum E2~4 complete`)
+               (name y~16 `enum E2~5 complete`)
                (assoc `unsigned int` 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (generic
+                  (name f~9 `fn(e: enum E1~1 complete) -> int`)
+                  (assoc `ptr<typeof(`fn(∅: unsigned int) -> int`)>` 42))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (generic
+                  (name g~12 `fn() -> enum E1~1 complete`)
+                  (assoc `ptr<typeof(`fn() -> unsigned int`)>` 27))))
          (return
             (add
                (generic
-                  (name x~10 `enum E1~0 complete`)
-                  (assoc `enum E1~0 complete` 0)
-                  (assoc `enum E2~4 complete` 1))
+                  (name x~15 `enum E1~1 complete`)
+                  (assoc `enum E1~1 complete` 0)
+                  (assoc `enum E2~5 complete` 1))
                (generic
-                  (name y~11 `enum E2~4 complete`)
-                  (assoc `enum E1~0 complete` 1)
-                  (assoc `enum E2~4 complete` 0)))))))
+                  (name y~16 `enum E2~5 complete`)
+                  (assoc `enum E1~1 complete` 1)
+                  (assoc `enum E2~5 complete` 0)))))))
 
 ----- stderr -----

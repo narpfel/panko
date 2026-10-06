@@ -13,21 +13,41 @@ exit_code: 1
 
 ----- stderr -----
 Error: controlling expression does not match any type in this _Generic selection
-    ╭─[panko/tests/cases/execute/generic/test_type_compatibility.c:11:14]
+    ╭─[panko/tests/cases/execute/generic/test_type_compatibility.c:16:14]
     │
- 11 │     _Generic(x, unsigned: 0);
+ 16 │     _Generic(x, unsigned: 0);
     │     ─────────┬──┬───────────  
     │              │  ╰───────────── in this _Generic selection
     │              │                
-    │              ╰──────────────── controlling expression has type `enum E1~0 complete`
+    │              ╰──────────────── controlling expression has type `enum E1~1 complete`
 ────╯
 
 Error: controlling expression does not match any type in this _Generic selection
-    ╭─[panko/tests/cases/execute/generic/test_type_compatibility.c:13:14]
+    ╭─[panko/tests/cases/execute/generic/test_type_compatibility.c:18:14]
     │
- 13 │     _Generic(y, unsigned: 0);
+ 18 │     _Generic(y, unsigned: 0);
     │     ─────────┬──┬───────────  
     │              │  ╰───────────── in this _Generic selection
     │              │                
-    │              ╰──────────────── controlling expression has type `enum E2~4 complete`
+    │              ╰──────────────── controlling expression has type `enum E2~5 complete`
+────╯
+
+Error: controlling expression does not match any type in this _Generic selection
+    ╭─[panko/tests/cases/execute/generic/test_type_compatibility.c:22:29]
+    │
+ 22 │     printf("%d\n", _Generic(f, typeof(int(unsigned))*: 42));
+    │                    ─────────┬─────────┬───────────────────  
+    │                             │         ╰───────────────────── in this _Generic selection
+    │                             │                               
+    │                             ╰─────────────────────────────── controlling expression has type `ptr<fn(e: enum E1~1 complete) -> int>`
+────╯
+
+Error: controlling expression does not match any type in this _Generic selection
+    ╭─[panko/tests/cases/execute/generic/test_type_compatibility.c:24:29]
+    │
+ 24 │     printf("%d\n", _Generic(g, typeof(unsigned())*: 27));
+    │                    ─────────┬────────┬─────────────────  
+    │                             │        ╰─────────────────── in this _Generic selection
+    │                             │                            
+    │                             ╰──────────────────────────── controlling expression has type `ptr<fn() -> enum E1~1 complete>`
 ────╯
