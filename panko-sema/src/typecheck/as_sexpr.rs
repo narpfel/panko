@@ -258,8 +258,8 @@ impl AsSExpr for Expression<'_> {
 
 impl<T: Step> AsSExpr for Enumerators<'_, T> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { ty: _, enumerators } = self;
-        SExpr::new("enumerators").lines(*enumerators)
+        let Self { ty, enumerators } = self;
+        SExpr::new("enumerators").inherit(ty).lines(*enumerators)
     }
 }
 
