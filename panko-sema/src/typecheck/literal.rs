@@ -395,7 +395,7 @@ mod tests {
     use crate::typecheck::constexpr::Integral::*;
 
     #[test]
-    fn test_grow_to_fit_positive() {
+    fn test_enumeration_ty_nonnegative() {
         assert_eq!(Type::UINT, Type::Arithmetic(enumeration_ty(Unsigned(0))));
         assert_eq!(Type::UINT, Type::Arithmetic(enumeration_ty(Unsigned(1))));
         assert_eq!(
@@ -414,7 +414,7 @@ mod tests {
     }
 
     #[test]
-    fn test_grow_to_fit_negative() {
+    fn test_enumeration_ty_negative() {
         assert_eq!(Type::INT, Type::Arithmetic(enumeration_ty(Signed(-1))));
         assert_eq!(
             Type::LONG,
