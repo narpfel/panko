@@ -936,6 +936,24 @@ fn typeck_complete_struct<'a>(
     Complete { name, id, kind, members }
 }
 
+fn find_underlying_ty<'a>(values: impl IntoIterator<Item = constexpr::Integral>) -> Arithmetic<'a> {
+    let integral = values
+        .into_iter()
+        .map(literal::enumeration_ty)
+        .reduce(
+            |Integral { signedness, kind },
+             Integral {
+                 signedness: rhs_signedness,
+                 kind: rhs_kind,
+             }| Integral {
+                signedness: signedness.min(rhs_signedness),
+                kind: kind.max(rhs_kind),
+            },
+        )
+        .unwrap();
+    Arithmetic::Integral(integral)
+}
+
 fn typeck_complete_enum<'a>(
     sess: &'a Session<'a>,
     complete: &CompleteEnum<'a, scope::Scope>,
@@ -948,11 +966,10 @@ fn typeck_complete_enum<'a>(
         assert_matches!(was_present, None);
     }
     let enumerators = sess.alloc_slice_fill_iter(enumerator_values.into_values());
-    let ty = enumerators
+    let enumerator_values = enumerators
         .iter()
-        .map(|enumerator| literal::enumeration_ty(constexpr::Integral::Unsigned(enumerator.value)))
-        .max_by_key(|ty| ty.conversion_rank())
-        .unwrap();
+        .map(|enumerator| constexpr::Integral::Unsigned(enumerator.value));
+    let ty = find_underlying_ty(enumerator_values);
     let ty = sess.alloc(Type::Arithmetic(ty.into()));
     let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
     CompleteEnum { name, id, enumerators }

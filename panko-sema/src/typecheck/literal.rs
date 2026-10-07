@@ -24,7 +24,6 @@ use super::Expression;
 use super::Type;
 use super::TypedExpression;
 use crate::fake_trait_impls::HashEqIgnored;
-use crate::ty;
 use crate::ty::Arithmetic;
 use crate::typecheck::constexpr;
 
@@ -379,14 +378,13 @@ pub(super) fn typeck_integer_literal<'a>(
     }
 }
 
-pub(super) fn enumeration_ty<'a, T: ty::Step>(value: constexpr::Integral) -> Arithmetic<'a, T> {
+pub(super) fn enumeration_ty(value: constexpr::Integral) -> Integral {
     use constexpr::Integral::*;
-    let integral = match value {
+    match value {
         Signed(value) if value < 0 => grow_to_fit(Signedness::Signed, IntegralKind::Int, 10, value),
         Signed(value) => grow_to_fit(Signedness::Unsigned, IntegralKind::Int, 10, value),
         Unsigned(value) => grow_to_fit(Signedness::Unsigned, IntegralKind::Int, 10, value),
-    };
-    Arithmetic::Integral(integral)
+    }
 }
 
 #[cfg(test)]
@@ -396,29 +394,45 @@ mod tests {
 
     #[test]
     fn test_enumeration_ty_nonnegative() {
-        assert_eq!(Type::UINT, Type::Arithmetic(enumeration_ty(Unsigned(0))));
-        assert_eq!(Type::UINT, Type::Arithmetic(enumeration_ty(Unsigned(1))));
         assert_eq!(
             Type::UINT,
-            Type::Arithmetic(enumeration_ty(Unsigned(u32::MAX.into()))),
-        );
-        assert_eq!(Type::UINT, Type::Arithmetic(enumeration_ty(Signed(1))));
-        assert_eq!(
-            Type::ULONG,
-            Type::Arithmetic(enumeration_ty(Signed(0x1_0000_0000))),
+            Type::Arithmetic(Arithmetic::Integral(enumeration_ty(Unsigned(0)))),
         );
         assert_eq!(
+            Type::UINT,
+            Type::Arithmetic(Arithmetic::Integral(enumeration_ty(Unsigned(1)))),
+        );
+        assert_eq!(
+            Type::UINT,
+            Type::Arithmetic(Arithmetic::Integral(enumeration_ty(Unsigned(
+                u32::MAX.into(),
+            )))),
+        );
+        assert_eq!(
+            Type::UINT,
+            Type::Arithmetic(Arithmetic::Integral(enumeration_ty(Signed(1)))),
+        );
+        assert_eq!(
             Type::ULONG,
-            Type::Arithmetic(enumeration_ty(Unsigned(0x1_0000_0000))),
+            Type::Arithmetic(Arithmetic::Integral(enumeration_ty(Signed(0x1_0000_0000)))),
+        );
+        assert_eq!(
+            Type::ULONG,
+            Type::Arithmetic(Arithmetic::Integral(enumeration_ty(Unsigned(
+                0x1_0000_0000,
+            )))),
         );
     }
 
     #[test]
     fn test_enumeration_ty_negative() {
-        assert_eq!(Type::INT, Type::Arithmetic(enumeration_ty(Signed(-1))));
+        assert_eq!(
+            Type::INT,
+            Type::Arithmetic(Arithmetic::Integral(enumeration_ty(Signed(-1)))),
+        );
         assert_eq!(
             Type::LONG,
-            Type::Arithmetic(enumeration_ty(Signed(-0x1_0000_0000))),
+            Type::Arithmetic(Arithmetic::Integral(enumeration_ty(Signed(-0x1_0000_0000)))),
         );
     }
 }
