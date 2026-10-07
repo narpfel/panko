@@ -27,12 +27,13 @@ exit_code: 0
                (subobject +0[0:2] (noop-type-conversion `enum E~0 complete` @8 (1 `int` @8)))
                (subobject +4[0:2] (noop-type-conversion `enum E~0 complete` @8 (2 `int` @8)))))
          (return
-            (add `int` @8
-               (noop-type-conversion `int` @8
-                  (member `enum E~0 complete` @8 x +0[0:2]
-                     (t~7 `struct T~4 complete` @0)))
-               (noop-type-conversion `int` @12
-                  (member `enum E~0 complete` @12 y +4[0:2]
-                     (t~7 `struct T~4 complete` @0))))))))
+            (noop-type-conversion `int` @8
+               (add `unsigned int` @8
+                  (noop-type-conversion `unsigned int` @8
+                     (member `enum E~0 complete` @8 x +0[0:2]
+                        (t~7 `struct T~4 complete` @0)))
+                  (noop-type-conversion `unsigned int` @12
+                     (member `enum E~0 complete` @12 y +4[0:2]
+                        (t~7 `struct T~4 complete` @0)))))))))
 
 ----- stderr -----

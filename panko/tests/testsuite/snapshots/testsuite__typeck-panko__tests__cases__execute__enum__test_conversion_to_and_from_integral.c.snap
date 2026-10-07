@@ -48,8 +48,8 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 7>>`
                         (string `array<char; 7>` "%d %d\n\0"))))
-               (noop-type-conversion `int` (a~14 `enum E~1 complete`))
-               (noop-type-conversion `int` (b~15 `enum E~1 complete`))))))
+               (noop-type-conversion `unsigned int` (a~14 `enum E~1 complete`))
+               (noop-type-conversion `unsigned int` (b~15 `enum E~1 complete`))))))
    (function-definition external
       explicit_to_int~16 `fn() -> void`
       (compound-statement
@@ -79,9 +79,9 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "%d %d %d\n\0"))))
-               (noop-type-conversion `int` (a~22 `enum E~1 complete`))
-               (noop-type-conversion `int` (b~23 `enum E~1 complete`))
-               (noop-type-conversion `int` (c~24 `enum E~1 complete`))))))
+               (noop-type-conversion `unsigned int` (a~22 `enum E~1 complete`))
+               (noop-type-conversion `unsigned int` (b~23 `enum E~1 complete`))
+               (noop-type-conversion `unsigned int` (c~24 `enum E~1 complete`))))))
    (function-definition external
       main~25 `fn() -> int`
       (compound-statement
@@ -109,8 +109,8 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 10>>`
                         (string `array<char; 10>` "%d %d %d\n\0"))))
-               (noop-type-conversion `int` (x~5 `enum E~1 complete`))
-               (noop-type-conversion `int` (y~6 `enum E~1 complete`))
+               (noop-type-conversion `unsigned int` (x~5 `enum E~1 complete`))
+               (noop-type-conversion `unsigned int` (y~6 `enum E~1 complete`))
                (z~7 `int`))))))
 
 ----- stderr -----

@@ -1,4 +1,5 @@
 use std::bstr::ByteStr;
+use std::fmt::Display;
 use std::num::IntErrorKind;
 use std::str::Chars;
 
@@ -23,7 +24,9 @@ use super::Expression;
 use super::Type;
 use super::TypedExpression;
 use crate::fake_trait_impls::HashEqIgnored;
+use crate::ty;
 use crate::ty::Arithmetic;
+use crate::typecheck::constexpr;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct StringLiteral<'a> {
@@ -288,7 +291,18 @@ pub(super) fn typeck_bool_literal<'a>(token: &Token<'a>) -> TypedExpression<'a> 
     }
 }
 
-fn grow_to_fit(signedness: Signedness, kind: IntegralKind, base: u32, value: u64) -> Integral {
+fn grow_to_fit<T>(signedness: Signedness, kind: IntegralKind, base: u32, value: T) -> Integral
+where
+    T: Copy + Display,
+    i8: TryFrom<T>,
+    i16: TryFrom<T>,
+    i32: TryFrom<T>,
+    i64: TryFrom<T>,
+    u8: TryFrom<T>,
+    u16: TryFrom<T>,
+    u32: TryFrom<T>,
+    u64: TryFrom<T>,
+{
     const POSSIBLE_TYS: [Integral; 6] = [
         Integral {
             signedness: Signedness::Signed,
@@ -322,7 +336,7 @@ fn grow_to_fit(signedness: Signedness, kind: IntegralKind, base: u32, value: u64
         })
         .filter(|ty| ty.kind >= kind)
         .find(|ty| ty.can_represent(value))
-        .unwrap_or_else(|| todo!("emit error: integer constant cannot be represented"))
+        .unwrap_or_else(|| todo!("emit error: integer constant cannot be represented: {value}"))
 }
 
 pub(super) fn typeck_integer_literal<'a>(
@@ -362,5 +376,49 @@ pub(super) fn typeck_integer_literal<'a>(
                 sess.emit(IntegerLiteralDiagnostic::TooLarge { at: *token }),
             _ => unreachable!(),
         },
+    }
+}
+
+pub(super) fn enumeration_ty<'a, T: ty::Step>(value: constexpr::Integral) -> Arithmetic<'a, T> {
+    use constexpr::Integral::*;
+    let integral = match value {
+        Signed(value) if value < 0 => grow_to_fit(Signedness::Signed, IntegralKind::Int, 10, value),
+        Signed(value) => grow_to_fit(Signedness::Unsigned, IntegralKind::Int, 10, value),
+        Unsigned(value) => grow_to_fit(Signedness::Unsigned, IntegralKind::Int, 10, value),
+    };
+    Arithmetic::Integral(integral)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::typecheck::constexpr::Integral::*;
+
+    #[test]
+    fn test_grow_to_fit_positive() {
+        assert_eq!(Type::UINT, Type::Arithmetic(enumeration_ty(Unsigned(0))));
+        assert_eq!(Type::UINT, Type::Arithmetic(enumeration_ty(Unsigned(1))));
+        assert_eq!(
+            Type::UINT,
+            Type::Arithmetic(enumeration_ty(Unsigned(u32::MAX.into()))),
+        );
+        assert_eq!(Type::UINT, Type::Arithmetic(enumeration_ty(Signed(1))));
+        assert_eq!(
+            Type::ULONG,
+            Type::Arithmetic(enumeration_ty(Signed(0x1_0000_0000))),
+        );
+        assert_eq!(
+            Type::ULONG,
+            Type::Arithmetic(enumeration_ty(Unsigned(0x1_0000_0000))),
+        );
+    }
+
+    #[test]
+    fn test_grow_to_fit_negative() {
+        assert_eq!(Type::INT, Type::Arithmetic(enumeration_ty(Signed(-1))));
+        assert_eq!(
+            Type::LONG,
+            Type::Arithmetic(enumeration_ty(Signed(-0x1_0000_0000))),
+        );
     }
 }

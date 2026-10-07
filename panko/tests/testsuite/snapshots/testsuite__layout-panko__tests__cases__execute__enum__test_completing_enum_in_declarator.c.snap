@@ -21,36 +21,37 @@ exit_code: 0
                (subobject +8 (noop-type-conversion `enum E~2 complete` @8 (2 `int` @8)))
                (subobject +12 (noop-type-conversion `enum E~2 complete` @12 (3 `int` @12)))))
          (return
-            (add `int` @16
-               (add `int` @16
-                  (add `int` @16
-                     (noop-type-conversion `int` @16
-                        (deref `enum E~2 complete` @16
-                           (ptr-add `ptr<enum E~2 complete>` @24
-                              (noop-type-conversion `ptr<enum E~2 complete>` @24
-                                 (addressof `ptr<array<enum E~2 complete; 4>>` @24
-                                    (xs~7 `array<enum E~2 complete; 4>` @0)))
-                              (sign-extend `long` @32 (0 `int` @40)))))
-                     (noop-type-conversion `int` @32
+            (noop-type-conversion `int` @16
+               (add `unsigned int` @16
+                  (add `unsigned int` @16
+                     (add `unsigned int` @16
+                        (noop-type-conversion `unsigned int` @16
+                           (deref `enum E~2 complete` @16
+                              (ptr-add `ptr<enum E~2 complete>` @24
+                                 (noop-type-conversion `ptr<enum E~2 complete>` @24
+                                    (addressof `ptr<array<enum E~2 complete; 4>>` @24
+                                       (xs~7 `array<enum E~2 complete; 4>` @0)))
+                                 (sign-extend `long` @32 (0 `int` @40)))))
+                        (noop-type-conversion `unsigned int` @32
+                           (deref `enum E~2 complete` @32
+                              (ptr-add `ptr<enum E~2 complete>` @40
+                                 (noop-type-conversion `ptr<enum E~2 complete>` @40
+                                    (addressof `ptr<array<enum E~2 complete; 4>>` @40
+                                       (xs~7 `array<enum E~2 complete; 4>` @0)))
+                                 (sign-extend `long` @48 (1 `int` @56))))))
+                     (noop-type-conversion `unsigned int` @32
                         (deref `enum E~2 complete` @32
                            (ptr-add `ptr<enum E~2 complete>` @40
                               (noop-type-conversion `ptr<enum E~2 complete>` @40
                                  (addressof `ptr<array<enum E~2 complete; 4>>` @40
                                     (xs~7 `array<enum E~2 complete; 4>` @0)))
-                              (sign-extend `long` @48 (1 `int` @56))))))
-                  (noop-type-conversion `int` @32
+                              (sign-extend `long` @48 (2 `int` @56))))))
+                  (noop-type-conversion `unsigned int` @32
                      (deref `enum E~2 complete` @32
                         (ptr-add `ptr<enum E~2 complete>` @40
                            (noop-type-conversion `ptr<enum E~2 complete>` @40
                               (addressof `ptr<array<enum E~2 complete; 4>>` @40
                                  (xs~7 `array<enum E~2 complete; 4>` @0)))
-                           (sign-extend `long` @48 (2 `int` @56))))))
-               (noop-type-conversion `int` @32
-                  (deref `enum E~2 complete` @32
-                     (ptr-add `ptr<enum E~2 complete>` @40
-                        (noop-type-conversion `ptr<enum E~2 complete>` @40
-                           (addressof `ptr<array<enum E~2 complete; 4>>` @40
-                              (xs~7 `array<enum E~2 complete; 4>` @0)))
-                        (sign-extend `long` @48 (3 `int` @56))))))))))
+                           (sign-extend `long` @48 (3 `int` @56)))))))))))
 
 ----- stderr -----

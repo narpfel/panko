@@ -22,8 +22,8 @@ exit_code: 0
       main~6 `fn() -> int`
       (compound-statement
          (definition value~8 `enum E~0 complete` (noop-type-conversion `enum E~0 complete` (E `int`)))
-         (definition ptr~9 `ptr<int>` (sign-extend `ptr<int>` (value~8 `enum E~0 complete`)))
+         (definition ptr~9 `ptr<int>` (zero-extend `ptr<int>` (value~8 `enum E~0 complete`)))
          (definition roundtripped~10 `enum E~0 complete` (truncate `enum E~0 complete` (ptr~9 `ptr<int>`)))
-         (return (equal `int` (noop-type-conversion `int` (value~8 `enum E~0 complete`)) (noop-type-conversion `int` (roundtripped~10 `enum E~0 complete`)))))))
+         (return (equal `int` (noop-type-conversion `unsigned int` (value~8 `enum E~0 complete`)) (noop-type-conversion `unsigned int` (roundtripped~10 `enum E~0 complete`)))))))
 
 ----- stderr -----

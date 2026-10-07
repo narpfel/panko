@@ -31,10 +31,10 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 23>>`
                         (string `array<char; 23>` "%d %d %d 0x%08x %d %d\n\0"))))
-               (noop-type-conversion `int` (a~7 `enum E~1 complete`))
-               (noop-type-conversion `int` (b~8 `enum E~1 complete`))
-               (negate `int` (noop-type-conversion `int` (b~8 `enum E~1 complete`)))
-               (compl `int` (noop-type-conversion `int` (c~9 `enum E~1 complete`)))
+               (noop-type-conversion `unsigned int` (a~7 `enum E~1 complete`))
+               (noop-type-conversion `unsigned int` (b~8 `enum E~1 complete`))
+               (negate `unsigned int` (noop-type-conversion `unsigned int` (b~8 `enum E~1 complete`)))
+               (compl `unsigned int` (noop-type-conversion `unsigned int` (c~9 `enum E~1 complete`)))
                (not `int` (a~7 `enum E~1 complete`))
                (not `int` (b~8 `enum E~1 complete`)))))))
 

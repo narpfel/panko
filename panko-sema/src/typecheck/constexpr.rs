@@ -72,7 +72,7 @@ impl<'a> IntoIterator for Errors<'a> {
     }
 }
 
-enum Integral {
+pub(super) enum Integral {
     Signed(i64),
     Unsigned(u64),
 }

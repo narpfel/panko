@@ -38,13 +38,13 @@ exit_code: 0
                (assign `ptr<ptr<int>>` (unnamed-temporary~11 `ptr<ptr<int>>`)
                   (addressof `ptr<ptr<int>>`
                      (p~9 `ptr<int>`)))
-               (assign `ptr<int>` (deref `ptr<int>` (unnamed-temporary~11 `ptr<ptr<int>>`)) (ptr-add `ptr<int>` (deref `ptr<int>` (unnamed-temporary~11 `ptr<ptr<int>>`)) (sign-extend `long` (offset~10 `enum E~1 complete`))))))
-         (definition a~12 `int` (deref `int` (ptr-add `ptr<int>` (p~9 `ptr<int>`) (sign-extend `long` (noop-type-conversion `enum E~1 complete` (A `int`))))))
+               (assign `ptr<int>` (deref `ptr<int>` (unnamed-temporary~11 `ptr<ptr<int>>`)) (ptr-add `ptr<int>` (deref `ptr<int>` (unnamed-temporary~11 `ptr<ptr<int>>`)) (zero-extend `long` (offset~10 `enum E~1 complete`))))))
+         (definition a~12 `int` (deref `int` (ptr-add `ptr<int>` (p~9 `ptr<int>`) (zero-extend `long` (noop-type-conversion `enum E~1 complete` (A `int`))))))
          (expression (assign `enum E~1 complete` (offset~10 `enum E~1 complete`) (noop-type-conversion `enum E~1 complete` (C `int`))))
-         (definition b~13 `int` (deref `int` (ptr-add `ptr<int>` (p~9 `ptr<int>`) (sign-extend `long` (offset~10 `enum E~1 complete`)))))
+         (definition b~13 `int` (deref `int` (ptr-add `ptr<int>` (p~9 `ptr<int>`) (zero-extend `long` (offset~10 `enum E~1 complete`)))))
          (expression (assign `enum E~1 complete` (offset~10 `enum E~1 complete`) (noop-type-conversion `enum E~1 complete` (B `int`))))
-         (definition c~14 `int` (deref `int` (ptr-sub `ptr<int>` (p~9 `ptr<int>`) (sign-extend `long` (offset~10 `enum E~1 complete`)))))
-         (definition d~15 `int` (deref `int` (ptr-add `ptr<int>` (sign-extend `long` (offset~10 `enum E~1 complete`)) (p~9 `ptr<int>`))))
+         (definition c~14 `int` (deref `int` (ptr-sub `ptr<int>` (p~9 `ptr<int>`) (zero-extend `long` (offset~10 `enum E~1 complete`)))))
+         (definition d~15 `int` (deref `int` (ptr-add `ptr<int>` (zero-extend `long` (offset~10 `enum E~1 complete`)) (p~9 `ptr<int>`))))
          (expression
             (call `int`
                (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`

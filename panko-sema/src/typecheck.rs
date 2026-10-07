@@ -948,9 +948,12 @@ fn typeck_complete_enum<'a>(
         assert_matches!(was_present, None);
     }
     let enumerators = sess.alloc_slice_fill_iter(enumerator_values.into_values());
-    // TODO: this should be `Type::uint()` if there are no negative enumerator values to be
-    // compatible with GCC and clang
-    let ty = &const { Type::int() };
+    let ty = enumerators
+        .iter()
+        .map(|enumerator| literal::enumeration_ty(constexpr::Integral::Unsigned(enumerator.value)))
+        .max_by_key(|ty| ty.conversion_rank())
+        .unwrap();
+    let ty = sess.alloc(Type::Arithmetic(ty.into()));
     let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
     CompleteEnum { name, id, enumerators }
 }
@@ -2927,8 +2930,8 @@ fn typeck_expression<'a>(
                 Enum::Incomplete { .. } => unreachable!(),
                 Enum::Complete(complete) => typeck_complete_enum(sess, complete),
             };
-            let HashEqIgnored(Enumerators { ty, enumerators }) = enumerators;
-            let value = enumerators[*index].value;
+            let HashEqIgnored(Enumerators { ty: _, enumerators }) = enumerators;
+            let Enumerator { ty, value, .. } = enumerators[*index];
             let token = Token::synthesised(TokenKind::Identifier, *loc);
             TypedExpression {
                 ty: ty.unqualified(),

@@ -32,18 +32,18 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>` @24
                      (addressof `ptr<array<char; 16>>` @24
                         (string `array<char; 16>` @void "%d %d %d %d %d\n\0"))))
-               (noop-type-conversion `int` @0 (a~8 `enum E~1 complete` @0))
-               (add `int` @32
-                  (noop-type-conversion `int` @0 (a~8 `enum E~1 complete` @0))
-                  (1 `int` @36))
-               (add `int` @36
-                  (noop-type-conversion `int` @4 (b~9 `enum E~1 complete` @4))
-                  (noop-type-conversion `int` @8 (c~10 `enum E~1 complete` @8)))
-               (multiply `int` @40
-                  (3 `int` @40)
-                  (noop-type-conversion `int` @8 (c~10 `enum E~1 complete` @8)))
-               (left-shift `int` @44
-                  (noop-type-conversion `int` @4 (b~9 `enum E~1 complete` @4))
-                  (noop-type-conversion `int` @8 (c~10 `enum E~1 complete` @8))))))))
+               (noop-type-conversion `unsigned int` @0 (a~8 `enum E~1 complete` @0))
+               (add `unsigned int` @32
+                  (noop-type-conversion `unsigned int` @0 (a~8 `enum E~1 complete` @0))
+                  (noop-type-conversion `unsigned int` @36 (1 `int` @36)))
+               (add `unsigned int` @36
+                  (noop-type-conversion `unsigned int` @4 (b~9 `enum E~1 complete` @4))
+                  (noop-type-conversion `unsigned int` @8 (c~10 `enum E~1 complete` @8)))
+               (multiply `unsigned int` @40
+                  (noop-type-conversion `unsigned int` @40 (3 `int` @40))
+                  (noop-type-conversion `unsigned int` @8 (c~10 `enum E~1 complete` @8)))
+               (left-shift `unsigned int` @44
+                  (noop-type-conversion `unsigned int` @4 (b~9 `enum E~1 complete` @4))
+                  (noop-type-conversion `unsigned int` @8 (c~10 `enum E~1 complete` @8))))))))
 
 ----- stderr -----
