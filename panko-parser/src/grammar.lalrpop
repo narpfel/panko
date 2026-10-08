@@ -554,17 +554,21 @@ StructOrUnionSpecifier: ast::TypeSpecifier<'a> = {
         ast::TypeSpecifier::r#struct(<>),
 }
 
-EnumSpecifier: ast::TypeSpecifier<'a> = {
-    "enum" AnyIdentifier => ast::TypeSpecifier::incomplete_enum(<>),
-    <"enum"> <AnyIdentifier?> "{"
+Enumerator: ast::Enumerator<'a> = {
+    <name:AnyIdentifier> <value:("=" <ConstantExpression>)?> => ast::Enumerator { <> },
+}
+
+Enumerators = {
+    "{"
         PushIsInTypedef
         <NonEmptyCommaSep<Enumerator>> ","?
         PopIsInTypedef
-    "}" => ast::TypeSpecifier::r#enum(<>),
+    "}",
 }
 
-Enumerator: ast::Enumerator<'a> = {
-    <name:AnyIdentifier> <value:("=" <ConstantExpression>)?> => ast::Enumerator { <> },
+EnumSpecifier: ast::TypeSpecifier<'a> = {
+    "enum" AnyIdentifier => ast::TypeSpecifier::incomplete_enum(<>),
+    <"enum"> <AnyIdentifier?> <Enumerators> => ast::TypeSpecifier::r#enum(<>),
 }
 
 TypeofSpecifier: ast::TypeSpecifier<'a> = {
