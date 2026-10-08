@@ -1,4 +1,3 @@
-// [[known-bug: this should zero-extend the bitfield members because `enum E`’s compatible type should be `unsigned`]]
 // [[return: 3]]
 
 enum E { A, B, C };

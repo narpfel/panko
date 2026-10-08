@@ -13,7 +13,7 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/enum/test_enum_arithmetic.c"
    (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (enum E~1
-      (enumerators
+      (enumerators `unsigned int`
          (enumerator A~2 0 `int` 0)
          (enumerator B~3 1 `int` 1)
          (enumerator C~4 2 `int` 2)
@@ -32,10 +32,10 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 16>>`
                         (string `array<char; 16>` "%d %d %d %d %d\n\0"))))
-               (noop-type-conversion `int` (a~8 `enum E~1 complete`))
-               (add `int` (noop-type-conversion `int` (a~8 `enum E~1 complete`)) (B `int`))
-               (add `int` (noop-type-conversion `int` (b~9 `enum E~1 complete`)) (noop-type-conversion `int` (c~10 `enum E~1 complete`)))
-               (multiply `int` (D `int`) (noop-type-conversion `int` (c~10 `enum E~1 complete`)))
-               (left-shift `int` (noop-type-conversion `int` (b~9 `enum E~1 complete`)) (noop-type-conversion `int` (c~10 `enum E~1 complete`))))))))
+               (noop-type-conversion `unsigned int` (a~8 `enum E~1 complete`))
+               (add `unsigned int` (noop-type-conversion `unsigned int` (a~8 `enum E~1 complete`)) (noop-type-conversion `unsigned int` (B `int`)))
+               (add `unsigned int` (noop-type-conversion `unsigned int` (b~9 `enum E~1 complete`)) (noop-type-conversion `unsigned int` (c~10 `enum E~1 complete`)))
+               (multiply `unsigned int` (noop-type-conversion `unsigned int` (D `int`)) (noop-type-conversion `unsigned int` (c~10 `enum E~1 complete`)))
+               (left-shift `unsigned int` (noop-type-conversion `unsigned int` (b~9 `enum E~1 complete`)) (noop-type-conversion `unsigned int` (c~10 `enum E~1 complete`))))))))
 
 ----- stderr -----

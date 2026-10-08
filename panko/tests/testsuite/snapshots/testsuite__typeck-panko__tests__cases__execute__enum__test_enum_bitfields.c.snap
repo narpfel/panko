@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/enum/test_enum_bitfields.c"
    (enum E~0
-      (enumerators
+      (enumerators `unsigned int`
          (enumerator A~1 0 `int` 0)
          (enumerator B~2 1 `int` 1)
          (enumerator C~3 2 `int` 2)))
@@ -27,12 +27,13 @@ exit_code: 0
                (subobject +0[0:2] (noop-type-conversion `enum E~0 complete` (B `int`)))
                (subobject +4[0:2] (noop-type-conversion `enum E~0 complete` (C `int`)))))
          (return
-            (add `int`
-               (noop-type-conversion `int`
-                  (member `enum E~0 complete` x +0[0:2]
-                     (t~7 `struct T~4 complete`)))
-               (noop-type-conversion `int`
-                  (member `enum E~0 complete` y +4[0:2]
-                     (t~7 `struct T~4 complete`))))))))
+            (noop-type-conversion `int`
+               (add `unsigned int`
+                  (noop-type-conversion `unsigned int`
+                     (member `enum E~0 complete` x +0[0:2]
+                        (t~7 `struct T~4 complete`)))
+                  (noop-type-conversion `unsigned int`
+                     (member `enum E~0 complete` y +4[0:2]
+                        (t~7 `struct T~4 complete`)))))))))
 
 ----- stderr -----

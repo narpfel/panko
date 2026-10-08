@@ -14,7 +14,7 @@ exit_code: 0
    (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (declaration external memcpy~1 `fn(dest: ptr<void>, src: ptr<void const>, n: unsigned long) -> void` ∅)
    (enum E~2
-      (enumerators
+      (enumerators `unsigned int`
          (enumerator False~3 0 `int` 0)
          (enumerator True~4 1 `int` 1)))
    (tentative-definition external false_value~5 `enum E~2 complete` ∅)

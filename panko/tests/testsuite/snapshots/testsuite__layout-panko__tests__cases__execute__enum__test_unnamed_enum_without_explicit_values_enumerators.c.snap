@@ -13,7 +13,7 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/enum/test_unnamed_enum_without_explicit_values_enumerators.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (enum ∅~1
-      (enumerators
+      (enumerators `unsigned int`
          (enumerator A~2 0 `int` 0)
          (enumerator B~3 1 `int` 1)
          (enumerator C~4 2 `int` 2)

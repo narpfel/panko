@@ -12,16 +12,16 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/enum/test_enum_value_is_nullptr_constant.c"
    (enum E~0
-      (enumerators
+      (enumerators `unsigned int`
          (enumerator A~1 0 `int` 0)
          (enumerator B~2 1 `int` 1)
          (enumerator C~3 2 `int` 2)))
    (function-definition external
       main~4 `fn() -> int`
       (compound-statement
-         (definition p1~7 `ptr<struct T~6>` (sign-extend `ptr<struct T~6>` (noop-type-conversion `enum E~0 complete` (A `int`))))
+         (definition p1~7 `ptr<struct T~6>` (zero-extend `ptr<struct T~6>` (noop-type-conversion `enum E~0 complete` (A `int`))))
          (hoisted-compound-literal compound_literal.9~10 `enum E~0 complete`)
-         (definition p2~8 `ptr<struct T~6>` (sign-extend `ptr<struct T~6>` (compound-literal `enum E~0 complete` (definition compound_literal.9~10 `enum E~0 complete` (braced ∅)))))
+         (definition p2~8 `ptr<struct T~6>` (zero-extend `ptr<struct T~6>` (compound-literal `enum E~0 complete` (definition compound_literal.9~10 `enum E~0 complete` (braced ∅)))))
          (return (ptr-equal `int` (p1~7 `ptr<struct T~6>`) (p2~8 `ptr<struct T~6>`))))))
 
 ----- stderr -----

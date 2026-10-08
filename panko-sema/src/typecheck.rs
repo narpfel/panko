@@ -936,6 +936,34 @@ fn typeck_complete_struct<'a>(
     Complete { name, id, kind, members }
 }
 
+fn find_underlying_ty<'a>(values: impl IntoIterator<Item = constexpr::Integral>) -> Arithmetic<'a> {
+    use constexpr::Integral::Signed;
+    use itertools::MinMaxResult::*;
+
+    let integral = match values.into_iter().minmax() {
+        NoElements => unreachable!(),
+        OneElement(value) => literal::enumeration_ty(value),
+        MinMax(smallest, largest) => match smallest < Signed(0) && largest > Signed(i64::MAX) {
+            true => todo!("error: no type can represent all enumerator values"),
+            false => {
+                let [
+                    Integral { signedness, kind },
+                    Integral {
+                        signedness: rhs_signedness,
+                        kind: rhs_kind,
+                    },
+                ] = [smallest, largest].map(literal::enumeration_ty);
+                Integral {
+                    signedness: signedness.min(rhs_signedness),
+                    kind: kind.max(rhs_kind),
+                }
+            }
+        },
+    };
+
+    Arithmetic::Integral(integral)
+}
+
 fn typeck_complete_enum<'a>(
     sess: &'a Session<'a>,
     complete: &CompleteEnum<'a, scope::Scope>,
@@ -948,9 +976,11 @@ fn typeck_complete_enum<'a>(
         assert_matches!(was_present, None);
     }
     let enumerators = sess.alloc_slice_fill_iter(enumerator_values.into_values());
-    // TODO: this should be `Type::uint()` if there are no negative enumerator values to be
-    // compatible with GCC and clang
-    let ty = &const { Type::int() };
+    let enumerator_values = enumerators
+        .iter()
+        .map(|enumerator| constexpr::Integral::Unsigned(enumerator.value));
+    let ty = find_underlying_ty(enumerator_values);
+    let ty = sess.alloc(Type::Arithmetic(ty.into()));
     let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
     CompleteEnum { name, id, enumerators }
 }
@@ -2927,8 +2957,8 @@ fn typeck_expression<'a>(
                 Enum::Incomplete { .. } => unreachable!(),
                 Enum::Complete(complete) => typeck_complete_enum(sess, complete),
             };
-            let HashEqIgnored(Enumerators { ty, enumerators }) = enumerators;
-            let value = enumerators[*index].value;
+            let HashEqIgnored(Enumerators { ty: _, enumerators }) = enumerators;
+            let Enumerator { ty, value, .. } = enumerators[*index];
             let token = Token::synthesised(TokenKind::Identifier, *loc);
             TypedExpression {
                 ty: ty.unqualified(),

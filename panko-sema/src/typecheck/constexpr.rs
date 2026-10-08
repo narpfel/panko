@@ -1,5 +1,6 @@
 use std::assert_matches;
 use std::bstr::ByteStr;
+use std::cmp::Ordering;
 use std::collections::LinkedList;
 use std::iter::once;
 use std::ops::Range;
@@ -72,9 +73,37 @@ impl<'a> IntoIterator for Errors<'a> {
     }
 }
 
-enum Integral {
+#[derive(Debug, Clone)]
+pub(super) enum Integral {
     Signed(i64),
     Unsigned(u64),
+}
+
+impl PartialEq for Integral {
+    fn eq(&self, other: &Self) -> bool {
+        self.partial_cmp(other) == Some(Ordering::Equal)
+    }
+}
+
+impl Eq for Integral {}
+
+impl Ord for Integral {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self.clone(), other.clone()) {
+            (Self::Signed(lhs), Self::Signed(rhs)) => lhs.cmp(&rhs),
+            (Self::Signed(lhs), Self::Unsigned(rhs)) =>
+                i64::try_from(rhs).map_or(Ordering::Less, |rhs| lhs.cmp(&rhs)),
+            (Self::Unsigned(lhs), Self::Signed(rhs)) =>
+                i64::try_from(lhs).map_or(Ordering::Greater, |lhs| lhs.cmp(&rhs)),
+            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => lhs.cmp(&rhs),
+        }
+    }
+}
+
+impl PartialOrd for Integral {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 #[derive(Debug)]
@@ -1036,5 +1065,23 @@ pub(super) fn run_static_initialiser<'a>(
     Initialiser::Static {
         initialiser: InitialiserRef(initialiser),
         value: value.persist(sess),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_integral_cmp() {
+        use Integral::*;
+
+        assert!(Signed(-1) < Signed(i64::MAX));
+        assert!(Signed(10) > Unsigned(0));
+        assert!(Signed(-1) < Unsigned(u64::MAX));
+        assert!(Signed(i64::MIN) < Unsigned(u64::MAX));
+        assert!(Signed(i64::MAX) < Unsigned(u64::MAX));
+        assert!(Unsigned(0) <= Unsigned(0));
+        assert!(Unsigned(10) < Signed(20));
     }
 }

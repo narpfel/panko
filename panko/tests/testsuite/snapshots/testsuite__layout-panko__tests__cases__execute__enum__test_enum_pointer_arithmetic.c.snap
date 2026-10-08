@@ -13,7 +13,7 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/enum/test_enum_pointer_arithmetic.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (enum E~1
-      (enumerators
+      (enumerators `unsigned int`
          (enumerator A~2 0 `int` 0)
          (enumerator B~3 1 `int` 1)
          (enumerator C~4 2 `int` 2)
@@ -43,12 +43,12 @@ exit_code: 0
                   (deref `ptr<int>` @40 (unnamed-temporary~11 `ptr<ptr<int>>` @48))
                   (ptr-add `ptr<int>` @56
                      (deref `ptr<int>` @56 (unnamed-temporary~11 `ptr<ptr<int>>` @48))
-                     (sign-extend `long` @64 (offset~10 `enum E~1 complete` @32))))))
+                     (zero-extend `long` @64 (offset~10 `enum E~1 complete` @32))))))
          (definition (a~12 `int` @36)
             (deref `int` @36
                (ptr-add `ptr<int>` @40
                   (p~9 `ptr<int>` @24)
-                  (sign-extend `long` @48 (noop-type-conversion `enum E~1 complete` @56 (0 `int` @56))))))
+                  (zero-extend `long` @48 (noop-type-conversion `enum E~1 complete` @56 (0 `int` @56))))))
          (expression
             (assign `enum E~1 complete` @32
                (offset~10 `enum E~1 complete` @32)
@@ -57,7 +57,7 @@ exit_code: 0
             (deref `int` @40
                (ptr-add `ptr<int>` @48
                   (p~9 `ptr<int>` @24)
-                  (sign-extend `long` @56 (offset~10 `enum E~1 complete` @32)))))
+                  (zero-extend `long` @56 (offset~10 `enum E~1 complete` @32)))))
          (expression
             (assign `enum E~1 complete` @32
                (offset~10 `enum E~1 complete` @32)
@@ -66,11 +66,11 @@ exit_code: 0
             (deref `int` @44
                (ptr-sub `ptr<int>` @48
                   (p~9 `ptr<int>` @24)
-                  (sign-extend `long` @56 (offset~10 `enum E~1 complete` @32)))))
+                  (zero-extend `long` @56 (offset~10 `enum E~1 complete` @32)))))
          (definition (d~15 `int` @48)
             (deref `int` @48
                (ptr-add `ptr<int>` @56
-                  (sign-extend `long` @56 (offset~10 `enum E~1 complete` @32))
+                  (zero-extend `long` @56 (offset~10 `enum E~1 complete` @32))
                   (p~9 `ptr<int>` @24))))
          (expression
             (call `int` @52

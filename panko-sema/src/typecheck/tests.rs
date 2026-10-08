@@ -78,3 +78,46 @@ test_usual_arithmetic_conversions!(
     Arithmetic::Integral(Integral { signedness: Unsigned, kind: Int }),
     Arithmetic::Integral(Integral { signedness: Signed, kind: Long }),
 );
+
+#[test]
+fn test_enum_underlying_ty() {
+    use constexpr::Integral::*;
+
+    assert_eq!(
+        ty::Type::UINT,
+        ty::Type::Arithmetic(find_underlying_ty([0, 1, 2, 3].map(Unsigned))),
+    );
+
+    assert_eq!(
+        ty::Type::INT,
+        ty::Type::Arithmetic(find_underlying_ty([0, 1, -2, 3].map(Signed))),
+    );
+
+    assert_eq!(
+        ty::Type::ULONG,
+        ty::Type::Arithmetic(find_underlying_ty([0, 1, 0x1_0000_0000, 3].map(Unsigned))),
+    );
+
+    assert_eq!(
+        ty::Type::LONG,
+        ty::Type::Arithmetic(find_underlying_ty([0, -1, 0x1_0000_0000, 3].map(Signed))),
+    );
+
+    assert_eq!(
+        ty::Type::LONG,
+        ty::Type::Arithmetic(find_underlying_ty(
+            [0, -0x1_0000_0000, 0x1_0000_0000, 3].map(Signed),
+        )),
+    );
+}
+
+#[should_panic]
+#[test]
+fn test_enum_underlying_ty_impossible() {
+    use constexpr::Integral::*;
+
+    assert_eq!(
+        ty::Type::LONG,
+        ty::Type::Arithmetic(find_underlying_ty([Signed(-1), Unsigned(u64::MAX)])),
+    );
+}

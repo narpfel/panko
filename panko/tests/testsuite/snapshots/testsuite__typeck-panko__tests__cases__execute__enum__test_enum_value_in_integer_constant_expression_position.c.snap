@@ -15,7 +15,7 @@ exit_code: 0
       main~0 `fn() -> int`
       (compound-statement
          (enum E~2
-            (enumerators
+            (enumerators `unsigned int`
                (enumerator A~3 0 `int` 0)
                (enumerator B~4 1 `int` 1)
                (enumerator C~5 2 `int` 2)))

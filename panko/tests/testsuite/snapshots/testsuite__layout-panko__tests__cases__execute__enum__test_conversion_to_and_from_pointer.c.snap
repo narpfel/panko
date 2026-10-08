@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/enum/test_conversion_to_and_from_pointer.c"
    (enum E~0
-      (enumerators
+      (enumerators `unsigned int`
          (enumerator A~1 0 `int` 0)
          (enumerator B~2 1 `int` 1)
          (enumerator C~3 2 `int` 2)
@@ -22,11 +22,11 @@ exit_code: 0
       (main~6 `fn() -> int` (static main))
       (compound-statement
          (definition (value~8 `enum E~0 complete` @0) (noop-type-conversion `enum E~0 complete` @0 (4 `int` @0)))
-         (definition (ptr~9 `ptr<int>` @8) (sign-extend `ptr<int>` @8 (value~8 `enum E~0 complete` @0)))
+         (definition (ptr~9 `ptr<int>` @8) (zero-extend `ptr<int>` @8 (value~8 `enum E~0 complete` @0)))
          (definition (roundtripped~10 `enum E~0 complete` @16) (truncate `enum E~0 complete` @16 (ptr~9 `ptr<int>` @8)))
          (return
             (equal `int` @20
-               (noop-type-conversion `int` @0 (value~8 `enum E~0 complete` @0))
-               (noop-type-conversion `int` @16 (roundtripped~10 `enum E~0 complete` @16)))))))
+               (noop-type-conversion `unsigned int` @0 (value~8 `enum E~0 complete` @0))
+               (noop-type-conversion `unsigned int` @16 (roundtripped~10 `enum E~0 complete` @16)))))))
 
 ----- stderr -----
