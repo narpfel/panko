@@ -1061,3 +1061,21 @@ pub(super) fn run_static_initialiser<'a>(
         value: value.persist(sess),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_integral_cmp() {
+        use Integral::*;
+
+        assert!(Signed(-1) < Signed(i64::MAX));
+        assert!(Signed(10) > Unsigned(0));
+        assert!(Signed(-1) < Unsigned(u64::MAX));
+        assert!(Signed(i64::MIN) < Unsigned(u64::MAX));
+        assert!(Signed(i64::MAX) < Unsigned(u64::MAX));
+        assert!(Unsigned(0) <= Unsigned(0));
+        assert!(Unsigned(10) < Signed(20));
+    }
+}
