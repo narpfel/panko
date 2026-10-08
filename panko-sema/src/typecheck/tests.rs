@@ -111,7 +111,7 @@ fn test_enum_underlying_ty() {
     );
 }
 
-// TODO: this should fail because there is no type that can represent all values
+#[should_panic]
 #[test]
 fn test_enum_underlying_ty_impossible() {
     use constexpr::Integral::*;

@@ -1,5 +1,6 @@
 use std::assert_matches;
 use std::bstr::ByteStr;
+use std::cmp::Ordering;
 use std::collections::LinkedList;
 use std::iter::once;
 use std::ops::Range;
@@ -72,9 +73,31 @@ impl<'a> IntoIterator for Errors<'a> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub(super) enum Integral {
     Signed(i64),
     Unsigned(u64),
+}
+
+impl PartialEq for Integral {
+    fn eq(&self, other: &Self) -> bool {
+        self.partial_cmp(other) == Some(Ordering::Equal)
+    }
+}
+
+impl PartialOrd for Integral {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match (self.clone(), other.clone()) {
+            (Self::Signed(lhs), Self::Signed(rhs)) => lhs.partial_cmp(&rhs),
+            (Self::Signed(lhs), Self::Unsigned(rhs)) => rhs
+                .try_into()
+                .map_or(Some(Ordering::Less), |rhs| lhs.partial_cmp(&rhs)),
+            (Self::Unsigned(lhs), Self::Signed(rhs)) => lhs
+                .try_into()
+                .map_or(Some(Ordering::Greater), |lhs: i64| lhs.partial_cmp(&rhs)),
+            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => lhs.partial_cmp(&rhs),
+        }
+    }
 }
 
 #[derive(Debug)]

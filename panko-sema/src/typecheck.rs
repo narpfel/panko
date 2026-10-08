@@ -937,20 +937,30 @@ fn typeck_complete_struct<'a>(
 }
 
 fn find_underlying_ty<'a>(values: impl IntoIterator<Item = constexpr::Integral>) -> Arithmetic<'a> {
-    let integral = values
-        .into_iter()
-        .map(literal::enumeration_ty)
-        .reduce(
-            |Integral { signedness, kind },
-             Integral {
-                 signedness: rhs_signedness,
-                 kind: rhs_kind,
-             }| Integral {
-                signedness: signedness.min(rhs_signedness),
-                kind: kind.max(rhs_kind),
-            },
-        )
-        .unwrap();
+    use constexpr::Integral::Signed;
+    use itertools::MinMaxResult::*;
+
+    let integral = match values.into_iter().minmax() {
+        NoElements => unreachable!(),
+        OneElement(value) => literal::enumeration_ty(value),
+        MinMax(smallest, largest) => match smallest < Signed(0) && largest > Signed(i64::MAX) {
+            true => todo!("error: no type can represent all enumerator values"),
+            false => {
+                let [
+                    Integral { signedness, kind },
+                    Integral {
+                        signedness: rhs_signedness,
+                        kind: rhs_kind,
+                    },
+                ] = [smallest, largest].map(literal::enumeration_ty);
+                Integral {
+                    signedness: signedness.min(rhs_signedness),
+                    kind: kind.max(rhs_kind),
+                }
+            }
+        },
+    };
+
     Arithmetic::Integral(integral)
 }
 
