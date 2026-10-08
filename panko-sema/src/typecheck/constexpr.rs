@@ -85,18 +85,24 @@ impl PartialEq for Integral {
     }
 }
 
+impl Eq for Integral {}
+
+impl Ord for Integral {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self.clone(), other.clone()) {
+            (Self::Signed(lhs), Self::Signed(rhs)) => lhs.cmp(&rhs),
+            (Self::Signed(lhs), Self::Unsigned(rhs)) =>
+                i64::try_from(rhs).map_or(Ordering::Less, |rhs| lhs.cmp(&rhs)),
+            (Self::Unsigned(lhs), Self::Signed(rhs)) =>
+                i64::try_from(lhs).map_or(Ordering::Greater, |lhs| lhs.cmp(&rhs)),
+            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => lhs.cmp(&rhs),
+        }
+    }
+}
+
 impl PartialOrd for Integral {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        match (self.clone(), other.clone()) {
-            (Self::Signed(lhs), Self::Signed(rhs)) => lhs.partial_cmp(&rhs),
-            (Self::Signed(lhs), Self::Unsigned(rhs)) => rhs
-                .try_into()
-                .map_or(Some(Ordering::Less), |rhs| lhs.partial_cmp(&rhs)),
-            (Self::Unsigned(lhs), Self::Signed(rhs)) => lhs
-                .try_into()
-                .map_or(Some(Ordering::Greater), |lhs: i64| lhs.partial_cmp(&rhs)),
-            (Self::Unsigned(lhs), Self::Unsigned(rhs)) => lhs.partial_cmp(&rhs),
-        }
+        Some(self.cmp(other))
     }
 }
 
