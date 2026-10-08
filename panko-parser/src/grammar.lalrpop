@@ -277,14 +277,16 @@ InitDeclaratorList: &'a [ast::InitDeclarator<'a>] = {
     CommaSep<InitDeclarator<Declarator<AnyIdentifier, AnyIdentifier>>>,
 }
 
+BitfieldWidth = { ":" <ConstantExpression> }
+
 InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
     <declarator:Declarator>
-        <bitfield_width:(":" <ConstantExpression>)?>
+        <bitfield_width:BitfieldWidth?>
         <initialiser:("=" <Initialiser>)?>
     => {
         ast::InitDeclarator { <> }
     },
-    <bitfield_width:(":" <ConstantExpression>)?> "=" <initialiser:Initialiser> => {
+    <bitfield_width:BitfieldWidth?> "=" <initialiser:Initialiser> => {
         ast::InitDeclarator {
             declarator: ast::Declarator {
                 pointers: None,
@@ -294,7 +296,7 @@ InitDeclarator<Declarator>: ast::InitDeclarator<'a> = {
             initialiser: Some(initialiser),
         }
     },
-    ":" <ConstantExpression> => ast::InitDeclarator {
+    BitfieldWidth => ast::InitDeclarator {
         declarator: ast::Declarator {
             pointers: None,
             direct_declarator: ast::DirectDeclarator::Abstract,
