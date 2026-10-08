@@ -186,6 +186,7 @@ InitDeclaratorNoInitialiser: Option<ast::InitDeclarator<'a>> = {
 FunctionBody = { CompoundStatement<DontPushTypedefScope> }
 
 Declaration: ast::Declaration<'a> = {
+    "enum" AnyIdentifier FixedUnderlying ";" => todo!(),
     <head:DeclarationHead<AbstractDeclaratorDisallowed, InitDeclarator<MaybeAbstractDeclarator>?>>
     <init_declarator_list:("," <InitDeclaratorList>)?> ";" => {
         let (specifiers, declarator) = head;
@@ -210,6 +211,7 @@ AbstractDeclaratorAllowed: ast::AbstractDeclaratorAllowed = {
     () => ast::AbstractDeclaratorAllowed::Yes,
 }
 
+#[inline]
 AbstractDeclaratorDisallowed: ast::AbstractDeclaratorAllowed = {
     () => ast::AbstractDeclaratorAllowed::No,
 }
@@ -263,10 +265,12 @@ DeclarationHead<IsAbstractDeclaratorAllowed, MaybeInitDeclarator>: (
     },
 }
 
+#[inline]
 DeclarationSpecifiers: ast::DeclarationSpecifiers<'a> = {
-    Some<(<DeclarationSpecifier> AttributeSpecifierSequence?)> => ast::DeclarationSpecifiers(<>),
+    SomeInline<(<DeclarationSpecifier> AttributeSpecifierSequence?)> => ast::DeclarationSpecifiers(<>),
 }
 
+#[inline]
 DeclarationSpecifier: ast::DeclarationSpecifier<'a> = {
     StorageClassSpecifier => ast::DeclarationSpecifier::StorageClass(<>),
     TypeSpecifierQualifier => ast::DeclarationSpecifier::TypeSpecifierQualifier(<>),
@@ -401,17 +405,22 @@ ParameterDeclarator: Option<ast::Declarator<'a>> = {
     AbstractDeclarator?,
 }
 
+#[inline]
 DeclarationSpecifierTypeSpecifierQualifier: ast::DeclarationSpecifier<'a> = {
     TypeSpecifierQualifier => ast::DeclarationSpecifier::TypeSpecifierQualifier(<>),
 }
 
-SpecifierQualifierList: ast::DeclarationSpecifiers<'a> = {
-    <Some<DeclarationSpecifierTypeSpecifierQualifier>> AttributeSpecifierSequence? =>
-        ast::DeclarationSpecifiers(<>),
+#[inline]
+SpecifierQualifierList<Inline>: ast::DeclarationSpecifiers<'a> = {
+    <Some<DeclarationSpecifierTypeSpecifierQualifier>> AttributeSpecifierSequence?
+        if Inline != "inline" => ast::DeclarationSpecifiers(<>),
+    <SomeInline<DeclarationSpecifierTypeSpecifierQualifier>> AttributeSpecifierSequence?
+        if Inline == "inline" => ast::DeclarationSpecifiers(<>),
 }
 
-TypeName: ast::TypeName<'a> = {
-    <specifier_qualifier_list:SpecifierQualifierList> <declarator:Bump<AbstractDeclarator>?> => {
+#[inline]
+TypeNameImpl<Inline>: ast::TypeName<'a> = {
+    <specifier_qualifier_list:SpecifierQualifierList<Inline>> <declarator:Bump<AbstractDeclarator>?> => {
         let crate::ast::DeclarationSpecifiers { storage_class, function_specifiers, ty }
             = crate::ast::parse_declaration_specifiers(sess, specifier_qualifier_list);
         assert_matches!(storage_class, None);
@@ -419,6 +428,8 @@ TypeName: ast::TypeName<'a> = {
         ast::TypeName { ty, declarator }
     },
 }
+
+TypeName = { TypeNameImpl<"not_inline"> }
 
 // TODO: `AbstractDeclarator` basically copies the structure of `Declarator`,
 // which leads to a lot of duplication. Maybe a macro can reduce this?
@@ -496,11 +507,13 @@ StorageClassSpecifierToken = {
     },
 }
 
+#[inline]
 TypeSpecifierQualifier: ast::TypeSpecifierQualifier<'a> = {
     TypeSpecifier => ast::TypeSpecifierQualifier::Specifier(<>),
     TypeQualifier => ast::TypeSpecifierQualifier::Qualifier(<>),
 }
 
+#[inline]
 TypeSpecifier: ast::TypeSpecifier<'a> = {
     TypeSpecifierToken => ast::TypeSpecifier::new(<>),
     BitIntTypeSpecifier => todo!(),
@@ -566,9 +579,34 @@ Enumerators = {
     "}",
 }
 
+EnumTypeSpecifier: ast::TypeSpecifier<'a> = {
+    TypeSpecifierToken => ast::TypeSpecifier::new(<>),
+    AtomicTypeSpecifier => todo!(),
+    TypedefName => ast::TypeSpecifier::new(<>),
+    TypeofSpecifier,
+}
+
+EnumTypeSpecifierQualifier: ast::TypeSpecifierQualifier<'a> = {
+    EnumTypeSpecifier => ast::TypeSpecifierQualifier::Specifier(<>),
+    TypeQualifier => ast::TypeSpecifierQualifier::Qualifier(<>),
+}
+
+EnumDeclarationSpecifierTypeSpecifierQualifier: ast::DeclarationSpecifier<'a> = {
+    EnumTypeSpecifierQualifier => ast::DeclarationSpecifier::TypeSpecifierQualifier(<>),
+}
+
+EnumSpecifierQualifierList: ast::DeclarationSpecifiers<'a> = {
+    <Some<EnumDeclarationSpecifierTypeSpecifierQualifier>> AttributeSpecifierSequence? =>
+        ast::DeclarationSpecifiers(<>),
+}
+
+// TODO: use a macro to deduplicate `EnumSpecifierQualifierList` with `SpecifierQualifierList`
+FixedUnderlying = { ":" EnumSpecifierQualifierList }
+
+#[inline]
 EnumSpecifier: ast::TypeSpecifier<'a> = {
     "enum" AnyIdentifier => ast::TypeSpecifier::incomplete_enum(<>),
-    <"enum"> <AnyIdentifier?> <Enumerators> => ast::TypeSpecifier::r#enum(<>),
+    <"enum"> <AnyIdentifier?> FixedUnderlying? <Enumerators> => ast::TypeSpecifier::r#enum(<>),
 }
 
 TypeofSpecifier: ast::TypeSpecifier<'a> = {
@@ -686,12 +724,13 @@ PrimaryExpression: ast::Expression<'a> = {
         <close_paren:")"> => ast::Expression::BuiltinOffsetof { <> },
 }
 
+#[inline]
 GenericAssocList: ast::GenericAssocList<'a> = {
     NonEmptyCommaSep<GenericAssociation> => ast::GenericAssocList(<>),
 }
 
 GenericAssociation: ast::GenericAssociation<'a> = {
-    <ty:TypeName> ":" <expr:AssignmentExpression> => ast::GenericAssociation::Ty { <> },
+    <ty:TypeNameImpl<"inline">> ":" <expr:AssignmentExpression> => ast::GenericAssociation::Ty { <> },
     <default:"default"> ":" <expr:AssignmentExpression> => ast::GenericAssociation::Default { <> },
 }
 
@@ -926,6 +965,14 @@ PredefinedConstant: ast::Expression<'a> = {
 
 Bump<T>: &'a T = {
     T => sess.alloc(<>),
+}
+
+#[inline]
+SomeInline<T>: &'a [T] = {
+    <mut v:T*> <e:T> => {
+        v.push(e);
+        sess.alloc_slice_copy(&v)
+    },
 }
 
 Some<T>: &'a [T] = {
