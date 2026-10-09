@@ -493,7 +493,7 @@ impl<'a> Scopes<'a> {
     pub(super) fn lookup_or_add_enum(
         &mut self,
         loc: Option<Token<'a>>,
-        fixed_underlying: Option<&'a Type<'a>>,
+        fixed_underlying: Option<&'a QualifiedType<'a>>,
     ) -> Tagged<'a> {
         let name = try { loc?.slice() };
         try { self.lookup_tagged(name?)? }.unwrap_or_else(|| {
@@ -554,7 +554,7 @@ impl<'a> Scopes<'a> {
     pub(super) fn lookup_or_add_complete_enum(
         &mut self,
         loc: Option<Token<'a>>,
-        underlying_ty: Option<&'a Type<'a>>,
+        underlying_ty: Option<&'a QualifiedType<'a>>,
         enumerators: &'a [panko_parser::Enumerator<'a>],
     ) -> (Tagged<'a>, Option<Tagged<'a>>) {
         let name = try { loc?.slice() };

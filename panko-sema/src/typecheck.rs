@@ -970,8 +970,17 @@ fn typeck_complete_enum<'a>(
 ) -> CompleteEnum<'a, Typeck> {
     let CompleteEnum { name, id, enumerators } = *complete;
     let NoHashEq(scope::Enumerators { fixed_underlying, enumerators }) = enumerators;
-    let fixed_underlying =
-        try { typeck_ty(sess, fixed_underlying?.unqualified(), IsParameter::No).ty };
+    let fixed_underlying = match fixed_underlying {
+        Some(ty) => match typeck_ty(sess, *ty, IsParameter::No).ty {
+            ty @ Type::Arithmetic(ty::Arithmetic::Integral(_)) => Some(ty),
+            checked_ty => {
+                let () =
+                    sess.emit(Diagnostic::NonintegralUnderlyingType { at: ty, ty: checked_ty });
+                None
+            }
+        },
+        None => None,
+    };
     let mut enumerator_values = IndexMap::default();
     for enumerator in enumerators.into_flat_iter() {
         let enumerator = typeck_enumerator(&mut enumerator_values, fixed_underlying, enumerator);

@@ -676,7 +676,7 @@ impl<'a> Enumerator<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Enumerators<'a> {
-    pub(crate) fixed_underlying: Option<&'a Type<'a>>,
+    pub(crate) fixed_underlying: Option<&'a QualifiedType<'a>>,
     pub(crate) enumerators: Option<&'a [Enumerator<'a>]>,
 }
 
@@ -1186,8 +1186,7 @@ fn resolve_enum<'a>(scopes: &mut Scopes<'a>, r#enum: &Enum<'a>) -> Type<'a> {
     let (Tagged { ty, tag, loc }, previous_decl) = match *r#enum {
         Enum::Incomplete { name } => (scopes.lookup_or_add_enum(Some(name), None), None),
         Enum::Complete { name, fixed_underlying, enumerators } => {
-            let fixed_underlying =
-                try { scopes.sess.alloc(resolve_ty(scopes, fixed_underlying?).ty) };
+            let fixed_underlying = try { scopes.sess.alloc(resolve_ty(scopes, fixed_underlying?)) };
             // TODO: if redeclared, check that redeclaration is valid
             scopes.lookup_or_add_complete_enum(name, fixed_underlying, enumerators)
         }
