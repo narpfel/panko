@@ -14,14 +14,14 @@ exit_code: 0
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (enum Long~1
       (enumerators `long`
-         (enumerator A~2 0 `long` 0)
-         (enumerator B~3 1 `long` 1)
-         (enumerator C~4 2 `long` 2)))
+         (enumerator A~2 0 `enum Long~1 complete` 0)
+         (enumerator B~3 1 `enum Long~1 complete` 1)
+         (enumerator C~4 2 `enum Long~1 complete` 2)))
    (enum Unsigned~5
       (enumerators `unsigned int`
-         (enumerator D~6 0 `unsigned int` 0)
-         (enumerator E~7 1 `unsigned int` 1)
-         (enumerator F~8 2 `unsigned int` 2)))
+         (enumerator D~6 0 `enum Unsigned~5 complete` 0)
+         (enumerator E~7 1 `enum Unsigned~5 complete` 1)
+         (enumerator F~8 2 `enum Unsigned~5 complete` 2)))
    (function-definition external stack-size=72
       (main~9 `fn() -> int` (static main))
       (compound-statement
@@ -34,12 +34,12 @@ exit_code: 0
                      (addressof `ptr<array<char; 8>>` @16
                         (string `array<char; 8>` @void "%ld %d\n\0"))))
                (subtract `long` @24
-                  (1 `long` @24)
-                  (2 `long` @32))
+                  (noop-type-conversion `long` @24 (1 `enum Long~1 complete` @24))
+                  (noop-type-conversion `long` @32 (2 `enum Long~1 complete` @32)))
                (less `int` @32
                   (subtract `long` @40
-                     (1 `long` @40)
-                     (2 `long` @48))
+                     (noop-type-conversion `long` @40 (1 `enum Long~1 complete` @40))
+                     (noop-type-conversion `long` @48 (2 `enum Long~1 complete` @48)))
                   (sign-extend `long` @48 (0 `int` @56)))))
          (expression
             (call `int` @0
@@ -50,12 +50,12 @@ exit_code: 0
                      (addressof `ptr<array<char; 9>>` @16
                         (string `array<char; 9>` @void "0x%x %d\n\0"))))
                (subtract `unsigned int` @24
-                  (1 `unsigned int` @24)
-                  (2 `unsigned int` @28))
+                  (noop-type-conversion `unsigned int` @24 (1 `enum Unsigned~5 complete` @24))
+                  (noop-type-conversion `unsigned int` @28 (2 `enum Unsigned~5 complete` @28)))
                (less `int` @28
                   (subtract `unsigned int` @28
-                     (1 `unsigned int` @28)
-                     (2 `unsigned int` @32))
+                     (noop-type-conversion `unsigned int` @28 (1 `enum Unsigned~5 complete` @28))
+                     (noop-type-conversion `unsigned int` @32 (2 `enum Unsigned~5 complete` @32)))
                   (noop-type-conversion `unsigned int` @32 (0 `int` @32))))))))
 
 ----- stderr -----
