@@ -73,3 +73,23 @@ Error: the type of a _Generic association shall be a complete object type other 
    │         │                        
    │         ╰──────────────────────── in this _Generic selection
 ───╯
+
+Error: the type of a _Generic association shall be a complete object type other than a variably modified type
+   ╭─[panko/tests/cases/test_error_invalid_generic_selection.c:8:18]
+   │
+ 8 │     _Generic(42, struct IncompleteStruct: 0, enum IncompleteEnum: 1, default: 2);
+   │     ────┬───     ───────────┬───────────  
+   │         │                   ╰───────────── this type is not allowed in a _Generic association
+   │         │                                 
+   │         ╰───────────────────────────────── in this _Generic selection
+───╯
+
+Error: the type of a _Generic association shall be a complete object type other than a variably modified type
+   ╭─[panko/tests/cases/test_error_invalid_generic_selection.c:8:46]
+   │
+ 8 │     _Generic(42, struct IncompleteStruct: 0, enum IncompleteEnum: 1, default: 2);
+   │     ────┬───                                 ──┬─  
+   │         │                                      ╰─── this type is not allowed in a _Generic association
+   │         │                                          
+   │         ╰────────────────────────────────────────── in this _Generic selection
+───╯
