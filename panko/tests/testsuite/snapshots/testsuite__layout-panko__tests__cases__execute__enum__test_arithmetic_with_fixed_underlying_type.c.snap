@@ -1,0 +1,61 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/enum/test_arithmetic_with_fixed_underlying_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_arithmetic_with_fixed_underlying_type.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (enum Long~1
+      (enumerators `long`
+         (enumerator A~2 0 `long` 0)
+         (enumerator B~3 1 `long` 1)
+         (enumerator C~4 2 `long` 2)))
+   (enum Unsigned~5
+      (enumerators `unsigned int`
+         (enumerator D~6 0 `unsigned int` 0)
+         (enumerator E~7 1 `unsigned int` 1)
+         (enumerator F~8 2 `unsigned int` 2)))
+   (function-definition external stack-size=72
+      (main~9 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 8>>` @16
+                        (string `array<char; 8>` @void "%ld %d\n\0"))))
+               (subtract `long` @24
+                  (1 `long` @24)
+                  (2 `long` @32))
+               (less `int` @32
+                  (subtract `long` @40
+                     (1 `long` @40)
+                     (2 `long` @48))
+                  (sign-extend `long` @48 (0 `int` @56)))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 9>>` @16
+                        (string `array<char; 9>` @void "0x%x %d\n\0"))))
+               (subtract `unsigned int` @24
+                  (1 `unsigned int` @24)
+                  (2 `unsigned int` @28))
+               (less `int` @28
+                  (subtract `unsigned int` @28
+                     (1 `unsigned int` @28)
+                     (2 `unsigned int` @32))
+                  (noop-type-conversion `unsigned int` @32 (0 `int` @32))))))))
+
+----- stderr -----

@@ -970,9 +970,11 @@ fn typeck_complete_enum<'a>(
 ) -> CompleteEnum<'a, Typeck> {
     let CompleteEnum { name, id, enumerators } = *complete;
     let NoHashEq(scope::Enumerators { fixed_underlying, enumerators }) = enumerators;
+    let fixed_underlying =
+        try { typeck_ty(sess, fixed_underlying?.unqualified(), IsParameter::No).ty };
     let mut enumerator_values = IndexMap::default();
     for enumerator in enumerators.into_flat_iter() {
-        let enumerator = typeck_enumerator(&mut enumerator_values, enumerator);
+        let enumerator = typeck_enumerator(&mut enumerator_values, fixed_underlying, enumerator);
         let was_present = enumerator_values.insert(enumerator.id, enumerator);
         assert_matches!(was_present, None);
     }
@@ -980,10 +982,8 @@ fn typeck_complete_enum<'a>(
     let enumerator_values = enumerators
         .iter()
         .map(|enumerator| constexpr::Integral::Unsigned(enumerator.value));
-    let ty = match fixed_underlying {
-        Some(ty) => typeck_ty(sess, ty.unqualified(), IsParameter::No).ty,
-        None => Type::Arithmetic(find_underlying_ty(enumerator_values).into()),
-    };
+    let ty = fixed_underlying
+        .unwrap_or_else(|| Type::Arithmetic(find_underlying_ty(enumerator_values).into()));
     let ty = sess.alloc(ty);
     let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
     CompleteEnum { name, id, enumerators }
@@ -991,13 +991,14 @@ fn typeck_complete_enum<'a>(
 
 fn typeck_enumerator<'a>(
     enumerator_values: &mut IndexMap<Id, Enumerator<'a, Typeck>>,
+    fixed_underlying: Option<Type<'a>>,
     enumerator: &scope::Enumerator<'a>,
 ) -> Enumerator<'a, Typeck> {
     let scope::Enumerator { name, loc, id, ty: _, index, value } = *enumerator;
     if let Some(value) = value {
         unimplemented_todo!(value, "explicit values for enumerators");
     }
-    let ty = Type::int();
+    let ty = fixed_underlying.unwrap_or(Type::INT);
     let value = try { enumerator_values.last()?.1.value.strict_add(1) }.unwrap_or(0);
     Enumerator { name, loc, id, ty, index, value }
 }

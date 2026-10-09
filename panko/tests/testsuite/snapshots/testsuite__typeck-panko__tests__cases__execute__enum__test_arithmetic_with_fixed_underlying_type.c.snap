@@ -1,0 +1,49 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_arithmetic_with_fixed_underlying_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_arithmetic_with_fixed_underlying_type.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum Long~1
+      (enumerators `long`
+         (enumerator A~2 0 `long` 0)
+         (enumerator B~3 1 `long` 1)
+         (enumerator C~4 2 `long` 2)))
+   (enum Unsigned~5
+      (enumerators `unsigned int`
+         (enumerator D~6 0 `unsigned int` 0)
+         (enumerator E~7 1 `unsigned int` 1)
+         (enumerator F~8 2 `unsigned int` 2)))
+   (function-definition external
+      main~9 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 8>>`
+                        (string `array<char; 8>` "%ld %d\n\0"))))
+               (subtract `long` (B `long`) (C `long`))
+               (less `int` (subtract `long` (B `long`) (C `long`)) (sign-extend `long` (0 `int`)))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 9>>`
+                        (string `array<char; 9>` "0x%x %d\n\0"))))
+               (subtract `unsigned int` (E `unsigned int`) (F `unsigned int`))
+               (less `int` (subtract `unsigned int` (E `unsigned int`) (F `unsigned int`)) (noop-type-conversion `unsigned int` (0 `int`))))))))
+
+----- stderr -----
