@@ -24,24 +24,24 @@ Error: nonintegral fixed underlying type `ptr<int>`
    ╭─[panko/tests/cases/enum/test_error_nonintegral_fixed_underlying_type.c:2:9]
    │
  2 │ enum B: typeof(int*) { B };
-   │         ───┬──  
-   │            ╰──── this type `ptr<int>` is not integral
+   │         ──────┬─────  
+   │               ╰─────── this type `ptr<int>` is not integral
 ───╯
 
 Error: nonintegral fixed underlying type `enum Okay~4 complete`
    ╭─[panko/tests/cases/enum/test_error_nonintegral_fixed_underlying_type.c:4:9]
    │
  4 │ enum C: typeof(enum Okay) { C };
-   │         ───┬──  
-   │            ╰──── this type `enum Okay~4 complete` is not integral
+   │         ────────┬────────  
+   │                 ╰────────── this type `enum Okay~4 complete` is not integral
 ───╯
 
 Error: nonintegral fixed underlying type `struct Incomplete~8`
    ╭─[panko/tests/cases/enum/test_error_nonintegral_fixed_underlying_type.c:5:9]
    │
  5 │ enum D: typeof(struct Incomplete) { D };
-   │         ───┬──  
-   │            ╰──── this type `struct Incomplete~8` is not integral
+   │         ────────────┬────────────  
+   │                     ╰────────────── this type `struct Incomplete~8` is not integral
 ───╯
 
 Error: nonintegral fixed underlying type `ptr<void>`

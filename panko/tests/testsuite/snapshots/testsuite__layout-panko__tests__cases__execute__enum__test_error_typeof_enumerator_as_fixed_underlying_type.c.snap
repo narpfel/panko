@@ -16,6 +16,6 @@ Error: nonintegral fixed underlying type `enum Enum~0 complete`
    ╭─[panko/tests/cases/execute/enum/test_error_typeof_enumerator_as_fixed_underlying_type.c:4:15]
    │
  4 │ enum Invalid: typeof(A) { X };
-   │               ───┬──  
-   │                  ╰──── this type `enum Enum~0 complete` is not integral
+   │               ────┬────  
+   │                   ╰────── this type `enum Enum~0 complete` is not integral
 ───╯

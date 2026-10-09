@@ -610,20 +610,22 @@ EnumSpecifier: ast::TypeSpecifier<'a> = {
 }
 
 TypeofSpecifier: ast::TypeSpecifier<'a> = {
-    <r#typeof:TypeofAndIsUnqual> "(" <expr:Bump<Expression>> ")" =>
+    <r#typeof:TypeofAndIsUnqual> "(" <expr:Bump<Expression>> <close_paren:")"> =>
         ast::TypeSpecifier {
             token: r#typeof.0,
             kind: ast::TypeSpecifierKind::Typeof {
                 unqual: r#typeof.1,
                 expr,
+                close_paren,
             },
         },
-    <r#typeof:TypeofAndIsUnqual> "(" <ty:Bump<TypeName>> ")" =>
+    <r#typeof:TypeofAndIsUnqual> "(" <ty:Bump<TypeName>> <close_paren:")"> =>
         ast::TypeSpecifier {
             token: r#typeof.0,
             kind: ast::TypeSpecifierKind::TypeofTy {
                 unqual: r#typeof.1,
                 ty,
+                close_paren,
             },
         },
 }
