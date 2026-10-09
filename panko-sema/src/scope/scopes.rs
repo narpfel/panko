@@ -14,6 +14,7 @@ use panko_parser::ast::Session;
 use panko_parser::nonempty;
 
 use super::BuiltinNameKind;
+use super::Enumerators;
 use super::Id;
 use super::IsInGlobalScope;
 use super::IsParameter;
@@ -489,11 +490,22 @@ impl<'a> Scopes<'a> {
         })
     }
 
-    pub(super) fn lookup_or_add_enum(&mut self, loc: Option<Token<'a>>) -> Tagged<'a> {
+    pub(super) fn lookup_or_add_enum(
+        &mut self,
+        loc: Option<Token<'a>>,
+        fixed_underlying: Option<&'a QualifiedType<'a>>,
+    ) -> Tagged<'a> {
         let name = try { loc?.slice() };
         try { self.lookup_tagged(name?)? }.unwrap_or_else(|| {
             let id = self.id();
-            let r#enum = Type::from(Enum::Incomplete { name, id, enable: () });
+            let r#enum = match fixed_underlying {
+                Some(_) => {
+                    let enumerators = NoHashEq(Enumerators { fixed_underlying, enumerators: None });
+                    Enum::Complete(CompleteEnum { name, id, enumerators })
+                }
+                None => Enum::Incomplete { name, id, enable: () },
+            };
+            let r#enum = Type::from(r#enum);
             let tagged = Tagged { ty: r#enum, tag: Tag::Enum, loc };
             match name {
                 Some(name) => *self
@@ -542,13 +554,14 @@ impl<'a> Scopes<'a> {
     pub(super) fn lookup_or_add_complete_enum(
         &mut self,
         loc: Option<Token<'a>>,
+        underlying_ty: Option<&'a QualifiedType<'a>>,
         enumerators: &'a [panko_parser::Enumerator<'a>],
     ) -> (Tagged<'a>, Option<Tagged<'a>>) {
         let name = try { loc?.slice() };
         let previous_definition = try { self.get_tagged_innermost(name?)? };
 
         // forward declare so that `name` is available in the body
-        let forward_decl = match self.lookup_or_add_enum(loc).ty {
+        let forward_decl = match self.lookup_or_add_enum(loc, underlying_ty).ty {
             Type::Arithmetic(Arithmetic::Enum(r#enum)) => r#enum,
             Type::Struct(r#struct) => Enum::Incomplete { name, id: r#struct.id(), enable: () },
             _ => unreachable!(),

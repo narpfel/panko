@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_conversion_with_fixed_underlying_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_conversion_with_fixed_underlying_type.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum E~1
+      (enumerators `short`
+         (enumerator A~2 `enum E~1 complete`.0 ∅)
+         (enumerator B~3 `enum E~1 complete`.1 ∅)
+         (enumerator C~4 `enum E~1 complete`.2 ∅)))
+   (function-definition
+      main~5 `fn() -> int`
+      (compound-statement
+         (declaration x~7 `enum E~1 complete` 0x7fff)
+         (declaration y~8 `enum E~1 complete` 0x8000)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (name x~7 `enum E~1 complete`)
+               (name y~8 `enum E~1 complete`)))
+         (return (less (name y~8 `enum E~1 complete`) (name x~7 `enum E~1 complete`))))))
+
+----- stderr -----

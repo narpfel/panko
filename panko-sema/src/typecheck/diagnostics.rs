@@ -698,6 +698,17 @@ pub(super) enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
         kind: StructKind,
     },
+
+    // TODO: include `enum` definition
+    #[error("nonintegral fixed underlying type `{ty}`")]
+    #[diagnostics(
+        at(colour = Red, label = "this type `{ty}` is not integral"),
+    )]
+    #[with(ty = ty.fg(Red))]
+    NonintegralUnderlyingType {
+        at: &'a scope::QualifiedType<'a>,
+        ty: Type<'a>,
+    },
 }
 
 fn describe_ty_completeness(ty: &QualifiedType) -> (&'static str, &'static str, &'static str) {

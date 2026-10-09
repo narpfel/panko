@@ -348,11 +348,13 @@ fn layout_complete_enum<'a>(
     let CompleteEnum { name, id, enumerators } = complete;
     let HashEqIgnored(Enumerators { ty, enumerators }) = enumerators;
     let ty = bump.alloc(layout_ty_unqual(stack, bump, *ty));
-    let enumerators = bump.alloc_slice_fill_iter(enumerators.iter().map(|enumerator| {
-        let Enumerator { name, loc, id, ty, index, value } = *enumerator;
-        let ty = layout_ty_unqual(stack, bump, ty);
-        Enumerator { name, loc, id, ty, index, value }
-    }));
+    let enumerators = try {
+        bump.alloc_slice_fill_iter(enumerators?.iter().map(|enumerator| {
+            let Enumerator { name, loc, id, ty, index, value } = *enumerator;
+            let ty = layout_ty_unqual(stack, bump, ty);
+            Enumerator { name, loc, id, ty, index, value }
+        }))
+    };
     let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
     CompleteEnum { name, id, enumerators }
 }

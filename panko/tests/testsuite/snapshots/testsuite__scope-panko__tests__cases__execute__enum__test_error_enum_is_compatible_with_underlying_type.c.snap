@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/enum/test_error_enum_is_compatible_with_underlying_type.c"
    (enum E~0
-      (enumerators
+      (enumerators ∅
          (enumerator A~1 `enum E~0`.0 ∅)
          (enumerator B~2 `enum E~0`.1 ∅)
          (enumerator C~3 `enum E~0`.2 ∅)))

@@ -313,7 +313,9 @@ impl AsSExpr for Enumerator<'_> {
 
 impl AsSExpr for Enumerators<'_> {
     fn as_sexpr(&self) -> SExpr {
-        let Self(enumerators) = self;
-        SExpr::new("enumerators").lines_explicit_empty(*enumerators)
+        let Self { fixed_underlying, enumerators } = self;
+        SExpr::new("enumerators")
+            .inherit(fixed_underlying)
+            .lines_explicit_empty(enumerators.into_flat_iter())
     }
 }

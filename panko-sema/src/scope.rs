@@ -675,7 +675,10 @@ impl<'a> Enumerator<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct Enumerators<'a>(pub(crate) &'a [Enumerator<'a>]);
+pub(crate) struct Enumerators<'a> {
+    pub(crate) fixed_underlying: Option<&'a QualifiedType<'a>>,
+    pub(crate) enumerators: Option<&'a [Enumerator<'a>]>,
+}
 
 impl fmt::Display for BuiltinNameKind<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -961,7 +964,7 @@ fn reresolve_enum<'a>(scopes: &mut Scopes<'a>, r#enum: ty::Enum<'a, Scope>) -> T
         ty::Enum::Complete(complete) => Type::from(complete),
         ty::Enum::Incomplete { name: Some(name), id: _, enable: _ } => {
             let name = Token::from_str(scopes.sess.bump(), panko_lex::TokenKind::Identifier, name);
-            scopes.lookup_or_add_enum(Some(name)).ty
+            scopes.lookup_or_add_enum(Some(name), None).ty
         }
         ty::Enum::Incomplete { name: None, id, enable } =>
             Type::from(ty::Enum::Incomplete { name: None, id, enable }),
@@ -1181,10 +1184,11 @@ fn resolve_struct_members<'a>(
 
 fn resolve_enum<'a>(scopes: &mut Scopes<'a>, r#enum: &Enum<'a>) -> Type<'a> {
     let (Tagged { ty, tag, loc }, previous_decl) = match *r#enum {
-        Enum::Incomplete { name } => (scopes.lookup_or_add_enum(Some(name)), None),
-        Enum::Complete { name, enumerators } => {
+        Enum::Incomplete { name } => (scopes.lookup_or_add_enum(Some(name), None), None),
+        Enum::Complete { name, fixed_underlying, enumerators } => {
+            let fixed_underlying = try { scopes.sess.alloc(resolve_ty(scopes, fixed_underlying?)) };
             // TODO: if redeclared, check that redeclaration is valid
-            scopes.lookup_or_add_complete_enum(name, enumerators)
+            scopes.lookup_or_add_complete_enum(name, fixed_underlying, enumerators)
         }
     };
     let expected = try { previous_decl?.tag }.unwrap_or(tag);
@@ -1210,6 +1214,11 @@ fn resolve_enumerators<'a>(
     enumerators: &[cst::Enumerator<'a>],
 ) -> Enumerators<'a> {
     let sess = scopes.sess;
+    let fixed_underlying = match ty {
+        ty::Enum::Incomplete { .. } => None,
+        ty::Enum::Complete(ty::CompleteEnum { name: _, id: _, enumerators }) =>
+            enumerators.0.fixed_underlying,
+    };
     let enumerators = enumerators.iter().enumerate().map(|(i, enumerator)| {
         let cst::Enumerator { name, value } = *enumerator;
         let value = try { sess.alloc(resolve_expr(scopes, &value?)) };
@@ -1226,7 +1235,10 @@ fn resolve_enumerators<'a>(
                 value: Some(sess.alloc(redeclared.into_diagnostic(sess, "value"))),
             })
     });
-    Enumerators(sess.alloc_slice_fill_iter(enumerators))
+    Enumerators {
+        fixed_underlying,
+        enumerators: Some(sess.alloc_slice_fill_iter(enumerators)),
+    }
 }
 
 fn resolve_function_definition<'a>(

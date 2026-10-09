@@ -1,0 +1,34 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/enum/test_error_nonintegral_fixed_underlying_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/enum/test_error_nonintegral_fixed_underlying_type.c"
+   (enum A~0
+      (enumerators `void`
+         (enumerator A~1 `enum A~0 complete`.0 ∅)))
+   (enum B~2
+      (enumerators `typeof(`ptr<int>`)`
+         (enumerator B~3 `enum B~2 complete`.0 ∅)))
+   (enum Okay~4
+      (enumerators `long`
+         (enumerator Okay~5 `enum Okay~4 complete`.0 ∅)))
+   (enum C~6
+      (enumerators `typeof(`enum Okay~4 complete`)`
+         (enumerator C~7 `enum C~6 complete`.0 ∅)))
+   (enum D~9
+      (enumerators `typeof(`struct Incomplete~8`)`
+         (enumerator D~10 `enum D~9 complete`.0 ∅)))
+   (typedef Typedef `ptr<void>`)
+   (enum E~11
+      (enumerators `ptr<void>`
+         (enumerator E~12 `enum E~11 complete`.0 ∅))))
+
+----- stderr -----

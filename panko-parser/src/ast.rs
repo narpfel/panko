@@ -362,6 +362,7 @@ pub enum Enum<'a> {
     },
     Complete {
         name: Option<Token<'a>>,
+        fixed_underlying: Option<&'a QualifiedType<'a>>,
         enumerators: &'a [Enumerator<'a>],
     },
 }
@@ -370,7 +371,11 @@ impl<'a> Enum<'a> {
     pub fn loc(&self) -> Loc<'a> {
         match self {
             Self::Incomplete { name } => name.loc(),
-            Self::Complete { name, enumerators: _ } => name
+            Self::Complete {
+                name,
+                fixed_underlying: _,
+                enumerators: _,
+            } => name
                 .expect(
                     "only needed for tag mismatches in redeclarations; \
                     and unnamed enums are never redeclared",
@@ -515,8 +520,11 @@ impl fmt::Display for Type<'_> {
             Type::Struct(Struct::Complete { name, kind, members: _ }) =>
                 write!(f, "{kind} {} complete", name.as_sexpr()),
             Type::Enum(Enum::Incomplete { name }) => write!(f, "enum {}", name.slice()),
-            Type::Enum(Enum::Complete { name, enumerators: _ }) =>
-                write!(f, "enum {} complete", name.as_sexpr()),
+            Type::Enum(Enum::Complete {
+                name,
+                fixed_underlying: _,
+                enumerators: _,
+            }) => write!(f, "enum {} complete", name.as_sexpr()),
         }
     }
 }
@@ -766,8 +774,11 @@ impl<'a> ParsedSpecifiers<'a> {
                     ),
                 }),
             Self::Enum(cst::Enum::Incomplete { name }) => Type::Enum(Enum::Incomplete { name }),
-            Self::Enum(cst::Enum::Complete { name, enumerators }) =>
-                Type::Enum(Enum::Complete { name, enumerators }),
+            Self::Enum(cst::Enum::Complete { name, fixed_underlying, enumerators }) => {
+                let fixed_underlying =
+                    try { sess.alloc(parse_declaration_specifiers(sess, fixed_underlying?).ty) };
+                Type::Enum(Enum::Complete { name, fixed_underlying, enumerators })
+            }
         }
     }
 }

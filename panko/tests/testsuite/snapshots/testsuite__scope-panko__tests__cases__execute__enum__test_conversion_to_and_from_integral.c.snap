@@ -13,7 +13,7 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/enum/test_conversion_to_and_from_integral.c"
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (enum E~1
-      (enumerators
+      (enumerators ∅
          (enumerator A~2 `enum E~1`.0 ∅)
          (enumerator B~3 `enum E~1`.1 ∅)
          (enumerator C~4 `enum E~1`.2 ∅)))
