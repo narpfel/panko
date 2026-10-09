@@ -458,6 +458,14 @@ impl<'a> TypeSpecifier<'a> {
                 Struct::Incomplete { name: end, kind: _ }
                 | Struct::Complete { name: Some(end), kind: _, members: _ },
             )
+            | TypeSpecifierKind::Enum(
+                Enum::Incomplete { name: end }
+                | Enum::Complete {
+                    name: Some(end),
+                    fixed_underlying: _,
+                    enumerators: _,
+                },
+            )
             | TypeSpecifierKind::Typeof { close_paren: end, .. }
             | TypeSpecifierKind::TypeofTy { close_paren: end, .. } =>
                 self.token.loc().until(end.loc()),
