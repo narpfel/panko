@@ -13,12 +13,12 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/generic/test_type_compatibility.c"
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (enum E1~1
-      (enumerators
+      (enumerators ∅
          (enumerator A~2 `enum E1~1`.0 ∅)
          (enumerator B~3 `enum E1~1`.1 ∅)
          (enumerator C~4 `enum E1~1`.2 ∅)))
    (enum E2~5
-      (enumerators
+      (enumerators ∅
          (enumerator D~6 `enum E2~5`.0 ∅)
          (enumerator E~7 `enum E2~5`.1 ∅)
          (enumerator F~8 `enum E2~5`.2 ∅)))

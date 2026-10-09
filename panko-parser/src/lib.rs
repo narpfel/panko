@@ -443,11 +443,12 @@ impl<'a> TypeSpecifier<'a> {
     fn r#enum(
         r#enum: Token<'a>,
         name: Option<Token<'a>>,
+        fixed_underlying: Option<DeclarationSpecifiers<'a>>,
         enumerators: &'a [Enumerator<'a>],
     ) -> Self {
         Self {
             token: r#enum,
-            kind: TypeSpecifierKind::Enum(Enum::Complete { name, enumerators }),
+            kind: TypeSpecifierKind::Enum(Enum::Complete { name, fixed_underlying, enumerators }),
         }
     }
 
@@ -614,6 +615,7 @@ enum Enum<'a> {
     },
     Complete {
         name: Option<Token<'a>>,
+        fixed_underlying: Option<DeclarationSpecifiers<'a>>,
         enumerators: &'a [Enumerator<'a>],
     },
 }

@@ -601,12 +601,12 @@ EnumSpecifierQualifierList: ast::DeclarationSpecifiers<'a> = {
 }
 
 // TODO: use a macro to deduplicate `EnumSpecifierQualifierList` with `SpecifierQualifierList`
-FixedUnderlying = { ":" EnumSpecifierQualifierList }
+FixedUnderlying = { ":" <EnumSpecifierQualifierList> }
 
 #[inline]
 EnumSpecifier: ast::TypeSpecifier<'a> = {
     "enum" AnyIdentifier => ast::TypeSpecifier::incomplete_enum(<>),
-    <"enum"> <AnyIdentifier?> FixedUnderlying? <Enumerators> => ast::TypeSpecifier::r#enum(<>),
+    <"enum"> <AnyIdentifier?> <FixedUnderlying?> <Enumerators> => ast::TypeSpecifier::r#enum(<>),
 }
 
 TypeofSpecifier: ast::TypeSpecifier<'a> = {

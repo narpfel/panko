@@ -969,8 +969,9 @@ fn typeck_complete_enum<'a>(
     complete: &CompleteEnum<'a, scope::Scope>,
 ) -> CompleteEnum<'a, Typeck> {
     let CompleteEnum { name, id, enumerators } = *complete;
+    let NoHashEq(scope::Enumerators { fixed_underlying, enumerators }) = enumerators;
     let mut enumerator_values = IndexMap::default();
-    for enumerator in enumerators.0.0 {
+    for enumerator in enumerators.into_flat_iter() {
         let enumerator = typeck_enumerator(&mut enumerator_values, enumerator);
         let was_present = enumerator_values.insert(enumerator.id, enumerator);
         assert_matches!(was_present, None);
@@ -979,8 +980,11 @@ fn typeck_complete_enum<'a>(
     let enumerator_values = enumerators
         .iter()
         .map(|enumerator| constexpr::Integral::Unsigned(enumerator.value));
-    let ty = find_underlying_ty(enumerator_values);
-    let ty = sess.alloc(Type::Arithmetic(ty.into()));
+    let ty = match fixed_underlying {
+        Some(ty) => typeck_ty(sess, ty.unqualified(), IsParameter::No).ty,
+        None => Type::Arithmetic(find_underlying_ty(enumerator_values).into()),
+    };
+    let ty = sess.alloc(ty);
     let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
     CompleteEnum { name, id, enumerators }
 }
