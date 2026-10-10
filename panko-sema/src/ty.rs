@@ -577,7 +577,10 @@ where
         u64: TryFrom<T>,
     {
         match self {
-            Self::Arithmetic(Arithmetic::Integral(integral)) => integral.can_represent(value),
+            Self::Arithmetic(arithmetic) => {
+                let Arithmetic::Integral(integral) = arithmetic.resolve_enums();
+                integral.can_represent(value)
+            }
             _ => false,
         }
     }

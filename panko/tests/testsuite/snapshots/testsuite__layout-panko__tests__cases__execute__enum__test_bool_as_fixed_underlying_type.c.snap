@@ -7,55 +7,107 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (enum Bool~1
+      (enumerators `bool`
+         (enumerator False~2 0 `enum Bool~1 complete` 0)
+         (enumerator True~3 1 `enum Bool~1 complete` 1)))
+   (function-definition external stack-size=72
+      (main~4 `fn() -> int` (static main))
+      (compound-statement
+         (definition (from_integral~6 `enum Bool~1 complete` @0) (bool-cast `enum Bool~1 complete` @0 (42 `int` @4)))
+         (expression
+            (call `int` @4
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 19>>` @16
+                        (string `array<char; 19>` @void "from_integral: %d\n\0"))))
+               (zero-extend `int` @24 (from_integral~6 `enum Bool~1 complete` @0))))
+         (definition (x~7 `int` @4) (123 `int` @4))
+         (definition (from_non_null_pointer~8 `enum Bool~1 complete` @8)
+            (bool-cast `enum Bool~1 complete` @8
+               (addressof `ptr<int>` @16
+                  (x~7 `int` @4))))
+         (expression
+            (call `int` @12
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @16
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @24
+                  (noop-type-conversion `ptr<char>` @24
+                     (addressof `ptr<array<char; 27>>` @24
+                        (string `array<char; 27>` @void "from_non_null_pointer: %d\n\0"))))
+               (zero-extend `int` @32 (from_non_null_pointer~8 `enum Bool~1 complete` @8))))
+         (definition (null~9 `ptr<int>` @16) (noop-type-conversion `ptr<int>` @16 (nullptr `nullptr_t` @16)))
+         (definition (from_null_pointer~10 `enum Bool~1 complete` @24) (bool-cast `enum Bool~1 complete` @24 (null~9 `ptr<int>` @16)))
+         (expression
+            (call `int` @28
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 23>>` @40
+                        (string `array<char; 23>` @void "from_null_pointer: %d\n\0"))))
+               (zero-extend `int` @48 (from_null_pointer~10 `enum Bool~1 complete` @24))))
+         (definition (from_nullptr~11 `enum Bool~1 complete` @25) (bool-cast `enum Bool~1 complete` @25 (nullptr `nullptr_t` @32)))
+         (expression
+            (call `int` @28
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @40
+                  (noop-type-conversion `ptr<char>` @40
+                     (addressof `ptr<array<char; 18>>` @40
+                        (string `array<char; 18>` @void "from_nullptr: %d\n\0"))))
+               (zero-extend `int` @48 (from_nullptr~11 `enum Bool~1 complete` @25))))
+         (compound-statement
+            (definition (from_integral~12 `enum Bool~1 complete` (static from_integral.12)) (bool-cast `enum Bool~1 complete` (42 `int`)))
+            (expression
+               (call `int` @28
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @40
+                     (noop-type-conversion `ptr<char>` @40
+                        (addressof `ptr<array<char; 29>>` @40
+                           (string `array<char; 29>` @void "constexpr from_integral: %d\n\0"))))
+                  (zero-extend `int` @48 (from_integral~12 `enum Bool~1 complete` (static from_integral.12)))))
+            (definition (x~13 `int` (static x.13)) (123 `int`))
+            (definition (from_non_null_pointer~14 `enum Bool~1 complete` (static from_non_null_pointer.14))
+               (bool-cast `enum Bool~1 complete`
+                  (addressof `ptr<int>`
+                     (x~13 `int`))))
+            (expression
+               (call `int` @28
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @40
+                     (noop-type-conversion `ptr<char>` @40
+                        (addressof `ptr<array<char; 37>>` @40
+                           (string `array<char; 37>` @void "constexpr from_non_null_pointer: %d\n\0"))))
+                  (zero-extend `int` @48 (from_non_null_pointer~14 `enum Bool~1 complete` (static from_non_null_pointer.14)))))
+            (definition (from_null_pointer~15 `enum Bool~1 complete` (static from_null_pointer.15)) (bool-cast `enum Bool~1 complete` (noop-type-conversion `ptr<int>` (nullptr `nullptr_t`))))
+            (expression
+               (call `int` @28
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @40
+                     (noop-type-conversion `ptr<char>` @40
+                        (addressof `ptr<array<char; 33>>` @40
+                           (string `array<char; 33>` @void "constexpr from_null_pointer: %d\n\0"))))
+                  (zero-extend `int` @48 (from_null_pointer~15 `enum Bool~1 complete` (static from_null_pointer.15)))))
+            (definition (from_nullptr~16 `enum Bool~1 complete` (static from_nullptr.16)) (bool-cast `enum Bool~1 complete` (nullptr `nullptr_t`)))
+            (expression
+               (call `int` @28
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @32
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+                  (noop-type-conversion `ptr<char const>` @40
+                     (noop-type-conversion `ptr<char>` @40
+                        (addressof `ptr<array<char; 28>>` @40
+                           (string `array<char; 28>` @void "constexpr from_nullptr: %d\n\0"))))
+                  (zero-extend `int` @48 (from_nullptr~16 `enum Bool~1 complete` (static from_nullptr.16)))))))))
 
 ----- stderr -----
-Error: invalid implicit conversion from `ptr<int>` to `enum Bool~1 complete`
-    ╭─[panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c:13:39]
-    │
- 13 │     enum Bool from_non_null_pointer = &x;
-    │                                       ─┬  
-    │                                        ╰── this is of type `ptr<int>`, which cannot be implicitly converted to `enum Bool~1 complete`
-────╯
-
-Error: invalid implicit conversion from `ptr<int>` to `enum Bool~1 complete`
-    ╭─[panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c:18:35]
-    │
- 18 │     enum Bool from_null_pointer = null;
-    │                                   ──┬─  
-    │                                     ╰─── this is of type `ptr<int>`, which cannot be implicitly converted to `enum Bool~1 complete`
-────╯
-
-Error: invalid implicit conversion from `nullptr_t` to `enum Bool~1 complete`
-    ╭─[panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c:22:30]
-    │
- 22 │     enum Bool from_nullptr = nullptr;
-    │                              ───┬───  
-    │                                 ╰───── this is of type `nullptr_t`, which cannot be implicitly converted to `enum Bool~1 complete`
-────╯
-
-Error: invalid implicit conversion from `ptr<int>` to `enum Bool~1 complete`
-    ╭─[panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c:32:50]
-    │
- 32 │         static enum Bool from_non_null_pointer = &x;
-    │                                                  ─┬  
-    │                                                   ╰── this is of type `ptr<int>`, which cannot be implicitly converted to `enum Bool~1 complete`
-────╯
-
-Error: invalid implicit conversion from `ptr<int>` to `enum Bool~1 complete`
-    ╭─[panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c:36:52]
-    │
- 36 │         static enum Bool from_null_pointer = (int*)nullptr;
-    │                                                    ───┬───  
-    │                                                       ╰───── this is of type `ptr<int>`, which cannot be implicitly converted to `enum Bool~1 complete`
-────╯
-
-Error: invalid implicit conversion from `nullptr_t` to `enum Bool~1 complete`
-    ╭─[panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c:40:41]
-    │
- 40 │         static enum Bool from_nullptr = nullptr;
-    │                                         ───┬───  
-    │                                            ╰───── this is of type `nullptr_t`, which cannot be implicitly converted to `enum Bool~1 complete`
-────╯

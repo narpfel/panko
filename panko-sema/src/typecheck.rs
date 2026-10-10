@@ -1208,8 +1208,9 @@ fn convert<'a>(
     };
     let convert = || {
         let cast = match (target_ty, target_ty.size().cmp(&expr_ty.size())) {
-            // TODO: also use `BoolCast` when `target_ty` is an enum with underlying type `bool`
-            (Type::BOOL, _) => Expression::BoolCast,
+            (Type::Arithmetic(arithmetic), _)
+                if let ty::Type::BOOL = ty::Type::Arithmetic(arithmetic.resolve_enums()) =>
+                Expression::BoolCast,
             (_, Ordering::Less) => Expression::Truncate,
             (_, Ordering::Equal) => Expression::NoopTypeConversion,
             (_, Ordering::Greater) => extend(),
@@ -1271,7 +1272,9 @@ fn convert<'a>(
         (Type::Function(_), _) =>
             sess.emit(Diagnostic::IllegalInitialiserForFunction { at: expr, ty: target }),
 
-        (Type::BOOL, Type::Pointer(_) | Type::Nullptr) => convert(),
+        (Type::Arithmetic(arithmetic), Type::Pointer(_) | Type::Nullptr)
+            if let ty::Type::BOOL = ty::Type::Arithmetic(arithmetic.resolve_enums()) =>
+            convert(),
 
         (Type::Pointer(_), Type::Nullptr) => convert(),
 

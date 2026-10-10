@@ -1,5 +1,3 @@
-// [[known-bug: conversions to enums with fixed underlying type `bool` not implemented]]
-
 int printf(char const*, ...);
 
 enum Bool: bool { False, True };
