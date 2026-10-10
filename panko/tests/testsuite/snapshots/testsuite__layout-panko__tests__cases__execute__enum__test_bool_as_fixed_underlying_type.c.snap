@@ -1,0 +1,61 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid implicit conversion from `ptr<int>` to `enum Bool~1 complete`
+    ╭─[panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c:13:39]
+    │
+ 13 │     enum Bool from_non_null_pointer = &x;
+    │                                       ─┬  
+    │                                        ╰── this is of type `ptr<int>`, which cannot be implicitly converted to `enum Bool~1 complete`
+────╯
+
+Error: invalid implicit conversion from `ptr<int>` to `enum Bool~1 complete`
+    ╭─[panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c:18:35]
+    │
+ 18 │     enum Bool from_null_pointer = null;
+    │                                   ──┬─  
+    │                                     ╰─── this is of type `ptr<int>`, which cannot be implicitly converted to `enum Bool~1 complete`
+────╯
+
+Error: invalid implicit conversion from `nullptr_t` to `enum Bool~1 complete`
+    ╭─[panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c:22:30]
+    │
+ 22 │     enum Bool from_nullptr = nullptr;
+    │                              ───┬───  
+    │                                 ╰───── this is of type `nullptr_t`, which cannot be implicitly converted to `enum Bool~1 complete`
+────╯
+
+Error: invalid implicit conversion from `ptr<int>` to `enum Bool~1 complete`
+    ╭─[panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c:32:50]
+    │
+ 32 │         static enum Bool from_non_null_pointer = &x;
+    │                                                  ─┬  
+    │                                                   ╰── this is of type `ptr<int>`, which cannot be implicitly converted to `enum Bool~1 complete`
+────╯
+
+Error: invalid implicit conversion from `ptr<int>` to `enum Bool~1 complete`
+    ╭─[panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c:36:52]
+    │
+ 36 │         static enum Bool from_null_pointer = (int*)nullptr;
+    │                                                    ───┬───  
+    │                                                       ╰───── this is of type `ptr<int>`, which cannot be implicitly converted to `enum Bool~1 complete`
+────╯
+
+Error: invalid implicit conversion from `nullptr_t` to `enum Bool~1 complete`
+    ╭─[panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c:40:41]
+    │
+ 40 │         static enum Bool from_nullptr = nullptr;
+    │                                         ───┬───  
+    │                                            ╰───── this is of type `nullptr_t`, which cannot be implicitly converted to `enum Bool~1 complete`
+────╯

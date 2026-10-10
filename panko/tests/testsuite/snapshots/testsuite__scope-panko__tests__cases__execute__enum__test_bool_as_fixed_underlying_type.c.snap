@@ -1,0 +1,67 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum Bool~1
+      (enumerators `bool`
+         (enumerator False~2 `enum Bool~1 complete`.0 ∅)
+         (enumerator True~3 `enum Bool~1 complete`.1 ∅)))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (declaration from_integral~6 `enum Bool~1 complete` 42)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "from_integral: %d\n")
+               (name from_integral~6 `enum Bool~1 complete`)))
+         (declaration x~7 `int` 123)
+         (declaration from_non_null_pointer~8 `enum Bool~1 complete` (addressof (name x~7 `int`)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "from_non_null_pointer: %d\n")
+               (name from_non_null_pointer~8 `enum Bool~1 complete`)))
+         (declaration null~9 `ptr<int>` nullptr)
+         (declaration from_null_pointer~10 `enum Bool~1 complete` (name null~9 `ptr<int>`))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "from_null_pointer: %d\n")
+               (name from_null_pointer~10 `enum Bool~1 complete`)))
+         (declaration from_nullptr~11 `enum Bool~1 complete` nullptr)
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "from_nullptr: %d\n")
+               (name from_nullptr~11 `enum Bool~1 complete`)))
+         (compound-statement
+            (declaration from_integral~12 `enum Bool~1 complete` 42)
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "constexpr from_integral: %d\n")
+                  (name from_integral~12 `enum Bool~1 complete`)))
+            (declaration x~13 `int` 123)
+            (declaration from_non_null_pointer~14 `enum Bool~1 complete` (addressof (name x~13 `int`)))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "constexpr from_non_null_pointer: %d\n")
+                  (name from_non_null_pointer~14 `enum Bool~1 complete`)))
+            (declaration from_null_pointer~15 `enum Bool~1 complete` (cast `ptr<int>` nullptr))
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "constexpr from_null_pointer: %d\n")
+                  (name from_null_pointer~15 `enum Bool~1 complete`)))
+            (declaration from_nullptr~16 `enum Bool~1 complete` nullptr)
+            (expression
+               (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+                  (string "constexpr from_nullptr: %d\n")
+                  (name from_nullptr~16 `enum Bool~1 complete`)))))))
+
+----- stderr -----
