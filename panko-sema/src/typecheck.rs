@@ -970,24 +970,16 @@ fn typeck_complete_enum<'a>(
 ) -> CompleteEnum<'a, Typeck> {
     let CompleteEnum { name, id, enumerators } = *complete;
     let NoHashEq(scope::Enumerators { fixed_underlying, enumerators }) = enumerators;
-    let fixed_underlying = match fixed_underlying {
-        Some(ty) => match typeck_ty(sess, *ty, IsParameter::No).ty {
-            ty @ Type::Arithmetic(ty::Arithmetic::Integral(_)) => Some(ty),
-            checked_ty => {
-                let () =
-                    sess.emit(Diagnostic::NonintegralUnderlyingType { at: ty, ty: checked_ty });
-                None
-            }
-        },
-        None => None,
-    };
-    let enumerator_ty = match fixed_underlying {
-        Some(ty) => {
-            let enumerators = HashEqIgnored(Enumerators { ty: sess.alloc(ty), enumerators: None });
-            Type::from(CompleteEnum { name, id, enumerators })
-        }
-        None => Type::INT,
-    };
+    let fixed_underlying =
+        fixed_underlying.and_then(|ty| match typeck_ty(sess, *ty, IsParameter::No).ty {
+            ty @ Type::Arithmetic(ty::Arithmetic::Integral(_)) => Some(sess.alloc(ty)),
+            checked_ty =>
+                sess.emit(Diagnostic::NonintegralUnderlyingType { at: ty, ty: checked_ty }),
+        });
+    let enumerator_ty = fixed_underlying.map_or(Type::INT, |ty| {
+        let enumerators = HashEqIgnored(Enumerators { ty, enumerators: None });
+        Type::from(CompleteEnum { name, id, enumerators })
+    });
     let mut enumerator_values = IndexMap::default();
     for enumerator in enumerators.into_flat_iter() {
         let enumerator = typeck_enumerator(&mut enumerator_values, enumerator_ty, enumerator);
@@ -998,9 +990,10 @@ fn typeck_complete_enum<'a>(
     let enumerator_values = enumerators
         .iter()
         .map(|enumerator| constexpr::Integral::Unsigned(enumerator.value));
-    let ty = fixed_underlying
-        .unwrap_or_else(|| Type::Arithmetic(find_underlying_ty(enumerator_values).into()));
-    let ty = sess.alloc(ty);
+    let ty = fixed_underlying.unwrap_or_else(|| {
+        let ty = Type::Arithmetic(find_underlying_ty(enumerator_values).into());
+        sess.alloc(ty)
+    });
     let enumerators = HashEqIgnored(Enumerators { ty, enumerators: Some(enumerators) });
     CompleteEnum { name, id, enumerators }
 }
