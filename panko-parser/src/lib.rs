@@ -219,6 +219,24 @@ pub struct Declaration<'a> {
     init_declarator_list: &'a [InitDeclarator<'a>],
 }
 
+impl<'a> Declaration<'a> {
+    fn enum_decl(
+        sess: &ast::Session<'a>,
+        r#enum: Token<'a>,
+        name: Token<'a>,
+        fixed_underlying: DeclarationSpecifiers<'a>,
+    ) -> Self {
+        let specifier =
+            DeclarationSpecifier::TypeSpecifierQualifier(TypeSpecifierQualifier::Specifier(
+                TypeSpecifier::r#enum(r#enum, Some(name), Some(fixed_underlying), &[]),
+            ));
+        Self {
+            specifiers: DeclarationSpecifiers(sess.alloc([specifier])),
+            init_declarator_list: &[],
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct DeclarationSpecifiers<'a>(&'a [DeclarationSpecifier<'a>]);
 

@@ -186,7 +186,7 @@ InitDeclaratorNoInitialiser: Option<ast::InitDeclarator<'a>> = {
 FunctionBody = { CompoundStatement<DontPushTypedefScope> }
 
 Declaration: ast::Declaration<'a> = {
-    "enum" AnyIdentifier FixedUnderlying ";" => todo!(),
+    <"enum"> <AnyIdentifier> <FixedUnderlying> ";" => ast::Declaration::enum_decl(sess, <>),
     <head:DeclarationHead<AbstractDeclaratorDisallowed, InitDeclarator<MaybeAbstractDeclarator>?>>
     <init_declarator_list:("," <InitDeclaratorList>)?> ";" => {
         let (specifiers, declarator) = head;
