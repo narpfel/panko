@@ -726,7 +726,6 @@ PrimaryExpression: ast::Expression<'a> = {
         <close_paren:")"> => ast::Expression::BuiltinOffsetof { <> },
 }
 
-#[inline]
 GenericAssocList: ast::GenericAssocList<'a> = {
     NonEmptyCommaSep<GenericAssociation> => ast::GenericAssocList(<>),
 }
