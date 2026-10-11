@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/enum/test_error_enumerator_value_out_of_range.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/enum/test_error_enumerator_value_out_of_range.c"
+   (enum TristateBool~0
+      (enumerators `bool`
+         (enumerator False~1 0 `enum TristateBool~0 complete` 0)
+         (enumerator True~2 1 `enum TristateBool~0 complete` 1)
+         (enumerator Maybe~3 2 `enum TristateBool~0 complete` 2)))
+   (function-definition external stack-size=24
+      (main~4 `fn() -> int` (static main))
+      (compound-statement
+         (return (zero-extend `int` @0 (2 `enum TristateBool~0 complete` @4))))))
+
+----- stderr -----
