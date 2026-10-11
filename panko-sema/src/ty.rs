@@ -240,6 +240,7 @@ impl<T: Step> AsSExpr for Enum<'_, T> {
         let s = match self {
             Enum::Incomplete { name, id, enable: _ } =>
                 format!("enum {name}~{id}", name = name.as_sexpr(), id = id.0),
+            // TODO: include the underlying type if it is fixed
             Enum::Complete(CompleteEnum { name, id, enumerators: _ }) =>
                 format!("enum {}~{} complete", name.as_sexpr(), id.0),
         };
@@ -577,7 +578,10 @@ where
         u64: TryFrom<T>,
     {
         match self {
-            Self::Arithmetic(Arithmetic::Integral(integral)) => integral.can_represent(value),
+            Self::Arithmetic(arithmetic) => {
+                let Arithmetic::Integral(integral) = arithmetic.resolve_enums();
+                integral.can_represent(value)
+            }
             _ => false,
         }
     }

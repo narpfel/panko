@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/enum/test_error_nonintegral_fixed_underlying_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: nonintegral fixed underlying type `void`
+   ╭─[panko/tests/cases/enum/test_error_nonintegral_fixed_underlying_type.c:1:9]
+   │
+ 1 │ enum A: void { A };
+   │         ──┬─  
+   │           ╰─── this type `void` is not integral
+───╯
+
+Error: nonintegral fixed underlying type `ptr<int>`
+   ╭─[panko/tests/cases/enum/test_error_nonintegral_fixed_underlying_type.c:2:9]
+   │
+ 2 │ enum B: typeof(int*) { B };
+   │         ──────┬─────  
+   │               ╰─────── this type `ptr<int>` is not integral
+───╯
+
+Error: nonintegral fixed underlying type `enum Okay~4 complete`
+   ╭─[panko/tests/cases/enum/test_error_nonintegral_fixed_underlying_type.c:4:9]
+   │
+ 4 │ enum C: typeof(enum Okay) { C };
+   │         ────────┬────────  
+   │                 ╰────────── this type `enum Okay~4 complete` is not integral
+───╯
+
+Error: nonintegral fixed underlying type `struct Incomplete~8`
+   ╭─[panko/tests/cases/enum/test_error_nonintegral_fixed_underlying_type.c:5:9]
+   │
+ 5 │ enum D: typeof(struct Incomplete) { D };
+   │         ────────────┬────────────  
+   │                     ╰────────────── this type `struct Incomplete~8` is not integral
+───╯
+
+Error: nonintegral fixed underlying type `ptr<void>`
+   ╭─[panko/tests/cases/enum/test_error_nonintegral_fixed_underlying_type.c:6:1]
+   │
+ 6 │ typedef void* Typedef;
+   │ ──────┬──────  
+   │       ╰──────── this type `ptr<void>` is not integral
+───╯

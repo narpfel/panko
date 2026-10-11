@@ -14,7 +14,7 @@ exit_code: 0
    (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (declaration memcpy~1 `fn(dest: ptr<void>, src: ptr<void const>, n: typeof((sizeof 0))) -> void` ∅)
    (enum E~2
-      (enumerators
+      (enumerators ∅
          (enumerator False~3 `enum E~2`.0 ∅)
          (enumerator True~4 `enum E~2`.1 ∅)))
    (declaration false_value~5 `enum E~2 complete` ∅)

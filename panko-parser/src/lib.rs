@@ -219,6 +219,24 @@ pub struct Declaration<'a> {
     init_declarator_list: &'a [InitDeclarator<'a>],
 }
 
+impl<'a> Declaration<'a> {
+    fn enum_decl(
+        sess: &ast::Session<'a>,
+        r#enum: Token<'a>,
+        name: Token<'a>,
+        fixed_underlying: DeclarationSpecifiers<'a>,
+    ) -> Self {
+        let specifier =
+            DeclarationSpecifier::TypeSpecifierQualifier(TypeSpecifierQualifier::Specifier(
+                TypeSpecifier::r#enum(r#enum, Some(name), Some(fixed_underlying), &[]),
+            ));
+        Self {
+            specifiers: DeclarationSpecifiers(sess.alloc([specifier])),
+            init_declarator_list: &[],
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct DeclarationSpecifiers<'a>(&'a [DeclarationSpecifier<'a>]);
 
@@ -443,20 +461,32 @@ impl<'a> TypeSpecifier<'a> {
     fn r#enum(
         r#enum: Token<'a>,
         name: Option<Token<'a>>,
+        fixed_underlying: Option<DeclarationSpecifiers<'a>>,
         enumerators: &'a [Enumerator<'a>],
     ) -> Self {
         Self {
             token: r#enum,
-            kind: TypeSpecifierKind::Enum(Enum::Complete { name, enumerators }),
+            kind: TypeSpecifierKind::Enum(Enum::Complete { name, fixed_underlying, enumerators }),
         }
     }
 
     fn loc(&self) -> Loc<'a> {
         match self.kind {
             TypeSpecifierKind::Struct(
-                Struct::Incomplete { name, kind: _ }
-                | Struct::Complete { name: Some(name), kind: _, members: _ },
-            ) => self.token.loc().until(name.loc()),
+                Struct::Incomplete { name: end, kind: _ }
+                | Struct::Complete { name: Some(end), kind: _, members: _ },
+            )
+            | TypeSpecifierKind::Enum(
+                Enum::Incomplete { name: end }
+                | Enum::Complete {
+                    name: Some(end),
+                    fixed_underlying: _,
+                    enumerators: _,
+                },
+            )
+            | TypeSpecifierKind::Typeof { close_paren: end, .. }
+            | TypeSpecifierKind::TypeofTy { close_paren: end, .. } =>
+                self.token.loc().until(end.loc()),
             _ => self.token.loc(),
         }
     }
@@ -585,8 +615,10 @@ impl<'a> TypeSpecifier<'a> {
                 signedness: Some(Signedness::Unsigned),
                 kind: Some(IntegralKind::Bool),
             }),
-            Kind::Typeof { unqual, expr } => exclusive(Parsed::Typeof { unqual, expr }),
-            Kind::TypeofTy { unqual, ty } => exclusive(Parsed::TypeofTy { unqual, ty }),
+            Kind::Typeof { unqual, expr, close_paren: _ } =>
+                exclusive(Parsed::Typeof { unqual, expr }),
+            Kind::TypeofTy { unqual, ty, close_paren: _ } =>
+                exclusive(Parsed::TypeofTy { unqual, ty }),
             Kind::Struct(r#struct) => exclusive(Parsed::Struct(r#struct)),
             Kind::Enum(r#enum) => exclusive(Parsed::Enum(r#enum)),
             _ => unimplemented_todo!(self, "unimplemented type specifier: {:#?}", self),
@@ -614,6 +646,7 @@ enum Enum<'a> {
     },
     Complete {
         name: Option<Token<'a>>,
+        fixed_underlying: Option<DeclarationSpecifiers<'a>>,
         enumerators: &'a [Enumerator<'a>],
     },
 }
@@ -654,10 +687,12 @@ enum TypeSpecifierKind<'a> {
     Typeof {
         unqual: bool,
         expr: &'a Expression<'a>,
+        close_paren: Token<'a>,
     },
     TypeofTy {
         unqual: bool,
         ty: &'a TypeName<'a>,
+        close_paren: Token<'a>,
     },
 }
 

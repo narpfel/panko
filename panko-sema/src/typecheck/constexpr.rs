@@ -301,7 +301,8 @@ impl<'a, 'b> Value<'a, 'b> {
         let ty = expr.ty.ty;
         assert!(ty.can_represent(value), "`{ty}`.can_represent({value})");
         match ty {
-            Type::Arithmetic(Arithmetic::Integral(integral)) => {
+            Type::Arithmetic(arithmetic) => {
+                let Arithmetic::Integral(integral) = arithmetic.resolve_enums();
                 let size = usize::try_from(integral.size()).unwrap();
                 let bytes = value.to_le_bytes().map(Byte::Literal)[..size].into();
                 let repr = Repr::Bytes(bytes);

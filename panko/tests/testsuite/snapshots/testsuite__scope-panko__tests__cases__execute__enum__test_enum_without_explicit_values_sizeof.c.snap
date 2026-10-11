@@ -12,7 +12,7 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/enum/test_enum_without_explicit_values_sizeof.c"
    (enum E~0
-      (enumerators
+      (enumerators ∅
          (enumerator A~1 `enum E~0`.0 ∅)
          (enumerator B~2 `enum E~0`.1 ∅)
          (enumerator C~3 `enum E~0`.2 ∅)))
@@ -21,7 +21,7 @@ exit_code: 0
       main~5 `fn() -> int`
       (compound-statement
          (enum E2~7
-            (enumerators
+            (enumerators ∅
                (enumerator X~8 `enum E2~7`.0 ∅)
                (enumerator Y~9 `enum E2~7`.1 ∅)
                (enumerator Z~10 `enum E2~7`.2 ∅)))

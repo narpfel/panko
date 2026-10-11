@@ -1,0 +1,113 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_bool_as_fixed_underlying_type.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum Bool~1
+      (enumerators `bool`
+         (enumerator False~2 0 `enum Bool~1 complete` 0)
+         (enumerator True~3 1 `enum Bool~1 complete` 1)))
+   (function-definition external
+      main~4 `fn() -> int`
+      (compound-statement
+         (definition from_integral~6 `enum Bool~1 complete` (bool-cast `enum Bool~1 complete` (42 `int`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 19>>`
+                        (string `array<char; 19>` "from_integral: %d\n\0"))))
+               (zero-extend `int` (from_integral~6 `enum Bool~1 complete`))))
+         (definition x~7 `int` (123 `int`))
+         (definition from_non_null_pointer~8 `enum Bool~1 complete`
+            (bool-cast `enum Bool~1 complete`
+               (addressof `ptr<int>`
+                  (x~7 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 27>>`
+                        (string `array<char; 27>` "from_non_null_pointer: %d\n\0"))))
+               (zero-extend `int` (from_non_null_pointer~8 `enum Bool~1 complete`))))
+         (definition null~9 `ptr<int>` (noop-type-conversion `ptr<int>` (nullptr `nullptr_t`)))
+         (definition from_null_pointer~10 `enum Bool~1 complete` (bool-cast `enum Bool~1 complete` (null~9 `ptr<int>`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 23>>`
+                        (string `array<char; 23>` "from_null_pointer: %d\n\0"))))
+               (zero-extend `int` (from_null_pointer~10 `enum Bool~1 complete`))))
+         (definition from_nullptr~11 `enum Bool~1 complete` (bool-cast `enum Bool~1 complete` (nullptr `nullptr_t`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 18>>`
+                        (string `array<char; 18>` "from_nullptr: %d\n\0"))))
+               (zero-extend `int` (from_nullptr~11 `enum Bool~1 complete`))))
+         (compound-statement
+            (definition from_integral~12 `enum Bool~1 complete` (bool-cast `enum Bool~1 complete` (42 `int`)))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 29>>`
+                           (string `array<char; 29>` "constexpr from_integral: %d\n\0"))))
+                  (zero-extend `int` (from_integral~12 `enum Bool~1 complete`))))
+            (definition x~13 `int` (123 `int`))
+            (definition from_non_null_pointer~14 `enum Bool~1 complete`
+               (bool-cast `enum Bool~1 complete`
+                  (addressof `ptr<int>`
+                     (x~13 `int`))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 37>>`
+                           (string `array<char; 37>` "constexpr from_non_null_pointer: %d\n\0"))))
+                  (zero-extend `int` (from_non_null_pointer~14 `enum Bool~1 complete`))))
+            (definition from_null_pointer~15 `enum Bool~1 complete` (bool-cast `enum Bool~1 complete` (noop-type-conversion `ptr<int>` (nullptr `nullptr_t`))))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 33>>`
+                           (string `array<char; 33>` "constexpr from_null_pointer: %d\n\0"))))
+                  (zero-extend `int` (from_null_pointer~15 `enum Bool~1 complete`))))
+            (definition from_nullptr~16 `enum Bool~1 complete` (bool-cast `enum Bool~1 complete` (nullptr `nullptr_t`)))
+            (expression
+               (call `int`
+                  (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                     (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+                  (noop-type-conversion `ptr<char const>`
+                     (noop-type-conversion `ptr<char>`
+                        (addressof `ptr<array<char; 28>>`
+                           (string `array<char; 28>` "constexpr from_nullptr: %d\n\0"))))
+                  (zero-extend `int` (from_nullptr~16 `enum Bool~1 complete`))))))))
+
+----- stderr -----

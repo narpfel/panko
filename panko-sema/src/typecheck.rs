@@ -969,9 +969,20 @@ fn typeck_complete_enum<'a>(
     complete: &CompleteEnum<'a, scope::Scope>,
 ) -> CompleteEnum<'a, Typeck> {
     let CompleteEnum { name, id, enumerators } = *complete;
+    let NoHashEq(scope::Enumerators { fixed_underlying, enumerators }) = enumerators;
+    let fixed_underlying =
+        fixed_underlying.and_then(|ty| match typeck_ty(sess, *ty, IsParameter::No).ty {
+            ty @ Type::Arithmetic(ty::Arithmetic::Integral(_)) => Some(sess.alloc(ty)),
+            checked_ty =>
+                sess.emit(Diagnostic::NonintegralUnderlyingType { at: ty, ty: checked_ty }),
+        });
+    let enumerator_ty = fixed_underlying.map_or(Type::INT, |ty| {
+        let enumerators = HashEqIgnored(Enumerators { ty, enumerators: &[] });
+        Type::from(CompleteEnum { name, id, enumerators })
+    });
     let mut enumerator_values = IndexMap::default();
-    for enumerator in enumerators.0.0 {
-        let enumerator = typeck_enumerator(&mut enumerator_values, enumerator);
+    for enumerator in enumerators {
+        let enumerator = typeck_enumerator(sess, &mut enumerator_values, enumerator_ty, enumerator);
         let was_present = enumerator_values.insert(enumerator.id, enumerator);
         assert_matches!(was_present, None);
     }
@@ -979,22 +990,32 @@ fn typeck_complete_enum<'a>(
     let enumerator_values = enumerators
         .iter()
         .map(|enumerator| constexpr::Integral::Unsigned(enumerator.value));
-    let ty = find_underlying_ty(enumerator_values);
-    let ty = sess.alloc(Type::Arithmetic(ty.into()));
+    let ty = fixed_underlying.unwrap_or_else(|| {
+        let ty = Type::Arithmetic(find_underlying_ty(enumerator_values).into());
+        sess.alloc(ty)
+    });
     let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
     CompleteEnum { name, id, enumerators }
 }
 
 fn typeck_enumerator<'a>(
+    sess: &'a Session<'a>,
     enumerator_values: &mut IndexMap<Id, Enumerator<'a, Typeck>>,
+    ty: Type<'a>,
     enumerator: &scope::Enumerator<'a>,
 ) -> Enumerator<'a, Typeck> {
     let scope::Enumerator { name, loc, id, ty: _, index, value } = *enumerator;
     if let Some(value) = value {
         unimplemented_todo!(value, "explicit values for enumerators");
     }
-    let ty = Type::int();
-    let value = try { enumerator_values.last()?.1.value.strict_add(1) }.unwrap_or(0);
+    let value = match try { enumerator_values.last()?.1.value.strict_add(1) }.unwrap_or(0) {
+        value if ty.can_represent(value) => value,
+        value => {
+            let () =
+                sess.emit(Diagnostic::EnumeratorValueOutOfRange { at: *enumerator, value, ty });
+            0
+        }
+    };
     Enumerator { name, loc, id, ty, index, value }
 }
 
@@ -1195,8 +1216,9 @@ fn convert<'a>(
     };
     let convert = || {
         let cast = match (target_ty, target_ty.size().cmp(&expr_ty.size())) {
-            // TODO: also use `BoolCast` when `target_ty` is an enum with underlying type `bool`
-            (Type::BOOL, _) => Expression::BoolCast,
+            (Type::Arithmetic(arithmetic), _)
+                if let ty::Type::BOOL = ty::Type::Arithmetic(arithmetic.resolve_enums()) =>
+                Expression::BoolCast,
             (_, Ordering::Less) => Expression::Truncate,
             (_, Ordering::Equal) => Expression::NoopTypeConversion,
             (_, Ordering::Greater) => extend(),
@@ -1258,7 +1280,9 @@ fn convert<'a>(
         (Type::Function(_), _) =>
             sess.emit(Diagnostic::IllegalInitialiserForFunction { at: expr, ty: target }),
 
-        (Type::BOOL, Type::Pointer(_) | Type::Nullptr) => convert(),
+        (Type::Arithmetic(arithmetic), Type::Pointer(_) | Type::Nullptr)
+            if let ty::Type::BOOL = ty::Type::Arithmetic(arithmetic.resolve_enums()) =>
+            convert(),
 
         (Type::Pointer(_), Type::Nullptr) => convert(),
 

@@ -1,0 +1,26 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_error_typeof_enumerator_as_fixed_underlying_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_error_typeof_enumerator_as_fixed_underlying_type.c"
+   (enum Enum~0
+      (enumerators `long`
+         (enumerator A~1 `enum Enum~0 complete`.0 ∅)
+         (enumerator B~2 `enum Enum~0 complete`.1 ∅)
+         (enumerator C~3 `enum Enum~0 complete`.2 ∅)))
+   (enum Invalid~4
+      (enumerators `typeof((enumerator A~1 `enum Enum~0 complete`.0 ∅))`
+         (enumerator X~5 `enum Invalid~4 complete`.0 ∅)))
+   (function-definition
+      main~6 `fn() -> int`
+      (compound-statement)))
+
+----- stderr -----

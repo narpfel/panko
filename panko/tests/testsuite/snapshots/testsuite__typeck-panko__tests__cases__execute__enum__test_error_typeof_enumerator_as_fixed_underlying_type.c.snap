@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_error_typeof_enumerator_as_fixed_underlying_type.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: nonintegral fixed underlying type `enum Enum~0 complete`
+   ╭─[panko/tests/cases/execute/enum/test_error_typeof_enumerator_as_fixed_underlying_type.c:4:15]
+   │
+ 4 │ enum Invalid: typeof(A) { X };
+   │               ────┬────  
+   │                   ╰────── this type `enum Enum~0 complete` is not integral
+───╯

@@ -38,6 +38,12 @@ exit_code: 0
                (assoc `fn() -> int` 1)
                (assoc `void` 2)
                (assoc default 3)))
+         (expression
+            (generic
+               42
+               (assoc `struct IncompleteStruct~5` 0)
+               (assoc `enum IncompleteEnum~6` 1)
+               (assoc default 2)))
          (return (name a~2 `int`)))))
 
 ----- stderr -----

@@ -1,0 +1,29 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/enum/test_error_enumerator_value_out_of_range.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: enumerator value `2` is out of range for type `enum TristateBool~0 complete`
+   ╭─[panko/tests/cases/enum/test_error_enumerator_value_out_of_range.c:1:40]
+   │
+ 1 │ enum TristateBool: bool { False, True, Maybe };
+   │                                        ──┬──  
+   │                                          ╰──── in the definition of enumerator `Maybe`
+───╯
+
+Error: enumerator value `2` is out of range for type `enum TristateBool~0 complete`
+   ╭─[panko/tests/cases/enum/test_error_enumerator_value_out_of_range.c:1:40]
+   │
+ 1 │ enum TristateBool: bool { False, True, Maybe };
+   │                                        ──┬──  
+   │                                          ╰──── in the definition of enumerator `Maybe`
+───╯
