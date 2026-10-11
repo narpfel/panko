@@ -500,7 +500,7 @@ impl<'a> Scopes<'a> {
             let id = self.id();
             let r#enum = match fixed_underlying {
                 Some(_) => {
-                    let enumerators = NoHashEq(Enumerators { fixed_underlying, enumerators: None });
+                    let enumerators = NoHashEq(Enumerators { fixed_underlying, enumerators: &[] });
                     Enum::Complete(CompleteEnum { name, id, enumerators })
                 }
                 None => Enum::Incomplete { name, id, enable: () },

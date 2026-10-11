@@ -471,7 +471,7 @@ pub(crate) enum Expression<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct Enumerators<'a, T: ty::Step> {
     pub(crate) ty: &'a ty::Type<'a, T>,
-    pub(crate) enumerators: Option<&'a [Enumerator<'a, T>]>,
+    pub(crate) enumerators: &'a [Enumerator<'a, T>],
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -977,11 +977,11 @@ fn typeck_complete_enum<'a>(
                 sess.emit(Diagnostic::NonintegralUnderlyingType { at: ty, ty: checked_ty }),
         });
     let enumerator_ty = fixed_underlying.map_or(Type::INT, |ty| {
-        let enumerators = HashEqIgnored(Enumerators { ty, enumerators: None });
+        let enumerators = HashEqIgnored(Enumerators { ty, enumerators: &[] });
         Type::from(CompleteEnum { name, id, enumerators })
     });
     let mut enumerator_values = IndexMap::default();
-    for enumerator in enumerators.into_flat_iter() {
+    for enumerator in enumerators {
         let enumerator = typeck_enumerator(sess, &mut enumerator_values, enumerator_ty, enumerator);
         let was_present = enumerator_values.insert(enumerator.id, enumerator);
         assert_matches!(was_present, None);
@@ -994,7 +994,7 @@ fn typeck_complete_enum<'a>(
         let ty = Type::Arithmetic(find_underlying_ty(enumerator_values).into());
         sess.alloc(ty)
     });
-    let enumerators = HashEqIgnored(Enumerators { ty, enumerators: Some(enumerators) });
+    let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
     CompleteEnum { name, id, enumerators }
 }
 
@@ -2982,7 +2982,7 @@ fn typeck_expression<'a>(
                 Enum::Complete(complete) => typeck_complete_enum(sess, complete),
             };
             let HashEqIgnored(Enumerators { ty: _, enumerators }) = enumerators;
-            let Enumerator { ty, value, .. } = enumerators.unwrap()[*index];
+            let Enumerator { ty, value, .. } = enumerators[*index];
             let token = Token::synthesised(TokenKind::Identifier, *loc);
             TypedExpression {
                 ty: ty.unqualified(),

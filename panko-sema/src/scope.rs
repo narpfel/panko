@@ -677,7 +677,7 @@ impl<'a> Enumerator<'a> {
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Enumerators<'a> {
     pub(crate) fixed_underlying: Option<&'a QualifiedType<'a>>,
-    pub(crate) enumerators: Option<&'a [Enumerator<'a>]>,
+    pub(crate) enumerators: &'a [Enumerator<'a>],
 }
 
 impl fmt::Display for BuiltinNameKind<'_> {
@@ -1237,7 +1237,7 @@ fn resolve_enumerators<'a>(
     });
     Enumerators {
         fixed_underlying,
-        enumerators: Some(sess.alloc_slice_fill_iter(enumerators)),
+        enumerators: sess.alloc_slice_fill_iter(enumerators),
     }
 }
 
