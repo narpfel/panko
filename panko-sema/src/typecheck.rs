@@ -982,7 +982,7 @@ fn typeck_complete_enum<'a>(
     });
     let mut enumerator_values = IndexMap::default();
     for enumerator in enumerators.into_flat_iter() {
-        let enumerator = typeck_enumerator(&mut enumerator_values, enumerator_ty, enumerator);
+        let enumerator = typeck_enumerator(sess, &mut enumerator_values, enumerator_ty, enumerator);
         let was_present = enumerator_values.insert(enumerator.id, enumerator);
         assert_matches!(was_present, None);
     }
@@ -999,6 +999,7 @@ fn typeck_complete_enum<'a>(
 }
 
 fn typeck_enumerator<'a>(
+    sess: &'a Session<'a>,
     enumerator_values: &mut IndexMap<Id, Enumerator<'a, Typeck>>,
     ty: Type<'a>,
     enumerator: &scope::Enumerator<'a>,
@@ -1007,7 +1008,14 @@ fn typeck_enumerator<'a>(
     if let Some(value) = value {
         unimplemented_todo!(value, "explicit values for enumerators");
     }
-    let value = try { enumerator_values.last()?.1.value.strict_add(1) }.unwrap_or(0);
+    let value = match try { enumerator_values.last()?.1.value.strict_add(1) }.unwrap_or(0) {
+        value if ty.can_represent(value) => value,
+        value => {
+            let () =
+                sess.emit(Diagnostic::EnumeratorValueOutOfRange { at: *enumerator, value, ty });
+            0
+        }
+    };
     Enumerator { name, loc, id, ty, index, value }
 }
 

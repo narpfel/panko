@@ -709,6 +709,15 @@ pub(super) enum Diagnostic<'a> {
         at: &'a scope::QualifiedType<'a>,
         ty: Type<'a>,
     },
+
+    #[error("enumerator value `{value}` is out of range for type `{ty}`")]
+    #[diagnostics(at(colour = Red, label = "in the definition of enumerator `{name}`"))]
+    #[with(value = value.fg(Red), ty = ty.fg(Blue), name = at.name)]
+    EnumeratorValueOutOfRange {
+        at: scope::Enumerator<'a>,
+        value: u64,
+        ty: Type<'a>,
+    },
 }
 
 fn describe_ty_completeness(ty: &QualifiedType) -> (&'static str, &'static str, &'static str) {
