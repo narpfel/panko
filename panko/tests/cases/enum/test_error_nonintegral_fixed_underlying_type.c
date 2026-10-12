@@ -5,3 +5,4 @@ enum C: typeof(enum Okay) { C };
 enum D: typeof(struct Incomplete) { D };
 typedef void* Typedef;
 enum E: Typedef { E };
+enum F: typeof(enum Okay);

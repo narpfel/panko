@@ -51,3 +51,11 @@ Error: nonintegral fixed underlying type `ptr<void>`
    │ ──────┬──────  
    │       ╰──────── this type `ptr<void>` is not integral
 ───╯
+
+Error: nonintegral fixed underlying type `enum Okay~4 complete`
+   ╭─[panko/tests/cases/enum/test_error_nonintegral_fixed_underlying_type.c:8:9]
+   │
+ 8 │ enum F: typeof(enum Okay);
+   │         ────────┬────────  
+   │                 ╰────────── this type `enum Okay~4 complete` is not integral
+───╯

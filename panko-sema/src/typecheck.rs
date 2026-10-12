@@ -971,10 +971,16 @@ fn typeck_complete_enum<'a>(
     let CompleteEnum { name, id, enumerators } = *complete;
     let NoHashEq(scope::Enumerators { fixed_underlying, enumerators }) = enumerators;
     let fixed_underlying =
-        fixed_underlying.and_then(|ty| match typeck_ty(sess, *ty, IsParameter::No).ty {
-            ty @ Type::Arithmetic(ty::Arithmetic::Integral(_)) => Some(sess.alloc(ty)),
-            checked_ty =>
-                sess.emit(Diagnostic::NonintegralUnderlyingType { at: ty, ty: checked_ty }),
+        fixed_underlying.map(|ty| match typeck_ty(sess, *ty, IsParameter::No).ty {
+            ty @ Type::Arithmetic(ty::Arithmetic::Integral(_)) => sess.alloc(ty),
+            checked_ty => {
+                // TODO: `enum`s are integral, so the error message should be changed when
+                // `checked_ty` is an `enum`
+                let () =
+                    sess.emit(Diagnostic::NonintegralUnderlyingType { at: ty, ty: checked_ty });
+                // TODO: should be `Type::Error`
+                &Type::INT
+            }
         });
     let enumerator_ty = fixed_underlying.map_or(Type::INT, |ty| {
         let enumerators = HashEqIgnored(Enumerators { ty, enumerators: &[] });

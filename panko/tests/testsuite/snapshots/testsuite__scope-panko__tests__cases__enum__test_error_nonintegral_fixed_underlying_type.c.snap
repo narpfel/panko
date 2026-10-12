@@ -29,6 +29,7 @@ exit_code: 0
    (typedef Typedef `ptr<void>`)
    (enum E~11
       (enumerators `ptr<void>`
-         (enumerator E~12 `enum E~11 complete`.0 ∅))))
+         (enumerator E~12 `enum E~11 complete`.0 ∅)))
+   (enum F~13 (enumerators `typeof(`enum Okay~4 complete`)` ∅)))
 
 ----- stderr -----
