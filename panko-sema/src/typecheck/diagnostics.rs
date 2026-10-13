@@ -26,6 +26,7 @@ use crate::ty::ArrayType;
 use crate::ty::ParameterDeclaration;
 use crate::ty::Struct;
 use crate::ty::subobjects::SubobjectIterator;
+use crate::typecheck::constexpr;
 
 #[derive(Debug, Report)]
 #[exit_code(1)]
@@ -715,7 +716,7 @@ pub(super) enum Diagnostic<'a> {
     #[with(value = value.fg(Red), ty = ty.fg(Blue), name = at.name)]
     EnumeratorValueOutOfRange {
         at: scope::Enumerator<'a>,
-        value: u64,
+        value: constexpr::Integral,
         ty: Type<'a>,
     },
 }
