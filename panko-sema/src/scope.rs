@@ -302,7 +302,7 @@ pub(crate) enum Redeclared<'a> {
 }
 
 impl<'a> Redeclared<'a> {
-    pub(crate) fn into_diagnostic<E>(self, sess: &'a Session<'a>, kind: &'a str) -> E
+    pub(crate) fn into_diagnostic<E>(self, sess: &Session<'a>, kind: &'a str) -> E
     where
         E: FromError<'a>,
     {

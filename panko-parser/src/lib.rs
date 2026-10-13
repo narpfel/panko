@@ -493,7 +493,7 @@ impl<'a> TypeSpecifier<'a> {
 
     fn parse(
         &self,
-        sess: &'a ast::Session<'a>,
+        sess: &ast::Session<'a>,
         specifiers: DeclarationSpecifiers<'a>,
         position: usize,
         ty: ParsedSpecifiers<'a>,
@@ -831,7 +831,7 @@ impl<'a> Declarator<'a> {
         }
     }
 
-    fn reinterpret_as_concrete(&self, sess: &'a ast::Session<'a>) -> Option<(Token<'a>, Self)> {
+    fn reinterpret_as_concrete(&self, sess: &ast::Session<'a>) -> Option<(Token<'a>, Self)> {
         let Self { pointers, direct_declarator } = *self;
         let (name, direct_declarator) = direct_declarator.reinterpret_as_concrete(sess)?;
         Some((name, Self { pointers, direct_declarator }))
@@ -876,7 +876,7 @@ pub enum DirectDeclarator<'a> {
 }
 
 impl<'a> DirectDeclarator<'a> {
-    pub fn with_name(&self, sess: &'a ast::Session<'a>, name: Token<'a>) -> Option<Self> {
+    pub fn with_name(&self, sess: &ast::Session<'a>, name: Token<'a>) -> Option<Self> {
         match self {
             DirectDeclarator::Abstract => Some(Self::Identifier(name)),
             DirectDeclarator::Identifier(_) => None,
@@ -937,7 +937,7 @@ impl<'a> DirectDeclarator<'a> {
         }
     }
 
-    fn reinterpret_as_concrete(&self, sess: &'a ast::Session<'a>) -> Option<(Token<'a>, Self)> {
+    fn reinterpret_as_concrete(&self, sess: &ast::Session<'a>) -> Option<(Token<'a>, Self)> {
         match *self {
             Self::Abstract => None,
             Self::Identifier(_) => None,
@@ -1539,7 +1539,7 @@ impl<'a, 'b> TypedefTracker<'a, 'b> {
 }
 
 pub fn parse<'a>(
-    sess: &'a ast::Session<'a>,
+    sess: &ast::Session<'a>,
     filename: &'a Path,
     typedef_names: &'a RefCell<TypedefNames<'a>>,
     tokens: LexerHacked<'a, impl Iterator<Item = Token<'a>>>,

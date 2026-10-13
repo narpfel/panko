@@ -31,7 +31,7 @@ impl PtrAddOrder {
 }
 
 pub(super) fn typeck_ptradd<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     op: &BinOp<'a>,
     pointer: TypedExpression<'a>,
     pointee_ty: &QualifiedType<'a>,
@@ -68,7 +68,7 @@ pub(super) fn typeck_ptradd<'a>(
 }
 
 pub(super) fn typeck_ptrsub<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     op: &BinOp<'a>,
     pointer: TypedExpression<'a>,
     pointee_ty: &QualifiedType<'a>,
@@ -102,7 +102,7 @@ pub(super) fn typeck_ptrsub<'a>(
 }
 
 pub(super) fn typeck_ptrcmp<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     lhs: TypedExpression<'a>,
     kind: Comparison,
     op_token: &Token<'a>,
@@ -122,7 +122,7 @@ pub(super) fn typeck_ptrcmp<'a>(
 }
 
 pub(super) fn typeck_ptrdiff<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     op: &BinOp<'a>,
     lhs: TypedExpression<'a>,
     lhs_pointee_ty: &QualifiedType<'a>,

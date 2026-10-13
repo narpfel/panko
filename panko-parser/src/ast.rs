@@ -392,7 +392,7 @@ pub struct Member<'a> {
 }
 
 impl<'a> Member<'a> {
-    fn parse(sess: &'a Session<'a>, member: &'a cst::Declaration<'a>) -> Declaration<'a, Self> {
+    fn parse(sess: &Session<'a>, member: &'a cst::Declaration<'a>) -> Declaration<'a, Self> {
         let Declaration {
             storage_class,
             function_specifiers,
@@ -446,7 +446,7 @@ pub enum Statement<'a> {
 }
 
 impl<'a> ExternalDeclaration<'a> {
-    fn from_parse_tree(sess: &'a Session<'a>, decl: &'a cst::ExternalDeclaration<'a>) -> Self {
+    fn from_parse_tree(sess: &Session<'a>, decl: &'a cst::ExternalDeclaration<'a>) -> Self {
         match decl {
             cst::ExternalDeclaration::FunctionDefinition(def) =>
                 Self::FunctionDefinition(FunctionDefinition::from_parse_tree(sess, def)),
@@ -457,7 +457,7 @@ impl<'a> ExternalDeclaration<'a> {
 }
 
 impl<'a> FunctionDefinition<'a> {
-    fn from_parse_tree(sess: &'a Session<'a>, def: &cst::FunctionDefinition<'a>) -> Self {
+    fn from_parse_tree(sess: &Session<'a>, def: &cst::FunctionDefinition<'a>) -> Self {
         let cst::FunctionDefinition { declaration_specifiers, declarator, body } = *def;
         let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
             parse_declaration_specifiers(sess, declaration_specifiers);
@@ -542,7 +542,7 @@ impl fmt::Display for Integral {
 }
 
 impl<'a> Declaration<'a, InitDeclarator<'a>> {
-    fn from_parse_tree(sess: &'a Session<'a>, decl: &'a cst::Declaration<'a>) -> Self {
+    fn from_parse_tree(sess: &Session<'a>, decl: &'a cst::Declaration<'a>) -> Self {
         let cst::Declaration { specifiers, init_declarator_list } = decl;
         let DeclarationSpecifiers { storage_class, function_specifiers, ty } =
             parse_declaration_specifiers(sess, *specifiers);
@@ -556,7 +556,7 @@ impl<'a> Declaration<'a, InitDeclarator<'a>> {
 }
 
 impl<'a> TypeQualifier<'a> {
-    fn parse(self, sess: &'a Session<'a>, qualifiers: &mut Qualifiers<'a>) {
+    fn parse(self, sess: &Session<'a>, qualifiers: &mut Qualifiers<'a>) {
         let Qualifiers { const_qualifier, volatile_qualifier } = qualifiers;
         match self.kind {
             TypeQualifierKind::Const => match *const_qualifier {
@@ -575,7 +575,7 @@ impl<'a> TypeQualifier<'a> {
 }
 
 impl<'a> CompoundStatement<'a> {
-    fn from_parse_tree(sess: &'a Session<'a>, stmt: &cst::CompoundStatement<'a>) -> Self {
+    fn from_parse_tree(sess: &Session<'a>, stmt: &cst::CompoundStatement<'a>) -> Self {
         Self(
             sess.alloc_slice_fill_iter(
                 stmt.0
@@ -587,7 +587,7 @@ impl<'a> CompoundStatement<'a> {
 }
 
 impl<'a> Statement<'a> {
-    fn from_parse_tree(sess: &'a Session<'a>, item: &'a BlockItem<'a>) -> Self {
+    fn from_parse_tree(sess: &Session<'a>, item: &'a BlockItem<'a>) -> Self {
         match item {
             BlockItem::Declaration(decl) =>
                 Self::Declaration(Declaration::from_parse_tree(sess, decl)),
@@ -595,7 +595,7 @@ impl<'a> Statement<'a> {
         }
     }
 
-    fn from_unlabeled_statement(sess: &'a Session<'a>, stmt: &UnlabeledStatement<'a>) -> Self {
+    fn from_unlabeled_statement(sess: &Session<'a>, stmt: &UnlabeledStatement<'a>) -> Self {
         match stmt {
             UnlabeledStatement::ExpressionStatement(expr) => Self::Expression(expr.0),
             UnlabeledStatement::PrimaryBlock(PrimaryBlock::CompoundStatement(block)) =>
@@ -740,7 +740,7 @@ pub(crate) enum ParsedSpecifiers<'a> {
 impl<'a> ParsedSpecifiers<'a> {
     pub(crate) fn into_type(
         self,
-        sess: &'a Session<'a>,
+        sess: &Session<'a>,
         if_none: impl FnOnce() -> Type<'a>,
     ) -> Type<'a> {
         match self {
@@ -790,7 +790,7 @@ pub struct Qualifiers<'a> {
 }
 
 impl<'a> Qualifiers<'a> {
-    pub fn parse(sess: &'a Session<'a>, type_qualifiers: &[TypeQualifier<'a>]) -> Self {
+    pub fn parse(sess: &Session<'a>, type_qualifiers: &[TypeQualifier<'a>]) -> Self {
         let mut qualifiers = Self::default();
         for qualifier in type_qualifiers {
             qualifier.parse(sess, &mut qualifiers)
@@ -806,7 +806,7 @@ pub struct FunctionSpecifiers<'a> {
 }
 
 pub fn parse_declaration_specifiers<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     specifiers: cst::DeclarationSpecifiers<'a>,
 ) -> DeclarationSpecifiers<'a> {
     let mut qualifiers = Qualifiers::default();
@@ -884,7 +884,7 @@ pub fn reject_function_specifiers<'a>(
 }
 
 pub(crate) fn from_parse_tree<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     parse_tree: cst::TranslationUnit<'a>,
 ) -> TranslationUnit<'a> {
     let cst::TranslationUnit { filename, decls } = parse_tree;

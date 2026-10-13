@@ -189,10 +189,7 @@ gen fn parse_escape_sequences(mut chars: Chars<'_>, encoding_prefix: EncodingPre
     }
 }
 
-pub(super) fn parse_char_literal<'a>(
-    sess: &'a Session<'a>,
-    char: &Token<'a>,
-) -> TypedExpression<'a> {
+pub(super) fn parse_char_literal<'a>(sess: &Session<'a>, char: &Token<'a>) -> TypedExpression<'a> {
     let TokenKind::CharConstant(encoding_prefix) = char.kind
     else {
         unreachable!()
@@ -241,7 +238,7 @@ pub(super) fn parse_char_literal<'a>(
     TypedExpression { ty: ty.unqualified(), expr }
 }
 
-fn parse_string_literal<'a>(sess: &'a Session<'a>, tokens: &[Token<'a>]) -> StringLiteral<'a> {
+fn parse_string_literal<'a>(sess: &Session<'a>, tokens: &[Token<'a>]) -> StringLiteral<'a> {
     let value = tokens
         .iter()
         .flat_map(|token| {
@@ -263,7 +260,7 @@ fn parse_string_literal<'a>(sess: &'a Session<'a>, tokens: &[Token<'a>]) -> Stri
 }
 
 pub(super) fn typeck_string_literal<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     tokens: &[Token<'a>],
 ) -> TypedExpression<'a> {
     let string = parse_string_literal(sess, tokens);
@@ -339,7 +336,7 @@ where
 }
 
 pub(super) fn typeck_integer_literal<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     token: &Token<'a>,
     int: Integer,
     value: &str,

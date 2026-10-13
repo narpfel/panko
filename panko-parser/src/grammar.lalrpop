@@ -9,7 +9,7 @@ use crate::ast::Session;
 use crate::TypedefTracker;
 
 grammar<'a, 'b, 'c>(
-    sess: &'a Session<'a>,
+    sess: &'c Session<'a>,
     typedef_tracker: &'c mut TypedefTracker<'a, 'b>,
     filename: &'a Path,
 );

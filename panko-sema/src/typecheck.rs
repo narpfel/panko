@@ -721,7 +721,7 @@ impl fmt::Display for ConversionKind {
 }
 
 fn typeck_array_ty<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     ty: scope::ArrayType<'a>,
     is_parameter: IsParameter,
     reference: Option<&scope::Reference<'a>>,
@@ -774,7 +774,7 @@ fn typeck_array_ty<'a>(
 }
 
 fn typeck_function_ty<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     ty: scope::FunctionType<'a>,
     is_parameter: IsParameter,
 ) -> Type<'a> {
@@ -826,7 +826,7 @@ fn typeck_function_ty<'a>(
 }
 
 fn typeck_struct_members<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     kind: StructKind,
     members: &[NoHashEq<scope::Member<'a>>],
 ) -> &'a [Member<'a, Typeck>] {
@@ -928,7 +928,7 @@ fn typeck_struct_members<'a>(
 }
 
 fn typeck_complete_struct<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     complete: &Complete<'a, scope::Scope>,
 ) -> Complete<'a, Typeck> {
     let Complete { name, id, kind, members } = *complete;
@@ -965,7 +965,7 @@ fn find_underlying_ty<'a>(values: impl IntoIterator<Item = constexpr::Integral>)
 }
 
 fn typeck_complete_enum<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     complete: &CompleteEnum<'a, scope::Scope>,
 ) -> CompleteEnum<'a, Typeck> {
     let CompleteEnum { name, id, enumerators } = *complete;
@@ -1005,7 +1005,7 @@ fn typeck_complete_enum<'a>(
 }
 
 fn typeck_enumerator<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     enumerator_values: &mut IndexMap<Id, Enumerator<'a, Typeck>>,
     ty: Type<'a>,
     enumerator: &scope::Enumerator<'a>,
@@ -1026,7 +1026,7 @@ fn typeck_enumerator<'a>(
 }
 
 fn typeck_ty_with_initialiser<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     ty: scope::QualifiedType<'a>,
     is_parameter: IsParameter,
     reference: Option<&scope::Reference<'a>>,
@@ -1080,7 +1080,7 @@ fn typeck_ty_with_initialiser<'a>(
 }
 
 fn typeck_ty<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     ty: scope::QualifiedType<'a>,
     is_parameter: IsParameter,
 ) -> QualifiedType<'a> {
@@ -1094,7 +1094,7 @@ enum NeedsInitialiser {
 }
 
 fn typeck_reference<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     reference: scope::Reference<'a>,
     needs_initialiser: NeedsInitialiser,
 ) -> Reference<'a> {
@@ -1205,7 +1205,7 @@ fn typeck_reference<'a>(
 }
 
 fn convert<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     target: QualifiedType<'a>,
     expr: TypedExpression<'a>,
     kind: ConversionKind,
@@ -1311,7 +1311,7 @@ fn convert<'a>(
 }
 
 fn convert_as_if_by_assignment<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     target: QualifiedType<'a>,
     expr: TypedExpression<'a>,
 ) -> TypedExpression<'a> {
@@ -1319,7 +1319,7 @@ fn convert_as_if_by_assignment<'a>(
 }
 
 fn typeck_function_definition<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     definition: &scope::FunctionDefinition<'a>,
 ) -> FunctionDefinition<'a> {
     let scope::FunctionDefinition {
@@ -1374,7 +1374,7 @@ fn typeck_function_definition<'a>(
 }
 
 fn typeck_array_initialisation_with_string<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     reference: &Reference<'a>,
     array_ty: &ArrayType<'a, Typeck>,
     initialiser: &scope::Expression<'a>,
@@ -1415,7 +1415,7 @@ fn typeck_array_initialisation_with_string<'a>(
 }
 
 fn typeck_initialiser_list<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     reference: &Reference<'a>,
     subobject_initialisers: &mut IndexMap<SubobjectKey, SubobjectInitialiser<'a>>,
     subobjects: &mut Subobjects<'a>,
@@ -1571,7 +1571,7 @@ fn typeck_initialiser_list<'a>(
 }
 
 fn typeck_initialiser<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     initialiser: &scope::Initialiser<'a>,
     reference: &Reference<'a>,
 ) -> Initialiser<'a> {
@@ -1626,7 +1626,7 @@ fn typeck_initialiser<'a>(
 }
 
 fn typeck_reference_declaration<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     reference: scope::Reference<'a>,
     needs_initialiser: NeedsInitialiser,
 ) -> Reference<'a> {
@@ -1682,7 +1682,7 @@ fn typeck_reference_declaration<'a>(
 }
 
 fn typeck_declaration<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     declaration: &scope::Declaration<'a>,
 ) -> Declaration<'a> {
     let scope::Declaration {
@@ -1727,7 +1727,7 @@ fn typeck_declaration<'a>(
 }
 
 fn typeck_compound_statement<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     stmt: &scope::CompoundStatement<'a>,
     function: &scope::FunctionDefinition<'a>,
 ) -> CompoundStatement<'a> {
@@ -1741,7 +1741,7 @@ fn typeck_compound_statement<'a>(
 }
 
 gen fn typeck_statement<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     stmt: &scope::Statement<'a>,
     function: &scope::FunctionDefinition<'a>,
 ) -> Statement<'a> {
@@ -1818,10 +1818,7 @@ gen fn typeck_statement<'a>(
     }
 }
 
-fn typeck_redeclaration_error<'a, Error>(
-    sess: &'a Session<'a>,
-    redeclared: &Redeclared<'a>,
-) -> Error
+fn typeck_redeclaration_error<'a, Error>(sess: &Session<'a>, redeclared: &Redeclared<'a>) -> Error
 where
     Error: FromError<'a>,
 {
@@ -1948,7 +1945,7 @@ fn perform_usual_arithmetic_conversions<'a>(
 }
 
 fn typeck_binop<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     lhs: TypedExpression<'a>,
     op: &BinOp<'a>,
     rhs: TypedExpression<'a>,
@@ -2006,7 +2003,7 @@ fn typeck_binop<'a>(
 }
 
 fn typeck_unary_op<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     expr: &scope::Expression<'a>,
     context: Context,
     operator: &UnaryOp<'a>,
@@ -2178,7 +2175,7 @@ fn typeck_unary_op<'a>(
 
 fn check_assignable<'a>(
     target: &'a TypedExpression<'a>,
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
 ) -> &'a TypedExpression<'a> {
     if !target.is_modifiable_lvalue() {
         let error = if !target.is_lvalue() {
@@ -2207,7 +2204,7 @@ fn check_assignable<'a>(
 
 fn typeck_assign<'a>(
     target: &'a TypedExpression<'a>,
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     typeck_value: impl FnOnce() -> TypedExpression<'a>,
 ) -> TypedExpression<'a> {
     let target = check_assignable(target, sess);
@@ -2222,7 +2219,7 @@ fn typeck_assign<'a>(
 }
 
 fn typeck_arithmetic_binop<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     op: BinOp<'a>,
     lhs: TypedExpression<'a>,
     rhs: TypedExpression<'a>,
@@ -2258,7 +2255,7 @@ fn typeck_arithmetic_binop<'a>(
 }
 
 fn typeck_integral_shift<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     op: BinOp<'a>,
     lhs: TypedExpression<'a>,
     rhs: TypedExpression<'a>,
@@ -2283,7 +2280,7 @@ fn typeck_integral_shift<'a>(
 }
 
 fn check_ty_can_sizeof<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     ty: &QualifiedType<'a>,
     at: &scope::Expression<'a>,
     op: &Token<'a>,
@@ -2313,7 +2310,7 @@ fn check_ty_can_sizeof<'a>(
 }
 
 fn desugar_postfix_increment<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     op: BinOp<'a>,
     operand: &'a scope::Expression<'a>,
     reference: &scope::Reference<'a>,
@@ -2432,7 +2429,7 @@ impl From<UnaryOpKind> for Context {
 }
 
 fn typeck_expression<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     expr: &scope::Expression<'a>,
     context: Context,
 ) -> TypedExpression<'a> {
@@ -3023,7 +3020,7 @@ fn typeck_expression<'a>(
     }
 }
 
-fn typeck_typedef<'a>(sess: &'a Session<'a>, typedef: &scope::Typedef<'a>) -> Typedef<'a> {
+fn typeck_typedef<'a>(sess: &Session<'a>, typedef: &scope::Typedef<'a>) -> Typedef<'a> {
     let scope::Typedef { ty, name, previously_declared_as } = *typedef;
     let ty = typeck_ty(sess, ty, IsParameter::No);
     if let Some(previously_declared_as) = previously_declared_as {
@@ -3039,7 +3036,7 @@ fn typeck_typedef<'a>(sess: &'a Session<'a>, typedef: &scope::Typedef<'a>) -> Ty
 }
 
 fn typeck_declaration_in_global_scope<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     declaration: &scope::Declaration<'a>,
 ) -> ExternalDeclaration<'a> {
     let decl = typeck_declaration(sess, declaration);
@@ -3060,7 +3057,7 @@ fn typeck_declaration_in_global_scope<'a>(
 }
 
 pub fn resolve_types<'a>(
-    sess: &'a Session<'a>,
+    sess: &Session<'a>,
     translation_unit: scope::TranslationUnit<'a>,
 ) -> TranslationUnit<'a> {
     let scope::TranslationUnit { filename, decls } = translation_unit;
