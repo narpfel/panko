@@ -1,0 +1,53 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_explicit_enumerator_value_unsigned.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: enumerator value `1152921504606846975` is out of range for type `int`
+   ╭─[panko/tests/cases/execute/enum/test_explicit_enumerator_value_unsigned.c:8:5]
+   │
+ 8 │     C = 0x0fff'ffff'ffff'ffff,
+   │     ┬  
+   │     ╰── in the definition of enumerator `C`
+───╯
+
+Error: enumerator value `1152921504606846975` is out of range for type `int`
+   ╭─[panko/tests/cases/execute/enum/test_explicit_enumerator_value_unsigned.c:8:5]
+   │
+ 8 │     C = 0x0fff'ffff'ffff'ffff,
+   │     ┬  
+   │     ╰── in the definition of enumerator `C`
+───╯
+
+Error: enumerator value `1152921504606846975` is out of range for type `int`
+   ╭─[panko/tests/cases/execute/enum/test_explicit_enumerator_value_unsigned.c:8:5]
+   │
+ 8 │     C = 0x0fff'ffff'ffff'ffff,
+   │     ┬  
+   │     ╰── in the definition of enumerator `C`
+───╯
+
+Error: enumerator value `1152921504606846975` is out of range for type `int`
+   ╭─[panko/tests/cases/execute/enum/test_explicit_enumerator_value_unsigned.c:8:5]
+   │
+ 8 │     C = 0x0fff'ffff'ffff'ffff,
+   │     ┬  
+   │     ╰── in the definition of enumerator `C`
+───╯
+
+Error: enumerator value `1152921504606846975` is out of range for type `int`
+   ╭─[panko/tests/cases/execute/enum/test_explicit_enumerator_value_unsigned.c:8:5]
+   │
+ 8 │     C = 0x0fff'ffff'ffff'ffff,
+   │     ┬  
+   │     ╰── in the definition of enumerator `C`
+───╯
