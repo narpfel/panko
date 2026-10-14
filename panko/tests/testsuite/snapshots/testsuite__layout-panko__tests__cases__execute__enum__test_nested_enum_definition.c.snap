@@ -1,0 +1,97 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/enum/test_nested_enum_definition.c
+---
+success: false
+exit_code: 2
+----- stdout -----
+
+----- stderr -----
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_nested_enum_definition.c:8:33]
+   │
+ 8 │     C = sizeof(enum Inner { X = B + 2, Y = A + X }),
+   │                                 ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_nested_enum_definition.c:8:33]
+   │
+ 8 │     C = sizeof(enum Inner { X = B + 2, Y = A + X }),
+   │                                 ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_nested_enum_definition.c:8:33]
+   │
+ 8 │     C = sizeof(enum Inner { X = B + 2, Y = A + X }),
+   │                                 ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_nested_enum_definition.c:8:33]
+   │
+ 8 │     C = sizeof(enum Inner { X = B + 2, Y = A + X }),
+   │                                 ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_nested_enum_definition.c:8:33]
+   │
+ 8 │     C = sizeof(enum Inner { X = B + 2, Y = A + X }),
+   │                                 ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_nested_enum_definition.c:8:33]
+   │
+ 8 │     C = sizeof(enum Inner { X = B + 2, Y = A + X }),
+   │                                 ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_nested_enum_definition.c:8:44]
+   │
+ 8 │     C = sizeof(enum Inner { X = B + 2, Y = A + X }),
+   │                                            ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_nested_enum_definition.c:8:44]
+   │
+ 8 │     C = sizeof(enum Inner { X = B + 2, Y = A + X }),
+   │                                            ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_nested_enum_definition.c:8:44]
+   │
+ 8 │     C = sizeof(enum Inner { X = B + 2, Y = A + X }),
+   │                                            ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_nested_enum_definition.c:8:44]
+   │
+ 8 │     C = sizeof(enum Inner { X = B + 2, Y = A + X }),
+   │                                            ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_nested_enum_definition.c:8:44]
+   │
+ 8 │     C = sizeof(enum Inner { X = B + 2, Y = A + X }),
+   │                                            ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_nested_enum_definition.c:8:44]
+   │
+ 8 │     C = sizeof(enum Inner { X = B + 2, Y = A + X }),
+   │                                            ─  
+───╯
