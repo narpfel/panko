@@ -1,0 +1,69 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_type_of_enumerator_during_enum_definition.c
+---
+success: false
+exit_code: 2
+----- stdout -----
+
+----- stderr -----
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_type_of_enumerator_during_enum_definition.c:7:16]
+   │
+ 7 │     B = sizeof(A),
+   │                ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_type_of_enumerator_during_enum_definition.c:7:16]
+   │
+ 7 │     B = sizeof(A),
+   │                ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_type_of_enumerator_during_enum_definition.c:7:16]
+   │
+ 7 │     B = sizeof(A),
+   │                ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_type_of_enumerator_during_enum_definition.c:7:16]
+   │
+ 7 │     B = sizeof(A),
+   │                ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_type_of_enumerator_during_enum_definition.c:8:23]
+   │
+ 8 │     C = sizeof(typeof(B)),
+   │                       ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_type_of_enumerator_during_enum_definition.c:8:23]
+   │
+ 8 │     C = sizeof(typeof(B)),
+   │                       ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_type_of_enumerator_during_enum_definition.c:8:23]
+   │
+ 8 │     C = sizeof(typeof(B)),
+   │                       ─  
+───╯
+
+Error: TODO: accessing enumerators in nested `enum` definitions not implemented correctly
+   ╭─[panko/tests/cases/execute/enum/test_type_of_enumerator_during_enum_definition.c:8:23]
+   │
+ 8 │     C = sizeof(typeof(B)),
+   │                       ─  
+───╯
