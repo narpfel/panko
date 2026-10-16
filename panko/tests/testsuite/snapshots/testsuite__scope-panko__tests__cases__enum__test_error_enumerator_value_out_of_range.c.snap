@@ -16,8 +16,18 @@ exit_code: 0
          (enumerator False~1 `enum TristateBool~0 complete`.0 ∅)
          (enumerator True~2 `enum TristateBool~0 complete`.1 ∅)
          (enumerator Maybe~3 `enum TristateBool~0 complete`.2 ∅)))
+   (enum SignedChar~4
+      (enumerators `signed char`
+         (enumerator A~5 `enum SignedChar~4 complete`.0
+            126)
+         (enumerator B~6 `enum SignedChar~4 complete`.1 ∅)
+         (enumerator C~7 `enum SignedChar~4 complete`.2 ∅)
+         (enumerator D~8 `enum SignedChar~4 complete`.3
+            (multiply 2
+               (enumerator A~5 `enum SignedChar~4 complete`.0
+                  126)))))
    (function-definition
-      main~4 `fn() -> int`
+      main~9 `fn() -> int`
       (compound-statement
          (return (enumerator Maybe~3 `enum TristateBool~0 complete`.2 ∅)))))
 
