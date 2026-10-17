@@ -1,5 +1,3 @@
-// [[known-bug: enumerators have the wrong type during `enum` definition]]
-
 int printf(char const*, ...);
 
 enum E {

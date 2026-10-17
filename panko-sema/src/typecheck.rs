@@ -24,7 +24,6 @@ use panko_parser::LogicalOp;
 use panko_parser::MemberAccessOp;
 use panko_parser::MemberAccessOpKind;
 use panko_parser::StructKind;
-use panko_parser::TodoError;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast;
@@ -1014,7 +1013,15 @@ fn typeck_enumerator<'a>(
     ty: Type<'a>,
     enumerator: &scope::Enumerator<'a>,
 ) -> Enumerator<'a, Typeck> {
-    let scope::Enumerator { name, loc, id, ty: _, index, value } = *enumerator;
+    let scope::Enumerator {
+        name,
+        loc,
+        id,
+        ty: _,
+        state: _,
+        index,
+        value,
+    } = *enumerator;
     let value = match value {
         Some(value) => {
             let sess = &ExprEnv {
@@ -3017,30 +3024,41 @@ fn typeck_expression<'a>(
             TypedExpression { ty: decl.reference.ty, expr }
         }
         scope::Expression::Enumerator(enumerator) => {
-            let scope::Enumerator { name, loc, id, ty, index, value: _ } = enumerator;
+            let scope::Enumerator { name, loc, id, ty, state, index, value } = enumerator;
             let Enumerator { ty, value, .. } = try { sess.enumerators?.get(id).copied()? }
-                .unwrap_or_else(|| {
-                    let CompleteEnum { name: _, id: _, enumerators } = match ty {
-                        Enum::Incomplete { .. } => {
-                            // TODO: this should be unreachable but nested enum definitions are
-                            // implemented incorrectly so this works around that case panicking
-                            let () = sess.emit(TodoError::Error {
-                                at: expr.loc(),
-                                msg: "accessing enumerators in nested `enum` definitions not implemented correctly",
-                            });
-                            return Enumerator {
-                                name,
-                                loc: *loc,
-                                id: *id,
-                                ty: Type::INT,
-                                index: *index,
-                                value: 0.into(),
-                            };
+                .unwrap_or_else(|| match state {
+                    scope::EnumeratorState::InEnumeratorList => {
+                        let value = value.unwrap_or_else(|| {
+                            unimplemented_todo!(
+                                enumerator,
+                                "using enumerator without explicit value in enumerator list",
+                            )
+                        });
+                        let value = typeck_expression(sess, value, Context::Default);
+                        let value = constexpr::eval(&value).into_integral().unwrap_or_else(|_| {
+                            unimplemented_todo!(
+                                value,
+                                "nonintegral enumerator value in enumerator list",
+                            )
+                        });
+                        Enumerator {
+                            name,
+                            loc: *loc,
+                            id: *id,
+                            ty: Type::INT,
+                            index: *index,
+                            value,
                         }
-                        Enum::Complete(complete) => typeck_complete_enum(sess, complete),
-                    };
-                    let HashEqIgnored(Enumerators { ty: _, enumerators }) = enumerators;
-                    enumerators[*index]
+                    }
+                    scope::EnumeratorState::EnumerationComplete => match ty {
+                        Enum::Incomplete { .. } => unreachable!(),
+                        Enum::Complete(complete) => {
+                            let CompleteEnum { name: _, id: _, enumerators } =
+                                typeck_complete_enum(sess, complete);
+                            let HashEqIgnored(Enumerators { ty: _, enumerators }) = enumerators;
+                            enumerators[*index]
+                        }
+                    },
                 });
             let value = value.cast_unsigned();
             let token = Token::synthesised(TokenKind::Identifier, *loc);

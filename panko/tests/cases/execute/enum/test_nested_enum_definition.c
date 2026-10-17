@@ -1,5 +1,3 @@
-// [[known-bug: accessing enumerators in nested `enum` definition not implemented]]
-
 int printf(char const*, ...);
 
 enum Outer {
