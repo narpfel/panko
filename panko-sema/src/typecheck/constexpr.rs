@@ -2,6 +2,7 @@ use std::assert_matches;
 use std::bstr::ByteStr;
 use std::cmp::Ordering;
 use std::collections::LinkedList;
+use std::fmt;
 use std::iter::once;
 use std::ops::Range;
 
@@ -73,10 +74,27 @@ impl<'a> IntoIterator for Errors<'a> {
     }
 }
 
-#[derive(Debug, Clone)]
-pub(super) enum Integral {
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum Integral {
     Signed(i64),
     Unsigned(u64),
+}
+
+impl Integral {
+    pub(crate) fn cast_unsigned(self) -> u64 {
+        match self {
+            Self::Signed(value) => value.cast_unsigned(),
+            Self::Unsigned(value) => value,
+        }
+    }
+
+    pub(crate) fn succ(self) -> Self {
+        match self {
+            Self::Signed(i64::MAX) => Self::Unsigned(i64::MAX.cast_unsigned() + 1),
+            Self::Signed(value) => Self::Signed(value + 1),
+            Self::Unsigned(value) => Self::Unsigned(value.strict_add(1)),
+        }
+    }
 }
 
 impl PartialEq for Integral {
@@ -89,7 +107,7 @@ impl Eq for Integral {}
 
 impl Ord for Integral {
     fn cmp(&self, other: &Self) -> Ordering {
-        match (self.clone(), other.clone()) {
+        match (*self, *other) {
             (Self::Signed(lhs), Self::Signed(rhs)) => lhs.cmp(&rhs),
             (Self::Signed(lhs), Self::Unsigned(rhs)) =>
                 i64::try_from(rhs).map_or(Ordering::Less, |rhs| lhs.cmp(&rhs)),
@@ -103,6 +121,40 @@ impl Ord for Integral {
 impl PartialOrd for Integral {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
+    }
+}
+
+impl fmt::Display for Integral {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Signed(value) => write!(f, "{value}"),
+            Self::Unsigned(value) => write!(f, "{value}"),
+        }
+    }
+}
+
+macro_rules! impl_try_from {
+    ($($t:ty),+ $(,)?) => {
+        $(
+            impl TryFrom<Integral> for $t {
+                type Error = <u8 as TryFrom<i64>>::Error;
+
+                fn try_from(value: Integral) -> Result<Self, Self::Error> {
+                    match value {
+                        Integral::Signed(value) => Ok(value.try_into()?),
+                        Integral::Unsigned(value) => Ok(value.try_into()?),
+                    }
+                }
+            }
+        )+
+    };
+}
+
+impl_try_from!(i8, i16, i32, i64, u8, u16, u32, u64);
+
+impl From<u64> for Integral {
+    fn from(value: u64) -> Self {
+        Self::Unsigned(value)
     }
 }
 
@@ -247,7 +299,7 @@ impl<'a> Pointer<'a> {
 }
 
 impl<'a, 'b> Value<'a, 'b> {
-    fn into_integral(self) -> Result<Integral, Errors<'a>> {
+    pub(crate) fn into_integral(self) -> Result<Integral, Errors<'a>> {
         let Self { expr, repr: _ } = &self;
         let signedness = match expr.ty.ty {
             Type::Arithmetic(arithmetic) => arithmetic.resolve_enums().signedness(),

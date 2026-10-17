@@ -14,6 +14,7 @@ use panko_parser::ast::Session;
 use panko_parser::nonempty;
 
 use super::BuiltinNameKind;
+use super::EnumeratorState;
 use super::Enumerators;
 use super::Id;
 use super::IsInGlobalScope;
@@ -312,7 +313,8 @@ impl<'a> Scopes<'a> {
         let loc = name.loc();
         let name = name.slice();
         let id = self.id();
-        let enumerator = Enumerator { name, loc, id, ty, index, value };
+        let state = EnumeratorState::InEnumeratorList;
+        let enumerator = Enumerator { name, loc, id, ty, state, index, value };
         match self.scopes.last_mut().lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
                 let stored = entry.get_mut();
@@ -647,5 +649,19 @@ impl<'a> Scopes<'a> {
 
     pub(crate) fn take_hoisted_compound_literals(&mut self) -> Drain<Reference<'a>> {
         self.hoisted_compound_literal_decls.drain(..)
+    }
+
+    pub(crate) fn enumerator_list_done(&mut self, enumerator: Enumerator<'a>) -> Enumerator<'a> {
+        self.lookup_innermost(enumerator.name).and_modify(|name| {
+            // ignore mismatches as redeclaration errors don’t insert an enumerator entry into the
+            // scope
+            if let Name::Enumerator(Unfixupped(enumerator)) = name {
+                enumerator.state = EnumeratorState::EnumerationComplete
+            }
+        });
+        Enumerator {
+            state: EnumeratorState::EnumerationComplete,
+            ..enumerator
+        }
     }
 }

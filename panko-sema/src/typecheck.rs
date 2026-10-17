@@ -481,7 +481,7 @@ pub(crate) struct Enumerator<'a, T: ty::Step> {
     pub(crate) id: Id,
     pub(crate) ty: ty::Type<'a, T>,
     pub(crate) index: usize,
-    pub(crate) value: u64,
+    pub(crate) value: constexpr::Integral,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -993,9 +993,7 @@ fn typeck_complete_enum<'a>(
         assert_matches!(was_present, None);
     }
     let enumerators = sess.alloc_slice_fill_iter(enumerator_values.into_values());
-    let enumerator_values = enumerators
-        .iter()
-        .map(|enumerator| constexpr::Integral::Unsigned(enumerator.value));
+    let enumerator_values = enumerators.iter().map(|enumerator| enumerator.value);
     let ty = fixed_underlying.unwrap_or_else(|| {
         let ty = Type::Arithmetic(find_underlying_ty(enumerator_values).into());
         sess.alloc(ty)
@@ -1010,16 +1008,30 @@ fn typeck_enumerator<'a>(
     ty: Type<'a>,
     enumerator: &scope::Enumerator<'a>,
 ) -> Enumerator<'a, Typeck> {
-    let scope::Enumerator { name, loc, id, ty: _, index, value } = *enumerator;
-    if let Some(value) = value {
-        unimplemented_todo!(value, "explicit values for enumerators");
-    }
-    let value = match try { enumerator_values.last()?.1.value.strict_add(1) }.unwrap_or(0) {
+    let scope::Enumerator {
+        name,
+        loc,
+        id,
+        ty: _,
+        state: _,
+        index,
+        value,
+    } = *enumerator;
+    let value = match value {
+        Some(value) => {
+            let value = typeck_expression(sess, value, Context::Default);
+            constexpr::eval(&value)
+                .into_integral()
+                .expect("TODO: nonintegral")
+        }
+        None => try { enumerator_values.last()?.1.value.succ() }.unwrap_or(0.into()),
+    };
+    let value = match value {
         value if ty.can_represent(value) => value,
         value => {
             let () =
                 sess.emit(Diagnostic::EnumeratorValueOutOfRange { at: *enumerator, value, ty });
-            0
+            0.into()
         }
     };
     Enumerator { name, loc, id, ty, index, value }
@@ -2979,13 +2991,45 @@ fn typeck_expression<'a>(
             TypedExpression { ty: decl.reference.ty, expr }
         }
         scope::Expression::Enumerator(enumerator) => {
-            let scope::Enumerator { name: _, loc, id: _, ty, index, value: _ } = enumerator;
-            let CompleteEnum { name: _, id: _, enumerators } = match ty {
-                Enum::Incomplete { .. } => unreachable!(),
-                Enum::Complete(complete) => typeck_complete_enum(sess, complete),
+            let scope::Enumerator {
+                name: _,
+                loc,
+                id: _,
+                ty,
+                state,
+                index,
+                value,
+            } = enumerator;
+
+            let (ty, value) = match state {
+                scope::EnumeratorState::InEnumeratorList => {
+                    let value = value.unwrap_or_else(|| {
+                        unimplemented_todo!(
+                            enumerator,
+                            "using enumerator without explicit value in enumerator list",
+                        )
+                    });
+                    let value = typeck_expression(sess, value, Context::Default);
+                    let value = constexpr::eval(&value).into_integral().unwrap_or_else(|_| {
+                        unimplemented_todo!(
+                            value,
+                            "nonintegral enumerator value in enumerator list",
+                        )
+                    });
+                    (Type::INT, value)
+                }
+                scope::EnumeratorState::EnumerationComplete => match ty {
+                    Enum::Incomplete { .. } => unreachable!(),
+                    Enum::Complete(complete) => {
+                        let CompleteEnum { name: _, id: _, enumerators } =
+                            typeck_complete_enum(sess, complete);
+                        let HashEqIgnored(Enumerators { ty: _, enumerators }) = enumerators;
+                        let Enumerator { ty, value, .. } = enumerators[*index];
+                        (ty, value)
+                    }
+                },
             };
-            let HashEqIgnored(Enumerators { ty: _, enumerators }) = enumerators;
-            let Enumerator { ty, value, .. } = enumerators[*index];
+            let value = value.cast_unsigned();
             let token = Token::synthesised(TokenKind::Identifier, *loc);
             TypedExpression {
                 ty: ty.unqualified(),
