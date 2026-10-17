@@ -3,7 +3,6 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
 use std::marker::PhantomData;
-use std::ops::Deref;
 use std::path::Path;
 
 use indexmap::IndexMap;
@@ -741,18 +740,14 @@ fn typeck_array_ty<'a>(
     }
     let length = length
         .map(|length| {
-            ArrayLength::try_from(sess.alloc(typeck_expression(
-                &sess.into(),
-                length,
-                Context::Default,
-            )))
-            .unwrap_or_else(|error| {
-                match *error {
-                    Either::Left(error) => sess.emit(error),
-                    Either::Right(errors) => sess.emit_many(errors),
-                }
-                ArrayLength::Unknown
-            })
+            ArrayLength::try_from(sess.alloc(typeck_expression(sess, length, Context::Default)))
+                .unwrap_or_else(|error| {
+                    match *error {
+                        Either::Left(error) => sess.emit(error),
+                        Either::Right(errors) => sess.emit_many(errors),
+                    }
+                    ArrayLength::Unknown
+                })
         })
         .unwrap_or(ArrayLength::Unknown);
     let length = if let Some(reference) = reference
@@ -841,7 +836,7 @@ fn typeck_struct_members<'a>(
             let NoHashEq(member @ scope::Member { name, bitfield_width, ty }) = *member;
             let (width_expr, bitfield_width) = try {
                 let BitfieldWidth { width } = bitfield_width.as_ref()?;
-                let width = typeck_expression(&sess.into(), width, Context::Default);
+                let width = typeck_expression(sess, width, Context::Default);
                 let value = match constexpr::eval(&width).into_unsigned() {
                     Ok(Ok(value)) => value,
                     Ok(Err(value)) => {
@@ -1024,10 +1019,6 @@ fn typeck_enumerator<'a>(
     } = *enumerator;
     let value = match value {
         Some(value) => {
-            let sess = &ExprEnv {
-                sess,
-                enumerators: Some(enumerator_values),
-            };
             let value = typeck_expression(sess, value, Context::Default);
             constexpr::eval(&value)
                 .into_integral()
@@ -1072,7 +1063,7 @@ fn typeck_ty_with_initialiser<'a>(
         } => {
             let ty = match expr {
                 scope::Typeof::Expr(expr) => {
-                    let expr = typeck_expression(&sess.into(), expr, Context::Typeof);
+                    let expr = typeck_expression(sess, expr, Context::Typeof);
                     if !allow_bitfields && expr.is_bitfield() {
                         sess.emit(Diagnostic::TypeofOfBitfield { at: expr, unqual })
                     }
@@ -1405,11 +1396,7 @@ fn typeck_array_initialisation_with_string<'a>(
     if let Type::Arithmetic(ty::Arithmetic::Integral(integral)) = array_ty.ty.ty
         && let IntegralKind::Char | IntegralKind::PlainChar = integral.kind
     {
-        let expr = typeck_expression(
-            &sess.into(),
-            initialiser,
-            Context::ArrayInitialisationByString,
-        );
+        let expr = typeck_expression(sess, initialiser, Context::ArrayInitialisationByString);
         let Type::Array(string_ty) = expr.ty.ty
         else {
             unreachable!()
@@ -1454,7 +1441,7 @@ fn typeck_initialiser_list<'a>(
         },
     ] = initialiser_list
     {
-        let typed_initialiser = typeck_expression(&sess.into(), initialiser, Context::Default);
+        let typed_initialiser = typeck_expression(sess, initialiser, Context::Default);
         // workaround for `char const* s = {"abc"};` and similarly: we have to compute `next`
         // to check whether we are initialising an array, and reset to the initial state when
         // it’s not an array
@@ -1482,7 +1469,7 @@ fn typeck_initialiser_list<'a>(
                 let apply = |subobjects: &mut Subobjects<'a>, designator: &Designator<'a>| {
                     match designator {
                         Designator::Bracketed { open_bracket: _, index, close_bracket: _ } => {
-                            let index = typeck_expression(&sess.into(), index, Context::Default);
+                            let index = typeck_expression(sess, index, Context::Default);
                             let index = match constexpr::eval(&index).into_unsigned() {
                                 Ok(Ok(index)) => index,
                                 Ok(Err(index)) =>
@@ -1552,7 +1539,7 @@ fn typeck_initialiser_list<'a>(
                 assert!(left);
             }
             scope::Initialiser::Expression(expr) => {
-                let typed_expr = typeck_expression(&sess.into(), expr, Context::Default);
+                let typed_expr = typeck_expression(sess, expr, Context::Default);
                 match subobjects.next(&typed_expr.ty.ty) {
                     Ok(subobject) => {
                         let subobject_initialiser = if let scope::Expression::String(_) = expr
@@ -1644,7 +1631,7 @@ fn typeck_initialiser<'a>(
             _ => convert_as_if_by_assignment(
                 sess,
                 reference.ty,
-                typeck_expression(&sess.into(), initialiser, Context::Default),
+                typeck_expression(sess, initialiser, Context::Default),
             ),
         }),
     }
@@ -1797,9 +1784,8 @@ gen fn typeck_statement<'a>(
             }
             return;
         }
-        scope::Statement::Expression(expr) => Statement::Expression(try {
-            typeck_expression(&sess.into(), expr.as_ref()?, Context::Default)
-        }),
+        scope::Statement::Expression(expr) =>
+            Statement::Expression(try { typeck_expression(sess, expr.as_ref()?, Context::Default) }),
         scope::Statement::Compound(stmt) =>
             Statement::Compound(typeck_compound_statement(sess, stmt, function)),
         scope::Statement::Return { return_, expr } => {
@@ -1807,7 +1793,7 @@ gen fn typeck_statement<'a>(
             let return_ty = typeck_ty(sess, *function.return_ty(), IsParameter::No);
             let expr = expr
                 .as_ref()
-                .map(|expr| typeck_expression(&sess.into(), expr, Context::Default));
+                .map(|expr| typeck_expression(sess, expr, Context::Default));
             let expr = match expr {
                 Some(expr) => Some(convert_as_if_by_assignment(sess, return_ty, expr)),
                 None => match return_ty.ty {
@@ -2035,7 +2021,7 @@ fn typeck_unary_op<'a>(
     operator: &UnaryOp<'a>,
     operand: &scope::Expression<'a>,
 ) -> TypedExpression<'a> {
-    let operand = typeck_expression(&sess.into(), operand, Context::from(operator.kind));
+    let operand = typeck_expression(sess, operand, Context::from(operator.kind));
     match operator.kind {
         UnaryOpKind::Addressof => {
             let is_function_designator = operand.ty.ty.is_function();
@@ -2454,27 +2440,8 @@ impl From<UnaryOpKind> for Context {
     }
 }
 
-struct ExprEnv<'a, 'b> {
-    sess: &'b Session<'a>,
-    enumerators: Option<&'b IndexMap<Id, Enumerator<'a, Typeck>>>,
-}
-
-impl<'a> Deref for ExprEnv<'a, '_> {
-    type Target = Session<'a>;
-
-    fn deref(&self) -> &Self::Target {
-        self.sess
-    }
-}
-
-impl<'a, 'b> From<&'b Session<'a>> for ExprEnv<'a, 'b> {
-    fn from(sess: &'b Session<'a>) -> Self {
-        Self { sess, enumerators: None }
-    }
-}
-
 fn typeck_expression<'a>(
-    sess: &ExprEnv<'a, '_>,
+    sess: &Session<'a>,
     expr: &scope::Expression<'a>,
     context: Context,
 ) -> TypedExpression<'a> {
@@ -3024,42 +2991,44 @@ fn typeck_expression<'a>(
             TypedExpression { ty: decl.reference.ty, expr }
         }
         scope::Expression::Enumerator(enumerator) => {
-            let scope::Enumerator { name, loc, id, ty, state, index, value } = enumerator;
-            let Enumerator { ty, value, .. } = try { sess.enumerators?.get(id).copied()? }
-                .unwrap_or_else(|| match state {
-                    scope::EnumeratorState::InEnumeratorList => {
-                        let value = value.unwrap_or_else(|| {
-                            unimplemented_todo!(
-                                enumerator,
-                                "using enumerator without explicit value in enumerator list",
-                            )
-                        });
-                        let value = typeck_expression(sess, value, Context::Default);
-                        let value = constexpr::eval(&value).into_integral().unwrap_or_else(|_| {
-                            unimplemented_todo!(
-                                value,
-                                "nonintegral enumerator value in enumerator list",
-                            )
-                        });
-                        Enumerator {
-                            name,
-                            loc: *loc,
-                            id: *id,
-                            ty: Type::INT,
-                            index: *index,
+            let scope::Enumerator {
+                name: _,
+                loc,
+                id: _,
+                ty,
+                state,
+                index,
+                value,
+            } = enumerator;
+
+            let (ty, value) = match state {
+                scope::EnumeratorState::InEnumeratorList => {
+                    let value = value.unwrap_or_else(|| {
+                        unimplemented_todo!(
+                            enumerator,
+                            "using enumerator without explicit value in enumerator list",
+                        )
+                    });
+                    let value = typeck_expression(sess, value, Context::Default);
+                    let value = constexpr::eval(&value).into_integral().unwrap_or_else(|_| {
+                        unimplemented_todo!(
                             value,
-                        }
+                            "nonintegral enumerator value in enumerator list",
+                        )
+                    });
+                    (Type::INT, value)
+                }
+                scope::EnumeratorState::EnumerationComplete => match ty {
+                    Enum::Incomplete { .. } => unreachable!(),
+                    Enum::Complete(complete) => {
+                        let CompleteEnum { name: _, id: _, enumerators } =
+                            typeck_complete_enum(sess, complete);
+                        let HashEqIgnored(Enumerators { ty: _, enumerators }) = enumerators;
+                        let Enumerator { ty, value, .. } = enumerators[*index];
+                        (ty, value)
                     }
-                    scope::EnumeratorState::EnumerationComplete => match ty {
-                        Enum::Incomplete { .. } => unreachable!(),
-                        Enum::Complete(complete) => {
-                            let CompleteEnum { name: _, id: _, enumerators } =
-                                typeck_complete_enum(sess, complete);
-                            let HashEqIgnored(Enumerators { ty: _, enumerators }) = enumerators;
-                            enumerators[*index]
-                        }
-                    },
-                });
+                },
+            };
             let value = value.cast_unsigned();
             let token = Token::synthesised(TokenKind::Identifier, *loc);
             TypedExpression {
