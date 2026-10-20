@@ -14,10 +14,10 @@ exit_code: 0
    (enum E~0
       (enumerators `char`
          (enumerator A~1 0 `enum E~0 complete` 42)
-         (enumerator B~2 1 `enum E~0 complete` 4)))
+         (enumerator B~2 1 `enum E~0 complete` 1)))
    (function-definition external stack-size=24
       (main~3 `fn() -> int` (static main))
       (compound-statement
-         (return (sign-extend `int` @0 (4 `enum E~0 complete` @4))))))
+         (return (sign-extend `int` @0 (1 `enum E~0 complete` @4))))))
 
 ----- stderr -----
