@@ -19,8 +19,12 @@ exit_code: 0
          (enumerator C~4 2 `int` 2)
          (enumerator D~5 3 `int` 3)))
    (definition external b~6 `int` (B `int`))
+   (enum ∅~7
+      (enumerators `long`
+         (enumerator E~8 0 `enum ∅~7 complete` 0)
+         (enumerator F~9 1 `enum ∅~7 complete` 1)))
    (function-definition external
-      main~7 `fn() -> int`
+      main~10 `fn() -> int`
       (compound-statement
          (expression
             (call `int`
@@ -34,6 +38,16 @@ exit_code: 0
                (b~6 `int`)
                (D `int`)
                (add `int` (add `int` (A `int`) (b~6 `int`)) (D `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 9>>`
+                        (string `array<char; 9>` "%ld %ld\n\0"))))
+               (noop-type-conversion `long` (E `enum ∅~7 complete`))
+               (noop-type-conversion `long` (F `enum ∅~7 complete`))))
          (return (C `int`)))))
 
 ----- stderr -----

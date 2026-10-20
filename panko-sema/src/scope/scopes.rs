@@ -585,7 +585,8 @@ impl<'a> Scopes<'a> {
                     previous_decl,
                     Some(Tagged {
                         ty: Type::Arithmetic(Arithmetic::Enum(
-                            Enum::Incomplete { name: None, id: old_id, enable: () },
+                            Enum::Incomplete { name: None, id: old_id, enable: () }
+                            | Enum::Complete(CompleteEnum { name: None, id: old_id, enumerators: _ })
                         )),
                         tag: Tag::Enum,
                         loc: None,
