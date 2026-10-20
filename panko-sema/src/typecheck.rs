@@ -986,9 +986,11 @@ fn typeck_complete_enum<'a>(
         let enumerators = HashEqIgnored(Enumerators { ty, enumerators: &[] });
         Type::from(CompleteEnum { name, id, enumerators })
     });
-    let mut enumerator_values = IndexMap::default();
+    let mut enumerator_values: IndexMap<Id, Enumerator<'_, Typeck>> = IndexMap::default();
     for enumerator in enumerators {
-        let enumerator = typeck_enumerator(sess, &mut enumerator_values, enumerator_ty, enumerator);
+        let enumerator = typeck_enumerator(sess, enumerator_ty, enumerator, || {
+            try { enumerator_values.last()?.1.value.succ() }.unwrap_or(0.into())
+        });
         let was_present = enumerator_values.insert(enumerator.id, enumerator);
         assert_matches!(was_present, None);
     }
@@ -1004,9 +1006,9 @@ fn typeck_complete_enum<'a>(
 
 fn typeck_enumerator<'a>(
     sess: &Session<'a>,
-    enumerator_values: &mut IndexMap<Id, Enumerator<'a, Typeck>>,
     ty: Type<'a>,
     enumerator: &scope::Enumerator<'a>,
+    implicit_value: impl FnOnce() -> constexpr::Integral,
 ) -> Enumerator<'a, Typeck> {
     let scope::Enumerator {
         name,
@@ -1017,15 +1019,12 @@ fn typeck_enumerator<'a>(
         index,
         value,
     } = *enumerator;
-    let value = match value {
-        Some(value) => {
-            let value = typeck_expression(sess, value, Context::Default);
-            constexpr::eval(&value)
-                .into_integral()
-                .expect("TODO: nonintegral")
-        }
-        None => try { enumerator_values.last()?.1.value.succ() }.unwrap_or(0.into()),
-    };
+    let value = value.map_or_else(implicit_value, |value| {
+        let value = typeck_expression(sess, value, Context::Default);
+        constexpr::eval(&value).into_integral().unwrap_or_else(|_| {
+            unimplemented_todo!(value, "nonintegral enumerator value in enumerator list")
+        })
+    });
     let value = match value {
         value if ty.can_represent(value) => value,
         value => {
@@ -2998,34 +2997,24 @@ fn typeck_expression<'a>(
                 ty,
                 state,
                 index,
-                value,
+                value: _,
             } = enumerator;
 
-            let (ty, value) = match state {
-                scope::EnumeratorState::InEnumeratorList => {
-                    let value = value.unwrap_or_else(|| {
+            let Enumerator { ty, value, .. } = match state {
+                scope::EnumeratorState::InEnumeratorList =>
+                    typeck_enumerator(sess, Type::INT, enumerator, || {
                         unimplemented_todo!(
                             enumerator,
                             "using enumerator without explicit value in enumerator list",
                         )
-                    });
-                    let value = typeck_expression(sess, value, Context::Default);
-                    let value = constexpr::eval(&value).into_integral().unwrap_or_else(|_| {
-                        unimplemented_todo!(
-                            value,
-                            "nonintegral enumerator value in enumerator list",
-                        )
-                    });
-                    (Type::INT, value)
-                }
+                    }),
                 scope::EnumeratorState::EnumerationComplete => match ty {
                     Enum::Incomplete { .. } => unreachable!(),
                     Enum::Complete(complete) => {
                         let CompleteEnum { name: _, id: _, enumerators } =
                             typeck_complete_enum(sess, complete);
                         let HashEqIgnored(Enumerators { ty: _, enumerators }) = enumerators;
-                        let Enumerator { ty, value, .. } = enumerators[*index];
-                        (ty, value)
+                        enumerators[*index]
                     }
                 },
             };
