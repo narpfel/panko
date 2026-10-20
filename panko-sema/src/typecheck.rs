@@ -481,6 +481,7 @@ pub(crate) struct Enumerator<'a, T: ty::Step> {
     pub(crate) id: Id,
     pub(crate) ty: ty::Type<'a, T>,
     pub(crate) index: usize,
+    // TODO: use an `Expression`/`Result<Integral, &'a dyn Report>` here for error propagation?
     pub(crate) value: constexpr::Integral,
 }
 
