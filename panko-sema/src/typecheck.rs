@@ -1035,9 +1035,16 @@ fn typeck_enumerator<'a>(
     });
     let value = value.map_or_else(implicit_value, |value| {
         let value = typeck_expression(sess, value, Context::Default);
-        constexpr::eval(&value).into_integral().unwrap_or_else(|_| {
-            unimplemented_todo!(value, "nonintegral enumerator value in enumerator list")
-        })
+        constexpr::eval(&value)
+            .into_integral()
+            .unwrap_or_else(|errors| {
+                for error in errors {
+                    if let Either::Left(error) = error {
+                        sess.emit(error)
+                    }
+                }
+                0.into()
+            })
     });
     let value = match value {
         value if ty.can_represent(value) => value,
