@@ -1,0 +1,39 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_explicit_enumerator_value.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_explicit_enumerator_value.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum E~1
+      (enumerators `unsigned int`
+         (enumerator A~2 0 `int` 123)
+         (enumerator B~3 1 `int` 61)
+         (enumerator C~4 2 `int` 122)
+         (enumerator D~5 3 `int` 1)
+         (enumerator E~6 4 `int` 2)))
+   (function-definition external
+      main~7 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 16>>`
+                        (string `array<char; 16>` "%d %d %d %d %d\n\0"))))
+               (A `int`)
+               (B `int`)
+               (C `int`)
+               (D `int`)
+               (E `int`))))))
+
+----- stderr -----

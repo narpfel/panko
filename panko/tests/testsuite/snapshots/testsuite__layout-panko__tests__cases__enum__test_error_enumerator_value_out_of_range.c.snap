@@ -27,3 +27,19 @@ Error: enumerator value `2` is out of range for type `enum TristateBool~0 comple
    │                                        ──┬──  
    │                                          ╰──── in the definition of enumerator `Maybe`
 ───╯
+
+Error: enumerator value `128` is out of range for type `enum SignedChar~4 complete`
+   ╭─[panko/tests/cases/enum/test_error_enumerator_value_out_of_range.c:6:5]
+   │
+ 6 │     C,
+   │     ┬  
+   │     ╰── in the definition of enumerator `C`
+───╯
+
+Error: enumerator value `252` is out of range for type `enum SignedChar~4 complete`
+   ╭─[panko/tests/cases/enum/test_error_enumerator_value_out_of_range.c:7:5]
+   │
+ 7 │     D = 2 * A,
+   │     ┬  
+   │     ╰── in the definition of enumerator `D`
+───╯

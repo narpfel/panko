@@ -226,7 +226,12 @@ pub enum Enum<'a, T: Step> {
     Complete(CompleteEnum<'a, T>),
 }
 
-impl<T: Step> Enum<'_, T> {
+impl<'a, T: Step> Enum<'a, T> {
+    pub(crate) fn name(&self) -> Option<&'a str> {
+        let (Self::Incomplete { name, .. } | Self::Complete(CompleteEnum { name, .. })) = self;
+        *name
+    }
+
     pub(crate) fn id(&self) -> Id {
         match self {
             Self::Incomplete { name: _, id, enable: _ }

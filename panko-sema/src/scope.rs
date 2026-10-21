@@ -659,11 +659,18 @@ pub enum BuiltinNameKind<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) enum EnumeratorState {
+    InEnumeratorList,
+    EnumerationComplete,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub(crate) struct Enumerator<'a> {
     pub(crate) name: &'a str,
     pub(crate) loc: Loc<'a>,
     pub(crate) id: Id,
     pub(crate) ty: ty::Enum<'a, Scope>,
+    pub(crate) state: EnumeratorState,
     pub(crate) index: usize,
     pub(crate) value: Option<&'a Expression<'a>>,
 }
@@ -1229,12 +1236,17 @@ fn resolve_enumerators<'a>(
                 loc: name.loc(),
                 id: scopes.id(),
                 ty,
+                state: EnumeratorState::InEnumeratorList,
                 index: i,
                 // TODO: pass `"function"` for redeclared functions, but that needs typeck
                 // TODO: this is also incorrect for `Redeclared::TypedefAsValue`
                 value: Some(sess.alloc(redeclared.into_diagnostic(sess, "value"))),
             })
     });
+    let enumerators = enumerators
+        .collect_vec()
+        .into_iter()
+        .map(|enumerator| scopes.enumerator_list_done(enumerator));
     Enumerators {
         fixed_underlying,
         enumerators: sess.alloc_slice_fill_iter(enumerators),
