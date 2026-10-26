@@ -34,6 +34,28 @@ exit_code: 0
                (61 `int` @28)
                (122 `int` @32)
                (1 `int` @36)
-               (2 `int` @40))))))
+               (2 `int` @40)))
+         (enum E2~9
+            (enumerators `unsigned long`
+               (enumerator F~10 0 `enum E2~9 complete` 9223372036854775807)
+               (enumerator G~11 1 `enum E2~9 complete` 9223372036854775808)))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 7>>` @16
+                        (string `array<char; 7>` @void "0x%lx\n\0"))))
+               (noop-type-conversion `unsigned long` @24 (9223372036854775807 `enum E2~9 complete` @24))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 7>>` @16
+                        (string `array<char; 7>` @void "0x%lx\n\0"))))
+               (noop-type-conversion `unsigned long` @24 (9223372036854775808 `enum E2~9 complete` @24)))))))
 
 ----- stderr -----

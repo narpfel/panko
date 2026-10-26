@@ -81,6 +81,20 @@ exit_code: 0
                                     123)
                                  2))
                            2))))
-               (enumerator E~6 `enum E~1 complete`.4 ∅))))))
+               (enumerator E~6 `enum E~1 complete`.4 ∅)))
+         (enum E2~9
+            (enumerators `unsigned long`
+               (enumerator F~10 `enum E2~9 complete`.0
+                  0x7fff'ffff'ffff'ffff)
+               (enumerator G~11 `enum E2~9 complete`.1 ∅)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%lx\n")
+               (enumerator F~10 `enum E2~9 complete`.0
+                  0x7fff'ffff'ffff'ffff)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "0x%lx\n")
+               (enumerator G~11 `enum E2~9 complete`.1 ∅))))))
 
 ----- stderr -----
