@@ -25,9 +25,11 @@ exit_code: 0
          (enumerator D~8 `enum SignedChar~4 complete`.3
             (multiply 2
                (enumerator A~5 `enum SignedChar~4 complete`.0
-                  126)))))
+                  126)))
+         (enumerator E~9 `enum SignedChar~4 complete`.4
+            0xffff'ffff'ffff'ffff)))
    (function-definition
-      main~9 `fn() -> int`
+      main~10 `fn() -> int`
       (compound-statement
          (return (enumerator Maybe~3 `enum TristateBool~0 complete`.2 ∅)))))
 

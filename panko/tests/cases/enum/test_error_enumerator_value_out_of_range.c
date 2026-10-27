@@ -5,6 +5,7 @@ enum SignedChar: signed char {
     B,
     C,
     D = 2 * A,
+    E = 0xffff'ffff'ffff'ffff,
 };
 
 int main() {

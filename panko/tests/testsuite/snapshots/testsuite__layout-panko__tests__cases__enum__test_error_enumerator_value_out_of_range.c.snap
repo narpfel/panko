@@ -43,3 +43,11 @@ Error: enumerator value `252` is out of range for type `enum SignedChar~4 comple
    │     ┬  
    │     ╰── in the definition of enumerator `D`
 ───╯
+
+Error: enumerator value `18446744073709551615` is out of range for type `enum SignedChar~4 complete`
+   ╭─[panko/tests/cases/enum/test_error_enumerator_value_out_of_range.c:8:5]
+   │
+ 8 │     E = 0xffff'ffff'ffff'ffff,
+   │     ┬  
+   │     ╰── in the definition of enumerator `E`
+───╯
