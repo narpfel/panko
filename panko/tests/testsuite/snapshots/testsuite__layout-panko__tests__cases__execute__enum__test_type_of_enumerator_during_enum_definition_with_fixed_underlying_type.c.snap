@@ -12,7 +12,8 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/enum/test_type_of_enumerator_during_enum_definition_with_fixed_underlying_type.c"
    (enum E~0
-      (enumerators `char`
+      (enumerators
+         (underlying-type `char`)
          (enumerator A~1 0 `enum E~0 complete` 42)
          (enumerator B~2 1 `enum E~0 complete` 1)))
    (function-definition external stack-size=24

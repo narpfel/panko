@@ -12,8 +12,12 @@ exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/execute/enum/test_fixed_underlying_type_no_enumerators.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
-   (enum Bool~1 (enumerators `bool`))
-   (enum UnsignedLong~2 (enumerators `unsigned long`))
+   (enum Bool~1
+      (enumerators
+         (underlying-type `bool`)))
+   (enum UnsignedLong~2
+      (enumerators
+         (underlying-type `unsigned long`)))
    (function-definition external stack-size=56
       (main~3 `fn() -> int` (static main))
       (compound-statement

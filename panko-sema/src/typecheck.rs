@@ -469,8 +469,11 @@ pub(crate) enum Expression<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) struct UnderlyingType<'a, T: ty::Step>(pub(crate) &'a ty::Type<'a, T>);
+
+#[derive(Debug, Clone, Copy)]
 pub struct Enumerators<'a, T: ty::Step> {
-    pub(crate) underlying_ty: &'a ty::Type<'a, T>,
+    pub(crate) underlying_ty: UnderlyingType<'a, T>,
     pub(crate) enumerators: &'a [Enumerator<'a, T>],
 }
 
@@ -1005,6 +1008,7 @@ fn typeck_complete_enum<'a>(
     let values = enumerators.iter().map(|enumerator| enumerator.value);
     let underlying_ty = fixed_underlying
         .unwrap_or_else(|| sess.alloc(Type::Arithmetic(find_underlying_ty(values).into())));
+    let underlying_ty = UnderlyingType(underlying_ty);
     let enumerators = HashEqIgnored(Enumerators { underlying_ty, enumerators });
     CompleteEnum { name, id, enumerators }
 }
@@ -1028,6 +1032,7 @@ fn typeck_enumerator<'a>(
     let ty = fixed_underlying.map_or(Type::INT, |underlying_ty| {
         let name = r#enum.name();
         let id = r#enum.id();
+        let underlying_ty = UnderlyingType(underlying_ty);
         let enumerators = HashEqIgnored(Enumerators { underlying_ty, enumerators: &[] });
         Type::from(CompleteEnum { name, id, enumerators })
     });
@@ -1930,7 +1935,7 @@ where
             Self::Integral(integral) => ty::Arithmetic::Integral(*integral),
             Self::Enum(Enum::Incomplete { .. }) => unreachable!(),
             Self::Enum(Enum::Complete(complete_enum)) =>
-                match complete_enum.enumerators.0.underlying_ty {
+                match complete_enum.enumerators.0.underlying_ty.0 {
                     ty::Type::Arithmetic(arithmetic) => arithmetic.resolve_enums(),
                     _ => unreachable!(),
                 },
