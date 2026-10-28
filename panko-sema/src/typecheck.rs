@@ -470,7 +470,7 @@ pub(crate) enum Expression<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Enumerators<'a, T: ty::Step> {
-    pub(crate) ty: &'a ty::Type<'a, T>,
+    pub(crate) underlying_ty: &'a ty::Type<'a, T>,
     pub(crate) enumerators: &'a [Enumerator<'a, T>],
 }
 
@@ -1002,12 +1002,10 @@ fn typeck_complete_enum<'a>(
         assert_matches!(was_present, None);
     }
     let enumerators = sess.alloc_slice_fill_iter(enumerator_values.into_values());
-    let enumerator_values = enumerators.iter().map(|enumerator| enumerator.value);
-    let ty = fixed_underlying.unwrap_or_else(|| {
-        let ty = Type::Arithmetic(find_underlying_ty(enumerator_values).into());
-        sess.alloc(ty)
-    });
-    let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
+    let values = enumerators.iter().map(|enumerator| enumerator.value);
+    let underlying_ty = fixed_underlying
+        .unwrap_or_else(|| sess.alloc(Type::Arithmetic(find_underlying_ty(values).into())));
+    let enumerators = HashEqIgnored(Enumerators { underlying_ty, enumerators });
     CompleteEnum { name, id, enumerators }
 }
 
@@ -1027,10 +1025,10 @@ fn typeck_enumerator<'a>(
         index,
         value,
     } = *enumerator;
-    let ty = fixed_underlying.map_or(Type::INT, |ty| {
+    let ty = fixed_underlying.map_or(Type::INT, |underlying_ty| {
         let name = r#enum.name();
         let id = r#enum.id();
-        let enumerators = HashEqIgnored(Enumerators { ty, enumerators: &[] });
+        let enumerators = HashEqIgnored(Enumerators { underlying_ty, enumerators: &[] });
         Type::from(CompleteEnum { name, id, enumerators })
     });
     let value = value.map_or_else(implicit_value, |value| {
@@ -1931,10 +1929,11 @@ where
         match self {
             Self::Integral(integral) => ty::Arithmetic::Integral(*integral),
             Self::Enum(Enum::Incomplete { .. }) => unreachable!(),
-            Self::Enum(Enum::Complete(complete_enum)) => match complete_enum.enumerators.0.ty {
-                ty::Type::Arithmetic(arithmetic) => arithmetic.resolve_enums(),
-                _ => unreachable!(),
-            },
+            Self::Enum(Enum::Complete(complete_enum)) =>
+                match complete_enum.enumerators.0.underlying_ty {
+                    ty::Type::Arithmetic(arithmetic) => arithmetic.resolve_enums(),
+                    _ => unreachable!(),
+                },
         }
     }
 }
@@ -3036,7 +3035,8 @@ fn typeck_expression<'a>(
                     Enum::Complete(complete) => {
                         let CompleteEnum { name: _, id: _, enumerators } =
                             typeck_complete_enum(sess, complete);
-                        let HashEqIgnored(Enumerators { ty: _, enumerators }) = enumerators;
+                        let HashEqIgnored(Enumerators { underlying_ty: _, enumerators }) =
+                            enumerators;
                         enumerators[*index]
                     }
                 },

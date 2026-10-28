@@ -346,14 +346,14 @@ fn layout_complete_enum<'a>(
     complete: CompleteEnum<'a, Typeck>,
 ) -> CompleteEnum<'a, Layout> {
     let CompleteEnum { name, id, enumerators } = complete;
-    let HashEqIgnored(Enumerators { ty, enumerators }) = enumerators;
-    let ty = bump.alloc(layout_ty_unqual(stack, bump, *ty));
+    let HashEqIgnored(Enumerators { underlying_ty, enumerators }) = enumerators;
+    let underlying_ty = bump.alloc(layout_ty_unqual(stack, bump, *underlying_ty));
     let enumerators = bump.alloc_slice_fill_iter(enumerators.iter().map(|enumerator| {
         let Enumerator { name, loc, id, ty, index, value } = *enumerator;
         let ty = layout_ty_unqual(stack, bump, ty);
         Enumerator { name, loc, id, ty, index, value }
     }));
-    let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
+    let enumerators = HashEqIgnored(Enumerators { underlying_ty, enumerators });
     CompleteEnum { name, id, enumerators }
 }
 
