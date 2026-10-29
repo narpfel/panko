@@ -15,6 +15,7 @@ exit_code: 0
    (enum E~1
       (enumerators
          (underlying-type `short`)
+         (member-type `enum E~1 complete`)
          (enumerator A~2 0 `enum E~1 complete` 0)
          (enumerator B~3 1 `enum E~1 complete` 1)
          (enumerator C~4 2 `enum E~1 complete` 2)))

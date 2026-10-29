@@ -14,10 +14,12 @@ exit_code: 0
    (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
    (enum Bool~1
       (enumerators
-         (underlying-type `bool`)))
+         (underlying-type `bool`)
+         (member-type `enum Bool~1 complete`)))
    (enum UnsignedLong~2
       (enumerators
-         (underlying-type `unsigned long`)))
+         (underlying-type `unsigned long`)
+         (member-type `enum UnsignedLong~2 complete`)))
    (function-definition external
       main~3 `fn() -> int`
       (compound-statement

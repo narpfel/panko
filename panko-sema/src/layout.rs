@@ -32,6 +32,7 @@ use crate::typecheck::Enumerator;
 use crate::typecheck::Enumerators;
 use crate::typecheck::Member;
 use crate::typecheck::MemberKind;
+use crate::typecheck::MemberType;
 use crate::typecheck::PtrAddOrder;
 use crate::typecheck::Typeck;
 use crate::typecheck::Typedef;
@@ -347,14 +348,15 @@ fn layout_complete_enum<'a>(
     complete: CompleteEnum<'a, Typeck>,
 ) -> CompleteEnum<'a, Layout> {
     let CompleteEnum { name, id, enumerators } = complete;
-    let HashEqIgnored(Enumerators { underlying_ty, enumerators }) = enumerators;
+    let HashEqIgnored(Enumerators { underlying_ty, member_ty, enumerators }) = enumerators;
     let underlying_ty = UnderlyingType(bump.alloc(layout_ty_unqual(stack, bump, *underlying_ty.0)));
+    let member_ty = MemberType(bump.alloc(layout_ty_unqual(stack, bump, *member_ty.0)));
     let enumerators = bump.alloc_slice_fill_iter(enumerators.iter().map(|enumerator| {
         let Enumerator { name, loc, id, ty, index, value } = *enumerator;
         let ty = layout_ty_unqual(stack, bump, ty);
         Enumerator { name, loc, id, ty, index, value }
     }));
-    let enumerators = HashEqIgnored(Enumerators { underlying_ty, enumerators });
+    let enumerators = HashEqIgnored(Enumerators { underlying_ty, member_ty, enumerators });
     CompleteEnum { name, id, enumerators }
 }
 

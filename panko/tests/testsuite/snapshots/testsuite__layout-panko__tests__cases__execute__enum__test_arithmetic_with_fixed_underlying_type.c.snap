@@ -15,12 +15,14 @@ exit_code: 0
    (enum Long~1
       (enumerators
          (underlying-type `long`)
+         (member-type `enum Long~1 complete`)
          (enumerator A~2 0 `enum Long~1 complete` 0)
          (enumerator B~3 1 `enum Long~1 complete` 1)
          (enumerator C~4 2 `enum Long~1 complete` 2)))
    (enum Unsigned~5
       (enumerators
          (underlying-type `unsigned int`)
+         (member-type `enum Unsigned~5 complete`)
          (enumerator D~6 0 `enum Unsigned~5 complete` 0)
          (enumerator E~7 1 `enum Unsigned~5 complete` 1)
          (enumerator F~8 2 `enum Unsigned~5 complete` 2)))

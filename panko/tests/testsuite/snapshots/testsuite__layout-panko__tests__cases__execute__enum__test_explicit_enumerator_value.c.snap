@@ -15,6 +15,7 @@ exit_code: 0
    (enum E~1
       (enumerators
          (underlying-type `unsigned int`)
+         (member-type `int`)
          (enumerator A~2 0 `int` 123)
          (enumerator B~3 1 `int` 61)
          (enumerator C~4 2 `int` 122)
@@ -39,6 +40,7 @@ exit_code: 0
          (enum E2~9
             (enumerators
                (underlying-type `unsigned long`)
+               (member-type `enum E2~9 complete`)
                (enumerator F~10 0 `enum E2~9 complete` 9223372036854775807)
                (enumerator G~11 1 `enum E2~9 complete` 9223372036854775808)))
          (expression

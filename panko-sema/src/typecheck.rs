@@ -472,8 +472,12 @@ pub(crate) enum Expression<'a> {
 pub(crate) struct UnderlyingType<'a, T: ty::Step>(pub(crate) &'a ty::Type<'a, T>);
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) struct MemberType<'a, T: ty::Step>(pub(crate) &'a ty::Type<'a, T>);
+
+#[derive(Debug, Clone, Copy)]
 pub struct Enumerators<'a, T: ty::Step> {
     pub(crate) underlying_ty: UnderlyingType<'a, T>,
+    pub(crate) member_ty: MemberType<'a, T>,
     pub(crate) enumerators: &'a [Enumerator<'a, T>],
 }
 
@@ -1005,11 +1009,24 @@ fn typeck_complete_enum<'a>(
         assert_matches!(was_present, None);
     }
     let enumerators = sess.alloc_slice_fill_iter(enumerator_values.into_values());
-    let values = enumerators.iter().map(|enumerator| enumerator.value);
+    let values = || enumerators.iter().map(|enumerator| enumerator.value);
     let underlying_ty = fixed_underlying
-        .unwrap_or_else(|| sess.alloc(Type::Arithmetic(find_underlying_ty(values).into())));
+        .unwrap_or_else(|| sess.alloc(Type::Arithmetic(find_underlying_ty(values()).into())));
+    let member_ty =
+        match fixed_underlying.is_none() && values().all(|value| Type::INT.can_represent(value)) {
+            true => Type::INT,
+            false => {
+                let enumerators = HashEqIgnored(Enumerators {
+                    underlying_ty: UnderlyingType(underlying_ty),
+                    member_ty: MemberType(underlying_ty),
+                    enumerators: &[],
+                });
+                Type::from(CompleteEnum { name, id, enumerators })
+            }
+        };
     let underlying_ty = UnderlyingType(underlying_ty);
-    let enumerators = HashEqIgnored(Enumerators { underlying_ty, enumerators });
+    let member_ty = MemberType(sess.alloc(member_ty));
+    let enumerators = HashEqIgnored(Enumerators { underlying_ty, member_ty, enumerators });
     CompleteEnum { name, id, enumerators }
 }
 
@@ -1032,8 +1049,11 @@ fn typeck_enumerator<'a>(
     let ty = fixed_underlying.map_or(Type::INT, |underlying_ty| {
         let name = r#enum.name();
         let id = r#enum.id();
-        let underlying_ty = UnderlyingType(underlying_ty);
-        let enumerators = HashEqIgnored(Enumerators { underlying_ty, enumerators: &[] });
+        let enumerators = HashEqIgnored(Enumerators {
+            underlying_ty: UnderlyingType(underlying_ty),
+            member_ty: MemberType(underlying_ty),
+            enumerators: &[],
+        });
         Type::from(CompleteEnum { name, id, enumerators })
     });
     let value = value.map_or_else(implicit_value, |value| {
@@ -3025,24 +3045,26 @@ fn typeck_expression<'a>(
                 value: _,
             } = enumerator;
 
-            let Enumerator { ty, value, .. } = match state {
+            let (ty, Enumerator { value, .. }) = match state {
                 scope::EnumeratorState::InEnumeratorList => {
                     let fixed_underlying = typeck_fixed_underlying_ty(sess, ty);
-                    typeck_enumerator(sess, ty, fixed_underlying, enumerator, || {
-                        unimplemented_todo!(
-                            enumerator,
-                            "using enumerator without explicit value in enumerator list",
-                        )
-                    })
+                    let enumerator =
+                        typeck_enumerator(sess, ty, fixed_underlying, enumerator, || {
+                            unimplemented_todo!(
+                                enumerator,
+                                "using enumerator without explicit value in enumerator list",
+                            )
+                        });
+                    (enumerator.ty, enumerator)
                 }
                 scope::EnumeratorState::EnumerationComplete => match ty {
                     Enum::Incomplete { .. } => unreachable!(),
                     Enum::Complete(complete) => {
                         let CompleteEnum { name: _, id: _, enumerators } =
                             typeck_complete_enum(sess, complete);
-                        let HashEqIgnored(Enumerators { underlying_ty: _, enumerators }) =
+                        let HashEqIgnored(Enumerators { underlying_ty: _, member_ty, enumerators }) =
                             enumerators;
-                        enumerators[*index]
+                        (*member_ty.0, enumerators[*index])
                     }
                 },
             };

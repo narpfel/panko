@@ -16,6 +16,7 @@ exit_code: 0
    (enum E~2
       (enumerators
          (underlying-type `unsigned int`)
+         (member-type `int`)
          (enumerator False~3 0 `int` 0)
          (enumerator True~4 1 `int` 1)))
    (tentative-definition external (false_value~5 `enum E~2 complete` (static false_value)) ∅)

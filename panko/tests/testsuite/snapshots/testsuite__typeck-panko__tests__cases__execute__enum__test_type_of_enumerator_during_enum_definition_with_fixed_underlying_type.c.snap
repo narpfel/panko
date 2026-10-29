@@ -14,6 +14,7 @@ exit_code: 0
    (enum E~0
       (enumerators
          (underlying-type `char`)
+         (member-type `enum E~0 complete`)
          (enumerator A~1 0 `enum E~0 complete` 42)
          (enumerator B~2 1 `enum E~0 complete` 1)))
    (function-definition external

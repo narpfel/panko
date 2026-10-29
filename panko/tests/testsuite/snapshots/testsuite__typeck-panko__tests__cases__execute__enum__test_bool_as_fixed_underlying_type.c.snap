@@ -15,6 +15,7 @@ exit_code: 0
    (enum Bool~1
       (enumerators
          (underlying-type `bool`)
+         (member-type `enum Bool~1 complete`)
          (enumerator False~2 0 `enum Bool~1 complete` 0)
          (enumerator True~3 1 `enum Bool~1 complete` 1)))
    (function-definition external

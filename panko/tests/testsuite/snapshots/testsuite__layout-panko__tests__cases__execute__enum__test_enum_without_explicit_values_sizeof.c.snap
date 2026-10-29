@@ -14,6 +14,7 @@ exit_code: 0
    (enum E~0
       (enumerators
          (underlying-type `unsigned int`)
+         (member-type `int`)
          (enumerator A~1 0 `int` 0)
          (enumerator B~2 1 `int` 1)
          (enumerator C~3 2 `int` 2)))
@@ -24,6 +25,7 @@ exit_code: 0
          (enum E2~7
             (enumerators
                (underlying-type `unsigned int`)
+               (member-type `int`)
                (enumerator X~8 0 `int` 0)
                (enumerator Y~9 1 `int` 1)
                (enumerator Z~10 2 `int` 2)))
