@@ -1,0 +1,32 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_implicit_next_enumerator_value_retains_sign.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_implicit_next_enumerator_value_retains_sign.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum E~1
+      (enumerators ∅
+         (enumerator A~2 `enum E~1`.0
+            0x7fff'ffff)
+         (enumerator B~3 `enum E~1`.1 ∅)))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d\n")
+               (less
+                  (enumerator A~2 `enum E~1 complete`.0
+                     0x7fff'ffff)
+                  (enumerator B~3 `enum E~1 complete`.1 ∅))
+               (greater (enumerator B~3 `enum E~1 complete`.1 ∅) 0))))))
+
+----- stderr -----
