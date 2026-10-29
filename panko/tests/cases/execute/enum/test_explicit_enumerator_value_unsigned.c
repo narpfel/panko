@@ -1,5 +1,3 @@
-// [[known-bug: non-`int` as nonexplicit underlying type not implemented]]
-
 int printf(char const*, ...);
 
 enum NonInt {

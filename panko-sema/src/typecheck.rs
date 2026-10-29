@@ -76,6 +76,7 @@ pub use crate::typecheck::constexpr::PersistedTarget as Target;
 pub use crate::typecheck::constexpr::PersistedValue as Value;
 use crate::typecheck::diagnostics::Diagnostic;
 use crate::typecheck::literal::StringLiteral;
+use crate::typecheck::literal::grow_to_fit;
 pub(crate) use crate::typecheck::ptr::PtrAddOrder;
 
 mod as_sexpr;
@@ -1003,7 +1004,11 @@ fn typeck_complete_enum<'a>(
     let mut enumerator_values: IndexMap<Id, Enumerator<'_, Typeck>> = IndexMap::default();
     for enumerator in enumerators {
         let enumerator = typeck_enumerator(sess, r#enum, fixed_underlying, enumerator, || {
-            try { enumerator_values.last()?.1.value.succ() }.unwrap_or(0.into())
+            try {
+                let Enumerator { ty, value, .. } = enumerator_values.last()?.1;
+                (*ty, value.succ())
+            }
+            .unwrap_or((Type::INT, 0.into()))
         });
         let was_present = enumerator_values.insert(enumerator.id, enumerator);
         assert_matches!(was_present, None);
@@ -1035,7 +1040,7 @@ fn typeck_enumerator<'a>(
     r#enum: &Enum<'a, scope::Scope>,
     fixed_underlying: Option<&'a Type<'a>>,
     enumerator: &scope::Enumerator<'a>,
-    implicit_value: impl FnOnce() -> constexpr::Integral,
+    implicit_value: impl FnOnce() -> (Type<'a>, constexpr::Integral),
 ) -> Enumerator<'a, Typeck> {
     let scope::Enumerator {
         name,
@@ -1046,7 +1051,7 @@ fn typeck_enumerator<'a>(
         index,
         value,
     } = *enumerator;
-    let ty = fixed_underlying.map_or(Type::INT, |underlying_ty| {
+    let ty = fixed_underlying.map(|underlying_ty| {
         let name = r#enum.name();
         let id = r#enum.id();
         let enumerators = HashEqIgnored(Enumerators {
@@ -1056,9 +1061,10 @@ fn typeck_enumerator<'a>(
         });
         Type::from(CompleteEnum { name, id, enumerators })
     });
-    let value = value.map_or_else(implicit_value, |value| {
+    let value = value.map(|value| {
         let value = typeck_expression(sess, value, Context::Default);
-        constexpr::eval(&value)
+        let ty = value.ty.ty;
+        let value = constexpr::eval(&value)
             .into_integral()
             .unwrap_or_else(|errors| {
                 for error in errors {
@@ -1067,8 +1073,24 @@ fn typeck_enumerator<'a>(
                     }
                 }
                 0.into()
-            })
+            });
+        (ty, value)
     });
+
+    let (ty, value) = match (ty, value) {
+        (None, Some((_, value))) if Type::INT.can_represent(value) => (Type::INT, value),
+        (Some(ty), Some((_, value))) | (None, Some((ty, value))) => (ty, value),
+        (None, None) => {
+            let (ty, value) = implicit_value();
+            let ty::Arithmetic::Integral(ty) = match ty {
+                ty::Type::Arithmetic(arithmetic) => arithmetic.resolve_enums(),
+                _ => unreachable!(),
+            };
+            let ty = grow_to_fit(ty.signedness, ty.kind, 10, value);
+            (ty::Type::Arithmetic(ty::Arithmetic::Integral(ty)), value)
+        }
+        (Some(ty), None) => (ty, implicit_value().1),
+    };
     let value = match value {
         value if ty.can_represent(value) => value,
         value => {
