@@ -28,7 +28,7 @@ use super::Type;
 use crate::fake_trait_impls::NoHashEq;
 use crate::scope::BuiltinName;
 use crate::scope::Enumerator;
-use crate::scope::Expression;
+use crate::scope::EnumeratorValue;
 use crate::scope::Redeclared;
 use crate::ty::Arithmetic;
 use crate::ty::Complete;
@@ -300,7 +300,7 @@ impl<'a> Scopes<'a> {
         name: Token<'a>,
         ty: Enum<'a, super::Scope>,
         index: usize,
-        value: Option<&'a Expression<'a>>,
+        value: Option<&'a EnumeratorValue<'a>>,
     ) -> Result<Enumerator<'a>, Redeclared<'a>> {
         if let Entry::Occupied(entry) = self.lookup_ty_innermost(name.slice()) {
             return Err(Redeclared::TypedefAsValue {

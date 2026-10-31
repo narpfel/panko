@@ -665,6 +665,21 @@ pub(crate) enum EnumeratorState {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) enum EnumeratorValue<'a> {
+    Explicit(Expression<'a>),
+    Implicit(Enumerator<'a>),
+}
+
+impl<'a> EnumeratorValue<'a> {
+    pub(crate) fn get_explicit(&self) -> Option<&Expression<'a>> {
+        match self {
+            Self::Explicit(expression) => Some(expression),
+            Self::Implicit(_) => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub(crate) struct Enumerator<'a> {
     pub(crate) name: &'a str,
     pub(crate) loc: Loc<'a>,
@@ -672,7 +687,7 @@ pub(crate) struct Enumerator<'a> {
     pub(crate) ty: ty::Enum<'a, Scope>,
     pub(crate) state: EnumeratorState,
     pub(crate) index: usize,
-    pub(crate) value: Option<&'a Expression<'a>>,
+    pub(crate) value: Option<&'a EnumeratorValue<'a>>,
 }
 
 impl<'a> Enumerator<'a> {
@@ -1226,10 +1241,15 @@ fn resolve_enumerators<'a>(
         ty::Enum::Complete(ty::CompleteEnum { name: _, id: _, enumerators }) =>
             enumerators.0.fixed_underlying,
     };
-    let enumerators = enumerators.iter().enumerate().map(|(i, enumerator)| {
+    let mut scoped_enumerators = vec![];
+    for (i, enumerator) in enumerators.iter().enumerate() {
         let cst::Enumerator { name, value } = *enumerator;
-        let value = try { sess.alloc(resolve_expr(scopes, &value?)) };
-        scopes
+        let value = match value {
+            Some(value) => Some(EnumeratorValue::Explicit(resolve_expr(scopes, &value))),
+            None => try { EnumeratorValue::Implicit(scoped_enumerators[i.checked_sub(1)?]) },
+        };
+        let value = try { sess.alloc(value?) };
+        let enumerator = scopes
             .add_enumerator(name, ty, i, value)
             .unwrap_or_else(|redeclared| Enumerator {
                 name: name.slice(),
@@ -1240,11 +1260,13 @@ fn resolve_enumerators<'a>(
                 index: i,
                 // TODO: pass `"function"` for redeclared functions, but that needs typeck
                 // TODO: this is also incorrect for `Redeclared::TypedefAsValue`
-                value: Some(sess.alloc(redeclared.into_diagnostic(sess, "value"))),
-            })
-    });
-    let enumerators = enumerators
-        .collect_vec()
+                value: Some(sess.alloc(EnumeratorValue::Explicit(
+                    redeclared.into_diagnostic(sess, "value"),
+                ))),
+            });
+        scoped_enumerators.push(enumerator);
+    }
+    let enumerators = scoped_enumerators
         .into_iter()
         .map(|enumerator| scopes.enumerator_list_done(enumerator));
     Enumerators {
