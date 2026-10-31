@@ -60,6 +60,28 @@ exit_code: 0
                   (noop-type-conversion `ptr<char>`
                      (addressof `ptr<array<char; 7>>`
                         (string `array<char; 7>` "0x%lx\n\0"))))
-               (noop-type-conversion `unsigned long` (G `enum E2~9 complete`)))))))
+               (noop-type-conversion `unsigned long` (G `enum E2~9 complete`))))
+         (enum E3~12
+            (enumerators
+               (underlying-type `unsigned int`)
+               (member-type `int`)
+               (enumerator H~13 0 `int` 0)
+               (enumerator I~14 1 `int` 123)
+               (enumerator J~15 2 `int` 124)
+               (enumerator K~16 3 `int` 125)
+               (enumerator L~17 4 `int` 0)
+               (enumerator M~18 5 `int` 1)
+               (enumerator N~19 6 `int` 249)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "%d %d %d\n\0"))))
+               (L `int`)
+               (M `int`)
+               (N `int`))))))
 
 ----- stderr -----

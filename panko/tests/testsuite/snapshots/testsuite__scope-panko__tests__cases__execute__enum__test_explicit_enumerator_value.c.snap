@@ -95,6 +95,26 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "0x%lx\n")
-               (enumerator G~11 `enum E2~9 complete`.1 ∅))))))
+               (enumerator G~11 `enum E2~9 complete`.1 ∅)))
+         (enum E3~12
+            (enumerators ∅
+               (enumerator H~13 `enum E3~12`.0 ∅)
+               (enumerator I~14 `enum E3~12`.1
+                  123)
+               (enumerator J~15 `enum E3~12`.2 ∅)
+               (enumerator K~16 `enum E3~12`.3 ∅)
+               (enumerator L~17 `enum E3~12`.4
+                  (enumerator H~13 `enum E3~12`.0 ∅))
+               (enumerator M~18 `enum E3~12`.5 ∅)
+               (enumerator N~19 `enum E3~12`.6
+                  (add (enumerator J~15 `enum E3~12`.2 ∅) (enumerator K~16 `enum E3~12`.3 ∅)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (enumerator L~17 `enum E3~12 complete`.4
+                  (enumerator H~13 `enum E3~12`.0 ∅))
+               (enumerator M~18 `enum E3~12 complete`.5 ∅)
+               (enumerator N~19 `enum E3~12 complete`.6
+                  (add (enumerator J~15 `enum E3~12`.2 ∅) (enumerator K~16 `enum E3~12`.3 ∅))))))))
 
 ----- stderr -----

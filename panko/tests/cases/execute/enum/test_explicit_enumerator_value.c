@@ -22,4 +22,18 @@ int main() {
     printf("0x%lx\n", F);
     // [[print: 0x8000000000000000]]
     printf("0x%lx\n", G);
+
+    // test using enumerators without explicit values in same enumerator list
+    enum E3 {
+        H,
+        I = 123,
+        J,
+        K,
+        L = H,
+        M,
+        N = J + K,
+    };
+
+    // [[print: 0 1 249]]
+    printf("%d %d %d\n", L, M, N);
 }
