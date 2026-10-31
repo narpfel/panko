@@ -1063,7 +1063,7 @@ fn typeck_enumerator<'a>(
         Type::from(CompleteEnum { name, id, enumerators })
     });
     let value = try {
-        let value = typeck_expression(sess, value?.get_explicit()?, Context::Default);
+        let value = typeck_expression(sess, value.get_explicit()?, Context::Default);
         let ty = value.ty.ty;
         let value = constexpr::eval(&value)
             .into_integral()
@@ -3072,15 +3072,16 @@ fn typeck_expression<'a>(
                 scope::EnumeratorState::InEnumeratorList => {
                     let fixed_underlying = typeck_fixed_underlying_ty(sess, ty);
                     let implicit_value = || match value {
-                        Some(EnumeratorValue::Implicit(enumerator)) => {
-                            let enumerator = scope::Expression::Enumerator(*enumerator);
+                        EnumeratorValue::Explicit(_) => unreachable!(),
+                        EnumeratorValue::Implicit(enumerator) => {
+                            let enumerator = scope::Expression::Enumerator(**enumerator);
                             let expr = typeck_expression(sess, &enumerator, Context::Default);
                             (
                                 expr.ty.ty,
                                 constexpr::eval(&expr).into_integral().unwrap().succ(),
                             )
                         }
-                        Some(EnumeratorValue::Explicit(_)) | None => unreachable!(),
+                        EnumeratorValue::Zero => (Type::INT, 0.into()),
                     };
                     let enumerator =
                         typeck_enumerator(sess, ty, fixed_underlying, enumerator, implicit_value);

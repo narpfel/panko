@@ -300,7 +300,7 @@ impl<'a> Scopes<'a> {
         name: Token<'a>,
         ty: Enum<'a, super::Scope>,
         index: usize,
-        value: Option<&'a EnumeratorValue<'a>>,
+        value: EnumeratorValue<'a>,
     ) -> Result<Enumerator<'a>, Redeclared<'a>> {
         if let Entry::Occupied(entry) = self.lookup_ty_innermost(name.slice()) {
             return Err(Redeclared::TypedefAsValue {

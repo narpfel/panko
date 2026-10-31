@@ -28,7 +28,6 @@ use crate::scope::BuiltinName;
 use crate::scope::Declarator;
 use crate::scope::Declarators;
 use crate::scope::Enumerator;
-use crate::scope::EnumeratorValue;
 use crate::scope::Enumerators;
 use crate::scope::Member;
 use crate::scope::Type;
@@ -316,7 +315,7 @@ impl AsSExpr for Enumerator<'_> {
         SExpr::new("enumerator")
             .inline_string(format!("{name}~{}", id.0))
             .inline_string(format!("{}.{index}", Type::from(*ty).as_sexpr()))
-            .lines_explicit_empty(value.and_then(EnumeratorValue::get_explicit))
+            .lines_explicit_empty(value.get_explicit())
     }
 }
 
