@@ -14,6 +14,7 @@ use panko_parser::ast::Session;
 use panko_parser::nonempty;
 
 use super::BuiltinNameKind;
+use super::EnumeratorState;
 use super::Enumerators;
 use super::Id;
 use super::IsInGlobalScope;
@@ -27,7 +28,7 @@ use super::Type;
 use crate::fake_trait_impls::NoHashEq;
 use crate::scope::BuiltinName;
 use crate::scope::Enumerator;
-use crate::scope::Expression;
+use crate::scope::EnumeratorValue;
 use crate::scope::Redeclared;
 use crate::ty::Arithmetic;
 use crate::ty::Complete;
@@ -299,7 +300,7 @@ impl<'a> Scopes<'a> {
         name: Token<'a>,
         ty: Enum<'a, super::Scope>,
         index: usize,
-        value: Option<&'a Expression<'a>>,
+        value: EnumeratorValue<'a>,
     ) -> Result<Enumerator<'a>, Redeclared<'a>> {
         if let Entry::Occupied(entry) = self.lookup_ty_innermost(name.slice()) {
             return Err(Redeclared::TypedefAsValue {
@@ -312,7 +313,8 @@ impl<'a> Scopes<'a> {
         let loc = name.loc();
         let name = name.slice();
         let id = self.id();
-        let enumerator = Enumerator { name, loc, id, ty, index, value };
+        let state = EnumeratorState::InEnumeratorList;
+        let enumerator = Enumerator { name, loc, id, ty, state, index, value };
         match self.scopes.last_mut().lookup_innermost(name) {
             Entry::Occupied(mut entry) => {
                 let stored = entry.get_mut();
@@ -583,7 +585,8 @@ impl<'a> Scopes<'a> {
                     previous_decl,
                     Some(Tagged {
                         ty: Type::Arithmetic(Arithmetic::Enum(
-                            Enum::Incomplete { name: None, id: old_id, enable: () },
+                            Enum::Incomplete { name: None, id: old_id, enable: () }
+                            | Enum::Complete(CompleteEnum { name: None, id: old_id, enumerators: _ })
                         )),
                         tag: Tag::Enum,
                         loc: None,
@@ -647,5 +650,19 @@ impl<'a> Scopes<'a> {
 
     pub(crate) fn take_hoisted_compound_literals(&mut self) -> Drain<Reference<'a>> {
         self.hoisted_compound_literal_decls.drain(..)
+    }
+
+    pub(crate) fn enumerator_list_done(&mut self, enumerator: Enumerator<'a>) -> Enumerator<'a> {
+        self.lookup_innermost(enumerator.name).and_modify(|name| {
+            // ignore mismatches as redeclaration errors don’t insert an enumerator entry into the
+            // scope
+            if let Name::Enumerator(Unfixupped(enumerator)) = name {
+                enumerator.state = EnumeratorState::EnumerationComplete
+            }
+        });
+        Enumerator {
+            state: EnumeratorState::EnumerationComplete,
+            ..enumerator
+        }
     }
 }

@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_type_of_enumerator_during_enum_definition_with_fixed_underlying_type.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_type_of_enumerator_during_enum_definition_with_fixed_underlying_type.c"
+   (enum E~0
+      (enumerators `char`
+         (enumerator A~1 `enum E~0 complete`.0
+            42)
+         (enumerator B~2 `enum E~0 complete`.1
+            (sizeof
+               (enumerator A~1 `enum E~0 complete`.0
+                  42)))))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement
+         (return
+            (enumerator B~2 `enum E~0 complete`.1
+               (sizeof
+                  (enumerator A~1 `enum E~0 complete`.0
+                     42)))))))
+
+----- stderr -----

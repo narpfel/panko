@@ -47,6 +47,7 @@ use crate::scope::Declarators;
 use crate::scope::DesignatedInitialiser;
 use crate::scope::Designation;
 use crate::scope::Designator;
+use crate::scope::EnumeratorValue;
 use crate::scope::GenericAssociation;
 use crate::scope::Id;
 use crate::scope::IncrementFixity;
@@ -76,6 +77,7 @@ pub use crate::typecheck::constexpr::PersistedTarget as Target;
 pub use crate::typecheck::constexpr::PersistedValue as Value;
 use crate::typecheck::diagnostics::Diagnostic;
 use crate::typecheck::literal::StringLiteral;
+use crate::typecheck::literal::grow_to_fit;
 pub(crate) use crate::typecheck::ptr::PtrAddOrder;
 
 mod as_sexpr;
@@ -469,8 +471,15 @@ pub(crate) enum Expression<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) struct UnderlyingType<'a, T: ty::Step>(pub(crate) &'a ty::Type<'a, T>);
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct MemberType<'a, T: ty::Step>(pub(crate) &'a ty::Type<'a, T>);
+
+#[derive(Debug, Clone, Copy)]
 pub struct Enumerators<'a, T: ty::Step> {
-    pub(crate) ty: &'a ty::Type<'a, T>,
+    pub(crate) underlying_ty: UnderlyingType<'a, T>,
+    pub(crate) member_ty: MemberType<'a, T>,
     pub(crate) enumerators: &'a [Enumerator<'a, T>],
 }
 
@@ -481,7 +490,8 @@ pub(crate) struct Enumerator<'a, T: ty::Step> {
     pub(crate) id: Id,
     pub(crate) ty: ty::Type<'a, T>,
     pub(crate) index: usize,
-    pub(crate) value: u64,
+    // TODO: use an `Expression`/`Result<Integral, &'a dyn Report>` here for error propagation?
+    pub(crate) value: constexpr::Integral,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -964,62 +974,130 @@ fn find_underlying_ty<'a>(values: impl IntoIterator<Item = constexpr::Integral>)
     Arithmetic::Integral(integral)
 }
 
+fn typeck_fixed_underlying_ty<'a>(
+    sess: &Session<'a>,
+    r#enum: &Enum<'a, scope::Scope>,
+) -> Option<&'a Type<'a>> {
+    let ty = match r#enum {
+        Enum::Incomplete { .. } => None?,
+        Enum::Complete(CompleteEnum { enumerators, .. }) => enumerators.0.fixed_underlying?,
+    };
+    match typeck_ty(sess, *ty, IsParameter::No).ty {
+        ty @ Type::Arithmetic(ty::Arithmetic::Integral(_)) => Some(sess.alloc(ty)),
+        checked_ty => {
+            // TODO: `enum`s are integral, so the error message should be changed when
+            // `checked_ty` is an `enum`
+            let () = sess.emit(Diagnostic::NonintegralUnderlyingType { at: ty, ty: checked_ty });
+            // TODO: should be `Type::Error`
+            Some(&Type::INT)
+        }
+    }
+}
+
 fn typeck_complete_enum<'a>(
     sess: &Session<'a>,
     complete: &CompleteEnum<'a, scope::Scope>,
 ) -> CompleteEnum<'a, Typeck> {
     let CompleteEnum { name, id, enumerators } = *complete;
-    let NoHashEq(scope::Enumerators { fixed_underlying, enumerators }) = enumerators;
-    let fixed_underlying =
-        fixed_underlying.map(|ty| match typeck_ty(sess, *ty, IsParameter::No).ty {
-            ty @ Type::Arithmetic(ty::Arithmetic::Integral(_)) => sess.alloc(ty),
-            checked_ty => {
-                // TODO: `enum`s are integral, so the error message should be changed when
-                // `checked_ty` is an `enum`
-                let () =
-                    sess.emit(Diagnostic::NonintegralUnderlyingType { at: ty, ty: checked_ty });
-                // TODO: should be `Type::Error`
-                &Type::INT
-            }
-        });
-    let enumerator_ty = fixed_underlying.map_or(Type::INT, |ty| {
-        let enumerators = HashEqIgnored(Enumerators { ty, enumerators: &[] });
-        Type::from(CompleteEnum { name, id, enumerators })
-    });
-    let mut enumerator_values = IndexMap::default();
+    let NoHashEq(scope::Enumerators { fixed_underlying: _, enumerators }) = enumerators;
+    let r#enum = &Enum::Complete(*complete);
+    let fixed_underlying = typeck_fixed_underlying_ty(sess, r#enum);
+    let mut enumerator_values: IndexMap<Id, Enumerator<'_, Typeck>> = IndexMap::default();
     for enumerator in enumerators {
-        let enumerator = typeck_enumerator(sess, &mut enumerator_values, enumerator_ty, enumerator);
+        let enumerator = typeck_enumerator(sess, r#enum, fixed_underlying, enumerator, || {
+            try {
+                let Enumerator { ty, value, .. } = enumerator_values.last()?.1;
+                (*ty, value.succ())
+            }
+            .unwrap_or((Type::INT, 0.into()))
+        });
         let was_present = enumerator_values.insert(enumerator.id, enumerator);
         assert_matches!(was_present, None);
     }
     let enumerators = sess.alloc_slice_fill_iter(enumerator_values.into_values());
-    let enumerator_values = enumerators
-        .iter()
-        .map(|enumerator| constexpr::Integral::Unsigned(enumerator.value));
-    let ty = fixed_underlying.unwrap_or_else(|| {
-        let ty = Type::Arithmetic(find_underlying_ty(enumerator_values).into());
-        sess.alloc(ty)
-    });
-    let enumerators = HashEqIgnored(Enumerators { ty, enumerators });
+    let values = || enumerators.iter().map(|enumerator| enumerator.value);
+    let underlying_ty = fixed_underlying
+        .unwrap_or_else(|| sess.alloc(Type::Arithmetic(find_underlying_ty(values()).into())));
+    let member_ty =
+        match fixed_underlying.is_none() && values().all(|value| Type::INT.can_represent(value)) {
+            true => Type::INT,
+            false => {
+                let enumerators = HashEqIgnored(Enumerators {
+                    underlying_ty: UnderlyingType(underlying_ty),
+                    member_ty: MemberType(underlying_ty),
+                    enumerators: &[],
+                });
+                Type::from(CompleteEnum { name, id, enumerators })
+            }
+        };
+    let underlying_ty = UnderlyingType(underlying_ty);
+    let member_ty = MemberType(sess.alloc(member_ty));
+    let enumerators = HashEqIgnored(Enumerators { underlying_ty, member_ty, enumerators });
     CompleteEnum { name, id, enumerators }
 }
 
 fn typeck_enumerator<'a>(
     sess: &Session<'a>,
-    enumerator_values: &mut IndexMap<Id, Enumerator<'a, Typeck>>,
-    ty: Type<'a>,
+    r#enum: &Enum<'a, scope::Scope>,
+    fixed_underlying: Option<&'a Type<'a>>,
     enumerator: &scope::Enumerator<'a>,
+    implicit_value: impl FnOnce() -> (Type<'a>, constexpr::Integral),
 ) -> Enumerator<'a, Typeck> {
-    let scope::Enumerator { name, loc, id, ty: _, index, value } = *enumerator;
-    if let Some(value) = value {
-        unimplemented_todo!(value, "explicit values for enumerators");
-    }
-    let value = match try { enumerator_values.last()?.1.value.strict_add(1) }.unwrap_or(0) {
+    let scope::Enumerator {
+        name,
+        loc,
+        id,
+        ty: _,
+        state: _,
+        index,
+        value,
+    } = *enumerator;
+    let ty = fixed_underlying.map(|underlying_ty| {
+        let name = r#enum.name();
+        let id = r#enum.id();
+        let enumerators = HashEqIgnored(Enumerators {
+            underlying_ty: UnderlyingType(underlying_ty),
+            member_ty: MemberType(underlying_ty),
+            enumerators: &[],
+        });
+        Type::from(CompleteEnum { name, id, enumerators })
+    });
+    let value = try {
+        let value = typeck_expression(sess, value.get_explicit()?, Context::Default);
+        let ty = value.ty.ty;
+        let value = constexpr::eval(&value)
+            .into_integral()
+            .unwrap_or_else(|errors| {
+                for error in errors {
+                    if let Either::Left(error) = error {
+                        sess.emit(error)
+                    }
+                }
+                0.into()
+            });
+        (ty, value)
+    };
+
+    let (ty, value) = match (ty, value) {
+        (None, Some((_, value))) if Type::INT.can_represent(value) => (Type::INT, value),
+        (Some(ty), Some((_, value))) | (None, Some((ty, value))) => (ty, value),
+        (None, None) => {
+            let (ty, value) = implicit_value();
+            let ty::Arithmetic::Integral(ty) = match ty {
+                ty::Type::Arithmetic(arithmetic) => arithmetic.resolve_enums(),
+                _ => unreachable!(),
+            };
+            let ty = grow_to_fit(ty.signedness, ty.kind, 10, value);
+            (ty::Type::Arithmetic(ty::Arithmetic::Integral(ty)), value)
+        }
+        (Some(ty), None) => (ty, implicit_value().1),
+    };
+    let value = match value {
         value if ty.can_represent(value) => value,
         value => {
             let () =
                 sess.emit(Diagnostic::EnumeratorValueOutOfRange { at: *enumerator, value, ty });
-            0
+            0.into()
         }
     };
     Enumerator { name, loc, id, ty, index, value }
@@ -1899,10 +1977,11 @@ where
         match self {
             Self::Integral(integral) => ty::Arithmetic::Integral(*integral),
             Self::Enum(Enum::Incomplete { .. }) => unreachable!(),
-            Self::Enum(Enum::Complete(complete_enum)) => match complete_enum.enumerators.0.ty {
-                ty::Type::Arithmetic(arithmetic) => arithmetic.resolve_enums(),
-                _ => unreachable!(),
-            },
+            Self::Enum(Enum::Complete(complete_enum)) =>
+                match complete_enum.enumerators.0.underlying_ty.0 {
+                    ty::Type::Arithmetic(arithmetic) => arithmetic.resolve_enums(),
+                    _ => unreachable!(),
+                },
         }
     }
 }
@@ -2979,13 +3058,47 @@ fn typeck_expression<'a>(
             TypedExpression { ty: decl.reference.ty, expr }
         }
         scope::Expression::Enumerator(enumerator) => {
-            let scope::Enumerator { name: _, loc, id: _, ty, index, value: _ } = enumerator;
-            let CompleteEnum { name: _, id: _, enumerators } = match ty {
-                Enum::Incomplete { .. } => unreachable!(),
-                Enum::Complete(complete) => typeck_complete_enum(sess, complete),
+            let scope::Enumerator {
+                name: _,
+                loc,
+                id: _,
+                ty,
+                state,
+                index,
+                value,
+            } = enumerator;
+
+            let (ty, Enumerator { value, .. }) = match state {
+                scope::EnumeratorState::InEnumeratorList => {
+                    let fixed_underlying = typeck_fixed_underlying_ty(sess, ty);
+                    let implicit_value = || match value {
+                        EnumeratorValue::Explicit(_) => unreachable!(),
+                        EnumeratorValue::Implicit(enumerator) => {
+                            let enumerator = scope::Expression::Enumerator(**enumerator);
+                            let expr = typeck_expression(sess, &enumerator, Context::Default);
+                            (
+                                expr.ty.ty,
+                                constexpr::eval(&expr).into_integral().unwrap().succ(),
+                            )
+                        }
+                        EnumeratorValue::Zero => (Type::INT, 0.into()),
+                    };
+                    let enumerator =
+                        typeck_enumerator(sess, ty, fixed_underlying, enumerator, implicit_value);
+                    (enumerator.ty, enumerator)
+                }
+                scope::EnumeratorState::EnumerationComplete => match ty {
+                    Enum::Incomplete { .. } => unreachable!(),
+                    Enum::Complete(complete) => {
+                        let CompleteEnum { name: _, id: _, enumerators } =
+                            typeck_complete_enum(sess, complete);
+                        let HashEqIgnored(Enumerators { underlying_ty: _, member_ty, enumerators }) =
+                            enumerators;
+                        (*member_ty.0, enumerators[*index])
+                    }
+                },
             };
-            let HashEqIgnored(Enumerators { ty: _, enumerators }) = enumerators;
-            let Enumerator { ty, value, .. } = enumerators[*index];
+            let value = value.cast_unsigned();
             let token = Token::synthesised(TokenKind::Identifier, *loc);
             TypedExpression {
                 ty: ty.unqualified(),

@@ -13,12 +13,16 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/enum/test_arithmetic_with_fixed_underlying_type.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (enum Long~1
-      (enumerators `long`
+      (enumerators
+         (underlying-type `long`)
+         (member-type `enum Long~1 complete`)
          (enumerator A~2 0 `enum Long~1 complete` 0)
          (enumerator B~3 1 `enum Long~1 complete` 1)
          (enumerator C~4 2 `enum Long~1 complete` 2)))
    (enum Unsigned~5
-      (enumerators `unsigned int`
+      (enumerators
+         (underlying-type `unsigned int`)
+         (member-type `enum Unsigned~5 complete`)
          (enumerator D~6 0 `enum Unsigned~5 complete` 0)
          (enumerator E~7 1 `enum Unsigned~5 complete` 1)
          (enumerator F~8 2 `enum Unsigned~5 complete` 2)))

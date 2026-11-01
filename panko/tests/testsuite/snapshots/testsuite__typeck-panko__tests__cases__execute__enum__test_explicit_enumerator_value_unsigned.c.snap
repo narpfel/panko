@@ -1,0 +1,47 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_explicit_enumerator_value_unsigned.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_explicit_enumerator_value_unsigned.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum NonInt~1
+      (enumerators
+         (underlying-type `unsigned long`)
+         (member-type `enum NonInt~1 complete`)
+         (enumerator A~2 0 `int` 42)
+         (enumerator B~3 1 `int` 43)
+         (enumerator C~4 2 `unsigned long` 17293822569102704639)
+         (enumerator D~5 3 `unsigned long` 17293822569102704640)))
+   (function-definition external
+      main~6 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 9>>`
+                        (string `array<char; 9>` "%lu %lu\n\0"))))
+               (noop-type-conversion `unsigned long` (A `enum NonInt~1 complete`))
+               (noop-type-conversion `unsigned long` (B `enum NonInt~1 complete`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 19>>`
+                        (string `array<char; 19>` "0x%016lx 0x%016lx\n\0"))))
+               (noop-type-conversion `unsigned long` (C `enum NonInt~1 complete`))
+               (noop-type-conversion `unsigned long` (D `enum NonInt~1 complete`)))))))
+
+----- stderr -----
