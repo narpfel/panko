@@ -16,9 +16,35 @@ exit_code: 0
       (enumerators ∅
          (enumerator A~2 `enum E~1`.0
             0x7fff'ffff)
-         (enumerator B~3 `enum E~1`.1 ∅)))
+         (enumerator B~3 `enum E~1`.1 ∅)
+         (enumerator C~4 `enum E~1`.2
+            0x8000'0000)
+         (enumerator D~5 `enum E~1`.3
+            (equal (enumerator B~3 `enum E~1`.1 ∅)
+               (enumerator C~4 `enum E~1`.2
+                  0x8000'0000)))
+         (enumerator SizeofA~6 `enum E~1`.4
+            (generic
+               (enumerator A~2 `enum E~1`.0
+                  0x7fff'ffff)
+               (assoc `int`
+                  (sizeof
+                     (enumerator A~2 `enum E~1`.0
+                        0x7fff'ffff)))))
+         (enumerator SizeofB~7 `enum E~1`.5
+            (generic
+               (enumerator B~3 `enum E~1`.1 ∅)
+               (assoc `long` (sizeof (enumerator B~3 `enum E~1`.1 ∅)))))
+         (enumerator SizeofC~8 `enum E~1`.6
+            (generic
+               (enumerator C~4 `enum E~1`.2
+                  0x8000'0000)
+               (assoc `unsigned int`
+                  (sizeof
+                     (enumerator C~4 `enum E~1`.2
+                        0x8000'0000)))))))
    (function-definition
-      main~4 `fn() -> int`
+      main~9 `fn() -> int`
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
@@ -27,6 +53,34 @@ exit_code: 0
                   (enumerator A~2 `enum E~1 complete`.0
                      0x7fff'ffff)
                   (enumerator B~3 `enum E~1 complete`.1 ∅))
-               (greater (enumerator B~3 `enum E~1 complete`.1 ∅) 0))))))
+               (greater (enumerator B~3 `enum E~1 complete`.1 ∅) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d %d %zu\n")
+               (enumerator D~5 `enum E~1 complete`.3
+                  (equal (enumerator B~3 `enum E~1`.1 ∅)
+                     (enumerator C~4 `enum E~1`.2
+                        0x8000'0000)))
+               (enumerator SizeofA~6 `enum E~1 complete`.4
+                  (generic
+                     (enumerator A~2 `enum E~1`.0
+                        0x7fff'ffff)
+                     (assoc `int`
+                        (sizeof
+                           (enumerator A~2 `enum E~1`.0
+                              0x7fff'ffff)))))
+               (enumerator SizeofB~7 `enum E~1 complete`.5
+                  (generic
+                     (enumerator B~3 `enum E~1`.1 ∅)
+                     (assoc `long` (sizeof (enumerator B~3 `enum E~1`.1 ∅)))))
+               (enumerator SizeofC~8 `enum E~1 complete`.6
+                  (generic
+                     (enumerator C~4 `enum E~1`.2
+                        0x8000'0000)
+                     (assoc `unsigned int`
+                        (sizeof
+                           (enumerator C~4 `enum E~1`.2
+                              0x8000'0000)))))
+               (sizeof `enum E~1 complete`))))))
 
 ----- stderr -----

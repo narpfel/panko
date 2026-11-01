@@ -17,9 +17,14 @@ exit_code: 0
          (underlying-type `unsigned int`)
          (member-type `enum E~1 complete`)
          (enumerator A~2 0 `int` 2147483647)
-         (enumerator B~3 1 `long` 2147483648)))
+         (enumerator B~3 1 `long` 2147483648)
+         (enumerator C~4 2 `unsigned int` 2147483648)
+         (enumerator D~5 3 `int` 1)
+         (enumerator SizeofA~6 4 `int` 4)
+         (enumerator SizeofB~7 5 `int` 8)
+         (enumerator SizeofC~8 6 `int` 4)))
    (function-definition external
-      main~4 `fn() -> int`
+      main~9 `fn() -> int`
       (compound-statement
          (expression
             (call `int`
@@ -30,6 +35,19 @@ exit_code: 0
                      (addressof `ptr<array<char; 7>>`
                         (string `array<char; 7>` "%d %d\n\0"))))
                (less `int` (noop-type-conversion `unsigned int` (A `enum E~1 complete`)) (noop-type-conversion `unsigned int` (B `enum E~1 complete`)))
-               (greater `int` (noop-type-conversion `unsigned int` (B `enum E~1 complete`)) (noop-type-conversion `unsigned int` (0 `int`))))))))
+               (greater `int` (noop-type-conversion `unsigned int` (B `enum E~1 complete`)) (noop-type-conversion `unsigned int` (0 `int`)))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 17>>`
+                        (string `array<char; 17>` "%d %d %d %d %zu\n\0"))))
+               (noop-type-conversion `unsigned int` (D `enum E~1 complete`))
+               (noop-type-conversion `unsigned int` (SizeofA `enum E~1 complete`))
+               (noop-type-conversion `unsigned int` (SizeofB `enum E~1 complete`))
+               (noop-type-conversion `unsigned int` (SizeofC `enum E~1 complete`))
+               (sizeof `unsigned long` 4 `enum E~1 complete`))))))
 
 ----- stderr -----
