@@ -303,11 +303,19 @@ impl AsSExpr for BuiltinName<'_> {
 
 impl AsSExpr for Enumerator<'_> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name, loc: _, id, ty, index, value } = self;
+        let Self {
+            name,
+            loc: _,
+            id,
+            ty,
+            state: _,
+            index,
+            value,
+        } = self;
         SExpr::new("enumerator")
             .inline_string(format!("{name}~{}", id.0))
             .inline_string(format!("{}.{index}", Type::from(*ty).as_sexpr()))
-            .lines_explicit_empty(value)
+            .lines_explicit_empty(value.get_explicit())
     }
 }
 

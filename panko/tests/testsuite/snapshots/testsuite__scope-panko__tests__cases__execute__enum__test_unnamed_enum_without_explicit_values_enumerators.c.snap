@@ -19,8 +19,12 @@ exit_code: 0
          (enumerator C~4 `enum ∅~1`.2 ∅)
          (enumerator D~5 `enum ∅~1`.3 ∅)))
    (declaration b~6 `int` (enumerator B~3 `enum ∅~1 complete`.1 ∅))
+   (enum ∅~7
+      (enumerators `long`
+         (enumerator E~8 `enum ∅~7 complete`.0 ∅)
+         (enumerator F~9 `enum ∅~7 complete`.1 ∅)))
    (function-definition
-      main~7 `fn() -> int`
+      main~10 `fn() -> int`
       (compound-statement
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
@@ -29,6 +33,11 @@ exit_code: 0
                (name b~6 `int`)
                (enumerator D~5 `enum ∅~1 complete`.3 ∅)
                (add (add (enumerator A~2 `enum ∅~1 complete`.0 ∅) (name b~6 `int`)) (enumerator D~5 `enum ∅~1 complete`.3 ∅))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%ld %ld\n")
+               (enumerator E~8 `enum ∅~7 complete`.0 ∅)
+               (enumerator F~9 `enum ∅~7 complete`.1 ∅)))
          (return (enumerator C~4 `enum ∅~1 complete`.2 ∅)))))
 
 ----- stderr -----

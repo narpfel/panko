@@ -25,6 +25,8 @@ use crate::typecheck::Enumerator;
 use crate::typecheck::Enumerators;
 use crate::typecheck::Member;
 use crate::typecheck::MemberKind;
+use crate::typecheck::MemberType;
+use crate::typecheck::UnderlyingType;
 
 impl<Expression> AsSExpr for ArrayLength<Expression>
 where
@@ -256,10 +258,27 @@ impl AsSExpr for Expression<'_> {
     }
 }
 
+impl<T: Step> AsSExpr for UnderlyingType<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self(value) = *self;
+        SExpr::new("underlying-type").inherit(value)
+    }
+}
+
+impl<T: Step> AsSExpr for MemberType<'_, T> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self(value) = *self;
+        SExpr::new("member-type").inherit(value)
+    }
+}
+
 impl<T: Step> AsSExpr for Enumerators<'_, T> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { ty, enumerators } = self;
-        SExpr::new("enumerators").inherit(ty).lines(*enumerators)
+        let Self { underlying_ty, member_ty, enumerators } = self;
+        SExpr::new("enumerators")
+            .lines([underlying_ty])
+            .lines([member_ty])
+            .lines(*enumerators)
     }
 }
 

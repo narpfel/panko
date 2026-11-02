@@ -19,3 +19,11 @@ Error: nonintegral fixed underlying type `enum Enum~0 complete`
    │               ────┬────  
    │                   ╰────── this type `enum Enum~0 complete` is not integral
 ───╯
+
+Error: nonintegral fixed underlying type `enum Outer~6 complete`
+   ╭─[panko/tests/cases/execute/enum/test_error_typeof_enumerator_as_fixed_underlying_type.c:9:28]
+   │
+ 9 │     E = sizeof(enum Inner: typeof(D) { Y, Z }),
+   │                            ────┬────  
+   │                                ╰────── this type `enum Outer~6 complete` is not integral
+───╯

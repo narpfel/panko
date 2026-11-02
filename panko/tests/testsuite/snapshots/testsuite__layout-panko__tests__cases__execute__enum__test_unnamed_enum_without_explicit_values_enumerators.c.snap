@@ -13,14 +13,22 @@ exit_code: 0
 (translation-unit "panko/tests/cases/execute/enum/test_unnamed_enum_without_explicit_values_enumerators.c"
    (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
    (enum ∅~1
-      (enumerators `unsigned int`
+      (enumerators
+         (underlying-type `unsigned int`)
+         (member-type `int`)
          (enumerator A~2 0 `int` 0)
          (enumerator B~3 1 `int` 1)
          (enumerator C~4 2 `int` 2)
          (enumerator D~5 3 `int` 3)))
    (definition external (b~6 `int` (static b)) (B `int`))
+   (enum ∅~7
+      (enumerators
+         (underlying-type `long`)
+         (member-type `enum ∅~7 complete`)
+         (enumerator E~8 0 `enum ∅~7 complete` 0)
+         (enumerator F~9 1 `enum ∅~7 complete` 1)))
    (function-definition external stack-size=56
-      (main~7 `fn() -> int` (static main))
+      (main~10 `fn() -> int` (static main))
       (compound-statement
          (expression
             (call `int` @0
@@ -38,6 +46,16 @@ exit_code: 0
                      (0 `int` @32)
                      (b~6 `int` (static b)))
                   (3 `int` @36))))
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 9>>` @16
+                        (string `array<char; 9>` @void "%ld %ld\n\0"))))
+               (noop-type-conversion `long` @24 (0 `enum ∅~7 complete` @24))
+               (noop-type-conversion `long` @32 (1 `enum ∅~7 complete` @32))))
          (return (2 `int` @0)))))
 
 ----- stderr -----

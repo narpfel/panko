@@ -287,7 +287,12 @@ pub(super) fn typeck_bool_literal<'a>(token: &Token<'a>) -> TypedExpression<'a> 
     }
 }
 
-fn grow_to_fit<T>(signedness: Signedness, kind: IntegralKind, base: u32, value: T) -> Integral
+pub(super) fn grow_to_fit<T>(
+    signedness: Signedness,
+    kind: IntegralKind,
+    base: u32,
+    value: T,
+) -> Integral
 where
     T: Copy + Display,
     i8: TryFrom<T>,

@@ -1,0 +1,39 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/enum/test_nested_enum_definition.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_nested_enum_definition.c"
+   (declaration external (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)) ∅)
+   (enum Outer~1
+      (enumerators
+         (underlying-type `unsigned int`)
+         (member-type `int`)
+         (enumerator A~2 0 `int` 42)
+         (enumerator B~3 1 `int` 47)
+         (enumerator C~7 2 `int` 4)))
+   (function-definition external stack-size=56
+      (main~8 `fn() -> int` (static main))
+      (compound-statement
+         (expression
+            (call `int` @0
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>` @8
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int` (static printf)))
+               (noop-type-conversion `ptr<char const>` @16
+                  (noop-type-conversion `ptr<char>` @16
+                     (addressof `ptr<array<char; 16>>` @16
+                        (string `array<char; 16>` @void "%d %d %d %d %d\n\0"))))
+               (42 `int` @24)
+               (47 `int` @28)
+               (4 `int` @32)
+               (49 `int` @36)
+               (91 `int` @40))))))
+
+----- stderr -----

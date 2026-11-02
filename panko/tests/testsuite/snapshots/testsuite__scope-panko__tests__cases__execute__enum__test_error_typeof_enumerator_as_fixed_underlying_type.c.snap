@@ -19,8 +19,14 @@ exit_code: 0
    (enum Invalid~4
       (enumerators `typeof((enumerator A~1 `enum Enum~0 complete`.0 ∅))`
          (enumerator X~5 `enum Invalid~4 complete`.0 ∅)))
+   (enum Outer~6
+      (enumerators `char`
+         (enumerator D~7 `enum Outer~6 complete`.0
+            42)
+         (enumerator E~11 `enum Outer~6 complete`.1
+            (sizeof `enum Inner~8 complete`))))
    (function-definition
-      main~6 `fn() -> int`
+      main~12 `fn() -> int`
       (compound-statement)))
 
 ----- stderr -----

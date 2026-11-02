@@ -1,0 +1,87 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/enum/test_explicit_enumerator_value.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_explicit_enumerator_value.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum E~1
+      (enumerators
+         (underlying-type `unsigned int`)
+         (member-type `int`)
+         (enumerator A~2 0 `int` 123)
+         (enumerator B~3 1 `int` 61)
+         (enumerator C~4 2 `int` 122)
+         (enumerator D~5 3 `int` 1)
+         (enumerator E~6 4 `int` 2)))
+   (function-definition external
+      main~7 `fn() -> int`
+      (compound-statement
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 16>>`
+                        (string `array<char; 16>` "%d %d %d %d %d\n\0"))))
+               (A `int`)
+               (B `int`)
+               (C `int`)
+               (D `int`)
+               (E `int`)))
+         (enum E2~9
+            (enumerators
+               (underlying-type `unsigned long`)
+               (member-type `enum E2~9 complete`)
+               (enumerator F~10 0 `enum E2~9 complete` 9223372036854775807)
+               (enumerator G~11 1 `enum E2~9 complete` 9223372036854775808)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "0x%lx\n\0"))))
+               (noop-type-conversion `unsigned long` (F `enum E2~9 complete`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 7>>`
+                        (string `array<char; 7>` "0x%lx\n\0"))))
+               (noop-type-conversion `unsigned long` (G `enum E2~9 complete`))))
+         (enum E3~12
+            (enumerators
+               (underlying-type `unsigned int`)
+               (member-type `int`)
+               (enumerator H~13 0 `int` 0)
+               (enumerator I~14 1 `int` 123)
+               (enumerator J~15 2 `int` 124)
+               (enumerator K~16 3 `int` 125)
+               (enumerator L~17 4 `int` 0)
+               (enumerator M~18 5 `int` 1)
+               (enumerator N~19 6 `int` 249)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "%d %d %d\n\0"))))
+               (L `int`)
+               (M `int`)
+               (N `int`))))))
+
+----- stderr -----

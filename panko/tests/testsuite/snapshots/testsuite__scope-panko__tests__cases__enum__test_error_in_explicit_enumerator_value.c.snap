@@ -1,0 +1,27 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/enum/test_error_in_explicit_enumerator_value.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/enum/test_error_in_explicit_enumerator_value.c"
+   (enum E~0
+      (enumerators ∅
+         (enumerator A~1 `enum E~0`.0
+            0)
+         (enumerator B~2 `enum E~0`.1
+            (divide 42
+               (enumerator A~1 `enum E~0`.0
+                  0)))
+         (enumerator C~3 `enum E~0`.2
+            (left-shift 1 123))
+         (enumerator NonIntegral~4 `enum E~0`.3
+            (string "hello")))))
+
+----- stderr -----

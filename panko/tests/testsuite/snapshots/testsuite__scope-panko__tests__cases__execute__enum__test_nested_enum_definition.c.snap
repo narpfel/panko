@@ -1,0 +1,62 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/enum/test_nested_enum_definition.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/enum/test_nested_enum_definition.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (enum Outer~1
+      (enumerators ∅
+         (enumerator A~2 `enum Outer~1`.0
+            42)
+         (enumerator B~3 `enum Outer~1`.1
+            (add
+               (enumerator A~2 `enum Outer~1`.0
+                  42)
+               5))
+         (enumerator C~7 `enum Outer~1`.2
+            (sizeof `enum Inner~4 complete`))))
+   (function-definition
+      main~8 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d %d %d\n")
+               (enumerator A~2 `enum Outer~1 complete`.0
+                  42)
+               (enumerator B~3 `enum Outer~1 complete`.1
+                  (add
+                     (enumerator A~2 `enum Outer~1`.0
+                        42)
+                     5))
+               (enumerator C~7 `enum Outer~1 complete`.2
+                  (sizeof `enum Inner~4 complete`))
+               (enumerator X~5 `enum Inner~4 complete`.0
+                  (add
+                     (enumerator B~3 `enum Outer~1`.1
+                        (add
+                           (enumerator A~2 `enum Outer~1`.0
+                              42)
+                           5))
+                     2))
+               (enumerator Y~6 `enum Inner~4 complete`.1
+                  (add
+                     (enumerator A~2 `enum Outer~1`.0
+                        42)
+                     (enumerator X~5 `enum Inner~4`.0
+                        (add
+                           (enumerator B~3 `enum Outer~1`.1
+                              (add
+                                 (enumerator A~2 `enum Outer~1`.0
+                                    42)
+                                 5))
+                           2)))))))))
+
+----- stderr -----
