@@ -92,7 +92,8 @@ impl Integral {
         match self {
             Self::Signed(i64::MAX) => Self::Unsigned(i64::MAX.cast_unsigned() + 1),
             Self::Signed(value) => Self::Signed(value + 1),
-            Self::Unsigned(value) => Self::Unsigned(value.strict_add(1)),
+            Self::Unsigned(value) =>
+                Self::Unsigned(value.checked_add(1).expect("TODO: handle overflow error")),
         }
     }
 }
