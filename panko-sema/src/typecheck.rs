@@ -1005,11 +1005,8 @@ fn typeck_complete_enum<'a>(
     let mut enumerator_values: IndexMap<Id, Enumerator<'_, Typeck>> = IndexMap::default();
     for enumerator in enumerators {
         let enumerator = typeck_enumerator(sess, r#enum, fixed_underlying, enumerator, || {
-            try {
-                let Enumerator { ty, value, .. } = enumerator_values.last()?.1;
-                (*ty, value.succ())
-            }
-            .unwrap_or((Type::INT, 0.into()))
+            let Enumerator { ty, value, .. } = enumerator_values.last()?.1;
+            Some((*ty, value.succ()))
         });
         let was_present = enumerator_values.insert(enumerator.id, enumerator);
         assert_matches!(was_present, None);
@@ -1041,7 +1038,7 @@ fn typeck_enumerator<'a>(
     r#enum: &Enum<'a, scope::Scope>,
     fixed_underlying: Option<&'a Type<'a>>,
     enumerator: &scope::Enumerator<'a>,
-    implicit_value: impl FnOnce() -> (Type<'a>, constexpr::Integral),
+    implicit_value: impl FnOnce() -> Option<(Type<'a>, constexpr::Integral)>,
 ) -> Enumerator<'a, Typeck> {
     let scope::Enumerator {
         name,
@@ -1078,6 +1075,7 @@ fn typeck_enumerator<'a>(
         (ty, value)
     };
 
+    let implicit_value = || implicit_value().unwrap_or((Type::INT, 0.into()));
     let (ty, value) = match (ty, value) {
         (None, Some((_, value))) if Type::INT.can_represent(value) => (Type::INT, value),
         (Some(ty), Some((_, value))) | (None, Some((ty, value))) => (ty, value),
@@ -3076,12 +3074,12 @@ fn typeck_expression<'a>(
                         EnumeratorValue::Implicit(enumerator) => {
                             let enumerator = scope::Expression::Enumerator(**enumerator);
                             let expr = typeck_expression(sess, &enumerator, Context::Default);
-                            (
+                            Some((
                                 expr.ty.ty,
                                 constexpr::eval(&expr).into_integral().unwrap().succ(),
-                            )
+                            ))
                         }
-                        EnumeratorValue::Zero => (Type::INT, 0.into()),
+                        EnumeratorValue::Zero => None,
                     };
                     let enumerator =
                         typeck_enumerator(sess, ty, fixed_underlying, enumerator, implicit_value);
