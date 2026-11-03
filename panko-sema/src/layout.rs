@@ -1,4 +1,4 @@
-use std::bstr::ByteStr;
+use std::byte_str::ByteStr;
 use std::path::Path;
 
 use panko_lex::Bump;

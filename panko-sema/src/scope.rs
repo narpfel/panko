@@ -1,5 +1,5 @@
 use std::assert_matches;
-use std::bstr::ByteStr;
+use std::byte_str::ByteStr;
 use std::fmt;
 use std::path::Path;
 

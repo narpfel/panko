@@ -1,4 +1,4 @@
-use std::bstr::ByteStr;
+use std::byte_str::ByteStr;
 use std::fmt::Display;
 use std::num::IntErrorKind;
 use std::str::Chars;

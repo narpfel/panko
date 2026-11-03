@@ -1,4 +1,4 @@
-#![feature(bstr)]
+#![feature(byte_str)]
 #![feature(closure_track_caller)]
 #![feature(cmp_minmax)]
 #![feature(exact_bitshifts)]

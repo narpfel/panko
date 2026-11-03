@@ -1,11 +1,11 @@
-#![feature(bstr)]
+#![feature(byte_str)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
 
 use std::borrow::Cow;
-use std::bstr::ByteStr;
-use std::bstr::ByteString;
+use std::byte_str::ByteStr;
+use std::byte_str::ByteString;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Write as _;
