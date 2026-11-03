@@ -767,6 +767,7 @@ name = "panko-sema"
 version = "0.1.0"
 dependencies = [
  "ariadne",
+ "bumpalo",
  "indexmap",
  "itertools",
  "panko-lex",

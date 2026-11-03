@@ -6,6 +6,10 @@ impl Bump {
         Self::default()
     }
 
+    pub fn get(&self) -> &bumpalo::Bump {
+        &self.0
+    }
+
     pub fn alloc<T>(&self, value: T) -> &T {
         const {
             assert!(!std::mem::needs_drop::<T>());
