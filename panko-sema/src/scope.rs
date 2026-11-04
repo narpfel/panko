@@ -1242,8 +1242,7 @@ fn resolve_enumerators<'a>(
         ty::Enum::Complete(ty::CompleteEnum { name: _, id: _, enumerators }) =>
             enumerators.0.fixed_underlying,
     };
-    let mut scoped_enumerators =
-        bumpalo::collections::Vec::with_capacity_in(enumerators.len(), scopes.sess.bump().get());
+    let mut scoped_enumerators = Vec::with_capacity_in(enumerators.len(), scopes.sess.bump());
     for (i, enumerator) in enumerators.iter().enumerate() {
         let cst::Enumerator { name, value } = *enumerator;
         let value = match value {
@@ -1274,7 +1273,7 @@ fn resolve_enumerators<'a>(
     }
     Enumerators {
         fixed_underlying,
-        enumerators: scoped_enumerators.into_bump_slice(),
+        enumerators: scoped_enumerators.leak(),
     }
 }
 

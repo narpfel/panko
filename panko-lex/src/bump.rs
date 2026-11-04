@@ -1,13 +1,14 @@
+use std::alloc::AllocError;
+use std::alloc::Allocator;
+use std::alloc::Layout;
+use std::ptr::NonNull;
+
 #[derive(Debug, Default)]
 pub struct Bump(bumpalo::Bump);
 
 impl Bump {
     pub fn new() -> Self {
         Self::default()
-    }
-
-    pub fn get(&self) -> &bumpalo::Bump {
-        &self.0
     }
 
     pub fn alloc<T>(&self, value: T) -> &T {
@@ -47,4 +48,15 @@ impl Bump {
         let values = values.into_iter().collect::<Vec<_>>();
         self.alloc_slice_copy(&values)
     }
+}
+
+unsafe impl Allocator for Bump {
+    fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
+        self.0
+            .try_alloc_layout(layout)
+            .map(|ptr| NonNull::from_raw_parts(ptr, layout.size()))
+            .map_err(|bumpalo::AllocErr| AllocError)
+    }
+
+    unsafe fn deallocate(&self, _ptr: NonNull<u8>, _layout: Layout) {}
 }

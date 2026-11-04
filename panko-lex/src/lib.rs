@@ -1,4 +1,5 @@
 #![feature(iter_map_windows)]
+#![feature(ptr_metadata)]
 #![feature(type_alias_impl_trait)]
 #![feature(unqualified_local_imports)]
 
