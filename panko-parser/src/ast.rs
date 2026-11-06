@@ -452,6 +452,13 @@ impl<'a> ExternalDeclaration<'a> {
                 Self::FunctionDefinition(FunctionDefinition::from_parse_tree(sess, def)),
             cst::ExternalDeclaration::Declaration(decl) =>
                 Self::Declaration(Declaration::from_parse_tree(sess, decl)),
+            cst::ExternalDeclaration::StaticAssert(static_assert) => unimplemented_todo!(
+                static_assert
+                    .static_assert
+                    .loc()
+                    .until(static_assert.close_paren.loc()),
+                "static assertions as external declarations",
+            ),
         }
     }
 }
@@ -591,6 +598,13 @@ impl<'a> Statement<'a> {
         match item {
             BlockItem::Declaration(decl) =>
                 Self::Declaration(Declaration::from_parse_tree(sess, decl)),
+            BlockItem::StaticAssert(static_assert) => unimplemented_todo!(
+                static_assert
+                    .static_assert
+                    .loc()
+                    .until(static_assert.close_paren.loc()),
+                "static assertions as statements",
+            ),
             BlockItem::UnlabeledStatement(stmt) => Self::from_unlabeled_statement(sess, stmt),
         }
     }
