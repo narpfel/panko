@@ -211,6 +211,30 @@ pub struct TranslationUnit<'a> {
 pub enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
+}
+
+impl<'a> From<AnyDeclaration<'a>> for ExternalDeclaration<'a> {
+    fn from(value: AnyDeclaration<'a>) -> Self {
+        match value {
+            AnyDeclaration::Declaration(decl) => Self::Declaration(decl),
+            AnyDeclaration::StaticAssert(static_assert) => Self::StaticAssert(static_assert),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum AnyDeclaration<'a> {
+    Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct StaticAssert<'a> {
+    static_assert: Token<'a>,
+    expr: Expression<'a>,
+    msg: Option<Token<'a>>,
+    close_paren: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1053,7 +1077,17 @@ struct CompoundStatement<'a>(&'a [BlockItem<'a>]);
 #[derive(Debug, Clone, Copy)]
 enum BlockItem<'a> {
     Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
     UnlabeledStatement(UnlabeledStatement<'a>),
+}
+
+impl<'a> From<AnyDeclaration<'a>> for BlockItem<'a> {
+    fn from(value: AnyDeclaration<'a>) -> Self {
+        match value {
+            AnyDeclaration::Declaration(decl) => Self::Declaration(decl),
+            AnyDeclaration::StaticAssert(static_assert) => Self::StaticAssert(static_assert),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]

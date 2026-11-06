@@ -133,6 +133,8 @@ extern {
         "false" => Token { kind: TokenKind::False, .. },
         "nullptr" => Token { kind: TokenKind::Nullptr, .. },
 
+        "static_assert" => Token { kind: TokenKind::StaticAssert, .. },
+
         "__builtin_offsetof" => Token { kind: TokenKind::BuiltinOffsetof, .. },
 
         Identifier => Token { kind: TokenKind::Identifier, .. },
@@ -153,7 +155,7 @@ pub TranslationUnit: ast::TranslationUnit<'a> = {
 
 ExternalDeclaration: ast::ExternalDeclaration<'a> = {
     FunctionDefinition => ast::ExternalDeclaration::FunctionDefinition(<>),
-    Declaration => ast::ExternalDeclaration::Declaration(<>),
+    AnyDeclaration => ast::ExternalDeclaration::from(<>),
 }
 
 FunctionDefinition: ast::FunctionDefinition<'a> = {
@@ -185,6 +187,13 @@ InitDeclaratorNoInitialiser: Option<ast::InitDeclarator<'a>> = {
 
 FunctionBody = { CompoundStatement<DontPushTypedefScope> }
 
+AnyDeclaration: ast::AnyDeclaration<'a> = {
+    Declaration => ast::AnyDeclaration::Declaration(<>),
+    // attribute-specifier-sequence declaration-specifiers init_declarator_list ";"
+    StaticAssert => ast::AnyDeclaration::StaticAssert(<>),
+    // attribute-declaration
+}
+
 Declaration: ast::Declaration<'a> = {
     <"enum"> <AnyIdentifier> <FixedUnderlying> ";" => ast::Declaration::enum_decl(sess, <>),
     <head:DeclarationHead<AbstractDeclaratorDisallowed, InitDeclarator<MaybeAbstractDeclarator>?>>
@@ -202,9 +211,13 @@ Declaration: ast::Declaration<'a> = {
         typedef_tracker.is_not_in_typedef();
         ast::Declaration { specifiers, init_declarator_list }
     },
-    // attribute-specifier-sequence declaration-specifiers init_declarator_list ";"
-    // static_assert-declaration
-    // attribute-declaration
+}
+
+StaticAssert: ast::StaticAssert<'a> = {
+    <static_assert:"static_assert"> "("
+        <expr:ConstantExpression>
+        <msg:("," <MaybeUnterminatedString>)?>
+    <close_paren:")"> ";" => ast::StaticAssert { <> },
 }
 
 AbstractDeclaratorAllowed: ast::AbstractDeclaratorAllowed = {
@@ -679,7 +692,7 @@ BlockItemList: &'a [ast::BlockItem<'a>] = {
 }
 
 BlockItem: ast::BlockItem<'a> = {
-    Declaration => ast::BlockItem::Declaration(<>),
+    AnyDeclaration => ast::BlockItem::from(<>),
     UnlabeledStatement => ast::BlockItem::UnlabeledStatement(<>),
     // label
 }
