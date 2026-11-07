@@ -18,7 +18,6 @@ use ariadne::Fmt as _;
 use itertools::Either;
 use itertools::Itertools as _;
 use lalrpop_util::ParseError;
-use lalrpop_util::lalrpop_mod;
 use panko_lex::LexerHacked;
 use panko_lex::Loc;
 use panko_lex::Token;
@@ -37,15 +36,10 @@ use crate::sexpr_builder::AsSExpr as _;
 
 mod as_sexpr;
 pub mod ast;
+mod grammar;
 pub mod nonempty;
 pub mod preprocess;
 pub mod sexpr_builder;
-
-lalrpop_mod!(
-    #[allow(clippy::as_conversions, reason = "lalrpop generates `as` conversions")]
-    #[allow(unused_qualifications)]
-    grammar
-);
 
 const SEXPR_INDENT: usize = 3;
 pub const NO_VALUE: &str = "∅";
@@ -1578,7 +1572,7 @@ pub fn parse<'a>(
     typedef_names: &'a RefCell<TypedefNames<'a>>,
     tokens: LexerHacked<'a, impl Iterator<Item = Token<'a>>>,
 ) -> Option<ast::TranslationUnit<'a>> {
-    let parser = grammar::TranslationUnitParser::new();
+    let parser = grammar::grammar::TranslationUnitParser::new();
     let typedef_tracker = &mut TypedefTracker {
         typedef_names,
         is_in_typedef: nonempty::Vec::default(),
