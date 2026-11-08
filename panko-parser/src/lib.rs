@@ -225,10 +225,10 @@ enum AnyDeclaration<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct StaticAssert<'a> {
-    static_assert: Token<'a>,
-    expr: Expression<'a>,
-    msg: Option<Token<'a>>,
-    close_paren: Token<'a>,
+    pub static_assert: Token<'a>,
+    pub expr: Expression<'a>,
+    pub msg: Option<Token<'a>>,
+    pub close_paren: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]

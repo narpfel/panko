@@ -18,6 +18,7 @@ use super::Slot;
 use super::Statement;
 use super::SubobjectInitialiser;
 use super::TranslationUnit;
+use crate::layout::StaticAssert;
 use crate::layout::Subobject;
 use crate::typecheck::MemberKind;
 
@@ -37,6 +38,7 @@ impl AsSExpr for ExternalDeclaration<'_> {
             ExternalDeclaration::EnumDecl(decl) => decl.as_sexpr(),
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
+            ExternalDeclaration::StaticAssert(static_assert) => static_assert.as_sexpr(),
             ExternalDeclaration::Typedef(typedef) => typedef.as_sexpr(),
             ExternalDeclaration::ProvideExternalDefinitionForInlineFunction(name) =>
                 SExpr::new("provide-external-definition").inline_string(name.to_string()),
@@ -102,6 +104,13 @@ where
                 MemberKind::Bitfield(bitfield) => format!("+{offset}[{bitfield}]"),
             })
             .inherit(initialiser)
+    }
+}
+
+impl AsSExpr for StaticAssert<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { expr, msg } = self;
+        SExpr::new("static-assert").inherit(expr).inherit(msg)
     }
 }
 

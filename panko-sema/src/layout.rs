@@ -68,6 +68,7 @@ pub enum ExternalDeclaration<'a> {
     EnumDecl(CompleteEnum<'a, Layout>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
     Typedef(Typedef<'a>),
     ProvideExternalDefinitionForInlineFunction(&'a str),
     Error(&'a dyn Report),
@@ -121,6 +122,12 @@ pub struct FunctionDefinition<'a> {
     pub stack_size: u64,
     pub argument_area_size: u64,
     pub body: CompoundStatement<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct StaticAssert<'a> {
+    pub expr: LayoutedExpression<'a>,
+    pub msg: Option<&'a str>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -509,6 +516,22 @@ fn layout_declaration<'a>(
     Declaration { reference, initialiser }
 }
 
+fn layout_static_assert<'a>(
+    bump: &'a Bump,
+    static_assert: &typecheck::StaticAssert<'a>,
+) -> StaticAssert<'a> {
+    let typecheck::StaticAssert {
+        static_assert: _,
+        expr,
+        msg,
+        close_paren: _,
+    } = *static_assert;
+    // TODO: declarations in the global scope should not get a stack
+    let expr = layout_expression(&mut Stack::default(), bump, &expr);
+    // TODO: use the string content and not the token’s slice here
+    StaticAssert { expr, msg: try { msg?.slice() } }
+}
+
 fn layout_compound_statement<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
@@ -804,6 +827,8 @@ pub fn layout<'a>(
                     bump,
                     decl,
                 )),
+            typecheck::ExternalDeclaration::StaticAssert(static_assert) =>
+                ExternalDeclaration::StaticAssert(layout_static_assert(bump, static_assert)),
             typecheck::ExternalDeclaration::Typedef(typedef) =>
                 ExternalDeclaration::Typedef(*typedef),
             typecheck::ExternalDeclaration::ProvideExternalDefinitionForInlineFunction(name) =>

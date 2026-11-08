@@ -270,6 +270,7 @@ pub struct TranslationUnit<'a> {
 pub(crate) enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declarators<'a>),
+    StaticAssert(StaticAssert<'a>),
     Error(&'a dyn Report),
 }
 
@@ -403,6 +404,14 @@ pub(crate) enum Designator<'a> {
         dot: Token<'a>,
         ident: Token<'a>,
     },
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct StaticAssert<'a> {
+    pub(crate) static_assert: Token<'a>,
+    pub(crate) expr: Expression<'a>,
+    pub(crate) msg: Option<Token<'a>>,
+    pub(crate) close_paren: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1708,6 +1717,15 @@ fn resolve_declaration<'a>(
     }
 }
 
+fn resolve_static_assert<'a>(
+    scopes: &mut Scopes<'a>,
+    static_assert: &cst::StaticAssert<'a>,
+) -> StaticAssert<'a> {
+    let cst::StaticAssert { static_assert, expr, msg, close_paren } = *static_assert;
+    let expr = resolve_expr(scopes, &expr);
+    StaticAssert { static_assert, expr, msg, close_paren }
+}
+
 gen fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Statement<'a> {
     let stmt = match stmt {
         ast::Statement::Declaration(decl) =>
@@ -1983,6 +2001,8 @@ fn resolve_external_declaration<'a>(
             resolve_function_definition(scopes, def),
         ast::ExternalDeclaration::Declaration(decl) =>
             ExternalDeclaration::Declaration(resolve_declaration(scopes, decl)),
+        ast::ExternalDeclaration::StaticAssert(static_assert) =>
+            ExternalDeclaration::StaticAssert(resolve_static_assert(scopes, static_assert)),
     }
 }
 

@@ -33,6 +33,7 @@ use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::reject_function_specifiers;
+use panko_parser::error_todo;
 use panko_parser::unimplemented_todo;
 use panko_report::Report;
 
@@ -200,6 +201,7 @@ pub(crate) enum ExternalDeclaration<'a> {
     EnumDecl(CompleteEnum<'a, Typeck>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
     Typedef(Typedef<'a>),
     ProvideExternalDefinitionForInlineFunction(&'a str),
     Error(&'a dyn Report),
@@ -289,6 +291,22 @@ pub(crate) struct FunctionDefinition<'a> {
     pub(crate) noreturn: Option<cst::FunctionSpecifier<'a>>,
     pub(crate) varargs: Option<Varargs<'a>>,
     pub(crate) body: CompoundStatement<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct StaticAssert<'a> {
+    #[expect(
+        unused,
+        reason = "used for error handling, but error handling is not implemented yet"
+    )]
+    pub(crate) static_assert: Token<'a>,
+    pub(crate) expr: TypedExpression<'a>,
+    pub(crate) msg: Option<Token<'a>>,
+    #[expect(
+        unused,
+        reason = "used for error handling, but error handling is not implemented yet"
+    )]
+    pub(crate) close_paren: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1802,6 +1820,25 @@ fn typeck_declaration<'a>(
     Declaration { reference, initialiser }
 }
 
+impl<'a> From<StaticAssert<'a>> for ExternalDeclaration<'a> {
+    fn from(static_assert: StaticAssert<'a>) -> Self {
+        Self::StaticAssert(static_assert)
+    }
+}
+
+fn typeck_static_assert<'a, T: From<StaticAssert<'a>> + FromError<'a>>(
+    sess: &Session<'a>,
+    static_assert: &scope::StaticAssert<'a>,
+) -> T {
+    let scope::StaticAssert { static_assert, expr, msg, close_paren } = *static_assert;
+    let expr = typeck_expression(sess, &expr, Context::Default);
+    let value = constexpr::eval(&expr);
+    match value.is_nonzero() {
+        true => StaticAssert { static_assert, expr, msg, close_paren }.into(),
+        false => error_todo!(static_assert, "static assertion failed"),
+    }
+}
+
 fn typeck_compound_statement<'a>(
     sess: &Session<'a>,
     stmt: &scope::CompoundStatement<'a>,
@@ -3211,6 +3248,8 @@ pub fn resolve_types<'a>(
                     }
                     return;
                 }
+                scope::ExternalDeclaration::StaticAssert(static_assert) =>
+                    typeck_static_assert(sess, static_assert),
                 scope::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
             }
         })),

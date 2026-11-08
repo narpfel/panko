@@ -22,6 +22,7 @@ pub use crate::Initialiser;
 use crate::JumpStatement;
 use crate::NO_VALUE;
 use crate::PrimaryBlock;
+use crate::StaticAssert;
 use crate::StorageClassSpecifierKind;
 use crate::StructKind;
 use crate::TypeName;
@@ -239,6 +240,7 @@ pub struct TranslationUnit<'a> {
 pub enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a, InitDeclarator<'a>>),
+    StaticAssert(StaticAssert<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -452,13 +454,8 @@ impl<'a> ExternalDeclaration<'a> {
                 Self::FunctionDefinition(FunctionDefinition::from_parse_tree(sess, def)),
             cst::ExternalDeclaration::Declaration(decl) =>
                 Self::Declaration(Declaration::from_parse_tree(sess, decl)),
-            cst::ExternalDeclaration::StaticAssert(static_assert) => unimplemented_todo!(
-                static_assert
-                    .static_assert
-                    .loc()
-                    .until(static_assert.close_paren.loc()),
-                "static assertions as external declarations",
-            ),
+            cst::ExternalDeclaration::StaticAssert(static_assert) =>
+                Self::StaticAssert(*static_assert),
         }
     }
 }

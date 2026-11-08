@@ -27,6 +27,7 @@ impl AsSExpr for ExternalDeclaration<'_> {
         match self {
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
+            ExternalDeclaration::StaticAssert(static_assert) => static_assert.as_sexpr(),
         }
     }
 }
