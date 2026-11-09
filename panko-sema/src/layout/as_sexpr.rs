@@ -110,7 +110,7 @@ where
 impl AsSExpr for StaticAssert<'_> {
     fn as_sexpr(&self) -> SExpr {
         let Self { expr, msg } = self;
-        SExpr::new("static-assert").inherit(expr).inherit(msg)
+        SExpr::new("static-assert").inherit(msg).inherit(expr)
     }
 }
 

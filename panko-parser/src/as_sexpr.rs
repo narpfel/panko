@@ -65,7 +65,7 @@ impl AsSExpr for StaticAssert<'_> {
             msg,
             close_paren: _,
         } = self;
-        SExpr::new("static-assert").inherit(expr).inherit(msg)
+        SExpr::new("static-assert").inherit(msg).inherit(expr)
     }
 }
 

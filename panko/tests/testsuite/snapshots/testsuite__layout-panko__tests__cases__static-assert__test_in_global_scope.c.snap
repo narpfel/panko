@@ -11,24 +11,21 @@ success: true
 exit_code: 0
 ----- stdout -----
 (translation-unit "panko/tests/cases/static-assert/test_in_global_scope.c"
-   (static-assert
+   (static-assert ∅
       (equal `int` @0
          (42 `int` @0)
          (multiply `int` @4
             (21 `int` @4)
-            (2 `int` @8)))
-      ∅)
-   (static-assert (1 `bool` @0) "true is true")
+            (2 `int` @8))))
+   (static-assert "true is true" (1 `bool` @0))
    (tentative-definition external (x~0 `int` (static x)) ∅)
-   (static-assert
+   (static-assert "pointer to static is not nullptr"
       (addressof `ptr<int>` @0
-         (x~0 `int` (static x)))
-      "pointer to static is not nullptr")
-   (static-assert (not `int` @0 (nullptr `nullptr_t` @8)) ∅)
-   (static-assert
+         (x~0 `int` (static x))))
+   (static-assert ∅ (not `int` @0 (nullptr `nullptr_t` @8)))
+   (static-assert ∅
       (less `int` @0
          (1 `unsigned long` @8)
-         (2 `unsigned long` @16))
-      ∅))
+         (2 `unsigned long` @16))))
 
 ----- stderr -----
