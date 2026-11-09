@@ -410,7 +410,7 @@ pub(crate) enum Designator<'a> {
 pub(crate) struct StaticAssert<'a> {
     pub(crate) static_assert: Token<'a>,
     pub(crate) expr: Expression<'a>,
-    pub(crate) msg: Option<Token<'a>>,
+    pub(crate) msg: Option<&'a [Token<'a>]>,
     pub(crate) close_paren: Token<'a>,
 }
 

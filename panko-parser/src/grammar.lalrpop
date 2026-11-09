@@ -216,7 +216,7 @@ Declaration: ast::Declaration<'a> = {
 StaticAssert: ast::StaticAssert<'a> = {
     <static_assert:"static_assert"> "("
         <expr:ConstantExpression>
-        <msg:("," <MaybeUnterminatedString>)?>
+        <msg:("," <Some<String>>)?>
     <close_paren:")"> ";" => ast::StaticAssert { <> },
 }
 

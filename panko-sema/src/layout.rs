@@ -127,7 +127,7 @@ pub struct FunctionDefinition<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct StaticAssert<'a> {
     pub expr: LayoutedExpression<'a>,
-    pub msg: Option<&'a str>,
+    pub msg: Option<&'a ByteStr>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -528,8 +528,7 @@ fn layout_static_assert<'a>(
     } = *static_assert;
     // TODO: declarations in the global scope should not get a stack
     let expr = layout_expression(&mut Stack::default(), bump, &expr);
-    // TODO: use the string content and not the token’s slice here
-    StaticAssert { expr, msg: try { msg?.slice() } }
+    StaticAssert { expr, msg }
 }
 
 fn layout_compound_statement<'a>(

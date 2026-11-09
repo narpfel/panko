@@ -1,3 +1,4 @@
+#![feature(byte_str)]
 #![feature(closure_track_caller)]
 #![feature(coverage_attribute)]
 #![feature(exact_bitshifts)]
@@ -227,7 +228,7 @@ enum AnyDeclaration<'a> {
 pub struct StaticAssert<'a> {
     pub static_assert: Token<'a>,
     pub expr: Expression<'a>,
-    pub msg: Option<Token<'a>>,
+    pub msg: Option<&'a [Token<'a>]>,
     pub close_paren: Token<'a>,
 }
 

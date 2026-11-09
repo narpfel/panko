@@ -18,6 +18,7 @@ exit_code: 0
       (addressof `ptr<int>`
          (x~0 `int`)))
    (static-assert ∅ (not `int` (nullptr `nullptr_t`)))
-   (static-assert ∅ (less `int` (sizeof `unsigned long` 1 `char`) (sizeof `unsigned long` 2 `array<char; 2>`))))
+   (static-assert ∅ (less `int` (sizeof `unsigned long` 1 `char`) (sizeof `unsigned long` 2 `array<char; 2>`)))
+   (static-assert "multiplestringtokens" (42 `int`)))
 
 ----- stderr -----

@@ -26,6 +26,7 @@ exit_code: 0
    (static-assert ∅
       (less `int` @0
          (1 `unsigned long` @8)
-         (2 `unsigned long` @16))))
+         (2 `unsigned long` @16)))
+   (static-assert "multiplestringtokens" (42 `int` @0)))
 
 ----- stderr -----

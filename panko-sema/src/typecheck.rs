@@ -301,7 +301,7 @@ pub(crate) struct StaticAssert<'a> {
     )]
     pub(crate) static_assert: Token<'a>,
     pub(crate) expr: TypedExpression<'a>,
-    pub(crate) msg: Option<Token<'a>>,
+    pub(crate) msg: Option<&'a ByteStr>,
     #[expect(
         unused,
         reason = "used for error handling, but error handling is not implemented yet"
@@ -1831,18 +1831,15 @@ fn typeck_static_assert<'a, T: From<StaticAssert<'a>> + FromError<'a>>(
     static_assert: &scope::StaticAssert<'a>,
 ) -> T {
     let scope::StaticAssert { static_assert, expr, msg, close_paren } = *static_assert;
+    let msg = try {
+        let bytes = literal::parse_string_literal(sess, msg?).value();
+        ByteStr::new(bytes.trim_suffix(b"\0"))
+    };
     let expr = typeck_expression(sess, &expr, Context::Default);
     let value = constexpr::eval(&expr);
     match value.is_nonzero() {
         true => StaticAssert { static_assert, expr, msg, close_paren }.into(),
-        false => sess.emit(Diagnostic::StaticAssertionFailed {
-            at: expr,
-            static_assert,
-            msg: try {
-                let bytes = literal::parse_string_literal(sess, &[msg?]).value();
-                ByteStr::new(bytes.trim_suffix(b"\0"))
-            },
-        }),
+        false => sess.emit(Diagnostic::StaticAssertionFailed { at: expr, static_assert, msg }),
     }
 }
 
