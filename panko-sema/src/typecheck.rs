@@ -1,4 +1,5 @@
 use std::assert_matches;
+use std::byte_str::ByteStr;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
@@ -33,7 +34,6 @@ use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::reject_function_specifiers;
-use panko_parser::error_todo;
 use panko_parser::unimplemented_todo;
 use panko_report::Report;
 
@@ -1835,7 +1835,14 @@ fn typeck_static_assert<'a, T: From<StaticAssert<'a>> + FromError<'a>>(
     let value = constexpr::eval(&expr);
     match value.is_nonzero() {
         true => StaticAssert { static_assert, expr, msg, close_paren }.into(),
-        false => error_todo!(static_assert, "static assertion failed"),
+        false => sess.emit(Diagnostic::StaticAssertionFailed {
+            at: expr,
+            static_assert,
+            msg: try {
+                let bytes = literal::parse_string_literal(sess, &[msg?]).value();
+                ByteStr::new(bytes.trim_suffix(b"\0"))
+            },
+        }),
     }
 }
 
