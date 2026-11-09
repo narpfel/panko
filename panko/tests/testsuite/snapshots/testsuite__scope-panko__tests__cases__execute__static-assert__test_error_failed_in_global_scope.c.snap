@@ -1,0 +1,17 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/static-assert/test_error_failed_in_global_scope.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/static-assert/test_error_failed_in_global_scope.c"
+   (static-assert ∅ (equal true false))
+   (static-assert "message" (equal 42 27)))
+
+----- stderr -----
