@@ -12,6 +12,7 @@ use itertools::zip_eq;
 use panko_parser::BinOpKind;
 use panko_parser::Comparison;
 use panko_parser::LogicalOpKind;
+use panko_parser::ast::FromError;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::unimplemented_todo;
@@ -61,6 +62,29 @@ impl<'a> Errors<'a> {
         let Self(mut errors) = self;
         errors.append(&mut other_errors);
         Self(errors)
+    }
+}
+
+trait Reports<'a> = Iterator<Item = &'a dyn Report> + ExactSizeIterator;
+
+impl<'a> Errors<'a> {
+    #[track_caller]
+    fn into_reports(self, sess: &Session<'a>) -> impl Reports<'a> {
+        self.into_iter().map(|error| match error {
+            Either::Left(diagnostic) => sess.emit(diagnostic),
+            Either::Right(report) => report,
+        })
+    }
+
+    #[track_caller]
+    pub(super) fn emit<Expr>(self, sess: &Session<'a>) -> Expr
+    where
+        Expr: FromError<'a>,
+    {
+        let mut reports = self.into_reports(sess);
+        let result = reports.next().expect("`Errors` is nonempty");
+        reports.for_each(drop);
+        Expr::from_error(result)
     }
 }
 
@@ -350,10 +374,10 @@ impl<'a, 'b> Value<'a, 'b> {
         }
     }
 
-    fn error(expr: &'b TypedExpression<'a>) -> Self {
+    fn error(expr: &'b TypedExpression<'a>, error: &'a dyn Report) -> Self {
         Self {
             expr,
-            repr: Repr::Error(Errors::default()),
+            repr: Repr::Error(Errors(LinkedList::from_iter([Either::Right(error)]))),
         }
     }
 
@@ -417,14 +441,8 @@ impl<'a, 'b> Value<'a, 'b> {
     fn persist(self, sess: &Session<'a>) -> PersistedValue<'a, Reference<'a>> {
         match self.repr {
             Repr::Bytes(bytes) => persist(sess, bytes),
-            Repr::Error(errors) => {
-                let errors =
-                    sess.alloc_slice_fill_iter(errors.into_iter().map(|error| match error {
-                        Either::Left(diagnostic) => sess.emit(diagnostic),
-                        Either::Right(diagnostic) => diagnostic,
-                    }));
-                PersistedValue::Error(errors)
-            }
+            Repr::Error(errors) =>
+                PersistedValue::Error(sess.alloc_slice_fill_iter(errors.into_reports(sess))),
         }
     }
 }
@@ -725,7 +743,7 @@ pub(super) fn eval<'a, 'b>(typed_expr: &'b TypedExpression<'a>) -> Value<'a, 'b>
     }
 
     match expr {
-        Expression::Error(_) => Value::error(typed_expr),
+        Expression::Error(error) => Value::error(typed_expr, *error),
 
         Expression::Parenthesised { open_paren: _, expr, close_paren: _ } => eval(expr),
 

@@ -874,7 +874,7 @@ fn typeck_struct_members<'a>(
                         None?
                     }
                     Err(errors) => {
-                        sess.emit_many(errors.into_iter().filter_map(Either::left));
+                        let () = errors.emit(sess);
                         None?
                     }
                 };
@@ -1083,11 +1083,7 @@ fn typeck_enumerator<'a>(
         let value = constexpr::eval(&value)
             .into_integral()
             .unwrap_or_else(|errors| {
-                for error in errors {
-                    if let Either::Left(error) = error {
-                        sess.emit(error)
-                    }
-                }
+                let () = errors.emit(sess);
                 0.into()
             });
         (ty, value)
@@ -1559,9 +1555,7 @@ fn typeck_initialiser_list<'a>(
                                         at: *designator,
                                         index,
                                     }),
-                                Err(errors) =>
-                                    return sess
-                                        .emit_many(errors.into_iter().filter_map(Either::left)),
+                                Err(errors) => return errors.emit(sess),
                             };
                             subobjects.goto_index(index)
                         }
