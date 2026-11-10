@@ -127,3 +127,11 @@ void non_constexpr_builtin_names() {
 void out_of_bounds_in_deref_of_pointer_into_string_literal() {
     static char a = "string"[1234];
 }
+
+void type_error_in_cast_to_bool() {
+    struct T {
+        int x;
+    };
+    static bool explicit = (bool)(struct T){ .x = 42 };
+    static bool implicit = (struct T){ .x = 42 };
+}
