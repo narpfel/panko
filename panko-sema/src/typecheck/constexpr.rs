@@ -363,7 +363,7 @@ impl<'a, 'b> Value<'a, 'b> {
         }
     }
 
-    pub(super) fn is_nonzero(&self) -> bool {
+    fn is_nonzero(&self) -> bool {
         let Value { expr: _, repr } = self;
         match repr {
             Repr::Bytes(bytes) => bytes.iter().any(|&b| match b {

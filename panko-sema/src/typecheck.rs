@@ -1830,10 +1830,14 @@ fn typeck_static_assert<'a, T: From<StaticAssert<'a>> + FromError<'a>>(
         ByteStr::new(bytes.trim_suffix(b"\0"))
     };
     let expr = typeck_expression(sess, &expr, Context::Default);
-    let value = constexpr::eval(&expr);
-    match value.is_nonzero() {
-        true => StaticAssert { static_assert, expr, msg, close_paren }.into(),
-        false => sess.emit(Diagnostic::StaticAssertionFailed { at: expr, static_assert, msg }),
+    let bool = Type::bool().unqualified();
+    let condition = convert(sess, bool, expr, ConversionKind::Implicit);
+    let value = constexpr::eval(&condition);
+    match value.into_unsigned() {
+        Ok(Ok(0)) => sess.emit(Diagnostic::StaticAssertionFailed { at: expr, static_assert, msg }),
+        Ok(Ok(1)) => StaticAssert { static_assert, expr, msg, close_paren }.into(),
+        Ok(Ok(_) | Err(_)) => unreachable!("`bool`s are either 0 or 1"),
+        Err(errors) => errors.emit(sess),
     }
 }
 

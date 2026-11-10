@@ -1,5 +1,3 @@
-// [[known-bug: checking if a `static_assert`’s condition can be converted to `bool` is not implemented yet]]
-
 struct T {
     int x;
 };
