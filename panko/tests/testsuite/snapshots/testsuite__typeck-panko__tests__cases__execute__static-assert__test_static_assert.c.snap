@@ -1,0 +1,40 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/static-assert/test_static_assert.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/static-assert/test_static_assert.c"
+   (declaration external puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (struct T~1
+      (member x @0 `int`)
+      (member y @4 `int`))
+   (static-assert ∅ (equal `int` (sizeof `unsigned long` 8 `struct T~1 complete`) (multiply `unsigned long` (sign-extend `unsigned long` (2 `int`)) (sizeof `unsigned long` 4 `int`))))
+   (function-definition external
+      main~2 `fn() -> int`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.4~5 `struct T~1 complete`)
+         (static-assert ""
+            (equal `int`
+               (member `int` y +4
+                  (compound-literal `struct T~1 complete`
+                     (definition compound_literal.4~5 `struct T~1 complete`
+                        (braced
+                           (subobject +0 (42 `int`))))))
+               (0 `int`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>) -> int>`
+                  (puts~0 `fn(∅: ptr<char const>) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 48>>`
+                        (string `array<char; 48>` "`static_assert` does not do anything at runtime\0")))))))))
+
+----- stderr -----

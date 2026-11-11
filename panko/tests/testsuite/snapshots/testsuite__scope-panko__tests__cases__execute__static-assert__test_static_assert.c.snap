@@ -1,0 +1,35 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/static-assert/test_static_assert.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/static-assert/test_static_assert.c"
+   (declaration puts~0 `fn(∅: ptr<char const>) -> int` ∅)
+   (struct T~1
+      (member x `int`)
+      (member y `int`))
+   (static-assert ∅ (equal (sizeof `struct T~1 complete`) (multiply 2 (sizeof `int`))))
+   (function-definition
+      main~2 `fn() -> int`
+      (compound-statement
+         (hoisted-compound-literal compound_literal.4~5 `struct T~1 complete`)
+         (static-assert ("")
+            (equal
+               (dot y
+                  (compound-literal
+                     (declaration compound_literal.4~5 `struct T~1 complete`
+                        (braced
+                           (designation ((member x)) 42)))))
+               0))
+         (expression
+            (call (name puts~0 `fn(∅: ptr<char const>) -> int`)
+               (string "`static_assert` does not do anything at runtime"))))))
+
+----- stderr -----
