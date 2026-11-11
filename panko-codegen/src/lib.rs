@@ -630,6 +630,9 @@ impl<'a> Codegen<'a> {
                 // TODO: enum decls can contain errors which should be emitted here
             }
             Statement::Declaration(decl) => self.declaration(decl),
+            Statement::StaticAssert(_) => {
+                // `static_assert` doesn’t generate any code
+            }
             Statement::Typedef(_) => {
                 // TODO: emit the type in case of a VMT
             }

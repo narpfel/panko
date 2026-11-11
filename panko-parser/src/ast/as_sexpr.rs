@@ -97,6 +97,7 @@ impl AsSExpr for Statement<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Statement::Declaration(decl) => decl.as_sexpr(),
+            Statement::StaticAssert(static_assert) => static_assert.as_sexpr(),
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),
             Statement::Return { return_: _, expr } => SExpr::new("return").inherit(expr),

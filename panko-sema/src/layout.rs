@@ -148,6 +148,7 @@ pub enum Statement<'a> {
     StructDecl(Complete<'a, Layout>),
     EnumDecl(CompleteEnum<'a, Layout>),
     Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<LayoutedExpression<'a>>),
     Compound(CompoundStatement<'a>),
@@ -559,6 +560,8 @@ fn layout_statement<'a>(
             Statement::EnumDecl(layout_complete_enum(stack, bump, *complete)),
         typecheck::Statement::Declaration(decl) =>
             Statement::Declaration(layout_declaration(stack, bump, decl)),
+        typecheck::Statement::StaticAssert(static_assert) =>
+            Statement::StaticAssert(layout_static_assert(bump, static_assert)),
         typecheck::Statement::Typedef(typedef) => Statement::Typedef(*typedef),
         typecheck::Statement::Expression(expr) => stack.with_block(|stack| {
             Statement::Expression(try { layout_expression(stack, bump, expr.as_ref()?) })

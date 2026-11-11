@@ -332,6 +332,7 @@ pub(crate) enum Statement<'a> {
     StructDecl(Complete<'a, Typeck>),
     EnumDecl(CompleteEnum<'a, Typeck>),
     Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<TypedExpression<'a>>),
     Compound(CompoundStatement<'a>),
@@ -1820,6 +1821,12 @@ impl<'a> From<StaticAssert<'a>> for ExternalDeclaration<'a> {
     }
 }
 
+impl<'a> From<StaticAssert<'a>> for Statement<'a> {
+    fn from(static_assert: StaticAssert<'a>) -> Self {
+        Self::StaticAssert(static_assert)
+    }
+}
+
 fn typeck_static_assert<'a, T: From<StaticAssert<'a>> + FromError<'a>>(
     sess: &Session<'a>,
     static_assert: &scope::StaticAssert<'a>,
@@ -1887,6 +1894,7 @@ gen fn typeck_statement<'a>(
             }
             return;
         }
+        scope::Statement::StaticAssert(static_assert) => typeck_static_assert(sess, static_assert),
         scope::Statement::Expression(expr) =>
             Statement::Expression(try { typeck_expression(sess, expr.as_ref()?, Context::Default) }),
         scope::Statement::Compound(stmt) =>

@@ -439,6 +439,7 @@ pub(crate) struct CompoundStatement<'a>(pub(crate) &'a [Statement<'a>]);
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Statement<'a> {
     Declaration(Declarators<'a>),
+    StaticAssert(StaticAssert<'a>),
     Expression(Option<Expression<'a>>),
     Compound(CompoundStatement<'a>),
     Return {
@@ -1730,6 +1731,8 @@ gen fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> S
     let stmt = match stmt {
         ast::Statement::Declaration(decl) =>
             Statement::Declaration(resolve_declaration(scopes, decl)),
+        ast::Statement::StaticAssert(static_assert) =>
+            Statement::StaticAssert(resolve_static_assert(scopes, static_assert)),
         ast::Statement::Expression(expr) =>
             Statement::Expression(try { resolve_expr(scopes, expr.as_ref()?) }),
         ast::Statement::Compound(stmts) =>

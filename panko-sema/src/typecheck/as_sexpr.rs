@@ -175,6 +175,7 @@ impl AsSExpr for Statement<'_> {
             Statement::StructDecl(decl) => decl.as_sexpr(),
             Statement::EnumDecl(decl) => decl.as_sexpr(),
             Statement::Declaration(decl) => decl.as_sexpr(),
+            Statement::StaticAssert(static_assert) => static_assert.as_sexpr(),
             Statement::Typedef(typedef) => typedef.as_sexpr(),
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),
