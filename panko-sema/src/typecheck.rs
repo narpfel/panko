@@ -854,6 +854,19 @@ fn typeck_function_ty<'a>(
     }
 }
 
+fn eval_bitfield_width<'a>(
+    sess: &Session<'a>,
+    bitfield_width: Option<BitfieldWidth<'a>>,
+) -> Option<(TypedExpression<'a>, u64)> {
+    let BitfieldWidth { width: expr } = bitfield_width.as_ref()?;
+    let expr = typeck_expression(sess, expr, Context::Default);
+    match constexpr::eval(&expr).into_unsigned() {
+        Ok(Ok(width)) => Some((expr, width)),
+        Ok(Err(width)) => sess.emit(Diagnostic::BitfieldWidthNegative { at: expr, width }),
+        Err(errors) => errors.emit(sess),
+    }
+}
+
 fn typeck_struct_members<'a>(
     sess: &Session<'a>,
     kind: StructKind,
@@ -863,25 +876,7 @@ fn typeck_struct_members<'a>(
     let members = gen {
         for member in members {
             let NoHashEq(member @ scope::Member { name, bitfield_width, ty }) = *member;
-            let (width_expr, bitfield_width) = try {
-                let BitfieldWidth { width } = bitfield_width.as_ref()?;
-                let width = typeck_expression(sess, width, Context::Default);
-                let value = match constexpr::eval(&width).into_unsigned() {
-                    Ok(Ok(value)) => value,
-                    Ok(Err(value)) => {
-                        // TODO: use this error
-                        let () = sess
-                            .emit(Diagnostic::BitfieldWidthNegative { at: width, width: value });
-                        None?
-                    }
-                    Err(errors) => {
-                        let () = errors.emit(sess);
-                        None?
-                    }
-                };
-                (width, value)
-            }
-            .unzip();
+            let bitfield_width = eval_bitfield_width(sess, bitfield_width);
             // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
             // better error recovery due to trying to compute the size and align of incomplete
             // types when using this struct)
@@ -894,7 +889,7 @@ fn typeck_struct_members<'a>(
                     (8, 8)
                 }
             };
-            let width = bitfield_width.unwrap_or(ty_size);
+            let width = try { bitfield_width?.1 }.unwrap_or(ty_size);
             if size + width > size.next_multiple_of(ty_size) {
                 size = size.next_multiple_of(align);
             }
@@ -903,31 +898,19 @@ fn typeck_struct_members<'a>(
                 StructKind::Union => 0,
             };
             let kind = match bitfield_width {
-                Some(_) if !ty.ty.is_valid_for_bitfield() =>
-                    sess.emit(Diagnostic::NonintegralBitfield {
-                        at: member,
-                        ty,
-                        width: width_expr.unwrap(),
-                    }),
-                Some(0) => {
+                Some((width, _)) if !ty.ty.is_valid_for_bitfield() =>
+                    sess.emit(Diagnostic::NonintegralBitfield { at: member, ty, width }),
+                Some((width, 0)) => {
                     if let Some(name) = name {
-                        sess.emit(Diagnostic::NamedZeroWidthBitfield {
-                            at: name,
-                            width: width_expr.unwrap(),
-                        })
+                        sess.emit(Diagnostic::NamedZeroWidthBitfield { at: name, width })
                     }
                     size = size.next_multiple_of(align);
                     continue;
                 }
-                Some(width) => {
+                Some((at, width)) => {
                     let max_size = ty.ty.max_bitfield_size();
                     if width > max_size {
-                        sess.emit(Diagnostic::BitfieldTooWide {
-                            at: width_expr.unwrap(),
-                            width,
-                            ty,
-                            name: member,
-                        })
+                        sess.emit(Diagnostic::BitfieldTooWide { at, width, ty, name: member })
                     }
                     let width = width.min(max_size);
                     MemberKind::Bitfield(Bitfield { offset: size % ty_size, width })
