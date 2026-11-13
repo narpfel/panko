@@ -68,6 +68,7 @@ pub enum ExternalDeclaration<'a> {
     EnumDecl(CompleteEnum<'a, Layout>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
     Typedef(Typedef<'a>),
     ProvideExternalDefinitionForInlineFunction(&'a str),
     Error(&'a dyn Report),
@@ -124,6 +125,12 @@ pub struct FunctionDefinition<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct StaticAssert<'a> {
+    pub expr: LayoutedExpression<'a>,
+    pub msg: Option<&'a ByteStr>,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub enum Return<'a> {
     Void,
     InRegisters(Class),
@@ -141,6 +148,7 @@ pub enum Statement<'a> {
     StructDecl(Complete<'a, Layout>),
     EnumDecl(CompleteEnum<'a, Layout>),
     Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<LayoutedExpression<'a>>),
     Compound(CompoundStatement<'a>),
@@ -509,6 +517,21 @@ fn layout_declaration<'a>(
     Declaration { reference, initialiser }
 }
 
+fn layout_static_assert<'a>(
+    bump: &'a Bump,
+    static_assert: &typecheck::StaticAssert<'a>,
+) -> StaticAssert<'a> {
+    let typecheck::StaticAssert {
+        static_assert: _,
+        expr,
+        msg,
+        close_paren: _,
+    } = *static_assert;
+    // TODO: declarations in the global scope should not get a stack
+    let expr = layout_expression(&mut Stack::default(), bump, &expr);
+    StaticAssert { expr, msg }
+}
+
 fn layout_compound_statement<'a>(
     stack: &mut Stack<'a>,
     bump: &'a Bump,
@@ -537,6 +560,8 @@ fn layout_statement<'a>(
             Statement::EnumDecl(layout_complete_enum(stack, bump, *complete)),
         typecheck::Statement::Declaration(decl) =>
             Statement::Declaration(layout_declaration(stack, bump, decl)),
+        typecheck::Statement::StaticAssert(static_assert) =>
+            Statement::StaticAssert(layout_static_assert(bump, static_assert)),
         typecheck::Statement::Typedef(typedef) => Statement::Typedef(*typedef),
         typecheck::Statement::Expression(expr) => stack.with_block(|stack| {
             Statement::Expression(try { layout_expression(stack, bump, expr.as_ref()?) })
@@ -804,6 +829,8 @@ pub fn layout<'a>(
                     bump,
                     decl,
                 )),
+            typecheck::ExternalDeclaration::StaticAssert(static_assert) =>
+                ExternalDeclaration::StaticAssert(layout_static_assert(bump, static_assert)),
             typecheck::ExternalDeclaration::Typedef(typedef) =>
                 ExternalDeclaration::Typedef(*typedef),
             typecheck::ExternalDeclaration::ProvideExternalDefinitionForInlineFunction(name) =>

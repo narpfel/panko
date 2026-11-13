@@ -1,4 +1,5 @@
 use std::assert_matches;
+use std::byte_str::ByteStr;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
@@ -200,6 +201,7 @@ pub(crate) enum ExternalDeclaration<'a> {
     EnumDecl(CompleteEnum<'a, Typeck>),
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
     Typedef(Typedef<'a>),
     ProvideExternalDefinitionForInlineFunction(&'a str),
     Error(&'a dyn Report),
@@ -292,6 +294,22 @@ pub(crate) struct FunctionDefinition<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) struct StaticAssert<'a> {
+    #[expect(
+        unused,
+        reason = "used for error handling, but error handling is not implemented yet"
+    )]
+    pub(crate) static_assert: Token<'a>,
+    pub(crate) expr: TypedExpression<'a>,
+    pub(crate) msg: Option<&'a ByteStr>,
+    #[expect(
+        unused,
+        reason = "used for error handling, but error handling is not implemented yet"
+    )]
+    pub(crate) close_paren: Token<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum Return<'a> {
     Void,
     InRegisters(Class),
@@ -314,6 +332,7 @@ pub(crate) enum Statement<'a> {
     StructDecl(Complete<'a, Typeck>),
     EnumDecl(CompleteEnum<'a, Typeck>),
     Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
     Typedef(Typedef<'a>),
     Expression(Option<TypedExpression<'a>>),
     Compound(CompoundStatement<'a>),
@@ -835,6 +854,19 @@ fn typeck_function_ty<'a>(
     }
 }
 
+fn eval_bitfield_width<'a>(
+    sess: &Session<'a>,
+    bitfield_width: Option<BitfieldWidth<'a>>,
+) -> Option<(TypedExpression<'a>, u64)> {
+    let BitfieldWidth { width: expr } = bitfield_width.as_ref()?;
+    let expr = typeck_expression(sess, expr, Context::Default);
+    match constexpr::eval(&expr).into_unsigned() {
+        Ok(Ok(width)) => Some((expr, width)),
+        Ok(Err(width)) => sess.emit(Diagnostic::BitfieldWidthNegative { at: expr, width }),
+        Err(errors) => errors.emit(sess),
+    }
+}
+
 fn typeck_struct_members<'a>(
     sess: &Session<'a>,
     kind: StructKind,
@@ -844,25 +876,7 @@ fn typeck_struct_members<'a>(
     let members = gen {
         for member in members {
             let NoHashEq(member @ scope::Member { name, bitfield_width, ty }) = *member;
-            let (width_expr, bitfield_width) = try {
-                let BitfieldWidth { width } = bitfield_width.as_ref()?;
-                let width = typeck_expression(sess, width, Context::Default);
-                let value = match constexpr::eval(&width).into_unsigned() {
-                    Ok(Ok(value)) => value,
-                    Ok(Err(value)) => {
-                        // TODO: use this error
-                        let () = sess
-                            .emit(Diagnostic::BitfieldWidthNegative { at: width, width: value });
-                        None?
-                    }
-                    Err(errors) => {
-                        sess.emit_many(errors.into_iter().filter_map(Either::left));
-                        None?
-                    }
-                };
-                (width, value)
-            }
-            .unzip();
+            let bitfield_width = eval_bitfield_width(sess, bitfield_width);
             // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
             // better error recovery due to trying to compute the size and align of incomplete
             // types when using this struct)
@@ -875,7 +889,7 @@ fn typeck_struct_members<'a>(
                     (8, 8)
                 }
             };
-            let width = bitfield_width.unwrap_or(ty_size);
+            let width = try { bitfield_width?.1 }.unwrap_or(ty_size);
             if size + width > size.next_multiple_of(ty_size) {
                 size = size.next_multiple_of(align);
             }
@@ -884,31 +898,19 @@ fn typeck_struct_members<'a>(
                 StructKind::Union => 0,
             };
             let kind = match bitfield_width {
-                Some(_) if !ty.ty.is_valid_for_bitfield() =>
-                    sess.emit(Diagnostic::NonintegralBitfield {
-                        at: member,
-                        ty,
-                        width: width_expr.unwrap(),
-                    }),
-                Some(0) => {
+                Some((width, _)) if !ty.ty.is_valid_for_bitfield() =>
+                    sess.emit(Diagnostic::NonintegralBitfield { at: member, ty, width }),
+                Some((width, 0)) => {
                     if let Some(name) = name {
-                        sess.emit(Diagnostic::NamedZeroWidthBitfield {
-                            at: name,
-                            width: width_expr.unwrap(),
-                        })
+                        sess.emit(Diagnostic::NamedZeroWidthBitfield { at: name, width })
                     }
                     size = size.next_multiple_of(align);
                     continue;
                 }
-                Some(width) => {
+                Some((at, width)) => {
                     let max_size = ty.ty.max_bitfield_size();
                     if width > max_size {
-                        sess.emit(Diagnostic::BitfieldTooWide {
-                            at: width_expr.unwrap(),
-                            width,
-                            ty,
-                            name: member,
-                        })
+                        sess.emit(Diagnostic::BitfieldTooWide { at, width, ty, name: member })
                     }
                     let width = width.min(max_size);
                     MemberKind::Bitfield(Bitfield { offset: size % ty_size, width })
@@ -1065,11 +1067,7 @@ fn typeck_enumerator<'a>(
         let value = constexpr::eval(&value)
             .into_integral()
             .unwrap_or_else(|errors| {
-                for error in errors {
-                    if let Either::Left(error) = error {
-                        sess.emit(error)
-                    }
-                }
+                let () = errors.emit(sess);
                 0.into()
             });
         (ty, value)
@@ -1541,9 +1539,7 @@ fn typeck_initialiser_list<'a>(
                                         at: *designator,
                                         index,
                                     }),
-                                Err(errors) =>
-                                    return sess
-                                        .emit_many(errors.into_iter().filter_map(Either::left)),
+                                Err(errors) => return errors.emit(sess),
                             };
                             subobjects.goto_index(index)
                         }
@@ -1802,6 +1798,39 @@ fn typeck_declaration<'a>(
     Declaration { reference, initialiser }
 }
 
+impl<'a> From<StaticAssert<'a>> for ExternalDeclaration<'a> {
+    fn from(static_assert: StaticAssert<'a>) -> Self {
+        Self::StaticAssert(static_assert)
+    }
+}
+
+impl<'a> From<StaticAssert<'a>> for Statement<'a> {
+    fn from(static_assert: StaticAssert<'a>) -> Self {
+        Self::StaticAssert(static_assert)
+    }
+}
+
+fn typeck_static_assert<'a, T: From<StaticAssert<'a>> + FromError<'a>>(
+    sess: &Session<'a>,
+    static_assert: &scope::StaticAssert<'a>,
+) -> T {
+    let scope::StaticAssert { static_assert, expr, msg, close_paren } = *static_assert;
+    let msg = try {
+        let bytes = literal::parse_string_literal(sess, msg?).value();
+        ByteStr::new(bytes.trim_suffix(b"\0"))
+    };
+    let expr = typeck_expression(sess, &expr, Context::Default);
+    let bool = Type::bool().unqualified();
+    let condition = convert(sess, bool, expr, ConversionKind::Implicit);
+    let value = constexpr::eval(&condition);
+    match value.into_unsigned() {
+        Ok(Ok(0)) => sess.emit(Diagnostic::StaticAssertionFailed { at: expr, static_assert, msg }),
+        Ok(Ok(1)) => StaticAssert { static_assert, expr, msg, close_paren }.into(),
+        Ok(Ok(_) | Err(_)) => unreachable!("`bool`s are either 0 or 1"),
+        Err(errors) => errors.emit(sess),
+    }
+}
+
 fn typeck_compound_statement<'a>(
     sess: &Session<'a>,
     stmt: &scope::CompoundStatement<'a>,
@@ -1848,6 +1877,7 @@ gen fn typeck_statement<'a>(
             }
             return;
         }
+        scope::Statement::StaticAssert(static_assert) => typeck_static_assert(sess, static_assert),
         scope::Statement::Expression(expr) =>
             Statement::Expression(try { typeck_expression(sess, expr.as_ref()?, Context::Default) }),
         scope::Statement::Compound(stmt) =>
@@ -3211,6 +3241,8 @@ pub fn resolve_types<'a>(
                     }
                     return;
                 }
+                scope::ExternalDeclaration::StaticAssert(static_assert) =>
+                    typeck_static_assert(sess, static_assert),
                 scope::ExternalDeclaration::Error(error) => ExternalDeclaration::Error(*error),
             }
         })),

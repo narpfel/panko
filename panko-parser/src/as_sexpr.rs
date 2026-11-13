@@ -26,6 +26,7 @@ use crate::MemberAccessOpKind;
 use crate::ParameterDeclaration;
 use crate::Pointer;
 use crate::PrimaryBlock;
+use crate::StaticAssert;
 use crate::StorageClassSpecifier;
 use crate::StructKind;
 use crate::TranslationUnit;
@@ -51,7 +52,20 @@ impl AsSExpr for ExternalDeclaration<'_> {
         match self {
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
+            ExternalDeclaration::StaticAssert(static_assert) => static_assert.as_sexpr(),
         }
+    }
+}
+
+impl AsSExpr for StaticAssert<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self {
+            static_assert: _,
+            expr,
+            msg,
+            close_paren: _,
+        } = self;
+        SExpr::new("static-assert").inherit(msg).inherit(expr)
     }
 }
 
@@ -251,6 +265,7 @@ impl AsSExpr for BlockItem<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             BlockItem::Declaration(decl) => decl.as_sexpr(),
+            BlockItem::StaticAssert(static_assert) => static_assert.as_sexpr(),
             BlockItem::UnlabeledStatement(unlabeled_statement) => unlabeled_statement.as_sexpr(),
         }
     }

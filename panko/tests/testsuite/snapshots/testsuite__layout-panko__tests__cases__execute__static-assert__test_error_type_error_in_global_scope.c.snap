@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/static-assert/test_error_type_error_in_global_scope.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: invalid implicit conversion from `struct T~0 complete` to `bool`
+   ╭─[panko/tests/cases/execute/static-assert/test_error_type_error_in_global_scope.c:6:15]
+   │
+ 6 │ static_assert((struct T){ .x = 42 });
+   │               ┬  
+   │               ╰── this is of type `struct T~0 complete`, which cannot be implicitly converted to `bool`
+───╯

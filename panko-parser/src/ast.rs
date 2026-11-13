@@ -22,6 +22,7 @@ pub use crate::Initialiser;
 use crate::JumpStatement;
 use crate::NO_VALUE;
 use crate::PrimaryBlock;
+use crate::StaticAssert;
 use crate::StorageClassSpecifierKind;
 use crate::StructKind;
 use crate::TypeName;
@@ -239,6 +240,7 @@ pub struct TranslationUnit<'a> {
 pub enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a, InitDeclarator<'a>>),
+    StaticAssert(StaticAssert<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -437,6 +439,7 @@ pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
 pub enum Statement<'a> {
     // TODO: restrict the kinds of decls that are allowed in function scope?
     Declaration(Declaration<'a, InitDeclarator<'a>>),
+    StaticAssert(StaticAssert<'a>),
     Expression(Option<Expression<'a>>),
     Compound(CompoundStatement<'a>),
     Return {
@@ -452,6 +455,8 @@ impl<'a> ExternalDeclaration<'a> {
                 Self::FunctionDefinition(FunctionDefinition::from_parse_tree(sess, def)),
             cst::ExternalDeclaration::Declaration(decl) =>
                 Self::Declaration(Declaration::from_parse_tree(sess, decl)),
+            cst::ExternalDeclaration::StaticAssert(static_assert) =>
+                Self::StaticAssert(*static_assert),
         }
     }
 }
@@ -591,6 +596,7 @@ impl<'a> Statement<'a> {
         match item {
             BlockItem::Declaration(decl) =>
                 Self::Declaration(Declaration::from_parse_tree(sess, decl)),
+            BlockItem::StaticAssert(static_assert) => Self::StaticAssert(*static_assert),
             BlockItem::UnlabeledStatement(stmt) => Self::from_unlabeled_statement(sess, stmt),
         }
     }

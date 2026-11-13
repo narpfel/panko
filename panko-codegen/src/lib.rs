@@ -630,6 +630,9 @@ impl<'a> Codegen<'a> {
                 // TODO: enum decls can contain errors which should be emitted here
             }
             Statement::Declaration(decl) => self.declaration(decl),
+            Statement::StaticAssert(_) => {
+                // `static_assert` doesn’t generate any code
+            }
             Statement::Typedef(_) => {
                 // TODO: emit the type in case of a VMT
             }
@@ -1347,6 +1350,9 @@ pub fn emit(translation_unit: TranslationUnit, with_debug_info: bool) -> (String
             }
             ExternalDeclaration::FunctionDefinition(def) => cg.function_definition(def),
             ExternalDeclaration::Declaration(decl) => cg.external_declaration(decl),
+            ExternalDeclaration::StaticAssert(_) => {
+                // `static_assert` doesn’t generate any code
+            }
             ExternalDeclaration::Typedef(_) => {
                 // TODO: check that the type is not a VMT
             }

@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_designated_initialisation_with_typedef_collision.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unexpected token `x` of kind `TypeIdentifier`
+   ╭─[panko/tests/cases/execute/struct/test_designated_initialisation_with_typedef_collision.c:8:21]
+   │
+ 8 │     struct T t = { .x = 42 };
+   │                     ┬  
+   │                     ╰── expected one of the following token kinds: [Identifier]
+───╯

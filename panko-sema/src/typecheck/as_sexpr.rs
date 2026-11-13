@@ -26,6 +26,7 @@ use crate::typecheck::Enumerators;
 use crate::typecheck::Member;
 use crate::typecheck::MemberKind;
 use crate::typecheck::MemberType;
+use crate::typecheck::StaticAssert;
 use crate::typecheck::UnderlyingType;
 
 impl<Expression> AsSExpr for ArrayLength<Expression>
@@ -76,6 +77,7 @@ impl AsSExpr for ExternalDeclaration<'_> {
             ExternalDeclaration::EnumDecl(decl) => decl.as_sexpr(),
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
+            ExternalDeclaration::StaticAssert(static_assert) => static_assert.as_sexpr(),
             ExternalDeclaration::Typedef(typedef) => typedef.as_sexpr(),
             ExternalDeclaration::ProvideExternalDefinitionForInlineFunction(name) =>
                 SExpr::new("provide-external-definition").inline_string(name.to_string()),
@@ -112,6 +114,18 @@ impl AsSExpr for FunctionDefinition<'_> {
 impl AsSExpr for ParamRefs<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("params").lines(self.0)
+    }
+}
+
+impl AsSExpr for StaticAssert<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self {
+            static_assert: _,
+            expr,
+            msg,
+            close_paren: _,
+        } = self;
+        SExpr::new("static-assert").inherit(msg).inherit(expr)
     }
 }
 
@@ -161,6 +175,7 @@ impl AsSExpr for Statement<'_> {
             Statement::StructDecl(decl) => decl.as_sexpr(),
             Statement::EnumDecl(decl) => decl.as_sexpr(),
             Statement::Declaration(decl) => decl.as_sexpr(),
+            Statement::StaticAssert(static_assert) => static_assert.as_sexpr(),
             Statement::Typedef(typedef) => typedef.as_sexpr(),
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),
