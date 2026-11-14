@@ -1,0 +1,76 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/static-assert/test_in_struct_member_list.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/static-assert/test_in_struct_member_list.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct Outer~1
+      (member x `array<int; (sizeof `struct Inner~2 complete`)>`)
+      (static-assert ∅ (equal (sizeof `struct Inner~2 complete`) (sizeof `int`)))
+      (member y `int`)
+      (static-assert ∅ (equal (sizeof `struct InStaticAssert~3 complete`) 1)))
+   (static-assert ∅ (equal (sizeof `struct Inner~2 complete`) (sizeof `int`)))
+   (static-assert ∅ (equal (sizeof `struct InStaticAssert~3 complete`) 1))
+   (static-assert ∅ (equal (sizeof `struct Outer~1 complete`) (multiply 5 (sizeof `int`))))
+   (union U~4
+      (member x `int`)
+      (static-assert ∅ (equal (multiply 21 2) 42)))
+   (function-definition
+      main~5 `fn() -> int`
+      (compound-statement
+         (declaration inner~7 `struct Inner~2 complete`
+            (braced
+               123))
+         (declaration in_static_assert~8 `struct InStaticAssert~3 complete`
+            (braced
+               27))
+         (declaration u~9 `union U~4 complete`
+            (braced
+               456))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d\n")
+               (dot x
+                  (name inner~7 `struct Inner~2 complete`))
+               (dot c
+                  (name in_static_assert~8 `struct InStaticAssert~3 complete`))
+               (dot x
+                  (name u~9 `union U~4 complete`))))
+         (declaration value~10 `struct Outer~1 complete`
+            (braced
+               (designation ((member x) (index 0)) 1)
+               (designation ((member x) (index 1)) 2)
+               (designation ((member x) (index 2)) 4)
+               (designation ((member x) (index 3)) 8)
+               (designation ((member y)) 42)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d %d %d %d %d\n")
+               (subscript
+                  (dot x
+                     (name value~10 `struct Outer~1 complete`))
+                  0)
+               (subscript
+                  (dot x
+                     (name value~10 `struct Outer~1 complete`))
+                  1)
+               (subscript
+                  (dot x
+                     (name value~10 `struct Outer~1 complete`))
+                  2)
+               (subscript
+                  (dot x
+                     (name value~10 `struct Outer~1 complete`))
+                  3)
+               (dot y
+                  (name value~10 `struct Outer~1 complete`)))))))
+
+----- stderr -----
