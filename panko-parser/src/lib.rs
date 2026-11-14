@@ -461,7 +461,7 @@ impl<'a> TypeSpecifier<'a> {
     fn r#struct(
         struct_or_union: Token<'a>,
         name: Option<Token<'a>>,
-        members: &'a [Declaration<'a>],
+        members: &'a [AnyDeclaration<'a>],
     ) -> Self {
         let kind = struct_kind(struct_or_union.kind);
         Self {
@@ -654,7 +654,7 @@ enum Struct<'a> {
     Complete {
         name: Option<Token<'a>>,
         kind: StructKind,
-        members: &'a [Declaration<'a>],
+        members: &'a [AnyDeclaration<'a>],
     },
 }
 

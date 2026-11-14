@@ -6,6 +6,7 @@ use crate::ast::Declaration;
 use crate::ast::ExternalDeclaration;
 use crate::ast::FunctionDefinition;
 use crate::ast::Member;
+use crate::ast::MemberDeclaration;
 use crate::ast::QualifiedType;
 use crate::ast::Statement;
 use crate::ast::Struct;
@@ -74,6 +75,15 @@ impl AsSExpr for Struct<'_> {
             Self::Incomplete { name, kind } => kind.as_sexpr().inherit(name),
             Self::Complete { name, kind, members } =>
                 kind.as_sexpr().inherit(name).lines_explicit_empty(*members),
+        }
+    }
+}
+
+impl AsSExpr for MemberDeclaration<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Member(decl) => decl.as_sexpr(),
+            Self::StaticAssert(static_assert) => static_assert.as_sexpr(),
         }
     }
 }

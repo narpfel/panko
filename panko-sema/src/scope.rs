@@ -207,6 +207,12 @@ pub(crate) enum Diagnostic<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) enum MemberDeclaration<'a> {
+    Member(Member<'a>),
+    StaticAssert(StaticAssert<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
 pub(crate) struct Member<'a> {
     pub(crate) name: Option<Token<'a>>,
     pub(crate) bitfield_width: Option<BitfieldWidth<'a>>,
@@ -242,7 +248,7 @@ pub(crate) enum Scope {}
 impl ty::Step for Scope {
     type Enumerators<'a> = NoHashEq<Enumerators<'a>>;
     type LengthExpr<'a> = NoHashEq<Option<&'a Expression<'a>>>;
-    type Member<'a> = NoHashEq<Member<'a>>;
+    type Member<'a> = NoHashEq<MemberDeclaration<'a>>;
     type TypeofExpr<'a> = NoHashEq<Typeof<'a>>;
 }
 
@@ -1174,45 +1180,61 @@ fn resolve_struct<'a>(scopes: &mut Scopes<'a>, r#struct: &Struct<'a>) -> Type<'a
     ty
 }
 
+gen fn resolve_struct_member<'a>(
+    scopes: &mut Scopes<'a>,
+    member: &ast::Declaration<'a, ast::Member<'a>>,
+) -> Member<'a> {
+    let ast::Declaration {
+        storage_class,
+        function_specifiers,
+        ty: unresolved_ty,
+        declarators,
+    } = member;
+    assert_matches!(storage_class, None);
+    assert_matches!(
+        function_specifiers,
+        FunctionSpecifiers { inline: None, noreturn: None },
+    );
+
+    let ty = resolve_ty(scopes, unresolved_ty);
+    if let ast::Type::Struct(Struct::Complete { name: None, kind: _, members: _ }) =
+        unresolved_ty.ty
+        && declarators.is_empty()
+    {
+        yield Member { name: None, bitfield_width: None, ty }
+    }
+
+    for ast::Member { declarator, bitfield_width } in *declarators {
+        let (ty, name) = parse_declarator(scopes, ty, *declarator, IsParameter::No);
+        let bitfield_width = try {
+            BitfieldWidth {
+                width: resolve_expr(scopes, bitfield_width.as_ref()?),
+            }
+        };
+        yield Member { name, bitfield_width, ty }
+    }
+}
+
 fn resolve_struct_members<'a>(
     scopes: &mut Scopes<'a>,
-    members: &'a [ast::Declaration<'a, ast::Member<'a>>],
-) -> &'a [NoHashEq<Member<'a>>] {
+    members: &'a [ast::MemberDeclaration<'a>],
+) -> &'a [NoHashEq<MemberDeclaration<'a>>] {
     let sess = scopes.sess;
     let members = gen {
         for member in members {
-            let ast::Declaration {
-                storage_class,
-                function_specifiers,
-                ty: unqualified_ty,
-                declarators,
-            } = member;
-            assert_matches!(storage_class, None);
-            assert_matches!(
-                function_specifiers,
-                FunctionSpecifiers { inline: None, noreturn: None },
-            );
-
-            let ty = resolve_ty(scopes, unqualified_ty);
-            if let ast::Type::Struct(Struct::Complete { name: None, kind: _, members: _ }) =
-                unqualified_ty.ty
-                && declarators.is_empty()
-            {
-                yield NoHashEq(Member { name: None, bitfield_width: None, ty })
-            }
-
-            for ast::Member { declarator, bitfield_width } in *declarators {
-                let (ty, name) = parse_declarator(scopes, ty, *declarator, IsParameter::No);
-                let bitfield_width = try {
-                    BitfieldWidth {
-                        width: resolve_expr(scopes, bitfield_width.as_ref()?),
-                    }
-                };
-                yield NoHashEq(Member { name, bitfield_width, ty })
+            match member {
+                ast::MemberDeclaration::Member(member) =>
+                    for member in resolve_struct_member(scopes, member) {
+                        yield MemberDeclaration::Member(member)
+                    },
+                ast::MemberDeclaration::StaticAssert(static_assert) => {
+                    let static_assert = resolve_static_assert(scopes, static_assert);
+                    yield MemberDeclaration::StaticAssert(static_assert)
+                }
             }
         }
     };
-    sess.alloc_slice_collect(members)
+    sess.alloc_slice_collect(members.map(NoHashEq))
 }
 
 fn resolve_enum<'a>(scopes: &mut Scopes<'a>, r#enum: &Enum<'a>) -> Type<'a> {

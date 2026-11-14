@@ -14,6 +14,7 @@ use panko_report::Report;
 use panko_report::Sliced as _;
 
 use crate as cst;
+use crate::AnyDeclaration;
 use crate::BlockItem;
 pub use crate::DesignatedInitialiser;
 use crate::Enumerator;
@@ -332,7 +333,7 @@ pub enum Struct<'a> {
     Complete {
         name: Option<Token<'a>>,
         kind: StructKind,
-        members: &'a [Declaration<'a, Member<'a>>],
+        members: &'a [MemberDeclaration<'a>],
     },
 }
 
@@ -385,6 +386,12 @@ impl<'a> Enum<'a> {
                 .loc(),
         }
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum MemberDeclaration<'a> {
+    Member(Declaration<'a, Member<'a>>),
+    StaticAssert(StaticAssert<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -775,9 +782,14 @@ impl<'a> ParsedSpecifiers<'a> {
                 Type::Struct(Struct::Complete {
                     name,
                     kind,
-                    members: sess.alloc_slice_fill_iter(
-                        members.iter().map(|member| Member::parse(sess, member)),
-                    ),
+                    members: sess.alloc_slice_fill_iter(members.iter().map(
+                        |member| match member {
+                            AnyDeclaration::Declaration(member) =>
+                                MemberDeclaration::Member(Member::parse(sess, member)),
+                            AnyDeclaration::StaticAssert(static_assert) =>
+                                MemberDeclaration::StaticAssert(*static_assert),
+                        },
+                    )),
                 }),
             Self::Enum(cst::Enum::Incomplete { name }) => Type::Enum(Enum::Incomplete { name }),
             Self::Enum(cst::Enum::Complete { name, fixed_underlying, enumerators }) => {

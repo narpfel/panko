@@ -55,6 +55,7 @@ use crate::scope::IncrementFixity;
 use crate::scope::IsInGlobalScope;
 use crate::scope::IsParameter;
 use crate::scope::Linkage;
+use crate::scope::MemberDeclaration;
 use crate::scope::Redeclared;
 use crate::scope::RefInitialiser;
 use crate::scope::RefKind;
@@ -870,12 +871,20 @@ fn eval_bitfield_width<'a>(
 fn typeck_struct_members<'a>(
     sess: &Session<'a>,
     kind: StructKind,
-    members: &[NoHashEq<scope::Member<'a>>],
+    members: &[NoHashEq<MemberDeclaration<'a>>],
 ) -> &'a [Member<'a, Typeck>] {
     let mut size = 0_u64;
     let members = gen {
         for member in members {
-            let NoHashEq(member @ scope::Member { name, bitfield_width, ty }) = *member;
+            let member = match member {
+                NoHashEq(MemberDeclaration::Member(member)) => *member,
+                NoHashEq(MemberDeclaration::StaticAssert(static_assert)) => {
+                    // TODO: use the `StaticAssert` so that the sexpr repr shows it
+                    let _: Option<StaticAssert<'a>> = typeck_static_assert(sess, static_assert);
+                    continue;
+                }
+            };
+            let scope::Member { name, bitfield_width, ty } = member;
             let bitfield_width = eval_bitfield_width(sess, bitfield_width);
             // TODO: when `ty` is incomplete or a function, `ty` should be `Type::Error` (for
             // better error recovery due to trying to compute the size and align of incomplete

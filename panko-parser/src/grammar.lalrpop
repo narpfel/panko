@@ -576,7 +576,7 @@ StructOrUnion = {
 
 StructOrUnionSpecifier: ast::TypeSpecifier<'a> = {
     StructOrUnion AnyIdentifier => ast::TypeSpecifier::incomplete_struct(<>),
-    <StructOrUnion> <AnyIdentifier?> "{" PushIsInTypedef <Many<Declaration>> PopIsInTypedef "}" =>
+    <StructOrUnion> <AnyIdentifier?> "{" PushIsInTypedef <Many<AnyDeclaration>> PopIsInTypedef "}" =>
         ast::TypeSpecifier::r#struct(<>),
 }
 
