@@ -229,7 +229,6 @@ pub struct StaticAssert<'a> {
     pub static_assert: Token<'a>,
     pub expr: Expression<'a>,
     pub msg: Option<&'a [Token<'a>]>,
-    pub close_paren: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]

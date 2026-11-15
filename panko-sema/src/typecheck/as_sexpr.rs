@@ -119,12 +119,7 @@ impl AsSExpr for ParamRefs<'_> {
 
 impl AsSExpr for StaticAssert<'_> {
     fn as_sexpr(&self) -> SExpr {
-        let Self {
-            static_assert: _,
-            expr,
-            msg,
-            close_paren: _,
-        } = self;
+        let Self { expr, msg } = self;
         SExpr::new("static-assert").inherit(msg).inherit(expr)
     }
 }

@@ -296,18 +296,8 @@ pub(crate) struct FunctionDefinition<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct StaticAssert<'a> {
-    #[expect(
-        unused,
-        reason = "used for error handling, but error handling is not implemented yet"
-    )]
-    pub(crate) static_assert: Token<'a>,
     pub(crate) expr: TypedExpression<'a>,
     pub(crate) msg: Option<&'a ByteStr>,
-    #[expect(
-        unused,
-        reason = "used for error handling, but error handling is not implemented yet"
-    )]
-    pub(crate) close_paren: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1823,7 +1813,7 @@ fn typeck_static_assert<'a, T: From<StaticAssert<'a>> + FromError<'a>>(
     sess: &Session<'a>,
     static_assert: &scope::StaticAssert<'a>,
 ) -> T {
-    let scope::StaticAssert { static_assert, expr, msg, close_paren } = *static_assert;
+    let scope::StaticAssert { static_assert, expr, msg } = *static_assert;
     let msg = try {
         let bytes = literal::parse_string_literal(sess, msg?).value();
         ByteStr::new(bytes.trim_suffix(b"\0"))
@@ -1834,7 +1824,7 @@ fn typeck_static_assert<'a, T: From<StaticAssert<'a>> + FromError<'a>>(
     let value = constexpr::eval(&condition);
     match value.into_unsigned() {
         Ok(Ok(0)) => sess.emit(Diagnostic::StaticAssertionFailed { at: expr, static_assert, msg }),
-        Ok(Ok(1)) => StaticAssert { static_assert, expr, msg, close_paren }.into(),
+        Ok(Ok(1)) => StaticAssert { expr, msg }.into(),
         Ok(Ok(_) | Err(_)) => unreachable!("`bool`s are either 0 or 1"),
         Err(errors) => errors.emit(sess),
     }

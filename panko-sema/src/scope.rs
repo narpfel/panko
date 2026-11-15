@@ -417,7 +417,6 @@ pub(crate) struct StaticAssert<'a> {
     pub(crate) static_assert: Token<'a>,
     pub(crate) expr: Expression<'a>,
     pub(crate) msg: Option<&'a [Token<'a>]>,
-    pub(crate) close_paren: Token<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1744,9 +1743,9 @@ fn resolve_static_assert<'a>(
     scopes: &mut Scopes<'a>,
     static_assert: &cst::StaticAssert<'a>,
 ) -> StaticAssert<'a> {
-    let cst::StaticAssert { static_assert, expr, msg, close_paren } = *static_assert;
+    let cst::StaticAssert { static_assert, expr, msg } = *static_assert;
     let expr = resolve_expr(scopes, &expr);
-    StaticAssert { static_assert, expr, msg, close_paren }
+    StaticAssert { static_assert, expr, msg }
 }
 
 gen fn resolve_stmt<'a>(scopes: &mut Scopes<'a>, stmt: &ast::Statement<'a>) -> Statement<'a> {

@@ -521,12 +521,7 @@ fn layout_static_assert<'a>(
     bump: &'a Bump,
     static_assert: &typecheck::StaticAssert<'a>,
 ) -> StaticAssert<'a> {
-    let typecheck::StaticAssert {
-        static_assert: _,
-        expr,
-        msg,
-        close_paren: _,
-    } = *static_assert;
+    let typecheck::StaticAssert { expr, msg } = *static_assert;
     // TODO: declarations in the global scope should not get a stack
     let expr = layout_expression(&mut Stack::default(), bump, &expr);
     StaticAssert { expr, msg }
