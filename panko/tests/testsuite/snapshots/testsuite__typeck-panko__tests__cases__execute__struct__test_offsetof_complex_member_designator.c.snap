@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_offsetof_complex_member_designator.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: unexpected token `[` of kind `LBracket`
+    ╭─[panko/tests/cases/execute/struct/test_offsetof_complex_member_designator.c:24:51]
+    │
+ 24 │     printf("%zu\n", offsetof(struct Outer, middles[5].inner.x));
+    │                                                   ┬  
+    │                                                   ╰── expected one of the following token kinds: [")"]
+────╯

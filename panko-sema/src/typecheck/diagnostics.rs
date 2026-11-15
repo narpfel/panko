@@ -1,3 +1,5 @@
+use std::byte_str::ByteStr;
+
 use ariadne::Color::Blue;
 use ariadne::Color::Green;
 use ariadne::Color::Magenta;
@@ -718,6 +720,15 @@ pub(super) enum Diagnostic<'a> {
         at: scope::Enumerator<'a>,
         value: constexpr::Integral,
         ty: Type<'a>,
+    },
+
+    #[error("static assertion failed{msg}")]
+    #[diagnostics(at(colour = Red, label = "this assertion failed"), static_assert(colour = Blue))]
+    #[with(msg = msg.map_or_default(|msg| format!(": {msg}")))]
+    StaticAssertionFailed {
+        at: TypedExpression<'a>,
+        static_assert: Token<'a>,
+        msg: Option<&'a ByteStr>,
     },
 }
 

@@ -1,0 +1,25 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/static-assert/test_error_type_error_in_global_scope.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/static-assert/test_error_type_error_in_global_scope.c"
+   (struct T~0
+      (member x `int`))
+   (static-assert ∅
+      (compound-literal
+         (declaration compound_literal.1~2 `struct T~0 complete`
+            (braced
+               (designation ((member x)) 42)))))
+   (function-definition
+      main~3 `fn() -> int`
+      (compound-statement)))
+
+----- stderr -----

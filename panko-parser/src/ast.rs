@@ -14,6 +14,7 @@ use panko_report::Report;
 use panko_report::Sliced as _;
 
 use crate as cst;
+use crate::AnyDeclaration;
 use crate::BlockItem;
 pub use crate::DesignatedInitialiser;
 use crate::Enumerator;
@@ -22,6 +23,7 @@ pub use crate::Initialiser;
 use crate::JumpStatement;
 use crate::NO_VALUE;
 use crate::PrimaryBlock;
+use crate::StaticAssert;
 use crate::StorageClassSpecifierKind;
 use crate::StructKind;
 use crate::TypeName;
@@ -239,6 +241,7 @@ pub struct TranslationUnit<'a> {
 pub enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a, InitDeclarator<'a>>),
+    StaticAssert(StaticAssert<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -330,7 +333,7 @@ pub enum Struct<'a> {
     Complete {
         name: Option<Token<'a>>,
         kind: StructKind,
-        members: &'a [Declaration<'a, Member<'a>>],
+        members: &'a [MemberDeclaration<'a>],
     },
 }
 
@@ -386,6 +389,12 @@ impl<'a> Enum<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub enum MemberDeclaration<'a> {
+    Member(Declaration<'a, Member<'a>>),
+    StaticAssert(StaticAssert<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct Member<'a> {
     pub declarator: cst::Declarator<'a>,
     pub bitfield_width: Option<Expression<'a>>,
@@ -437,6 +446,7 @@ pub struct CompoundStatement<'a>(pub &'a [Statement<'a>]);
 pub enum Statement<'a> {
     // TODO: restrict the kinds of decls that are allowed in function scope?
     Declaration(Declaration<'a, InitDeclarator<'a>>),
+    StaticAssert(StaticAssert<'a>),
     Expression(Option<Expression<'a>>),
     Compound(CompoundStatement<'a>),
     Return {
@@ -452,6 +462,8 @@ impl<'a> ExternalDeclaration<'a> {
                 Self::FunctionDefinition(FunctionDefinition::from_parse_tree(sess, def)),
             cst::ExternalDeclaration::Declaration(decl) =>
                 Self::Declaration(Declaration::from_parse_tree(sess, decl)),
+            cst::ExternalDeclaration::StaticAssert(static_assert) =>
+                Self::StaticAssert(*static_assert),
         }
     }
 }
@@ -591,6 +603,7 @@ impl<'a> Statement<'a> {
         match item {
             BlockItem::Declaration(decl) =>
                 Self::Declaration(Declaration::from_parse_tree(sess, decl)),
+            BlockItem::StaticAssert(static_assert) => Self::StaticAssert(*static_assert),
             BlockItem::UnlabeledStatement(stmt) => Self::from_unlabeled_statement(sess, stmt),
         }
     }
@@ -769,9 +782,14 @@ impl<'a> ParsedSpecifiers<'a> {
                 Type::Struct(Struct::Complete {
                     name,
                     kind,
-                    members: sess.alloc_slice_fill_iter(
-                        members.iter().map(|member| Member::parse(sess, member)),
-                    ),
+                    members: sess.alloc_slice_fill_iter(members.iter().map(
+                        |member| match member {
+                            AnyDeclaration::Declaration(member) =>
+                                MemberDeclaration::Member(Member::parse(sess, member)),
+                            AnyDeclaration::StaticAssert(static_assert) =>
+                                MemberDeclaration::StaticAssert(*static_assert),
+                        },
+                    )),
                 }),
             Self::Enum(cst::Enum::Incomplete { name }) => Type::Enum(Enum::Incomplete { name }),
             Self::Enum(cst::Enum::Complete { name, fixed_underlying, enumerators }) => {

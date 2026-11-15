@@ -6,6 +6,7 @@ use crate::ast::Declaration;
 use crate::ast::ExternalDeclaration;
 use crate::ast::FunctionDefinition;
 use crate::ast::Member;
+use crate::ast::MemberDeclaration;
 use crate::ast::QualifiedType;
 use crate::ast::Statement;
 use crate::ast::Struct;
@@ -27,6 +28,7 @@ impl AsSExpr for ExternalDeclaration<'_> {
         match self {
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
+            ExternalDeclaration::StaticAssert(static_assert) => static_assert.as_sexpr(),
         }
     }
 }
@@ -77,6 +79,15 @@ impl AsSExpr for Struct<'_> {
     }
 }
 
+impl AsSExpr for MemberDeclaration<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Member(decl) => decl.as_sexpr(),
+            Self::StaticAssert(static_assert) => static_assert.as_sexpr(),
+        }
+    }
+}
+
 impl AsSExpr for Member<'_> {
     fn as_sexpr(&self) -> SExpr {
         let Self { declarator, bitfield_width } = self;
@@ -96,6 +107,7 @@ impl AsSExpr for Statement<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Statement::Declaration(decl) => decl.as_sexpr(),
+            Statement::StaticAssert(static_assert) => static_assert.as_sexpr(),
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),
             Statement::Return { return_: _, expr } => SExpr::new("return").inherit(expr),

@@ -30,10 +30,21 @@ use crate::scope::Declarators;
 use crate::scope::Enumerator;
 use crate::scope::Enumerators;
 use crate::scope::Member;
+use crate::scope::MemberDeclaration;
+use crate::scope::StaticAssert;
 use crate::scope::Type;
 use crate::ty::Arithmetic;
 use crate::ty::Enum;
 use crate::ty::Struct;
+
+impl AsSExpr for MemberDeclaration<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            MemberDeclaration::Member(member) => member.as_sexpr(),
+            MemberDeclaration::StaticAssert(static_assert) => static_assert.as_sexpr(),
+        }
+    }
+}
 
 impl AsSExpr for Member<'_> {
     fn as_sexpr(&self) -> SExpr {
@@ -66,6 +77,7 @@ impl AsSExpr for ExternalDeclaration<'_> {
         match self {
             ExternalDeclaration::FunctionDefinition(def) => def.as_sexpr(),
             ExternalDeclaration::Declaration(decl) => decl.as_sexpr(),
+            ExternalDeclaration::StaticAssert(static_assert) => static_assert.as_sexpr(),
             ExternalDeclaration::Error(_error) => SExpr::new("error"),
         }
     }
@@ -74,6 +86,13 @@ impl AsSExpr for ExternalDeclaration<'_> {
 impl AsSExpr for Redeclared<'_> {
     fn as_sexpr(&self) -> SExpr {
         SExpr::new("redeclared").inline_string(self.name().to_owned())
+    }
+}
+
+impl AsSExpr for StaticAssert<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        let Self { static_assert: _, expr, msg } = self;
+        SExpr::new("static-assert").inherit(msg).inherit(expr)
     }
 }
 
@@ -193,6 +212,7 @@ impl AsSExpr for Statement<'_> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Statement::Declaration(decl) => decl.as_sexpr(),
+            Statement::StaticAssert(static_assert) => static_assert.as_sexpr(),
             Statement::Expression(expr) => SExpr::new("expression").inherit(expr),
             Statement::Compound(compound_statement) => compound_statement.as_sexpr(),
             Statement::Return { return_: _, expr } => SExpr::new("return").inherit(expr),

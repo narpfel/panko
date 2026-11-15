@@ -10,6 +10,7 @@
 #![feature(macro_metavar_expr_concat)]
 #![feature(option_array_transpose)]
 #![feature(stmt_expr_attributes)]
+#![feature(trait_alias)]
 #![feature(try_blocks)]
 #![feature(unqualified_local_imports)]
 

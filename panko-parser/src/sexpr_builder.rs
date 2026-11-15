@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use std::byte_str::ByteStr;
 use std::fmt;
 use std::iter::once;
 use std::iter::repeat;
@@ -330,6 +331,12 @@ impl AsSExpr for Token<'_> {
 impl AsSExpr for &str {
     fn as_sexpr(&self) -> SExpr {
         SExpr::string(*self)
+    }
+}
+
+impl AsSExpr for &ByteStr {
+    fn as_sexpr(&self) -> SExpr {
+        SExpr::string(format!("{self:?}"))
     }
 }
 

@@ -904,7 +904,7 @@ impl<'a> Preprocessor<'a> {
             typedef_names,
             is_in_typedef: nonempty::Vec::default(),
         };
-        let parser = crate::grammar::ConstantExpressionParser::new();
+        let parser = crate::grammar::grammar::ConstantExpressionParser::new();
         let expr = parser
             .parse(sess, typedef_tracker, Path::new(""), tokens)
             .unwrap_or_else(handle_parse_error(sess));

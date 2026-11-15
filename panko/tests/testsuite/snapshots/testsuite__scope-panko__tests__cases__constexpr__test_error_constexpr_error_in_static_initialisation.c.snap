@@ -189,6 +189,24 @@ exit_code: 0
    (function-definition
       out_of_bounds_in_deref_of_pointer_into_string_literal~95 `fn() -> void`
       (compound-statement
-         (declaration a~97 `char` (subscript (string "string") 1234)))))
+         (declaration a~97 `char` (subscript (string "string") 1234))))
+   (function-definition
+      type_error_in_cast_to_bool~98 `fn() -> void`
+      (compound-statement
+         (struct T~100
+            (member x `int`))
+         (hoisted-compound-literal compound_literal.102~103 `struct T~100 complete`)
+         (declaration explicit~101 `bool`
+            (cast `bool`
+               (compound-literal
+                  (declaration compound_literal.102~103 `struct T~100 complete`
+                     (braced
+                        (designation ((member x)) 42))))))
+         (hoisted-compound-literal compound_literal.105~106 `struct T~100 complete`)
+         (declaration implicit~104 `bool`
+            (compound-literal
+               (declaration compound_literal.105~106 `struct T~100 complete`
+                  (braced
+                     (designation ((member x)) 42))))))))
 
 ----- stderr -----

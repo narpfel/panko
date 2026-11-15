@@ -238,7 +238,10 @@ pub(super) fn parse_char_literal<'a>(sess: &Session<'a>, char: &Token<'a>) -> Ty
     TypedExpression { ty: ty.unqualified(), expr }
 }
 
-fn parse_string_literal<'a>(sess: &Session<'a>, tokens: &[Token<'a>]) -> StringLiteral<'a> {
+pub(super) fn parse_string_literal<'a>(
+    sess: &Session<'a>,
+    tokens: &[Token<'a>],
+) -> StringLiteral<'a> {
     let value = tokens
         .iter()
         .flat_map(|token| {

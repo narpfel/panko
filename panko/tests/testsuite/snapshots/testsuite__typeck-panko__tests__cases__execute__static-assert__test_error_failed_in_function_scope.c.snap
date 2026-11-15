@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/static-assert/test_error_failed_in_function_scope.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: static assertion failed: all pointers have the same size
+   ╭─[panko/tests/cases/execute/static-assert/test_error_failed_in_function_scope.c:3:19]
+   │
+ 3 │     static_assert(sizeof &function != sizeof(int*), "all pointers have the same size");
+   │     ───────────── ────────────────┬───────────────  
+   │                                   ╰───────────────── this assertion failed
+───╯

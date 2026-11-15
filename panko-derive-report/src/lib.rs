@@ -264,24 +264,6 @@ fn derive_report_impl(input: DeriveInput) -> Result<TokenStream> {
                 }
             }
         }
-
-        impl #impl_generics ::panko_report::Report for Box<#name #ty_generics> #where_clause {
-            fn print(&self) {
-                self.as_ref().print()
-            }
-
-            fn write(&self, writer: &mut dyn std::io::Write) {
-                self.as_ref().write(writer)
-            }
-
-            fn exit_code(&self) -> u8 {
-                self.as_ref().exit_code()
-            }
-
-            fn location(&self) -> ::panko_report::Loc {
-                self.as_ref().location()
-            }
-        }
     );
 
     Ok(expanded)

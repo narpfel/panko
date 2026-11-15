@@ -527,7 +527,7 @@ impl<'a> Scopes<'a> {
         &mut self,
         loc: Option<Token<'a>>,
         kind: StructKind,
-        members: &'a [ast::Declaration<'a, ast::Member<'a>>],
+        members: &'a [ast::MemberDeclaration<'a>],
     ) -> (Tagged<'a>, Option<Tagged<'a>>) {
         let name = try { loc?.slice() };
         let previous_definition = try { self.get_tagged_innermost(name?)? };

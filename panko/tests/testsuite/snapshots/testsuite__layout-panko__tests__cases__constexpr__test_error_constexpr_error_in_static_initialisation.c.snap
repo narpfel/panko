@@ -466,3 +466,19 @@ Error: not a constant expression
  128 │     static char a = "string"[1234];
      │                     ──────────────  
 ─────╯
+
+Error: invalid explicit conversion from `struct T~100 complete` to `bool`
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:135:34]
+     │
+ 135 │     static bool explicit = (bool)(struct T){ .x = 42 };
+     │                                  ┬  
+     │                                  ╰── this is of type `struct T~100 complete`, which cannot be explicitly converted to `bool`
+─────╯
+
+Error: invalid implicit conversion from `struct T~100 complete` to `bool`
+     ╭─[panko/tests/cases/constexpr/test_error_constexpr_error_in_static_initialisation.c:136:28]
+     │
+ 136 │     static bool implicit = (struct T){ .x = 42 };
+     │                            ┬  
+     │                            ╰── this is of type `struct T~100 complete`, which cannot be implicitly converted to `bool`
+─────╯

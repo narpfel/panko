@@ -1,3 +1,4 @@
+#![feature(byte_str)]
 #![feature(closure_track_caller)]
 #![feature(coverage_attribute)]
 #![feature(exact_bitshifts)]
@@ -18,7 +19,6 @@ use ariadne::Fmt as _;
 use itertools::Either;
 use itertools::Itertools as _;
 use lalrpop_util::ParseError;
-use lalrpop_util::lalrpop_mod;
 use panko_lex::LexerHacked;
 use panko_lex::Loc;
 use panko_lex::Token;
@@ -37,15 +37,10 @@ use crate::sexpr_builder::AsSExpr as _;
 
 mod as_sexpr;
 pub mod ast;
+mod grammar;
 pub mod nonempty;
 pub mod preprocess;
 pub mod sexpr_builder;
-
-lalrpop_mod!(
-    #[allow(clippy::as_conversions, reason = "lalrpop generates `as` conversions")]
-    #[allow(unused_qualifications)]
-    grammar
-);
 
 const SEXPR_INDENT: usize = 3;
 pub const NO_VALUE: &str = "∅";
@@ -211,6 +206,29 @@ pub struct TranslationUnit<'a> {
 pub enum ExternalDeclaration<'a> {
     FunctionDefinition(FunctionDefinition<'a>),
     Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
+}
+
+impl<'a> From<AnyDeclaration<'a>> for ExternalDeclaration<'a> {
+    fn from(value: AnyDeclaration<'a>) -> Self {
+        match value {
+            AnyDeclaration::Declaration(decl) => Self::Declaration(decl),
+            AnyDeclaration::StaticAssert(static_assert) => Self::StaticAssert(static_assert),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum AnyDeclaration<'a> {
+    Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct StaticAssert<'a> {
+    pub static_assert: Token<'a>,
+    pub expr: Expression<'a>,
+    pub msg: Option<&'a [Token<'a>]>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -442,7 +460,7 @@ impl<'a> TypeSpecifier<'a> {
     fn r#struct(
         struct_or_union: Token<'a>,
         name: Option<Token<'a>>,
-        members: &'a [Declaration<'a>],
+        members: &'a [AnyDeclaration<'a>],
     ) -> Self {
         let kind = struct_kind(struct_or_union.kind);
         Self {
@@ -635,7 +653,7 @@ enum Struct<'a> {
     Complete {
         name: Option<Token<'a>>,
         kind: StructKind,
-        members: &'a [Declaration<'a>],
+        members: &'a [AnyDeclaration<'a>],
     },
 }
 
@@ -1053,7 +1071,17 @@ struct CompoundStatement<'a>(&'a [BlockItem<'a>]);
 #[derive(Debug, Clone, Copy)]
 enum BlockItem<'a> {
     Declaration(Declaration<'a>),
+    StaticAssert(StaticAssert<'a>),
     UnlabeledStatement(UnlabeledStatement<'a>),
+}
+
+impl<'a> From<AnyDeclaration<'a>> for BlockItem<'a> {
+    fn from(value: AnyDeclaration<'a>) -> Self {
+        match value {
+            AnyDeclaration::Declaration(decl) => Self::Declaration(decl),
+            AnyDeclaration::StaticAssert(static_assert) => Self::StaticAssert(static_assert),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1544,7 +1572,7 @@ pub fn parse<'a>(
     typedef_names: &'a RefCell<TypedefNames<'a>>,
     tokens: LexerHacked<'a, impl Iterator<Item = Token<'a>>>,
 ) -> Option<ast::TranslationUnit<'a>> {
-    let parser = grammar::TranslationUnitParser::new();
+    let parser = grammar::grammar::TranslationUnitParser::new();
     let typedef_tracker = &mut TypedefTracker {
         typedef_names,
         is_in_typedef: nonempty::Vec::default(),

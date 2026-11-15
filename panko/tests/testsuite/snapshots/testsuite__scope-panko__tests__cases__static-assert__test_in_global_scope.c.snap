@@ -1,0 +1,22 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/static-assert/test_in_global_scope.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/static-assert/test_in_global_scope.c"
+   (static-assert ∅ (equal 42 (multiply 21 2)))
+   (static-assert ("true is true") true)
+   (declaration x~0 `int` ∅)
+   (static-assert ("pointer to static is not nullptr") (addressof (name x~0 `int`)))
+   (static-assert ∅ (not nullptr))
+   (static-assert ∅ (less (sizeof `char`) (sizeof `array<char; 2>`)))
+   (static-assert ("multiple" "string" "tokens") 42))
+
+----- stderr -----

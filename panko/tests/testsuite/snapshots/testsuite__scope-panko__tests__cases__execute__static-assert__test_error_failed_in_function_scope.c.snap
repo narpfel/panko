@@ -1,0 +1,19 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/static-assert/test_error_failed_in_function_scope.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/static-assert/test_error_failed_in_function_scope.c"
+   (function-definition
+      function~0 `fn() -> void`
+      (compound-statement
+         (static-assert ("all pointers have the same size") (not-equal (sizeof (addressof (name function~0 `fn() -> void`))) (sizeof `ptr<int>`))))))
+
+----- stderr -----

@@ -1,0 +1,96 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/static-assert/test_in_struct_member_list.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/static-assert/test_in_struct_member_list.c"
+   (declaration external printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct Outer~1
+      (member x @0 `array<int; 4>`)
+      (member y @16 `int`))
+   (static-assert ∅ (equal `int` (sizeof `unsigned long` 4 `struct Inner~2 complete`) (sizeof `unsigned long` 4 `int`)))
+   (static-assert ∅ (equal `int` (sizeof `unsigned long` 1 `struct InStaticAssert~3 complete`) (sign-extend `unsigned long` (1 `int`))))
+   (static-assert ∅ (equal `int` (sizeof `unsigned long` 20 `struct Outer~1 complete`) (multiply `unsigned long` (sign-extend `unsigned long` (5 `int`)) (sizeof `unsigned long` 4 `int`))))
+   (union U~4
+      (member x @0 `int`))
+   (function-definition external
+      main~5 `fn() -> int`
+      (compound-statement
+         (definition inner~7 `struct Inner~2 complete`
+            (braced
+               (subobject +0 (123 `int`))))
+         (definition in_static_assert~8 `struct InStaticAssert~3 complete`
+            (braced
+               (subobject +0 (truncate `char` (27 `int`)))))
+         (definition u~9 `union U~4 complete`
+            (braced
+               (subobject +0 (456 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 10>>`
+                        (string `array<char; 10>` "%d %d %d\n\0"))))
+               (member `int` x +0
+                  (inner~7 `struct Inner~2 complete`))
+               (sign-extend `int`
+                  (member `char` c +0
+                     (in_static_assert~8 `struct InStaticAssert~3 complete`)))
+               (member `int` x +0
+                  (u~9 `union U~4 complete`))))
+         (definition value~10 `struct Outer~1 complete`
+            (braced
+               (subobject +0 (1 `int`))
+               (subobject +4 (2 `int`))
+               (subobject +8 (4 `int`))
+               (subobject +12 (8 `int`))
+               (subobject +16 (42 `int`))))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 16>>`
+                        (string `array<char; 16>` "%d %d %d %d %d\n\0"))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; 4>>`
+                           (member `array<int; 4>` x +0
+                              (value~10 `struct Outer~1 complete`))))
+                     (sign-extend `long` (0 `int`))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; 4>>`
+                           (member `array<int; 4>` x +0
+                              (value~10 `struct Outer~1 complete`))))
+                     (sign-extend `long` (1 `int`))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; 4>>`
+                           (member `array<int; 4>` x +0
+                              (value~10 `struct Outer~1 complete`))))
+                     (sign-extend `long` (2 `int`))))
+               (deref `int`
+                  (ptr-add `ptr<int>`
+                     (noop-type-conversion `ptr<int>`
+                        (addressof `ptr<array<int; 4>>`
+                           (member `array<int; 4>` x +0
+                              (value~10 `struct Outer~1 complete`))))
+                     (sign-extend `long` (3 `int`))))
+               (member `int` y +16
+                  (value~10 `struct Outer~1 complete`)))))))
+
+----- stderr -----
