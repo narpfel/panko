@@ -23,6 +23,9 @@ int main() {
     // [[print: 68]]
     printf("%zu\n", offsetof(struct Outer, middles[5].inner.x));
 
+    // [[print: 12]]
+    printf("%zu\n", offsetof(struct Outer, middles->inner.y));
+
     // [[return: 8]]
     return offsetof(struct Middle, inner.y);
 }
