@@ -335,7 +335,7 @@ pub fn execute_runtest(context: &Context, test_name: &Path, filenames: Vec<PathB
     }
 
     let expected_return_code_re =
-        Regex::new(r"(?m)^// \[\[return: (?P<return_code>.*?)\]\]$").unwrap();
+        Regex::new(r"(?m)^\s*// \[\[return: (?P<return_code>.*?)\]\]$").unwrap();
 
     let expected_return_codes = expected_return_code_re.captures_iter(&source).map(|captures| {
         let return_code = captures.name("return_code").unwrap().as_str();
