@@ -16,6 +16,7 @@ exit_code: 0
       (member x `int`)
       (member y `int`))
    (static-assert ∅ (equal (sizeof `struct T~1 complete`) (multiply 2 (sizeof `int`))))
+   (static-assert ("also accepts `_Static_assert`") (equal (sizeof `int`) (sizeof `unsigned int`)))
    (function-definition
       main~2 `fn() -> int`
       (compound-statement

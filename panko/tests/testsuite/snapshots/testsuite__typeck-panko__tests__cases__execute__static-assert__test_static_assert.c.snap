@@ -16,6 +16,7 @@ exit_code: 0
       (member x @0 `int`)
       (member y @4 `int`))
    (static-assert ∅ (equal `int` (sizeof `unsigned long` 8 `struct T~1 complete`) (multiply `unsigned long` (sign-extend `unsigned long` (2 `int`)) (sizeof `unsigned long` 4 `int`))))
+   (static-assert "also accepts `_Static_assert`" (equal `int` (sizeof `unsigned long` 4 `int`) (sizeof `unsigned long` 4 `unsigned int`)))
    (function-definition external
       main~2 `fn() -> int`
       (compound-statement

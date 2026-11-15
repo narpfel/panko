@@ -21,6 +21,10 @@ exit_code: 0
          (multiply `unsigned long` @16
             (sign-extend `unsigned long` @16 (2 `int` @24))
             (4 `unsigned long` @32))))
+   (static-assert "also accepts `_Static_assert`"
+      (equal `int` @0
+         (4 `unsigned long` @8)
+         (4 `unsigned long` @16)))
    (function-definition external stack-size=40
       (main~2 `fn() -> int` (static main))
       (compound-statement
