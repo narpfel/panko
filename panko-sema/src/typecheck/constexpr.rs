@@ -363,17 +363,6 @@ impl<'a, 'b> Value<'a, 'b> {
         }
     }
 
-    fn is_nonzero(&self) -> bool {
-        let Value { expr: _, repr } = self;
-        match repr {
-            Repr::Bytes(bytes) => bytes.iter().any(|&b| match b {
-                Byte::Literal(b) => b != 0,
-                Byte::Address { .. } => true,
-            }),
-            Repr::Error(_) => unreachable!(),
-        }
-    }
-
     fn error(expr: &'b TypedExpression<'a>, error: &'a dyn Report) -> Self {
         Self {
             expr,
@@ -409,7 +398,16 @@ impl<'a, 'b> Value<'a, 'b> {
             _ if let Repr::Error(_) = repr => Value { expr, repr },
             // TODO: check for illegal pointer conversions
             Kind::Noop => Value { expr, repr },
-            Kind::Bool => Value::int(Self { expr: old_expr, repr }.is_nonzero().into(), expr),
+            Kind::Bool => {
+                let is_nonzero = match repr {
+                    Repr::Bytes(bytes) => bytes.iter().any(|&b| match b {
+                        Byte::Literal(b) => b != 0,
+                        Byte::Address { .. } => true,
+                    }),
+                    Repr::Error(_) => unreachable!(),
+                };
+                Value::int(is_nonzero.into(), expr)
+            }
             Kind::Truncate | Kind::ZeroExtend | Kind::SignExtend => match ty {
                 Type::Arithmetic(arithmetic) => {
                     let Arithmetic::Integral(integral) = arithmetic.resolve_enums();
