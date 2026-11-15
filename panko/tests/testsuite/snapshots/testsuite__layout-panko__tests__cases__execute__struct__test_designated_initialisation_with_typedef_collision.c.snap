@@ -7,15 +7,21 @@ info:
     - "--stop-after=layout"
     - panko/tests/cases/execute/struct/test_designated_initialisation_with_typedef_collision.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_designated_initialisation_with_typedef_collision.c"
+   (struct T~0
+      (member x @0 `int`))
+   (typedef x `long`)
+   (function-definition external stack-size=24
+      (main~1 `fn() -> int` (static main))
+      (compound-statement
+         (definition (t~3 `struct T~0 complete` @0)
+            (braced
+               (subobject +0 (42 `int` @0))))
+         (return
+            (member `int` @0 x +0
+               (t~3 `struct T~0 complete` @0))))))
 
 ----- stderr -----
-Error: unexpected token `x` of kind `TypeIdentifier`
-   ╭─[panko/tests/cases/execute/struct/test_designated_initialisation_with_typedef_collision.c:8:21]
-   │
- 8 │     struct T t = { .x = 42 };
-   │                     ┬  
-   │                     ╰── expected one of the following token kinds: [Identifier]
-───╯

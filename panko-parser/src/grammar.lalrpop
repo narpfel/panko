@@ -498,7 +498,7 @@ Designation: ast::Designation<'a> = {
 
 Designator: ast::Designator<'a> = {
     <open_bracket:"["> <index:Expression> <close_bracket:"]"> => ast::Designator::Bracketed { <> },
-    <dot:"."> <ident:Identifier> => ast::Designator::Identifier { <> },
+    <dot:"."> <ident:AnyIdentifier> => ast::Designator::Identifier { <> },
 }
 
 AttributeSpecifierSequence: () = {}

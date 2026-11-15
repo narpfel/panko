@@ -1,5 +1,3 @@
-// [[known-bug: designated initialisers should accept `AnyIdentifier` (so that `typedef`’d names work)]]
-
 struct T { int x; };
 
 typedef long x;
