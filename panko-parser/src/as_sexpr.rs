@@ -23,6 +23,7 @@ use crate::Initialiser;
 use crate::JumpStatement;
 use crate::MemberAccessOp;
 use crate::MemberAccessOpKind;
+use crate::MemberDesignator;
 use crate::ParameterDeclaration;
 use crate::Pointer;
 use crate::PrimaryBlock;
@@ -353,9 +354,11 @@ impl AsSExpr for Expression<'_> {
             Expression::BuiltinOffsetof {
                 builtin_offsetof: _,
                 ty,
-                member,
+                member_designator,
                 close_paren: _,
-            } => SExpr::new("offsetof").inherit(ty).inherit(member),
+            } => SExpr::new("offsetof")
+                .inherit(ty)
+                .inherit(member_designator),
             Expression::CompoundLiteral {
                 open_paren: _,
                 storage_class_specifiers,
@@ -386,5 +389,18 @@ impl AsSExpr for MemberAccessOp<'_> {
             MemberAccessOpKind::Arrow => "arrow",
         };
         SExpr::new(s)
+    }
+}
+
+impl AsSExpr for MemberDesignator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Member(token) => SExpr::string(token.slice()),
+            Self::Subscript { lhs, index } => SExpr::new("subscript").inherit(lhs).inherit(index),
+            Self::MemberAccess { lhs, op, member } => op
+                .as_sexpr()
+                .inline_string(member.slice().to_owned())
+                .inherit(lhs),
+        }
     }
 }

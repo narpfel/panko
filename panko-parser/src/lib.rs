@@ -1202,7 +1202,7 @@ pub enum Expression<'a> {
     BuiltinOffsetof {
         builtin_offsetof: Token<'a>,
         ty: TypeName<'a>,
-        member: Token<'a>,
+        member_designator: MemberDesignator<'a>,
         close_paren: Token<'a>,
     },
     CompoundLiteral {
@@ -1254,7 +1254,7 @@ impl<'a> Expression<'a> {
             Self::BuiltinOffsetof {
                 builtin_offsetof,
                 ty: _,
-                member: _,
+                member_designator: _,
                 close_paren,
             } => builtin_offsetof.loc().until(close_paren.loc()),
             Self::CompoundLiteral {
@@ -1484,6 +1484,20 @@ pub enum MemberAccessOpKind {
 pub struct MemberAccessOp<'a> {
     pub kind: MemberAccessOpKind,
     pub token: Token<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum MemberDesignator<'a> {
+    Member(Token<'a>),
+    Subscript {
+        lhs: &'a Self,
+        index: &'a Expression<'a>,
+    },
+    MemberAccess {
+        lhs: &'a Self,
+        op: MemberAccessOp<'a>,
+        member: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]

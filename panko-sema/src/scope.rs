@@ -18,9 +18,11 @@ use panko_parser::IncrementOp;
 use panko_parser::LogicalOp;
 use panko_parser::MemberAccessOp;
 use panko_parser::MemberAccessOpKind;
+use panko_parser::MemberDesignator;
 use panko_parser::NO_VALUE;
 use panko_parser::ParameterTypeList;
 use panko_parser::StorageClassSpecifierKind;
+use panko_parser::TodoError;
 use panko_parser::TypeName;
 use panko_parser::TypeQualifier;
 use panko_parser::UnaryOp;
@@ -1944,13 +1946,23 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::BuiltinOffsetof {
             builtin_offsetof,
             ty,
-            member,
+            member_designator,
             close_paren,
-        } => Expression::BuiltinOffsetof {
-            builtin_offsetof: *builtin_offsetof,
-            ty: resolve_typename(scopes, ty),
-            member: *member,
-            close_paren: *close_paren,
+        } => match member_designator {
+            MemberDesignator::Member(member) => Expression::BuiltinOffsetof {
+                builtin_offsetof: *builtin_offsetof,
+                ty: resolve_typename(scopes, ty),
+                member: *member,
+                close_paren: *close_paren,
+            },
+            MemberDesignator::Subscript { lhs: _, index } => scopes.sess.emit(TodoError::Error {
+                at: index.loc(),
+                msg: "not implemented: `__builtin_offsetof` with index access `member-designator`",
+            }),
+            MemberDesignator::MemberAccess { op, .. } => scopes.sess.emit(TodoError::Error {
+                at: op.token.loc(),
+                msg: "not implemented: `__builtin_offsetof` with member access `member-designator`",
+            }),
         },
         ast::Expression::CompoundLiteral {
             open_paren,
