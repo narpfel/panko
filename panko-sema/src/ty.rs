@@ -28,11 +28,13 @@ use crate::typecheck::Typeck;
 
 pub(crate) mod subobjects;
 
+pub trait StepDependent = Copy + Eq + Hash + fmt::Debug + AsSExpr;
+
 pub trait Step {
-    type TypeofExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
-    type LengthExpr<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
-    type Member<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr;
-    type Enumerators<'a>: Copy + Eq + Hash + fmt::Debug + AsSExpr + NeverIffNever;
+    type TypeofExpr<'a>: StepDependent;
+    type LengthExpr<'a>: StepDependent;
+    type Member<'a>: StepDependent;
+    type Enumerators<'a>: StepDependent + NeverIffNever;
 }
 
 #[derive(Debug, Clone, Copy)]
