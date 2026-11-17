@@ -748,7 +748,7 @@ GenericAssociation: ast::GenericAssociation<'a> = {
     <default:"default"> ":" <expr:AssignmentExpression> => ast::GenericAssociation::Default { <> },
 }
 
-MemberDesignator: ast::MemberDesignator<'a> = {
+MemberDesignator: ast::MemberDesignator<'a, ast::Expression<'a>> = {
     <AnyIdentifier> => ast::MemberDesignator::Member(<>),
     <lhs:Bump<MemberDesignator>> "[" <index:Bump<Expression>> "]" =>
         ast::MemberDesignator::Subscript { <> },

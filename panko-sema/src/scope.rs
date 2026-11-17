@@ -18,6 +18,7 @@ use panko_parser::IncrementOp;
 use panko_parser::LogicalOp;
 use panko_parser::MemberAccessOp;
 use panko_parser::MemberAccessOpKind;
+use panko_parser::MemberDesignator;
 use panko_parser::NO_VALUE;
 use panko_parser::ParameterTypeList;
 use panko_parser::StorageClassSpecifierKind;
@@ -554,7 +555,7 @@ pub(crate) enum Expression<'a> {
     BuiltinOffsetof {
         builtin_offsetof: Token<'a>,
         ty: QualifiedType<'a>,
-        member_designator: MemberDesignator<'a>,
+        member_designator: MemberDesignator<'a, Self>,
         close_paren: Token<'a>,
     },
     BuiltinName(BuiltinName<'a>),
@@ -658,20 +659,6 @@ pub(crate) enum GenericAssociation<'a> {
 pub(crate) enum Typeof<'a> {
     Expr(&'a Expression<'a>),
     Ty(&'a QualifiedType<'a>),
-}
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) enum MemberDesignator<'a> {
-    Member(Token<'a>),
-    Subscript {
-        lhs: &'a Self,
-        index: &'a Expression<'a>,
-    },
-    MemberAccess {
-        lhs: &'a Self,
-        op: MemberAccessOp<'a>,
-        member: Token<'a>,
-    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1801,15 +1788,15 @@ fn resolve_assoc<'a>(
 
 fn resolve_member_designator<'a>(
     scopes: &mut Scopes<'a>,
-    member_designator: &cst::MemberDesignator<'a>,
-) -> MemberDesignator<'a> {
+    member_designator: &MemberDesignator<'a, ast::Expression<'a>>,
+) -> MemberDesignator<'a, Expression<'a>> {
     match member_designator {
-        cst::MemberDesignator::Member(token) => MemberDesignator::Member(*token),
-        cst::MemberDesignator::Subscript { lhs, index } => MemberDesignator::Subscript {
+        MemberDesignator::Member(token) => MemberDesignator::Member(*token),
+        MemberDesignator::Subscript { lhs, index } => MemberDesignator::Subscript {
             lhs: scopes.sess.alloc(resolve_member_designator(scopes, lhs)),
             index: scopes.sess.alloc(resolve_expr(scopes, index)),
         },
-        cst::MemberDesignator::MemberAccess { lhs, op, member } => MemberDesignator::MemberAccess {
+        MemberDesignator::MemberAccess { lhs, op, member } => MemberDesignator::MemberAccess {
             lhs: scopes.sess.alloc(resolve_member_designator(scopes, lhs)),
             op: *op,
             member: *member,

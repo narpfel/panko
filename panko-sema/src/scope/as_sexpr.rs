@@ -31,7 +31,6 @@ use crate::scope::Enumerator;
 use crate::scope::Enumerators;
 use crate::scope::Member;
 use crate::scope::MemberDeclaration;
-use crate::scope::MemberDesignator;
 use crate::scope::StaticAssert;
 use crate::scope::Type;
 use crate::ty::Arithmetic;
@@ -313,19 +312,6 @@ impl AsSExpr for Typeof<'_> {
         match self {
             Self::Expr(expr) => expr.as_sexpr(),
             Self::Ty(ty) => ty.as_sexpr(),
-        }
-    }
-}
-
-impl AsSExpr for MemberDesignator<'_> {
-    fn as_sexpr(&self) -> SExpr {
-        match self {
-            Self::Member(token) => SExpr::string(token.slice()),
-            Self::Subscript { lhs, index } => SExpr::new("subscript").inherit(lhs).inherit(index),
-            Self::MemberAccess { lhs, op, member } => op
-                .as_sexpr()
-                .inline_string(member.slice().to_owned())
-                .inherit(lhs),
         }
     }
 }

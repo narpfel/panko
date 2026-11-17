@@ -392,7 +392,7 @@ impl AsSExpr for MemberAccessOp<'_> {
     }
 }
 
-impl AsSExpr for MemberDesignator<'_> {
+impl<Expr: AsSExpr> AsSExpr for MemberDesignator<'_, Expr> {
     fn as_sexpr(&self) -> SExpr {
         match self {
             Self::Member(token) => SExpr::string(token.slice()),
