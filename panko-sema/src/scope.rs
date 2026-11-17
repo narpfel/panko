@@ -18,11 +18,9 @@ use panko_parser::IncrementOp;
 use panko_parser::LogicalOp;
 use panko_parser::MemberAccessOp;
 use panko_parser::MemberAccessOpKind;
-use panko_parser::MemberDesignator;
 use panko_parser::NO_VALUE;
 use panko_parser::ParameterTypeList;
 use panko_parser::StorageClassSpecifierKind;
-use panko_parser::TodoError;
 use panko_parser::TypeName;
 use panko_parser::TypeQualifier;
 use panko_parser::UnaryOp;
@@ -556,7 +554,7 @@ pub(crate) enum Expression<'a> {
     BuiltinOffsetof {
         builtin_offsetof: Token<'a>,
         ty: QualifiedType<'a>,
-        member: Token<'a>,
+        member_designator: MemberDesignator<'a>,
         close_paren: Token<'a>,
     },
     BuiltinName(BuiltinName<'a>),
@@ -660,6 +658,20 @@ pub(crate) enum GenericAssociation<'a> {
 pub(crate) enum Typeof<'a> {
     Expr(&'a Expression<'a>),
     Ty(&'a QualifiedType<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum MemberDesignator<'a> {
+    Member(Token<'a>),
+    Subscript {
+        lhs: &'a Self,
+        index: &'a Expression<'a>,
+    },
+    MemberAccess {
+        lhs: &'a Self,
+        op: MemberAccessOp<'a>,
+        member: Token<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -833,7 +845,7 @@ impl<'a> Expression<'a> {
             Expression::BuiltinOffsetof {
                 builtin_offsetof,
                 ty: _,
-                member: _,
+                member_designator: _,
                 close_paren,
             } => builtin_offsetof.loc().until(close_paren.loc()),
             Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
@@ -1787,6 +1799,24 @@ fn resolve_assoc<'a>(
     }
 }
 
+fn resolve_member_designator<'a>(
+    scopes: &mut Scopes<'a>,
+    member_designator: &cst::MemberDesignator<'a>,
+) -> MemberDesignator<'a> {
+    match member_designator {
+        cst::MemberDesignator::Member(token) => MemberDesignator::Member(*token),
+        cst::MemberDesignator::Subscript { lhs, index } => MemberDesignator::Subscript {
+            lhs: scopes.sess.alloc(resolve_member_designator(scopes, lhs)),
+            index: scopes.sess.alloc(resolve_expr(scopes, index)),
+        },
+        cst::MemberDesignator::MemberAccess { lhs, op, member } => MemberDesignator::MemberAccess {
+            lhs: scopes.sess.alloc(resolve_member_designator(scopes, lhs)),
+            op: *op,
+            member: *member,
+        },
+    }
+}
+
 fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expression<'a> {
     match expr {
         ast::Expression::Error(error) => Expression::Error(*error),
@@ -1948,21 +1978,11 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
             ty,
             member_designator,
             close_paren,
-        } => match member_designator {
-            MemberDesignator::Member(member) => Expression::BuiltinOffsetof {
-                builtin_offsetof: *builtin_offsetof,
-                ty: resolve_typename(scopes, ty),
-                member: *member,
-                close_paren: *close_paren,
-            },
-            MemberDesignator::Subscript { lhs: _, index } => scopes.sess.emit(TodoError::Error {
-                at: index.loc(),
-                msg: "not implemented: `__builtin_offsetof` with index access `member-designator`",
-            }),
-            MemberDesignator::MemberAccess { op, .. } => scopes.sess.emit(TodoError::Error {
-                at: op.token.loc(),
-                msg: "not implemented: `__builtin_offsetof` with member access `member-designator`",
-            }),
+        } => Expression::BuiltinOffsetof {
+            builtin_offsetof: *builtin_offsetof,
+            ty: resolve_typename(scopes, ty),
+            member_designator: resolve_member_designator(scopes, member_designator),
+            close_paren: *close_paren,
         },
         ast::Expression::CompoundLiteral {
             open_paren,

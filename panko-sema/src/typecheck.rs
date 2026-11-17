@@ -24,6 +24,7 @@ use panko_parser::LogicalOp;
 use panko_parser::MemberAccessOp;
 use panko_parser::MemberAccessOpKind;
 use panko_parser::StructKind;
+use panko_parser::TodoError;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast;
@@ -56,6 +57,7 @@ use crate::scope::IsInGlobalScope;
 use crate::scope::IsParameter;
 use crate::scope::Linkage;
 use crate::scope::MemberDeclaration;
+use crate::scope::MemberDesignator;
 use crate::scope::Redeclared;
 use crate::scope::RefInitialiser;
 use crate::scope::RefKind;
@@ -3044,9 +3046,28 @@ fn typeck_expression<'a>(
         scope::Expression::BuiltinOffsetof {
             builtin_offsetof,
             ty,
-            member: member_tok,
+            member_designator,
             close_paren: _,
         } => {
+            let member_tok = match member_designator {
+                MemberDesignator::Member(token) => token,
+                MemberDesignator::Subscript { lhs: _, index } =>
+                    return TypedExpression {
+                        ty: Type::size_t().unqualified(),
+                        expr: sess.emit(TodoError::Error {
+                            at: index.loc(),
+                            msg: "not implemented: `__builtin_offsetof` with index access `member-designator`",
+                        }),
+                    },
+                MemberDesignator::MemberAccess { op, .. } =>
+                    return TypedExpression {
+                        ty: Type::size_t().unqualified(),
+                        expr: sess.emit(TodoError::Error {
+                            at: op.token.loc(),
+                            msg: "not implemented: `__builtin_offsetof` with member access `member-designator`",
+                        }),
+                    },
+            };
             let ty = typeck_ty(sess, *ty, IsParameter::No);
             let expr = lookup_member(sess, &ty, member_tok, || ty.loc())
                 .map_right(|member| match member.kind {

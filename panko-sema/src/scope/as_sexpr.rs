@@ -31,6 +31,7 @@ use crate::scope::Enumerator;
 use crate::scope::Enumerators;
 use crate::scope::Member;
 use crate::scope::MemberDeclaration;
+use crate::scope::MemberDesignator;
 use crate::scope::StaticAssert;
 use crate::scope::Type;
 use crate::ty::Arithmetic;
@@ -278,9 +279,11 @@ impl AsSExpr for Expression<'_> {
             Expression::BuiltinOffsetof {
                 builtin_offsetof: _,
                 ty,
-                member,
+                member_designator,
                 close_paren: _,
-            } => SExpr::new("offsetof").inherit(ty).inherit(member),
+            } => SExpr::new("offsetof")
+                .inherit(ty)
+                .inherit(member_designator),
             Expression::BuiltinName(builtin_name) => builtin_name.as_sexpr(),
             Expression::CompoundLiteral { open_paren: _, decl } =>
                 SExpr::new("compound-literal").inherit(decl),
@@ -310,6 +313,19 @@ impl AsSExpr for Typeof<'_> {
         match self {
             Self::Expr(expr) => expr.as_sexpr(),
             Self::Ty(ty) => ty.as_sexpr(),
+        }
+    }
+}
+
+impl AsSExpr for MemberDesignator<'_> {
+    fn as_sexpr(&self) -> SExpr {
+        match self {
+            Self::Member(token) => SExpr::string(token.slice()),
+            Self::Subscript { lhs, index } => SExpr::new("subscript").inherit(lhs).inherit(index),
+            Self::MemberAccess { lhs, op, member } => op
+                .as_sexpr()
+                .inline_string(member.slice().to_owned())
+                .inherit(lhs),
         }
     }
 }
