@@ -1,5 +1,3 @@
-// [[known-bug: index access in `offsetof` not implemented]]
-
 #include <stddef.h>
 
 struct T { int xs[10]; };

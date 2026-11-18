@@ -1,5 +1,3 @@
-// [[known-bug: `offsetof` accepts only identifiers as member designators]]
-
 #include <stddef.h>
 
 int printf(char const*, ...);

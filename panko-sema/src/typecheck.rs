@@ -25,7 +25,6 @@ use panko_parser::MemberAccessOp;
 use panko_parser::MemberAccessOpKind;
 use panko_parser::MemberDesignator;
 use panko_parser::StructKind;
-use panko_parser::TodoError;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
 use panko_parser::ast;
@@ -36,6 +35,7 @@ use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::reject_function_specifiers;
+use panko_parser::error_todo;
 use panko_parser::unimplemented_todo;
 use panko_report::Report;
 
@@ -2516,6 +2516,69 @@ where
     }
 }
 
+#[expect(clippy::result_large_err)]
+fn compute_offset<'a>(
+    sess: &Session<'a>,
+    ty: &QualifiedType<'a>,
+    member_designator: &MemberDesignator<'a, scope::Expression<'a>>,
+) -> Result<(QualifiedType<'a>, u64), Expression<'a>> {
+    match member_designator {
+        MemberDesignator::Member(member_tok) => {
+            let member = Result::from(lookup_member(sess, ty, member_tok, || ty.loc()))?;
+            match member.kind {
+                MemberKind::Normal => Ok((member.ty, member.offset)),
+                MemberKind::Bitfield(_) =>
+                    Err(sess.emit(Diagnostic::OffsetofBitfield { at: *member_tok, ty: *ty })),
+            }
+        }
+        MemberDesignator::Subscript { lhs, index } => {
+            // TODO: this should not short-circuit
+            let (ty, offset) = compute_offset(sess, ty, lhs)?;
+            let index_expr = typeck_expression(sess, index, Context::Default);
+            match constexpr::eval(&index_expr).into_unsigned() {
+                Ok(Ok(index)) => match ty.ty {
+                    Type::Array(ArrayType { ty: element, length, loc: _ }) => match length {
+                        ArrayLength::Constant(length) if index < length =>
+                            Ok((*element, offset + element.ty.size() * index)),
+                        ArrayLength::Constant(length) => error_todo!(
+                            index_expr,
+                            "array index out of bounds: {} >= {}",
+                            index,
+                            length,
+                        ),
+                        ArrayLength::Unknown => unimplemented_todo!(
+                            index_expr,
+                            "`offsetof` involving flexible array member",
+                        ),
+                        ArrayLength::Variable(_) =>
+                            unreachable!("VMTs are not allowed as struct members"),
+                    },
+                    _ => error_todo!(index_expr, "non-array type used in `offsetof` index access"),
+                },
+                Ok(Err(negative)) => error_todo!(index_expr, "negative array index {}", negative),
+                Err(errors) => Err(errors.emit(sess)),
+            }
+        }
+        MemberDesignator::MemberAccess { lhs, op, member } => {
+            // TODO: this should not short-circuit
+            let (ty, offset) = compute_offset(sess, ty, lhs)?;
+            match (op.kind, &ty) {
+                (MemberAccessOpKind::Dot, ty)
+                | (
+                    MemberAccessOpKind::Arrow,
+                    &QualifiedType {
+                        ty: Type::Array(ArrayType { ty, length: _, loc: _ }),
+                        ..
+                    },
+                ) => compute_offset(sess, ty, &MemberDesignator::Member(*member))
+                    .map(|(ty, additional_offset)| (ty, offset + additional_offset)),
+                (MemberAccessOpKind::Arrow, _) =>
+                    error_todo!(op.token, "non-array type used in `offsetof` deref access"),
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 enum Context {
     Default,
@@ -3049,38 +3112,16 @@ fn typeck_expression<'a>(
             member_designator,
             close_paren: _,
         } => {
-            let member_tok = match member_designator {
-                MemberDesignator::Member(token) => token,
-                MemberDesignator::Subscript { lhs: _, index } =>
-                    return TypedExpression {
-                        ty: Type::size_t().unqualified(),
-                        expr: sess.emit(TodoError::Error {
-                            at: index.loc(),
-                            msg: "not implemented: `__builtin_offsetof` with index access `member-designator`",
-                        }),
-                    },
-                MemberDesignator::MemberAccess { op, .. } =>
-                    return TypedExpression {
-                        ty: Type::size_t().unqualified(),
-                        expr: sess.emit(TodoError::Error {
-                            at: op.token.loc(),
-                            msg: "not implemented: `__builtin_offsetof` with member access `member-designator`",
-                        }),
-                    },
-            };
             let ty = typeck_ty(sess, *ty, IsParameter::No);
-            let expr = lookup_member(sess, &ty, member_tok, || ty.loc())
-                .map_right(|member| match member.kind {
-                    MemberKind::Normal => Expression::Integer {
-                        value: member.offset,
-                        // TODO: this shows `__builtin_offsetof` as the `Integer` expr’s value in
-                        // the typeck sexpr repr
-                        token: *builtin_offsetof,
-                    },
-                    MemberKind::Bitfield(_) =>
-                        sess.emit(Diagnostic::OffsetofBitfield { at: *member_tok, ty }),
-                })
-                .into_inner();
+            let expr = match compute_offset(sess, &ty, member_designator) {
+                Ok((_ty, value)) => Expression::Integer {
+                    value,
+                    // TODO: this shows `__builtin_offsetof` as the `Integer` expr’s value in
+                    // the typeck sexpr repr
+                    token: *builtin_offsetof,
+                },
+                Err(expr) => expr,
+            };
             TypedExpression { ty: Type::size_t().unqualified(), expr }
         }
         scope::Expression::BuiltinName(name @ BuiltinName { kind, loc }) => {

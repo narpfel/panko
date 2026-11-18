@@ -8,13 +8,13 @@ info:
     - panko/tests/cases/execute/struct/test_offsetof_not_constexpr.c
 ---
 success: false
-exit_code: 2
+exit_code: 1
 ----- stdout -----
 
 ----- stderr -----
-Error: TODO: not implemented: `__builtin_offsetof` with index access `member-designator`
-    ╭─[panko/tests/cases/execute/struct/test_offsetof_not_constexpr.c:11:34]
-    │
- 11 │     return offsetof(struct T, xs[x]);
-    │                                  ─  
-────╯
+Error: not a constant expression
+   ╭─[panko/tests/cases/execute/struct/test_offsetof_not_constexpr.c:9:34]
+   │
+ 9 │     return offsetof(struct T, xs[x]);
+   │                                  ─  
+───╯
