@@ -2537,22 +2537,21 @@ fn compute_offset<'a>(
             let index_expr = typeck_expression(sess, index, Context::Default);
             match constexpr::eval(&index_expr).into_unsigned() {
                 Ok(Ok(index)) => match ty.ty {
-                    Type::Array(ArrayType { ty: element, length, loc: _ }) => match length {
-                        ArrayLength::Constant(length) if index < length =>
-                            Ok((*element, offset + element.ty.size() * index)),
-                        ArrayLength::Constant(length) => error_todo!(
-                            index_expr,
-                            "array index out of bounds: {} >= {}",
-                            index,
-                            length,
-                        ),
-                        ArrayLength::Unknown => unimplemented_todo!(
-                            index_expr,
-                            "`offsetof` involving flexible array member",
-                        ),
-                        ArrayLength::Variable(_) =>
-                            unreachable!("VMTs are not allowed as struct members"),
-                    },
+                    Type::Array(ArrayType { ty: element, length, loc: _ }) => {
+                        let ok = || Ok((*element, offset + element.ty.size() * index));
+                        match length {
+                            ArrayLength::Unknown => ok(),
+                            ArrayLength::Constant(length) if index < length => ok(),
+                            ArrayLength::Constant(length) => error_todo!(
+                                index_expr,
+                                "array index out of bounds: {} >= {}",
+                                index,
+                                length,
+                            ),
+                            ArrayLength::Variable(_) =>
+                                unreachable!("VMTs are not allowed as struct members"),
+                        }
+                    }
                     _ => error_todo!(index_expr, "non-array type used in `offsetof` index access"),
                 },
                 Ok(Err(negative)) => error_todo!(index_expr, "negative array index {}", negative),
