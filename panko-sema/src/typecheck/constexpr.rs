@@ -663,7 +663,7 @@ fn eval_static_initialiser<'a, 'b>(
                         }
                     },
                     Repr::Error(errors) =>
-                        repr = Repr::Error(std::mem::take(errors).chain(gather_errors([value]))),
+                        *errors = std::mem::take(errors).chain(gather_errors([value])),
                 }
             }
             Value { expr, repr }
@@ -686,9 +686,8 @@ fn eval_static_initialiser<'a, 'b>(
                     });
                     Repr::Bytes(bytes.collect())
                 }
-                PersistedValue::Error(reports) => Repr::Error(Errors(LinkedList::from_iter(
-                    reports.iter().copied().map(Either::Right),
-                ))),
+                PersistedValue::Error(reports) =>
+                    Repr::Error(Errors(reports.iter().copied().map(Either::Right).collect())),
             };
             Value { expr, repr }
         }
