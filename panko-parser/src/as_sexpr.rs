@@ -24,6 +24,7 @@ use crate::JumpStatement;
 use crate::MemberAccessOp;
 use crate::MemberAccessOpKind;
 use crate::MemberDesignator;
+use crate::OffsetofDesignator;
 use crate::ParameterDeclaration;
 use crate::Pointer;
 use crate::PrimaryBlock;
@@ -394,13 +395,20 @@ impl AsSExpr for MemberAccessOp<'_> {
 
 impl<Expr: AsSExpr> AsSExpr for MemberDesignator<'_, Expr> {
     fn as_sexpr(&self) -> SExpr {
+        let Self { member, designators } = self;
+        match designators {
+            [] => SExpr::string(member.slice()),
+            _ => SExpr::new("dot").inherit(member).lines(*designators),
+        }
+    }
+}
+
+impl<Expr: AsSExpr> AsSExpr for OffsetofDesignator<'_, Expr> {
+    fn as_sexpr(&self) -> SExpr {
         match self {
-            Self::Member(token) => SExpr::string(token.slice()),
-            Self::Subscript { lhs, index } => SExpr::new("subscript").inherit(lhs).inherit(index),
-            Self::MemberAccess { lhs, op, member } => op
-                .as_sexpr()
-                .inline_string(member.slice().to_owned())
-                .inherit(lhs),
+            Self::Subscript { index } => SExpr::new("subscript").inherit(index),
+            Self::MemberAccess { op, member } =>
+                op.as_sexpr().inline_string(member.slice().to_owned()),
         }
     }
 }

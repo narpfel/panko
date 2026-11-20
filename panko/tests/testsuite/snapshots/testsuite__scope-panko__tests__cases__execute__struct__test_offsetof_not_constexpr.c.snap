@@ -22,6 +22,9 @@ exit_code: 0
       main~1 `fn() -> int`
       (compound-statement
          (declaration x~3 `int` 2)
-         (return (offsetof `struct T~0 complete` (subscript xs (name x~3 `int`)))))))
+         (return
+            (offsetof `struct T~0 complete`
+               (dot xs
+                  (subscript (name x~3 `int`))))))))
 
 ----- stderr -----

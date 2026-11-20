@@ -24,6 +24,7 @@ use panko_parser::LogicalOp;
 use panko_parser::MemberAccessOp;
 use panko_parser::MemberAccessOpKind;
 use panko_parser::MemberDesignator;
+use panko_parser::OffsetofDesignator;
 use panko_parser::StructKind;
 use panko_parser::UnaryOp;
 use panko_parser::UnaryOpKind;
@@ -2521,47 +2522,52 @@ fn compute_offset<'a>(
     sess: &Session<'a>,
     ty: &QualifiedType<'a>,
     member_designator: &MemberDesignator<'a, scope::Expression<'a>>,
-) -> Result<(QualifiedType<'a>, u64), Expression<'a>> {
-    match member_designator {
-        MemberDesignator::Member(member_tok) => {
-            let member = Result::from(lookup_member(sess, ty, member_tok, || ty.loc()))?;
-            match member.kind {
-                MemberKind::Normal => Ok((member.ty, member.offset)),
-                MemberKind::Bitfield(_) =>
-                    Err(sess.emit(Diagnostic::OffsetofBitfield { at: *member_tok, ty: *ty })),
-            }
+) -> Result<u64, Expression<'a>> {
+    let compute_member_offset = |ty, member_tok| {
+        let member = Result::from(lookup_member(sess, &ty, member_tok, || ty.loc()))?;
+        match member.kind {
+            MemberKind::Normal => Ok((member.ty, member.offset)),
+            MemberKind::Bitfield(_) =>
+                Err(sess.emit(Diagnostic::OffsetofBitfield { at: *member_tok, ty })),
         }
-        MemberDesignator::Subscript { lhs, index } => {
-            // TODO: this should not short-circuit
-            let (ty, offset) = compute_offset(sess, ty, lhs)?;
-            let index_expr = typeck_expression(sess, index, Context::Default);
-            match constexpr::eval(&index_expr).into_unsigned() {
-                Ok(Ok(index)) => match ty.ty {
-                    Type::Array(ArrayType { ty: element, length, loc: _ }) => {
-                        let ok = || Ok((*element, offset + element.ty.size() * index));
-                        match length {
-                            ArrayLength::Unknown => ok(),
-                            ArrayLength::Constant(length) if index < length => ok(),
-                            ArrayLength::Constant(length) => error_todo!(
-                                index_expr,
-                                "array index out of bounds: {} >= {}",
-                                index,
-                                length,
-                            ),
-                            ArrayLength::Variable(_) =>
-                                unreachable!("VMTs are not allowed as struct members"),
+    };
+
+    let MemberDesignator { member, designators } = member_designator;
+    let (ty, offset) = compute_member_offset(*ty, member)?;
+    // TODO: this should not short-circuit
+    designators
+        .iter()
+        .try_fold((ty, offset), |(ty, offset), designator| match designator {
+            OffsetofDesignator::Subscript { index } => {
+                let index_expr = typeck_expression(sess, index, Context::Default);
+                match constexpr::eval(&index_expr).into_unsigned() {
+                    Ok(Ok(index)) => match ty.ty {
+                        Type::Array(ArrayType { ty: element, length, loc: _ }) => {
+                            let ok = || Ok((*element, offset + element.ty.size() * index));
+                            match length {
+                                ArrayLength::Unknown => ok(),
+                                ArrayLength::Constant(length) if index < length => ok(),
+                                ArrayLength::Constant(length) => error_todo!(
+                                    index_expr,
+                                    "array index out of bounds: {} >= {}",
+                                    index,
+                                    length,
+                                ),
+                                ArrayLength::Variable(_) =>
+                                    unreachable!("VMTs are not allowed as struct members"),
+                            }
                         }
-                    }
-                    _ => error_todo!(index_expr, "non-array type used in `offsetof` index access"),
-                },
-                Ok(Err(negative)) => error_todo!(index_expr, "negative array index {}", negative),
-                Err(errors) => Err(errors.emit(sess)),
+                        _ => error_todo!(
+                            index_expr,
+                            "non-array type used in `offsetof` index access",
+                        ),
+                    },
+                    Ok(Err(negative)) =>
+                        error_todo!(index_expr, "negative array index {}", negative),
+                    Err(errors) => Err(errors.emit(sess)),
+                }
             }
-        }
-        MemberDesignator::MemberAccess { lhs, op, member } => {
-            // TODO: this should not short-circuit
-            let (ty, offset) = compute_offset(sess, ty, lhs)?;
-            match (op.kind, &ty) {
+            OffsetofDesignator::MemberAccess { op, member } => match (op.kind, &ty) {
                 (MemberAccessOpKind::Dot, ty)
                 | (
                     MemberAccessOpKind::Arrow,
@@ -2569,13 +2575,13 @@ fn compute_offset<'a>(
                         ty: Type::Array(ArrayType { ty, length: _, loc: _ }),
                         ..
                     },
-                ) => compute_offset(sess, ty, &MemberDesignator::Member(*member))
+                ) => compute_member_offset(*ty, member)
                     .map(|(ty, additional_offset)| (ty, offset + additional_offset)),
                 (MemberAccessOpKind::Arrow, _) =>
                     error_todo!(op.token, "non-array type used in `offsetof` deref access"),
-            }
-        }
-    }
+            },
+        })
+        .map(|(_, offset)| offset)
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -3113,7 +3119,7 @@ fn typeck_expression<'a>(
         } => {
             let ty = typeck_ty(sess, *ty, IsParameter::No);
             let expr = match compute_offset(sess, &ty, member_designator) {
-                Ok((_ty, value)) => Expression::Integer {
+                Ok(value) => Expression::Integer {
                     value,
                     // TODO: this shows `__builtin_offsetof` as the `Integer` expr’s value in
                     // the typeck sexpr repr

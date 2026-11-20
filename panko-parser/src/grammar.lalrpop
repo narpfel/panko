@@ -749,11 +749,12 @@ GenericAssociation: ast::GenericAssociation<'a> = {
 }
 
 MemberDesignator: ast::MemberDesignator<'a, ast::Expression<'a>> = {
-    <AnyIdentifier> => ast::MemberDesignator::Member(<>),
-    <lhs:Bump<MemberDesignator>> "[" <index:Bump<Expression>> "]" =>
-        ast::MemberDesignator::Subscript { <> },
-    <lhs:Bump<MemberDesignator>> <op:MemberAccessOp> <member:AnyIdentifier> =>
-        ast::MemberDesignator::MemberAccess { <> },
+    <member:AnyIdentifier> <designators:Many<OffsetofDesignator>> => ast::MemberDesignator { <> },
+}
+
+OffsetofDesignator: ast::OffsetofDesignator<'a, ast::Expression<'a>> = {
+    "[" <index:Expression> "]" => ast::OffsetofDesignator::Subscript { <> },
+    <op:MemberAccessOp> <member:AnyIdentifier> => ast::OffsetofDesignator::MemberAccess { <> },
 }
 
 IncrementOperator: ast::IncrementOp<'a> = {

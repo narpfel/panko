@@ -32,11 +32,21 @@ exit_code: 0
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (offsetof `struct Outer~3 complete` (dot x (dot inner (subscript middles 5))))))
+               (offsetof `struct Outer~3 complete`
+                  (dot middles
+                     (subscript 5)
+                     (dot inner)
+                     (dot x)))))
          (expression
             (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
                (string "%zu\n")
-               (offsetof `struct Outer~3 complete` (dot y (arrow inner middles)))))
-         (return (offsetof `struct Middle~2 complete` (dot y inner))))))
+               (offsetof `struct Outer~3 complete`
+                  (dot middles
+                     (arrow inner)
+                     (dot y)))))
+         (return
+            (offsetof `struct Middle~2 complete`
+               (dot inner
+                  (dot y)))))))
 
 ----- stderr -----

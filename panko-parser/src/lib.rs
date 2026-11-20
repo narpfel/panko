@@ -1487,14 +1487,17 @@ pub struct MemberAccessOp<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum MemberDesignator<'a, Expr> {
-    Member(Token<'a>),
+pub struct MemberDesignator<'a, Expr> {
+    pub member: Token<'a>,
+    pub designators: &'a [OffsetofDesignator<'a, Expr>],
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum OffsetofDesignator<'a, Expr> {
     Subscript {
-        lhs: &'a Self,
-        index: &'a Expr,
+        index: Expr,
     },
     MemberAccess {
-        lhs: &'a Self,
         op: MemberAccessOp<'a>,
         member: Token<'a>,
     },

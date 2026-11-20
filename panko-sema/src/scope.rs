@@ -20,6 +20,7 @@ use panko_parser::MemberAccessOp;
 use panko_parser::MemberAccessOpKind;
 use panko_parser::MemberDesignator;
 use panko_parser::NO_VALUE;
+use panko_parser::OffsetofDesignator;
 use panko_parser::ParameterTypeList;
 use panko_parser::StorageClassSpecifierKind;
 use panko_parser::TypeName;
@@ -1790,18 +1791,16 @@ fn resolve_member_designator<'a>(
     scopes: &mut Scopes<'a>,
     member_designator: &MemberDesignator<'a, ast::Expression<'a>>,
 ) -> MemberDesignator<'a, Expression<'a>> {
-    match member_designator {
-        MemberDesignator::Member(token) => MemberDesignator::Member(*token),
-        MemberDesignator::Subscript { lhs, index } => MemberDesignator::Subscript {
-            lhs: scopes.sess.alloc(resolve_member_designator(scopes, lhs)),
-            index: scopes.sess.alloc(resolve_expr(scopes, index)),
-        },
-        MemberDesignator::MemberAccess { lhs, op, member } => MemberDesignator::MemberAccess {
-            lhs: scopes.sess.alloc(resolve_member_designator(scopes, lhs)),
-            op: *op,
-            member: *member,
-        },
-    }
+    let MemberDesignator { member, designators } = *member_designator;
+    let designators = scopes
+        .sess
+        .alloc_slice_fill_iter(designators.iter().map(|designator| match designator {
+            OffsetofDesignator::Subscript { index } =>
+                OffsetofDesignator::Subscript { index: resolve_expr(scopes, index) },
+            OffsetofDesignator::MemberAccess { op, member } =>
+                OffsetofDesignator::MemberAccess { op: *op, member: *member },
+        }));
+    MemberDesignator { member, designators }
 }
 
 fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expression<'a> {
