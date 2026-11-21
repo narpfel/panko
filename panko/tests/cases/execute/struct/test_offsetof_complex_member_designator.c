@@ -1,5 +1,3 @@
-// [[known-bug: `offsetof` accepts only identifiers as member designators]]
-
 #include <stddef.h>
 
 int printf(char const*, ...);
@@ -25,6 +23,9 @@ int main() {
 
     // [[print: 12]]
     printf("%zu\n", offsetof(struct Outer, middles->inner.y));
+
+    // [[print: 124]]
+    printf("%zu\n", offsetof(struct Outer, middles[10]));
 
     // [[return: 8]]
     return offsetof(struct Middle, inner.y);

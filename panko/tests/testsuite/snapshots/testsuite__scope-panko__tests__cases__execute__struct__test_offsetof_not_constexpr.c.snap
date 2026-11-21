@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_offsetof_not_constexpr.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_offsetof_not_constexpr.c"
+   (typedef ptrdiff_t `typeof((subtract (cast `ptr<char>` nullptr) (cast `ptr<char>` nullptr)))`)
+   (typedef size_t `typeof((sizeof `char`))`)
+   (typedef max_align_t `long long`)
+   (typedef wchar_t `int`)
+   (typedef nullptr_t `typeof(nullptr)`)
+   (struct T~0
+      (member xs `array<int; 10>`))
+   (function-definition
+      main~1 `fn() -> int`
+      (compound-statement
+         (declaration x~3 `int` 2)
+         (return
+            (offsetof `struct T~0 complete`
+               (dot xs
+                  (subscript (name x~3 `int`))))))))
+
+----- stderr -----

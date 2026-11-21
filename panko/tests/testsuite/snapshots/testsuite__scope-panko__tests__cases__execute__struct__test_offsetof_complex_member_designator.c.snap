@@ -7,15 +7,52 @@ info:
     - "--stop-after=scopes"
     - panko/tests/cases/execute/struct/test_offsetof_complex_member_designator.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_offsetof_complex_member_designator.c"
+   (typedef ptrdiff_t `typeof((subtract (cast `ptr<char>` nullptr) (cast `ptr<char>` nullptr)))`)
+   (typedef size_t `typeof((sizeof `char`))`)
+   (typedef max_align_t `long long`)
+   (typedef wchar_t `int`)
+   (typedef nullptr_t `typeof(nullptr)`)
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (struct Inner~1
+      (member x `int`)
+      (member y `int`))
+   (struct Middle~2
+      (member x `int`)
+      (member inner `struct Inner~1 complete`))
+   (struct Outer~3
+      (member x `int`)
+      (member middles `array<struct Middle~2 complete; 10>`))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (offsetof `struct Outer~3 complete`
+                  (dot middles
+                     (subscript 5)
+                     (dot inner)
+                     (dot x)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (offsetof `struct Outer~3 complete`
+                  (dot middles
+                     (arrow inner)
+                     (dot y)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (offsetof `struct Outer~3 complete`
+                  (dot middles
+                     (subscript 10)))))
+         (return
+            (offsetof `struct Middle~2 complete`
+               (dot inner
+                  (dot y)))))))
 
 ----- stderr -----
-Error: unexpected token `[` of kind `LBracket`
-    ╭─[panko/tests/cases/execute/struct/test_offsetof_complex_member_designator.c:24:51]
-    │
- 24 │     printf("%zu\n", offsetof(struct Outer, middles[5].inner.x));
-    │                                                   ┬  
-    │                                                   ╰── expected one of the following token kinds: [")"]
-────╯
