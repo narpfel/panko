@@ -707,6 +707,13 @@ pub(super) enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
     },
 
+    #[error("cannot use arrow operator on non-array type `{ty}`")]
+    #[diagnostics(at(colour = Red), ty(colour = Blue, label = "`{ty}` is not an array"))]
+    OffsetofArrowNonArray {
+        at: Token<'a>,
+        ty: QualifiedType<'a>,
+    },
+
     #[error("{kind} type `{ty}` does not have a member named `{at}`")]
     #[diagnostics(
         at(colour = Red, label = "this member does not exist"),

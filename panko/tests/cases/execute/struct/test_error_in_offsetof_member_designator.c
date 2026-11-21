@@ -19,4 +19,7 @@ int main() {
 
     // [[compile-error: index `-42` is out of bounds for array of type `array<struct Inner~\d+ complete; 10>`]]
     offsetof(struct Outer, inners[-42]);
+
+    // [[compile-error: cannot use arrow operator on non-array type `struct Inner~\d+ complete`]]
+    offsetof(struct Outer, inners[4]->y);
 }

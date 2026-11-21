@@ -45,3 +45,14 @@ Error: index `-42` is out of bounds for array of type `array<struct Inner~0 comp
     │                                   ─┬─  
     │                                    ╰─── this evaluates to `-42`
 ────╯
+
+Error: cannot use arrow operator on non-array type `struct Inner~0 complete`
+    ╭─[panko/tests/cases/execute/struct/test_error_in_offsetof_member_designator.c:24:37]
+    │
+ 10 │     struct Inner inners[10];
+    │     ──────┬─────  
+    │           ╰─────── `struct Inner~0 complete` is not an array
+    │ 
+ 24 │     offsetof(struct Outer, inners[4]->y);
+    │                                     ──  
+────╯

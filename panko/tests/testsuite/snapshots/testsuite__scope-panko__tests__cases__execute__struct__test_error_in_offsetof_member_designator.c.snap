@@ -36,6 +36,11 @@ exit_code: 0
          (expression
             (offsetof `struct Outer~1 complete`
                (dot inners
-                  (subscript (negate 42))))))))
+                  (subscript (negate 42)))))
+         (expression
+            (offsetof `struct Outer~1 complete`
+               (dot inners
+                  (subscript 4)
+                  (arrow y)))))))
 
 ----- stderr -----

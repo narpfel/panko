@@ -36,7 +36,6 @@ use panko_parser::ast::IntegralKind;
 use panko_parser::ast::Session;
 use panko_parser::ast::Signedness;
 use panko_parser::ast::reject_function_specifiers;
-use panko_parser::error_todo;
 use panko_parser::unimplemented_todo;
 use panko_report::Report;
 
@@ -2574,7 +2573,7 @@ fn compute_offset<'a>(
                 ) => compute_member_offset(*ty, member)
                     .map(|(ty, additional_offset)| (ty, offset + additional_offset)),
                 (MemberAccessOpKind::Arrow, _) =>
-                    error_todo!(op.token, "non-array type used in `offsetof` deref access"),
+                    Err(sess.emit(Diagnostic::OffsetofArrowNonArray { at: op.token, ty })),
             },
         })
         .map(|(_, offset)| offset)
