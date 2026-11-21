@@ -22,3 +22,15 @@ Error: index `20` is out of bounds for array of type `array<int; 5>`
     │                               ─┬  
     │                                ╰── this evaluates to `20`
 ────╯
+
+Error: cannot use subscript operator on non-array type `int`
+    ╭─[panko/tests/cases/execute/struct/test_error_in_offsetof_member_designator.c:18:30]
+    │
+  5 │     int y;
+    │     ─┬─  
+    │      ╰─── `int` is not an array
+    │ 
+ 18 │     offsetof(struct Inner, y[4]);
+    │                              ┬  
+    │                              ╰── subscript operator use here
+────╯

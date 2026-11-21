@@ -13,4 +13,7 @@ struct Outer {
 int main() {
     // [[compile-error: index `20` is out of bounds for array of type `array<int; 5>`]]
     offsetof(struct Outer, xs[20]);
+
+    // [[compile-error: cannot use subscript operator on non-array type `int`]]
+    offsetof(struct Inner, y[4]);
 }

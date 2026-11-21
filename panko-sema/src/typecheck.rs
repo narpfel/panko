@@ -2557,10 +2557,10 @@ fn compute_offset<'a>(
                                     unreachable!("VMTs are not allowed as struct members"),
                             }
                         }
-                        _ => error_todo!(
-                            index_expr,
-                            "non-array type used in `offsetof` index access",
-                        ),
+                        _ => Err(sess.emit(Diagnostic::OffsetofNonArraySubscript {
+                            at: index_expr,
+                            ty,
+                        })),
                     },
                     Ok(Err(negative)) =>
                         error_todo!(index_expr, "negative array index {}", negative),

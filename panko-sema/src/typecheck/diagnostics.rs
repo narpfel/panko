@@ -698,6 +698,16 @@ pub(super) enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
     },
 
+    #[error("cannot use subscript operator on non-array type `{ty}`")]
+    #[diagnostics(
+        at(colour = Red, label = "subscript operator use here"),
+        ty(colour = Blue, label = "`{ty}` is not an array"),
+    )]
+    OffsetofNonArraySubscript {
+        at: TypedExpression<'a>,
+        ty: QualifiedType<'a>,
+    },
+
     #[error("{kind} type `{ty}` does not have a member named `{at}`")]
     #[diagnostics(
         at(colour = Red, label = "this member does not exist"),
