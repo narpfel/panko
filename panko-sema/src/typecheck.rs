@@ -2547,12 +2547,12 @@ fn compute_offset<'a>(
                             match length {
                                 ArrayLength::Unknown => ok(),
                                 ArrayLength::Constant(length) if index < length => ok(),
-                                ArrayLength::Constant(length) => error_todo!(
-                                    index_expr,
-                                    "array index out of bounds: {} >= {}",
-                                    index,
-                                    length,
-                                ),
+                                ArrayLength::Constant(_) =>
+                                    Err(sess.emit(Diagnostic::OffsetofOutOfBounds {
+                                        at: index_expr,
+                                        index,
+                                        ty,
+                                    })),
                                 ArrayLength::Variable(_) =>
                                     unreachable!("VMTs are not allowed as struct members"),
                             }

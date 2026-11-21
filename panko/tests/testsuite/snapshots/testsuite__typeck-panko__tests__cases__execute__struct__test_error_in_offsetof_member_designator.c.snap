@@ -1,0 +1,24 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_error_in_offsetof_member_designator.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: index `20` is out of bounds for array of type `array<int; 5>`
+    ╭─[panko/tests/cases/execute/struct/test_error_in_offsetof_member_designator.c:15:31]
+    │
+  9 │     int xs[5];
+    │     ─────────  
+    │ 
+ 15 │     offsetof(struct Outer, xs[20]);
+    │                               ─┬  
+    │                                ╰── this evaluates to `20`
+────╯

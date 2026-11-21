@@ -689,6 +689,15 @@ pub(super) enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
     },
 
+    #[error("index `{index}` is out of bounds for array of type `{ty}`")]
+    #[diagnostics(at(colour = Red, label = "this evaluates to `{index}`"), ty(colour = Blue))]
+    #[with(index = index.fg(Red))]
+    OffsetofOutOfBounds {
+        at: TypedExpression<'a>,
+        index: u64,
+        ty: QualifiedType<'a>,
+    },
+
     #[error("{kind} type `{ty}` does not have a member named `{at}`")]
     #[diagnostics(
         at(colour = Red, label = "this member does not exist"),
