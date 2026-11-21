@@ -694,7 +694,7 @@ pub(super) enum Diagnostic<'a> {
     #[with(index = index.fg(Red))]
     OffsetofOutOfBounds {
         at: TypedExpression<'a>,
-        index: u64,
+        index: constexpr::Integral,
         ty: QualifiedType<'a>,
     },
 

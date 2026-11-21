@@ -16,4 +16,6 @@ int main() {
 
     // [[compile-error: cannot use subscript operator on non-array type `int`]]
     offsetof(struct Inner, y[4]);
+
+    offsetof(struct Outer, inners[-42]);
 }
