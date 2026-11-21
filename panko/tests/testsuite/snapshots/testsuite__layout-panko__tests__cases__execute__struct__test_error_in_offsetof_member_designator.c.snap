@@ -36,12 +36,12 @@ Error: cannot use subscript operator on non-array type `int`
 ────╯
 
 Error: index `-42` is out of bounds for array of type `array<struct Inner~0 complete; 10>`
-    ╭─[panko/tests/cases/execute/struct/test_error_in_offsetof_member_designator.c:20:35]
+    ╭─[panko/tests/cases/execute/struct/test_error_in_offsetof_member_designator.c:21:35]
     │
  10 │     struct Inner inners[10];
     │     ───────────────────────  
     │ 
- 20 │     offsetof(struct Outer, inners[-42]);
+ 21 │     offsetof(struct Outer, inners[-42]);
     │                                   ─┬─  
     │                                    ╰─── this evaluates to `-42`
 ────╯
