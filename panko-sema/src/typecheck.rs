@@ -2547,7 +2547,9 @@ fn compute_offset<'a>(
                             let ok = || Ok((*element, offset + element.ty.size() * index));
                             match length {
                                 ArrayLength::Unknown => ok(),
-                                ArrayLength::Constant(length) if index < length => ok(),
+                                // TODO: one-past-end should only be allowed as last `designator`
+                                // (any further offsetting is out-of-bounds)
+                                ArrayLength::Constant(length) if index <= length => ok(),
                                 ArrayLength::Constant(_) => out_of_bounds(),
                                 ArrayLength::Variable(_) =>
                                     unreachable!("VMTs are not allowed as struct members"),

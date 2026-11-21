@@ -47,6 +47,15 @@ exit_code: 0
                      (addressof `ptr<array<char; 5>>`
                         (string `array<char; 5>` "%zu\n\0"))))
                (__builtin_offsetof `unsigned long`)))
+         (expression
+            (call `int`
+               (addressof `ptr<fn(∅: ptr<char const>, ...) -> int>`
+                  (printf~0 `fn(∅: ptr<char const>, ...) -> int`))
+               (noop-type-conversion `ptr<char const>`
+                  (noop-type-conversion `ptr<char>`
+                     (addressof `ptr<array<char; 5>>`
+                        (string `array<char; 5>` "%zu\n\0"))))
+               (__builtin_offsetof `unsigned long`)))
          (return (truncate `int` (__builtin_offsetof `unsigned long`))))))
 
 ----- stderr -----

@@ -44,6 +44,12 @@ exit_code: 0
                   (dot middles
                      (arrow inner)
                      (dot y)))))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%zu\n")
+               (offsetof `struct Outer~3 complete`
+                  (dot middles
+                     (subscript 10)))))
          (return
             (offsetof `struct Middle~2 complete`
                (dot inner
