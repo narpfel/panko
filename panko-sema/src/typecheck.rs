@@ -2540,9 +2540,8 @@ fn compute_offset<'a>(
         .try_fold((ty, offset), |(ty, offset), designator| match designator {
             OffsetofDesignator::Subscript { index } => {
                 let index_expr = typeck_expression(sess, index, Context::Default);
-                let out_of_bounds = |index| {
-                    Err(sess.emit(Diagnostic::OffsetofOutOfBounds { at: index_expr, index, ty }))
-                };
+                let out_of_bounds =
+                    || Err(sess.emit(Diagnostic::OffsetofOutOfBounds { at: index_expr, ty }));
                 match constexpr::eval(&index_expr).into_unsigned() {
                     Ok(Ok(index)) => match ty.ty {
                         Type::Array(ArrayType { ty: element, length, loc: _ }) => {
@@ -2550,8 +2549,7 @@ fn compute_offset<'a>(
                             match length {
                                 ArrayLength::Unknown => ok(),
                                 ArrayLength::Constant(length) if index < length => ok(),
-                                ArrayLength::Constant(_) =>
-                                    out_of_bounds(constexpr::Integral::Unsigned(index)),
+                                ArrayLength::Constant(_) => out_of_bounds(),
                                 ArrayLength::Variable(_) =>
                                     unreachable!("VMTs are not allowed as struct members"),
                             }
@@ -2561,7 +2559,7 @@ fn compute_offset<'a>(
                             ty,
                         })),
                     },
-                    Ok(Err(negative)) => out_of_bounds(constexpr::Integral::Signed(negative)),
+                    Ok(Err(_)) => out_of_bounds(),
                     Err(errors) => Err(errors.emit(sess)),
                 }
             }

@@ -691,10 +691,9 @@ pub(super) enum Diagnostic<'a> {
 
     #[error("index `{index}` is out of bounds for array of type `{ty}`")]
     #[diagnostics(at(colour = Red, label = "this evaluates to `{index}`"), ty(colour = Blue))]
-    #[with(index = index.fg(Red))]
+    #[with(index = constexpr::eval(at).into_integral().unwrap().fg(Red))]
     OffsetofOutOfBounds {
         at: TypedExpression<'a>,
-        index: constexpr::Integral,
         ty: QualifiedType<'a>,
     },
 
