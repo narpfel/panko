@@ -1,0 +1,59 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/struct/test_error_in_offsetof_member_designator.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: index `20` is out of bounds for array of type `array<int; 5>`
+    ╭─[panko/tests/cases/execute/struct/test_error_in_offsetof_member_designator.c:15:31]
+    │
+  9 │     int xs[5];
+    │     ─────────  
+    │ 
+ 15 │     offsetof(struct Outer, xs[20]);
+    │                               ─┬  
+    │                                ╰── this evaluates to `20`
+────╯
+
+Error: cannot use subscript operator on non-array type `int`
+    ╭─[panko/tests/cases/execute/struct/test_error_in_offsetof_member_designator.c:18:30]
+    │
+  5 │     int y;
+    │     ─┬─  
+    │      ╰─── `int` is not an array
+    │ 
+ 18 │     offsetof(struct Inner, y[4]);
+    │                              ┬  
+    │                              ╰── subscript operator used here
+────╯
+
+Error: index `-42` is out of bounds for array of type `array<struct Inner~0 complete; 10>`
+    ╭─[panko/tests/cases/execute/struct/test_error_in_offsetof_member_designator.c:21:35]
+    │
+ 10 │     struct Inner inners[10];
+    │     ───────────────────────  
+    │ 
+ 21 │     offsetof(struct Outer, inners[-42]);
+    │                                   ─┬─  
+    │                                    ╰─── this evaluates to `-42`
+────╯
+
+Error: cannot use arrow operator on non-array type `struct Inner~0 complete`
+    ╭─[panko/tests/cases/execute/struct/test_error_in_offsetof_member_designator.c:24:37]
+    │
+ 10 │     struct Inner inners[10];
+    │     ──────┬─────  
+    │           ╰─────── `struct Inner~0 complete` is not an array
+    │ 
+ 24 │     offsetof(struct Outer, inners[4]->y);
+    │                                     ─┬  
+    │                                      ╰── arrow operator used here
+────╯

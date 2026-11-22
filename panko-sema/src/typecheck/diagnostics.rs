@@ -689,6 +689,26 @@ pub(super) enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
     },
 
+    #[error("index `{index}` is out of bounds for array of type `{ty}`")]
+    #[diagnostics(at(colour = Red, label = "this evaluates to `{index}`"), ty(colour = Blue))]
+    #[with(index = constexpr::eval(at).into_integral().unwrap().fg(Red))]
+    OffsetofOutOfBounds {
+        at: TypedExpression<'a>,
+        ty: QualifiedType<'a>,
+    },
+
+    #[error("cannot use {kind} operator on non-array type `{ty}`")]
+    #[diagnostics(
+        at(colour = Red, label = "{kind} operator used here"),
+        ty(colour = Blue, label = "`{ty}` is not an array"),
+    )]
+    #[with(kind = kind.fg(Red))]
+    OffsetofNonArraySubscript {
+        at: Loc<'a>,
+        ty: QualifiedType<'a>,
+        kind: &'a str,
+    },
+
     #[error("{kind} type `{ty}` does not have a member named `{at}`")]
     #[diagnostics(
         at(colour = Red, label = "this member does not exist"),

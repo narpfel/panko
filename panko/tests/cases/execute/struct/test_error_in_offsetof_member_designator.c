@@ -1,0 +1,25 @@
+#include <stddef.h>
+
+struct Inner {
+    int x;
+    int y;
+};
+
+struct Outer {
+    int xs[5];
+    struct Inner inners[10];
+};
+
+int main() {
+    // [[compile-error: index `20` is out of bounds for array of type `array<int; 5>`]]
+    offsetof(struct Outer, xs[20]);
+
+    // [[compile-error: cannot use subscript operator on non-array type `int`]]
+    offsetof(struct Inner, y[4]);
+
+    // [[compile-error: index `-42` is out of bounds for array of type `array<struct Inner~\d+ complete; 10>`]]
+    offsetof(struct Outer, inners[-42]);
+
+    // [[compile-error: cannot use arrow operator on non-array type `struct Inner~\d+ complete`]]
+    offsetof(struct Outer, inners[4]->y);
+}

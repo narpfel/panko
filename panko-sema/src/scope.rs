@@ -18,7 +18,9 @@ use panko_parser::IncrementOp;
 use panko_parser::LogicalOp;
 use panko_parser::MemberAccessOp;
 use panko_parser::MemberAccessOpKind;
+use panko_parser::MemberDesignator;
 use panko_parser::NO_VALUE;
+use panko_parser::OffsetofDesignator;
 use panko_parser::ParameterTypeList;
 use panko_parser::StorageClassSpecifierKind;
 use panko_parser::TypeName;
@@ -554,7 +556,7 @@ pub(crate) enum Expression<'a> {
     BuiltinOffsetof {
         builtin_offsetof: Token<'a>,
         ty: QualifiedType<'a>,
-        member: Token<'a>,
+        member_designator: MemberDesignator<'a, Self>,
         close_paren: Token<'a>,
     },
     BuiltinName(BuiltinName<'a>),
@@ -831,7 +833,7 @@ impl<'a> Expression<'a> {
             Expression::BuiltinOffsetof {
                 builtin_offsetof,
                 ty: _,
-                member: _,
+                member_designator: _,
                 close_paren,
             } => builtin_offsetof.loc().until(close_paren.loc()),
             Expression::BuiltinName(BuiltinName { kind: _, loc }) => *loc,
@@ -1785,6 +1787,22 @@ fn resolve_assoc<'a>(
     }
 }
 
+fn resolve_member_designator<'a>(
+    scopes: &mut Scopes<'a>,
+    member_designator: &MemberDesignator<'a, ast::Expression<'a>>,
+) -> MemberDesignator<'a, Expression<'a>> {
+    let MemberDesignator { member, designators } = *member_designator;
+    let designators = scopes
+        .sess
+        .alloc_slice_fill_iter(designators.iter().map(|designator| match designator {
+            OffsetofDesignator::Subscript { index } =>
+                OffsetofDesignator::Subscript { index: resolve_expr(scopes, index) },
+            OffsetofDesignator::MemberAccess { op, member } =>
+                OffsetofDesignator::MemberAccess { op: *op, member: *member },
+        }));
+    MemberDesignator { member, designators }
+}
+
 fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expression<'a> {
     match expr {
         ast::Expression::Error(error) => Expression::Error(*error),
@@ -1944,12 +1962,12 @@ fn resolve_expr<'a>(scopes: &mut Scopes<'a>, expr: &ast::Expression<'a>) -> Expr
         ast::Expression::BuiltinOffsetof {
             builtin_offsetof,
             ty,
-            member,
+            member_designator,
             close_paren,
         } => Expression::BuiltinOffsetof {
             builtin_offsetof: *builtin_offsetof,
             ty: resolve_typename(scopes, ty),
-            member: *member,
+            member_designator: resolve_member_designator(scopes, member_designator),
             close_paren: *close_paren,
         },
         ast::Expression::CompoundLiteral {

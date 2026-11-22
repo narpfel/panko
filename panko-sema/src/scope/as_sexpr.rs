@@ -278,9 +278,11 @@ impl AsSExpr for Expression<'_> {
             Expression::BuiltinOffsetof {
                 builtin_offsetof: _,
                 ty,
-                member,
+                member_designator,
                 close_paren: _,
-            } => SExpr::new("offsetof").inherit(ty).inherit(member),
+            } => SExpr::new("offsetof")
+                .inherit(ty)
+                .inherit(member_designator),
             Expression::BuiltinName(builtin_name) => builtin_name.as_sexpr(),
             Expression::CompoundLiteral { open_paren: _, decl } =>
                 SExpr::new("compound-literal").inherit(decl),

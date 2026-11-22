@@ -735,7 +735,7 @@ PrimaryExpression: ast::Expression<'a> = {
         <close_paren:")"> => ast::Expression::Generic { <> },
     <builtin_offsetof:"__builtin_offsetof"> "("
         <ty:TypeName> ","
-        <member:AnyIdentifier>
+        <member_designator:MemberDesignator>
         <close_paren:")"> => ast::Expression::BuiltinOffsetof { <> },
 }
 
@@ -746,6 +746,15 @@ GenericAssocList: ast::GenericAssocList<'a> = {
 GenericAssociation: ast::GenericAssociation<'a> = {
     <ty:TypeNameImpl<"inline">> ":" <expr:AssignmentExpression> => ast::GenericAssociation::Ty { <> },
     <default:"default"> ":" <expr:AssignmentExpression> => ast::GenericAssociation::Default { <> },
+}
+
+MemberDesignator: ast::MemberDesignator<'a, ast::Expression<'a>> = {
+    <member:AnyIdentifier> <designators:Many<OffsetofDesignator>> => ast::MemberDesignator { <> },
+}
+
+OffsetofDesignator: ast::OffsetofDesignator<'a, ast::Expression<'a>> = {
+    "[" <index:Expression> "]" => ast::OffsetofDesignator::Subscript { <> },
+    <op:MemberAccessOp> <member:AnyIdentifier> => ast::OffsetofDesignator::MemberAccess { <> },
 }
 
 IncrementOperator: ast::IncrementOp<'a> = {
