@@ -2531,54 +2531,53 @@ fn compute_offset<'a>(
         }
     };
 
-    let MemberDesignator { member, designators } = member_designator;
-    let (ty, offset) = compute_member_offset(*ty, member)?;
-    // TODO: this should not short-circuit
-    designators
-        .iter()
-        .try_fold((ty, offset), |(ty, offset), designator| {
-            let non_array_subscript =
-                |at, kind| Err(sess.emit(Diagnostic::OffsetofNonArraySubscript { at, ty, kind }));
-            match designator {
-                OffsetofDesignator::Subscript { index } => {
-                    let index_expr = typeck_expression(sess, index, Context::Default);
-                    let out_of_bounds =
-                        || Err(sess.emit(Diagnostic::OffsetofOutOfBounds { at: index_expr, ty }));
-                    match constexpr::eval(&index_expr).into_unsigned() {
-                        Ok(Ok(index)) => match ty.ty {
-                            Type::Array(ArrayType { ty: element, length, loc: _ }) => {
-                                let ok = || Ok((*element, offset + element.ty.size() * index));
-                                match length {
-                                    ArrayLength::Unknown => ok(),
-                                    // TODO: one-past-end should only be allowed as last
-                                    // `designator` (any further offsetting is out-of-bounds)
-                                    ArrayLength::Constant(length) if index <= length => ok(),
-                                    ArrayLength::Constant(_) => out_of_bounds(),
-                                    ArrayLength::Variable(_) =>
-                                        unreachable!("VMTs are not allowed as struct members"),
-                                }
-                            }
-                            _ => non_array_subscript(index_expr.loc(), "subscript"),
-                        },
-                        Ok(Err(_)) => out_of_bounds(),
-                        Err(errors) => Err(errors.emit(sess)),
+    let non_array_subscript =
+        |at, ty, kind| Err(sess.emit(Diagnostic::OffsetofNonArraySubscript { at, ty, kind }));
+
+    let compute_designator = |(ty, offset), designator: &'a _| match designator {
+        OffsetofDesignator::Subscript { index } => {
+            let index_expr = typeck_expression(sess, index, Context::Default);
+            let out_of_bounds =
+                || Err(sess.emit(Diagnostic::OffsetofOutOfBounds { at: index_expr, ty }));
+            match constexpr::eval(&index_expr).into_unsigned() {
+                Ok(Ok(index)) => match ty.ty {
+                    Type::Array(ArrayType { ty: element, length, loc: _ }) => {
+                        let ok = || Ok((*element, offset + element.ty.size() * index));
+                        match length {
+                            ArrayLength::Unknown => ok(),
+                            // TODO: one-past-end should only be allowed as last
+                            // `designator` (any further offsetting is out-of-bounds)
+                            ArrayLength::Constant(length) if index <= length => ok(),
+                            ArrayLength::Constant(_) => out_of_bounds(),
+                            ArrayLength::Variable(_) =>
+                                unreachable!("VMTs are not allowed as struct members"),
+                        }
                     }
-                }
-                OffsetofDesignator::MemberAccess { op, member } => match (op.kind, &ty) {
-                    (MemberAccessOpKind::Dot, ty)
-                    | (
-                        MemberAccessOpKind::Arrow,
-                        &QualifiedType {
-                            ty: Type::Array(ArrayType { ty, length: _, loc: _ }),
-                            ..
-                        },
-                    ) => compute_member_offset(*ty, member)
-                        .map(|(ty, additional_offset)| (ty, offset + additional_offset)),
-                    (MemberAccessOpKind::Arrow, _) => non_array_subscript(op.token.loc(), "arrow"),
+                    _ => non_array_subscript(index_expr.loc(), ty, "subscript"),
                 },
+                Ok(Err(_)) => out_of_bounds(),
+                Err(errors) => Err(errors.emit(sess)),
             }
-        })
-        .map(|(_, offset)| offset)
+        }
+        OffsetofDesignator::MemberAccess { op, member } => match (op.kind, &ty) {
+            (MemberAccessOpKind::Dot, ty)
+            | (
+                MemberAccessOpKind::Arrow,
+                &QualifiedType {
+                    ty: Type::Array(ArrayType { ty, length: _, loc: _ }),
+                    ..
+                },
+            ) => compute_member_offset(*ty, member)
+                .map(|(ty, additional_offset)| (ty, offset + additional_offset)),
+            (MemberAccessOpKind::Arrow, _) => non_array_subscript(op.token.loc(), ty, "arrow"),
+        },
+    };
+
+    let MemberDesignator { member, designators } = member_designator;
+    let base = compute_member_offset(*ty, member)?;
+    // TODO: this should not short-circuit
+    let (_, offset) = designators.iter().try_fold(base, compute_designator)?;
+    Ok(offset)
 }
 
 #[derive(Debug, Clone, Copy)]
