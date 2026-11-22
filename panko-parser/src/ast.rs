@@ -119,6 +119,15 @@ where
     }
 }
 
+impl<'a, T> FromError<'a> for Box<T>
+where
+    T: FromError<'a>,
+{
+    fn from_error(error: &'a dyn Report) -> Self {
+        Self::new(T::from_error(error))
+    }
+}
+
 type Diagnostics<'a> = RefCell<Vec<&'a dyn Report>>;
 
 #[derive(Debug)]

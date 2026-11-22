@@ -2516,14 +2516,13 @@ where
     }
 }
 
-#[expect(clippy::result_large_err)]
 fn compute_offset<'a>(
     sess: &Session<'a>,
     ty: &QualifiedType<'a>,
     member_designator: &MemberDesignator<'a, scope::Expression<'a>>,
-) -> Result<u64, Expression<'a>> {
-    let compute_member_offset = |ty, member_tok| {
-        let member = Result::from(lookup_member(sess, &ty, member_tok, || ty.loc()))?;
+) -> Result<u64, Box<Expression<'a>>> {
+    let compute_member_offset = |ty, member_tok| -> Result<_, Box<_>> {
+        let member = Result::from(lookup_member::<Box<_>>(sess, &ty, member_tok, || ty.loc()))?;
         match member.kind {
             MemberKind::Normal => Ok((member.ty, member.offset)),
             MemberKind::Bitfield(_) =>
@@ -3121,7 +3120,7 @@ fn typeck_expression<'a>(
                     // the typeck sexpr repr
                     token: *builtin_offsetof,
                 },
-                Err(expr) => expr,
+                Err(expr) => *expr,
             };
             TypedExpression { ty: Type::size_t().unqualified(), expr }
         }
