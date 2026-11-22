@@ -32,7 +32,7 @@ Error: cannot use subscript operator on non-array type `int`
     │ 
  18 │     offsetof(struct Inner, y[4]);
     │                              ┬  
-    │                              ╰── subscript operator use here
+    │                              ╰── subscript operator used here
 ────╯
 
 Error: index `-42` is out of bounds for array of type `array<struct Inner~0 complete; 10>`
@@ -55,5 +55,5 @@ Error: cannot use arrow operator on non-array type `struct Inner~0 complete`
     │ 
  24 │     offsetof(struct Outer, inners[4]->y);
     │                                     ─┬  
-    │                                      ╰── arrow operator use here
+    │                                      ╰── arrow operator used here
 ────╯

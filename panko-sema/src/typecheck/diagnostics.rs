@@ -699,7 +699,7 @@ pub(super) enum Diagnostic<'a> {
 
     #[error("cannot use {kind} operator on non-array type `{ty}`")]
     #[diagnostics(
-        at(colour = Red, label = "{kind} operator use here"),
+        at(colour = Red, label = "{kind} operator used here"),
         ty(colour = Blue, label = "`{ty}` is not an array"),
     )]
     #[with(kind = kind.fg(Red))]
