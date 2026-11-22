@@ -697,21 +697,16 @@ pub(super) enum Diagnostic<'a> {
         ty: QualifiedType<'a>,
     },
 
-    #[error("cannot use subscript operator on non-array type `{ty}`")]
+    #[error("cannot use {kind} operator on non-array type `{ty}`")]
     #[diagnostics(
-        at(colour = Red, label = "subscript operator use here"),
+        at(colour = Red, label = "{kind} operator use here"),
         ty(colour = Blue, label = "`{ty}` is not an array"),
     )]
+    #[with(kind = kind.fg(Red))]
     OffsetofNonArraySubscript {
-        at: TypedExpression<'a>,
+        at: Loc<'a>,
         ty: QualifiedType<'a>,
-    },
-
-    #[error("cannot use arrow operator on non-array type `{ty}`")]
-    #[diagnostics(at(colour = Red), ty(colour = Blue, label = "`{ty}` is not an array"))]
-    OffsetofArrowNonArray {
-        at: Token<'a>,
-        ty: QualifiedType<'a>,
+        kind: &'a str,
     },
 
     #[error("{kind} type `{ty}` does not have a member named `{at}`")]

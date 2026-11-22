@@ -54,5 +54,6 @@ Error: cannot use arrow operator on non-array type `struct Inner~0 complete`
     │           ╰─────── `struct Inner~0 complete` is not an array
     │ 
  24 │     offsetof(struct Outer, inners[4]->y);
-    │                                     ──  
+    │                                     ─┬  
+    │                                      ╰── arrow operator use here
 ────╯
