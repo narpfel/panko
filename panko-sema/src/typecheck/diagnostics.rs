@@ -28,6 +28,7 @@ use crate::ty::ArrayType;
 use crate::ty::ParameterDeclaration;
 use crate::ty::Struct;
 use crate::ty::subobjects::SubobjectIterator;
+use crate::typecheck::Member;
 use crate::typecheck::constexpr;
 
 #[derive(Debug, Report)]
@@ -677,6 +678,17 @@ pub(super) enum Diagnostic<'a> {
     #[error("struct member declared with an abstract declarator")]
     #[diagnostics(at(colour = Red, label = "in this declaration"))]
     MemberWithAbstractDeclarator { at: QualifiedType<'a> },
+
+    #[error("duplicate member declaration for `{name}`")]
+    #[diagnostics(
+        at(colour = Red, label = "duplicate declaration"),
+        previous_decl(colour = Blue, label = "previously declared here"),
+    )]
+    #[with(name = at.name)]
+    MemberRedeclared {
+        at: Member<'a, Typeck>,
+        previous_decl: Member<'a, Typeck>,
+    },
 
     #[error("cannot apply `{offsetof}` to bitfield member `{at}`")]
     #[diagnostics(

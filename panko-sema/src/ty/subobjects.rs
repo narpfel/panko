@@ -140,7 +140,13 @@ impl<'a> SubobjectIterator<'a> {
                     kind: MemberKind::Normal,
                 }),
                 Self::Struct { ty, index, offset, is_empty: _ } => {
-                    let Member { name: _, ty, offset: member_offset, kind } = ty.members[*index];
+                    let Member {
+                        name: _,
+                        loc: _,
+                        ty,
+                        offset: member_offset,
+                        kind,
+                    } = ty.members[*index];
                     Some(Subobject {
                         ty: ty.ty,
                         offset: offset.strict_add(member_offset),
