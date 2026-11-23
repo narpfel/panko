@@ -14,6 +14,9 @@ exit_code: 0
    (struct T~0
       (member x `int`)
       (member y `int`)
-      (member x `char`)))
+      (member x `char`))
+   (struct U~1
+      (member redeclared_in_anonymous `int`)
+      (member ∅ `struct ∅~2 complete`)))
 
 ----- stderr -----
