@@ -13,25 +13,25 @@ exit_code: 1
 
 ----- stderr -----
 Error: duplicate member declaration for `x`
-   ╭─[panko/tests/cases/execute/struct/test_error_member_redeclaration.c:6:10]
+   ╭─[panko/tests/cases/execute/struct/test_error_member_redeclaration.c:9:10]
    │
- 2 │     int x;
+ 5 │     int x;
    │         ┬  
    │         ╰── previously declared here
    │ 
- 6 │     char x;
+ 9 │     char x;
    │          ┬  
    │          ╰── duplicate declaration
 ───╯
 
 Error: duplicate member declaration for `redeclared_in_anonymous`
-    ╭─[panko/tests/cases/execute/struct/test_error_member_redeclaration.c:12:19]
+    ╭─[panko/tests/cases/execute/struct/test_error_member_redeclaration.c:15:19]
     │
- 10 │     int redeclared_in_anonymous;
+ 13 │     int redeclared_in_anonymous;
     │         ───────────┬───────────  
     │                    ╰───────────── previously declared here
     │ 
- 12 │     struct { long redeclared_in_anonymous; };
+ 15 │     struct { long redeclared_in_anonymous; };
     │                   ───────────┬───────────  
     │                              ╰───────────── duplicate declaration
 ────╯
