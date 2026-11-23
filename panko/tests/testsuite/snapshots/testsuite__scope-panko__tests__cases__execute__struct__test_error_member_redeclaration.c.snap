@@ -1,0 +1,19 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/struct/test_error_member_redeclaration.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/struct/test_error_member_redeclaration.c"
+   (struct T~0
+      (member x `int`)
+      (member y `int`)
+      (member x `char`)))
+
+----- stderr -----
