@@ -1,6 +1,8 @@
 use std::assert_matches;
 use std::byte_str::ByteStr;
 use std::cmp::Ordering;
+use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 use std::fmt;
 use std::hash::Hash;
 use std::marker::PhantomData;
@@ -174,9 +176,17 @@ impl<'a> FromError<'a> for MemberKind {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Member<'a, T: ty::Step> {
     pub(crate) name: &'a str,
+    pub(crate) loc: HashEqIgnored<Loc<'a>>,
     pub ty: ty::QualifiedType<'a, T>,
     pub offset: u64,
     pub kind: MemberKind,
+}
+
+impl<'a, T: ty::Step> Member<'a, T> {
+    fn loc(&self) -> Loc<'a> {
+        let HashEqIgnored(loc) = self.loc;
+        loc
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -920,14 +930,27 @@ fn typeck_struct_members<'a>(
             };
             size += width;
             match name {
-                Some(name) => yield Member { name: name.slice(), ty, offset, kind },
+                Some(name) =>
+                    yield Member {
+                        name: name.slice(),
+                        loc: HashEqIgnored(name.loc()),
+                        ty,
+                        offset,
+                        kind,
+                    },
                 None if let Type::Struct(Struct::Complete(complete)) = ty.ty
                     && let Complete { name: None, id: _, kind: _, members } = complete =>
                     for &member in members {
-                        let Member { name, ty: m_ty, offset: m_offset, kind } = member;
+                        let Member {
+                            name,
+                            loc,
+                            ty: m_ty,
+                            offset: m_offset,
+                            kind,
+                        } = member;
                         let ty = m_ty.merge_qualifiers(&ty);
                         let offset = offset + m_offset;
-                        yield Member { name, ty, offset, kind };
+                        yield Member { name, loc, ty, offset, kind };
                     },
                 None => match kind {
                     MemberKind::Normal =>
@@ -937,6 +960,17 @@ fn typeck_struct_members<'a>(
             }
         }
     };
+
+    let mut decls = HashMap::new();
+    let members = members.filter_map(|member| {
+        match decls.entry(member.name) {
+            // TODO: use this error
+            Entry::Occupied(entry) =>
+                sess.emit(Diagnostic::MemberRedeclared { at: member, previous_decl: *entry.get() }),
+            Entry::Vacant(entry) => Some(*entry.insert(member)),
+        }
+    });
+
     sess.alloc_slice_collect(members)
 }
 

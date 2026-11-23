@@ -334,9 +334,9 @@ fn layout_member<'a>(
     bump: &'a Bump,
     member: &Member<'a, Typeck>,
 ) -> Member<'a, Layout> {
-    let Member { name, ty, offset, kind } = *member;
+    let Member { name, loc, ty, offset, kind } = *member;
     let ty = layout_ty(stack, bump, ty);
-    Member { name, ty, offset, kind }
+    Member { name, loc, ty, offset, kind }
 }
 
 fn layout_complete_struct<'a>(

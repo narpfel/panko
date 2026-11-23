@@ -44,7 +44,7 @@ where
 
 impl<'a, T: Step> Member<'a, T> {
     pub(crate) fn as_sexpr_without_ty(&self, offset_sign: &str) -> SExpr {
-        let Self { name, ty: _, offset, kind } = self;
+        let Self { name, loc: _, ty: _, offset, kind } = self;
         SExpr::new("member")
             .inherit(name)
             .inline_string(match kind {
@@ -56,7 +56,7 @@ impl<'a, T: Step> Member<'a, T> {
 
 impl<T: Step> AsSExpr for Member<'_, T> {
     fn as_sexpr(&self) -> SExpr {
-        let Self { name: _, ty, offset: _, kind: _ } = self;
+        let Self { name: _, loc: _, ty, offset: _, kind: _ } = self;
         self.as_sexpr_without_ty("@").inherit(ty)
     }
 }
