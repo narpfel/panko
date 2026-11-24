@@ -19,3 +19,11 @@ Error: cannot use type qualifier `const` in non-parameter array declarator
    │            ──┬──  
    │              ╰──── help: remove this `const`
 ───╯
+
+Error: cannot use type qualifier `const` in non-parameter array declarator
+   ╭─[panko/tests/cases/arrays/test_error_type_qualifier_in_array_brackets.c:5:62]
+   │
+ 5 │ void qualifier_not_in_outermost_derivation_typeof(typeof(int[const])* xs);
+   │                                                              ──┬──  
+   │                                                                ╰──── help: remove this `const`
+───╯
