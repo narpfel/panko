@@ -937,7 +937,7 @@ fn parse_declarator<'a>(
                 let Qualifiers { const_qualifier, volatile_qualifier } = match is_parameter {
                     IsParameter::Yes
                         if matches!(
-                            direct_declarator,
+                            direct_declarator.unwrap_parens(),
                             DirectDeclarator::Abstract | DirectDeclarator::Identifier(_)
                         ) =>
                         Qualifiers::parse(sess, type_qualifiers),

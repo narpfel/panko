@@ -1,5 +1,3 @@
-// [[known-bug: parentheses don’t stop the array type derivation from being outermost]]
-
 int printf(char const*, ...);
 
 void print(int ((xs))[const]) {

@@ -7,15 +7,33 @@ info:
     - "--stop-after=scopes"
     - panko/tests/cases/execute/arrays/test_array_as_function_parameter_with_qualifier_parenthesised.c
 ---
-success: false
-exit_code: 1
+success: true
+exit_code: 0
 ----- stdout -----
+(translation-unit "panko/tests/cases/execute/arrays/test_array_as_function_parameter_with_qualifier_parenthesised.c"
+   (declaration printf~0 `fn(∅: ptr<char const>, ...) -> int` ∅)
+   (function-definition
+      print~1 `fn(xs: array<int; ∅>) -> void`
+      (params
+         xs~3 `array<int; ∅> const`)
+      (compound-statement
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (subscript (name xs~3 `array<int; ∅> const`) 0)))
+         (expression
+            (call (name printf~0 `fn(∅: ptr<char const>, ...) -> int`)
+               (string "%d\n")
+               (subscript (name xs~3 `array<int; ∅> const`) 1)))))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (declaration xs~6 `array<int; ∅>`
+            (braced
+               42
+               27))
+         (expression
+            (call (name print~1 `fn(xs: array<int; ∅>) -> void`)
+               (name xs~6 `array<int; ∅>`))))))
 
 ----- stderr -----
-Error: cannot use type qualifier `const` in non-parameter array declarator
-   ╭─[panko/tests/cases/execute/arrays/test_array_as_function_parameter_with_qualifier_parenthesised.c:5:23]
-   │
- 5 │ void print(int ((xs))[const]) {
-   │                       ──┬──  
-   │                         ╰──── help: remove this `const`
-───╯
