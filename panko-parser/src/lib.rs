@@ -1030,7 +1030,7 @@ impl<'a> DirectDeclarator<'a> {
         })
     }
 
-    pub fn unwrap_parens(&self) -> &Self {
+    fn unwrap_parens(&self) -> &Self {
         match self {
             Self::Parenthesised {
                 declarator: Declarator { pointers: None, direct_declarator },
@@ -1038,6 +1038,10 @@ impl<'a> DirectDeclarator<'a> {
             } => direct_declarator.unwrap_parens(),
             _ => self,
         }
+    }
+
+    pub fn is_outermost(&self) -> bool {
+        matches!(self.unwrap_parens(), Self::Abstract | Self::Identifier(_))
     }
 }
 
