@@ -935,8 +935,13 @@ fn parse_declarator<'a>(
                 close_bracket,
             }) => {
                 let Qualifiers { const_qualifier, volatile_qualifier } = match is_parameter {
-                    IsParameter::Yes => Qualifiers::parse(sess, type_qualifiers),
-                    IsParameter::No => {
+                    IsParameter::Yes
+                        if matches!(
+                            direct_declarator,
+                            DirectDeclarator::Abstract | DirectDeclarator::Identifier(_)
+                        ) =>
+                        Qualifiers::parse(sess, type_qualifiers),
+                    IsParameter::Yes | IsParameter::No => {
                         for qualifier in type_qualifiers {
                             sess.emit(Diagnostic::InvalidTypeQualifierInArrayBrackets {
                                 at: *qualifier,
