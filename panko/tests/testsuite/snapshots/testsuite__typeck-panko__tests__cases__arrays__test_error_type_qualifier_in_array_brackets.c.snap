@@ -28,7 +28,7 @@ Error: cannot use type qualifier `const` in non-parameter array declarator
    │                                                                ╰──── help: remove this `const`
 ───╯
 
-Error: cannot use type qualifier `const` in non-parameter array declarator
+Error: cannot use type qualifier `const` in non-outermost array derivation
    ╭─[panko/tests/cases/arrays/test_error_type_qualifier_in_array_brackets.c:6:54]
    │
  6 │ void qualifier_not_in_outermost_derivation(int (*xs)[const]);

@@ -191,9 +191,13 @@ pub(crate) enum Diagnostic<'a> {
         parameter: Loc<'a>,
     },
 
-    #[error("cannot use type qualifier `{at}` in non-parameter array declarator")]
+    #[error("cannot use type qualifier `{at}` in non-{kind} array {place}")]
     #[diagnostics(at(colour = Red, label = "help: remove this `{at}`"))]
-    InvalidTypeQualifierInArrayBrackets { at: TypeQualifier<'a> },
+    InvalidTypeQualifierInArrayBrackets {
+        at: TypeQualifier<'a>,
+        kind: &'a str,
+        place: &'a str,
+    },
 
     #[error("`{typedef}` declarations cannot have initialisers")]
     #[diagnostics(
@@ -934,17 +938,22 @@ fn parse_declarator<'a>(
                 length,
                 close_bracket,
             }) => {
-                let Qualifiers { const_qualifier, volatile_qualifier } = match is_parameter {
-                    IsParameter::Yes if direct_declarator.is_outermost() =>
-                        Qualifiers::parse(sess, type_qualifiers),
-                    IsParameter::Yes | IsParameter::No => {
-                        for qualifier in type_qualifiers {
-                            sess.emit(Diagnostic::InvalidTypeQualifierInArrayBrackets {
-                                at: *qualifier,
-                            })
-                        }
-                        Qualifiers::default()
+                let error = |kind, place| {
+                    for qualifier in type_qualifiers {
+                        sess.emit(Diagnostic::InvalidTypeQualifierInArrayBrackets {
+                            at: *qualifier,
+                            kind,
+                            place,
+                        })
                     }
+                    Qualifiers::default()
+                };
+                let Qualifiers { const_qualifier, volatile_qualifier } = match is_parameter {
+                    IsParameter::Yes => match direct_declarator.is_outermost() {
+                        true => Qualifiers::parse(sess, type_qualifiers),
+                        false => error("outermost", "derivation"),
+                    },
+                    IsParameter::No => error("parameter", "declarator"),
                 };
                 declarator = cst::Declarator {
                     pointers: None,
