@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/arrays/test_array_as_function_parameter_with_qualifier_parenthesised.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot use type qualifier `const` in non-parameter array declarator
+   ╭─[panko/tests/cases/execute/arrays/test_array_as_function_parameter_with_qualifier_parenthesised.c:5:23]
+   │
+ 5 │ void print(int ((xs))[const]) {
+   │                       ──┬──  
+   │                         ╰──── help: remove this `const`
+───╯
