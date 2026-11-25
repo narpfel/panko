@@ -20,7 +20,7 @@ exit_code: 0
    (function-definition external stack-size=120
       (main~3 `fn() -> int` (static main))
       (compound-statement
-         (definition (xs~5 `array<int; 5> const` @0)
+         (definition (xs~5 `array<int const; 5>` @0)
             (braced
                (subobject +0 (1 `int` @0))
                (subobject +4 (2 `int` @4))
@@ -28,6 +28,6 @@ exit_code: 0
                (subobject +12 (4 `int` @12))
                (subobject +16 (5 `int` @16))))
          (typedef Array `array<long; 10>`)
-         (definition (ys~6 `array<long; 10> const` @24) (braced ∅)))))
+         (definition (ys~6 `array<long const; 10>` @24) (braced ∅)))))
 
 ----- stderr -----

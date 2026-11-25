@@ -31,3 +31,11 @@ Error: implicit conversion from `ptr<int const>` to `ptr<int>` drops qualifiers
    │          ┬  
    │          ╰── this is of type `ptr<int const>`, which is more qualified than `ptr<int>`
 ───╯
+
+Error: implicit conversion from `ptr<int const>` to `ptr<int>` drops qualifiers
+    ╭─[panko/tests/cases/execute/arrays/test_type_alias_with_qualifiers.c:13:14]
+    │
+ 13 │     return f(xs);
+    │              ─┬  
+    │               ╰── this is of type `ptr<int const>`, which is more qualified than `ptr<int>`
+────╯

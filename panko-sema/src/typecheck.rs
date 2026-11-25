@@ -1141,51 +1141,82 @@ fn typeck_ty_with_initialiser<'a>(
     reference: Option<&scope::Reference<'a>>,
 ) -> QualifiedType<'a> {
     let scope::QualifiedType { is_const, is_volatile, ty, loc } = ty;
-    let ty = match ty {
-        ty::Type::Arithmetic(ty::Arithmetic::Integral(integral)) =>
-            Type::Arithmetic(ty::Arithmetic::Integral(integral)),
-        ty::Type::Arithmetic(ty::Arithmetic::Enum(Enum::Incomplete { name, id, enable })) =>
-            Type::from(Enum::Incomplete { name, id, enable }),
-        ty::Type::Arithmetic(ty::Arithmetic::Enum(Enum::Complete(complete))) =>
-            Type::from(typeck_complete_enum(sess, &complete)),
-        ty::Type::Pointer(pointee) =>
-            Type::Pointer(sess.alloc(typeck_ty(sess, *pointee, IsParameter::No))),
-        ty::Type::Array(ty) => typeck_array_ty(sess, ty, is_parameter, reference),
-        ty::Type::Function(ty) => typeck_function_ty(sess, ty, is_parameter),
-        ty::Type::Void => Type::Void,
-        ty::Type::Typeof {
-            expr: NoHashEq(expr),
-            unqual,
-            allow_bitfields,
-        } => {
-            let ty = match expr {
-                scope::Typeof::Expr(expr) => {
-                    let expr = typeck_expression(sess, expr, Context::Typeof);
-                    if !allow_bitfields && expr.is_bitfield() {
-                        sess.emit(Diagnostic::TypeofOfBitfield { at: expr, unqual })
+    let check_ty = || {
+        let ty = match ty {
+            ty::Type::Arithmetic(ty::Arithmetic::Integral(integral)) =>
+                Type::Arithmetic(ty::Arithmetic::Integral(integral)),
+            ty::Type::Arithmetic(ty::Arithmetic::Enum(Enum::Incomplete { name, id, enable })) =>
+                Type::from(Enum::Incomplete { name, id, enable }),
+            ty::Type::Arithmetic(ty::Arithmetic::Enum(Enum::Complete(complete))) =>
+                Type::from(typeck_complete_enum(sess, &complete)),
+            ty::Type::Pointer(pointee) =>
+                Type::Pointer(sess.alloc(typeck_ty(sess, *pointee, IsParameter::No))),
+            ty::Type::Array(ty) => typeck_array_ty(sess, ty, is_parameter, reference),
+            ty::Type::Function(ty) => typeck_function_ty(sess, ty, is_parameter),
+            ty::Type::Void => Type::Void,
+            ty::Type::Typeof {
+                expr: NoHashEq(expr),
+                unqual,
+                allow_bitfields,
+            } => {
+                let ty = match expr {
+                    scope::Typeof::Expr(expr) => {
+                        let expr = typeck_expression(sess, expr, Context::Typeof);
+                        if !allow_bitfields && expr.is_bitfield() {
+                            sess.emit(Diagnostic::TypeofOfBitfield { at: expr, unqual })
+                        }
+                        expr.ty
                     }
-                    expr.ty
+                    scope::Typeof::Ty(ty) => typeck_ty(sess, *ty, is_parameter),
+                };
+                match unqual {
+                    true => ty.ty,
+                    false =>
+                        return QualifiedType {
+                            is_const: is_const | ty.is_const,
+                            is_volatile: is_volatile | ty.is_volatile,
+                            ty: ty.ty,
+                            loc: ty.loc,
+                        },
                 }
-                scope::Typeof::Ty(ty) => typeck_ty(sess, *ty, is_parameter),
-            };
-            match unqual {
-                true => ty.ty,
-                false =>
-                    return QualifiedType {
-                        is_const: is_const | ty.is_const,
-                        is_volatile: is_volatile | ty.is_volatile,
-                        ty: ty.ty,
-                        loc: ty.loc,
-                    },
             }
-        }
-        ty::Type::Nullptr => Type::Nullptr,
-        ty::Type::Struct(Struct::Incomplete { name, id, kind }) =>
-            Type::Struct(Struct::Incomplete { name, id, kind }),
-        ty::Type::Struct(Struct::Complete(complete)) =>
-            Type::Struct(Struct::Complete(typeck_complete_struct(sess, &complete))),
+            ty::Type::Nullptr => Type::Nullptr,
+            ty::Type::Struct(Struct::Incomplete { name, id, kind }) =>
+                Type::Struct(Struct::Incomplete { name, id, kind }),
+            ty::Type::Struct(Struct::Complete(complete)) =>
+                Type::Struct(Struct::Complete(typeck_complete_struct(sess, &complete))),
+        };
+        QualifiedType { is_const, is_volatile, ty, loc }
     };
-    QualifiedType { is_const, is_volatile, ty, loc }
+
+    let fixup_array_type = |qualified_ty| {
+        let QualifiedType {
+            is_const,
+            is_volatile,
+            ref ty,
+            loc: self_loc,
+        } = qualified_ty;
+        match ty {
+            &Type::Array(ArrayType { ty, length, loc }) if is_const || is_volatile => {
+                let ty = sess.alloc(QualifiedType {
+                    is_const: is_const | ty.is_const,
+                    is_volatile: is_volatile | ty.is_volatile,
+                    ty: ty.ty,
+                    loc: ty.loc,
+                });
+                let ty = Type::Array(ArrayType { ty, length, loc });
+                QualifiedType {
+                    is_const: false,
+                    is_volatile: false,
+                    ty,
+                    loc: self_loc,
+                }
+            }
+            _ => qualified_ty,
+        }
+    };
+
+    fixup_array_type(check_ty())
 }
 
 fn typeck_ty<'a>(
