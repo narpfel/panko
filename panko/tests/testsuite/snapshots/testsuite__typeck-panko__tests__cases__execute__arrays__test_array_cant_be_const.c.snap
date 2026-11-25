@@ -24,6 +24,12 @@ exit_code: 0
          (definition p~3 `ptr<int>`
             (noop-type-conversion `ptr<int>`
                (addressof `ptr<array<int; 5>>`
-                  (xs~2 `array<int; 5> const`)))))))
+                  (xs~2 `array<int; 5> const`))))
+         (typedef Array `array<long; 10>`)
+         (definition ys~4 `array<long; 10> const` (braced ∅))
+         (definition p2~5 `ptr<long>`
+            (noop-type-conversion `ptr<long>`
+               (addressof `ptr<array<long; 10>>`
+                  (ys~4 `array<long; 10> const`)))))))
 
 ----- stderr -----

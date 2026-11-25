@@ -1,0 +1,33 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/arrays/test_type_alias_with_qualifiers.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to `const` value `xs`
+   ╭─[panko/tests/cases/execute/arrays/test_type_alias_with_qualifiers.c:7:5]
+   │
+ 5 │ bool f(Array const xs) {
+   │                    ─┬  
+   │                     ╰── note: `xs` declared here
+   │ 
+ 7 │     xs = p;
+   │     ─┬  
+   │      ╰── this value is `const`
+───╯
+
+Error: implicit conversion from `ptr<int const>` to `ptr<int>` drops qualifiers
+   ╭─[panko/tests/cases/execute/arrays/test_type_alias_with_qualifiers.c:7:10]
+   │
+ 7 │     xs = p;
+   │          ┬  
+   │          ╰── this is of type `ptr<int const>`, which is more qualified than `ptr<int>`
+───╯

@@ -1,0 +1,31 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arrays/test_type_alias_with_qualifiers.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/arrays/test_type_alias_with_qualifiers.c"
+   (typedef Array `array<int; 10>`)
+   (function-definition
+      f~0 `fn(xs: array<int; 10>) -> bool`
+      (params
+         xs~2 `array<int; 10> const`)
+      (compound-statement
+         (declaration p~3 `ptr<int const>` nullptr)
+         (expression (assign (name xs~2 `array<int; 10> const`) (name p~3 `ptr<int const>`)))
+         (return (name xs~2 `array<int; 10> const`))))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (declaration xs~6 `array<int; 10> const` (braced ∅))
+         (return
+            (call (name f~0 `fn(xs: array<int; 10>) -> bool`)
+               (name xs~6 `array<int; 10> const`))))))
+
+----- stderr -----

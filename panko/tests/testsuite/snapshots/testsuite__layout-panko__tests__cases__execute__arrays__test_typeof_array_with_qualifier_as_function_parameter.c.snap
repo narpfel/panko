@@ -1,0 +1,33 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=layout"
+    - "--stop-after=layout"
+    - panko/tests/cases/execute/arrays/test_typeof_array_with_qualifier_as_function_parameter.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot assign to `const` value `xs`
+   ╭─[panko/tests/cases/execute/arrays/test_typeof_array_with_qualifier_as_function_parameter.c:5:5]
+   │
+ 3 │ bool f(typeof(int[]) const xs) {
+   │                            ─┬  
+   │                             ╰── note: `xs` declared here
+   │ 
+ 5 │     xs = p;
+   │     ─┬  
+   │      ╰── this value is `const`
+───╯
+
+Error: implicit conversion from `ptr<int const>` to `ptr<int>` drops qualifiers
+   ╭─[panko/tests/cases/execute/arrays/test_typeof_array_with_qualifier_as_function_parameter.c:5:10]
+   │
+ 5 │     xs = p;
+   │          ┬  
+   │          ╰── this is of type `ptr<int const>`, which is more qualified than `ptr<int>`
+───╯

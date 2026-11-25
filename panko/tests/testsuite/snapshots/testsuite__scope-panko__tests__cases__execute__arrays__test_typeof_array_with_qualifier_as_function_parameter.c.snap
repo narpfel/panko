@@ -1,0 +1,30 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=scopes"
+    - "--stop-after=scopes"
+    - panko/tests/cases/execute/arrays/test_typeof_array_with_qualifier_as_function_parameter.c
+---
+success: true
+exit_code: 0
+----- stdout -----
+(translation-unit "panko/tests/cases/execute/arrays/test_typeof_array_with_qualifier_as_function_parameter.c"
+   (function-definition
+      f~0 `fn(xs: typeof(`array<int; ∅>`)) -> bool`
+      (params
+         xs~2 `typeof(`array<int; ∅>`) const`)
+      (compound-statement
+         (declaration p~3 `ptr<int const>` nullptr)
+         (expression (assign (name xs~2 `typeof(`array<int; ∅>`) const`) (name p~3 `ptr<int const>`)))
+         (return (name xs~2 `typeof(`array<int; ∅>`) const`))))
+   (function-definition
+      main~4 `fn() -> int`
+      (compound-statement
+         (declaration x~6 `int` 42)
+         (return
+            (call (name f~0 `fn(xs: typeof(`array<int; ∅>`)) -> bool`)
+               (addressof (name x~6 `int`)))))))
+
+----- stderr -----
