@@ -1,0 +1,21 @@
+---
+source: panko/tests/testsuite/main.rs
+info:
+  program: panko
+  args:
+    - "--print=typeck"
+    - "--stop-after=typeck"
+    - panko/tests/cases/execute/arrays/test_typeof_array_with_qualifier_in_brackets_as_function_parameter.c
+---
+success: false
+exit_code: 1
+----- stdout -----
+
+----- stderr -----
+Error: cannot use type qualifier `const` in non-parameter array declarator
+   ╭─[panko/tests/cases/execute/arrays/test_typeof_array_with_qualifier_in_brackets_as_function_parameter.c:4:18]
+   │
+ 4 │ int f(typeof(int[const]) xs) {
+   │                  ──┬──  
+   │                    ╰──── help: remove this `const`
+───╯
