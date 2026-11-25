@@ -117,20 +117,22 @@ pub(super) enum Diagnostic<'a> {
         function: scope::FunctionDefinition<'a>,
     },
 
-    #[error("cannot assign to `const` value `{decl}`")]
+    #[error("cannot assign to `{const_}` value `{decl}`")]
     #[diagnostics(
-        at(colour = Red, label = "this value is `const`"),
+        at(colour = Red, label = "this value is `{const_}`"),
         decl(colour = Blue, label = "note: `{decl}` declared here")
     )]
+    #[with(const_ = "const".fg(Red))]
     AssignmentToConstName {
         at: &'a Expression<'a>,
         decl: Reference<'a>,
     },
 
-    #[error("cannot assign to `const` expression")]
+    #[error("cannot assign to `{const_}` expression")]
     #[diagnostics(
-        at(colour = Red, label = "this value is `const`"),
+        at(colour = Red, label = "this value is `{const_}`"),
     )]
+    #[with(const_ = "const".fg(Red))]
     AssignmentToConst { at: Expression<'a> },
 
     #[error("cannot assign to this expression because it is not an lvalue")]
