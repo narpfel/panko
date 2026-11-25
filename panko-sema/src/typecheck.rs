@@ -1194,7 +1194,7 @@ fn typeck_ty_with_initialiser<'a>(
             is_const,
             is_volatile,
             ref ty,
-            loc: self_loc,
+            loc: qualified_loc,
         } = qualified_ty;
         match ty {
             &Type::Array(ArrayType { ty, length, loc }) if is_const || is_volatile => {
@@ -1209,7 +1209,7 @@ fn typeck_ty_with_initialiser<'a>(
                     is_const: false,
                     is_volatile: false,
                     ty,
-                    loc: self_loc,
+                    loc: qualified_loc,
                 }
             }
             _ => qualified_ty,
