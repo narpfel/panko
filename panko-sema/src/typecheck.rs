@@ -770,18 +770,17 @@ fn typeck_array_ty<'a>(
         // TODO: this should be `Type::Error`
         sess.emit(Diagnostic::ArrayOfFunctions { at: *ty })
     }
-    let length = length
-        .map(|length| {
-            ArrayLength::try_from(sess.alloc(typeck_expression(sess, length, Context::Default)))
-                .unwrap_or_else(|error| {
-                    match *error {
-                        Either::Left(error) => sess.emit(error),
-                        Either::Right(errors) => sess.emit_many(errors),
-                    }
-                    ArrayLength::Unknown
-                })
-        })
-        .unwrap_or(ArrayLength::Unknown);
+    let length = try {
+        ArrayLength::try_from(sess.alloc(typeck_expression(sess, length?, Context::Default)))
+            .unwrap_or_else(|error| {
+                match *error {
+                    Either::Left(error) => sess.emit(error),
+                    Either::Right(errors) => sess.emit_many(errors),
+                }
+                ArrayLength::Unknown
+            })
+    }
+    .unwrap_or(ArrayLength::Unknown);
     let length = if let Some(reference) = reference
         && let Some(RefInitialiser::Initialiser(initialiser)) = reference.initialiser
         && let ArrayLength::Unknown = length
